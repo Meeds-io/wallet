@@ -1,0 +1,20 @@
+[
+	{
+		"avatar": "/portal/rest/img/user",
+		"name": "Test user 1",
+    "id": "@testuser1",
+		"type": "contact"
+	},
+	{
+    "avatar": "/portal/rest/img/user",
+		"name": "Test user 2",
+		"id": "@testuser2",
+		"type": "contact"
+	},
+  {
+    "avatar": "/portal/rest/img/user",
+    "name": "Test user 3",
+    "id": "@testuser3",
+    "type": "contact"
+  }
+]

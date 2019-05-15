@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2003-2018 eXo Platform SAS. This is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+  License for more details. You should have received a copy of the GNU Lesser General Public License along with this software; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF site: http://www.fsf.org. -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <!-- Managing both DB that use sequences and db that use auto increment -->
+  <property name="autoIncrement" value="true" dbms="mysql,mssql,h2,sybase,db2,hsqldb"/>
+  <property name="autoIncrement" value="false" dbms="oracle,postgresql"/>
+
+  <changeSet author="wallet" id="1.3.0-1">
+    <createTable tableName="ADDONS_WALLET_ACCOUNT">
+      <column name="IDENTITY_ID" type="BIGINT">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_IDENTITY_ID"/>
+      </column>
+      <column name="IDENTITY_TYPE" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="ADDRESS" type="VARCHAR(100)" >
+        <constraints nullable="false" />
+      </column>
+      <column name="PHRASE" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+      <column name="ENABLED" type="BOOLEAN"/>
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-2">
+    <validCheckSum>7:1b92fcacd4904402b5fc850db10ea561</validCheckSum>
+    <validCheckSum>7:f4f8b6ffb1575004cfcb4ac607382fa9</validCheckSum>
+    <createTable tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="TRANSACTION_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_TRANSACTION_ID"/>
+      </column>
+      <column name="NETWORK_ID" type="BIGINT">
+        <constraints nullable="false" />
+      </column>
+      <column name="HASH" type="VARCHAR(100)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="UK_WALLET_TRANSACTION_HASH" />
+      </column>
+      <column name="PENDING" type="BOOLEAN"/>
+      <column name="SUCCESS" type="BOOLEAN"/>
+      <column name="ADMIN_OP" type="BOOLEAN"/>
+      <column name="FROM_ADDRESS" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+      <column name="TO_ADDRESS" type="VARCHAR(100)" />
+      <column name="BY_ADDRESS" type="VARCHAR(100)" />
+      <column name="LABEL" type="TEXT" />
+      <column name="MESSAGE" type="TEXT" />
+      <column name="VALUE" type="DOUBLE" />
+      <column name="CONTRACT_ADDRESS" type="VARCHAR(100)" />
+      <column name="CONTRACT_METHOD" type="VARCHAR(30)" />
+      <column name="CONTRACT_AMOUNT" type="DOUBLE" />
+      <column name="CREATED_DATE" type="BIGINT" />
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-3" dbms="oracle,postgresql">
+    <createSequence sequenceName="SEQ_WALLET_TRANSACTION" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-4">
+    <validCheckSum>7:bb95ae8fbc0f09bf25b8796d65ecd566</validCheckSum>
+    <validCheckSum>7:911616801cc4391f56c826ff6b4ebca0</validCheckSum>
+    <createIndex tableName="ADDONS_WALLET_ACCOUNT" indexName="IDX_ADDONS_WALLET_01">
+      <column name="ADDRESS" type="VARCHAR(100)" />
+    </createIndex>
+    <createIndex tableName="ADDONS_WALLET_TRANSACTION" indexName="IDX_ADDONS_WALLET_02">
+      <column name="NETWORK_ID" type="BIGINT" />
+      <column name="TO_ADDRESS" type="VARCHAR(100)" />
+      <column name="CONTRACT_ADDRESS" type="VARCHAR(100)" />
+      <column name="CREATED_DATE" type="BIGINT" descending="true"/>
+    </createIndex>
+    <createIndex tableName="ADDONS_WALLET_TRANSACTION" indexName="IDX_ADDONS_WALLET_03">
+      <column name="NETWORK_ID" type="BIGINT" />
+      <column name="ADMIN_OP" type="BOOLEAN" />
+      <column name="FROM_ADDRESS" type="VARCHAR(100)" />
+      <column name="TO_ADDRESS" type="VARCHAR(100)" />
+      <column name="BY_ADDRESS" type="VARCHAR(100)" />
+      <column name="CREATED_DATE" type="BIGINT" descending="true"/>
+    </createIndex>
+    <createIndex tableName="ADDONS_WALLET_TRANSACTION" indexName="IDX_ADDONS_WALLET_04">
+      <column name="HASH" type="VARCHAR(100)" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-6">
+    <createTable tableName="ADDONS_WALLET_LABEL">
+      <column name="LABEL_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_LABEL_ID"/>
+      </column>
+      <column name="IDENTITY_ID" type="BIGINT" />
+      <column name="ADDRESS" type="VARCHAR(100)" >
+        <constraints nullable="false" />
+      </column>
+      <column name="LABEL" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-7" dbms="oracle,postgresql">
+    <createSequence sequenceName="SEQ_WALLET_LABEL" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-8">
+    <createTable tableName="ADDONS_WALLET_KEY">
+      <column name="KEY_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_KEY_ID"/>
+      </column>
+      <column name="WALLET_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_ACCOUNT_01" references="ADDONS_WALLET_ACCOUNT(IDENTITY_ID)" nullable="false" />
+      </column>
+      <column name="CONTENT" type="CLOB">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-9" dbms="oracle,postgresql">
+    <createSequence sequenceName="SEQ_WALLET_KEY" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-11">
+    <addColumn tableName="ADDONS_WALLET_ACCOUNT">
+      <column name="INITIALIZATION_STATE" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-13">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="ISSUER_ID" type="BIGINT" defaultValueNumeric="0" />
+    </addColumn>
+  </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,1 @@
+<%= ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER, AMOUNT, SENDER, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER, SYMBOL)%>

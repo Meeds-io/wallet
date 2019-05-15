@@ -1,0 +1,37 @@
+<% String acceptURL = FUNDS_REQUEST_SENT ? "" : FUNDS_ACCEPT_URL + "&id=" + NOTIFICATION_ID; %>
+<li class="$READ clearfix" data-id="$NOTIFICATION_ID">
+  <div class="media">
+    <div class="avatarXSmall pull-left">
+      <img src="$AVATAR" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'" />
+    </div>
+    <div class="media-body">
+      <div class="contentSmall" data-link="$acceptURL">
+        <div class="content">
+        </div>
+        <div class="status">
+          <%= ACCOUNT_TYPE.equals("space") ? 
+               _ctx.appRes("Notification.message.SpaceFundsRequestNotificationPlugin", USER_URL, AMOUNT, SYMBOL, SENDER_URL)
+               : _ctx.appRes("Notification.message.FundsRequestNotificationPlugin", USER_URL, AMOUNT, SYMBOL)%>
+        </div>
+        <% if (org.apache.commons.lang.StringUtils.isNotBlank(MESSAGE)) { %>
+        <div class="content">
+          <%= MESSAGE %>
+        </div>
+        <% } %>
+        <div class="content">
+          <div class="confirm">
+            <% if(FUNDS_REQUEST_SENT) { %>
+              <i class="uiIcon uiIconTick uiIconLightGray"></i>
+            <% } else { %>
+              <a class="btn btn-mini btn-primary delete-item" href="$acceptURL"><%= _ctx.appRes("Notification.message.FundsRequestAccpt") %></a>
+            <% } %>
+          </div>
+        </div>
+        <div class="lastUpdatedTime">
+          $LAST_UPDATED_TIME
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="remove-item" data-rest=""><i class="uiIconClose uiIconLightGray"></i></span>
+</li>

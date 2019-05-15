@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2003-2018 eXo Platform SAS. This is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+  License for more details. You should have received a copy of the GNU Lesser General Public License along with this software; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF site: http://www.fsf.org. -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <!-- Managing both DB that use sequences and db that use auto increment -->
+  <property name="autoIncrement" value="true" dbms="mysql,mssql,h2,sybase,db2,hsqldb"/>
+  <property name="autoIncrement" value="false" dbms="oracle,postgresql"/>
+
+  <changeSet author="reward" id="1.0.0-1" runOnChange="false">
+    <validCheckSum>7:b6e791d36a486b4501fde54aed6a4a8d</validCheckSum>
+    <validCheckSum>7:ff477a093e9169fc1a89e113f14b8def</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="ADDONS_WALLET_GAM_TEAM"/>
+      </not>
+    </preConditions>
+    <createTable tableName="ADDONS_WALLET_GAM_TEAM">
+      <column name="TEAM_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_GAM_TEAM"/>
+      </column>
+      <column name="TEAM_NAME" type="NVARCHAR(200)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="UK_WALLET_GAM_TEAM_NAME"/>
+      </column>
+      <column name="TEAM_DESCRIPTION" type="NVARCHAR(2000)"/>
+      <column name="TEAM_REWARD_TYPE" type="INT"/>
+      <column name="TEAM_BUDGET" type="DOUBLE"/>
+      <column name="TEAM_MEMBER_REWARD" type="DOUBLE"/>
+      <column name="TEAM_SPACE_ID" type="BIGINT"/>
+      <column name="TEAM_MANAGER_ID" type="BIGINT"/>
+      <column name="TEAM_DISABLED" type="BOOLEAN" defaultValueBoolean="false"/>
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-2" runOnChange="false" onValidationFail="MARK_RAN" failOnError="false">
+    <validCheckSum>7:4c22877ac3021d85be104b086fff5ece</validCheckSum>
+    <validCheckSum>7:64aeffaa9b8d94fbe10663101e431b30</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
+      </not>
+    </preConditions>
+    <createTable tableName="ADDONS_WALLET_GAM_TEAM_MEMBER">
+      <column name="MEMBER_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_GAM_TEAM_MEM"/>
+      </column>
+      <column name="MEMBER_IDENTITY_ID" type="BIGINT">
+        <constraints nullable="false" uniqueConstraintName="WALLET_GAM_MEMBER_IDENTITY_ID"/>
+      </column>
+      <column name="TEAM_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_GAM_01" references="ADDONS_WALLET_GAM_TEAM(TEAM_ID)" nullable="false"/>
+      </column>
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-4" dbms="oracle,postgresql">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <sequenceExists sequenceName="SEQ_WALLET_GAM_TEAM_ID"/>
+      </not>
+    </preConditions>
+
+    <createSequence sequenceName="SEQ_WALLET_GAM_TEAM_ID" startValue="1"/>
+    <createSequence sequenceName="SEQ_WALLET_GAM_TEAM_MEMBER_ID" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-5">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="ADDONS_WALLET_GAM_TEAM" columnName="TEAM_DISABLED"/>
+      </not>
+    </preConditions>
+    <addColumn tableName="ADDONS_WALLET_GAM_TEAM">
+      <column name="TEAM_DISABLED" type="BOOLEAN" defaultValueBoolean="false"/>
+    </addColumn>
+  </changeSet>
+
+</databaseChangeLog>

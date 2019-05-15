@@ -1,0 +1,14 @@
+[
+	{
+		"prettyName": "space_1",
+		"avatarUrl": "/portal/rest/img/space",
+		"displayName": "Space 1",
+		"id": "875"
+	},
+	{
+		"prettyName": "space_2",
+    "avatarUrl": "/portal/rest/img/space",
+		"displayName": "Space 2",
+		"id": "853"
+	}
+]

@@ -1,0 +1,8 @@
+{
+	"name": "Space 2",
+  "id": "space_2",
+  "managers": ["testuser2"],
+	"address": "0x98AA82155aE6045E1E41552409b78Dd011D457D7",
+  "avatar": "/portal/rest/img/space",
+  "type": "space"
+}

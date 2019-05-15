@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+             version="2.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
+   <portlet>
+     <portlet-name>EthereumWalletAdminSettings</portlet-name>
+     <display-name xml:lang="EN">Settings Administration Application</display-name>
+     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+     <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/walletAdmin.html</value>
+     </init-param>
+     <expiration-cache>-1</expiration-cache>
+     <cache-scope>PUBLIC</cache-scope>
+     <supports>
+       <mime-type>text/html</mime-type>
+     </supports>
+     <supported-locale>en</supported-locale>
+     <portlet-info>
+       <title>Settings Administration Application</title>
+       <keywords>Settings Administration Application</keywords>
+     </portlet-info>
+      <security-role-ref>
+        <role-name>admin</role-name>
+        <role-link>admin</role-link>
+      </security-role-ref>
+   </portlet>
+   <portlet>
+     <portlet-name>EthereumWalletAdminContracts</portlet-name>
+     <display-name xml:lang="EN">Contracts Administration Application</display-name>
+     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+     <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/walletAdmin.html</value>
+     </init-param>
+     <expiration-cache>-1</expiration-cache>
+     <cache-scope>PUBLIC</cache-scope>
+     <supports>
+       <mime-type>text/html</mime-type>
+     </supports>
+     <supported-locale>en</supported-locale>
+     <portlet-info>
+       <title>Contracts Administration Application</title>
+       <keywords>Contracts Administration Application</keywords>
+     </portlet-info>
+      <security-role-ref>
+        <role-name>admin</role-name>
+        <role-link>admin</role-link>
+      </security-role-ref>
+   </portlet>
+   <portlet>
+     <portlet-name>EthereumWalletAdminWallets</portlet-name>
+     <display-name xml:lang="EN">Wallets Administration Application</display-name>
+     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+     <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/walletAdmin.html</value>
+     </init-param>
+     <expiration-cache>-1</expiration-cache>
+     <cache-scope>PUBLIC</cache-scope>
+     <supports>
+       <mime-type>text/html</mime-type>
+     </supports>
+     <supported-locale>en</supported-locale>
+     <portlet-info>
+       <title>Wallets Administration Application</title>
+       <keywords>Wallets Administration Application</keywords>
+     </portlet-info>
+      <security-role-ref>
+        <role-name>admin</role-name>
+        <role-link>admin</role-link>
+      </security-role-ref>
+   </portlet>
+</portlet-app>

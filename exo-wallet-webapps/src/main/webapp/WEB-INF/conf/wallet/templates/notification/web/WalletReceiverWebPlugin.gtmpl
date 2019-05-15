@@ -1,0 +1,26 @@
+<% String openURL = HASH == null ? BASE_URL : BASE_URL + "?hash=" + HASH + "&contract=" + CONTRACT_ADDRESS; %>
+<li class="$READ clearfix" data-id="$NOTIFICATION_ID">
+  <div class="media">
+    <div class="avatarXSmall pull-left">
+      <img src="$AVATAR" onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'" />
+    </div>
+    <div class="media-body">
+      <div class="contentSmall" data-link="$openURL">
+        <div class="content">
+        </div>
+        <div class="status">
+          <%= ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER_URL, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)%>
+        </div>
+        <% if(org.apache.commons.lang.StringUtils.isNotBlank(MESSAGE)) { %>
+          <div class="content">
+            <%= MESSAGE %>
+          </div>
+        <% } %>
+        <div class="lastUpdatedTime">
+          $LAST_UPDATED_TIME
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="remove-item" data-rest=""><i class="uiIconClose uiIconLightGray"></i></span>
+</li>
