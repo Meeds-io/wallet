@@ -4,14 +4,14 @@
   https://jira.exoplatform.org/browse/PLF-8100
 
   <portlet-skin>
-    <application-name>exo-ethereum-wallet-admin</application-name>
+    <application-name>wallet-admin</application-name>
     <portlet-name>EthereumWalletAdmin</portlet-name>
     <skin-name>Enterprise</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 
   <portlet-skin>
-    <application-name>exo-ethereum-wallet-admin</application-name>
+    <application-name>wallet-admin</application-name>
     <portlet-name>EthereumWalletAdmin</portlet-name>
     <skin-name>Default</skin-name>
     <css-path>/css/wallet.css</css-path>

@@ -78,18 +78,7 @@
 </template>
 
 <script>
-import WalletResetModal from './WalletResetModal.vue';
-import InformationBubble from './InformationBubble.vue';
-import ConfirmDialog from './ConfirmDialog.vue';
-
-import {enableMetamask, disableMetamask, removeServerSideBackup, sendPrivateKeyToServer} from '../js/WalletUtils.js';
-
 export default {
-  components: {
-    WalletResetModal,
-    InformationBubble,
-    ConfirmDialog,
-  },
   props: {
     walletAddress: {
       type: String,
@@ -132,15 +121,15 @@ export default {
     },
     changeMetamaskOption() {
       if (this.useMetamask) {
-        enableMetamask(this.isSpace);
+        this.walletUtils.enableMetamask(this.isSpace);
       } else {
-        disableMetamask(this.isSpace);
+        this.walletUtils.disableMetamask(this.isSpace);
       }
       this.$emit('settings-changed');
     },
     saveKeysOnServer() {
       if (this.hasKeyOnServerSide) {
-        return sendPrivateKeyToServer(this.walletAddress)
+        return this.walletUtils.sendPrivateKeyToServer(this.walletAddress)
           .then((result, error) => {
             if (error) {
               throw error;
@@ -151,7 +140,7 @@ export default {
             this.hasKeyOnServerSide = false;
           });
       } else {
-        return removeServerSideBackup(this.walletAddress);
+        return this.walletUtils.removeServerSideBackup(this.walletAddress);
       }
     },
   }

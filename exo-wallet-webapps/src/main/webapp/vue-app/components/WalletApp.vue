@@ -186,23 +186,13 @@
 
 <script>
 import WalletAppMenu from './WalletAppMenu.vue';
-import WalletSetup from './WalletSetup.vue';
-import WalletSummary from './WalletSummary.vue';
 import WalletAccountsList from './WalletAccountsList.vue';
-import AccountDetail from './AccountDetail.vue';
 import WalletSettingsModal from './WalletSettingsModal.vue';
-
-import * as constants from '../js/Constants.js';
-import {getContractsDetails, retrieveContractDetails} from '../js/TokenUtils.js';
-import {initWeb3, initSettings, computeBalance, etherToFiat, gasToEther} from '../js/WalletUtils.js';
 
 export default {
   components: {
     WalletAppMenu,
-    WalletSummary,
-    WalletSetup,
     WalletAccountsList,
-    AccountDetail,
     WalletSettingsModal,
   },
   props: {
@@ -246,7 +236,7 @@ export default {
       return !this.loading && !this.error && this.walletAddress && !this.useMetamask && this.browserWalletExists;
     },
     displayEtherBalanceTooLow() {
-      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < gasToEther(window.walletSettings.userPreferences.defaultGas, this.gasPriceInEther);
+      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(window.walletSettings.userPreferences.defaultGas, this.gasPriceInEther);
     },
     etherBalance() {
       if (this.refreshIndex > 0 && this.walletAddress && this.accountsDetails && this.accountsDetails[this.walletAddress]) {
@@ -257,7 +247,7 @@ export default {
       return 0;
     },
     totalFiatBalance() {
-      return Number(etherToFiat(this.totalBalance));
+      return Number(this.walletUtils.etherToFiat(this.totalBalance));
     },
     totalBalance() {
       let balance = 0;
@@ -342,7 +332,7 @@ export default {
       this.accountsDetails = {};
       this.walletAddress = null;
 
-      return initSettings(this.isSpace)
+      return this.walletUtils.initSettings(this.isSpace)
         .then((result, error) => {
           this.handleError(error);
           if (!window.walletSettings || !window.walletSettings.isWalletEnabled) {
@@ -357,13 +347,13 @@ export default {
             if (window.walletSettings.userPreferences.walletAddress || this.useMetamask) {
               this.forceUpdate();
             } else {
-              throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
+              throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
             }
           }
         })
         .then((result, error) => {
           this.handleError(error);
-          return initWeb3(this.isSpace);
+          return this.walletUtils.initWeb3(this.isSpace);
         })
         .then((result, error) => {
           this.handleError(error);
@@ -399,14 +389,14 @@ export default {
           console.debug('init method - error', e);
           const error = `${e}`;
 
-          if (error.indexOf(constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
+          if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
             if (!this.useMetamask) {
               this.browserWalletExists = window.walletSettings.browserWalletExists = false;
               this.walletAddress = null;
             }
-          } else if (error.indexOf(constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
+          } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = 'Failed to load user settings';
-          } else if (error.indexOf(constants.ERROR_WALLET_DISCONNECTED) >= 0) {
+          } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
             this.error = 'Failed to connect to network';
           } else {
             this.error = error;
@@ -421,7 +411,7 @@ export default {
     },
     refreshBalance() {
       const walletAddress = String(this.walletAddress);
-      return computeBalance(walletAddress)
+      return this.walletUtils.computeBalance(walletAddress)
         .then((balanceDetails, error) => {
           if (error) {
             this.$set(this.accountsDetails, walletAddress, {
@@ -465,11 +455,11 @@ export default {
     },
     refreshTokenBalance(accountDetail) {
       if (accountDetail) {
-        return retrieveContractDetails(this.walletAddress, accountDetail, false).then(() => this.forceUpdate());
+        return this.tokenUtils.retrieveContractDetails(this.walletAddress, accountDetail, false).then(() => this.forceUpdate());
       }
     },
     reloadContracts() {
-      return getContractsDetails(this.walletAddress, this.networkId, false, false)
+      return this.tokenUtils.getContractsDetails(this.walletAddress, this.networkId, false, false)
         .then((contractsDetails, error) => {
           this.handleError(error);
           if (contractsDetails && contractsDetails.length) {

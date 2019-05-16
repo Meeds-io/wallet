@@ -10,7 +10,7 @@ const config = merge(webpackCommonConfig, {
     walletAdminWallets: './src/main/webapp/vue-app/walletAdminWallets.js'
   },
   output: {
-    path: path.join(__dirname, 'target/exo-ethereum-wallet-admin/'),
+    path: path.join(__dirname, 'target/wallet-admin/'),
     filename: 'js/[name].bundle.js'
   },
   externals: {

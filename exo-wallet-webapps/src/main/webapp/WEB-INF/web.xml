@@ -13,17 +13,6 @@
   <listener>
     <listener-class>org.exoplatform.container.web.PortalContainerConfigOwner</listener-class>
   </listener>
-  
-  <servlet>
-    <servlet-name>ServiceLoaderServlet</servlet-name>
-    <servlet-class>org.exoplatform.addon.wallet.external.ServiceLoaderServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>ServiceLoaderServlet</servlet-name>
-    <url-pattern>/init</url-pattern>
-  </servlet-mapping>
 
   <filter>
     <filter-name>ResourceRequestFilter</filter-name>

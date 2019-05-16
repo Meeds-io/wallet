@@ -168,18 +168,8 @@
 </template>
 
 <script>
-import DelegateTokensModal from './DelegateTokensModal.vue';
-import SendDelegatedTokensModal from './SendDelegatedTokensModal.vue';
-import SendTokensModal from './SendTokensModal.vue';
-import SendEtherModal from './SendEtherModal.vue';
 
 export default {
-  components: {
-    DelegateTokensModal,
-    SendDelegatedTokensModal,
-    SendTokensModal,
-    SendEtherModal,
-  },
   props: {
     isReadOnly: {
       type: Boolean,

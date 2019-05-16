@@ -3,12 +3,6 @@
 </template>
 
 <script>
-import * as constants from '../../js/Constants.js';
-import {saveTransactionDetails} from '../../js/TransactionUtils.js';
-import {retrieveContractDetails, sendContractTransaction} from '../../js/TokenUtils.js';
-import {initWeb3, initSettings, watchMetamaskAccount, convertTokenAmountToSend, truncateError, lockBrowserWallet, unlockBrowserWallet, hashCode} from '../../js/WalletUtils.js';
-import {searchAddress} from '../../js/AddressRegistry.js';
-
 export default {
   data() {
     return {
@@ -69,7 +63,7 @@ export default {
           }
         }
 
-        return initSettings(isSpace)
+        return this.walletUtils.initSettings(isSpace)
           .then((result, error) => {
             this.handleError(error);
             if (!window.walletSettings || !window.walletSettings.isWalletEnabled) {
@@ -78,14 +72,14 @@ export default {
               throw new Error('Wallet disabled for current user');
             } else if (!window.walletSettings.userPreferences.walletAddress) {
               this.isReadOnly = true;
-              throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
+              throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
             } else if (!window.walletSettings.defaultPrincipalAccount) {
               this.isReadOnly = true;
               throw new Error("Wallet principal account isn't configured");
             }
             this.isWalletEnabled = true;
             this.isReadOnly = false;
-            return initWeb3();
+            return this.walletUtils.initWeb3();
           })
           .then((result, error) => {
             this.handleError(error);
@@ -117,7 +111,7 @@ export default {
               isContract: true,
               isDefault: true,
             };
-            return retrieveContractDetails(this.walletAddress, this.principalContractDetails);
+            return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.principalContractDetails);
           })
           .then((result, error) => {
             this.handleError(error);
@@ -144,11 +138,11 @@ export default {
             console.debug('init method - error', e);
             const error = `${e}`;
 
-            if (error.indexOf(constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
+            if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
               this.error = 'Wallet not configured';
-            } else if (error.indexOf(constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
+            } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
               this.error = 'Failed to load user settings';
-            } else if (error.indexOf(constants.ERROR_WALLET_DISCONNECTED) >= 0) {
+            } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
               this.error = 'Failed to connect to network';
             } else {
               this.error = (e && e.message) || e;
@@ -165,7 +159,7 @@ export default {
             document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : result}));
 
             if (this.useMetamask && window.walletSettings.enablingMetamaskAccountDone) {
-              this.$nextTick(() => watchMetamaskAccount(window.walletSettings.detectedMetamaskAccount));
+              this.$nextTick(() => this.walletUtils.watchMetamaskAccount(window.walletSettings.detectedMetamaskAccount));
             }
           });
       } catch(e) {
@@ -238,7 +232,7 @@ export default {
         }
 
         try {
-          const unlocked = this.useMetamask || unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(password));
+          const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(password));
           if (!unlocked) {
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
               detail : 'Wrong password'
@@ -265,21 +259,21 @@ export default {
         const isApprovedAccount = this.principalContractDetails.contract.methods.isApprovedAccount;
         const contractAddress = this.principalContractDetails.address;
         const contractType = this.principalContractDetails.contractType;
-        const amountWithDecimals = convertTokenAmountToSend(amount, this.principalContractDetails.decimals);
+        const amountWithDecimals = this.walletUtils.convertTokenAmountToSend(amount, this.principalContractDetails.decimals);
 
         let approvedSender = false;
         let approvedReceiver = false;
         let receiverAddress = null;
         let senderAddress = null;
 
-        return searchAddress(receiver.id, receiver.type)
+        return this.addressRegistry.searchAddress(receiver.id, receiver.type)
           .then((address) => {
             receiverAddress = address;
             if (!receiverAddress || !receiverAddress.length) {
               throw new Error(`Receiver doesn't have a wallet`);
             }
 
-            return searchAddress(sender.id, sender.type)
+            return this.addressRegistry.searchAddress(sender.id, sender.type)
               .then((address) => {
                 senderAddress = address;
 
@@ -353,7 +347,7 @@ export default {
               }
 
               //finally paas this data parameter to send Transaction
-              return sendContractTransaction(this.useMetamask, this.networkId, {
+              return this.tokenUtils.sendContractTransaction(this.useMetamask, this.networkId, {
                    contractAddress: contractAddress,
                    senderAddress: senderAddress,
                    gas: defaultGas,
@@ -379,7 +373,7 @@ export default {
                     };
 
                     // *async* save transaction message for contract, sender and receiver
-                    saveTransactionDetails(pendingTransaction);
+                    this.transactionUtils.saveTransactionDetails(pendingTransaction);
 
                     // The transaction has been hashed and will be sent
                     document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
@@ -398,9 +392,9 @@ export default {
             .catch((e) => {
               console.debug('contract transfer method - error', e);
               this.loading = false;
-              throw new Error(`Error sending tokens: ${truncateError(e)}`);
+              throw new Error(`Error sending tokens: ${this.walletUtils.truncateError(e)}`);
             })
-            .finally(() => this.useMetamask || lockBrowserWallet());
+            .finally(() => this.useMetamask || this.walletUtils.lockBrowserWallet());
           })
           .catch((error) => {
             console.debug('sendTokens method - error', error);

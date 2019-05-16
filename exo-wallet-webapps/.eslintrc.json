@@ -25,7 +25,8 @@
         "Vuetify": true,
         "EthereumQRPlugin": true,
         "isMaximized": true,
-        "abiDecoder": true
+        "abiDecoder": true,
+        "WalletCommon": true
     },
     "parserOptions": {
         "sourceType": "module",

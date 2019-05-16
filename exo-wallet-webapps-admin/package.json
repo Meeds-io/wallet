@@ -1,10 +1,10 @@
 {
-  "name": "exo-ethereum-wallet-admin",
-  "version": "1.3.0",
-  "description": "eXo Ethereum Wallet Admin",
+  "name": "exo-wallet-admin",
+  "version": "1.0.0",
+  "description": "eXo Wallet Admin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/exo-addons/exo-ethereum-wallet"
+    "url": "https://github.com/exoplatform/exo-wallet"
   },
   "scripts": {
     "watch": "webpack --config webpack.watch.js --progress --colors --watch -d",

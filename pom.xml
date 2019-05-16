@@ -18,6 +18,7 @@
     <module>exo-wallet-api</module>
     <module>exo-wallet-services</module>
     <module>exo-wallet-reward-services</module>
+    <module>exo-wallet-webapps-common</module>
     <module>exo-wallet-webapps</module>
     <module>exo-wallet-webapps-admin</module>
     <module>exo-wallet-webapps-reward</module>

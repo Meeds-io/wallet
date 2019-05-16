@@ -8,7 +8,7 @@ const config = merge(webpackCommonConfig, {
     rewardApp: './src/main/webapp/vue-app/rewardApp.js',
   },
   output: {
-    path: path.join(__dirname, 'target/exo-ethereum-wallet-reward/'),
+    path: path.join(__dirname, 'target/wallet-reward/'),
     filename: 'js/[name].bundle.js'
   },
   externals: {

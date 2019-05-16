@@ -1,8 +1,0 @@
-{
-	"name": "Space 3",
-  "id": "space_3",
-	"address": "",
-  "managers": ["testuser1"],
-  "avatar": "/portal/rest/img/space",
-  "type": "space"
-}

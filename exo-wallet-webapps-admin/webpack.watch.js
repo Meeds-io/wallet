@@ -5,7 +5,7 @@ const webpackProductionConfig = require('./webpack.prod.js');
 
 module.exports = merge(webpackProductionConfig, {
   output: {
-    path: '/exo-server/webapps/exo-ethereum-wallet-admin/',
+    path: '/exo-server/webapps/wallet-admin/',
     filename: 'js/[name].bundle.js'
   }
 });

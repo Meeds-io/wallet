@@ -29,7 +29,6 @@ import org.apache.commons.lang.StringUtils;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 import org.exoplatform.addon.wallet.reward.model.*;
-import org.exoplatform.addon.wallet.reward.service.*;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;

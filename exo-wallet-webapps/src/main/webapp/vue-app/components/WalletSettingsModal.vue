@@ -186,22 +186,11 @@
 </template>
 
 <script>
-import QrCode from './QRCode.vue';
-import WalletAddress from './WalletAddress.vue';
 import WalletSettingsSecurityTab from './WalletSettingsSecurityTab.vue';
-import WalletBackupModal from './WalletBackupModal.vue';
-import WalletImportKeyModal from './WalletImportKeyModal.vue';
-
-import {setDraggable, gasToFiat, enableMetamask, disableMetamask, removeServerSideBackup} from '../js/WalletUtils.js';
-import {FIAT_CURRENCIES} from '../js/Constants.js';
 
 export default {
   components: {
-    QrCode,
-    WalletAddress,
     WalletSettingsSecurityTab,
-    WalletBackupModal,
-    WalletImportKeyModal,
   },
   props: {
     title: {
@@ -266,7 +255,7 @@ export default {
       error: null,
       walletAddress: null,
       selectedTab: null,
-      selectedCurrency: FIAT_CURRENCIES['usd'],
+      selectedCurrency: this.constants.FIAT_CURRENCIES['usd'],
       currencies: [],
       defaultGas: 0,
       accountType: 0,
@@ -309,11 +298,11 @@ export default {
         this.error = null;
         this.walletAddress = window.walletSettings.userPreferences.walletAddress;
         this.defaultGas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
-        this.defaulGasPriceFiat = this.defaulGasPriceFiat || gasToFiat(this.defaultGas, window.walletSettings.maxGasPriceEther);
+        this.defaulGasPriceFiat = this.defaulGasPriceFiat || this.walletUtils.gasToFiat(this.defaultGas, window.walletSettings.maxGasPriceEther);
         this.accountType = window.walletSettings.userPreferences.useMetamask ? '2' : '1';
         this.enableDelegation = window.walletSettings.userPreferences.enableDelegation;
         if (window.walletSettings.userPreferences.currency) {
-          this.selectedCurrency = FIAT_CURRENCIES[window.walletSettings.userPreferences.currency];
+          this.selectedCurrency = this.constants.FIAT_CURRENCIES[window.walletSettings.userPreferences.currency];
         }
 
         this.accountsList = [];
@@ -347,7 +336,7 @@ export default {
         this.dialog = true;
         this.$nextTick(() => {
           this.refreshFromSettings();
-          setDraggable();
+          this.walletUtils.setDraggable();
         });
       }
     },
@@ -378,11 +367,11 @@ export default {
       }
     },
     defaultGas() {
-      this.defaulGasPriceFiat = gasToFiat(this.defaultGas, window.walletSettings.maxGasPriceEther);
+      this.defaulGasPriceFiat = this.walletUtils.gasToFiat(this.defaultGas, window.walletSettings.maxGasPriceEther);
     },
   },
   created() {
-    Object.keys(FIAT_CURRENCIES).forEach((key) => this.currencies.push(FIAT_CURRENCIES[key]));
+    Object.keys(this.constants.FIAT_CURRENCIES).forEach((key) => this.currencies.push(this.constants.FIAT_CURRENCIES[key]));
   },
   methods: {
     refreshFromSettings() {
@@ -443,14 +432,14 @@ export default {
     },
     changeAccountType() {
       if (this.useMetamaskChoice) {
-        enableMetamask(this.isSpace);
+        this.walletUtils.enableMetamask(this.isSpace);
       } else {
-        disableMetamask(this.isSpace);
+        this.walletUtils.disableMetamask(this.isSpace);
       }
       this.$emit('settings-changed');
     },
     removeServerSideBackup() {
-      return removeServerSideBackup(this.walletAddress)
+      return this.walletUtils.removeServerSideBackup(this.walletAddress)
         .then((removed) => {
           if (removed) {
             window.walletSettings.userPreferences.hasKeyOnServerSide = false;
