@@ -5,35 +5,35 @@
   <parent>
     <artifactId>addons-parent-pom</artifactId>
     <groupId>org.exoplatform.addons</groupId>
-    <version>9</version>
+    <version>10</version>
     <relativePath/>
   </parent>
   <groupId>org.exoplatform.addons.wallet</groupId>
-  <artifactId>exo-wallet</artifactId>
+  <artifactId>wallet</artifactId>
   <version>1.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>eXo Add-on:: eXo Wallet - Parent POM</name>
-  <description>eXo Wallet Addon</description>
+  <name>eXo Add-on:: Wallet Add-on</name>
+  <description>eXo Wallet Add-on</description>
   <modules>
-    <module>exo-wallet-api</module>
-    <module>exo-wallet-services</module>
-    <module>exo-wallet-reward-services</module>
-    <module>exo-wallet-webapps-common</module>
-    <module>exo-wallet-webapps</module>
-    <module>exo-wallet-webapps-admin</module>
-    <module>exo-wallet-webapps-reward</module>
-    <module>exo-wallet-packaging</module>
+    <module>wallet-api</module>
+    <module>wallet-services</module>
+    <module>wallet-reward-services</module>
+    <module>wallet-webapps-common</module>
+    <module>wallet-webapps</module>
+    <module>wallet-webapps-admin</module>
+    <module>wallet-webapps-reward</module>
+    <module>wallet-packaging</module>
   </modules>
   <scm>
-    <connection>scm:git:git://github.com/exo-addons/exo-wallet.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/exo-addons/exo-wallet.git</developerConnection>
-    <url>https://github.com/exo-addons/exo-wallet</url>
+    <connection>scm:git:git://github.com/exoplatform/wallet.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/exoplatform/wallet.git</developerConnection>
+    <url>https://github.com/exoplatform/wallet</url>
     <tag>HEAD</tag>
   </scm>
   <properties>
     <!-- 3rd party libraries versions -->
-    <org.exoplatform.platform.version>5.3.0-M06</org.exoplatform.platform.version>
-    <org.exoplatform.addons.wallet-contract.version>1.0.x-SNAPSHOT</org.exoplatform.addons.wallet-contract.version>
+    <org.exoplatform.platform.version>5.3.x-SNAPSHOT</org.exoplatform.platform.version>
+    <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
 
     <!-- Ethereum We3j for Java library -->
     <org.web3j.version>3.6.0</org.web3j.version>
@@ -51,7 +51,7 @@
     <com.github.eirslett.frontend.version>1.6</com.github.eirslett.frontend.version>
     <!-- **************************************** -->
     <!-- Jenkins Settings -->
-    <jenkins.job.name>addon-exo-wallet-master-ci</jenkins.job.name>
+    <jenkins.job.name>addon-wallet-master-ci</jenkins.job.name>
     <!-- **************************************** -->
   </properties>
   <dependencyManagement>
@@ -68,47 +68,47 @@
       <!-- Current project artifacts -->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-webapps</artifactId>
+        <artifactId>wallet-webapps</artifactId>
         <version>${project.version}</version>
         <type>war</type>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-webapps-admin</artifactId>
+        <artifactId>wallet-webapps-admin</artifactId>
         <version>${project.version}</version>
         <type>war</type>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-webapps-reward</artifactId>
+        <artifactId>wallet-webapps-reward</artifactId>
         <version>${project.version}</version>
         <type>war</type>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-api</artifactId>
+        <artifactId>wallet-api</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-services</artifactId>
+        <artifactId>wallet-services</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>exo-wallet-reward-services</artifactId>
+        <artifactId>wallet-reward-services</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>org.exoplatform.addons.wallet-contract</groupId>
+        <groupId>org.exoplatform.wallet</groupId>
         <artifactId>ert-contract</artifactId>
-        <version>${org.exoplatform.addons.wallet-contract.version}</version>
+        <version>${org.exoplatform.wallet.ert-contract.version}</version>
       </dependency>
 
       <dependency>
