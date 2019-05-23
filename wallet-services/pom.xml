@@ -7,6 +7,9 @@
   </parent>
   <artifactId>wallet-services</artifactId>
   <name>eXo Add-on:: Wallet - Services</name>
+  <properties>
+    <exo.test.coverage.ratio>0.06</exo.test.coverage.ratio>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
