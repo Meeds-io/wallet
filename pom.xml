@@ -68,6 +68,13 @@
       <!-- Current project artifacts -->
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>wallet-webapps-common</artifactId>
+        <version>${project.version}</version>
+        <type>war</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>wallet-webapps</artifactId>
         <version>${project.version}</version>
         <type>war</type>

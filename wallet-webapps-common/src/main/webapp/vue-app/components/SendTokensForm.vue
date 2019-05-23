@@ -119,7 +119,7 @@ import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
 import GasPriceChoice from './GasPriceChoice.vue';
 
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
 
@@ -182,12 +182,12 @@ export default {
     transactionFeeString() {
       if (this.transactionFeeToken) {
         if (this.contractDetails) {
-          return `${this.toFixed(this.transactionFeeToken)} ${this.contractDetails && this.contractDetails.symbol}`;
+          return `${toFixed(this.transactionFeeToken)} ${this.contractDetails && this.contractDetails.symbol}`;
         } else {
           return '';
         }
       } else if (this.transactionFeeFiat) {
-        return `${this.toFixed(this.transactionFeeFiat)} ${this.fiatSymbol}`;
+        return `${toFixed(this.transactionFeeFiat)} ${this.fiatSymbol}`;
       }
       return '';
     },
@@ -204,7 +204,7 @@ export default {
       return this.transactionFeeEther ? etherToFiat(this.transactionFeeEther) : 0;
     },
     transactionFeeToken() {
-      return !this.contractDetails || this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : this.toFixed(this.transactionFeeInWei / this.sellPriceInWei);
+      return !this.contractDetails || this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei);
     },
   },
   watch: {

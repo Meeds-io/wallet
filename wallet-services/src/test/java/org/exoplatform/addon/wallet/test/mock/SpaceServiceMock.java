@@ -21,6 +21,7 @@ import java.util.List;
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.services.security.MembershipEntry;
 import org.exoplatform.social.core.application.PortletPreferenceRequiredPlugin;
+import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.space.*;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceLifeCycleListener;
@@ -106,6 +107,11 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public Space createSpace(Space space, String creatorUserId) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Space createSpace(Space space, String creatorUserId, List<Identity> identitiesToInvite) throws SpaceException {
     throw new UnsupportedOperationException();
   }
 

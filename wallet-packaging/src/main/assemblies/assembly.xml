@@ -11,6 +11,15 @@
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/webapps</outputDirectory>
       <includes>
+        <include>${project.groupId}:wallet-webapps-common:war</include>
+      </includes>
+      <scope>provided</scope>
+      <outputFileNameMapping>wallet-common.war</outputFileNameMapping>
+    </dependencySet>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>/webapps</outputDirectory>
+      <includes>
         <include>${project.groupId}:wallet-webapps:war</include>
       </includes>
       <scope>provided</scope>
@@ -66,10 +75,10 @@
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/lib</outputDirectory>
       <includes>
-        <include>${project.groupId}:wallet-contracts:jar</include>
+        <include>org.exoplatform.wallet:ert-contract:jar</include>
       </includes>
       <scope>provided</scope>
-      <outputFileNameMapping>wallet-contracts.jar</outputFileNameMapping>
+      <outputFileNameMapping>ert-contract.jar</outputFileNameMapping>
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>

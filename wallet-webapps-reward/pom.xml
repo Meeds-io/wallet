@@ -51,7 +51,7 @@
           </execution>
           <execution>
             <id>npm run build</id>
-            <phase>package</phase>
+            <phase>compile</phase>
             <goals>
               <goal>npm</goal>
             </goals>

@@ -119,7 +119,7 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>wallet</finalName>
+    <finalName>wallet-common</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -185,7 +185,7 @@
           </execution>
           <execution>
             <id>npm run build</id>
-            <phase>package</phase>
+            <phase>compile</phase>
             <goals>
               <goal>npm</goal>
             </goals>

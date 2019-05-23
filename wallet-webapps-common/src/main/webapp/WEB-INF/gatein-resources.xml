@@ -120,6 +120,7 @@
     <name>walletJQueryUI</name>
     <as>JQueryUI</as>
     <script>
+      <minify>false</minify>
       <path>/js/lib/jquery-ui-1.18.12.min.js</path>
     </script>
     <depends>

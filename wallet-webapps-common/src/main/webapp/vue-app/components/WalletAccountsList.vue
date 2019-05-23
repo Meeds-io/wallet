@@ -173,6 +173,8 @@ import SendDelegatedTokensModal from './SendDelegatedTokensModal.vue';
 import SendTokensModal from './SendTokensModal.vue';
 import SendEtherModal from './SendEtherModal.vue';
 
+import {toFixed} from '../js/WalletUtils.js';
+
 export default {
   components: {
     DelegateTokensModal,
@@ -298,6 +300,9 @@ export default {
     },
     addSendTokenTransaction(transaction, contract) {
       this.$emit('transaction-sent', transaction);
+    },
+    toFixed(args) {
+      return toFixed(args);
     },
   },
 };

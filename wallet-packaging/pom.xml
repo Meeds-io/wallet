@@ -30,6 +30,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.exoplatform.wallet</groupId>
+      <artifactId>ert-contract</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.web3j</groupId>
       <artifactId>core</artifactId>
       <scope>provided</scope>
@@ -68,6 +74,13 @@
     <dependency>
       <groupId>io.reactivex</groupId>
       <artifactId>rxjava</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>wallet-webapps-common</artifactId>
+      <type>war</type>
       <scope>provided</scope>
     </dependency>
 

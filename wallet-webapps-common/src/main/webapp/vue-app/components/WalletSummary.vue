@@ -141,6 +141,7 @@ import SendFundsModal from './SendFundsModal.vue';
 
 import {loadTransactions} from '../js/TransactionUtils.js';
 import {refreshWallet} from '../js/AddressRegistry.js';
+import {toFixed} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -371,6 +372,9 @@ export default {
       ).then(() => {
         this.updatePendingTransactionsIndex++;
       });
+    },
+    toFixed(args) {
+      return toFixed(args);
     },
   },
 };

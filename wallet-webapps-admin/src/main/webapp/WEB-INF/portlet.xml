@@ -4,7 +4,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd">
    <portlet>
-     <portlet-name>EthereumWalletAdminSettings</portlet-name>
+     <portlet-name>WalletAdminSettings</portlet-name>
      <display-name xml:lang="EN">Settings Administration Application</display-name>
      <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
      <init-param>
@@ -27,7 +27,7 @@
       </security-role-ref>
    </portlet>
    <portlet>
-     <portlet-name>EthereumWalletAdminContracts</portlet-name>
+     <portlet-name>WalletAdminContracts</portlet-name>
      <display-name xml:lang="EN">Contracts Administration Application</display-name>
      <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
      <init-param>
@@ -50,7 +50,7 @@
       </security-role-ref>
    </portlet>
    <portlet>
-     <portlet-name>EthereumWalletAdminWallets</portlet-name>
+     <portlet-name>WalletAdminWallets</portlet-name>
      <display-name xml:lang="EN">Wallets Administration Application</display-name>
      <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
      <init-param>

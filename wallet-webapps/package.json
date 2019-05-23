@@ -1,7 +1,7 @@
 {
-  "name": "wallet-common",
+  "name": "wallet",
   "version": "1.0.0",
-  "description": "eXo Wallet-common",
+  "description": "eXo Wallet",
   "repository": {
     "type": "git",
     "url": "https://github.com/exoplatform/wallet"

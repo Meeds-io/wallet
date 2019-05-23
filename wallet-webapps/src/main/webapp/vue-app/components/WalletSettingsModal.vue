@@ -139,7 +139,7 @@
                   </div>
                 </v-card-text>
                 <v-card-text v-if="browserWalletExists" class="text-xs-center pb-0">
-                  <wallet-backup-modal
+                  <backup-modal
                     ref="walletBackupModal"
                     :display-complete-message="false"
                     @copied="
@@ -148,7 +148,7 @@
                     " />
                 </v-card-text>
                 <v-card-text class="text-xs-center">
-                  <wallet-import-key-modal
+                  <import-key-modal
                     ref="walletImportKeyModal"
                     :is-space="isSpace"
                     :wallet-address="walletAddress"

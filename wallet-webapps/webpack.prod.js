@@ -10,7 +10,7 @@ const config = merge(webpackCommonConfig, {
     spaceWallet: './src/main/webapp/vue-app/spaceWallet.js',
   },
   output: {
-    path: path.join(__dirname, 'target/wallet-common/'),
+    path: path.join(__dirname, 'target/wallet/'),
     filename: 'js/[name].bundle.js'
   },
   externals: {

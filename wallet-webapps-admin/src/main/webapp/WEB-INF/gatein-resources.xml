@@ -5,21 +5,21 @@
 
   <portlet-skin>
     <application-name>wallet-admin</application-name>
-    <portlet-name>EthereumWalletAdmin</portlet-name>
+    <portlet-name>WalletAdmin</portlet-name>
     <skin-name>Enterprise</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 
   <portlet-skin>
     <application-name>wallet-admin</application-name>
-    <portlet-name>EthereumWalletAdmin</portlet-name>
+    <portlet-name>WalletAdmin</portlet-name>
     <skin-name>Default</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 -->
 
   <portlet>
-    <name>EthereumWalletAdminSettings</name>
+    <name>WalletAdminSettings</name>
     <module>
       <script>
         <minify>false</minify>
@@ -69,7 +69,7 @@
   </portlet>
 
   <portlet>
-    <name>EthereumWalletAdminContracts</name>
+    <name>WalletAdminContracts</name>
     <module>
       <script>
         <minify>false</minify>
@@ -119,7 +119,7 @@
   </portlet>
 
   <portlet>
-    <name>EthereumWalletAdminWallets</name>
+    <name>WalletAdminWallets</name>
     <module>
       <script>
         <minify>false</minify>

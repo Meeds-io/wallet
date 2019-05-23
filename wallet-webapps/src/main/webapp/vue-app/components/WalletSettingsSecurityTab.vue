@@ -13,7 +13,7 @@
           </v-tooltip>
         </h4>
         <h5>Add an extra layer of security by using a dedicated password for your wallet.</h5>
-        <wallet-reset-modal
+        <reset-modal
           ref="walletResetModal"
           button-label="Reset wallet password"
           display-remember-me
@@ -117,7 +117,9 @@ export default {
       this.hasKeyOnServerSide = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide;
       this.useMetamask = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.useMetamask;
       this.browserWalletExists = window.walletSettings.browserWalletExists;
-      this.$refs.walletResetModal.init();
+      if (this.$refs.walletResetModal) {
+        this.$refs.walletResetModal.init();
+      }
     },
     changeMetamaskOption() {
       if (this.useMetamask) {

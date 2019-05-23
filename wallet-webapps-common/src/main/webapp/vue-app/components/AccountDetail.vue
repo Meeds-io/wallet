@@ -112,7 +112,7 @@ import SendEtherModal from './SendEtherModal.vue';
 import ProfileChip from './ProfileChip.vue';
 
 import {retrieveContractDetails} from '../js/TokenUtils.js';
-import {etherToFiat} from '../js/WalletUtils.js';
+import {etherToFiat, toFixed} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -189,10 +189,10 @@ export default {
   },
   computed: {
     fiatBalance() {
-      return this.contractDetails && this.contractDetails.balanceFiat ? `${this.toFixed(this.contractDetails.balanceFiat)} ${this.fiatSymbol}` : `0 ${this.fiatSymbol}`;
+      return this.contractDetails && this.contractDetails.balanceFiat ? `${toFixed(this.contractDetails.balanceFiat)} ${this.fiatSymbol}` : `0 ${this.fiatSymbol}`;
     },
     balance() {
-      return this.contractDetails && this.contractDetails.balance ? `${this.toFixed(this.contractDetails.balance)} ${this.contractDetails && this.contractDetails.symbol}` : '';
+      return this.contractDetails && this.contractDetails.balance ? `${toFixed(this.contractDetails.balance)} ${this.contractDetails && this.contractDetails.symbol}` : '';
     },
   },
   watch: {

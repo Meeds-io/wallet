@@ -789,7 +789,7 @@
 import WalletAddress from './WalletAddress.vue';
 import ProfileChip from './ProfileChip.vue';
 
-import {getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink} from '../js/WalletUtils.js';
+import {getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
 import {loadTransactions} from '../js/TransactionUtils.js';
 
 export default {
@@ -981,6 +981,9 @@ export default {
       } catch (e) {
         console.debug('forceUpdateList - method error', e);
       }
+    },
+    toFixed(args) {
+      return toFixed(args);
     },
   },
 };
