@@ -1,199 +1,122 @@
 <template>
-  <v-app
-    id="WalletApp"
-    :class="isMaximized ? 'maximized' : 'minimized'"
-    color="transaprent"
-    flat>
-    <main v-if="isWalletEnabled" id="walletEnabledContent">
-      <v-layout>
-        <v-flex>
-          <v-card :class="isMaximized && 'transparent'" flat>
-            <v-toolbar
-              :class="isMaximized ? 'mb-3' : 'no-padding'"
-              class="walletAppToolbar"
-              color="white"
-              flat
-              dense>
-              <v-toolbar-title v-if="isSpace && isMaximized">
-                Space Wallet
-              </v-toolbar-title>
-              <v-toolbar-title v-else-if="isMaximized">
-                My Wallet
-              </v-toolbar-title>
-              <v-toolbar-title v-else class="head-container">
-                Wallet
-              </v-toolbar-title>
-              <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
-                <v-tooltip
-                  content-class="etherTooLowWarning"
-                  attach="#etherTooLowWarningParent"
-                  absolute
-                  top
-                  class="ml-2">
-                  <v-icon slot="activator" color="orange">
-                    warning
+  <div>
+    <v-flex xs12>
+      <v-card class="cardstyle">
+        <v-card-title primary-title>
+          <div
+            slot="header"
+            class="panel-title walletheader">
+           <span style="padding:5px;"> My Wallet </span>
+              <v-flex md9 />
+         <wallet-app-menu/>
+          </div>
+        </v-card-title>
+      </v-card>
+    </v-flex>
+
+
+    <v-flex xs12>
+      <v-card class="cardbody">
+          <div class="btndisplay">
+          <div class="carddisplay">
+        <v-card class="cardbalance">
+          <div >
+            <span class="headlinecard">
+              Current balance
+            </span>
+            <span class="headlinefound " >
+              75.00 Ȼ
+            </span>
+          </div>
+        </v-card>
+
+          <v-card class="cardbalance">
+              <div class="cardcontent">
+            <span class="headlinecardearnedcauris ">
+             Total Earned Cauris
+            </span>
+                  <span class="headlinecauris " >
+              152 Ȼ
+                   <v-icon color="blue" size="28px" class="arrow-up-right">
+                     zoom_in
                   </v-icon>
-                  <span>
-                    No enough funds to send transactions
-                  </span>
-                </v-tooltip>
+            </span>
               </div>
-
-              <v-spacer />
-
-              <wallet-app-menu
-                ref="walletAppMenu"
-                :is-space="isSpace"
-                :is-maximized="isMaximized"
-                :is-space-administrator="isSpaceAdministrator"
-                @refresh="init()"
-                @maximize="maximize()"
-                @modify-settings="showSettingsModal = true" />
-
-              <wallet-settings-modal
-                ref="walletSettingsModal"
-                :is-space="isSpace"
-                :open="showSettingsModal"
-                :app-loading="loading"
-                :fiat-symbol="fiatSymbol"
-                :display-reset-option="displayWalletResetOption"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccounts"
-                :principal-account-address="principalAccount"
-                @copied="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
-                @close="showSettingsModal = false"
-                @settings-changed="init()" />
-            </v-toolbar>
-
-            <v-toolbar
-              class="additionalToolbar"
-              color="white"
-              flat
-              dense>
-              <wallet-setup
-                ref="walletSetup"
-                :is-space="isSpace"
-                :wallet-address="walletAddress"
-                :refresh-index="refreshIndex"
-                :loading="loading"
-                :is-minimized="!isMaximized"
-                @loading="loading = true"
-                @end-loading="loading = false"
-                @refresh="init()"
-                @error="
-                  loading = false;
-                  error = $event;
-                " />
-            </v-toolbar>
-
-            <!-- Body -->
-            <v-card
-              v-if="displayAccountsList"
-              id="walletAppBody"
-              class="text-xs-center"
-              flat>
-              <div v-if="error && !loading" class="alert alert-error">
-                <i class="uiIconError"></i> {{ error }}
-              </div>
-
-              <v-progress-circular
-                v-if="loading"
-                color="primary"
-                class="mt-4 mb-4"
-                indeterminate />
-
-              <wallet-summary
-                v-if="walletAddress && !loading && accountsDetails[walletAddress]"
-                ref="walletSummary"
-                :is-maximized="isMaximized"
-                :is-space="isSpace"
-                :is-space-administrator="isSpaceAdministrator"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccountsToDisplay"
-                :principal-account="principalAccount"
-                :refresh-index="refreshIndex"
-                :network-id="networkId"
-                :wallet-address="walletAddress"
-                :ether-balance="etherBalance"
-                :total-balance="totalBalance"
-                :total-fiat-balance="totalFiatBalance"
-                :is-read-only="isReadOnly"
-                :fiat-symbol="fiatSymbol"
-                :loading="loading"
-                @refresh-balance="refreshBalance"
-                @refresh-token-balance="refreshTokenBalance"
-                @error="error = $event" />
-
-              <wallet-accounts-list
-                v-if="isMaximized && !loading"
-                ref="walletAccountsList"
-                :is-read-only="isReadOnly"
-                :accounts-details="accountsDetails"
-                :principal-account="principalAccount"
-                :overview-accounts="overviewAccountsToDisplay"
-                :wallet-address="walletAddress"
-                :network-id="networkId"
-                :refresh-index="refreshIndex"
-                :fiat-symbol="fiatSymbol"
-                @account-details-selected="openAccountDetail"
-                @refresh-contracts="forceUpdate"
-                @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
-                @error="error = $event" />
-            </v-card>
-
-            <!-- The selected account detail -->
-            <v-navigation-drawer
-              id="accountDetailsDrawer"
-              v-model="seeAccountDetails"
-              fixed
-              right
-              stateless
-              temporary
-              width="700"
-              max-width="100vw">
-              <account-detail
-                ref="accountDetail"
-                :fiat-symbol="fiatSymbol"
-                :is-read-only="isReadOnly"
-                :network-id="networkId"
-                :wallet-address="walletAddress"
-                :contract-details="selectedAccount"
-                :selected-transaction-hash="selectedTransactionHash"
-                @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
-                @back="back()" />
-            </v-navigation-drawer>
           </v-card>
-        </v-flex>
-      </v-layout>
-      <div id="walletDialogsParent">
+
+          <v-card class="cardbalance">
+              <div class="cardcontent" >
+            <span class="headlinecard ">
+              Last Transactions
+            </span>
+                  <span class="headlinecauris " >
+              152 Ȼ
+
+                  <v-icon  color="blue" size="28px" class="arrow-up-right">
+                     zoom_in
+                  </v-icon>
+                  </span>
+              </div>
+          </v-card>
+              </div>
+
+
+              <v-flex md2/>
+              <div class="btndisplayblock">
+              <v-flex md2>
+                  <v-btn class="btn">
+
+                      Send
+                  </v-btn>
+              </v-flex>
+
+              <v-flex md2>
+                  <v-btn class="btn ">
+
+                      Request
+                  </v-btn>
+              </v-flex>
+             </div>
       </div>
-    </main>
-    <main v-else-if="isMaximized && !loading" id="walletDisabledContent">
-      <v-layout>
-        <v-flex>
-          <v-card-title class="transparent" flat>
-            <v-spacer />
-            <div class="alert alert-warning">
-              <i class="uiIconWarning"></i> You don't have enough access rights to use Ethereum Wallet application
-            </div>
-            <v-spacer />
-          </v-card-title>
-        </v-flex>
-      </v-layout>
-    </main>
-  </v-app>
+
+   <div class="history">
+
+            <span style="font-weight: 600; padding:8px;">HISTORY</span>
+
+            <v-flex md2/>
+
+    <div class="centerBlock">
+      <v-toolbar class="uiGrayLightBox">
+
+        <v-tabs right v-model="selectedTab" class="tabColor">
+
+
+            <v-tab key="invited" href="#invited" color="transparent">Last Week</v-tab>
+            <v-tab key="notYetInvited" href="#notYetInvited">Last month </v-tab>
+
+        </v-tabs>
+      </v-toolbar>
+    </div>
+   </div>
+          <v-flex md2/>
+
+
+   <chart-app></chart-app>
+
+      </v-card>
+    </v-flex>
+  </div>
 </template>
+
 
 <script>
 import WalletAppMenu from './WalletAppMenu.vue';
-import WalletAccountsList from './WalletAccountsList.vue';
-import WalletSettingsModal from './WalletSettingsModal.vue';
+import ChartApp from './ChartApp.vue';
 
 export default {
   components: {
     WalletAppMenu,
-    WalletAccountsList,
-    WalletSettingsModal,
+    ChartApp
   },
   props: {
     isSpace: {
@@ -205,6 +128,16 @@ export default {
   },
   data() {
     return {
+
+      value: [
+        423,
+        446,
+        675,
+        510,
+        590,
+        610,
+        760
+      ],
       isWalletEnabled: false,
       loading: true,
       useMetamask: false,
@@ -531,3 +464,345 @@ export default {
   },
 };
 </script>
+
+
+
+
+
+<style>
+body{
+font-family:"Source Sans Pro";
+
+}
+
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,700i');
+
+.theme--light.application {
+  background: transparent !important;
+  color: transparent !important;
+  border: none;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  z-index: 21;
+  visibility: inherit;
+  width: 100%;
+  margin: 0 !important;
+}
+.panel {
+  transform: rotate(0deg);
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 10px;
+  background: rgb(255, 255, 255);
+  left: 302px;
+    border: 1px none rgb(0, 0, 0);
+    border-radius: 2px;
+    box-shadow: 0 1px 5px 1px rgba(102, 97, 91, 0.15);
+}
+
+
+.theme--light.v-expansion-panel .v-expansion-panel__container{
+    border: 1px none rgb(0, 0, 0);
+    border-radius: 2px !important;
+    box-shadow: 0 1px 5px 1px rgba(102, 97, 91, 0.15);
+}
+
+
+.panel-title {
+  font-weight: bold;
+}
+
+.container {
+    flex: 1 1 100%;
+    margin: auto;
+    padding: 0px!important;
+    width: 100%;
+}
+
+ .container.fill-height, .v-expansion-panel {
+    width: 96% !important;
+    margin: 20px auto;
+    }
+
+
+
+
+
+    .v-expansion-panel__body .container.fill-height {
+        align-items: center;
+        display: flex;
+        margin: 0;
+        padding: 15px;
+         width: 96% !important;
+        max-width: 96% !important;
+    }
+
+    v-expansion-panel theme--light{
+    padding:0;
+    }
+    ul.v-expansion-panel:first-of-type {
+        border: 1px none rgb(0, 0, 0);
+        border-radius: 2px;
+        box-shadow: 0 1px 5px 1px rgba(102, 97, 91, 0.15);
+    }
+
+
+ul.v-expansion-panel:first-of-type {
+     border: 0.5px none rgb(0, 0, 0);
+     box-shadow: none;
+
+
+}
+
+
+i.uiIconWikiWiki.uiIconWikiWhite {
+    padding: 10px;
+}
+.v-card.theme--light {
+       border: 1px solid #c6c6c6!important;
+}
+.v-toolbar theme--light{
+height: 55px;
+}
+.v-toolbar__content{
+height: 35px!important;
+}
+.v-toolbar__content, .v-toolbar__extension {
+    align-items: center;
+    display: flex;
+    padding: 0 7px!important;
+}
+.panel {
+    transform: rotate(0deg);
+    box-sizing: border-box;
+    border-radius: 3px!important;
+
+}
+
+ .v-expansion-panel__body .v-card {
+    box-shadow: 0 2px 0px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12)!important;
+    border-radius: 3px!important;}
+
+
+    li.v-expansion-panel__container.panel {
+        height: 60px !important;
+    }
+    li.v-expansion-panel__container.panel.v-expansion-panel__container--active {
+        height: auto !important;
+    }
+    .v-expansion-panel__header {
+        padding: 0 !important;
+    }
+    .container.panel.fluid.fill-height {
+        height: 100px;
+        padding:10px;
+
+        height: 100px;
+    }
+
+    .v-card {
+    display: block;
+    border-radius: 2px;
+    width: 97%!important;
+
+    position: relative;
+    text-decoration: none;
+    transition: .3s cubic-bezier(.25,.8,.5,1);
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+}
+.v-card.theme--light {
+    border: 1px solid #c6c6c6!important;
+    margin-left: 20px!important;
+}
+.v-card__title {
+    align-items: center;
+    display: block!important;
+    flex-wrap: wrap;
+    padding: 16px;
+}
+.dispostion_flex_1{
+    display:flex;
+    padding: 40px;
+}
+.dispostion_flex{
+    display:flex;
+}
+.v-btn__content {
+    align-items: center;
+    border-radius: inherit;
+    display: flex;
+    font-weight: 500;
+    flex: 1 0 auto;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    transition: .3s cubic-bezier(.25,.8,.5,1);
+    white-space: nowrap;
+    width: 200px!important;
+}
+
+.decalage {
+    margin-left: 40px;
+}
+
+.v-icon {
+    align-items: center;
+    display: inline-flex;
+    -webkit-font-feature-settings: "liga";
+    font-feature-settings: "liga";
+
+    justify-content: center;
+    line-height: 1;
+    font-weight: 600;
+    transition: .3s cubic-bezier(.25,.8,.5,1);
+    vertical-align: text-bottom;
+}
+.flex {
+    flex: 1 1 auto;
+    padding: 10px!important;
+}
+
+.walletheader{
+    display: inline-flex;
+    width: 97%;
+font-weight: 600;
+color: rgb(0, 0, 0);
+margin:0 15px;
+text-align: -webkit-auto;
+font-size: 18px;
+
+}
+.walletbalance{
+text-align: -webkit-center;
+}
+.v-icon .v-icon v-icon--right material-icons theme--light{
+font-size: 20px!important;
+
+}
+.v-btn .v-icon--right {
+    margin-left: auto;
+}
+.btn.btn-primary, .btn-primary {
+    font-family: Helvetica, arial, sans-serif;
+    font-weight: normal;
+    color: #ffffff;
+    border: none;
+    box-shadow: none;
+    padding: 0px 10px!important;
+}
+.v-btn .v-icon--right {
+    margin-left: 0px!important;
+}
+.theme--light.v-btn:not(.v-btn--icon):not(.v-btn--flat) {
+   background-color: none!important;
+}
+.v-btn--icon {
+    border: none;
+
+}
+.v-card__title--primary {
+    padding-top: 10px!important;
+}
+.v-btn {
+    margin:0px!important;
+
+}
+.flex.md9 {
+
+    max-width: 79%!important;
+}
+.cardstyle.v-card.theme--light {
+    height: 50px;
+}
+
+.headlinecard {
+    font-size: 20px!important;
+
+    padding: 20px;
+    line-height: 30px!important;
+}
+
+.headlinecardearnedcauris {
+    font-size: 20px!important;
+
+    padding: 13px;
+    line-height: 30px!important;
+}
+
+.cardbalance.v-card.theme--light {
+    height: 75px;
+   box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 0px 1px 0 rgba(0,0,0,.14), 0 1px 14px 3px rgba(0,0,0,.12);
+    width: 180px!important;
+        padding: 6px;
+}
+
+
+
+
+
+
+.cardbody{
+padding-top: 20px;
+
+}
+.headlinefound{
+
+font-size: 40px!important;
+    font-weight: 700;
+    padding: 20px;
+    color: blue;
+    line-height: 35px!important;
+}
+
+.carddisplay {
+    display: inline-flex;
+    padding: 15px;
+}
+
+.headlinecauris {
+
+   font-size: 28px!important;
+   font-weight: 600;
+    line-height: 30px!important;
+}
+
+.cardcontent {
+    display: inline-block;
+    text-align: -webkit-center;
+}
+
+.btndisplay {
+    display: inline-flex;
+}
+.v-btn:not(.v-btn--depressed):not(.v-btn--flat):active {
+    box-shadow: none!important;}
+
+ .theme--light.v-btn:not(.v-btn--icon):not(.v-btn--flat) {
+    background-color: #ffffff!important;
+}
+
+.history {
+       margin-top: 25px;
+
+}
+
+.btndisplayinlineblock {
+    display: inline-flex;
+}
+.v-toolbar {
+    transition: none;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
+    position: relative;
+    width: 24%!important;
+    will-change: padding-left,padding-right;
+}
+.theme--light.v-toolbar {
+    background-color: #ffffff!important;
+    color: rgba(0,0,0,.87);
+}
+.centerBlock {
+    text-align: -webkit-center;
+
+}
+
+</style>
