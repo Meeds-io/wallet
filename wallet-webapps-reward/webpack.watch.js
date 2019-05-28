@@ -5,7 +5,7 @@ const webpackProductionConfig = require('./webpack.prod.js');
 
 module.exports = merge(webpackProductionConfig, {
   output: {
-    path: '/home/exo/server/platform-5.3-wallet/webapps/wallet-reward/',
+    path: '/exo-server/webapps/wallet-reward/',
     filename: 'js/[name].bundle.js'
   }
 });

@@ -1,20 +1,22 @@
-
-
-
 <script>
-import VueCharts from 'vue-chartjs'
-import { line } from 'vue-chartjs'
-
-
 export default {
-  extends: Line,
-  props: ['data', 'options'],
+  extends: VueChart.Line,
+  props: {
+    data: {
+      type: Object,
+      default: function() {
+        return {};
+      },
+    },
+    options: {
+      type: Object,
+      default: function() {
+        return {};
+      },
+    },
+  },
   mounted () {
     this.renderChart(this.data, this.options)
   }
 }
 </script>
-
-
-
-

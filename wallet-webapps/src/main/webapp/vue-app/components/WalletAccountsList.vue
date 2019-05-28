@@ -142,9 +142,9 @@
                     <h4 v-if="item.error" class="mb-0">
                       {{ item.error }}
                     </h4> <h3 v-if="!item.error && (item.balanceFiat === 0 || item.balanceFiat) && overviewAccounts.indexOf('fiat') > -1" class="headline mb-0">
-                      {{ `${toFixed(item.balanceFiat)} ${fiatSymbol}` }}
+                      {{ `${walletUtils.toFixed(item.balanceFiat)} ${fiatSymbol}` }}
                     </h3> <h4 v-if="!item.error && (item.balance === 0 || item.balance)">
-                      {{ `${toFixed(item.balance)} ${item && item.symbol}` }}
+                      {{ `${walletUtils.toFixed(item.balance)} ${item && item.symbol}` }}
                     </h4>
                   </div>
                   <v-spacer v-if="!item.error" />
