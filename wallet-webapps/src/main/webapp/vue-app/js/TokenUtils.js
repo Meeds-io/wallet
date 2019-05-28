@@ -333,31 +333,31 @@ export function getSavedContractDetails(address, networkId) {
 /*
  * Creates a Web3 conract instance
  */
- export function createNewContractInstanceByName(tokenName, ...args) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+export function createNewContractInstanceByName(tokenName, ...args) {
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 /*
  * Creates a Web3 conract instance
  */
 export function createNewContractInstanceByNameAndAddress(tokenName, tokenAddress) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 export function estimateContractDeploymentGas(instance) {
@@ -616,7 +616,7 @@ function getContractFiles(tokenName) {
     .then((abi) => {
       return {
         abi: abi,
-        bin: contractBin
-      }
+        bin: contractBin,
+      };
     });
 }

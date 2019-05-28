@@ -758,12 +758,12 @@ export function toFixed(value, decimals) {
 
 export function saveWalletInitializationStatus(address, status) {
   return fetch(`/portal/rest/wallet/api/account/setInitializationStatus?address=${address}&status=${status}`, {
-      credentials: 'include',
-    }).then((resp) => {
-      if(!resp || !resp.ok) {
-        throw new Error('Error while changing initialization status of wallet');
-      }
-    });
+    credentials: 'include',
+  }).then((resp) => {
+    if (!resp || !resp.ok) {
+      throw new Error('Error while changing initialization status of wallet');
+    }
+  });
 }
 
 function createLocalWeb3Instance(isSpace, useMetamask) {
