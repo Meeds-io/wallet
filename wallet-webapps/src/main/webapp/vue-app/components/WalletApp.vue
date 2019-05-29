@@ -101,7 +101,7 @@
                 class="mt-4 mb-4"
                 indeterminate />
 
-              <wallet-summary
+              <wallet-app-summary
                 v-if="walletAddress && !loading && accountsDetails[walletAddress]"
                 ref="walletSummary"
                 :is-maximized="isMaximized"
@@ -169,11 +169,13 @@
 
 <script>
 import WalletAppMenu from './WalletAppMenu.vue';
+import WalletAppSummary from './WalletAppSummary.vue';
 import WalletSettingsModal from './WalletSettingsModal.vue';
 
 export default {
   components: {
     WalletAppMenu,
+    WalletAppSummary,
     WalletSettingsModal,
   },
   props: {

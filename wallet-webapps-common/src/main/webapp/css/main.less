@@ -625,6 +625,28 @@
   }
 }
 
+#WalletApp, #WalletSpaceApp {
+  .walletSummaryBalance {
+    width: 210px;
+
+    .v-card__title {
+      white-space: nowrap;
+      flex-direction: row;
+      flex-wrap: nowrap;
+
+      > * {
+        display: inline-block;
+      }
+    }
+  }
+
+  .walletSummaryActions {
+    .v-card__title > *, .v-dialog__activator button {
+      width: 100%;
+    }
+  }
+}
+
 @media (min-width : 1024px) {
   #WalletApp, #WalletSpaceApp {
 
