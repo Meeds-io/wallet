@@ -108,7 +108,7 @@
               flat
               no-resize />
 
-            <gas-price-choice :estimated-fee="`${toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
+            <gas-price-choice :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
           </v-form>
         </v-card-text>
         <v-card-actions>

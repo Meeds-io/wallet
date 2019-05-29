@@ -132,7 +132,7 @@
                 loading...
               </span>
               <template v-else-if="props.item.balancePrincipal">
-                {{ toFixed(props.item.balancePrincipal) }} {{ principalContract && principalContract.symbol ? principalContract.symbol : '' }}
+                {{ walletUtils.toFixed(props.item.balancePrincipal) }} {{ principalContract && principalContract.symbol ? principalContract.symbol : '' }}
               </template>
               <template v-else>
                 -
@@ -152,7 +152,7 @@
                 loading...
               </span>
               <template v-else>
-                {{ toFixed(props.item.balance) }} eth
+                {{ walletUtils.toFixed(props.item.balance) }} eth
               </template>
             </td>
             <td class="text-xs-center">

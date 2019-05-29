@@ -136,6 +136,10 @@
       <minify>false</minify>
       <path>/js/lib/vue-chartjs.min.js</path>
     </script>
+    <depends>
+      <module>chart</module>
+      <as>Chart</as>
+    </depends>
   </module>
 
   <module>

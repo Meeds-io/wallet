@@ -125,6 +125,10 @@
         <module>iePolyfills</module>
       </depends>
       <depends>
+        <module>vueChart</module>
+        <as>VueChart</as>
+      </depends>
+      <depends>
         <module>vuetify</module>
       </depends>
       <depends>

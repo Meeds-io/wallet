@@ -90,7 +90,6 @@
             <v-card
               v-if="displayAccountsList"
               id="walletAppBody"
-              class="text-xs-center"
               flat>
               <div v-if="error && !loading" class="alert alert-error">
                 <i class="uiIconError"></i> {{ error }}
@@ -122,22 +121,6 @@
                 :loading="loading"
                 @refresh-balance="refreshBalance"
                 @refresh-token-balance="refreshTokenBalance"
-                @error="error = $event" />
-
-              <wallet-accounts-list
-                v-if="isMaximized && !loading"
-                ref="walletAccountsList"
-                :is-read-only="isReadOnly"
-                :accounts-details="accountsDetails"
-                :principal-account="principalAccount"
-                :overview-accounts="overviewAccountsToDisplay"
-                :wallet-address="walletAddress"
-                :network-id="networkId"
-                :refresh-index="refreshIndex"
-                :fiat-symbol="fiatSymbol"
-                @account-details-selected="openAccountDetail"
-                @refresh-contracts="forceUpdate"
-                @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
                 @error="error = $event" />
             </v-card>
 
@@ -174,7 +157,7 @@
           <v-card-title class="transparent" flat>
             <v-spacer />
             <div class="alert alert-warning">
-              <i class="uiIconWarning"></i> You don't have enough access rights to use Ethereum Wallet application
+              <i class="uiIconWarning"></i> You don't have enough privileges to use Wallet application.
             </div>
             <v-spacer />
           </v-card-title>
@@ -186,13 +169,11 @@
 
 <script>
 import WalletAppMenu from './WalletAppMenu.vue';
-import WalletAccountsList from './WalletAccountsList.vue';
 import WalletSettingsModal from './WalletSettingsModal.vue';
 
 export default {
   components: {
     WalletAppMenu,
-    WalletAccountsList,
     WalletSettingsModal,
   },
   props: {

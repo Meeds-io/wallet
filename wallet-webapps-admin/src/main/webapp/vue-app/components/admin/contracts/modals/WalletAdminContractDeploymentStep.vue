@@ -25,7 +25,7 @@
     </v-card-title>
     <v-card-text v-else>
       <div v-if="transactionFee">
-        Estimated deployment gas: <code>{{ gas }} gas ({{ toFixed(transactionFee) }} {{ fiatSymbol }})</code>
+        Estimated deployment gas: <code>{{ gas }} gas ({{ walletUtils.toFixed(transactionFee) }} {{ fiatSymbol }})</code>
       </div>
       <slot></slot> <h4 v-if="!storedPassword">
         Your wallet password

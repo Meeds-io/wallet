@@ -13,11 +13,11 @@
             Contract Details: {{ contractDetails.title }}
           </div>
           <h3 v-if="contractDetails.contractBalanceFiat" class="font-weight-light">
-            Contract balance: {{ toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ toFixed(contractDetails.contractBalance) }} ether
+            Contract balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ toFixed(contractDetails.contractBalance) }} ether
           </h3> <h4 v-if="contractDetails.owner" class="grey--text font-weight-light no-wrap">
             Owner: <wallet-address :value="contractDetails.owner" display-label />
           </h4> <h4 v-if="contractDetails.totalSupply" class="grey--text font-weight-light">
-            Total supply: {{ toFixed(totalSupply) }} {{ contractDetails && contractDetails.symbol }}
+            Total supply: {{ walletUtils.toFixed(totalSupply) }} {{ contractDetails && contractDetails.symbol }}
           </h4>
         </v-flex>
 

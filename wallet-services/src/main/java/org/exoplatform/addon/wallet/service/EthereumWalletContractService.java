@@ -190,7 +190,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
   public String getContractFileContent(String name, String extension) throws IOException {
     try (InputStream abiInputStream = this.getClass()
                                           .getClassLoader()
-                                          .getResourceAsStream("org/exoplatform/addon/ethereum/wallet/contract/" + name + "."
+                                          .getResourceAsStream("org/exoplatform/addon/wallet/contract/" + name + "."
                                               + extension)) {
       return IOUtils.toString(abiInputStream);
     }

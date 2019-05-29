@@ -165,15 +165,15 @@ export default {
     },
     minGasFiatPrice() {
       const amount = this.defaultGas && this.walletUtils.gasToFiat(this.defaultGas, this.gweiToEther(this.minGasPrice));
-      return amount ? `${this.toFixed(amount)} ${this.fiatSymbol}` : '';
+      return amount ? `${this.walletUtils.toFixed(amount)} ${this.fiatSymbol}` : '';
     },
     normalGasFiatPrice() {
       const amount = this.defaultGas && this.walletUtils.gasToFiat(this.defaultGas, this.gweiToEther(this.normalGasPrice));
-      return amount ? `${this.toFixed(amount)} ${this.fiatSymbol}` : '';
+      return amount ? `${this.walletUtils.toFixed(amount)} ${this.fiatSymbol}` : '';
     },
     maxGasFiatPrice() {
       const amount = this.defaultGas && this.walletUtils.gasToFiat(this.defaultGas, this.gweiToEther(this.maxGasPrice));
-      return amount ? `${this.toFixed(amount)} ${this.fiatSymbol}` : '';
+      return amount ? `${this.walletUtils.toFixed(amount)} ${this.fiatSymbol}` : '';
     },
   },
   methods: {

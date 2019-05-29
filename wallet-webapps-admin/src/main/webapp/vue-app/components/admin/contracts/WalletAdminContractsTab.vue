@@ -28,7 +28,7 @@
             indeterminate
             size="20" />
           <span v-else>
-            {{ toFixed(props.item.contractBalance) }} ether
+            {{ walletUtils.toFixed(props.item.contractBalance) }} ether
           </span>
         </td>
         <td class="clickable text-xs-center" @click="openContractDetails(props.item)">
