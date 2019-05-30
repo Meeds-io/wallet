@@ -29,7 +29,8 @@
       v-else-if="!noButton"
       slot="activator"
       :disabled="disabled"
-      class="btn btn-primary mr-1 mt-2">
+      :class="!regularBtn && 'btn-primary'"
+      class="btn mr-1 mt-2">
       Send
     </button>
     <v-card class="elevation-12">
@@ -139,6 +140,12 @@ export default {
       },
     },
     noButton: {
+      type: Boolean,
+      default: function() {
+        return false;
+      },
+    },
+    regularBtn: {
       type: Boolean,
       default: function() {
         return false;

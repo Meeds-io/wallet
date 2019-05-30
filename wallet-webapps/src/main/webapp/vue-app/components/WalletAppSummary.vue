@@ -51,9 +51,9 @@
       fluid
       grid-list-md>
       <v-layout row wrap>
-        <v-flex>
-          <v-card class="walletSummaryBalance elevation-3">
-            <v-card-title class="headline blue-grey--text lighten-3">
+        <v-flex xs12 md3>
+          <v-card class="walletSummaryBalance">
+            <v-card-title class="headline">
               Current balance
             </v-card-title>
             <v-card-title>
@@ -61,9 +61,9 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex xs12 md3>
           <v-card class="walletSummaryBalance elevation-3">
-            <v-card-title class="title blue-grey--text lighten-3">
+            <v-card-title class="title">
               Total rewarded Cauri
             </v-card-title>
             <v-card-title>
@@ -71,9 +71,9 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex>
+        <v-flex xs12 md3>
           <v-card class="walletSummaryBalance elevation-3">
-            <v-card-title class="title blue-grey--text lighten-3">
+            <v-card-title class="title">
               Last transactions
             </v-card-title>
             <v-card-title>
@@ -81,9 +81,12 @@
             </v-card-title>
           </v-card>
         </v-flex>
-        <v-flex class="walletSummaryActions">
+        <v-flex
+          xs12
+          md3
+          class="walletSummaryActions">
           <v-card flat>
-            <v-card-title>
+            <div class="walletSummaryAction">
               <send-funds-modal
                 v-if="!isSpace || isSpaceAdministrator"
                 ref="sendFundsModal"
@@ -94,14 +97,15 @@
                 :wallet-address="walletAddress"
                 :disabled="disableSendButton"
                 :icon="!isMaximized"
+                regular-btn
                 @success="refreshBalance($event)"
                 @pending="loadPendingTransactions()"
                 @error="
                   loadPendingTransactions();
                   $emit('error', $event);
                 " />
-            </v-card-title>
-            <v-card-title>
+            </div>
+            <div class="walletSummaryAction">
               <request-funds-modal
                 v-if="!isSpace || isSpaceAdministrator"
                 ref="walletRequestFundsModal"
@@ -110,7 +114,7 @@
                 :principal-account="principalAccount"
                 :wallet-address="walletAddress"
                 :icon="!isMaximized" />
-            </v-card-title>
+            </div>
           </v-card>
         </v-flex>
       </v-layout>

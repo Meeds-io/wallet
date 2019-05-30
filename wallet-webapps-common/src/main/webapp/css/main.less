@@ -629,6 +629,10 @@
   .walletSummaryBalance {
     width: 210px;
 
+    .title, .headline {
+      color: #4d5466;
+    }
+
     .v-card__title {
       white-space: nowrap;
       flex-direction: row;
@@ -641,8 +645,9 @@
   }
 
   .walletSummaryActions {
-    .v-card__title > *, .v-dialog__activator button {
+    .walletSummaryAction > *, .walletSummaryAction .v-dialog__activator button {
       width: 100%;
+      margin-left: 0 !important;
     }
   }
 }
