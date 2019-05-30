@@ -87,6 +87,23 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
+export function getStoredTransactions(networkId, account, contractAddress, limit, transactionHashToSearch, onlyPending, isAdministration) {
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+    .then((resp) => {
+      if (resp && resp.ok) {
+        return resp.json();
+      } else {
+        return null;
+      }
+    })
+    .then((transactions) => {
+      return transactions && transactions.length ? transactions : [];
+    })
+    .catch((error) => {
+      throw new Error('Error retrieving transactions list', error);
+    });
+}
+
 function loadTransactionReceipt(transactionDetails) {
   if (transactionDetails.transaction && transactionDetails.receipt) {
     return Promise.resolve();
@@ -416,23 +433,6 @@ function retrieveWalletDetails(transactionDetails, prefix) {
       });
     }
   }
-}
-
-function getStoredTransactions(networkId, account, contractAddress, limit, transactionHashToSearch, onlyPending, isAdministration) {
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
-    .then((resp) => {
-      if (resp && resp.ok) {
-        return resp.json();
-      } else {
-        return null;
-      }
-    })
-    .then((transactions) => {
-      return transactions && transactions.length ? transactions : [];
-    })
-    .catch((error) => {
-      throw new Error('Error retrieving transactions list', error);
-    });
 }
 
 function getLastPendingTransactionSent(networkId, address) {

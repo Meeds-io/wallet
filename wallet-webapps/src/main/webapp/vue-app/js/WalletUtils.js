@@ -680,7 +680,7 @@ export function convertTokenAmountToSend(amount, decimals) {
 }
 
 /*
- * return amount * 10 ^ decimals
+ * return amount / 10 ^ decimals
  */
 export function convertTokenAmountReceived(amount, decimals) {
   if (decimals === 0) {

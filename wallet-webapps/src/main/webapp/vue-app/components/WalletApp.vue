@@ -41,7 +41,7 @@
 
               <v-spacer />
 
-              <wallet-app-menu
+              <toolbar-menu
                 ref="walletAppMenu"
                 :is-space="isSpace"
                 :is-maximized="isMaximized"
@@ -50,7 +50,7 @@
                 @maximize="maximize()"
                 @modify-settings="showSettingsModal = true" />
 
-              <wallet-settings-modal
+              <settings-modal
                 ref="walletSettingsModal"
                 :is-space="isSpace"
                 :open="showSettingsModal"
@@ -101,7 +101,7 @@
                 class="mt-4 mb-4"
                 indeterminate />
 
-              <wallet-app-summary
+              <wallet-summary
                 v-if="walletAddress && !loading && accountsDetails[walletAddress]"
                 ref="walletSummary"
                 :is-maximized="isMaximized"
@@ -168,15 +168,15 @@
 </template>
 
 <script>
-import WalletAppMenu from './WalletAppMenu.vue';
-import WalletAppSummary from './WalletAppSummary.vue';
-import WalletSettingsModal from './WalletSettingsModal.vue';
+import ToolbarMenu from './wallet-app/ToolbarMenu.vue';
+import WalletSummary from './wallet-app/Summary.vue';
+import SettingsModal from './wallet-app/SettingsModal.vue';
 
 export default {
   components: {
-    WalletAppMenu,
-    WalletAppSummary,
-    WalletSettingsModal,
+    ToolbarMenu,
+    WalletSummary,
+    SettingsModal,
   },
   props: {
     isSpace: {

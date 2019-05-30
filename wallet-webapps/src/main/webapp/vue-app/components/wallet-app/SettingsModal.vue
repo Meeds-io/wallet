@@ -89,7 +89,7 @@
             <v-tab-item
               id="security"
               value="security">
-              <wallet-settings-security-tab
+              <settings-security-tab
                 ref="securityTab"
                 :wallet-address="walletAddress"
                 :is-space="isSpace"
@@ -186,11 +186,11 @@
 </template>
 
 <script>
-import WalletSettingsSecurityTab from './WalletSettingsSecurityTab.vue';
+import SettingsSecurityTab from './SettingsSecurityTab.vue';
 
 export default {
   components: {
-    WalletSettingsSecurityTab,
+    SettingsSecurityTab,
   },
   props: {
     title: {

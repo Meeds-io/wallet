@@ -52,34 +52,19 @@
       grid-list-md>
       <v-layout row wrap>
         <v-flex xs12 md3>
-          <v-card class="walletSummaryBalance">
-            <v-card-title class="headline">
-              Current balance
-            </v-card-title>
-            <v-card-title>
-              {{ principalAccountDetails.balance }} {{ principalAccountDetails.symbol }}
-            </v-card-title>
-          </v-card>
+          <summary-balance :contract-details="principalAccountDetails" />
         </v-flex>
         <v-flex xs12 md3>
-          <v-card class="walletSummaryBalance elevation-3">
-            <v-card-title class="title">
-              Total rewarded Cauri
-            </v-card-title>
-            <v-card-title>
-              {{ principalAccountDetails.rewardBalance }} {{ principalAccountDetails.symbol }}
-            </v-card-title>
-          </v-card>
+          <summary-reward
+            :contract-details="principalAccountDetails"
+            :wallet-address="walletAddress"
+            @error="$emit('error', $event)" />
         </v-flex>
         <v-flex xs12 md3>
-          <v-card class="walletSummaryBalance elevation-3">
-            <v-card-title class="title">
-              Last transactions
-            </v-card-title>
-            <v-card-title>
-              {{ lastTransaction && lastTransaction.amount }} {{ principalAccountDetails.symbol }}
-            </v-card-title>
-          </v-card>
+          <summary-transaction
+            :contract-details="principalAccountDetails"
+            :wallet-address="walletAddress"
+            @error="$emit('error', $event)" />
         </v-flex>
         <v-flex
           xs12
@@ -123,11 +108,16 @@
 </template>
 
 <script>
-import {loadTransactions} from '../js/TransactionUtils.js';
-import {refreshWallet} from '../js/AddressRegistry.js';
-import {toFixed} from '../js/WalletUtils.js';
+import SummaryBalance from './SummaryBalance.vue';
+import SummaryReward from './SummaryReward.vue';
+import SummaryTransaction from './SummaryTransaction.vue';
 
 export default {
+  components: {
+    SummaryBalance,
+    SummaryReward,
+    SummaryTransaction,
+  },
   props: {
     accountsDetails: {
       type: Object,
@@ -306,7 +296,7 @@ export default {
           if(!resp || !resp.ok) {
             throw new Error('Error while requesting authorization for wallet');
           }
-          return refreshWallet(window.walletSettings.userPreferences.wallet);
+          return this.adressRegistry.refreshWallet(window.walletSettings.userPreferences.wallet);
         }).then(() => {
           this.walletInitializationStatus = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.initializationState;
         }).catch(e => {
@@ -318,7 +308,7 @@ export default {
       this.lastTransaction = null;
       const lastTransactions = {};
 
-      return loadTransactions(
+      return this.transactionUtils.loadTransactions(
         this.networkId,
         this.walletAddress,
         null,
@@ -334,7 +324,7 @@ export default {
     loadPendingTransactions() {
       Object.keys(this.pendingTransactions).forEach((key) => delete this.pendingTransactions[key]);
 
-      return loadTransactions(
+      return this.transactionUtils.loadTransactions(
         this.networkId,
         this.walletAddress,
         null,
@@ -361,9 +351,6 @@ export default {
       ).then(() => {
         this.updatePendingTransactionsIndex++;
       });
-    },
-    toFixed(args) {
-      return toFixed(args);
     },
   },
 };
