@@ -1,18 +1,27 @@
 <template>
   <v-card class="walletSummaryBalance elevation-3">
-    <v-card-title class="title">
+    <v-card-title class="title pb-1">
       Total Rewarded Cauri
     </v-card-title>
-    <v-card-title class="rewardBalance pt-0 headline">
+    <v-card-title class="rewardBalance headline pt-0 pb-1">
       <template v-if="loadingBalance">
         <v-progress-circular
           color="primary"
           class="mb-2"
           indeterminate />
       </template>
-      <template v-else>
-        {{ rewardBalance }} {{ contractDetails.symbol }}
-      </template>
+      <v-container v-else fluid>
+        <v-layout row>
+          <v-flex grow class="amount">
+            {{ rewardBalance }} {{ contractDetails.symbol }}
+          </v-flex>
+          <v-flex shrink>
+            <v-btn icon small>
+              <v-icon color="primary">fa-search-plus</v-icon>
+            </v-btn>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-card-title>
   </v-card>
 </template>

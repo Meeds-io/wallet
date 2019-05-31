@@ -1,10 +1,27 @@
 <template>
   <v-card class="walletSummaryBalance elevation-3">
-    <v-card-title class="title">
+    <v-card-title class="title pb-1">
       Last transactions
     </v-card-title>
-    <v-card-title class="lastTransactionBalance pt-0 headline">
-      {{ lastTransactionSign }}{{ lastTransaction && lastTransaction.contractAmount }} {{ contractDetails.symbol }}
+    <v-card-title class="lastTransactionBalance headline pt-0 pb-1">
+      <template v-if="loadingTransaction">
+        <v-progress-circular
+          color="primary"
+          class="mb-2"
+          indeterminate />
+      </template>
+      <v-container v-else fluid grid-list-sm>
+        <v-layout row>
+          <v-flex grow class="amount">
+            {{ lastTransactionSign }}{{ lastTransaction && lastTransaction.contractAmount }} {{ contractDetails.symbol }}
+          </v-flex>
+          <v-flex shrink>
+            <v-btn icon small>
+              <v-icon color="primary">fa-search-plus</v-icon>
+            </v-btn>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-card-title>
   </v-card>
 </template>
@@ -34,7 +51,7 @@ export default {
   },
   computed: {
     lastTransactionSign() {
-      return this.lastTransaction && this.lastTransaction.contractAmount && this.lastTransactionSent && '-';
+      return (this.lastTransaction && this.lastTransaction.contractAmount && this.lastTransactionSent && '-') || '+';
     }
   },
   watch: {

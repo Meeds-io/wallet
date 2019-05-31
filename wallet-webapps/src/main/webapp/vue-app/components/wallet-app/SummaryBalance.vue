@@ -1,6 +1,6 @@
 <template>
   <v-card class="walletSummaryBalance">
-    <v-card-title class="headline">
+    <v-card-title class="headline pb-1">
       Current balance
     </v-card-title>
     <v-card-title class="tokenBalance pt-0 display-1">
