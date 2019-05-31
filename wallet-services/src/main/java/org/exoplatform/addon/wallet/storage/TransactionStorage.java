@@ -40,9 +40,13 @@ public class TransactionStorage {
                                 : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
   }
 
-  public List<TransactionDetail> getContractTransactions(long networkId, String contractAddress, int limit) {
+  public List<TransactionDetail> getContractTransactions(long networkId,
+                                                         String contractAddress,
+                                                         String contractMethodName,
+                                                         int limit) {
     List<TransactionEntity> transactions = walletTransactionDAO.getContractTransactions(networkId,
                                                                                         StringUtils.lowerCase(contractAddress),
+                                                                                        contractMethodName,
                                                                                         limit);
     return transactions == null ? Collections.emptyList()
                                 : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
@@ -51,6 +55,7 @@ public class TransactionStorage {
   public List<TransactionDetail> getWalletTransactions(long networkId,
                                                        String address,
                                                        String contractAddress,
+                                                       String contractMethodName,
                                                        String hash,
                                                        int limit,
                                                        boolean pending,
@@ -60,13 +65,21 @@ public class TransactionStorage {
     List<TransactionEntity> transactions = walletTransactionDAO.getWalletTransactions(networkId,
                                                                                       address,
                                                                                       contractAddress,
+                                                                                      contractMethodName,
                                                                                       limit,
                                                                                       pending,
                                                                                       administration);
     boolean limitNotReached = transactions != null && transactions.size() == limit;
     if (StringUtils.isNotBlank(hash) && limitNotReached
         && transactions.stream().noneMatch(transaction -> StringUtils.equalsIgnoreCase(transaction.getHash(), hash))) {
-      return getWalletTransactions(networkId, address, contractAddress, hash, limit * 2, pending, administration);
+      return getWalletTransactions(networkId,
+                                   address,
+                                   contractAddress,
+                                   contractMethodName,
+                                   hash,
+                                   limit * 2,
+                                   pending,
+                                   administration);
     }
     return transactions == null ? Collections.emptyList()
                                 : transactions.stream().map(this::fromEntity).collect(Collectors.toList());

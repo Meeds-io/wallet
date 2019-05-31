@@ -27,21 +27,34 @@ import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 
 public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, Long> {
 
-  private static final String HASH_PARAM             = "hash";
+  private static final String HASH_PARAM                 = "hash";
 
-  private static final String ADDRESS_PARAM          = "address";
+  private static final String ADDRESS_PARAM              = "address";
 
-  private static final String CONTRACT_ADDRESS_PARAM = "contractAddress";
+  private static final String CONTRACT_ADDRESS_PARAM     = "contractAddress";
 
-  private static final String NETWORK_ID_PARAM       = "networkId";
+  private static final String CONTRACT_METHOD_NAME_PARAM = "methodName";
 
-  public List<TransactionEntity> getContractTransactions(long networkId, String contractAddress, int limit) {
+  private static final String NETWORK_ID_PARAM           = "networkId";
+
+  public List<TransactionEntity> getContractTransactions(long networkId,
+                                                         String contractAddress,
+                                                         String contractMethodName,
+                                                         int limit) {
     contractAddress = StringUtils.lowerCase(contractAddress);
 
-    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getContractTransactions",
+    String queryName = "WalletTransaction.getContractTransactions";
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      queryName = "WalletTransaction.getContractTransactionsWithMethodName";
+    }
+
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery(queryName,
                                                                               TransactionEntity.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, contractAddress.toLowerCase());
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      query.setParameter(CONTRACT_METHOD_NAME_PARAM, contractMethodName);
+    }
     if (limit > 0) {
       query.setMaxResults(limit);
     }
@@ -51,6 +64,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
   public List<TransactionEntity> getWalletTransactions(long networkId,
                                                        String address,
                                                        String contractAddress,
+                                                       String contractMethodName,
                                                        int limit,
                                                        boolean pending,
                                                        boolean administration) {
@@ -71,6 +85,12 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     queryString.append("' OR tx.byAddress = '");
     queryString.append(address);
     queryString.append("')");
+
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      queryString.append(" AND tx.contractMethodName = '");
+      queryString.append(contractMethodName);
+      queryString.append("'");
+    }
 
     if (pending) {
       queryString.append(" AND tx.isPending = TRUE");

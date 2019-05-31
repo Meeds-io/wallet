@@ -68,15 +68,16 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   public List<TransactionDetail> getTransactions(long networkId,
                                                  String address,
                                                  String contractAddress,
+                                                 String contractMethodName,
                                                  String hash,
                                                  int limit,
                                                  boolean onlyPending,
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException {
     if (contractService.isContract(address, networkId)) {
-      return getContractTransactions(networkId, address, limit, currentUser);
+      return getContractTransactions(networkId, address, contractMethodName, limit, currentUser);
     } else {
-      return getWalletTransactions(networkId, address, contractAddress, hash, limit, onlyPending, administration, currentUser);
+      return getWalletTransactions(networkId, address, contractAddress, contractMethodName, hash, limit, onlyPending, administration, currentUser);
     }
   }
 
@@ -138,6 +139,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
   private List<TransactionDetail> getContractTransactions(Long networkId,
                                                           String contractAddress,
+                                                          String contractMethodName,
                                                           int limit,
                                                           String currentUser) throws IllegalAccessException {
     ContractDetail contractDetail = contractService.getContractDetail(contractAddress, networkId);
@@ -152,6 +154,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
     List<TransactionDetail> transactionDetails = transactionStorage.getContractTransactions(networkId,
                                                                                             contractAddress,
+                                                                                            contractMethodName,
                                                                                             limit);
     transactionDetails.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail, currentUser));
     return transactionDetails;
@@ -160,6 +163,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   private List<TransactionDetail> getWalletTransactions(long networkId,
                                                         String address,
                                                         String contractAddress,
+                                                        String contractMethodName,
                                                         String hash,
                                                         int limit,
                                                         boolean pending,
@@ -176,6 +180,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     List<TransactionDetail> transactionDetails = transactionStorage.getWalletTransactions(networkId,
                                                                                           address,
                                                                                           contractAddress,
+                                                                                          contractMethodName,
                                                                                           hash,
                                                                                           limit,
                                                                                           pending,

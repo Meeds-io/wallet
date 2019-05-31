@@ -33,49 +33,13 @@
             {{ balance }}
           </h4>
           <h3 v-else class="font-weight-light">
-            {{ balance }}
+            <template v-if="selectedContractMethodName === 'reward'">
+              Reward balance: {{ rewardBalance }}
+            </template>
+            <template v-else>
+              Balance: {{ balance }}
+            </template>
           </h3>
-        </v-flex>
-
-        <v-flex v-if="!isDisplayOnly" id="accountDetailActions">
-          <!-- Ether action -->
-          <send-ether-modal
-            v-if="!contractDetails.isContract"
-            ref="sendEtherModal"
-            :is-readonly="isReadOnly"
-            :account="walletAddress"
-            :balance="contractDetails.balance"
-            use-navigation
-            @sent="newTransactionPending"
-            @error="error = $event" />
-
-          <!-- Contract actions -->
-          <send-tokens-modal
-            v-if="contractDetails.isContract"
-            ref="sendTokensModal"
-            :is-readonly="isReadOnly"
-            :account="walletAddress"
-            :contract-details="contractDetails"
-            use-navigation
-            @sent="newTransactionPending"
-            @error="error = $event" />
-          <send-delegated-tokens-modal
-            v-if="contractDetails.isContract && enableDelegation"
-            ref="sendDelegatedTokensModal"
-            :wallet-address="walletAddress"
-            :is-readonly="isReadOnly"
-            :contract-details="contractDetails"
-            use-navigation
-            @sent="newTransactionPending"
-            @error="error = $event" />
-          <delegate-tokens-modal
-            v-if="contractDetails.isContract && enableDelegation"
-            ref="delegateTokensModal"
-            :is-readonly="isReadOnly"
-            :contract-details="contractDetails"
-            use-navigation
-            @sent="newTransactionPending"
-            @error="error = $event" />
         </v-flex>
         <v-btn
           icon
@@ -97,6 +61,7 @@
       :fiat-symbol="fiatSymbol"
       :administration="isAdministration"
       :selected-transaction-hash="selectedTransactionHash"
+      :selected-contract-method-name="selectedContractMethodName"
       :error="error"
       @error="error = $event"
       @refresh-balance="refreshBalance" />
@@ -166,6 +131,12 @@ export default {
         return null;
       },
     },
+    selectedContractMethodName: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
     contractDetails: {
       type: Object,
       default: function() {
@@ -190,6 +161,9 @@ export default {
   computed: {
     fiatBalance() {
       return this.contractDetails && this.contractDetails.balanceFiat ? `${toFixed(this.contractDetails.balanceFiat)} ${this.fiatSymbol}` : `0 ${this.fiatSymbol}`;
+    },
+    rewardBalance() {
+      return this.contractDetails && this.contractDetails.rewardBalance ? `${toFixed(this.contractDetails.rewardBalance)} ${this.contractDetails && this.contractDetails.symbol}` : '';
     },
     balance() {
       return this.contractDetails && this.contractDetails.balance ? `${toFixed(this.contractDetails.balance)} ${this.contractDetails && this.contractDetails.symbol}` : '';

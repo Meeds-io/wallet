@@ -26,12 +26,12 @@ export function getLastNonce(networkId, walletAddress, useMetamask) {
     });
 }
 
-export function loadTransactions(networkId, account, contractDetails, transactions, onlyPending, transactionsLimit, transactionHashToSearch, isAdministration, refreshCallback) {
+export function loadTransactions(networkId, account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
   }
 
-  return getStoredTransactions(networkId, account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, transactionHashToSearch, onlyPending, isAdministration).then((storedTransactions) => {
+  return getStoredTransactions(networkId, account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
     const loadedTransactions = Object.assign({}, transactions);
     const loadingPromises = [];
 
@@ -87,8 +87,11 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
-export function getStoredTransactions(networkId, account, contractAddress, limit, transactionHashToSearch, onlyPending, isAdministration) {
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+export function getStoredTransactions(networkId, account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
+  const transactionHashToSearch = filterObject && filterObject.hash;
+  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
+
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();

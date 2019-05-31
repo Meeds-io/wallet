@@ -16,7 +16,10 @@
             {{ rewardBalance }} {{ contractDetails.symbol }}
           </v-flex>
           <v-flex shrink>
-            <v-btn icon small>
+            <v-btn
+              icon
+              small
+              @click="displayTransactionList">
               <v-icon color="primary">fa-search-plus</v-icon>
             </v-btn>
           </v-flex>
@@ -61,6 +64,9 @@ export default {
     }
   },
   methods: {
+    displayTransactionList() {
+      this.$emit('display-transactions', this.contractDetails);
+    },
     refreshBalance() {
       if (!this.contractDetails || !this.contractDetails.contract || !this.walletAddress) {
         return;
@@ -68,7 +74,7 @@ export default {
       this.loadingBalance = true;
       this.contractDetails.contract.methods.rewardBalanceOf(this.walletAddress).call()
         .then(rewardBalance => {
-          this.rewardBalance = (rewardBalance && this.walletUtils.convertTokenAmountReceived(rewardBalance, this.contractDetails.decimals)) || 0;
+          this.rewardBalance = this.contractDetails.rewardBalance = (rewardBalance && this.walletUtils.convertTokenAmountReceived(rewardBalance, this.contractDetails.decimals)) || 0;
         })
         .catch(e => {
           this.$emit('error', e);

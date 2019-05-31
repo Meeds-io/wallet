@@ -23,6 +23,7 @@ public interface WalletTransactionService {
    * @param networkId blockchain network id
    * @param address wallet address
    * @param contractAddress contract address to use to filter transactions
+   * @param contractMethodName the contract method name to use to filter on transactions
    * @param hash the transaction hash to include in resulted transactions
    * @param limit limit size of returned transactions unless the hash parameter
    *          is not null, in that case, continue searching in transactions list
@@ -37,6 +38,7 @@ public interface WalletTransactionService {
   public List<TransactionDetail> getTransactions(long networkId,
                                                  String address,
                                                  String contractAddress,
+                                                 String contractMethodName,
                                                  String hash,
                                                  int limit,
                                                  boolean onlyPending,

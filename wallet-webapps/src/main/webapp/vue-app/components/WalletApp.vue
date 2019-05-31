@@ -119,6 +119,7 @@
                 :is-read-only="isReadOnly"
                 :fiat-symbol="fiatSymbol"
                 :loading="loading"
+                @display-transactions="openAccountDetail"
                 @refresh-balance="refreshBalance"
                 @refresh-token-balance="refreshTokenBalance"
                 @error="error = $event" />
@@ -142,6 +143,7 @@
                 :wallet-address="walletAddress"
                 :contract-details="selectedAccount"
                 :selected-transaction-hash="selectedTransactionHash"
+                :selected-contract-method-name="selectedContractMethodName"
                 @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
                 @back="back()" />
             </v-navigation-drawer>
@@ -210,6 +212,7 @@ export default {
       browserWalletExists: false,
       walletAddress: null,
       selectedTransactionHash: null,
+      selectedContractMethodName: null,
       selectedAccount: null,
       fiatSymbol: '$',
       accountsDetails: {},
@@ -464,23 +467,28 @@ export default {
           }
         });
     },
-    openAccountDetail(accountDetails, hash) {
+    openAccountDetail(accountDetails, hash, methodName) {
+      this.error = null;
       if(!accountDetails) {
         console.error(`Can't open empty account details`);
         return;
       }
-      if (!accountDetails.error) {
+      if (accountDetails.error) {
+        this.error = 'Error displaying transactions list';
+        console.warn(this.error, accountDetails.error);
+      } else {
         this.selectedAccount = accountDetails;
         this.selectedTransactionHash = hash;
-      }
-      this.seeAccountDetails = true;
+        this.selectedContractMethodName = methodName;
+        this.seeAccountDetails = true;
 
-      this.$nextTick(() => {
-        const thiss = this;
-        $('.v-overlay').on('click', (event) => {
-          thiss.back();
+        this.$nextTick(() => {
+          const thiss = this;
+          $('.v-overlay').on('click', (event) => {
+            thiss.back();
+          });
         });
-      });
+      }
     },
     back() {
       this.seeAccountDetails = false;

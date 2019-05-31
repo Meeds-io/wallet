@@ -10,13 +10,19 @@
           class="mb-2"
           indeterminate />
       </template>
-      <v-container v-else fluid grid-list-sm>
+      <v-container
+        v-else
+        fluid
+        grid-list-sm>
         <v-layout row>
           <v-flex grow class="amount">
             {{ lastTransactionSign }}{{ lastTransaction && lastTransaction.contractAmount }} {{ contractDetails.symbol }}
           </v-flex>
           <v-flex shrink>
-            <v-btn icon small>
+            <v-btn
+              icon
+              small
+              @click="displayTransactionList">
               <v-icon color="primary">fa-search-plus</v-icon>
             </v-btn>
           </v-flex>
@@ -63,6 +69,9 @@ export default {
     this.refreshLastTransaction();
   },
   methods: {
+    displayTransactionList() {
+      this.$emit('display-transactions', this.contractDetails);
+    },
     refreshLastTransaction() {
       if (!this.contractDetails || !this.contractDetails.address || !this.walletAddress) {
         return;

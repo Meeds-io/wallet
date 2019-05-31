@@ -840,6 +840,12 @@ export default {
         return null;
       },
     },
+    selectedContractMethodName: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
     administration: {
       type: Boolean,
       default: function() {
@@ -959,7 +965,11 @@ export default {
     },
     loadRecentTransaction(limit) {
       const thiss = this;
-      return loadTransactions(this.networkId, this.account, this.contractDetails, this.transactions, false, limit, this.selectedTransactionHash, this.administration, () => {
+      const filterObject = {
+        hash: this.selectedTransactionHash,
+        contractMethodName: this.selectedContractMethodName,
+      };
+      return loadTransactions(this.networkId, this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
         thiss.$emit('refresh-balance');
         thiss.forceUpdateList();
       })
