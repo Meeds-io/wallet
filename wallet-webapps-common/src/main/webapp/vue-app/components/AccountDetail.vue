@@ -70,10 +70,6 @@
 
 <script>
 import TransactionsList from './TransactionsList.vue';
-import SendTokensModal from './SendTokensModal.vue';
-import DelegateTokensModal from './DelegateTokensModal.vue';
-import SendDelegatedTokensModal from './SendDelegatedTokensModal.vue';
-import SendEtherModal from './SendEtherModal.vue';
 import ProfileChip from './ProfileChip.vue';
 
 import {retrieveContractDetails} from '../js/TokenUtils.js';
@@ -81,10 +77,6 @@ import {etherToFiat, toFixed} from '../js/WalletUtils.js';
 
 export default {
   components: {
-    SendEtherModal,
-    SendTokensModal,
-    DelegateTokensModal,
-    SendDelegatedTokensModal,
     TransactionsList,
     ProfileChip,
   },

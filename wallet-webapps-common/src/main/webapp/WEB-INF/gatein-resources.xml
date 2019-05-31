@@ -134,7 +134,12 @@
     <as>VueChart</as>
     <script>
       <minify>false</minify>
-      <path>/js/lib/vue-chartjs.min.js</path>
+      <adapter>
+        (function() {
+          <include>/js/lib/vue-chartjs.min.js</include>
+          return VueChart;
+        })();
+      </adapter>
     </script>
     <depends>
       <module>chart</module>

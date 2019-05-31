@@ -13,6 +13,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_TRANSACTION")
 @NamedQueries({
+//    @NamedQuery(name = "WalletTransaction.countReceivedContractAmount", query = "SELECT sum(tx.contractAmount) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.toAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initialize' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.creationDate > :startDate AND tx.creationDate < :endDate"),
     @NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),

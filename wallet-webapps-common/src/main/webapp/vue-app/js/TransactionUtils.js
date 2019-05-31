@@ -87,24 +87,36 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
-export function getStoredTransactions(networkId, account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
-  const transactionHashToSearch = filterObject && filterObject.hash;
-  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
-
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+export function getTransactionsAmounts(networkId, contractAddress, walletAddress, periodicity) {
+  const lang = window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language || 'en';
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?networkId=${networkId}&contractAddress=${contractAddress || ''}&address=${contractAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
       } else {
         return null;
       }
-    })
-    .then((transactions) => {
-      return transactions && transactions.length ? transactions : [];
-    })
-    .catch((error) => {
-      throw new Error('Error retrieving transactions list', error);
     });
+}
+
+export function getStoredTransactions(networkId, account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
+  const transactionHashToSearch = filterObject && filterObject.hash;
+  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
+  
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+  .then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      return null;
+    }
+  })
+  .then((transactions) => {
+    return transactions && transactions.length ? transactions : [];
+  })
+  .catch((error) => {
+    throw new Error('Error retrieving transactions list', error);
+  });
 }
 
 function loadTransactionReceipt(transactionDetails) {

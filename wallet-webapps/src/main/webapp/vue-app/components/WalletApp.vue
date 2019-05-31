@@ -123,6 +123,13 @@
                 @refresh-balance="refreshBalance"
                 @refresh-token-balance="refreshTokenBalance"
                 @error="error = $event" />
+
+              <transaction-history-chart
+                ref="transactionHistoryChart"
+                class="transactionHistoryChart"
+                :wallet-address="walletAddress"
+                :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]" 
+                @error="error = $event" />
             </v-card>
 
             <!-- The selected account detail -->
@@ -173,12 +180,14 @@
 import ToolbarMenu from './wallet-app/ToolbarMenu.vue';
 import WalletSummary from './wallet-app/Summary.vue';
 import SettingsModal from './wallet-app/SettingsModal.vue';
+import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
 
 export default {
   components: {
     ToolbarMenu,
     WalletSummary,
     SettingsModal,
+    TransactionHistoryChart,
   },
   props: {
     isSpace: {

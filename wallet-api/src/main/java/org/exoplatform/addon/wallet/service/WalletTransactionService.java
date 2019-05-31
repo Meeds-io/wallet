@@ -1,9 +1,9 @@
 package org.exoplatform.addon.wallet.service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.TransactionStatistics;
 
 public interface WalletTransactionService {
 
@@ -23,7 +23,8 @@ public interface WalletTransactionService {
    * @param networkId blockchain network id
    * @param address wallet address
    * @param contractAddress contract address to use to filter transactions
-   * @param contractMethodName the contract method name to use to filter on transactions
+   * @param contractMethodName the contract method name to use to filter on
+   *          transactions
    * @param hash the transaction hash to include in resulted transactions
    * @param limit limit size of returned transactions unless the hash parameter
    *          is not null, in that case, continue searching in transactions list
@@ -44,6 +45,23 @@ public interface WalletTransactionService {
                                                  boolean onlyPending,
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException;
+
+  /**
+   * Retrives the Transaction statistics of a user on a designated contract by
+   * period of time
+   * 
+   * @param networkId
+   * @param contractAddress
+   * @param address
+   * @param periodicity
+   * @param locale
+   * @return
+   */
+  public TransactionStatistics getTransactionStatistics(long networkId,
+                                                        String contractAddress,
+                                                        String address,
+                                                        String periodicity,
+                                                        Locale locale) throws IllegalAccessException;
 
   /**
    * @param hash transaction hash

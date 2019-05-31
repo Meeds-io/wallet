@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.dao;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -28,6 +30,10 @@ import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, Long> {
 
   private static final String HASH_PARAM                 = "hash";
+
+  private static final String START_DATE                 = "startDate";
+
+  private static final String END_DATE                   = "endDate";
 
   private static final String ADDRESS_PARAM              = "address";
 
@@ -135,6 +141,26 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+  }
+
+  public long countReceivedContractAmount(long networkId,
+                                          String contractAddress,
+                                          String address,
+                                          LocalDate startDate,
+                                          LocalDate endDate) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countReceivedContractAmount",
+                                                                 Long.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    query.setParameter(START_DATE, toSeconds(startDate));
+    query.setParameter(END_DATE, toSeconds(endDate));
+    Long result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
+
+  private long toSeconds(LocalDate date) {
+    return date.atStartOfDay().atZone(ZoneOffset.systemDefault()).toEpochSecond();
   }
 
 }

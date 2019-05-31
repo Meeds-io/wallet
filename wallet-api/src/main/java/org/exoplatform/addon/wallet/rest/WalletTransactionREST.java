@@ -19,15 +19,16 @@ package org.exoplatform.addon.wallet.rest;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.getCurrentUserId;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.TransactionStatistics;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -114,6 +115,49 @@ public class WalletTransactionREST implements ResourceContainer {
       return Response.status(403).build();
     } catch (Exception e) {
       LOG.warn("Error getting transactions of wallet " + address, e);
+      return Response.serverError().build();
+    }
+  }
+
+  /**
+   * @param networkId Blockchain network Id
+   * @param contractAddress contract address
+   * @param address wallet address
+   * @param periodicity month / week
+   * @return REST Response with the transactions statistics of period of time
+   *         for a designated wallet
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("getTransactionsAmounts")
+  @RolesAllowed("users")
+  public Response getTransactionsAmounts(@QueryParam("networkId") long networkId,
+                                         @QueryParam("contractAddress") String contractAddress,
+                                         @QueryParam("address") String address,
+                                         @QueryParam("periodicity") String periodicity,
+                                         @QueryParam("lang") String lang) {
+    if (networkId == 0) {
+      LOG.warn("Bad request sent to server with empty networkId {}", networkId);
+      return Response.status(400).build();
+    }
+    if (StringUtils.isBlank(address)) {
+      LOG.warn(EMPTY_ADDRESS_ERROR, address);
+      return Response.status(400).build();
+    }
+
+    String currentUserId = getCurrentUserId();
+    try {
+      TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(networkId,
+                                                                                                contractAddress,
+                                                                                                address,
+                                                                                                periodicity,
+                                                                                                new Locale(lang));
+      return Response.ok(transactionStatistics).build();
+    } catch (IllegalAccessException e) {
+      LOG.warn("User {} attempts to display transactions statistics of address {}", currentUserId, address);
+      return Response.status(403).build();
+    } catch (Exception e) {
+      LOG.warn("Error getting transactions statistics of wallet " + address, e);
       return Response.serverError().build();
     }
   }

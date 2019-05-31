@@ -2,6 +2,8 @@ package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.time.*;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,7 +22,11 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class EthereumWalletTransactionService implements WalletTransactionService {
 
-  private static final Log      LOG = ExoLogger.getLogger(EthereumWalletTransactionService.class);
+  private static final String   MONTH_PERIODICITY  = "month";
+
+  private static final String   WEEKLY_PERIODICITY = "week";
+
+  private static final Log      LOG                = ExoLogger.getLogger(EthereumWalletTransactionService.class);
 
   private WalletAccountService  accountService;
 
@@ -77,8 +83,60 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     if (contractService.isContract(address, networkId)) {
       return getContractTransactions(networkId, address, contractMethodName, limit, currentUser);
     } else {
-      return getWalletTransactions(networkId, address, contractAddress, contractMethodName, hash, limit, onlyPending, administration, currentUser);
+      return getWalletTransactions(networkId,
+                                   address,
+                                   contractAddress,
+                                   contractMethodName,
+                                   hash,
+                                   limit,
+                                   onlyPending,
+                                   administration,
+                                   currentUser);
     }
+  }
+
+  @Override
+  public TransactionStatistics getTransactionStatistics(long networkId,
+                                                        String contractAddress,
+                                                        String address,
+                                                        String periodicity,
+                                                        Locale locale) throws IllegalAccessException {
+    TransactionStatistics transactionStatistics = new TransactionStatistics();
+
+    if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
+      List<Month> monthsList = Arrays.asList(Month.JANUARY,
+                                             Month.FEBRUARY,
+                                             Month.MARCH,
+                                             Month.APRIL,
+                                             Month.MAY,
+                                             Month.JUNE,
+                                             Month.JULY,
+                                             Month.AUGUST,
+                                             Month.SEPTEMBER,
+                                             Month.OCTOBER,
+                                             Month.NOVEMBER,
+                                             Month.DECEMBER);
+
+      transactionStatistics.setLabels(monthsList.stream()
+                                                .map(month -> month.getDisplayName(TextStyle.FULL, locale))
+                                                .collect(Collectors.toList()));
+
+      List<String> income = new ArrayList<>();
+      transactionStatistics.setIncome(income);
+      List<String> outcome = new ArrayList<>();
+      transactionStatistics.setOutcome(outcome);
+
+      for (Month month : monthsList) {
+        transactionStorage.countReceivedContractAmount(networkId,
+                                                       contractAddress,
+                                                       address,
+                                                       getStartDate(month),
+                                                       getEndDate(month));
+      }
+    } else if (StringUtils.equalsIgnoreCase(periodicity, WEEKLY_PERIODICITY)) {
+      // TODO
+    }
+    return transactionStatistics;
   }
 
   @Override
@@ -261,6 +319,16 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       listenerService = CommonsUtils.getService(ListenerService.class);
     }
     return listenerService;
+  }
+
+  private LocalDate getStartDate(Month selectedMonth) {
+    YearMonth monthDate = Year.now().atMonth(selectedMonth);
+    return monthDate.atDay(1);
+  }
+
+  private LocalDate getEndDate(Month selectedMonth) {
+    YearMonth monthDate = Year.now().atMonth(selectedMonth);
+    return monthDate.atEndOfMonth();
   }
 
 }

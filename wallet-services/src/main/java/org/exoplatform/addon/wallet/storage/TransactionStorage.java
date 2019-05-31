@@ -2,8 +2,7 @@ package org.exoplatform.addon.wallet.storage;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.formatTransactionHash;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,6 +104,23 @@ public class TransactionStorage {
     hash = formatTransactionHash(hash);
     TransactionEntity transactionEntity = walletTransactionDAO.getTransactionByHash(hash);
     return fromEntity(transactionEntity);
+  }
+
+  /**
+   * Return contract amount received during a period of time
+   * 
+   * @param networkId
+   * @param contractAddress
+   * @param address
+   * @param startDate
+   * @param endDate
+   */
+  public long countReceivedContractAmount(long networkId,
+                                          String contractAddress,
+                                          String address,
+                                          LocalDate startDate,
+                                          LocalDate endDate) {
+    return walletTransactionDAO.countReceivedContractAmount(networkId, contractAddress, address, startDate, endDate);
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {
