@@ -137,7 +137,7 @@
       <adapter>
         (function() {
           <include>/js/lib/vue-chartjs.min.js</include>
-          return VueChart;
+          return VueChartJs;
         })();
       </adapter>
     </script>

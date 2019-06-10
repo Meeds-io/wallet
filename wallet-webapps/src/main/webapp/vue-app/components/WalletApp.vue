@@ -386,6 +386,8 @@ export default {
           this.forceUpdate();
         })
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
+        .then(() => this.$nextTick())
+        .then(() => this.$refs.transactionHistoryChart && this.$refs.transactionHistoryChart.initializeChart())
         .catch((e) => {
           console.debug('init method - error', e);
           const error = `${e}`;
@@ -484,7 +486,6 @@ export default {
       }
       if (accountDetails.error) {
         this.error = 'Error displaying transactions list';
-        console.warn(this.error, accountDetails.error);
       } else {
         this.selectedAccount = accountDetails;
         this.selectedTransactionHash = hash;
