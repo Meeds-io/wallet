@@ -127,6 +127,7 @@
               <transaction-history-chart
                 ref="transactionHistoryChart"
                 class="transactionHistoryChart"
+                :periodicity="periodicity"
                 :wallet-address="walletAddress"
                 :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]" 
                 @error="error = $event" />
@@ -226,6 +227,7 @@ export default {
       fiatSymbol: '$',
       accountsDetails: {},
       refreshIndex: 1,
+      periodicity: 'month',
       error: null,
     };
   },

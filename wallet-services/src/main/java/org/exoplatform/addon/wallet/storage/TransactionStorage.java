@@ -115,12 +115,20 @@ public class TransactionStorage {
    * @param startDate
    * @param endDate
    */
-  public long countReceivedContractAmount(long networkId,
-                                          String contractAddress,
-                                          String address,
-                                          LocalDate startDate,
-                                          LocalDate endDate) {
+  public double countReceivedContractAmount(long networkId,
+                                            String contractAddress,
+                                            String address,
+                                            LocalDate startDate,
+                                            LocalDate endDate) {
     return walletTransactionDAO.countReceivedContractAmount(networkId, contractAddress, address, startDate, endDate);
+  }
+
+  public double countSentContractAmount(long networkId,
+                                        String contractAddress,
+                                        String address,
+                                        LocalDate startDate,
+                                        LocalDate endDate) {
+    return walletTransactionDAO.countSentContractAmount(networkId, contractAddress, address, startDate, endDate);
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {

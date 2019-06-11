@@ -127,11 +127,20 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       transactionStatistics.setOutcome(outcome);
 
       for (Month month : monthsList) {
-        transactionStorage.countReceivedContractAmount(networkId,
-                                                       contractAddress,
-                                                       address,
-                                                       getStartDate(month),
-                                                       getEndDate(month));
+        double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
+                                                                                       contractAddress,
+                                                                                       address,
+                                                                                       getStartDate(month),
+                                                                                       getEndDate(month));
+        transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
+      }
+      for (Month month : monthsList) {
+        double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
+                                                                               contractAddress,
+                                                                               address,
+                                                                               getStartDate(month),
+                                                                               getEndDate(month));
+        transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
       }
     } else if (StringUtils.equalsIgnoreCase(periodicity, WEEKLY_PERIODICITY)) {
       // TODO

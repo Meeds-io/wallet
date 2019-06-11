@@ -27,6 +27,13 @@ export default {
       outcomeGradient: null,
     }
   },
+  watch: {
+    periodicity (oldVal, newVal) {
+      if (oldVal && newVal && oldVal !== newVal) {
+        this.initializeChart();
+      }
+    }
+  },
   methods: {
     initializeChart() {
       if (!this.walletAddress || !this.contractDetails || !this.contractDetails.address) {

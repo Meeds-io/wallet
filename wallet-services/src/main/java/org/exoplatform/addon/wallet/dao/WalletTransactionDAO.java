@@ -143,19 +143,35 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
-  public long countReceivedContractAmount(long networkId,
-                                          String contractAddress,
-                                          String address,
-                                          LocalDate startDate,
-                                          LocalDate endDate) {
-    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countReceivedContractAmount",
-                                                                 Long.class);
+  public double countReceivedContractAmount(long networkId,
+                                            String contractAddress,
+                                            String address,
+                                            LocalDate startDate,
+                                            LocalDate endDate) {
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countReceivedContractAmount",
+                                                                   Double.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
     query.setParameter(START_DATE, toSeconds(startDate));
     query.setParameter(END_DATE, toSeconds(endDate));
-    Long result = query.getSingleResult();
+    Double result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
+
+  public double countSentContractAmount(long networkId,
+                                        String contractAddress,
+                                        String address,
+                                        LocalDate startDate,
+                                        LocalDate endDate) {
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countSentContractAmount",
+                                                                   Double.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    query.setParameter(START_DATE, toSeconds(startDate));
+    query.setParameter(END_DATE, toSeconds(endDate));
+    Double result = query.getSingleResult();
     return result == null ? 0 : result;
   }
 
