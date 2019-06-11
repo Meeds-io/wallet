@@ -100,10 +100,10 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
       // Ensure that stored transaction has a timestamp
       if (transactionDetail.getTimestamp() == 0) {
         if (blockTimestamp != null) {
-          transactionDetail.setTimestamp(blockTimestamp);
+          transactionDetail.setTimestamp(blockTimestamp * 1000);
         } else if (StringUtils.isNotBlank(blockHash)) {
           Block block = getEthereumClientConnector().getBlock(blockHash);
-          transactionDetail.setTimestamp(block.getTimestamp().longValue());
+          transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
         }
       }
 

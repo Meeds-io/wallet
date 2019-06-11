@@ -1,31 +1,32 @@
 package org.exoplatform.addon.wallet.storage;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.formatTransactionHash;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
-import java.time.*;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.addon.wallet.entity.TransactionEntity;
 import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 
 public class TransactionStorage {
 
-  private static final long    MINIMUM_CREATED_DATE_MILLIS = ZonedDateTime
-                                                                          .of(2018,
-                                                                              1,
-                                                                              1,
-                                                                              0,
-                                                                              0,
-                                                                              0,
-                                                                              0,
-                                                                              ZoneId.systemDefault().normalized())
-                                                                          .toEpochSecond()
-      * 1000;
+  private static final Log     LOG                         = ExoLogger.getLogger(TransactionStorage.class);
+
+  private static final long    MINIMUM_CREATED_DATE_MILLIS =
+                                                           LocalDate.of(2018, 1, 1)
+                                                                    .atStartOfDay(ZoneOffset.systemDefault())
+                                                                    .toEpochSecond()
+                                                               * 1000;
 
   private WalletTransactionDAO walletTransactionDAO;
 
@@ -141,14 +142,28 @@ public class TransactionStorage {
     detail.setContractAddress(entity.getContractAddress());
     detail.setContractAmount(entity.getContractAmount());
     detail.setContractMethodName(entity.getContractMethodName());
-    detail.setTimestamp(entity.getCreatedDate());
-    detail.setIssuerId(entity.getIssuerIdentityId());
-
-    // Workaround for old bug when adding timestamp in seconds
+    // FIXME Workaround for old bug when adding timestamp in seconds
     if (entity.getCreatedDate() > 0 && entity.getCreatedDate() < MINIMUM_CREATED_DATE_MILLIS) {
-      detail.setTimestamp(entity.getCreatedDate() * 1000);
+      if (LOG.isDebugEnabled()) {
+        LOG.warn("Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
+      }
+      entity.setCreatedDate(entity.getCreatedDate() * 1000);
+      walletTransactionDAO.update(entity);
     }
-
+    // FIXME workaround to update ether amount that was stored in milliseconds
+    if (entity.getValue() > 10000L && (StringUtils.isBlank(entity.getContractAddress())
+        || StringUtils.isBlank(entity.getContractMethodName())
+        || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_INITIALIZEACCOUNT)
+        || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_SETSELLPRICE))) {
+      if (LOG.isDebugEnabled()) {
+        LOG.warn("[from DB] Transaction {} has a value in WEI, converting it to ether.", entity.getHash());
+      }
+      entity.setValue(convertFromDecimals(new BigInteger(String.valueOf(entity.getValue())), ETHER_TO_WEI_DECIMALS));
+      walletTransactionDAO.update(entity);
+    }
+    detail.setTimestamp(entity.getCreatedDate());
+    detail.setValue(entity.getValue());
+    detail.setIssuerId(entity.getIssuerIdentityId());
     detail.setHash(entity.getHash());
     detail.setFrom(entity.getFromAddress());
     detail.setTo(entity.getToAddress());
@@ -158,7 +173,6 @@ public class TransactionStorage {
     detail.setNetworkId(entity.getNetworkId());
     detail.setPending(entity.isPending());
     detail.setSucceeded(entity.isSuccess());
-    detail.setValue(entity.getValue());
     return detail;
   }
 
@@ -181,6 +195,14 @@ public class TransactionStorage {
     entity.setPending(detail.isPending());
     entity.setSuccess(detail.isSucceeded());
     entity.setValue(detail.getValue());
+    if (detail.getTimestamp() == 0) {
+      entity.setCreatedDate(System.currentTimeMillis());
+    } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
+      if (LOG.isDebugEnabled()) {
+        LOG.warn("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
+      }
+      detail.setTimestamp(entity.getCreatedDate() * 1000);
+    }
     entity.setCreatedDate(detail.getTimestamp());
     if (detail.getIssuer() != null) {
       entity.setIssuerIdentityId(detail.getIssuer().getTechnicalId());

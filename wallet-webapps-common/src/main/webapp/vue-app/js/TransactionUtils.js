@@ -89,7 +89,7 @@ export function saveTransactionDetails(transaction, contractDetails) {
 
 export function getTransactionsAmounts(networkId, contractAddress, walletAddress, periodicity) {
   const lang = window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language || 'en';
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?networkId=${networkId}&contractAddress=${contractAddress || ''}&address=${contractAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?networkId=${networkId}&contractAddress=${contractAddress || ''}&address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();

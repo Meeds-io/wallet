@@ -43,13 +43,13 @@ export default {
       this.incomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
       this.outcomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
   
-      this.incomeGradient.addColorStop(0, 'rgba(255, 0,0, 0.5)')
-      this.incomeGradient.addColorStop(0.5, 'rgba(255, 0, 0, 0.25)');
-      this.incomeGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      this.outcomeGradient.addColorStop(0, 'rgba(255, 0,0, 0.5)')
+      this.outcomeGradient.addColorStop(0.5, 'rgba(255, 0, 0, 0.25)');
+      this.outcomeGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
       
-      this.outcomeGradient.addColorStop(0, 'rgba(0, 231, 255, 0.9)')
-      this.outcomeGradient.addColorStop(0.5, 'rgba(0, 231, 255, 0.25)');
-      this.outcomeGradient.addColorStop(1, 'rgba(0, 231, 255, 0)');
+      this.incomeGradient.addColorStop(0, 'rgba(0, 231, 255, 0.9)')
+      this.incomeGradient.addColorStop(0.5, 'rgba(0, 231, 255, 0.25)');
+      this.incomeGradient.addColorStop(1, 'rgba(0, 231, 255, 0)');
   
       this.transactionUtils.getTransactionsAmounts(this.contractDetails.networkId ,this.contractDetails.address, this.walletAddress, this.periodicity)
         .then((transactionsData) => {
@@ -58,7 +58,7 @@ export default {
             datasets: [
               {
                 label: 'Income',
-                borderColor: '#FC2525',
+                borderColor: '#05CBE1',
                 pointBackgroundColor: 'white',
                 pointBorderColor: 'white',
                 borderWidth: 1,
@@ -66,7 +66,7 @@ export default {
                 data: transactionsData.income,
               },{
                 label: 'Outcome',
-                borderColor: '#05CBE1',
+                borderColor: '#FC2525',
                 pointBackgroundColor: 'white',
                 pointBorderColor: 'white',
                 borderWidth: 1,

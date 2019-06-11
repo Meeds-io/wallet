@@ -16,8 +16,7 @@
  */
 package org.exoplatform.addon.wallet.dao;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -153,8 +152,8 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
-    query.setParameter(START_DATE, toSeconds(startDate));
-    query.setParameter(END_DATE, toSeconds(endDate));
+    query.setParameter(START_DATE, toMilliSeconds(startDate, false));
+    query.setParameter(END_DATE, toMilliSeconds(endDate, true));
     Double result = query.getSingleResult();
     return result == null ? 0 : result;
   }
@@ -169,14 +168,16 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
-    query.setParameter(START_DATE, toSeconds(startDate));
-    query.setParameter(END_DATE, toSeconds(endDate));
+    query.setParameter(START_DATE, toMilliSeconds(startDate, false));
+    query.setParameter(END_DATE, toMilliSeconds(endDate, true));
     Double result = query.getSingleResult();
     return result == null ? 0 : result;
   }
 
-  private long toSeconds(LocalDate date) {
-    return date.atStartOfDay().atZone(ZoneOffset.systemDefault()).toEpochSecond();
+  private long toMilliSeconds(LocalDate date, boolean endDate) {
+    ZonedDateTime dateTime = endDate ? date.plusDays(1).atStartOfDay(ZoneOffset.systemDefault())
+                                     : date.atStartOfDay(ZoneOffset.systemDefault());
+    return dateTime.toEpochSecond() * 1000;
   }
 
 }

@@ -163,7 +163,7 @@ public class EthereumTransactionDecoder {
     }
 
     Block block = ethereumClientConnector.getBlock(transaction.getBlockHash());
-    transactionDetail.setTimestamp(block.getTimestamp().longValue());
+    transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
 
     String senderAddress = transaction.getFrom();
     transactionDetail.setFrom(senderAddress);
@@ -226,6 +226,9 @@ public class EthereumTransactionDecoder {
         String topic = topics.get(0);
         LOG.debug("Treating transaction {} with {} topics", hash, topics.size());
         String methodName = CONTRACT_METHODS_BY_SIG.get(topic);
+        if (StringUtils.isBlank(methodName)) {
+          continue;
+        }
         transactionDetail.setContractMethodName(methodName);
         if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
           EventValues parameters = extractEventParameters(TRANSFER_EVENT, log);
