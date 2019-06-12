@@ -150,6 +150,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService 
         getListenerService().broadcast(ADMIN_WALLET_MODIFIED_EVENT,
                                        wallet.clone(),
                                        null);
+        this.isReadOnlyContract = false;
       } catch (Exception e) {
         // Make sure to delete corresponding wallet when the private key isn't
         // saved
