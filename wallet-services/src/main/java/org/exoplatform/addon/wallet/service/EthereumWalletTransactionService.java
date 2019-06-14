@@ -6,6 +6,7 @@ import java.time.*;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -22,11 +23,11 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class EthereumWalletTransactionService implements WalletTransactionService {
 
+  private static final Log      LOG               = ExoLogger.getLogger(EthereumWalletTransactionService.class);
+
   private static final String   YEAR_PERIODICITY  = "year";
 
   private static final String   MONTH_PERIODICITY = "month";
-
-  private static final Log      LOG                = ExoLogger.getLogger(EthereumWalletTransactionService.class);
 
   private WalletAccountService  accountService;
 
@@ -100,74 +101,66 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
                                                         String contractAddress,
                                                         String address,
                                                         String periodicity,
-                                                        Locale locale) throws IllegalAccessException {
+                                                        Locale locale) {
+    if (StringUtils.isBlank(contractAddress)) {
+      throw new IllegalArgumentException("Empty contract address");
+    }
+    if (StringUtils.isBlank(address)) {
+      throw new IllegalArgumentException("Wallet address is mandatory");
+    }
+    if (StringUtils.isBlank(periodicity)) {
+      throw new IllegalArgumentException("Periodicity is mandatory");
+    }
+
     TransactionStatistics transactionStatistics = new TransactionStatistics();
-    List<Period> periodList = new ArrayList<>();
+    List<LocalDate> periodList = null;
 
     if (StringUtils.equalsIgnoreCase(periodicity, YEAR_PERIODICITY)) {
+      final Locale userLocale = locale == null ? Locale.getDefault() : locale;
+
+      // Compute labels to display in chart
       List<YearMonth> monthsList = new ArrayList<>();
-      //to optimise with stream()
-      for (long i=11; i>=1; i--) {
+      // to optimise with stream()
+      for (long i = 11; i >= 1; i--) {
         monthsList.add(YearMonth.now().minusMonths(i));
       }
       monthsList.add(YearMonth.now());
       transactionStatistics.setLabels(monthsList.stream()
-                                                .map(month -> month.getMonth().getDisplayName(TextStyle.FULL, locale))
+                                                .map(month -> month.getMonth().getDisplayName(TextStyle.FULL, userLocale) + " " + month.getYear())
                                                 .collect(Collectors.toList()));
 
-      List<String> income = new ArrayList<>();
-      transactionStatistics.setIncome(income);
-      List<String> outcome = new ArrayList<>();
-      transactionStatistics.setOutcome(outcome);
-
-      for (YearMonth month : monthsList) {
-        double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
-                                                                                       contractAddress,
-                                                                                       address,
-                                                                                       getStartDate(month),
-                                                                                       getEndDate(month));
-        transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
-      }
-      for (YearMonth month : monthsList) {
-        double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
-                                                                               contractAddress,
-                                                                               address,
-                                                                               getStartDate(month),
-                                                                               getEndDate(month));
-        transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
-      }
+      // Compte list of 12 months to include in chart
+      periodList = monthsList.stream().map(yearMonth -> yearMonth.atDay(1)).collect(Collectors.toList());
     } else if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
       int maxDayOfMonth = MonthDay.now().getMonth().maxLength();
-      List<Integer> dayList = new ArrayList<>(maxDayOfMonth);
-      //to optimise with stream()
-      for (int i =1; i<=maxDayOfMonth; i++) {
-        dayList.add(i);
-      }
+      List<Integer> dayList = IntStream.rangeClosed(1, maxDayOfMonth).boxed().collect(Collectors.toList());
       transactionStatistics.setLabels(dayList.stream()
-              .map(day -> day.toString())
-              .collect(Collectors.toList()));
+                                             .map(day -> String.format("%02d", day))
+                                             .collect(Collectors.toList()));
 
-      List<String> income = new ArrayList<>();
-      transactionStatistics.setIncome(income);
-      List<String> outcome = new ArrayList<>();
-      transactionStatistics.setOutcome(outcome);
+      // Compte list of days of current month to include in chart
+      periodList = dayList.stream().map(dayOfMonth -> YearMonth.now().atDay(dayOfMonth)).collect(Collectors.toList());
+    } else {
+      throw new IllegalArgumentException("Uknown periodicity parameter: " + periodicity);
+    }
 
-      for (int day : dayList) {
-        double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
-                contractAddress,
-                address,
-                getStartOfDay(MonthDay.now().getMonth(), day),
-                getEndOfDay(MonthDay.now().getMonth(), day));
-        transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
-      }
-      for (int day : dayList) {
-        double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
-                contractAddress,
-                address,
-                getStartOfDay(MonthDay.now().getMonth(), day),
-                getEndOfDay(MonthDay.now().getMonth(), day));
-        transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
-      }
+    // Compute income and outcome
+    for (LocalDate startDate : periodList) {
+      ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneOffset.systemDefault());
+      ZonedDateTime endDateTime = getEndDate(startDate, periodicity);
+
+      double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
+                                                                                     contractAddress,
+                                                                                     address,
+                                                                                     startDateTime,
+                                                                                     endDateTime);
+      transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
+      double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
+                                                                             contractAddress,
+                                                                             address,
+                                                                             startDateTime,
+                                                                             endDateTime);
+      transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
     }
     return transactionStatistics;
   }
@@ -354,22 +347,15 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     return listenerService;
   }
 
-  private LocalDate getStartDate(YearMonth selectedMonth) {
-    return selectedMonth.atDay(1);
-  }
-
-  private LocalDate getEndDate(YearMonth selectedMonth) {
-    return selectedMonth.atEndOfMonth();
-  }
-
-  private LocalDate getStartOfDay(Month currentMonth, int day) {
-    LocalDate startOfDay = MonthDay.of(currentMonth,day).atYear(Year.now().getValue()).atStartOfDay().toLocalDate();
-    return startOfDay;
-  }
-
-  private LocalDate getEndOfDay(Month currentMonth, int day) {
-    LocalDate endOfDay = MonthDay.of(currentMonth,day).atYear(Year.now().getValue()).atTime(LocalTime.MAX).toLocalDate();
-    return endOfDay;
+  private ZonedDateTime getEndDate(LocalDate selectedDay, String periodicity) {
+    return StringUtils.equalsIgnoreCase(periodicity, YEAR_PERIODICITY)
+                                                                       ? YearMonth.of(selectedDay.getYear(),
+                                                                                      selectedDay.getMonthValue())
+                                                                                  .atEndOfMonth()
+                                                                                  .plusDays(1)
+                                                                                  .atStartOfDay(ZoneOffset.systemDefault())
+                                                                       : selectedDay.plusDays(1)
+                                                                                    .atStartOfDay(ZoneOffset.systemDefault());
   }
 
 }

@@ -124,12 +124,22 @@
                 @refresh-token-balance="refreshTokenBalance"
                 @error="error = $event" />
 
-              <v-flex offset-lg7 xs12 sm6 class="px-3 pb-2 ">
-                <v-btn-toggle v-model="text">
-                  <v-btn  value="left" flat class="btn py-2 pl-2 px-2" >
+              <v-flex
+                offset-lg7
+                xs12
+                sm6
+                class="px-3 pb-2 ">
+                <v-btn-toggle v-model="periodicity">
+                  <v-btn
+                    value="year"
+                    flat
+                    class="btn py-2 pl-2 px-2">
                     Year View
                   </v-btn>
-                  <v-btn value="right" flat class="btn py-2 pl-2 px-2" >
+                  <v-btn
+                    value="month"
+                    flat
+                    class="btn py-2 pl-2 px-2">
                     Month View
                   </v-btn>
                 </v-btn-toggle>
@@ -219,7 +229,6 @@ export default {
     return {
       isWalletEnabled: false,
       loading: true,
-      text: 'center',
       useMetamask: false,
       isReadOnly: true,
       isSpaceAdministrator: false,
@@ -276,6 +285,9 @@ export default {
     },
   },
   watch: {
+    periodicity() {
+      this.$refs.transactionHistoryChart.initializeChart();
+    },
     seeAccountDetails() {
       if (this.seeAccountDetails) {
         $('body').addClass('hide-scroll');

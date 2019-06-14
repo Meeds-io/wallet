@@ -61,7 +61,7 @@ public interface WalletTransactionService {
                                                         String contractAddress,
                                                         String address,
                                                         String periodicity,
-                                                        Locale locale) throws IllegalAccessException;
+                                                        Locale locale);
 
   /**
    * @param hash transaction hash

@@ -3,8 +3,7 @@ package org.exoplatform.addon.wallet.storage;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,16 +118,16 @@ public class TransactionStorage {
   public double countReceivedContractAmount(long networkId,
                                             String contractAddress,
                                             String address,
-                                            LocalDate startDate,
-                                            LocalDate endDate) {
+                                            ZonedDateTime startDate,
+                                            ZonedDateTime endDate) {
     return walletTransactionDAO.countReceivedContractAmount(networkId, contractAddress, address, startDate, endDate);
   }
 
   public double countSentContractAmount(long networkId,
                                         String contractAddress,
                                         String address,
-                                        LocalDate startDate,
-                                        LocalDate endDate) {
+                                        ZonedDateTime startDate,
+                                        ZonedDateTime endDate) {
     return walletTransactionDAO.countSentContractAmount(networkId, contractAddress, address, startDate, endDate);
   }
 
@@ -142,7 +141,7 @@ public class TransactionStorage {
     detail.setContractAddress(entity.getContractAddress());
     detail.setContractAmount(entity.getContractAmount());
     detail.setContractMethodName(entity.getContractMethodName());
-    // FIXME Workaround for old bug when adding timestamp in seconds
+    // FIXME Workaround for old bug when adding timestamp in seconds // NOSONAR
     if (entity.getCreatedDate() > 0 && entity.getCreatedDate() < MINIMUM_CREATED_DATE_MILLIS) {
       if (LOG.isDebugEnabled()) {
         LOG.warn("Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
@@ -150,7 +149,7 @@ public class TransactionStorage {
       entity.setCreatedDate(entity.getCreatedDate() * 1000);
       walletTransactionDAO.update(entity);
     }
-    // FIXME workaround to update ether amount that was stored in milliseconds
+    // FIXME workaround to update ether amount that was stored in milliseconds // NOSONAR
     if (entity.getValue() > 10000L && (StringUtils.isBlank(entity.getContractAddress())
         || StringUtils.isBlank(entity.getContractMethodName())
         || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_INITIALIZEACCOUNT)
@@ -199,7 +198,8 @@ public class TransactionStorage {
       entity.setCreatedDate(System.currentTimeMillis());
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
       if (LOG.isDebugEnabled()) {
-        LOG.warn("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
+        LOG.warn("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
+                 entity.getHash());
       }
       detail.setTimestamp(entity.getCreatedDate() * 1000);
     }

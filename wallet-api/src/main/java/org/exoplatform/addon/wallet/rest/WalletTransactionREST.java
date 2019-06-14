@@ -145,7 +145,6 @@ public class WalletTransactionREST implements ResourceContainer {
       return Response.status(400).build();
     }
 
-    String currentUserId = getCurrentUserId();
     try {
       TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(networkId,
                                                                                                 contractAddress,
@@ -153,9 +152,6 @@ public class WalletTransactionREST implements ResourceContainer {
                                                                                                 periodicity,
                                                                                                 new Locale(lang));
       return Response.ok(transactionStatistics).build();
-    } catch (IllegalAccessException e) {
-      LOG.warn("User {} attempts to display transactions statistics of address {}", currentUserId, address);
-      return Response.status(403).build();
     } catch (Exception e) {
       LOG.warn("Error getting transactions statistics of wallet " + address, e);
       return Response.serverError().build();
