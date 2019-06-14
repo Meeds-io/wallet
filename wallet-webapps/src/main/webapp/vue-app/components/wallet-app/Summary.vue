@@ -54,20 +54,22 @@
         <v-flex xs12 md3>
           <summary-balance :contract-details="principalAccountDetails" />
         </v-flex>
-        <v-flex xs12 md3>
+        <v-flex xs12 md1></v-flex>
+        <v-flex xs12 md2>
           <summary-reward
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event, null, 'reward')"
             @error="$emit('error', $event)" />
         </v-flex>
-        <v-flex xs12 md3>
+        <v-flex xs12 md2>
           <summary-transaction
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event)"
             @error="$emit('error', $event)" />
         </v-flex>
+        <v-flex xs12 md1></v-flex>
         <v-flex
           xs12
           md3

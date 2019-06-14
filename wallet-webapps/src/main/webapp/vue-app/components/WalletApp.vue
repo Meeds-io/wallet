@@ -124,12 +124,23 @@
                 @refresh-token-balance="refreshTokenBalance"
                 @error="error = $event" />
 
+              <v-flex offset-lg7 xs12 sm6 class="px-3 pb-2 ">
+                <v-btn-toggle v-model="text">
+                  <v-btn  value="left" flat class="btn py-2 pl-2 px-2" >
+                    Year View
+                  </v-btn>
+                  <v-btn value="right" flat class="btn py-2 pl-2 px-2" >
+                    Month View
+                  </v-btn>
+                </v-btn-toggle>
+              </v-flex>
+
               <transaction-history-chart
                 ref="transactionHistoryChart"
                 class="transactionHistoryChart"
                 :periodicity="periodicity"
                 :wallet-address="walletAddress"
-                :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]" 
+                :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]"
                 @error="error = $event" />
             </v-card>
 
@@ -208,6 +219,7 @@ export default {
     return {
       isWalletEnabled: false,
       loading: true,
+      text: 'center',
       useMetamask: false,
       isReadOnly: true,
       isSpaceAdministrator: false,

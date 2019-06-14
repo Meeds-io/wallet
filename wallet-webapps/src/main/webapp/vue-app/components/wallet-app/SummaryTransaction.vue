@@ -1,5 +1,5 @@
 <template>
-  <v-card class="walletSummaryBalance elevation-3">
+  <v-card class="walletSummaryBalance">
     <v-card-title class="title pb-1">
       Last transactions
     </v-card-title>
