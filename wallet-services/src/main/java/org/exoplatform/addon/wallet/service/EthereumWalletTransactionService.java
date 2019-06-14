@@ -22,9 +22,9 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class EthereumWalletTransactionService implements WalletTransactionService {
 
-  private static final String   MONTH_PERIODICITY  = "month";
+  private static final String   YEAR_PERIODICITY  = "year";
 
-  private static final String   WEEKLY_PERIODICITY = "week";
+  private static final String   MONTH_PERIODICITY = "month";
 
   private static final Log      LOG                = ExoLogger.getLogger(EthereumWalletTransactionService.class);
 
@@ -102,23 +102,17 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
                                                         String periodicity,
                                                         Locale locale) throws IllegalAccessException {
     TransactionStatistics transactionStatistics = new TransactionStatistics();
+    List<Period> periodList = new ArrayList<>();
 
-    if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
-      List<Month> monthsList = Arrays.asList(Month.JANUARY,
-                                             Month.FEBRUARY,
-                                             Month.MARCH,
-                                             Month.APRIL,
-                                             Month.MAY,
-                                             Month.JUNE,
-                                             Month.JULY,
-                                             Month.AUGUST,
-                                             Month.SEPTEMBER,
-                                             Month.OCTOBER,
-                                             Month.NOVEMBER,
-                                             Month.DECEMBER);
-
+    if (StringUtils.equalsIgnoreCase(periodicity, YEAR_PERIODICITY)) {
+      List<YearMonth> monthsList = new ArrayList<>();
+      //to optimise with stream()
+      for (long i=11; i>=1; i--) {
+        monthsList.add(YearMonth.now().minusMonths(i));
+      }
+      monthsList.add(YearMonth.now());
       transactionStatistics.setLabels(monthsList.stream()
-                                                .map(month -> month.getDisplayName(TextStyle.FULL, locale))
+                                                .map(month -> month.getMonth().getDisplayName(TextStyle.FULL, locale))
                                                 .collect(Collectors.toList()));
 
       List<String> income = new ArrayList<>();
@@ -126,7 +120,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       List<String> outcome = new ArrayList<>();
       transactionStatistics.setOutcome(outcome);
 
-      for (Month month : monthsList) {
+      for (YearMonth month : monthsList) {
         double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
                                                                                        contractAddress,
                                                                                        address,
@@ -134,7 +128,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
                                                                                        getEndDate(month));
         transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
       }
-      for (Month month : monthsList) {
+      for (YearMonth month : monthsList) {
         double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
                                                                                contractAddress,
                                                                                address,
@@ -142,8 +136,38 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
                                                                                getEndDate(month));
         transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
       }
-    } else if (StringUtils.equalsIgnoreCase(periodicity, WEEKLY_PERIODICITY)) {
-      // TODO
+    } else if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
+      int maxDayOfMonth = MonthDay.now().getMonth().maxLength();
+      List<Integer> dayList = new ArrayList<>(maxDayOfMonth);
+      //to optimise with stream()
+      for (int i =1; i<=maxDayOfMonth; i++) {
+        dayList.add(i);
+      }
+      transactionStatistics.setLabels(dayList.stream()
+              .map(day -> day.toString())
+              .collect(Collectors.toList()));
+
+      List<String> income = new ArrayList<>();
+      transactionStatistics.setIncome(income);
+      List<String> outcome = new ArrayList<>();
+      transactionStatistics.setOutcome(outcome);
+
+      for (int day : dayList) {
+        double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
+                contractAddress,
+                address,
+                getStartOfDay(MonthDay.now().getMonth(), day),
+                getEndOfDay(MonthDay.now().getMonth(), day));
+        transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
+      }
+      for (int day : dayList) {
+        double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
+                contractAddress,
+                address,
+                getStartOfDay(MonthDay.now().getMonth(), day),
+                getEndOfDay(MonthDay.now().getMonth(), day));
+        transactionStatistics.getOutcome().add(String.valueOf(sentContractAmount));
+      }
     }
     return transactionStatistics;
   }
@@ -330,14 +354,22 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     return listenerService;
   }
 
-  private LocalDate getStartDate(Month selectedMonth) {
-    YearMonth monthDate = Year.now().atMonth(selectedMonth);
-    return monthDate.atDay(1);
+  private LocalDate getStartDate(YearMonth selectedMonth) {
+    return selectedMonth.atDay(1);
   }
 
-  private LocalDate getEndDate(Month selectedMonth) {
-    YearMonth monthDate = Year.now().atMonth(selectedMonth);
-    return monthDate.atEndOfMonth();
+  private LocalDate getEndDate(YearMonth selectedMonth) {
+    return selectedMonth.atEndOfMonth();
+  }
+
+  private LocalDate getStartOfDay(Month currentMonth, int day) {
+    LocalDate startOfDay = MonthDay.of(currentMonth,day).atYear(Year.now().getValue()).atStartOfDay().toLocalDate();
+    return startOfDay;
+  }
+
+  private LocalDate getEndOfDay(Month currentMonth, int day) {
+    LocalDate endOfDay = MonthDay.of(currentMonth,day).atYear(Year.now().getValue()).atTime(LocalTime.MAX).toLocalDate();
+    return endOfDay;
   }
 
 }
