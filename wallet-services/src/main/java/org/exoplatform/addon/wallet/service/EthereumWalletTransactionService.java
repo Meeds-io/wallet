@@ -135,7 +135,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       int maxDayOfMonth = MonthDay.now().getMonth().maxLength();
       List<Integer> dayList = IntStream.rangeClosed(1, maxDayOfMonth).boxed().collect(Collectors.toList());
       transactionStatistics.setLabels(dayList.stream()
-                                             .map(day -> String.format("%02d", day))
+                                             .map(day -> String.format("%02d", day) + " " + MonthDay.now().getMonth())
                                              .collect(Collectors.toList()));
 
       // Compte list of days of current month to include in chart
