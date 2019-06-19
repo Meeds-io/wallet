@@ -1,5 +1,5 @@
 <template>
-  <v-card id="waletSummary" class="elevation-0">
+  <v-flex id="waletSummary" class="elevation-0">
     <v-card-title
       v-if="walletInitializationStatus === 'NEW' || walletInitializationStatus === 'MODIFIED' || walletInitializationStatus === 'PENDING'"
       primary-title
@@ -49,66 +49,42 @@
     <v-container
       v-if="principalAccountDetails"
       fluid
-      grid-list-md>
+      grid-list-md
+      pl-3
+      pr-0>
       <v-layout row wrap>
-        <v-flex xs12 md3>
+        <v-flex
+          md4
+          xs12
+          text-xs-center
+          text-md-left>
           <summary-balance :contract-details="principalAccountDetails" />
         </v-flex>
-        <v-flex xs12 md1 />
-        <v-flex xs12 md2>
+        <v-flex
+          md4
+          xs6
+          text-xs-left
+          text-md-right>
           <summary-reward
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event, null, 'reward')"
             @error="$emit('error', $event)" />
         </v-flex>
-        <v-flex xs12 md2>
+        <v-flex
+          md4
+          xs6
+          text-xs-center
+          text-md-right>
           <summary-transaction
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event)"
             @error="$emit('error', $event)" />
         </v-flex>
-        <v-flex xs12 md1 />
-        <v-flex
-          xs12
-          md3
-          class="walletSummaryActions">
-          <v-card flat>
-            <div class="walletSummaryAction">
-              <send-funds-modal
-                v-if="!isSpace || isSpaceAdministrator"
-                ref="sendFundsModal"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccounts"
-                :principal-account="principalAccount"
-                :network-id="networkId"
-                :wallet-address="walletAddress"
-                :disabled="disableSendButton"
-                :icon="!isMaximized"
-                regular-btn
-                @success="refreshBalance($event)"
-                @pending="loadPendingTransactions()"
-                @error="
-                  loadPendingTransactions();
-                  $emit('error', $event);
-                " />
-            </div>
-            <div class="walletSummaryAction">
-              <request-funds-modal
-                v-if="!isSpace || isSpaceAdministrator"
-                ref="walletRequestFundsModal"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccounts"
-                :principal-account="principalAccount"
-                :wallet-address="walletAddress"
-                :icon="!isMaximized" />
-            </div>
-          </v-card>
-        </v-flex>
       </v-layout>
     </v-container>
-  </v-card>
+  </v-flex>
 </template>
 
 <script>
@@ -142,24 +118,6 @@ export default {
       },
     },
     isMaximized: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    isSpace: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    isSpaceAdministrator: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    hideActions: {
       type: Boolean,
       default: function() {
         return false;
@@ -265,25 +223,6 @@ export default {
   methods: {
     init(isReadOnly) {
       this.walletInitializationStatus = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.initializationState;
-      if (document.location.search && document.location.search.length) {
-        const search = document.location.search.substring(1);
-        const parameters = JSON.parse(
-          `{"${decodeURI(search)
-            .replace(/"/g, '\\"')
-            .replace(/&/g, '","')
-            .replace(/=/g, '":"')}"}`
-        );
-        if (parameters && parameters.receiver && parameters.receiver_type) {
-          if (isReadOnly) {
-            throw new Error('Your wallet is in readonly state');
-          }
-          let contractAddress = parameters.contract;
-          if (!contractAddress && parameters.principal && this.principalAccount && this.principalAccount.indexOf('0x') === 0) {
-            contractAddress = this.principalAccount;
-          }
-          this.$refs.sendFundsModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, contractAddress, parameters.id);
-        }
-      }
     },
     refreshBalance(accountDetails) {
       if (accountDetails && accountDetails.isContract) {

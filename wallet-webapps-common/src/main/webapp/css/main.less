@@ -626,6 +626,43 @@
 }
 
 #WalletApp, #WalletSpaceApp {
+  .walletSummaryBalanceFounds{
+      display: inline-block;
+
+      .title, .headline {
+        color: #808080;
+      }
+
+      .tokenBalance {
+        color: #578DC9;
+      }
+
+      .rewardBalance, .lastTransactionBalance {
+        color: #000000;
+      }
+
+      .v-card__title {
+        white-space: nowrap;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        padding: 7px!important;
+
+        > * {
+          display: inline-block;
+        }
+      }
+
+      .container {
+        padding: 0;
+      }
+
+      .amount {
+        line-height: 40px;
+      }
+
+
+  }
+
   .walletSummaryBalance {
     display: inline-block;
 
@@ -645,6 +682,7 @@
       white-space: nowrap;
       flex-direction: row;
       flex-wrap: nowrap;
+      padding: 7px!important;
 
       > * {
         display: inline-block;
@@ -659,18 +697,38 @@
       line-height: 40px;
     }
   }
-
-  .walletSummaryActions {
-    .walletSummaryAction > *, .walletSummaryAction .v-dialog__activator button {
+  .walletSummaryAction{
+    .v-dialog__activator{
+      button.btn.btn-primary {
+        width: 250px;
+       }
+  }
+  .v-dialog__container{
+   .v-dialog__activator{
+     button.btn{
+      width: 250px;
+      }
+     }
+   }
+ }
+  .waletSummaryActions {
+    .walletSummaryAction > *, .walletSummaryAction button {
       width: 100%;
       margin-left: 0 !important;
+      width: 250px;
     }
+
   }
 
   .transactionHistoryChart {
     height: 450px;
+    width: 100%;
     max-height: 450px;
-    padding: 24px;
+    padding: 10px;
+
+    canvas {
+     width: 100% !important;
+    }
   }
 }
 

@@ -21,7 +21,7 @@
       <span>
         Send
       </span>
-      <v-icon>
+      <v-icon pr-2>
         send
       </v-icon>
     </v-btn>
@@ -30,7 +30,11 @@
       slot="activator"
       :disabled="disabled"
       :class="!regularBtn && 'btn-primary'"
-      class="btn mr-1 mt-2">
+      class="btn btn-primary  mr-1 mt-2"
+      width="250px">
+      <v-icon>
+        send
+      </v-icon>
       Send
     </button>
     <v-card class="elevation-12">

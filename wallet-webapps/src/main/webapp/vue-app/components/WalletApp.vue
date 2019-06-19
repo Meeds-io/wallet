@@ -101,57 +101,80 @@
                 class="mt-4 mb-4"
                 indeterminate />
 
-              <wallet-summary
-                v-if="walletAddress && !loading && accountsDetails[walletAddress]"
-                ref="walletSummary"
-                :is-maximized="isMaximized"
-                :is-space="isSpace"
-                :is-space-administrator="isSpaceAdministrator"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccountsToDisplay"
-                :principal-account="principalAccount"
-                :refresh-index="refreshIndex"
-                :network-id="networkId"
-                :wallet-address="walletAddress"
-                :ether-balance="etherBalance"
-                :total-balance="totalBalance"
-                :total-fiat-balance="totalFiatBalance"
-                :is-read-only="isReadOnly"
-                :fiat-symbol="fiatSymbol"
-                :loading="loading"
-                @display-transactions="openAccountDetail"
-                @refresh-balance="refreshBalance"
-                @refresh-token-balance="refreshTokenBalance"
-                @error="error = $event" />
-
-              <v-flex
-                offset-lg7
-                xs12
-                sm6
-                class="px-3 pb-2 ">
-                <v-btn-toggle v-model="periodicity">
-                  <v-btn
-                    value="year"
-                    flat
-                    class="btn py-2 pl-2 px-2">
-                    Year View
-                  </v-btn>
-                  <v-btn
-                    value="month"
-                    flat
-                    class="btn py-2 pl-2 px-2">
-                    Month View
-                  </v-btn>
-                </v-btn-toggle>
-              </v-flex>
-
-              <transaction-history-chart
-                ref="transactionHistoryChart"
-                class="transactionHistoryChart"
-                :periodicity="periodicity"
-                :wallet-address="walletAddress"
-                :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]"
-                @error="error = $event" />
+              <v-layout
+                row
+                wrap
+                class="ml-0 mr-0">
+                <v-flex md8 xs12>
+                  <v-layout
+                    row
+                    wrap
+                    class="ml-0 mr-0">
+                    <v-flex xs12>
+                      <wallet-summary
+                        v-if="walletAddress && !loading && accountsDetails[walletAddress]"
+                        ref="walletSummary"
+                        :is-maximized="isMaximized"
+                        :is-space="isSpace"
+                        :is-space-administrator="isSpaceAdministrator"
+                        :accounts-details="accountsDetails"
+                        :overview-accounts="overviewAccountsToDisplay"
+                        :principal-account="principalAccount"
+                        :refresh-index="refreshIndex"
+                        :network-id="networkId"
+                        :wallet-address="walletAddress"
+                        :ether-balance="etherBalance"
+                        :total-balance="totalBalance"
+                        :total-fiat-balance="totalFiatBalance"
+                        :is-read-only="isReadOnly"
+                        :fiat-symbol="fiatSymbol"
+                        :loading="loading"
+                        @display-transactions="openAccountDetail"
+                        @refresh-balance="refreshBalance"
+                        @refresh-token-balance="refreshTokenBalance"
+                        @error="error = $event" />
+                    </v-flex>
+                    <v-flex xs12>
+                      <chart-periodicity-buttons
+                        ref="chartPeriodicityButtons"
+                        @periodicity-changed="periodicity = $event"
+                        @error="error = $event" />
+                    </v-flex>
+                    <v-flex xs12>
+                      <transaction-history-chart
+                        ref="transactionHistoryChart"
+                        class="transactionHistoryChart"
+                        :periodicity="periodicity"
+                        :wallet-address="walletAddress"
+                        :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]"
+                        @error="error = $event" />
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex
+                  md4
+                  xs12
+                  text-md-center
+                  pt-2>
+                  <summary-buttons
+                    v-if="walletAddress && !loading && accountsDetails[walletAddress]"
+                    ref="waletSummaryActions"
+                    :is-maximized="isMaximized"
+                    :is-space="isSpace"
+                    :is-space-administrator="isSpaceAdministrator"
+                    :accounts-details="accountsDetails"
+                    :overview-accounts="overviewAccountsToDisplay"
+                    :principal-account="principalAccount"
+                    :refresh-index="refreshIndex"
+                    :network-id="networkId"
+                    :wallet-address="walletAddress"
+                    :is-read-only="isReadOnly"
+                    @display-transactions="openAccountDetail"
+                    @refresh-balance="refreshBalance"
+                    @refresh-token-balance="refreshTokenBalance"
+                    @error="error = $event" />
+                </v-flex>
+              </v-layout>
             </v-card>
 
             <!-- The selected account detail -->
@@ -201,15 +224,19 @@
 <script>
 import ToolbarMenu from './wallet-app/ToolbarMenu.vue';
 import WalletSummary from './wallet-app/Summary.vue';
+import SummaryButtons from './wallet-app/SummaryButtons.vue';
 import SettingsModal from './wallet-app/SettingsModal.vue';
 import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
+import ChartPeriodicityButtons from './wallet-app/ChartPeriodicityButtons.vue';
 
 export default {
   components: {
     ToolbarMenu,
     WalletSummary,
     SettingsModal,
+    SummaryButtons,
     TransactionHistoryChart,
+    ChartPeriodicityButtons,
   },
   props: {
     isSpace: {
@@ -229,7 +256,10 @@ export default {
     return {
       isWalletEnabled: false,
       loading: true,
+      d: new Date(),
       useMetamask: false,
+      disabledYear: true,
+      disabledMonth: false,
       isReadOnly: true,
       isSpaceAdministrator: false,
       seeAccountDetails: false,
@@ -248,11 +278,12 @@ export default {
       fiatSymbol: '$',
       accountsDetails: {},
       refreshIndex: 1,
-      periodicity: 'month',
       error: null,
+      periodicity: 'month',
     };
   },
   computed: {
+
     displayAccountsList() {
       return this.walletAddress;
     },
@@ -332,7 +363,10 @@ export default {
       this.init()
         .then((result, error) => {
           if (this.$refs.walletSummary) {
-            this.$refs.walletSummary.init(this.isReadOnly);
+            this.$refs.walletSummary.init();
+          }
+          if (this.$refs.walletSummaryActions) {
+            this.$refs.walletSummaryActions.init(this.isReadOnly);
           }
           if (this.$refs.walletAccountsList) {
             this.$refs.walletAccountsList.checkOpenTransaction();
@@ -434,10 +468,31 @@ export default {
           this.forceUpdate();
         });
     },
+
     forceUpdate() {
       this.refreshIndex++;
       this.$forceUpdate();
     },
+    disableYearButton() {
+
+      this.disabledYear = !this.disabledYear;
+
+      if (this.disabledYear === this.disabledMonth) {
+       this.disabledMonth = !this.disabledMonth;
+
+     }
+    },
+    disableMonthButton() {
+
+   this.disabledMonth = !this.disabledMonth;
+
+     if (this.disabledMonth === this.disabledYear) {
+      this.disabledYear = !this.disabledYear;
+
+
+      }
+    },
+
     refreshBalance() {
       const walletAddress = String(this.walletAddress);
       return this.walletUtils.computeBalance(walletAddress)

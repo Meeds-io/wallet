@@ -27,6 +27,9 @@
       v-else
       slot="activator"
       class="btn ml-1 mt-2">
+      <v-icon>
+        reply
+      </v-icon>
       Request
     </button>
     <v-card class="elevation-12">
