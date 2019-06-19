@@ -69,6 +69,45 @@
                 display-no-address />
             </td>
             <td
+              v-if="principalContract"
+              class="clickable text-xs-center"
+              @click="openAccountDetail(props.item)">
+              <v-progress-circular
+                v-if="props.item.loadingBalancePrincipal"
+                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
+                color="primary"
+                indeterminate
+                size="20" />
+              <span
+                v-else-if="loadingWallets && props.item.loadingBalancePrincipal !== false"
+                title="Loading balance...">
+                loading...
+              </span>
+              <template v-else-if="props.item.balancePrincipal">
+                {{ walletUtils.toFixed(props.item.balancePrincipal) }} {{ principalContract && principalContract.symbol ? principalContract.symbol : '' }}
+              </template>
+              <template v-else>
+                -
+              </template>
+            </td>
+            <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
+              <v-progress-circular
+                v-if="props.item.loadingBalance"
+                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
+                color="primary"
+                class="mr-4"
+                indeterminate
+                size="20" />
+              <span
+                v-else-if="loadingWallets && props.item.loadingBalance !== false"
+                title="Loading balance...">
+                loading...
+              </span>
+              <template v-else>
+                {{ walletUtils.toFixed(props.item.balance) }} eth
+              </template>
+            </td>
+            <td
               v-if="principalContract && principalContract.contractType && principalContract.contractType > 1"
               class="clickable"
               @click="openAccountDetail(props.item)">
@@ -116,45 +155,6 @@
               <span v-else>
                 {{ props.item.address }}
               </span>
-            </td>
-            <td
-              v-if="principalContract"
-              class="clickable text-xs-center"
-              @click="openAccountDetail(props.item)">
-              <v-progress-circular
-                v-if="props.item.loadingBalancePrincipal"
-                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
-                color="primary"
-                indeterminate
-                size="20" />
-              <span
-                v-else-if="loadingWallets && props.item.loadingBalancePrincipal !== false"
-                title="Loading balance...">
-                loading...
-              </span>
-              <template v-else-if="props.item.balancePrincipal">
-                {{ walletUtils.toFixed(props.item.balancePrincipal) }} {{ principalContract && principalContract.symbol ? principalContract.symbol : '' }}
-              </template>
-              <template v-else>
-                -
-              </template>
-            </td>
-            <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
-              <v-progress-circular
-                v-if="props.item.loadingBalance"
-                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
-                color="primary"
-                class="mr-4"
-                indeterminate
-                size="20" />
-              <span
-                v-else-if="loadingWallets && props.item.loadingBalance !== false"
-                title="Loading balance...">
-                loading...
-              </span>
-              <template v-else>
-                {{ walletUtils.toFixed(props.item.balance) }} eth
-              </template>
             </td>
             <td class="text-xs-center">
               <v-progress-circular
@@ -352,7 +352,17 @@ export default {
           value: 'name',
         },
         {
-          text: 'Initialization status',
+          text: 'Principal balance',
+          align: 'center',
+          value: 'balancePrincipal',
+        },
+        {
+          text: 'Ether balance',
+          align: 'center',
+          value: 'balance',
+        },
+        {
+          text: 'Initialization',
           align: 'center',
           sortable: true,
           value: 'initializationState',
@@ -362,16 +372,6 @@ export default {
           align: 'center',
           sortable: false,
           value: 'address',
-        },
-        {
-          text: 'Principal balance',
-          align: 'center',
-          value: 'balancePrincipal',
-        },
-        {
-          text: 'Ether balance',
-          align: 'center',
-          value: 'balance',
         },
         {
           text: '',
