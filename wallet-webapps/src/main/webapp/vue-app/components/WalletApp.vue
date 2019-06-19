@@ -172,6 +172,7 @@
                     @display-transactions="openAccountDetail"
                     @refresh-balance="refreshBalance"
                     @refresh-token-balance="refreshTokenBalance"
+                    @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
                     @error="error = $event" />
                 </v-flex>
               </v-layout>

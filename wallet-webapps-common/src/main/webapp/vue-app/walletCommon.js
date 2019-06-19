@@ -1,18 +1,14 @@
 import AccountDetail from './components/AccountDetail.vue';
 import AddressAutoComplete from './components/AddressAutoComplete.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
-import DelegateTokensModal from './components/DelegateTokensModal.vue';
 import GasPriceChoice from './components/GasPriceChoice.vue';
 import InformationBubble from './components/InformationBubble.vue';
 import WarningBubble from './components/WarningBubble.vue';
 import ProfileChip from './components/ProfileChip.vue';
 import QRCode from './components/QRCode.vue';
 import QRCodeModal from './components/QRCodeModal.vue';
-import SendDelegatedTokensModal from './components/SendDelegatedTokensModal.vue';
 import SendEtherForm from './components/SendEtherForm.vue';
 import SendEtherModal from './components/SendEtherModal.vue';
-import SendFundsForm from './components/SendFundsForm.vue';
-import SendFundsModal from './components/SendFundsModal.vue';
 import SendTokensForm from './components/SendTokensForm.vue';
 import SendTokensModal from './components/SendTokensModal.vue';
 import TransactionsList from './components/TransactionsList.vue';
@@ -25,7 +21,6 @@ import ResetModal from './components/WalletResetModal.vue';
 import RequestFundsModal from './components/WalletRequestFundsModal.vue';
 import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
-import WalletSummary from './components/WalletSummary.vue';
 
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
@@ -47,18 +42,14 @@ const WalletCommon = {
     Vue.component('account-detail', AccountDetail);
     Vue.component('address-auto-complete', AddressAutoComplete);
     Vue.component('confirm-dialog', ConfirmDialog);
-    Vue.component('delegate-tokens-modal', DelegateTokensModal);
     Vue.component('gas-price-choice', GasPriceChoice);
     Vue.component('information-bubble', InformationBubble);
     Vue.component('warning-bubble', WarningBubble);
     Vue.component('profile-chip', ProfileChip);
     Vue.component('qr-code', QRCode);
     Vue.component('qr-code-modal', QRCodeModal);
-    Vue.component('send-delegated-tokens-modal', SendDelegatedTokensModal);
     Vue.component('send-ether-form', SendEtherForm);
     Vue.component('send-ether-modal', SendEtherModal);
-    Vue.component('send-funds-form', SendFundsForm);
-    Vue.component('send-funds-modal', SendFundsModal);
     Vue.component('send-tokens-form', SendTokensForm);
     Vue.component('send-tokens-modal', SendTokensModal);
     Vue.component('transactions-list', TransactionsList);
@@ -71,7 +62,6 @@ const WalletCommon = {
     Vue.component('request-funds-modal', RequestFundsModal);
     Vue.component('wallet-address', WalletAddress);
     Vue.component('wallet-setup', WalletSetup);
-    Vue.component('wallet-summary', WalletSummary);
   },
 };
 window.WalletCommon = WalletCommon;

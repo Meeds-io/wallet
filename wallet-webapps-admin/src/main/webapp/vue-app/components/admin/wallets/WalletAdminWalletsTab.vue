@@ -789,11 +789,6 @@ export default {
         this.refreshWallet(wallet);
       });
     },
-    sendFunds(wallet) {
-      if (this.$refs.sendFundsModal) {
-        this.$refs.sendFundsModal.prepareSendForm(wallet.id, wallet.type, this.tokenAmount, this.principalContract && this.principalContract.address);
-      }
-    },
     proceessAction() {
       if (this.confirmAction === 'approve') {
         this.processTransaction(this.walletToProcess, this.confirmAction);

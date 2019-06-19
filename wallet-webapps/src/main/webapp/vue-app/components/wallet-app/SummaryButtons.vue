@@ -1,23 +1,13 @@
 <template>
   <v-card id="waletSummaryActions" class="elevation-0">
     <div class="walletSummaryAction">
-      <send-funds-modal
+      <send-tokens-modal
         v-if="!isSpace || isSpaceAdministrator"
-        ref="sendFundsModal"
-        :accounts-details="accountsDetails"
-        :overview-accounts="overviewAccounts"
-        :principal-account="principalAccount"
-        :network-id="networkId"
-        :wallet-address="walletAddress"
-        :disabled="disableSendButton"
-        :icon="!isMaximized"
-        regular-btn
-        @success="refreshBalance($event)"
-        @pending="loadPendingTransactions()"
-        @error="
-          loadPendingTransactions();
-          $emit('error', $event);
-        " />
+        ref="sendTokensModal"
+        :account="walletAddress"
+        :contract-details="principalAccountDetails"
+        @sent="$emit('transaction-sent')"
+        @error="$emit('error', $event)" />
     </div>
     <div class="walletSummaryAction">
       <request-funds-modal
@@ -161,11 +151,7 @@ export default {
           if (isReadOnly) {
             throw new Error('Your wallet is in readonly state');
           }
-          let contractAddress = parameters.contract;
-          if (!contractAddress && parameters.principal && this.principalAccount && this.principalAccount.indexOf('0x') === 0) {
-            contractAddress = this.principalAccount;
-          }
-          this.$refs.sendFundsModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, contractAddress, parameters.id);
+          this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
         }
       }
     },

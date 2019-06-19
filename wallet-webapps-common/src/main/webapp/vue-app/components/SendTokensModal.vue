@@ -10,31 +10,11 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <v-bottom-nav
-      v-if="useNavigation"
-      slot="activator"
-      :disabled="disabled"
-      :value="true"
-      color="white"
-      class="elevation-0 buttomNavigation">
-      <v-btn
-        :disabled="disabled"
-        flat
-        value="send">
-        <span>
-          Send tokens
-        </span>
-        <v-icon>
-          send
-        </v-icon>
-      </v-btn>
-    </v-bottom-nav>
     <button
-      v-else-if="!noButton"
       slot="activator"
       :disabled="disabled"
       class="btn btn-primary mt-1 mb-1">
-      Send tokens
+      Send
     </button>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
@@ -60,7 +40,7 @@
 <script>
 import SendTokensForm from './SendTokensForm.vue';
 
-import {setDraggable} from '../js/WalletUtils.js';
+import {setDraggable, checkFundRequestStatus} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -77,12 +57,6 @@ export default {
       type: Object,
       default: function() {
         return {};
-      },
-    },
-    noButton: {
-      type: Boolean,
-      default: function() {
-        return false;
       },
     },
     useNavigation: {
@@ -123,6 +97,7 @@ export default {
       return this.contractDetails && this.contractDetails.etherBalance;
     },
     disabled() {
+      console.log(this.isReadonly, this.contractDetails, this.balance, this.etherBalance);
       return this.isReadonly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
@@ -141,6 +116,30 @@ export default {
       } else {
         this.$emit('close');
       }
+    },
+  },
+  methods: {
+    prepareSendForm(receiver, receiverType, amount, notificationId, keepDialogOpen) {
+      if (!this.contractDetails) {
+        console.debug('prepareSendForm error - no accounts found');
+        return;
+      }
+
+      if (receiver && receiverType && notificationId) {
+        checkFundRequestStatus(notificationId).then((sent) => {
+          this.dialog = !sent;
+        });
+      } else {
+        this.dialog = true;
+      }
+
+      this.$nextTick(() => {
+        this.$refs.sendTokensForm.init();
+        if (receiver) {
+          this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
+          this.$refs.sendTokensForm.amount = Number(amount);
+        }
+      });
     },
   },
 };
