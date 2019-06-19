@@ -144,18 +144,6 @@
                 </v-icon>
               </template>
             </td>
-            <td class="clickable" @click="openAccountDetail(props.item)">
-              <a
-                v-if="addressEtherscanLink"
-                :href="`${addressEtherscanLink}${props.item.address}`"
-                target="_blank"
-                title="Open on etherscan">
-                {{ props.item.address }}
-              </a>
-              <span v-else>
-                {{ props.item.address }}
-              </span>
-            </td>
             <td class="text-xs-center">
               <v-progress-circular
                 v-if="props.item.pendingTransaction"
@@ -366,12 +354,6 @@ export default {
           align: 'center',
           sortable: true,
           value: 'initializationState',
-        },
-        {
-          text: 'Address',
-          align: 'center',
-          sortable: false,
-          value: 'address',
         },
         {
           text: '',
