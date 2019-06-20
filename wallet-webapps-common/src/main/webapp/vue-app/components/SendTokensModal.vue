@@ -25,7 +25,7 @@
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Send Tokens
+            Send funds
           </span>
       </div>
       <send-tokens-form
