@@ -626,8 +626,9 @@
 }
 
 #WalletApp, #WalletSpaceApp {
-  .walletSummaryBalanceFounds{
+  .walletSummaryCurrentBalance{
       display: inline-block;
+      width: 100%;
 
       .title, .headline {
         color: #808080;
@@ -643,7 +644,7 @@
 
       .v-card__title {
         white-space: nowrap;
-        flex-direction: row;
+        flex-direction: column;
         flex-wrap: nowrap;
         padding: 7px!important;
 
@@ -663,8 +664,12 @@
 
   }
 
+  .periodicityLabel {
+    text-transform: capitalize;
+  }
   .walletSummaryBalance {
     display: inline-block;
+    width: 100%;
 
     .title, .headline {
       color: #808080;
@@ -680,7 +685,7 @@
 
     .v-card__title {
       white-space: nowrap;
-      flex-direction: row;
+      flex-direction: column;
       flex-wrap: nowrap;
       padding: 7px!important;
 

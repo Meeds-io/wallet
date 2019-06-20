@@ -1,10 +1,8 @@
 <template>
   <v-layout>
     <v-flex md5 />
-    <v-flex md2 pt-2>
-      <v-input>
-        {{ months[new Date().getMonth()] }}
-      </v-input>
+    <v-flex md2 pt-2 class="periodicityLabel">
+      {{ periodicityLabel }}
     </v-flex>
     <v-flex md5 text-xs-right>
       <v-btn-toggle v-model="periodicity">
@@ -29,6 +27,14 @@
 
 <script>
 export default {
+  props: {
+    periodicityLabel: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
+  },
  data() {
     return {
       periodicity: 'month',

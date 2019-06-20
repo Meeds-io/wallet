@@ -135,8 +135,9 @@
                         @error="error = $event" />
                     </v-flex>
                     <v-flex xs12>
-                      <chart-periodicity-buttons
+                      <transaction-history-chart-summary
                         ref="chartPeriodicityButtons"
+                        :periodicity-label="periodicityLabel"
                         @periodicity-changed="periodicity = $event"
                         @error="error = $event" />
                     </v-flex>
@@ -147,6 +148,7 @@
                         :periodicity="periodicity"
                         :wallet-address="walletAddress"
                         :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]"
+                        @periodicity-label="periodicityLabel = $event"
                         @error="error = $event" />
                     </v-flex>
                   </v-layout>
@@ -228,7 +230,7 @@ import WalletSummary from './wallet-app/Summary.vue';
 import SummaryButtons from './wallet-app/SummaryButtons.vue';
 import SettingsModal from './wallet-app/SettingsModal.vue';
 import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
-import ChartPeriodicityButtons from './wallet-app/ChartPeriodicityButtons.vue';
+import TransactionHistoryChartSummary from './wallet-app/TransactionHistoryChartSummary.vue';
 
 export default {
   components: {
@@ -237,7 +239,7 @@ export default {
     SettingsModal,
     SummaryButtons,
     TransactionHistoryChart,
-    ChartPeriodicityButtons,
+    TransactionHistoryChartSummary,
   },
   props: {
     isSpace: {
@@ -267,6 +269,7 @@ export default {
       seeAccountDetailsPermanent: false,
       overviewAccounts: [],
       overviewAccountsToDisplay: [],
+      periodicityLabel: null,
       principalAccount: null,
       showSettingsModal: false,
       gasPriceInEther: null,
@@ -284,7 +287,6 @@ export default {
     };
   },
   computed: {
-
     displayAccountsList() {
       return this.walletAddress;
     },
@@ -317,9 +319,6 @@ export default {
     },
   },
   watch: {
-    periodicity() {
-      this.$refs.transactionHistoryChart.initializeChart();
-    },
     seeAccountDetails() {
       if (this.seeAccountDetails) {
         $('body').addClass('hide-scroll');

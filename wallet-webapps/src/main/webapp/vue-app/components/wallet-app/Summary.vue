@@ -52,19 +52,19 @@
       grid-list-md
       pl-3
       pr-0>
-      <v-layout row wrap>
+      <v-layout col wrap>
         <v-flex
           md4
           xs12
-          text-xs-center
-          text-md-left>
+          text-xs-center>
           <summary-balance :contract-details="principalAccountDetails" />
         </v-flex>
         <v-flex
-          md4
+          offset-md1
+          offset-xs0
+          md3
           xs6
-          text-xs-left
-          text-md-right>
+          text-xs-center>
           <summary-reward
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"
@@ -72,10 +72,11 @@
             @error="$emit('error', $event)" />
         </v-flex>
         <v-flex
-          md4
+          offset-md1
+          offset-xs0
+          md3
           xs6
-          text-xs-center
-          text-md-right>
+          text-xs-center>
           <summary-transaction
             :contract-details="principalAccountDetails"
             :wallet-address="walletAddress"

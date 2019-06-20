@@ -115,9 +115,8 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     TransactionStatistics transactionStatistics = new TransactionStatistics();
     List<LocalDate> periodList = null;
 
+    final Locale userLocale = locale == null ? Locale.getDefault() : locale;
     if (StringUtils.equalsIgnoreCase(periodicity, YEAR_PERIODICITY)) {
-      final Locale userLocale = locale == null ? Locale.getDefault() : locale;
-
       // Compute labels to display in chart
       List<YearMonth> monthsList = new ArrayList<>();
       // to optimise with stream()
@@ -125,17 +124,23 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
         monthsList.add(YearMonth.now().minusMonths(i));
       }
       monthsList.add(YearMonth.now());
+      transactionStatistics.setPeriodicityLabel(String.valueOf(Year.now().getValue()));
       transactionStatistics.setLabels(monthsList.stream()
-                                                .map(month -> month.getMonth().getDisplayName(TextStyle.FULL, userLocale) + " " + month.getYear())
+                                                .map(month -> StringUtils.capitalize(month.getMonth()
+                                                                                          .getDisplayName(TextStyle.FULL,
+                                                                                                          userLocale)))
                                                 .collect(Collectors.toList()));
 
       // Compte list of 12 months to include in chart
       periodList = monthsList.stream().map(yearMonth -> yearMonth.atDay(1)).collect(Collectors.toList());
     } else if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
-      int maxDayOfMonth = MonthDay.now().getMonth().maxLength();
+      Month currentMonth = MonthDay.now().getMonth();
+      int maxDayOfMonth = currentMonth.maxLength();
       List<Integer> dayList = IntStream.rangeClosed(1, maxDayOfMonth).boxed().collect(Collectors.toList());
+      String monthLabel = StringUtils.capitalize(currentMonth.getDisplayName(TextStyle.FULL, userLocale));
+      transactionStatistics.setPeriodicityLabel(monthLabel);
       transactionStatistics.setLabels(dayList.stream()
-                                             .map(day -> String.format("%02d", day) + " " + MonthDay.now().getMonth())
+                                             .map(day -> String.format("%02d", day))
                                              .collect(Collectors.toList()));
 
       // Compte list of days of current month to include in chart

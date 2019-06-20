@@ -53,6 +53,7 @@ export default {
   
       this.transactionUtils.getTransactionsAmounts(this.contractDetails.networkId ,this.contractDetails.address, this.walletAddress, this.periodicity)
         .then((transactionsData) => {
+          this.$emit('periodicity-label', transactionsData.periodicityLabel);
           this.renderChart({
             labels: transactionsData.labels,
             datasets: [
