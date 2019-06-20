@@ -24,47 +24,17 @@
         xsi:schemaLocation="http://www.gatein.org/xml/ns/gatein_objects_1_6 http://www.gatein.org/xml/ns/gatein_objects_1_6"
         xmlns="http://www.gatein.org/xml/ns/gatein_objects_1_6">
     <page>
-        <name>walletSettings</name>
-        <title>Wallet settings</title>
-        <access-permissions>*:/platform/administrators</access-permissions>
-        <edit-permission>manager:/platform/administrators</edit-permission>
-        <portlet-application>
-            <portlet>
-                <application-ref>wallet-admin</application-ref>
-                <portlet-ref>WalletAdminSettings</portlet-ref>
-            </portlet>
-            <title>Wallet settings</title>
-            <access-permissions>manager:/platform/administrators</access-permissions>
-            <show-info-bar>false</show-info-bar>
-        </portlet-application>
-    </page>
-    <page>
-        <name>walletContracts</name>
-        <title>Wallet settings</title>
+        <name>walletAdministration</name>
+        <title>Wallet adminsitration</title>
         <access-permissions>*:/platform/rewarding</access-permissions>
         <edit-permission>manager:/platform/administrators</edit-permission>
         <portlet-application>
             <portlet>
                 <application-ref>wallet-admin</application-ref>
-                <portlet-ref>WalletAdminContracts</portlet-ref>
+                <portlet-ref>WalletAdmin</portlet-ref>
             </portlet>
-            <title>Wallet settings</title>
+            <title>Wallet adminsitration</title>
             <access-permissions>manager:/platform/rewarding</access-permissions>
-            <show-info-bar>false</show-info-bar>
-        </portlet-application>
-    </page>
-    <page>
-        <name>walletAccounts</name>
-        <title>Wallet accounts administration</title>
-        <access-permissions>*:/platform/administrators</access-permissions>
-        <edit-permission>manager:/platform/administrators</edit-permission>
-        <portlet-application>
-            <portlet>
-                <application-ref>wallet-admin</application-ref>
-                <portlet-ref>WalletAdminWallets</portlet-ref>
-            </portlet>
-            <title>Wallet accounts administration</title>
-            <access-permissions>manager:/platform/administrators</access-permissions>
             <show-info-bar>false</show-info-bar>
         </portlet-application>
     </page>

@@ -41,7 +41,7 @@
           <description></description>
           <object type="org.exoplatform.commons.addons.PortletModel">
             <field name="contentId">
-              <string>exo-wallet/WalletLink</string>
+              <string>wallet/WalletLink</string>
             </field>
             <field name="permissions">
               <collection type="java.util.ArrayList">
@@ -85,7 +85,7 @@
           <description></description>
           <object type="org.exoplatform.commons.addons.PortletModel">
             <field name="contentId">
-              <string>exo-wallet/WalletAPI</string>
+              <string>wallet/WalletAPI</string>
             </field>
             <field name="permissions">
               <collection type="java.util.ArrayList">

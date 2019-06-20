@@ -30,34 +30,19 @@
             <label>Reward</label>
             <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
             <node>
-                <name>rewardAdministration</name>
-                <label>Reward Administration</label>
-                <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
-            </node>
-            <node>
-                <name>walletAdministration</name>
-                <label>Wallets</label>
-                <page-reference>group::/platform/rewarding::walletAccounts</page-reference>
-                <node>
-                    <name>walletAccounts</name>
-                    <label>Accounts</label>
-                    <page-reference>group::/platform/rewarding::walletAccounts</page-reference>
-                </node>
-                <node>
-                    <name>walletContracts</name>
-                    <label>Contracts</label>
-                    <page-reference>group::/platform/rewarding::walletContracts</page-reference>
-                </node>
-                <node>
-                    <name>walletSettings</name>
-                    <label>Settings</label>
-                    <page-reference>group::/platform/rewarding::walletSettings</page-reference>
-                </node>
-            </node>
-            <node>
                 <name>kudosAdministration</name>
                 <label>Kudos</label>
                 <page-reference>group::/platform/administrators::kudosAdministration</page-reference>
+            </node>
+            <node>
+                <name>walletAdministration</name>
+                <label>Wallet</label>
+                <page-reference>group::/platform/rewarding::walletAdministration</page-reference>
+            </node>
+            <node>
+                <name>rewardAdministration</name>
+                <label>Reward</label>
+                <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
             </node>
         </node>
     </page-nodes>

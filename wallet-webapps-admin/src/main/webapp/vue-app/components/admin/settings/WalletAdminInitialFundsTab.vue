@@ -193,12 +193,12 @@ export default {
         amount: etherAmount
       }];
 
-      if (this.principalContract && this.principalContract.value && this.principalContract.value.indexOf('0x') === 0) {
-        const tokenInitialFund = window.walletSettings.initialFunds && window.walletSettings.initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.principalContract.value.toLowerCase());
+      if (this.principalContract && this.principalContract.address && this.principalContract.address.indexOf('0x') === 0) {
+        const tokenInitialFund = window.walletSettings.initialFunds && window.walletSettings.initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.principalContract.address.toLowerCase());
         const tokenAmount = (tokenInitialFund && tokenInitialFund.amount) || 0;
         this.initialFunds.push({
-          name: this.principalContract.text,
-          address: this.principalContract.value,
+          name: this.principalContract.name,
+          address: this.principalContract.address,
           amount: tokenAmount
         });
       }

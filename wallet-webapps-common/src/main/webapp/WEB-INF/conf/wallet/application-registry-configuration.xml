@@ -65,7 +65,7 @@
                       </collection>
                     </field>
                     <field name="contentId">
-                      <string>exo-wallet/SpaceWallet</string>
+                      <string>wallet/SpaceWallet</string>
                     </field>
                     <field name="description">
                       <string>Space Wallet</string>

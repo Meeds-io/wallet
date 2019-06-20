@@ -17,6 +17,16 @@
             <i class="uiIconError"></i>{{ error }}
           </div>
 
+          <wallet-setup
+            ref="walletSetup"
+            :wallet-address="originalWalletAddress"
+            :refresh-index="refreshIndex"
+            :loading="loading"
+            class="mb-3"
+            is-administration
+            @refresh="init()"
+            @error="error = $event" />
+
           <v-dialog
             v-model="loading"
             attach="#walletDialogsParent"
@@ -38,13 +48,22 @@
             <v-tab
               key="wallets"
               href="#wallets">
-              Wallets
+              Wallets administration
             </v-tab>
             <v-tab
-              v-if="isAdmin"
-              key="adminAccount"
-              href="#adminAccount">
-              Admin account
+              key="funds"
+              href="#funds">
+              Initial funds
+            </v-tab>
+            <v-tab
+              key="packs"
+              href="#packs">
+              Cauri packs
+            </v-tab>
+            <v-tab
+              key="contracts"
+              href="#contracts">
+              Cauri administration
             </v-tab>
           </v-tabs>
 
@@ -67,33 +86,49 @@
                 @wallets-loaded="wallets = $event" />
             </v-tab-item>
             <v-tab-item
-              v-if="isAdmin"
-              id="adminAccount"
-              value="adminAccount">
-              <admin-account-tab
-                ref="adminAccountTab"
-                :network-id="networkId"
+              id="funds"
+              value="funds">
+              <initial-funds-tab
+                ref="fundsTab"
                 :loading="loading"
+                :principal-contract="principalContract"
+                @save="saveGlobalSettings" />
+            </v-tab-item>
+            <v-tab-item
+              id="packs"
+              value="packs" />
+            <v-tab-item
+              id="contracts"
+              value="contracts">
+              <contracts-tab
+                ref="contractsTab"
+                :network-id="networkId"
                 :wallet-address="walletAddress"
-                :principal-contract="principalContract" />
+                :loading="loading"
+                :fiat-symbol="fiatSymbol"
+                :address-etherscan-link="addressEtherscanLink"
+                :token-etherscan-link="tokenEtherscanLink"
+                :is-admin="isAdmin"
+                @pending-transaction="watchPendingTransaction" />
             </v-tab-item>
           </v-tabs-items>
         </v-flex>
       </v-layout>
-      <div id="walletDialogsParent">
-      </div>
+      <div id="walletDialogsParent"></div>
     </main>
   </v-app>
 </template>
 
 <script>
 import WalletsTab from './wallets/WalletAdminWalletsTab.vue';
-import AdminAccountTab from './wallets/WalletAdminAccountTab.vue';
+import InitialFundsTab from './settings/WalletAdminInitialFundsTab.vue';
+import ContractsTab from './contracts/WalletAdminContractsTab.vue';
 
 export default {
   components: {
     WalletsTab,
-    AdminAccountTab,
+    InitialFundsTab,
+    ContractsTab,
   },
   data() {
     return {
@@ -101,6 +136,7 @@ export default {
       selectedTab: 'wallets',
       fiatSymbol: '$',
       walletAddress: null,
+      originalWalletAddress: null,
       refreshIndex: 1,
       principalContract: null,
       principalAccountAddress: null,
@@ -132,13 +168,16 @@ export default {
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.networkId = window.walletSettings.defaultNetworkId;
-          this.walletAddress = (window.walletSettings.userPreferences && window.walletSettings.userPreferences.walletAddress) || window.walletSettings.detectedMetamaskAccount;
           this.isAdmin = window.walletSettings.isAdmin;
           if (window.walletSettings.defaultPrincipalAccount && window.walletSettings.defaultPrincipalAccount.indexOf('0x') === 0) {
             this.principalAccountAddress = window.walletSettings.defaultPrincipalAccount;
           }
         })
         .then(() => this.walletUtils.initWeb3(false, true))
+        .then(() => {
+          this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
+          this.originalWalletAddress = window.walletSettings.userPreferences.walletAddress;
+        })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug('Error connecting to network', error);
@@ -159,8 +198,10 @@ export default {
         .then((contractDetails) => {
           this.principalContract = contractDetails;
         })
-        .then(() => this.$refs.adminAccountTab && this.$refs.adminAccountTab.init())
+        .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
         .then(() => this.$refs && this.$refs.walletsTab && this.$refs.walletsTab.init(true))
+        .then(() => this.$refs.fundsTab && this.$refs.fundsTab.init())
+        .then(() => this.$refs.contractsTab && this.$refs.contractsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug(error);
@@ -244,6 +285,60 @@ export default {
     forceUpdate() {
       this.refreshIndex++;
       this.$forceUpdate();
+    },
+    saveGlobalSettings(globalSettings) {
+      this.loading = true;
+      const defaultInitialFundsMap = {};
+      if (!globalSettings.initialFunds) {
+        if (window.walletSettings.initialFunds && window.walletSettings.initialFunds.length) {
+          window.walletSettings.initialFunds.forEach((initialFund) => {
+            defaultInitialFundsMap[initialFund.address] = initialFund.amount;
+          });
+        }
+      }
+      const currentGlobalSettings = Object.assign({}, window.walletSettings, {initialFunds: defaultInitialFundsMap});
+      const globalSettingsToSave = Object.assign(currentGlobalSettings, globalSettings);
+      if(globalSettingsToSave.contractAbi) {
+        delete globalSettingsToSave.contractAbi;
+      }
+      if(globalSettingsToSave.contractBin) {
+        delete globalSettingsToSave.contractBin;
+      }
+      if(globalSettingsToSave.contractBin) {
+        delete globalSettingsToSave.contractBin;
+      }
+      if(globalSettingsToSave.userPreferences) {
+        delete globalSettingsToSave.userPreferences;
+      }
+      delete globalSettingsToSave.walletEnabled;
+      delete globalSettingsToSave.admin;
+
+      return fetch('/portal/rest/wallet/api/global-settings/save', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(globalSettingsToSave),
+      })
+        .then((resp) => {
+          if (resp && resp.ok) {
+            return resp.text();
+          } else {
+            throw new Error('Error saving global settings');
+          }
+        })
+        .then(() => {
+          window.setTimeout(() => {
+            this.init();
+          }, 200);
+        })
+        .catch((e) => {
+          this.loading = false;
+          console.debug('fetch global-settings - error', e);
+          this.error = 'Error saving global settings';
+        });
     },
   },
 };
