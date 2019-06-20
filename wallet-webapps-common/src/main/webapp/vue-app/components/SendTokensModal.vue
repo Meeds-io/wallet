@@ -13,7 +13,7 @@
     <button
       slot="activator"
       :disabled="disabled"
-      class="btn btn-primary mt-1 mb-1">
+      class="btn btn-primary">
       Send
     </button>
     <v-card class="elevation-12">

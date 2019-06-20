@@ -1,5 +1,5 @@
 <template>
-  <v-flex id="waletSummary" class="elevation-0">
+  <v-flex id="walletSummary" class="elevation-0">
     <v-card-title
       v-if="walletInitializationStatus === 'NEW' || walletInitializationStatus === 'MODIFIED' || walletInitializationStatus === 'PENDING'"
       primary-title

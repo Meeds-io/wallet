@@ -500,25 +500,6 @@
     cursor: pointer;
   }
 
-  &.minimized {
-    padding: 10px 0;
-
-    .head-container {
-      padding-left: 11px;
-      font-size: 17px;
-      font-weight: 400;
-      color: #4d5466;
-    }
-
-    .buttomNavigation .v-dialog__activator {
-      height: 100%;
-    }
-
-    #walletBrowserSetup {
-      width: auto;
-    }
-  }
-
   .transactionsList {
     overflow-x: hidden;
     overflow-y: auto;
@@ -702,25 +683,10 @@
       line-height: 40px;
     }
   }
-  .walletSummaryAction{
-    .v-dialog__activator{
-      button.btn.btn-primary {
-        width: 250px;
-       }
-  }
-  .v-dialog__container{
-   .v-dialog__activator{
-     button.btn{
-      width: 250px;
-      }
-     }
-   }
- }
-  .waletSummaryActions {
-    .walletSummaryAction > *, .walletSummaryAction button {
+  .walletSummaryActions {
+    .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
       width: 100%;
-      margin-left: 0 !important;
-      width: 250px;
+      box-sizing: border-box;
     }
 
   }
@@ -733,26 +699,6 @@
 
     canvas {
      width: 100% !important;
-    }
-  }
-}
-
-@media (min-width : 1024px) {
-  #WalletApp, #WalletSpaceApp {
-
-    &.minimized {
-      max-width: 100%;
-
-      .accountItem {
-        .v-speed-dial {
-          display: none;
-        }
-      }
-      .accountItem:hover {
-        .v-speed-dial {
-          display: block;
-        }
-      }
     }
   }
 }
@@ -826,7 +772,20 @@
 }
 
 /* Override uiPopup !important attributes */
-@media (max-width : 1024px) {
+@media (max-width : 959px) {
+  #WalletApp, #WalletSpaceApp {
+    .walletSummaryActions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      box-sizing: border-box;
+      padding: 0 0 5px 0;
+      margin-bottom: 0px !important;
+      box-shadow: 0 3px 3px -4px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,0.14),0 0px 2px 0 rgba(0,0,0,0.12)!important;
+    }
+  }
   #WalletAdminApp {
     .createNewToken {
       width: 100% !important;

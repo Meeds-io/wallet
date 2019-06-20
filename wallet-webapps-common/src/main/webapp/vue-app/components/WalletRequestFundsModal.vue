@@ -10,7 +10,7 @@
     @keydown.esc="dialog = false">
     <button
       slot="activator"
-      class="btn ml-1 mt-2">
+      class="btn">
       Request
     </button>
     <v-card class="elevation-12">

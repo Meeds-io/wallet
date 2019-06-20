@@ -157,7 +157,7 @@
                   md4
                   xs12
                   text-md-center
-                  pt-2>
+                  mt-1>
                   <summary-buttons
                     v-if="walletAddress && !loading && accountsDetails[walletAddress]"
                     ref="walletSummaryActions"
