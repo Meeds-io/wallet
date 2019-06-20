@@ -49,6 +49,10 @@
   position: relative;
 }
 
+#WalletApp, #WalletSpaceApp {
+  margin: 20px 20px 0;
+}
+
 #WalletApp, #WalletSpaceApp, #RewardApp, #WalletAdminApp, #TodoListApp {
   background: transparent;
 
@@ -544,9 +548,6 @@
     transform: rotate(45deg);
   }
 
-  &.maximized {
-    margin: 20px 20px 0;
-  }
 
   .dynamic-height .v-list__tile {
     height: auto;
@@ -695,7 +696,8 @@
     height: 450px;
     width: 100%;
     max-height: 450px;
-    padding: 10px;
+    padding: 10px 8px 10px 10px;
+    box-sizing: border-box;
 
     canvas {
      width: 100% !important;
@@ -774,6 +776,8 @@
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {
   #WalletApp, #WalletSpaceApp {
+    margin-bottom: 55px;
+
     .walletSummaryActions {
       position: fixed;
       bottom: 0;

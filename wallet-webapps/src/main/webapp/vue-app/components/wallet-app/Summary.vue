@@ -1,5 +1,5 @@
 <template>
-  <v-flex id="walletSummary" class="elevation-0">
+  <v-flex id="walletSummary" class="elevation-0 mr-3">
     <v-card-title
       v-if="walletInitializationStatus === 'NEW' || walletInitializationStatus === 'MODIFIED' || walletInitializationStatus === 'PENDING'"
       primary-title
@@ -64,6 +64,8 @@
           offset-xs0
           md3
           xs6
+          pr-0
+          pl-0
           text-xs-center>
           <summary-reward
             :contract-details="principalAccountDetails"
@@ -76,6 +78,8 @@
           offset-xs0
           md3
           xs6
+          pr-0
+          pl-0
           text-xs-center>
           <summary-transaction
             :contract-details="principalAccountDetails"

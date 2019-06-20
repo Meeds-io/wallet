@@ -1,10 +1,9 @@
 <template>
-  <v-layout>
-    <v-flex md5 />
-    <v-flex md2 pt-2 class="periodicityLabel">
+  <v-layout mr-3 ml-3 pr-1>
+    <v-flex md6 text-xs-left pt-2 class="periodicityLabel">
       {{ periodicityLabel }}
     </v-flex>
-    <v-flex md5 text-xs-right>
+    <v-flex md6 text-xs-right>
       <v-btn-toggle v-model="periodicity">
         <v-btn
           id="periodicityChangeYear"
