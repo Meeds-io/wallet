@@ -13,12 +13,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
-import org.exoplatform.addon.wallet.service.WalletAccountService;
-import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.addon.wallet.storage.AccountStorage;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -45,6 +44,8 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private ListenerService         listenerService;
 
+  private UserACL                 userACL;
+
   private String                  adminAccountPassword;
 
   public EthereumWalletAccountService(AccountStorage walletAccountStorage,
@@ -56,6 +57,29 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
         && StringUtils.isNotBlank(params.getValueParam(ADMIN_KEY_PARAMETER).getValue())) {
       this.adminAccountPassword = params.getValueParam(ADMIN_KEY_PARAMETER).getValue();
     }
+  }
+
+  @Override
+  public void start() {
+    Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+    if (provider == null) {
+      LOG.info("No BouncyCastleProvider defined, register new one");
+      provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
+      Security.addProvider(provider);
+    }
+    LOG.info("Start wallet with BouncyCastleProvider version: {}", provider.getVersion());
+
+    // Create admin wallet if not exists
+    Wallet wallet = getTokenAdminService().getAdminWallet();
+    if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
+      this.createAdminAccount();
+      LOG.info("Admin wallet created");
+    }
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
   }
 
   @Override
@@ -174,6 +198,16 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
       computeWalletFromIdentity(wallet, identity);
     }
     return wallet;
+  }
+
+  @Override
+  public void createAdminAccount() {
+    try {
+      this.createAdminAccount(null, getUserACL().getSuperUser());
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException("This exception shouldn't be thrown because no ACL check is made on server side method call",
+                                      e);
+    }
   }
 
   @Override
@@ -493,20 +527,10 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
     return listenerService;
   }
 
-  @Override
-  public void start() {
-    Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-    if (provider == null) {
-      LOG.info("No BouncyCastleProvider defined, register new one");
-      provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
-      Security.addProvider(provider);
+  private UserACL getUserACL() {
+    if (userACL == null) {
+      userACL = CommonsUtils.getService(UserACL.class);
     }
-    LOG.info("Start wallet with BouncyCastleProvider version: {}", provider.getVersion());
+    return userACL;
   }
-
-  @Override
-  public void stop() {
-    // Nothing to stop
-  }
-
 }
