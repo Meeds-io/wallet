@@ -1,6 +1,13 @@
 <template>
-  <v-layout mr-3 ml-3 pr-1>
-    <v-flex md6 text-xs-left pt-2 class="periodicityLabel">
+  <v-layout
+    mr-3
+    ml-3
+    pr-1>
+    <v-flex
+      md6
+      text-xs-left
+      pt-2
+      class="periodicityLabel">
       {{ periodicityLabel }}
     </v-flex>
     <v-flex md6 text-xs-right>

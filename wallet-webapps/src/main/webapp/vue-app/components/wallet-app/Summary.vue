@@ -170,12 +170,6 @@ export default {
         return false;
       },
     },
-    loading: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
   },
   data() {
     return {

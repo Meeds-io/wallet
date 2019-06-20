@@ -1,7 +1,6 @@
 <template>
   <v-app
     id="WalletApp"
-    :class="isMaximized ? 'maximized' : 'minimized'"
     color="transaprent"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
@@ -95,12 +94,6 @@
                 <i class="uiIconError"></i> {{ error }}
               </div>
 
-              <v-progress-circular
-                v-if="loading"
-                color="primary"
-                class="mt-4 mb-4"
-                indeterminate />
-
               <v-layout
                 row
                 wrap
@@ -112,7 +105,7 @@
                     class="ml-0 mr-0">
                     <v-flex xs12>
                       <wallet-summary
-                        v-if="walletAddress && !loading && accountsDetails[walletAddress]"
+                        v-if="walletAddress && accountsDetails[walletAddress]"
                         ref="walletSummary"
                         :is-maximized="isMaximized"
                         :is-space="isSpace"
@@ -136,6 +129,7 @@
                     </v-flex>
                     <v-flex xs12>
                       <transaction-history-chart-summary
+                        v-if="!loading"
                         ref="chartPeriodicityButtons"
                         :periodicity-label="periodicityLabel"
                         @periodicity-changed="periodicity = $event"
@@ -208,7 +202,7 @@
       <div id="walletDialogsParent">
       </div>
     </main>
-    <main v-else-if="isMaximized && !loading" id="walletDisabledContent">
+    <main v-else-if="!loading" id="walletDisabledContent">
       <v-layout>
         <v-flex>
           <v-card-title class="transparent" flat>
@@ -442,7 +436,6 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          this.loading = false;
           this.forceUpdate();
         })
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
@@ -464,9 +457,11 @@ export default {
           } else {
             this.error = error;
           }
-          this.loading = false;
-          this.forceUpdate();
-        });
+        })
+      .finally(() => {
+        this.loading = false;
+        this.forceUpdate();
+      });
     },
 
     forceUpdate() {
