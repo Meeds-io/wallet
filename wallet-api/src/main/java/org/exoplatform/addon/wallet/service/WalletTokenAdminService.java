@@ -8,6 +8,11 @@ import org.exoplatform.addon.wallet.model.Wallet;
 public interface WalletTokenAdminService {
 
   /**
+   * Generates admin account wallet in server side
+   */
+  public void createAdminAccount();
+
+  /**
    * Creates admin account wallet in server side
    * 
    * @param privateKey admin account wallet private key

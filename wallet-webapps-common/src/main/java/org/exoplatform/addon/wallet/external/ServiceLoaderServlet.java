@@ -61,6 +61,7 @@ public class ServiceLoaderServlet extends HttpServlet {
         EthereumWalletTokenAdminService service = new EthereumWalletTokenAdminService(web3jConnector, contextCL);
         container.registerComponentInstance(WalletTokenAdminService.class,
                                             service);
+        service.start();
         LOG.debug("EthereumWalletTokenAdminService instance created.");
 
         ListenerService listenerService = CommonsUtils.getService(ListenerService.class);

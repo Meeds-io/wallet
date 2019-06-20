@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.picocontainer.Startable;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.*;
 import org.web3j.protocol.ObjectMapperFactory;
@@ -29,13 +30,14 @@ import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.storage.AccountStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.ws.frameworks.json.impl.JsonException;
 
-public class EthereumWalletTokenAdminService implements WalletTokenAdminService {
+public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable {
 
   private static final int                      POOLING_ATTEMPTS                        = 100;
 
@@ -57,6 +59,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService 
                                                                                         "receiver address parameter is mandatory";
 
   private ClassLoader                           classLoader;
+
+  private UserACL                               userACL;
 
   private ListenerService                       listenerService;
 
@@ -82,8 +86,33 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService 
   }
 
   @Override
+  public void start() {
+    // Create admin wallet if not exists
+    Wallet wallet = getAdminWallet();
+    if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
+      createAdminAccount();
+      LOG.info("Admin wallet created");
+    }
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
+  }
+
+  @Override
   public final void reinit() {
     this.ertInstance = null;
+  }
+
+  @Override
+  public void createAdminAccount() {
+    try {
+      this.createAdminAccount(null, getUserACL().getSuperUser());
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException("This exception shouldn't be thrown because no ACL check is made on server side method call",
+                                      e);
+    }
   }
 
   @Override
@@ -846,4 +875,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService 
     return listenerService;
   }
 
+  private UserACL getUserACL() {
+    if (userACL == null) {
+      userACL = CommonsUtils.getService(UserACL.class);
+    }
+    return userACL;
+  }
 }
