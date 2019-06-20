@@ -33,6 +33,7 @@
             input-label="Recipient"
             input-placeholder="Select a recipient for your funds request"
             required
+            ignore-current-user
             @item-selected="recipient = $event" />
   
           <v-text-field

@@ -18,6 +18,7 @@
           title="Select a user, a space or an address to send to"
           autofocus
           required
+          ignore-current-user
           @item-selected="
             recipient = $event.address;
             $emit('receiver-selected', $event);
