@@ -8,11 +8,14 @@
     max-width="100vw"
     draggable="true"
     @keydown.esc="dialog = false">
-    <button
+    <v-btn
       slot="activator"
-      class="btn">
+      class="btn white">
+      <v-icon>
+        reply
+      </v-icon>
       Request
-    </button>
+    </v-btn>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
         <a

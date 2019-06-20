@@ -10,12 +10,15 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <button
+    <v-btn
       slot="activator"
       :disabled="disabled"
       class="btn btn-primary">
+      <v-icon color="white" class="mr-1">
+        send
+      </v-icon>
       Send
-    </button>
+    </v-btn>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
         <a
