@@ -13,12 +13,35 @@
     </div>
     <v-container>
       <v-layout>
-        <v-flex md2 xs12>
-          <v-switch v-model="displayUsers" label="Users" />
+        <v-flex md3 xs12>
+          <v-btn-toggle
+            v-model="userTypes"
+            mandatory
+            multiple>
+            <v-btn
+              v-model="displayUsers"
+              color="#578DC9"
+              value="users"
+              class="btn py-2 px-2">
+              Users
+            </v-btn>
+            <v-btn
+              v-model="displaySpaces"
+              color="#578DC9"
+              value="spaces"
+              class="btn py-2 px-2">
+              Spaces
+            </v-btn>
+            <v-btn
+              v-model="displayAdmin"
+              color="#578DC9"
+              value="admin"
+              class="btn py-2 px-2">
+              Admin
+            </v-btn>
+          </v-btn-toggle>
         </v-flex>
-        <v-flex md2 xs12>
-          <v-switch v-model="displaySpaces" label="Spaces" />
-        </v-flex>
+        <v-flex md1 xs12 />
         <v-flex md2 xs12>
           <v-switch v-model="displayDisabledWallets" label="Disabled wallets" />
         </v-flex>
@@ -176,7 +199,7 @@
                         </v-list-tile>
                         <v-divider />
                       </template>
-  
+
                       <template v-if="principalContract && principalContract.contractType && principalContract.contractType > 0 && (props.item.disapproved === true || props.item.disapproved === false)">
                         <v-list-tile v-if="props.item.disapproved === true" @click="openApproveModal(props.item)">
                           <v-list-tile-title>Approve wallet</v-list-tile-title>
@@ -187,16 +210,16 @@
                         <v-divider />
                       </template>
                     </template>
-  
+
                     <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
                       <v-list-tile-title>Disable wallet</v-list-tile-title>
                     </v-list-tile>
                     <v-list-tile v-else-if="!props.item.disabledUser && !props.item.deletedUser" @click="enableWallet(props.item, true)">
                       <v-list-tile-title>Enable wallet</v-list-tile-title>
                     </v-list-tile>
-  
+
                     <v-divider />
-  
+
                     <v-list-tile @click="openRemoveWalletModal(props.item)">
                       <v-list-tile-title>Remove wallet</v-list-tile-title>
                     </v-list-tile>
@@ -306,7 +329,8 @@ export default {
       appInitialized: false,
       useWalletAdmin: false,
       displayUsers: true,
-      displaySpaces: true,
+      displaySpaces: false,
+      displayAdmin: false,
       displayDisapprovedWallets: true,
       displayDisabledWallets: false,
       selectedTransactionHash: null,
@@ -362,6 +386,7 @@ export default {
           value: '',
         },
       ],
+      userTypes: ['users']
     };
   },
   computed: {
@@ -402,10 +427,10 @@ export default {
       return this.displayedWallets.length === this.limit;
     },
     displayedWallets() {
-      if (this.displayUsers && this.displayDisapprovedWallets && this.displaySpaces && this.displayDisabledWallets && !this.search) {
+      if (this.displayUsers && this.displayDisapprovedWallets && this.displaySpaces && this.displayDisabledWallets && this.displayAdmin && !this.search) {
         return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
       } else {
-        return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
+        return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
       }
     },
     filteredWallets() {
@@ -413,7 +438,7 @@ export default {
         const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
         const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
         this.wallets.forEach((wallet, index) => {
-          wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+          wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
         });
         return this.wallets.slice(0, limit);
       } else {
