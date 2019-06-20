@@ -13,11 +13,8 @@
       <request-funds-modal
         v-if="!isSpace || isSpaceAdministrator"
         ref="walletRequestFundsModal"
-        :accounts-details="accountsDetails"
-        :overview-accounts="overviewAccounts"
-        :principal-account="principalAccount"
         :wallet-address="walletAddress"
-        :icon="!isMaximized" />
+        :contract-details="principalAccountDetails" />
     </div>
   </v-card>
 </template>

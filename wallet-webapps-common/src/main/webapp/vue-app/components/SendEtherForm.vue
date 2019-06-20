@@ -202,7 +202,9 @@ export default {
     },
     sendEther() {
       this.error = null;
-      this.$refs.form.validate();
+      if (!this.$refs.form.validate()) {
+        return;
+      }
       if (!window.localWeb3.utils.isAddress(this.recipient)) {
         this.error = 'Invalid recipient address';
         return;

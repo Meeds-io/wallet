@@ -97,7 +97,6 @@ export default {
       return this.contractDetails && this.contractDetails.etherBalance;
     },
     disabled() {
-      console.log(this.isReadonly, this.contractDetails, this.balance, this.etherBalance);
       return this.isReadonly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
@@ -128,18 +127,18 @@ export default {
       if (receiver && receiverType && notificationId) {
         checkFundRequestStatus(notificationId).then((sent) => {
           this.dialog = !sent;
+          return this.$nextTick(() => {
+            if (receiver) {
+              this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
+              this.$refs.sendTokensForm.amount = Number(amount);
+              this.$refs.sendTokensForm.notificationId = notificationId;
+            }
+          });
         });
       } else {
         this.dialog = true;
-      }
-
-      this.$nextTick(() => {
         this.$refs.sendTokensForm.init();
-        if (receiver) {
-          this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
-          this.$refs.sendTokensForm.amount = Number(amount);
-        }
-      });
+      }
     },
   },
 };

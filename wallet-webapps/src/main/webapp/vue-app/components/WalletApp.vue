@@ -158,7 +158,7 @@
                   pt-2>
                   <summary-buttons
                     v-if="walletAddress && !loading && accountsDetails[walletAddress]"
-                    ref="waletSummaryActions"
+                    ref="walletSummaryActions"
                     :is-maximized="isMaximized"
                     :is-space="isSpace"
                     :is-space-administrator="isSpaceAdministrator"

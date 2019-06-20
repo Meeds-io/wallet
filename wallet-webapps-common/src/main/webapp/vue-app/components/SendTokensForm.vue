@@ -119,7 +119,7 @@ import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
 import GasPriceChoice from './GasPriceChoice.vue';
 
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
 
@@ -166,6 +166,7 @@ export default {
       walletPasswordShow: false,
       useMetamask: false,
       recipient: null,
+      notificationId: null,
       isApprovedRecipient: true,
       canSendToken: true,
       amount: null,
@@ -274,6 +275,7 @@ export default {
       this.showQRCodeModal = false;
       this.recipient = null;
       this.amount = null;
+      this.notificationId = null;
       this.warning = null;
       this.error = null;
       this.walletPassword = '';
@@ -329,7 +331,9 @@ export default {
 
       const setWalletInitialized = !this.isApprovedRecipient && Number(this.contractDetails.adminLevel) > 0; 
 
-      this.$refs.form.validate();
+      if (!this.$refs.form.validate()) {
+        return;
+      }
       if (this.contractDetails && this.contractDetails.isPaused) {
         this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
         return;
@@ -436,6 +440,10 @@ export default {
                 if (setWalletInitialized) {
                   // *async* set wallet as initialized
                   saveWalletInitializationStatus(pendingTransaction.to, 'INITIALIZED');
+                }
+
+                if (this.notificationId) {
+                  markFundRequestAsSent(this.notificationId);
                 }
               },
               null,

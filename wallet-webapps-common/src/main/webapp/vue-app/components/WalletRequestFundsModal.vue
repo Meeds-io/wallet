@@ -8,28 +8,9 @@
     max-width="100vw"
     draggable="true"
     @keydown.esc="dialog = false">
-    <v-btn
-      v-if="icon"
-      slot="activator"
-      :disabled="disabled"
-      class="bottomNavigationItem"
-      title="Request funds"
-      flat
-      value="request">
-      <span>
-        Request
-      </span>
-      <v-icon>
-        fa-comment-dollar
-      </v-icon>
-    </v-btn>
     <button
-      v-else
       slot="activator"
       class="btn ml-1 mt-2">
-      <v-icon>
-        reply
-      </v-icon>
       Request
     </button>
     <v-card class="elevation-12">
@@ -54,30 +35,14 @@
             required
             @item-selected="recipient = $event" />
   
-          <v-container
-            flat
-            fluid
-            grid-list-lg
-            class="mt-4 pl-2">
-            <v-layout row wrap>
-              <v-text-field
-                v-model.number="amount"
-                :disabled="loading"
-                name="amount"
-                label="Amount"
-                placeholder="Select a suggested amount to request funds" />
-  
-              <div id="requestFundsAccount" class="selectBoxVuetifyParent ml-1">
-                <v-combobox
-                  v-model="selectedOption"
-                  :items="accountsList"
-                  attach="#requestFundsAccount"
-                  label="Select currency"
-                  placeholder="Select a currency to use for requesting funds"
-                  cache-items />
-              </div>
-            </v-layout>
-          </v-container>
+          <v-text-field
+            v-model.number="amount"
+            :disabled="loading"
+            :rules="amoutRules"
+            name="amount"
+            label="Amount"
+            placeholder="Select a suggested amount to request funds"
+            class="mt-4" />
   
           <v-textarea
             id="requestMessage"
@@ -99,7 +64,8 @@
           class="btn btn-primary"
           @click="requestFunds">
           Send request
-        </button> <button
+        </button>
+        <button
           :disabled="loading"
           class="btn ml-2"
           @click="dialog = false">
@@ -121,77 +87,29 @@ export default {
     AddressAutoComplete,
   },
   props: {
-    icon: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
     walletAddress: {
       type: String,
       default: function() {
         return null;
       },
     },
-    accountsDetails: {
-      type: Object,
-      default: function() {
-        return {};
-      },
-    },
-    overviewAccounts: {
-      type: Array,
-      default: function() {
-        return [];
-      },
-    },
-    principalAccount: {
+    contractDetails: {
       type: String,
       default: function() {
         return null;
       },
     },
-    refreshIndex: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
   },
   data() {
     return {
-      selectedOption: null,
       recipient: null,
       amount: null,
       error: null,
       requestMessage: '',
       loading: false,
       dialog: false,
+      amoutRules: [(v) => !!v || 'Field is required', (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || 'Invalid amount'],
     };
-  },
-  computed: {
-    selectedAccount() {
-      return this.selectedOption && this.selectedOption.value;
-    },
-    accountsList() {
-      const accountsList = [];
-      if (this.accountsDetails && this.refreshIndex > 0) {
-        Object.keys(this.accountsDetails).forEach((key) => {
-          // Check list of accounts to display switch user preferences
-          const isContractOption = this.overviewAccounts.indexOf(key) > -1;
-          // Always allow to display ether option
-          // const isEtherOption = isContractOption || (key === this.walletAddress && (this.overviewAccounts.indexOf('ether') > -1 || this.overviewAccounts.indexOf('fiat') > -1));
-          const isEtherOption = isContractOption || key === this.walletAddress;
-          if (isContractOption || isEtherOption) {
-            accountsList.push({
-              text: this.accountsDetails[key].title,
-              value: this.accountsDetails[key],
-            });
-          }
-        });
-      }
-      return accountsList;
-    },
   },
   watch: {
     dialog() {
@@ -202,8 +120,6 @@ export default {
         if (this.$refs && this.$refs.autocomplete) {
           this.$refs.autocomplete.clear();
         }
-        const contractAddress = this.principalAccount === 'ether' || this.principalAccount === 'fiat' ? null : this.principalAccount;
-        this.selectedOption = this.accountsList.find((account) => account.value && account.value.address && ((account.value.isContract && account.value.address === contractAddress) || (!account.value.isContract && !contractAddress)));
         this.$nextTick(() => {
           setDraggable();
         });
@@ -212,7 +128,10 @@ export default {
   },
   methods: {
     requestFunds() {
-      if (!this.selectedAccount) {
+      if (!this.$refs.form.validate()) {
+        return;
+      }
+      if (!this.contractDetails) {
         this.error = 'Please select a valid account';
         return;
       }
@@ -234,7 +153,7 @@ export default {
           address: this.walletAddress,
           receipient: this.recipient.id,
           receipientType: this.recipient.type,
-          contract: this.selectedAccount.isContract ? this.selectedAccount.address : null,
+          contract: this.contractDetails && this.contractDetails.address,
           amount: this.amount,
           message: this.requestMessage,
         }),
