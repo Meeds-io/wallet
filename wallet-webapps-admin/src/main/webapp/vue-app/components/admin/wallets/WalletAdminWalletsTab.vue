@@ -42,13 +42,17 @@
           </v-btn-toggle>
         </v-flex>
         <v-flex md1 xs12 />
-        <v-flex md2 xs12>
-          <v-switch v-model="displayDisabledWallets" label="Disabled wallets" />
+        <v-flex md3 xs12>
+          <v-combobox
+            v-model="selectedWalletStatus"
+            :items="walletStatus"
+            label="Wallet Status"
+            single-line
+            chips
+            multiple
+            @change="log" />
         </v-flex>
-        <v-flex md2 xs12>
-          <v-switch v-model="displayDisapprovedWallets" label="Disapproved wallets" />
-        </v-flex>
-        <v-flex md1 xs12 />
+        <v-flex md2 xs12 />
         <v-flex md3 xs12>
           <v-text-field
             v-model="search"
@@ -386,7 +390,15 @@ export default {
           value: '',
         },
       ],
-      userTypes: ['users']
+      userTypes: ['users'],
+      walletStatus: [
+        //'Enabled',
+        'Disabled',
+        //'Approved',
+        'Disapproved',
+        //'Deleted'
+      ],
+      selectedWalletStatus: []
     };
   },
   computed: {
@@ -427,21 +439,31 @@ export default {
       return this.displayedWallets.length === this.limit;
     },
     displayedWallets() {
-      if (this.displayUsers && this.displayDisapprovedWallets && this.displaySpaces && this.displayDisabledWallets && this.displayAdmin && !this.search) {
-        return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
+      if (this.selectedWalletStatus.length === 0) {
+        if (this.displayUsers && this.displayDisapprovedWallets && this.displaySpaces && this.displayDisabledWallets && this.displayAdmin && !this.search) {
+          return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
+        } else {
+          return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
+        }
       } else {
-        return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
+        //TODO
+        return [];
       }
     },
     filteredWallets() {
-      if(this.displayedWallets && this.displayedWallets.length) {
-        const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
-        const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
-        this.wallets.forEach((wallet, index) => {
-          wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
-        });
-        return this.wallets.slice(0, limit);
+      if (this.selectedWalletStatus.length === 0) {
+        if(this.displayedWallets && this.displayedWallets.length) {
+          const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
+          const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
+          this.wallets.forEach((wallet, index) => {
+            wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+          });
+          return this.wallets.slice(0, limit);
+        } else {
+          return [];
+        }
       } else {
+        //TODO
         return [];
       }
     }
@@ -828,7 +850,7 @@ export default {
       } else if (this.confirmAction === 'initialize') {
         this.processTransaction(this.walletToProcess, this.confirmAction);
       }
-    },
+    }
   },
 };
 </script>
