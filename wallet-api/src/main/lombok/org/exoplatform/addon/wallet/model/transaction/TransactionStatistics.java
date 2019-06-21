@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.model;
+package org.exoplatform.addon.wallet.model.transaction;
 
 import java.util.ArrayList;
 import java.util.List;

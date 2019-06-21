@@ -23,12 +23,13 @@ import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
-import org.exoplatform.addon.wallet.model.TransactionStatistics;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -85,7 +86,6 @@ public class WalletTransactionREST implements ResourceContainer {
   /**
    * Get last pending transaction of an address
    * 
-   * @param networkId blockchain network id
    * @param address wallet address to retrieve its transactions
    * @return REST Response with the last pending transaction of an address
    */
@@ -93,12 +93,7 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getLastPendingTransactionSent")
   @RolesAllowed("users")
-  public Response getLastPendingTransactionSent(@QueryParam("networkId") long networkId,
-                                                @QueryParam("address") String address) {
-    if (networkId == 0) {
-      LOG.warn("Bad request sent to server with empty networkId {}", networkId);
-      return Response.status(400).build();
-    }
+  public Response getLastPendingTransactionSent(@QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();
@@ -106,8 +101,7 @@ public class WalletTransactionREST implements ResourceContainer {
 
     String currentUserId = getCurrentUserId();
     try {
-      TransactionDetail transactionDetail = transactionService.getAddressLastPendingTransactionSent(networkId,
-                                                                                                    address,
+      TransactionDetail transactionDetail = transactionService.getAddressLastPendingTransactionSent(address,
                                                                                                     currentUserId);
       return Response.ok(transactionDetail).build();
     } catch (IllegalAccessException e) {
@@ -120,7 +114,6 @@ public class WalletTransactionREST implements ResourceContainer {
   }
 
   /**
-   * @param networkId Blockchain network Id
    * @param contractAddress contract address
    * @param address wallet address
    * @param periodicity month / week
@@ -131,23 +124,17 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactionsAmounts")
   @RolesAllowed("users")
-  public Response getTransactionsAmounts(@QueryParam("networkId") long networkId,
-                                         @QueryParam("contractAddress") String contractAddress,
+  public Response getTransactionsAmounts(@QueryParam("contractAddress") String contractAddress,
                                          @QueryParam("address") String address,
                                          @QueryParam("periodicity") String periodicity,
                                          @QueryParam("lang") String lang) {
-    if (networkId == 0) {
-      LOG.warn("Bad request sent to server with empty networkId {}", networkId);
-      return Response.status(400).build();
-    }
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();
     }
 
     try {
-      TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(networkId,
-                                                                                                contractAddress,
+      TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(contractAddress,
                                                                                                 address,
                                                                                                 periodicity,
                                                                                                 new Locale(lang));
@@ -161,7 +148,6 @@ public class WalletTransactionREST implements ResourceContainer {
   /**
    * Get list of transactions of an address
    * 
-   * @param networkId blockchain network id
    * @param address wallet address to retrieve its transactions
    * @param contractAddress filtered contract address transactions
    * @param hash transaction hash to include in the returned list
@@ -176,18 +162,13 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactions")
   @RolesAllowed("users")
-  public Response getTransactions(@QueryParam("networkId") long networkId,
-                                  @QueryParam("address") String address,
+  public Response getTransactions(@QueryParam("address") String address,
                                   @QueryParam("contractAddress") String contractAddress,
                                   @QueryParam("contractMethodName") String contractMethodName,
                                   @QueryParam("hash") String hash,
                                   @QueryParam("limit") int limit,
                                   @QueryParam("pending") boolean onlyPending,
                                   @QueryParam("administration") boolean administration) {
-    if (networkId == 0) {
-      LOG.warn("Bad request sent to server with empty networkId {}", networkId);
-      return Response.status(400).build();
-    }
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();
@@ -195,8 +176,7 @@ public class WalletTransactionREST implements ResourceContainer {
 
     String currentUserId = getCurrentUserId();
     try {
-      List<TransactionDetail> transactionDetails = transactionService.getTransactions(networkId,
-                                                                                      address,
+      List<TransactionDetail> transactionDetails = transactionService.getTransactions(address,
                                                                                       contractAddress,
                                                                                       contractMethodName,
                                                                                       hash,

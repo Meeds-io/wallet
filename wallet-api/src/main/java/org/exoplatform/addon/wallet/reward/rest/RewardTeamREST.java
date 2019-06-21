@@ -7,7 +7,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.exoplatform.addon.wallet.reward.model.RewardTeam;
+import org.exoplatform.addon.wallet.model.reward.RewardTeam;
 import org.exoplatform.addon.wallet.reward.service.RewardTeamService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;

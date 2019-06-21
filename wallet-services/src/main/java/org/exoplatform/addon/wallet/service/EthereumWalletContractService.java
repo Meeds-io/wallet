@@ -4,8 +4,6 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -13,6 +11,7 @@ import org.json.JSONArray;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -24,23 +23,26 @@ import org.exoplatform.services.log.Log;
 
 public class EthereumWalletContractService implements WalletContractService, Startable {
 
-  private static final Log     LOG                                    =
-                                   ExoLogger.getLogger(EthereumWalletContractService.class);
+  private static final Log        LOG                                    =
+                                      ExoLogger.getLogger(EthereumWalletContractService.class);
 
-  private static final String  ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE =
-                                                                      "address parameter is mandatory";
+  private static final String     ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE = "address parameter is mandatory";
 
-  private ConfigurationManager configurationManager;
+  private ConfigurationManager    configurationManager;
 
-  private String               contractAbiPath;
+  private String                  contractAbiPath;
 
-  private JSONArray            contractAbi;
+  private JSONArray               contractAbi;
 
-  private String               contractBinaryPath;
+  private String                  contractBinaryPath;
 
-  private String               contractBinary;
+  private String                  contractBinary;
 
-  private SettingService       settingService;
+  private WalletService           walletService;
+
+  private WalletTokenAdminService walletTokenAdminService;
+
+  private SettingService          settingService;
 
   public EthereumWalletContractService(ConfigurationManager configurationManager, InitParams params) {
     this.configurationManager = configurationManager;
@@ -79,107 +81,46 @@ public class EthereumWalletContractService implements WalletContractService, Sta
   }
 
   @Override
-  public boolean isContract(String address, long networkId) {
-    return getContractDetail(address, networkId) != null;
+  public boolean isContract(String address) {
+    return getContractDetail(address) != null;
   }
 
   @Override
-  public void saveContract(ContractDetail contractDetail) {
-    if (StringUtils.isBlank(contractDetail.getAddress())) {
+  public void saveContractDetail(ContractDetail contractDetail) {
+    if (contractDetail == null) {
+      throw new IllegalArgumentException("contractDetail is mandatory");
+    }
+    String contractAddress = contractDetail.getAddress();
+    if (StringUtils.isBlank(contractAddress)) {
       throw new IllegalArgumentException(ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE);
     }
-    if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() == 0) {
-      throw new IllegalArgumentException("networkId parameter is mandatory");
-    }
 
-    String defaultContractsParamKey = WALLET_DEFAULT_CONTRACTS_NAME + contractDetail.getNetworkId();
-
-    String address = contractDetail.getAddress().toLowerCase();
-
+    String contractDetailString = toJsonString(contractDetail);
     getSettingService().set(WALLET_CONTEXT,
                             WALLET_SCOPE,
-                            address + contractDetail.getNetworkId(),
-                            SettingValue.create(contractDetail.toJSONString()));
-
-    if (contractDetail.isDefaultContract()) {
-      // Save the contract address in the list of default contract addreses
-      SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
-                                                                               WALLET_SCOPE,
-                                                                               defaultContractsParamKey);
-      String defaultContractsAddresses = defaultContractsAddressesValue == null ? address
-                                                                                : defaultContractsAddressesValue.getValue()
-                                                                                                                .toString()
-                                                                                    + "," + address;
-      getSettingService().set(WALLET_CONTEXT,
-                              WALLET_SCOPE,
-                              defaultContractsParamKey,
-                              SettingValue.create(defaultContractsAddresses));
-    }
+                            contractAddress,
+                            SettingValue.create(contractDetailString));
   }
 
   @Override
-  public boolean removeDefaultContract(String address, Long networkId) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn("Can't remove empty address for contract");
-      return false;
-    }
-    if (networkId == null || networkId == 0) {
-      LOG.warn("Can't remove empty network id for contract");
-      return false;
-    }
-
-    String defaultContractsParamKey = WALLET_DEFAULT_CONTRACTS_NAME + networkId;
-    final String defaultAddressToSave = address.toLowerCase();
-    SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
-                                                                             WALLET_SCOPE,
-                                                                             defaultContractsParamKey);
-    if (defaultContractsAddressesValue != null) {
-      String[] contractAddresses = defaultContractsAddressesValue.getValue().toString().split(",");
-      Set<String> contractAddressList = Arrays.stream(contractAddresses)
-                                              .filter(contractAddress -> !contractAddress.equalsIgnoreCase(defaultAddressToSave))
-                                              .collect(Collectors.toSet());
-      String contractAddressValue = StringUtils.join(contractAddressList, ",");
-
-      getSettingService().remove(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
-      getSettingService().set(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey, SettingValue.create(contractAddressValue));
-    }
-    return true;
-  }
-
-  @Override
-  public ContractDetail getContractDetail(String address, Long networkId) {
+  public ContractDetail getContractDetail(String address) {
     if (StringUtils.isBlank(address)) {
       return null;
     }
 
-    Set<String> defaultContracts = getDefaultContractsAddresses(networkId);
-    if (defaultContracts != null && !defaultContracts.contains(address)) {
-      return null;
-    }
-
-    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
+    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, address);
     if (contractDetailValue != null) {
-      return ContractDetail.parseStringToObject((String) contractDetailValue.getValue());
+      return fromJsonString((String) contractDetailValue.getValue(), ContractDetail.class);
     }
     return null;
   }
 
   @Override
-  public Set<String> getDefaultContractsAddresses(Long networkId) {
-    if (networkId == null || networkId == 0) {
-      return Collections.emptySet();
-    }
-
-    String defaultContractsParamKey = WALLET_DEFAULT_CONTRACTS_NAME + networkId;
-    SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
-                                                                             WALLET_SCOPE,
-                                                                             defaultContractsParamKey);
-    if (defaultContractsAddressesValue != null) {
-      String defaultContractsAddressesString = defaultContractsAddressesValue.getValue().toString().toLowerCase();
-      String[] contractAddresses = defaultContractsAddressesString.split(",");
-      return Arrays.stream(contractAddresses).map(String::toLowerCase).collect(Collectors.toSet());
-    }
-    return Collections.emptySet();
+  public void refreshContractDetail() {
+    GlobalSettings settings = getSettings();
+    String contractAddress = settings.getContractAddress();
+    ContractDetail contractDetail = getWalletTokenAdminService().loadContractDetailFromBlockchain(contractAddress);
+    getWalletService().setConfiguredContractDetail(contractDetail);
   }
 
   @Override
@@ -202,10 +143,25 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
   }
 
+  private WalletService getWalletService() {
+    if (walletService == null) {
+      walletService = CommonsUtils.getService(WalletService.class);
+    }
+    return walletService;
+  }
+
+  private WalletTokenAdminService getWalletTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return walletTokenAdminService;
+  }
+
   private SettingService getSettingService() {
     if (settingService == null) {
       settingService = CommonsUtils.getService(SettingService.class);
     }
     return settingService;
   }
+
 }

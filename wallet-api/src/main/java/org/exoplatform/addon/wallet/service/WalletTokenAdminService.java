@@ -2,8 +2,9 @@ package org.exoplatform.addon.wallet.service;
 
 import java.math.BigInteger;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 
 public interface WalletTokenAdminService {
 
@@ -79,5 +80,7 @@ public interface WalletTokenAdminService {
   String getContractAddress();
 
   void reinit();
+
+  ContractDetail loadContractDetailFromBlockchain(String contractAddress);
 
 }

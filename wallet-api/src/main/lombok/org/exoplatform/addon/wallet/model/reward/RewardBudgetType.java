@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.reward.model;
+package org.exoplatform.addon.wallet.model.reward;
 
 public enum RewardBudgetType {
   COMPUTED,

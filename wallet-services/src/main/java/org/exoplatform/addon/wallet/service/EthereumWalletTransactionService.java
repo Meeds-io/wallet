@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
@@ -58,13 +60,13 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   }
 
   @Override
-  public List<TransactionDetail> getPendingTransactions(long networkId) {
-    return transactionStorage.getPendingTransactions(networkId);
+  public List<TransactionDetail> getPendingTransactions() {
+    return transactionStorage.getPendingTransactions(getNetworkId());
   }
 
   @Override
-  public Set<String> getPendingTransactionHashes(long networkId) {
-    List<TransactionDetail> pendingTransactions = getPendingTransactions(networkId);
+  public Set<String> getPendingTransactionHashes() {
+    List<TransactionDetail> pendingTransactions = getPendingTransactions();
     if (pendingTransactions == null || pendingTransactions.isEmpty()) {
       return Collections.emptySet();
     }
@@ -72,8 +74,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   }
 
   @Override
-  public List<TransactionDetail> getTransactions(long networkId,
-                                                 String address,
+  public List<TransactionDetail> getTransactions(String address,
                                                  String contractAddress,
                                                  String contractMethodName,
                                                  String hash,
@@ -81,11 +82,10 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
                                                  boolean onlyPending,
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException {
-    if (contractService.isContract(address, networkId)) {
-      return getContractTransactions(networkId, address, contractMethodName, limit, currentUser);
+    if (contractService.isContract(address)) {
+      return getContractTransactions(address, contractMethodName, limit, currentUser);
     } else {
-      return getWalletTransactions(networkId,
-                                   address,
+      return getWalletTransactions(address,
                                    contractAddress,
                                    contractMethodName,
                                    hash,
@@ -97,8 +97,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   }
 
   @Override
-  public TransactionStatistics getTransactionStatistics(long networkId,
-                                                        String contractAddress,
+  public TransactionStatistics getTransactionStatistics(String contractAddress,
                                                         String address,
                                                         String periodicity,
                                                         Locale locale) {
@@ -154,14 +153,12 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneOffset.systemDefault());
       ZonedDateTime endDateTime = getEndDate(startDate, periodicity);
 
-      double receivedContractAmount = transactionStorage.countReceivedContractAmount(networkId,
-                                                                                     contractAddress,
+      double receivedContractAmount = transactionStorage.countReceivedContractAmount(contractAddress,
                                                                                      address,
                                                                                      startDateTime,
                                                                                      endDateTime);
       transactionStatistics.getIncome().add(String.valueOf(receivedContractAmount));
-      double sentContractAmount = transactionStorage.countSentContractAmount(networkId,
-                                                                             contractAddress,
+      double sentContractAmount = transactionStorage.countSentContractAmount(contractAddress,
                                                                              address,
                                                                              startDateTime,
                                                                              endDateTime);
@@ -176,8 +173,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   }
 
   @Override
-  public TransactionDetail getAddressLastPendingTransactionSent(long networkId,
-                                                                String address,
+  public TransactionDetail getAddressLastPendingTransactionSent(String address,
                                                                 String currentUser) throws IllegalAccessException {
     Wallet wallet = accountService.getWalletByAddress(address);
     if (wallet == null) {
@@ -186,7 +182,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     if (!canAccessWallet(wallet, currentUser)) {
       throw new IllegalAccessException("Can't access wallet with address " + address);
     }
-    return transactionStorage.getAddressLastPendingTransactionSent(networkId, address);
+    return transactionStorage.getAddressLastPendingTransactionSent(getNetworkId(), address);
   }
 
   @Override
@@ -226,12 +222,11 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     return pendingTransactionMaxDays;
   }
 
-  private List<TransactionDetail> getContractTransactions(Long networkId,
-                                                          String contractAddress,
+  private List<TransactionDetail> getContractTransactions(String contractAddress,
                                                           String contractMethodName,
                                                           int limit,
                                                           String currentUser) throws IllegalAccessException {
-    ContractDetail contractDetail = contractService.getContractDetail(contractAddress, networkId);
+    ContractDetail contractDetail = contractService.getContractDetail(contractAddress);
     if (contractDetail == null) {
       throw new IllegalStateException("Can't find contract with address " + contractAddress);
     }
@@ -241,16 +236,14 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
           + contractAddress);
     }
 
-    List<TransactionDetail> transactionDetails = transactionStorage.getContractTransactions(networkId,
-                                                                                            contractAddress,
+    List<TransactionDetail> transactionDetails = transactionStorage.getContractTransactions(contractAddress,
                                                                                             contractMethodName,
                                                                                             limit);
     transactionDetails.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail, currentUser));
     return transactionDetails;
   }
 
-  private List<TransactionDetail> getWalletTransactions(long networkId,
-                                                        String address,
+  private List<TransactionDetail> getWalletTransactions(String address,
                                                         String contractAddress,
                                                         String contractMethodName,
                                                         String hash,
@@ -266,7 +259,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       throw new IllegalAccessException("Can't access wallet with address " + address);
     }
 
-    List<TransactionDetail> transactionDetails = transactionStorage.getWalletTransactions(networkId,
+    List<TransactionDetail> transactionDetails = transactionStorage.getWalletTransactions(getNetworkId(),
                                                                                           address,
                                                                                           contractAddress,
                                                                                           contractMethodName,

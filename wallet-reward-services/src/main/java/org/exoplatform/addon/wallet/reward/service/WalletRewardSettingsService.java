@@ -24,13 +24,11 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
-import org.exoplatform.addon.wallet.reward.model.*;
-import org.exoplatform.addon.wallet.reward.service.RewardSettingsService;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.ws.frameworks.json.impl.JsonException;
 
 /**
  * A storage service to save/load reward transactions
@@ -67,12 +65,7 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
                                                                                            : settingsValue.getValue().toString();
 
-    RewardSettings storedRewardSettings;
-    try {
-      storedRewardSettings = fromJsonString(settingsValueString, RewardSettings.class);
-    } catch (JsonException e) {
-      throw new IllegalStateException("Unable to parse reward settings from database", e);
-    }
+    RewardSettings storedRewardSettings = fromJsonString(settingsValueString, RewardSettings.class);
     if (storedRewardSettings == null) {
       storedRewardSettings = new RewardSettings();
     }
@@ -128,12 +121,7 @@ public class WalletRewardSettingsService implements RewardSettingsService {
         }
       }
     }
-    String settingsString;
-    try {
-      settingsString = toJsonString(rewardSettingsToStore);
-    } catch (JsonException e) {
-      throw new IllegalStateException("Unable to parse reward settings to save on database", e);
-    }
+    String settingsString = toJsonString(rewardSettingsToStore);
     settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME, SettingValue.create(settingsString));
 
     // Purge cached settings

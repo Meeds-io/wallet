@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.reward.model;
+package org.exoplatform.addon.wallet.model.reward;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.decodeString;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.encodeString;
@@ -16,8 +16,6 @@ import lombok.EqualsAndHashCode.Exclude;
 public class RewardTransaction implements Serializable {
 
   private static final long serialVersionUID = 658273092293607458L;
-
-  private Long              networkId;
 
   private String            hash;
 

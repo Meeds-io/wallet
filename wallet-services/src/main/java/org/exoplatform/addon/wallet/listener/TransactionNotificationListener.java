@@ -21,8 +21,13 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
-import org.exoplatform.addon.wallet.model.*;
-import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionNotificationType;
+import org.exoplatform.addon.wallet.service.WalletAccountService;
+import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
@@ -45,13 +50,9 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
 
   private ExoContainer             container;
 
-  private WalletService            walletService;
-
   private WalletTransactionService transactionService;
 
   private WalletAccountService     walletAccountService;
-
-  private WalletContractService    contractService;
 
   public TransactionNotificationListener(PortalContainer container) {
     this.container = container;
@@ -72,17 +73,21 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
         // succeeded transaction
         return;
       }
+
       Wallet senderWallet = null;
       String senderAddress = transactionDetail.getFrom();
-      String principalContractAdminAddress = getWalletService().getSettings().getPrincipalContractAdminAddress();
+      GlobalSettings settings = getSettings();
+      ContractDetail contractDetail = settings.getContractDetail();
+      String contractAdminAddress = contractDetail == null ? null
+                                                           : contractDetail.getOwner();
       if (StringUtils.isNotBlank(senderAddress)) {
         senderWallet = getWalletAccountService().getWalletByAddress(senderAddress);
         if (senderWallet == null) {
           senderWallet = new Wallet();
           senderWallet.setAddress(senderAddress);
           senderWallet.setAvatar(LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
-          if (StringUtils.isNotBlank(principalContractAdminAddress)
-              && StringUtils.equalsIgnoreCase(principalContractAdminAddress, senderAddress)) {
+          if (StringUtils.isNotBlank(contractAdminAddress)
+              && StringUtils.equalsIgnoreCase(contractAdminAddress, senderAddress)) {
             senderWallet.setName(PRINCIPAL_CONTRACT_ADMIN_NAME);
           } else {
             senderWallet.setName(senderAddress);
@@ -98,8 +103,8 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
           receiverWallet = new Wallet();
           receiverWallet.setAddress(receiverAddress);
           receiverWallet.setAvatar(LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
-          if (StringUtils.isNotBlank(principalContractAdminAddress)
-              && StringUtils.equalsIgnoreCase(principalContractAdminAddress, receiverAddress)) {
+          if (StringUtils.isNotBlank(contractAdminAddress)
+              && StringUtils.equalsIgnoreCase(contractAdminAddress, receiverAddress)) {
             receiverWallet.setName(PRINCIPAL_CONTRACT_ADMIN_NAME);
           } else {
             receiverWallet.setName(receiverAddress);
@@ -109,11 +114,11 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
 
       if (senderWallet != null && senderWallet.getTechnicalId() > 0 && senderWallet.isEnabled() && !senderWallet.isDeletedUser()
           && !senderWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet);
+        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet, settings);
       }
       if (receiverWallet != null && receiverWallet.getTechnicalId() > 0 && receiverWallet.isEnabled()
           && !receiverWallet.isDeletedUser() && !receiverWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet);
+        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet, settings);
       }
     } catch (Exception e) {
       LOG.error("Error processing transaction notification {}", event.getData(), e);
@@ -125,7 +130,8 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
   private void sendNotification(TransactionDetail transactionDetail,
                                 TransactionNotificationType transactionStatus,
                                 Wallet senderWallet,
-                                Wallet receiverWallet) {
+                                Wallet receiverWallet,
+                                GlobalSettings settings) {
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
     ctx.append(HASH_PARAMETER, transactionDetail.getHash());
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, senderWallet);
@@ -137,23 +143,15 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
       ctx.append(CONTRACT_ADDRESS_PARAMETER, "");
       ctx.append(AMOUNT_PARAMETER, transactionDetail.getValue());
     } else {
-      ContractDetail contractDetails = getContractService().getContractDetail(transactionDetail.getContractAddress(),
-                                                                              transactionDetail.getNetworkId());
-      ctx.append(SYMBOL_PARAMETER, contractDetails.getSymbol());
-      ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetails.getAddress());
+      ContractDetail contractDetail = settings.getContractDetail();
+      ctx.append(SYMBOL_PARAMETER, contractDetail.getSymbol());
+      ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetail.getAddress());
       ctx.append(AMOUNT_PARAMETER, transactionDetail.getContractAmount());
     }
 
     // Notification type is determined automatically by
     // transactionStatus.getNotificationId()
     ctx.getNotificationExecutor().with(ctx.makeCommand(PluginKey.key(transactionStatus.getNotificationId()))).execute(ctx);
-  }
-
-  private WalletService getWalletService() {
-    if (walletService == null) {
-      walletService = CommonsUtils.getService(WalletService.class);
-    }
-    return walletService;
   }
 
   private WalletTransactionService getTransactionService() {
@@ -169,12 +167,4 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     }
     return walletAccountService;
   }
-
-  private WalletContractService getContractService() {
-    if (contractService == null) {
-      contractService = CommonsUtils.getService(WalletContractService.class);
-    }
-    return contractService;
-  }
-
 }

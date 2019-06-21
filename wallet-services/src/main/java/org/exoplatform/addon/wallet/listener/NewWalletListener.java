@@ -34,11 +34,11 @@ import org.exoplatform.services.listener.*;
 @Asynchronous
 public class NewWalletListener extends Listener<Wallet, Wallet> {
 
-  private WalletAccountService          walletAccountService;
+  private WalletAccountService    walletAccountService;
 
   private WalletTokenAdminService tokenTransactionService;
 
-  private ExoContainer                  container;
+  private ExoContainer            container;
 
   public NewWalletListener(PortalContainer container) {
     this.container = container;

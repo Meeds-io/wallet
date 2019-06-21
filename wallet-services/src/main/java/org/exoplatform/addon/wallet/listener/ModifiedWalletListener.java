@@ -18,7 +18,9 @@ package org.exoplatform.addon.wallet.listener;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.WalletInitializationState;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;

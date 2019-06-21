@@ -18,7 +18,7 @@ package org.exoplatform.addon.wallet.task.service;
 
 import java.util.Set;
 
-import org.exoplatform.addon.wallet.task.model.WalletAdminTask;
+import org.exoplatform.addon.wallet.model.task.WalletAdminTask;
 
 /**
  * A storage service to save/load wallet admin tasks

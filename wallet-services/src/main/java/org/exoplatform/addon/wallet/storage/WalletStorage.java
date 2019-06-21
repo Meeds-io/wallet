@@ -20,8 +20,8 @@ import org.exoplatform.web.security.codec.AbstractCodec;
 import org.exoplatform.web.security.codec.CodecInitializer;
 import org.exoplatform.web.security.security.TokenServiceInitializationException;
 
-public class AccountStorage {
-  private static final Log    LOG = ExoLogger.getLogger(AccountStorage.class);
+public class WalletStorage {
+  private static final Log    LOG = ExoLogger.getLogger(WalletStorage.class);
 
   private WalletAccountDAO    walletAccountDAO;
 
@@ -29,7 +29,7 @@ public class AccountStorage {
 
   private AbstractCodec       codec;
 
-  public AccountStorage(WalletAccountDAO walletAccountDAO, WalletPrivateKeyDAO privateKeyDAO, CodecInitializer codecInitializer) {
+  public WalletStorage(WalletAccountDAO walletAccountDAO, WalletPrivateKeyDAO privateKeyDAO, CodecInitializer codecInitializer) {
     this.walletAccountDAO = walletAccountDAO;
     this.privateKeyDAO = privateKeyDAO;
 
@@ -165,10 +165,10 @@ public class AccountStorage {
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
+    wallet.setHasPrivateKey(walletEntity.getPrivateKey() != null);
 
     Identity identity = getIdentityById(walletEntity.getId());
     computeWalletFromIdentity(wallet, identity);
-    wallet.setHasKeyOnServerSide(walletEntity.getPrivateKey() != null);
     return wallet;
   }
 

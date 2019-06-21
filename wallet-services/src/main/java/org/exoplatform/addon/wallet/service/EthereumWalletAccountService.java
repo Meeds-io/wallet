@@ -13,8 +13,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
-import org.exoplatform.addon.wallet.storage.AccountStorage;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
+import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
@@ -37,7 +37,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private WalletTokenAdminService tokenAdminService;
 
-  private AccountStorage          accountStorage;
+  private WalletStorage           accountStorage;
 
   private AddressLabelStorage     labelStorage;
 
@@ -45,7 +45,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private String                  adminAccountPassword;
 
-  public EthereumWalletAccountService(AccountStorage walletAccountStorage,
+  public EthereumWalletAccountService(WalletStorage walletAccountStorage,
                                       AddressLabelStorage labelStorage,
                                       InitParams params) {
     this.accountStorage = walletAccountStorage;
@@ -403,7 +403,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
   }
 
   @Override
-  public AddressLabel saveOrDeleteAddressLabel(AddressLabel label, String currentUser) {
+  public WalletAddressLabel saveOrDeleteAddressLabel(WalletAddressLabel label, String currentUser) {
     if (label == null) {
       throw new IllegalArgumentException("Label is empty");
     }
@@ -413,7 +413,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
       if (identity == null) {
         throw new IllegalStateException("Can't find identity of user " + currentUser);
       }
-      AddressLabel storedLabel = labelStorage.getLabel(labelId);
+      WalletAddressLabel storedLabel = labelStorage.getLabel(labelId);
       if (storedLabel == null) {
         label.setId(0);
       } else if (!StringUtils.equals(identity.getId(), String.valueOf(storedLabel.getIdentityId()))) {
@@ -436,7 +436,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
   }
 
   @Override
-  public Set<AddressLabel> getAddressesLabelsVisibleBy(String currentUser) {
+  public Set<WalletAddressLabel> getAddressesLabelsVisibleBy(String currentUser) {
     if (!isUserAdmin(currentUser)) {
       return Collections.emptySet();
     }

@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.addon.wallet.entity.TransactionEntity;
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -39,12 +39,10 @@ public class TransactionStorage {
                                 : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
   }
 
-  public List<TransactionDetail> getContractTransactions(long networkId,
-                                                         String contractAddress,
+  public List<TransactionDetail> getContractTransactions(String contractAddress,
                                                          String contractMethodName,
                                                          int limit) {
-    List<TransactionEntity> transactions = walletTransactionDAO.getContractTransactions(networkId,
-                                                                                        StringUtils.lowerCase(contractAddress),
+    List<TransactionEntity> transactions = walletTransactionDAO.getContractTransactions(StringUtils.lowerCase(contractAddress),
                                                                                         contractMethodName,
                                                                                         limit);
     return transactions == null ? Collections.emptyList()
@@ -115,20 +113,18 @@ public class TransactionStorage {
    * @param startDate
    * @param endDate
    */
-  public double countReceivedContractAmount(long networkId,
-                                            String contractAddress,
+  public double countReceivedContractAmount(String contractAddress,
                                             String address,
                                             ZonedDateTime startDate,
                                             ZonedDateTime endDate) {
-    return walletTransactionDAO.countReceivedContractAmount(networkId, contractAddress, address, startDate, endDate);
+    return walletTransactionDAO.countReceivedContractAmount(contractAddress, address, startDate, endDate);
   }
 
-  public double countSentContractAmount(long networkId,
-                                        String contractAddress,
+  public double countSentContractAmount(String contractAddress,
                                         String address,
                                         ZonedDateTime startDate,
                                         ZonedDateTime endDate) {
-    return walletTransactionDAO.countSentContractAmount(networkId, contractAddress, address, startDate, endDate);
+    return walletTransactionDAO.countSentContractAmount(contractAddress, address, startDate, endDate);
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {
@@ -149,7 +145,7 @@ public class TransactionStorage {
       entity.setCreatedDate(entity.getCreatedDate() * 1000);
       walletTransactionDAO.update(entity);
     }
-    // FIXME workaround to update ether amount that was stored in milliseconds // NOSONAR
+    // FIXME workaround to update amount that was stored in WEI // NOSONAR
     if (entity.getValue() > 10000L && (StringUtils.isBlank(entity.getContractAddress())
         || StringUtils.isBlank(entity.getContractMethodName())
         || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_INITIALIZEACCOUNT)

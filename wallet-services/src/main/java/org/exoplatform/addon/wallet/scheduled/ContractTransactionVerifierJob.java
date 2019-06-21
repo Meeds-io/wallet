@@ -8,7 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
@@ -29,10 +31,6 @@ public class ContractTransactionVerifierJob implements Job {
 
   private EthereumTransactionDecoder ethereumTransactionDecoder;
 
-  private WalletService              walletService;
-
-  private WalletContractService      contractService;
-
   private WalletTransactionService   transactionService;
 
   private SettingService             settingService;
@@ -51,22 +49,27 @@ public class ContractTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      GlobalSettings settings = getWalletService().getSettings();
-      if (settings == null || settings.getDefaultNetworkId() == null) {
-        LOG.debug("Empty network id on settings, ignore blockchain listening");
+      GlobalSettings settings = getSettings();
+      if (settings == null) {
+        LOG.debug("Empty settings, skip contract transaction verification");
         return;
       }
-      String wsURL = settings.getWebsocketProviderURL();
+      long networkId = settings.getNetwork().getId();
+      if (settings.getNetwork().getId() == 0) {
+        LOG.debug("Empty network id in settings, skip contract transaction verification");
+        return;
+      }
+      String wsURL = settings.getNetwork().getWebsocketProviderURL();
       if (StringUtils.isBlank(wsURL)) {
-        LOG.debug("Empty Websocket URL, skip contract transaction verification");
+        LOG.debug("Empty Websocket URL in settings, skip contract transaction verification");
         return;
       }
-      Long networkId = settings.getDefaultNetworkId();
-      Set<String> defaultContractsAddresses = getContractService().getDefaultContractsAddresses(networkId);
-      if (defaultContractsAddresses == null || defaultContractsAddresses.isEmpty()) {
-        LOG.debug("Empty contracts list in settings");
+      ContractDetail contractDetail = settings.getContractDetail();
+      if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress())) {
+        LOG.debug("Empty token address in settings, skip contract transaction verification");
         return;
       }
+
       long lastEthereumBlockNumber = getEthereumClientConnector().getLastestBlockNumber();
       long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
       if (lastEthereumBlockNumber <= lastWatchedBlockNumber) {
@@ -77,68 +80,66 @@ public class ContractTransactionVerifierJob implements Job {
       }
 
       boolean processed = true;
-      for (String contractAddress : defaultContractsAddresses) {
-        Set<String> transactionHashes = getEthereumClientConnector().getContractTransactions(contractAddress,
-                                                                                             lastWatchedBlockNumber,
-                                                                                             lastEthereumBlockNumber);
+      String contractAddress = contractDetail.getAddress();
+      Set<String> transactionHashes = getEthereumClientConnector().getContractTransactions(contractAddress,
+                                                                                           lastWatchedBlockNumber,
+                                                                                           lastEthereumBlockNumber);
 
-        LOG.debug("{} transactions has been found on contract {} between block {} and {}",
-                  transactionHashes.size(),
-                  contractAddress,
-                  lastWatchedBlockNumber,
-                  lastEthereumBlockNumber);
+      LOG.debug("{} transactions has been found on contract {} between block {} and {}",
+                transactionHashes.size(),
+                contractAddress,
+                lastWatchedBlockNumber,
+                lastEthereumBlockNumber);
 
-        ContractDetail contractDetail = getContractService().getContractDetail(contractAddress, networkId);
-        int addedTransactionsCount = 0;
-        int modifiedTransactionsCount = 0;
-        for (String transactionHash : transactionHashes) {
-          TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
-          if (transactionDetail == null) {
-            processed = processTransaction(networkId, transactionHash, contractDetail) && processed;
-            if (processed) {
-              addedTransactionsCount++;
-            }
-          } else {
-            LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
-            boolean changed = false;
+      int addedTransactionsCount = 0;
+      int modifiedTransactionsCount = 0;
+      for (String transactionHash : transactionHashes) {
+        TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+        if (transactionDetail == null) {
+          processed = processTransaction(networkId, transactionHash, contractDetail) && processed;
+          if (processed) {
+            addedTransactionsCount++;
+          }
+        } else {
+          LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
+          boolean changed = false;
 
-            // Verify that the transaction has been decoded
-            if (StringUtils.isBlank(transactionDetail.getContractAddress())
-                || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
-              transactionDetail.setContractAddress(contractAddress);
-              getEthereumTransactionDecoder().computeTransactionDetail(transactionDetail, contractDetail);
-              changed = true;
-            }
+          // Verify that the transaction has been decoded
+          if (StringUtils.isBlank(transactionDetail.getContractAddress())
+              || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
+            transactionDetail.setContractAddress(contractAddress);
+            getEthereumTransactionDecoder().computeTransactionDetail(transactionDetail, contractDetail);
+            changed = true;
+          }
 
-            // Broadcast event and send notifications when the transaction was
-            // marked as pending
-            boolean braodcastSavingTransaction = transactionDetail.isPending();
-            transactionDetail.setPending(false);
-            changed = changed || braodcastSavingTransaction;
+          // Broadcast event and send notifications when the transaction was
+          // marked as pending
+          boolean braodcastSavingTransaction = transactionDetail.isPending();
+          transactionDetail.setPending(false);
+          changed = changed || braodcastSavingTransaction;
 
-            // If the transaction wasn't marked as succeeded, try to verify the
-            // status from Blockchain again
-            if (!transactionDetail.isSucceeded()) {
-              TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-              transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
-              changed = true;
-            }
+          // If the transaction wasn't marked as succeeded, try to verify the
+          // status from Blockchain again
+          if (!transactionDetail.isSucceeded()) {
+            TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
+            transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+            changed = true;
+          }
 
-            // Save decoded transaction details after chaging its attributes
-            if (changed) {
-              getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
-              modifiedTransactionsCount++;
-            }
+          // Save decoded transaction details after chaging its attributes
+          if (changed) {
+            getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
+            modifiedTransactionsCount++;
           }
         }
-
-        LOG.debug("{} added and {} modified transactions has been stored using contract {} between block {} and {}",
-                  addedTransactionsCount,
-                  modifiedTransactionsCount,
-                  contractAddress,
-                  lastWatchedBlockNumber,
-                  lastEthereumBlockNumber);
       }
+
+      LOG.debug("{} added and {} modified transactions has been stored using contract {} between block {} and {}",
+                addedTransactionsCount,
+                modifiedTransactionsCount,
+                contractAddress,
+                lastWatchedBlockNumber,
+                lastEthereumBlockNumber);
 
       if (processed) {
         // Save last verified block for contracts transactions
@@ -191,25 +192,11 @@ public class ContractTransactionVerifierJob implements Job {
                             SettingValue.create(lastWatchedBlockNumber));
   }
 
-  private WalletService getWalletService() {
-    if (walletService == null) {
-      walletService = CommonsUtils.getService(WalletService.class);
-    }
-    return walletService;
-  }
-
   private WalletTransactionService getTransactionService() {
     if (transactionService == null) {
       transactionService = CommonsUtils.getService(WalletTransactionService.class);
     }
     return transactionService;
-  }
-
-  private WalletContractService getContractService() {
-    if (contractService == null) {
-      contractService = CommonsUtils.getService(WalletContractService.class);
-    }
-    return contractService;
   }
 
   private EthereumTransactionDecoder getEthereumTransactionDecoder() {

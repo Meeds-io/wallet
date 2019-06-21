@@ -26,7 +26,7 @@ import org.web3j.protocol.websocket.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.exoplatform.addon.wallet.model.GlobalSettings;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -86,30 +86,6 @@ public class EthereumClientConnectorForTransaction {
   }
 
   /**
-   * Change currently used globalSettings and re-init
-   * 
-   * @param newGlobalSettings newly saved global settings
-   */
-  public void changeSettings(GlobalSettings newGlobalSettings) {
-    if (newGlobalSettings == null) {
-      throw new IllegalArgumentException("GlobalSettings argument is mandatory");
-    }
-    if (this.globalSettings == null) {
-      // not yet initialized
-      return;
-    }
-    GlobalSettings oldGlobalSettings = this.globalSettings;
-    this.globalSettings = newGlobalSettings;
-
-    // If web socket connection changed, then close current connection and let
-    // the executor job re-init a new one
-    if (StringUtils.isBlank(newGlobalSettings.getWebsocketProviderURL())
-        || !StringUtils.equals(newGlobalSettings.getWebsocketProviderURL(), oldGlobalSettings.getWebsocketProviderURL())) {
-      resetConnection();
-    }
-  }
-
-  /**
    * @return true if the connection to the blockchain is established
    */
   public boolean isConnected() {
@@ -142,7 +118,7 @@ public class EthereumClientConnectorForTransaction {
   }
 
   private String getWebsocketProviderURL() {
-    return globalSettings == null ? null : globalSettings.getWebsocketProviderURL();
+    return globalSettings == null ? null : globalSettings.getNetwork().getWebsocketProviderURL();
   }
 
   private void resetConnection() {

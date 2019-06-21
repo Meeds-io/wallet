@@ -42,8 +42,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
   private static final String NETWORK_ID_PARAM           = "networkId";
 
-  public List<TransactionEntity> getContractTransactions(long networkId,
-                                                         String contractAddress,
+  public List<TransactionEntity> getContractTransactions(String contractAddress,
                                                          String contractMethodName,
                                                          int limit) {
     contractAddress = StringUtils.lowerCase(contractAddress);
@@ -55,7 +54,6 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
     TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery(queryName,
                                                                               TransactionEntity.class);
-    query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, contractAddress.toLowerCase());
     if (StringUtils.isNotBlank(contractMethodName)) {
       query.setParameter(CONTRACT_METHOD_NAME_PARAM, contractMethodName);
@@ -142,14 +140,12 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
-  public double countReceivedContractAmount(long networkId,
-                                            String contractAddress,
+  public double countReceivedContractAmount(String contractAddress,
                                             String address,
                                             ZonedDateTime startDate,
                                             ZonedDateTime endDate) {
     TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countReceivedContractAmount",
                                                                    Double.class);
-    query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
     query.setParameter(START_DATE, toMilliSeconds(startDate));
@@ -158,14 +154,12 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return result == null ? 0 : result;
   }
 
-  public double countSentContractAmount(long networkId,
-                                        String contractAddress,
+  public double countSentContractAmount(String contractAddress,
                                         String address,
                                         ZonedDateTime startDate,
                                         ZonedDateTime endDate) {
     TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countSentContractAmount",
                                                                    Double.class);
-    query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
     query.setParameter(START_DATE, toMilliSeconds(startDate));

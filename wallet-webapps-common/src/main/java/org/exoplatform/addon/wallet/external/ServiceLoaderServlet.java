@@ -12,9 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
-import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -63,9 +61,6 @@ public class ServiceLoaderServlet extends HttpServlet {
                                             service);
         service.start();
         LOG.debug("EthereumWalletTokenAdminService instance created.");
-
-        ListenerService listenerService = CommonsUtils.getService(ListenerService.class);
-        listenerService.addListener("exo.addon.wallet.settings.changed", new GlobalSettingsModificationListener(web3jConnector));
       } catch (Exception e) {
         LOG.warn("Can't create service with class EthereumWalletTokenAdminService", e);
       } finally {

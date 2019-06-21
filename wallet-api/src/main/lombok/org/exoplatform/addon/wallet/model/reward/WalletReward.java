@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.reward.model;
+package org.exoplatform.addon.wallet.model.reward;
 
 import java.io.Serializable;
 import java.util.Set;

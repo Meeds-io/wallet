@@ -29,6 +29,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.*;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
+import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
@@ -74,38 +77,35 @@ public class WalletUtils {
   public static final String                          EMPTY_HASH                            =
                                                                  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-  public static final String                          DEFAULT_NETWORK_ID                    = "defaultNetworkId";
+  public static final String                          NETWORK_ID                            = "networkId";
 
-  public static final String                          DEFAULT_NETWORK_URL                   = "defaultNetworkURL";
+  public static final String                          NETWORK_URL                           = "networkURL";
 
-  public static final String                          DEFAULT_NETWORK_WS_URL                = "defaultNetworkWSURL";
+  public static final String                          NETWORK_WS_URL                        = "networkWSURL";
 
-  public static final String                          DEFAULT_ACCESS_PERMISSION             = "defaultAccessPermission";
+  public static final String                          ACCESS_PERMISSION                     = "accessPermission";
 
-  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME            =
-                                                                                 "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
+  public static final String                          TOKEN_ADDRESS                         = "tokenAddress";
 
-  public static final String                          DEFAULT_GAS                           = "defaultGas";
+  public static final String                          GAS_LIMIT                             = "gasLimit";
 
-  public static final String                          MIN_GAS_PRICE                         = "minGasPrice";
+  public static final String                          MIN_GAS_PRICE                         = "cheapGasPrice";
 
   public static final String                          NORMAL_GAS_PRICE                      = "normalGasPrice";
 
-  public static final String                          MAX_GAS_PRICE                         = "maxGasPrice";
+  public static final String                          MAX_GAS_PRICE                         = "fastGasPrice";
 
-  public static final String                          DEFAULT_CONTRACTS_ADDRESSES           = "defaultContractAddresses";
+  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME            = "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
 
   public static final String                          SCOPE_NAME                            = "ADDONS_ETHEREUM_WALLET";
 
-  public static final String                          GLOBAL_SETTINGS_KEY_NAME              = "GLOBAL_SETTINGS";
+  public static final String                          INITIAL_FUNDS_KEY_NAME                = "INITIAL_FUNDS";
 
   public static final String                          SETTINGS_KEY_NAME                     = "ADDONS_ETHEREUM_WALLET_SETTINGS";
 
   public static final Context                         WALLET_CONTEXT                        = Context.GLOBAL;
 
   public static final Scope                           WALLET_SCOPE                          = Scope.APPLICATION.id(SCOPE_NAME);
-
-  public static final String                          WALLET_DEFAULT_CONTRACTS_NAME         = "WALLET_DEFAULT_CONTRACTS";
 
   public static final String                          WALLET_USER_TRANSACTION_NAME          = "WALLET_USER_TRANSACTION";
 
@@ -117,14 +117,6 @@ public class WalletUtils {
 
   public static final String                          BIN_PATH_PARAMETER                    = "contract.bin.path";
 
-  public static final int                             GLOBAL_DATA_VERSION                   = 6;
-
-  public static final int                             USER_DATA_VERSION                     = 1;
-
-  public static final int                             DEFAULT_GAS_UPGRADE_VERSION           = 1;
-
-  public static final int                             DEFAULT_GAS_PRICE_UPGRADE_VERSION     = 1;
-
   public static final String                          ADMINISTRATORS_GROUP                  = "/platform/administrators";
 
   public static final String                          REWARDINGS_GROUP                      = "/platform/rewarding";
@@ -132,9 +124,6 @@ public class WalletUtils {
   public static final String                          WALLET_ADMIN_REMOTE_ID                = "admin";
 
   public static final String                          PRINCIPAL_CONTRACT_ADMIN_NAME         = "Admin";
-
-  public static final String                          GLOAL_SETTINGS_CHANGED_EVENT          =
-                                                                                   "exo.addon.wallet.settings.changed";
 
   public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT          =
                                                                                    "exo.addon.wallet.addressAssociation.new";
@@ -577,20 +566,27 @@ public class WalletUtils {
       return;
     }
     wallet.setPassPhrase(null);
-    wallet.setHasKeyOnServerSide(false);
   }
 
-  public static final <T> T fromJsonString(String value, Class<T> resultClass) throws JsonException {
-    if (StringUtils.isBlank(value)) {
-      return null;
+  public static final <T> T fromJsonString(String value, Class<T> resultClass) {
+    try {
+      if (StringUtils.isBlank(value)) {
+        return null;
+      }
+      JsonDefaultHandler jsonDefaultHandler = new JsonDefaultHandler();
+      JSON_PARSER.parse(new ByteArrayInputStream(value.getBytes()), jsonDefaultHandler);
+      return ObjectBuilder.createObject(resultClass, jsonDefaultHandler.getJsonObject());
+    } catch (JsonException e) {
+      throw new IllegalStateException("Error creating object from string : " + value, e);
     }
-    JsonDefaultHandler jsonDefaultHandler = new JsonDefaultHandler();
-    JSON_PARSER.parse(new ByteArrayInputStream(value.getBytes()), jsonDefaultHandler);
-    return ObjectBuilder.createObject(resultClass, jsonDefaultHandler.getJsonObject());
   }
 
-  public static final String toJsonString(Object object) throws JsonException {
-    return JSON_GENERATOR.createJsonObject(object).toString();
+  public static final String toJsonString(Object object) {
+    try {
+      return JSON_GENERATOR.createJsonObject(object).toString();
+    } catch (JsonException e) {
+      throw new IllegalStateException("Error parsing object to string " + object, e);
+    }
   }
 
   public static final BigInteger convertToDecimals(double amount, int decimals) {
@@ -599,6 +595,19 @@ public class WalletUtils {
 
   public static final double convertFromDecimals(BigInteger amount, int decimals) {
     return BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
+  }
+
+  public static final GlobalSettings getSettings() {
+    return getWalletService().getSettings();
+  }
+
+  public static final long getNetworkId() {
+    GlobalSettings settings = getSettings();
+    return settings == null ? 0 : settings.getNetwork().getId();
+  }
+
+  private static final WalletService getWalletService() {
+    return CommonsUtils.getService(WalletService.class);
   }
 
 }

@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.exoplatform.addon.wallet.reward.model.WalletReward;
+import org.exoplatform.addon.wallet.model.reward.WalletReward;
 import org.exoplatform.addon.wallet.reward.service.RewardService;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.services.log.ExoLogger;

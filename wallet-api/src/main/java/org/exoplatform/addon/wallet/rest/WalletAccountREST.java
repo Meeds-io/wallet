@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.services.log.ExoLogger;
@@ -212,7 +213,7 @@ public class WalletAccountREST implements ResourceContainer {
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveAddress")
   @RolesAllowed("users")
-  public Response saveAddress(Wallet wallet) {
+  public Response saveWallet(Wallet wallet) {
     if (wallet == null) {
       LOG.warn("Bad request sent to server with empty data");
       return Response.status(400).build();
@@ -239,53 +240,6 @@ public class WalletAccountREST implements ResourceContainer {
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving address: User " + currentUserId + " attempts to save address of "
           + wallet.getType() + " '" + wallet.getId() + "' using address " + wallet.getAddress(), e);
-      return Response.status(500).build();
-    }
-  }
-
-  /**
-   * Creates admin account wallet in server side
-   * 
-   * @param privateKey admin account wallet private key
-   * @return Rest Response with operation status
-   */
-  @POST
-  @Path("createAdminAccount")
-  @RolesAllowed("administrators")
-  public Response createAdminAccount(@FormParam("privateKey") String privateKey) {
-    String currentUserId = getCurrentUserId();
-    LOG.info("User '{}' is creating admin account wallet", currentUserId);
-    try {
-      accountService.createAdminAccount(privateKey, currentUserId);
-      return Response.ok().build();
-    } catch (IllegalAccessException e) {
-      LOG.warn("Error creating admin account wallet by user '{}'", currentUserId, e);
-      return Response.status(403).build();
-    } catch (Exception e) {
-      LOG.error("Error creating admin account wallet by user '{}'", currentUserId, e);
-      return Response.status(500).build();
-    }
-  }
-
-  /**
-   * Removes admin account wallet from server
-   * 
-   * @return Rest Response with operation status
-   */
-  @GET
-  @Path("removeAdminWallet")
-  @RolesAllowed("administrators")
-  public Response removeAdminWallet() {
-    String currentUserId = getCurrentUserId();
-    LOG.info("User '{}' is removing admin account wallet", currentUserId);
-    try {
-      accountService.removeWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID, currentUserId);
-      return Response.ok().build();
-    } catch (IllegalAccessException e) {
-      LOG.warn("Error removing admin account wallet by user '{}'", currentUserId, e);
-      return Response.status(403).build();
-    } catch (Exception e) {
-      LOG.error("Error removing admin account wallet by user '{}'", currentUserId, e);
       return Response.status(500).build();
     }
   }
@@ -428,7 +382,7 @@ public class WalletAccountREST implements ResourceContainer {
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveOrDeleteAddressLabel")
   @RolesAllowed({ "administrators", "rewarding" })
-  public Response saveOrDeleteAddressLabel(AddressLabel label) {
+  public Response saveOrDeleteAddressLabel(WalletAddressLabel label) {
     if (label == null) {
       LOG.warn("Bad request sent to server with empty data");
       return Response.status(400).build();
@@ -439,37 +393,6 @@ public class WalletAccountREST implements ResourceContainer {
       return Response.ok(label).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving address label: User " + getCurrentUserId() + ", label: {}", label, e);
-      return Response.status(500).build();
-    }
-  }
-
-  /**
-   * Save Wallet preferences
-   * 
-   * @param preferences wallet preferences to save
-   * @return Rest Response of request
-   */
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("savePreferences")
-  @RolesAllowed("users")
-  public Response savePreferences(WalletPreferences preferences) {
-    if (preferences == null) {
-      LOG.warn("Bad request sent to server with empty preferenes");
-      return Response.status(400).build();
-    }
-    Long defaultGas = preferences.getDefaultGas();
-    if (defaultGas == null || defaultGas == 0) {
-      LOG.warn("Bad request sent to server with invalid preferenes defaultGas '{}'", defaultGas);
-      return Response.status(400).build();
-    }
-
-    LOG.debug("Saving user preferences '{}'", getCurrentUserId());
-    try {
-      walletService.saveUserPreferences(getCurrentUserId(), preferences);
-      return Response.ok().build();
-    } catch (Exception e) {
-      LOG.error("Unknown error occurred while saving user preferences '" + getCurrentUserId() + "'", e);
       return Response.status(500).build();
     }
   }

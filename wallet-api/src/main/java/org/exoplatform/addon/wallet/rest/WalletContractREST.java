@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.service.WalletContractService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -45,34 +44,6 @@ public class WalletContractREST implements ResourceContainer {
 
   public WalletContractREST(WalletContractService contractService) {
     this.contractService = contractService;
-  }
-
-  /**
-   * Return saved contract details by address
-   * 
-   * @param address token contract address
-   * @param networkId token contract blockchain network id
-   * @return REST Response with contract details
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("getContract")
-  @RolesAllowed("users")
-  public Response getContract(@QueryParam("address") String address, @QueryParam("networkId") Long networkId) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn("Empty contract address");
-      return Response.status(400).build();
-    }
-    try {
-      ContractDetail contractDetail = contractService.getContractDetail(address, networkId);
-      if (contractDetail == null) {
-        contractDetail = new ContractDetail();
-      }
-      return Response.ok(contractDetail).build();
-    } catch (Exception e) {
-      LOG.warn("Error getting contract details: " + address + " on network with id " + networkId, e);
-      return Response.serverError().build();
-    }
   }
 
   /**
@@ -139,58 +110,15 @@ public class WalletContractREST implements ResourceContainer {
    */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  @Path("save")
+  @Path("refresh")
   @RolesAllowed("administrators")
-  public Response saveContract(ContractDetail contractDetail) {
-    if (contractDetail == null) {
-      LOG.warn("Can't save empty contract");
-      return Response.status(400).build();
-    }
-    if (contractDetail.getAddress() == null) {
-      LOG.warn("Can't save empty address for contract");
-      return Response.status(400).build();
-    }
-    if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() == 0) {
-      LOG.warn("Can't remove empty network id for contract");
-      return Response.status(400).build();
-    }
-    contractDetail.setAddress(contractDetail.getAddress().toLowerCase());
+  public Response refreshContract() {
     try {
-      contractService.saveContract(contractDetail);
-      LOG.info("{} saved contract details '{}'", getCurrentUserId(), contractDetail.toJSONString());
+      contractService.refreshContractDetail();
+      LOG.info("User {} is refreshing Token from blockchain", getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error saving contract as default: " + contractDetail.getAddress(), e);
-      return Response.serverError().build();
-    }
-  }
-
-  /**
-   * Removes a contract address from default contracts displayed in wallet of
-   * all users
-   * 
-   * @param address cotnract address to remove
-   * @param networkId blockchain network id where contract is deployed
-   * @return REST response with status
-   */
-  @POST
-  @Path("remove")
-  @RolesAllowed("administrators")
-  public Response removeContract(@FormParam("address") String address, @FormParam("networkId") Long networkId) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn("Can't remove empty address for contract");
-      return Response.status(400).build();
-    }
-    if (networkId == null || networkId == 0) {
-      LOG.warn("Can't remove empty network id for contract");
-      return Response.status(400).build();
-    }
-    try {
-      contractService.removeDefaultContract(address.toLowerCase(), networkId);
-      LOG.info("{} removed contract details '{}'", getCurrentUserId(), address);
-      return Response.ok().build();
-    } catch (Exception e) {
-      LOG.warn("Error removing default contract: " + address, e);
+      LOG.warn("Error refreshing Token from blockchain", e);
       return Response.serverError().build();
     }
   }

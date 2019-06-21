@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode.Exclude;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddressLabel implements Serializable {
+public class WalletAddressLabel implements Serializable {
   private static final long serialVersionUID = 3841906887968752979L;
 
   private long              id;

@@ -16,7 +16,9 @@
  */
 package org.exoplatform.addon.wallet.service;
 
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.settings.*;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 
 /**
  * A storage service to save/load information used by users and spaces wallets
@@ -28,46 +30,28 @@ public interface WalletService {
    * 
    * @param newGlobalSettings global settings to save
    */
-  public void saveSettings(GlobalSettings newGlobalSettings);
 
-  /**
-   * Save global settings with new dataversion
-   * 
-   * @param newGlobalSettings global settings to save
-   * @param dataVersion new data version of global settings to save
-   */
-  public void saveSettings(GlobalSettings newGlobalSettings, Integer dataVersion);
+  public void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings);
 
   /**
    * Retrieves global stored settings used for all users.
    * 
    * @return {@link GlobalSettings} global settings of default watched
-   *         blockchain network without user preferences
+   *         blockchain network
    */
   public GlobalSettings getSettings();
 
   /**
-   * Retrieves global stored settings. if username is not null, the personal
-   * settings will be included.
+   * Retrieves user settings including global setting, network settings and
+   * contract detail. if username is not null, the personal settings will be
+   * included. if spaceId is not null wallet address will be retrieved
    * 
-   * @param networkId blockchain network id to retrieve its settings
-   * @return {@link GlobalSettings} global settings of blockchain network id
-   *         without user preferences
-   */
-  public GlobalSettings getSettings(Long networkId);
-
-  /**
-   * Retrieves global stored settings. if username is not null, the personal
-   * settings will be included. if spaceId is not null wallet address will be
-   * retrieved
-   * 
-   * @param networkId blockchain network id to retrieve its settings
    * @param spaceId space pretty name to include its settings
    * @param currentUser username to include its preferences
-   * @return {@link GlobalSettings} global settings with user and space
-   *         preferences included into it
+   * @return {@link UserSettings} user settings with user and space preferences
+   *         included into it
    */
-  public GlobalSettings getSettings(Long networkId, String spaceId, String currentUser);
+  public UserSettings getUserSettings(String spaceId, String currentUser);
 
   /**
    * Save user preferences of Wallet
@@ -75,7 +59,7 @@ public interface WalletService {
    * @param currentUser current user name to save its preferences
    * @param userPreferences user preferences to save
    */
-  public void saveUserPreferences(String currentUser, WalletPreferences userPreferences);
+  public void saveUserPreferences(String currentUser, WalletSettings userPreferences);
 
   /**
    * Save funds request and send notifications
@@ -108,5 +92,12 @@ public interface WalletService {
    *           notification
    */
   public boolean isFundRequestSent(String notificationId, String currentUser) throws IllegalAccessException;
+
+  /**
+   * Sets contract detail object in global settings
+   * 
+   * @param contractDetail
+   */
+  public void setConfiguredContractDetail(ContractDetail contractDetail);
 
 }

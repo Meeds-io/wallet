@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.task.model;
+package org.exoplatform.addon.wallet.model.task;
 
 import java.io.Serializable;
 import java.util.List;

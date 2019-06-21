@@ -18,7 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.List;
 
-import org.exoplatform.addon.wallet.reward.model.RewardTeam;
+import org.exoplatform.addon.wallet.model.reward.RewardTeam;
 
 /**
  * A storage service to save/load reward teams

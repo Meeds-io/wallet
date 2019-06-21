@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.exoplatform.addon.wallet.task.model.WalletAdminTask;
+import org.exoplatform.addon.wallet.model.task.WalletAdminTask;
 import org.exoplatform.addon.wallet.task.service.WalletTaskService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -62,6 +62,7 @@ public class WalletTaskREST implements ResourceContainer {
 
   /**
    * Marks a task identified by its technical id as completed
+   * 
    * @param taskId technical wallet task id
    * @return HTTP Response corresponding to the operation status
    */

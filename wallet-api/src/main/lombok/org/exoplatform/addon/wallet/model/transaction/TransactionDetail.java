@@ -1,10 +1,12 @@
-package org.exoplatform.addon.wallet.model;
+package org.exoplatform.addon.wallet.model.transaction;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.convertFromDecimals;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.convertToDecimals;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
+import org.exoplatform.addon.wallet.model.Wallet;
 
 import lombok.Data;
 import lombok.ToString;

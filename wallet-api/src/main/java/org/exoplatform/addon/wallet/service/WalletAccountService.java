@@ -176,9 +176,9 @@ public interface WalletAccountService {
    * @param label label details object to process
    * @param currentUser current user making the label
    *          creation/modification/deletion
-   * @return {@link AddressLabel} saved or deleted label details
+   * @return {@link WalletAddressLabel} saved or deleted label details
    */
-  public AddressLabel saveOrDeleteAddressLabel(AddressLabel label, String currentUser);
+  public WalletAddressLabel saveOrDeleteAddressLabel(WalletAddressLabel label, String currentUser);
 
   /**
    * List of labels that current user can access
@@ -186,7 +186,7 @@ public interface WalletAccountService {
    * @param currentUser current username accessing the list of addresses labels
    * @return a {@link Set} of label details
    */
-  public Set<AddressLabel> getAddressesLabelsVisibleBy(String currentUser);
+  public Set<WalletAddressLabel> getAddressesLabelsVisibleBy(String currentUser);
 
   /**
    * Change wallet initialization status

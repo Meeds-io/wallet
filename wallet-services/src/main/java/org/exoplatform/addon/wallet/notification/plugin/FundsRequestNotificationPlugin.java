@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;

@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.reward.model.*;
+import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.service.RewardSettingsService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;

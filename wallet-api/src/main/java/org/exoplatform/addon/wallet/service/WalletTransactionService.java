@@ -2,25 +2,22 @@ package org.exoplatform.addon.wallet.service;
 
 import java.util.*;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
-import org.exoplatform.addon.wallet.model.TransactionStatistics;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 
 public interface WalletTransactionService {
 
   /**
-   * @param networkId blockchain network id
    * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingTransactions(long networkId);
+  public List<TransactionDetail> getPendingTransactions();
 
   /**
-   * @param networkId blockchain network id
    * @return transactions hashes that are marked as pensing in internal database
    */
-  public Set<String> getPendingTransactionHashes(long networkId);
+  public Set<String> getPendingTransactionHashes();
 
   /**
-   * @param networkId blockchain network id
    * @param address wallet address
    * @param contractAddress contract address to use to filter transactions
    * @param contractMethodName the contract method name to use to filter on
@@ -36,8 +33,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user isn't allowed to access
    *           wallet transactions
    */
-  public List<TransactionDetail> getTransactions(long networkId,
-                                                 String address,
+  public List<TransactionDetail> getTransactions(String address,
                                                  String contractAddress,
                                                  String contractMethodName,
                                                  String hash,
@@ -50,15 +46,13 @@ public interface WalletTransactionService {
    * Retrives the Transaction statistics of a user on a designated contract by
    * period of time
    * 
-   * @param networkId
    * @param contractAddress
    * @param address
    * @param periodicity
    * @param locale
    * @return
    */
-  public TransactionStatistics getTransactionStatistics(long networkId,
-                                                        String contractAddress,
+  public TransactionStatistics getTransactionStatistics(String contractAddress,
                                                         String address,
                                                         String periodicity,
                                                         Locale locale);
@@ -71,7 +65,6 @@ public interface WalletTransactionService {
   public TransactionDetail getTransactionByHash(String hash);
 
   /**
-   * @param networkId blockchain network id
    * @param address wallet address
    * @param currentUser user accessing last pending transaction of wallet
    * @return last transaction marked as pending in internal database
@@ -79,8 +72,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user is not an admin and is
    *           not the owner of the wallet
    */
-  public TransactionDetail getAddressLastPendingTransactionSent(long networkId,
-                                                                String address,
+  public TransactionDetail getAddressLastPendingTransactionSent(String address,
                                                                 String currentUser) throws IllegalAccessException;
 
   /**

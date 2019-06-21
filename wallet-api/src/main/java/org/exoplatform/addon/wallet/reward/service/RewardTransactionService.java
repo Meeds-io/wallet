@@ -18,7 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.List;
 
-import org.exoplatform.addon.wallet.reward.model.RewardTransaction;
+import org.exoplatform.addon.wallet.model.reward.RewardTransaction;
 
 /**
  * A storage service to save/load reward transactions
@@ -26,13 +26,11 @@ import org.exoplatform.addon.wallet.reward.model.RewardTransaction;
 public interface RewardTransactionService {
 
   /**
-   * @param networkId
    * @param periodType
    * @param startDateInSeconds
    * @return
    */
-  public List<RewardTransaction> getRewardTransactions(Long networkId,
-                                                       String periodType,
+  public List<RewardTransaction> getRewardTransactions(String periodType,
                                                        long startDateInSeconds);
 
   /**

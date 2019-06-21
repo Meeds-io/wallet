@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.model;
+package org.exoplatform.addon.wallet.model.transaction;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.WALLET_RECEIVER_NOTIFICATION_ID;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.WALLET_SENDER_NOTIFICATION_ID;

@@ -23,33 +23,30 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
-
-import org.exoplatform.addon.wallet.model.GlobalSettings;
+import org.exoplatform.addon.wallet.model.settings.InitialFundsSettings;
+import org.exoplatform.addon.wallet.model.settings.UserSettings;
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
 /**
- * This class provide a REST endpoint to save/load global settings such as
- * ethereum network and default contracts
+ * This class provide a REST endpoint to save/load user settings
  */
-@Path("/wallet/api/global-settings")
-public class WalletGlobalSettingsREST implements ResourceContainer {
+@Path("/wallet/api/settings")
+public class WalletSettingsREST implements ResourceContainer {
 
-  private static final Log LOG = ExoLogger.getLogger(WalletGlobalSettingsREST.class);
+  private static final Log LOG = ExoLogger.getLogger(WalletSettingsREST.class);
 
   private WalletService    walletService;
 
-  public WalletGlobalSettingsREST(WalletService walletService) {
+  public WalletSettingsREST(WalletService walletService) {
     this.walletService = walletService;
   }
 
   /**
    * Get global settings of aplication
    * 
-   * @param networkId used blockchain network id
    * @param spaceId space wallet id to display
    * @return REST response with global settings with current user preferences
    *         and current space settings
@@ -57,48 +54,36 @@ public class WalletGlobalSettingsREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response getSettings(@QueryParam("networkId") Long networkId, @QueryParam("spaceId") String spaceId) {
+  public Response getSettings(@QueryParam("spaceId") String spaceId) {
+    String currentUser = getCurrentUserId();
     try {
-      GlobalSettings globalSettings = walletService.getSettings(networkId, spaceId, getCurrentUserId());
-      return Response.ok(globalSettings.toJSONString(true)).build();
+      UserSettings userSettings = walletService.getUserSettings(spaceId, currentUser);
+      return Response.ok(userSettings).build();
     } catch (Exception e) {
-      LOG.warn("Error getting settings for network {} and spaceId {}", networkId, spaceId, e);
+      LOG.warn("Error getting settings for user {} and spaceId {}", currentUser, spaceId, e);
       return Response.status(403).build();
     }
   }
 
   /**
-   * Save global settings
+   * Save intial funds settings
    * 
-   * @param globalSettings global settings details to save
+   * @param initialFundsSettings initial funds settings to save
    * @return REST response with status
    */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  @Path("save")
-  @RolesAllowed("administrators")
-  public Response saveSettings(GlobalSettings globalSettings) {
-    if (globalSettings == null) {
+  @Path("saveInitialFunds")
+  @RolesAllowed("rewarding")
+  public Response saveInitialFundsSettings(InitialFundsSettings initialFundsSettings) {
+    if (initialFundsSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
-      return Response.status(400).build();
-    }
-    if (StringUtils.isBlank(globalSettings.getProviderURL())) {
-      LOG.warn("Bad request sent to server with empty setting 'providerURL'");
-      return Response.status(400).build();
-    }
-    if (globalSettings.getDefaultNetworkId() == null) {
-      LOG.warn("Bad request sent to server with empty setting 'defaultNetworkId'");
-      return Response.status(400).build();
-    }
-
-    if (globalSettings.getDefaultGas() == null) {
-      LOG.warn("Bad request sent to server with empty setting 'defaultGas'");
       return Response.status(400).build();
     }
 
     try {
-      walletService.saveSettings(globalSettings);
-      LOG.info("{} saved wallet settings details '{}'", getCurrentUserId(), globalSettings.toJSONString(false));
+      walletService.saveInitialFundsSettings(initialFundsSettings);
+      LOG.info("{} saved initialFunds settings details '{}'", getCurrentUserId(), initialFundsSettings.toString());
       return Response.ok().build();
     } catch (Exception e) {
       LOG.warn("Error saving global settings", e);

@@ -10,9 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.quartz.*;
 import org.web3j.protocol.core.methods.response.Transaction;
 
-import org.exoplatform.addon.wallet.model.GlobalSettings;
-import org.exoplatform.addon.wallet.model.TransactionDetail;
-import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.service.EthereumClientConnector;
+import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -26,8 +26,6 @@ public class PendingTransactionVerifierJob implements Job {
   private static final Log         LOG = ExoLogger.getLogger(PendingTransactionVerifierJob.class);
 
   private EthereumClientConnector  ethereumClientConnector;
-
-  private WalletService            walletService;
 
   private WalletTransactionService transactionService;
 
@@ -49,12 +47,7 @@ public class PendingTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      GlobalSettings settings = getWalletService().getSettings();
-      if (settings == null || settings.getDefaultNetworkId() == null) {
-        LOG.debug("Empty network id on settings, ignore blockchain listening");
-        return;
-      }
-      List<TransactionDetail> pendingTransactions = getPendingTransactions(settings.getDefaultNetworkId());
+      List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
       if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
         LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                   pendingTransactions.size());
@@ -95,17 +88,6 @@ public class PendingTransactionVerifierJob implements Job {
     } catch (Exception e) {
       LOG.warn("Error treating pending transaction: {}", hash, e);
     }
-  }
-
-  private List<TransactionDetail> getPendingTransactions(long networkId) {
-    return getTransactionService().getPendingTransactions(networkId);
-  }
-
-  private WalletService getWalletService() {
-    if (walletService == null) {
-      walletService = CommonsUtils.getService(WalletService.class);
-    }
-    return walletService;
   }
 
   private EthereumClientConnector getEthereumClientConnector() {

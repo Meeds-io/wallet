@@ -253,7 +253,6 @@ export default {
     return {
       isWalletEnabled: false,
       loading: true,
-      d: new Date(),
       useMetamask: false,
       disabledYear: true,
       disabledMonth: false,

@@ -27,15 +27,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.*;
-import org.exoplatform.addon.wallet.storage.AccountStorage;
+import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.ws.frameworks.json.impl.JsonException;
 
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable {
 
@@ -70,11 +71,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private WalletAccountService                  accountService;
 
-  private AccountStorage                        accountStorage;
+  private WalletStorage                         accountStorage;
 
   private WalletTransactionService              transactionService;
-
-  private WalletContractService                 contractService;
 
   private ERTTokenV2                            ertInstance;
 
@@ -92,6 +91,22 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
       createAdminAccount();
       LOG.info("Admin wallet created");
+    }
+
+    GlobalSettings settings = getSettings();
+    ContractDetail contractDetail = settings.getContractDetail();
+    String contractAddress = settings.getContractAddress();
+    if (contractDetail == null && StringUtils.isNotBlank(contractAddress)) {
+      try {
+        contractDetail = loadContractDetailFromBlockchain(contractAddress);
+      } catch (Exception e) {
+        LOG.warn("Error retrieving contract with address {}", contractAddress, e);
+      }
+      if (contractDetail == null) {
+        LOG.warn("Can't find contract with address {} in configured blockchain", contractAddress);
+      } else {
+        getWalletService().setConfiguredContractDetail(contractDetail);
+      }
     }
   }
 
@@ -158,23 +173,16 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         throw new IllegalStateException("Error creating new wallet", e);
       }
 
-      String walletJson = null;
-      try {
-        walletJson = toJsonString(adminWallet);
-      } catch (JsonException e) {
-        throw new IllegalStateException("Error converting wallet to JSON object", e);
-      }
-
       wallet = new Wallet();
       wallet.setEnabled(true);
       wallet.setId(WALLET_ADMIN_REMOTE_ID);
       wallet.setType(WalletType.ADMIN.getId());
       wallet.setAddress("0x" + adminWallet.getAddress());
       wallet.setTechnicalId(identityId);
-      wallet.setHasKeyOnServerSide(true);
 
       getAccountService().saveWalletAddress(wallet, currentUser, false);
       try {
+        String walletJson = toJsonString(adminWallet);
         getAccountStorage().saveWalletPrivateKey(identityId, walletJson);
         getListenerService().broadcast(ADMIN_WALLET_MODIFIED_EVENT,
                                        wallet.clone(),
@@ -361,9 +369,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public final TransactionDetail initialize(String receiver, String issuerUsername) throws Exception {
-    GlobalSettings settings = getWalletService().getSettings();
-    String message = settings.getInitialFundsRequestMessage();
-    Map<String, Double> initialFunds = settings.getInitialFunds();
+    GlobalSettings settings = getSettings();
+    String message = settings.getInitialFunds().getRequestMessage();
+    Map<String, Double> initialFunds = settings.getInitialFunds().getFunds();
     double tokenAmount = 0;
     double etherAmount = 0;
 
@@ -620,11 +628,39 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public String getContractAddress() {
-    GlobalSettings settings = getWalletService().getSettings();
-    if (settings == null || StringUtils.isBlank(settings.getDefaultPrincipalAccount())) {
+    GlobalSettings settings = getSettings();
+    if (settings == null || StringUtils.isBlank(settings.getContractAddress())) {
       throw new IllegalStateException("No principal contract address is configured");
     }
-    return settings.getDefaultPrincipalAccount();
+    return settings.getContractAddress();
+  }
+
+  @Override
+  public ContractDetail loadContractDetailFromBlockchain(String contractAddress) {
+    try {
+      ContractDetail contractDetail = new ContractDetail();
+      contractDetail.setAddress(contractAddress);
+      contractDetail.setNetworkId(getNetworkId());
+      BigInteger implementationVersion =
+                                       (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_IMPLEMENTATIONADDRESS);
+      if (implementationVersion == null || implementationVersion.intValue() < 1) {
+        return null;
+      }
+      contractDetail.setContractType(implementationVersion.toString());
+      BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_DECIMALS);
+      contractDetail.setDecimals(decimals.intValue());
+      String name = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_NAME);
+      contractDetail.setName(name);
+      String symbol = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_SYMBOL);
+      contractDetail.setSymbol(symbol);
+      String owner = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_OWNER);
+      contractDetail.setOwner(owner);
+      BigInteger sellPrice = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_SETSELLPRICE);
+      contractDetail.setSellPrice(String.valueOf(convertFromDecimals(sellPrice, 18)));
+      return contractDetail;
+    } catch (Exception e) {
+      throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress);
+    }
   }
 
   private String checkContractAddress() {
@@ -643,14 +679,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       }
       transactionDetail.setIssuer(issuerWallet);
     }
-  }
-
-  private long getNetworkId() {
-    GlobalSettings settings = getWalletService().getSettings();
-    if (settings.getDefaultNetworkId() == 0) {
-      throw new IllegalStateException("No network ID is configured");
-    }
-    return settings.getDefaultNetworkId();
   }
 
   private final void checkAdminWalletIsValid() throws Exception {
@@ -738,8 +766,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (adminCredentials == null && writeOperation) {
       throw new IllegalStateException("Admin account keys aren't set");
     }
-    GlobalSettings settings = getWalletService().getSettings();
-    ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(settings.getMinGasPrice()),
+    GlobalSettings settings = getSettings();
+    ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(settings.getNetwork().getMinGasPrice()),
                                                             BigInteger.valueOf(DEFAULT_ADMIN_GAS));
     TransactionManager contractTransactionManager = getTransactionManager(adminCredentials);
     this.ertInstance = ERTTokenV2.load(contractAddress,
@@ -805,70 +833,47 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   private ContractDetail getPrincipalContractDetail() {
-    GlobalSettings settings = getWalletService().getSettings();
-    if (settings == null) {
-      throw new IllegalStateException("Global settings are null");
-    }
-    Long networkId = settings.getDefaultNetworkId();
-    if (networkId == null) {
-      throw new IllegalStateException("Global settings network id is empty");
-    }
-    String contractAddress = settings.getDefaultPrincipalAccount();
-    if (contractAddress == null) {
-      throw new IllegalStateException("Global settings principal contract is empty");
-    }
-
-    ContractDetail contractDetail = getContractService().getContractDetail(contractAddress, networkId);
-    if (contractDetail == null) {
-      throw new IllegalStateException("Can't find default contract details");
-    }
-    return contractDetail;
+    GlobalSettings settings = getSettings();
+    return settings.getContractDetail();
   }
 
   private int getDecimals() {
     return getPrincipalContractDetail().getDecimals();
   }
 
-  public WalletContractService getContractService() {
-    if (contractService == null) {
-      contractService = CommonsUtils.getService(WalletContractService.class);
-    }
-    return contractService;
-  }
-
-  public WalletTransactionService getTransactionService() {
-    if (transactionService == null) {
-      transactionService = CommonsUtils.getService(WalletTransactionService.class);
-    }
-    return transactionService;
-  }
-
-  public AccountStorage getAccountStorage() {
-    if (accountStorage == null) {
-      accountStorage = CommonsUtils.getService(AccountStorage.class);
-    }
-    return accountStorage;
-  }
-
-  public WalletAccountService getAccountService() {
-    if (accountService == null) {
-      accountService = CommonsUtils.getService(WalletAccountService.class);
-    }
-    return accountService;
-  }
-
-  public EthereumClientConnectorForTransaction getClientConnector() {
-    return clientConnector;
-  }
-
-  public WalletService getWalletService() {
+  private WalletService getWalletService() {
     if (walletService == null) {
       walletService = CommonsUtils.getService(WalletService.class);
     }
     return walletService;
   }
 
-  public ListenerService getListenerService() {
+  private WalletTransactionService getTransactionService() {
+    if (transactionService == null) {
+      transactionService = CommonsUtils.getService(WalletTransactionService.class);
+    }
+    return transactionService;
+  }
+
+  private WalletStorage getAccountStorage() {
+    if (accountStorage == null) {
+      accountStorage = CommonsUtils.getService(WalletStorage.class);
+    }
+    return accountStorage;
+  }
+
+  private WalletAccountService getAccountService() {
+    if (accountService == null) {
+      accountService = CommonsUtils.getService(WalletAccountService.class);
+    }
+    return accountService;
+  }
+
+  private EthereumClientConnectorForTransaction getClientConnector() {
+    return clientConnector;
+  }
+
+  private ListenerService getListenerService() {
     if (listenerService == null) {
       listenerService = CommonsUtils.getService(ListenerService.class);
     }
