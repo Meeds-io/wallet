@@ -20,6 +20,7 @@ import java.util.*;
 
 import org.exoplatform.application.registry.*;
 import org.exoplatform.commons.cluster.StartableClusterAware;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -41,16 +42,15 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
 
   private boolean                    isDone;
 
-  public ApplicationRegistrySetupService(PortalContainer container, ApplicationRegistryService applicationRegistryService) {
+  public ApplicationRegistrySetupService(PortalContainer container) {
     this.container = container;
-    this.applicationRegistryService = applicationRegistryService;
   }
 
   @Override
   public void start() {
     RequestLifeCycle.begin(container);
     try {
-      ApplicationCategory applicationCategory = applicationRegistryService.getApplicationCategory(WALLET_CATEGORY_NAME);
+      ApplicationCategory applicationCategory = getApplicationRegistryService().getApplicationCategory(WALLET_CATEGORY_NAME);
       if (applicationCategory == null) {
         applicationCategory = new ApplicationCategory();
         applicationCategory.setAccessPermissions(EVERYONE_PERMISSION_LIST);
@@ -67,8 +67,8 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
         application.setContentId("exo-ethereum-wallet/EthereumSpaceWallet");
         application.setType(ApplicationType.PORTLET);
 
-        applicationRegistryService.save(applicationCategory);
-        applicationRegistryService.save(applicationCategory, application);
+        getApplicationRegistryService().save(applicationCategory);
+        getApplicationRegistryService().save(applicationCategory, application);
       }
       this.isDone = true;
     } finally {
@@ -84,5 +84,12 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
   @Override
   public boolean isDone() {
     return isDone;
+  }
+
+  public ApplicationRegistryService getApplicationRegistryService() {
+    if (applicationRegistryService == null) {
+      applicationRegistryService = CommonsUtils.getService(ApplicationRegistryService.class);
+    }
+    return applicationRegistryService;
   }
 }

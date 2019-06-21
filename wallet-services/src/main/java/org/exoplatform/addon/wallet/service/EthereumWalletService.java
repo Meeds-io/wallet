@@ -77,17 +77,13 @@ public class EthereumWalletService implements WalletService, Startable {
   public EthereumWalletService(EthereumClientConnector clientConnector,
                                WalletContractService contractService,
                                WalletAccountService accountService,
-                               SettingService settingService,
-                               SpaceService spaceService,
                                WebNotificationStorage webNotificationStorage,
                                PortalContainer container,
                                InitParams params) {
     this.container = container;
-    this.settingService = settingService;
     this.clientConnector = clientConnector;
     this.accountService = accountService;
     this.contractService = contractService;
-    this.spaceService = spaceService;
     this.webNotificationStorage = webNotificationStorage;
 
     this.defaultSettings = new GlobalSettings();
@@ -201,10 +197,10 @@ public class EthereumWalletService implements WalletService, Startable {
 
     LOG.debug("Saving new global settings", newGlobalSettings.toJSONString(false));
 
-    settingService.set(WALLET_CONTEXT,
-                       WALLET_SCOPE,
-                       GLOBAL_SETTINGS_KEY_NAME,
-                       SettingValue.create(newGlobalSettings.toJSONString(false)));
+    getSettingService().set(WALLET_CONTEXT,
+                            WALLET_SCOPE,
+                            GLOBAL_SETTINGS_KEY_NAME,
+                            SettingValue.create(newGlobalSettings.toJSONString(false)));
 
     // Clear cached in memory stored settings
     this.storedSettings = null;
@@ -262,7 +258,7 @@ public class EthereumWalletService implements WalletService, Startable {
     if (StringUtils.isNotBlank(globalSettings.getAccessPermission())) {
       Space space = getSpace(globalSettings.getAccessPermission());
       // Disable wallet for users not member of the permitted space members
-      if (space != null && !(spaceService.isMember(space, currentUser) || spaceService.isSuperManager(currentUser))) {
+      if (space != null && !(getSpaceService().isMember(space, currentUser) || getSpaceService().isSuperManager(currentUser))) {
         LOG.debug("Wallet is disabled for user {} because he's not member of space {}", currentUser, space.getPrettyName());
         globalSettings.setWalletEnabled(false);
       }
@@ -285,7 +281,7 @@ public class EthereumWalletService implements WalletService, Startable {
 
     if (globalSettings.isWalletEnabled() || globalSettings.isAdmin()) {
       // Append user preferences
-      SettingValue<?> userSettingsValue = settingService.get(Context.USER.id(currentUser), WALLET_SCOPE, SETTINGS_KEY_NAME);
+      SettingValue<?> userSettingsValue = getSettingService().get(Context.USER.id(currentUser), WALLET_SCOPE, SETTINGS_KEY_NAME);
       WalletPreferences userSettings = null;
       if (userSettingsValue != null && userSettingsValue.getValue() != null) {
         userSettings = WalletPreferences.parseStringToObject(userSettingsValue.getValue().toString());
@@ -318,10 +314,10 @@ public class EthereumWalletService implements WalletService, Startable {
     if (userPreferences == null) {
       throw new IllegalArgumentException("userPreferences parameter is mandatory");
     }
-    settingService.set(Context.USER.id(currentUser),
-                       WALLET_SCOPE,
-                       SETTINGS_KEY_NAME,
-                       SettingValue.create(userPreferences.toJSONString()));
+    getSettingService().set(Context.USER.id(currentUser),
+                            WALLET_SCOPE,
+                            SETTINGS_KEY_NAME,
+                            SettingValue.create(userPreferences.toJSONString()));
   }
 
   @Override
@@ -402,7 +398,7 @@ public class EthereumWalletService implements WalletService, Startable {
   private GlobalSettings getStoredGlobalSettings() {
     GlobalSettings globalSettings = null;
     // Global settings computing
-    SettingValue<?> globalSettingsValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, GLOBAL_SETTINGS_KEY_NAME);
+    SettingValue<?> globalSettingsValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, GLOBAL_SETTINGS_KEY_NAME);
     if (globalSettingsValue != null && globalSettingsValue.getValue() != null) {
       globalSettings = GlobalSettings.parseStringToObject(defaultSettings, globalSettingsValue.getValue().toString());
     }
@@ -477,4 +473,17 @@ public class EthereumWalletService implements WalletService, Startable {
     return listenerService;
   }
 
+  private SettingService getSettingService() {
+    if (settingService == null) {
+      settingService = CommonsUtils.getService(SettingService.class);
+    }
+    return settingService;
+  }
+
+  private SpaceService getSpaceService() {
+    if (spaceService == null) {
+      spaceService = CommonsUtils.getService(SpaceService.class);
+    }
+    return spaceService;
+  }
 }

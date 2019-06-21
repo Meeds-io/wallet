@@ -13,9 +13,9 @@ import org.json.JSONArray;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
-import org.exoplatform.addon.wallet.service.WalletContractService;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.commons.utils.IOUtil;
 import org.exoplatform.container.configuration.ConfigurationManager;
 import org.exoplatform.container.xml.InitParams;
@@ -42,10 +42,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
 
   private SettingService       settingService;
 
-  public EthereumWalletContractService(ConfigurationManager configurationManager,
-                                       SettingService settingService,
-                                       InitParams params) {
-    this.settingService = settingService;
+  public EthereumWalletContractService(ConfigurationManager configurationManager, InitParams params) {
     this.configurationManager = configurationManager;
 
     if (params.containsKey(ABI_PATH_PARAMETER)) {
@@ -99,19 +96,24 @@ public class EthereumWalletContractService implements WalletContractService, Sta
 
     String address = contractDetail.getAddress().toLowerCase();
 
-    settingService.set(WALLET_CONTEXT,
-                       WALLET_SCOPE,
-                       address + contractDetail.getNetworkId(),
-                       SettingValue.create(contractDetail.toJSONString()));
+    getSettingService().set(WALLET_CONTEXT,
+                            WALLET_SCOPE,
+                            address + contractDetail.getNetworkId(),
+                            SettingValue.create(contractDetail.toJSONString()));
 
     if (contractDetail.isDefaultContract()) {
       // Save the contract address in the list of default contract addreses
-      SettingValue<?> defaultContractsAddressesValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey);
+      SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
+                                                                               WALLET_SCOPE,
+                                                                               defaultContractsParamKey);
       String defaultContractsAddresses = defaultContractsAddressesValue == null ? address
                                                                                 : defaultContractsAddressesValue.getValue()
                                                                                                                 .toString()
                                                                                     + "," + address;
-      settingService.set(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey, SettingValue.create(defaultContractsAddresses));
+      getSettingService().set(WALLET_CONTEXT,
+                              WALLET_SCOPE,
+                              defaultContractsParamKey,
+                              SettingValue.create(defaultContractsAddresses));
     }
   }
 
@@ -128,7 +130,9 @@ public class EthereumWalletContractService implements WalletContractService, Sta
 
     String defaultContractsParamKey = WALLET_DEFAULT_CONTRACTS_NAME + networkId;
     final String defaultAddressToSave = address.toLowerCase();
-    SettingValue<?> defaultContractsAddressesValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey);
+    SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
+                                                                             WALLET_SCOPE,
+                                                                             defaultContractsParamKey);
     if (defaultContractsAddressesValue != null) {
       String[] contractAddresses = defaultContractsAddressesValue.getValue().toString().split(",");
       Set<String> contractAddressList = Arrays.stream(contractAddresses)
@@ -136,8 +140,8 @@ public class EthereumWalletContractService implements WalletContractService, Sta
                                               .collect(Collectors.toSet());
       String contractAddressValue = StringUtils.join(contractAddressList, ",");
 
-      settingService.remove(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
-      settingService.set(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey, SettingValue.create(contractAddressValue));
+      getSettingService().remove(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
+      getSettingService().set(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey, SettingValue.create(contractAddressValue));
     }
     return true;
   }
@@ -153,7 +157,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
       return null;
     }
 
-    SettingValue<?> contractDetailValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
+    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, address + networkId);
     if (contractDetailValue != null) {
       return ContractDetail.parseStringToObject((String) contractDetailValue.getValue());
     }
@@ -167,7 +171,9 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
 
     String defaultContractsParamKey = WALLET_DEFAULT_CONTRACTS_NAME + networkId;
-    SettingValue<?> defaultContractsAddressesValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, defaultContractsParamKey);
+    SettingValue<?> defaultContractsAddressesValue = getSettingService().get(WALLET_CONTEXT,
+                                                                             WALLET_SCOPE,
+                                                                             defaultContractsParamKey);
     if (defaultContractsAddressesValue != null) {
       String defaultContractsAddressesString = defaultContractsAddressesValue.getValue().toString().toLowerCase();
       String[] contractAddresses = defaultContractsAddressesString.split(",");
@@ -196,4 +202,10 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
   }
 
+  private SettingService getSettingService() {
+    if (settingService == null) {
+      settingService = CommonsUtils.getService(SettingService.class);
+    }
+    return settingService;
+  }
 }

@@ -8,7 +8,7 @@
         <v-flex>
           <v-card class="applicationToolbar mb-3" flat>
             <v-flex class="pl-3 pr-3 pt-2 pb-2">
-              <strong>Wallet accounts administration</strong>
+              <strong>Wallets administration</strong>
             </v-flex>
           </v-card>
         </v-flex>
