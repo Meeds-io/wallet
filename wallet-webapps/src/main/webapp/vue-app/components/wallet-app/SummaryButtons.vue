@@ -49,12 +49,6 @@ export default {
         return {};
       },
     },
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
     walletAddress: {
       type: String,
       default: function() {

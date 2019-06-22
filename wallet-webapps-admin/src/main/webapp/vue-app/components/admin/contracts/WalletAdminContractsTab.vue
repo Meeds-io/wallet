@@ -68,29 +68,7 @@
         </td>
       </template>
     </v-data-table>
-    <v-divider />
-    <div class="text-xs-center pt-2 pb-2">
-      <deploy-new-contract
-        v-if="isAdmin"
-        :account="walletAddress"
-        :network-id="networkId"
-        :fiat-symbol="fiatSymbol"
-        @list-updated="updateList($event)" />
-      <button
-        v-if="isAdmin"
-        class="btn mt-3"
-        @click="showAddContractModal = true">
-        Add Existing contract Address
-      </button>
-      <add-contract-modal
-        v-if="isAdmin"
-        :net-id="networkId"
-        :account="walletAddress"
-        :open="showAddContractModal"
-        is-default-contract
-        @added="contractsModified"
-        @close="showAddContractModal = false" />
-    </div>
+
     <!-- The selected account detail -->
     <v-navigation-drawer
       id="contractDetailsDrawer"
@@ -105,7 +83,6 @@
         ref="contractDetail"
         :wallet-address="walletAddress"
         :contract-details="selectedContractDetails"
-        :network-id="networkId"
         :is-display-only="!selectedContractDetails || !selectedContractDetails.isAdmin"
         :fiat-symbol="fiatSymbol"
         :wallets="wallets"
@@ -116,23 +93,13 @@
   </v-card>
 </template>
 <script>
-import DeployNewContract from './modals/WalletAdminDeployNewContract.vue';
-import AddContractModal from './modals/WalletAdminAddContractModal.vue';
 import ContractDetail from './WalletAdminContractDetail.vue';
 
 export default {
   components: {
-    DeployNewContract,
-    AddContractModal,
     ContractDetail,
   },
   props: {
-    networkId: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     walletAddress: {
       type: String,
       default: function() {
@@ -252,9 +219,9 @@ export default {
     init(avoidReloading) {
       const previouslyRetrievedContracts = this.contracts;
       this.contracts = [];
-      return (avoidReloading ? Promise.resolve(previouslyRetrievedContracts) : this.tokenUtils.getContractsDetails(this.walletAddress, this.networkId, true, true))
+      return (avoidReloading ? Promise.resolve(previouslyRetrievedContracts) : this.tokenUtils.getContractsDetails(this.walletAddress, true, true))
         .then((contracts) => (this.contracts = contracts ? contracts.filter((contract) => contract.isDefault) : []))
-        .then(() => this.tokenUtils.getContractDeploymentTransactionsInProgress(this.networkId))
+        .then(() => this.tokenUtils.getContractDeploymentTransactionsInProgress())
         .then((contractsInProgress) => {
           Object.keys(contractsInProgress).forEach((hash) => {
             const contractInProgress = contractsInProgress[hash];
@@ -279,11 +246,11 @@ export default {
                   // This may happen when the contract is already added in //
                   if (window.walletSettings.defaultContractsToDisplay.indexOf(contractAddress)) {
                     this.newTokenAddress = contractAddress;
-                    this.tokenUtils.removeContractDeploymentTransactionsInProgress(this.networkId, contractInProgress.hash);
+                    this.tokenUtils.removeContractDeploymentTransactionsInProgress(contractInProgress.hash);
                     this.contractsModified();
                   } else {
                     // Save newly created contract as default
-                    return this.tokenUtils.saveContractAddress(this.walletAddress, contractAddress, this.networkId, contractInProgress.isDefault)
+                    return this.tokenUtils.saveContractAddress(this.walletAddress, contractAddress, contractInProgress.isDefault)
                       .then((added, error) => {
                         if (error) {
                           throw error;

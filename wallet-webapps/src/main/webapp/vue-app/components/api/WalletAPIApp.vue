@@ -9,7 +9,6 @@ export default {
       isWalletEnabled: false,
       isWalletInitialized: false,
       loading: true,
-      networkId: false,
       needPassword: false,
       isReadOnly: true,
       walletAddress: null,
@@ -87,7 +86,7 @@ export default {
             }
             this.needPassword = window.walletSettings.browserWalletExists && !window.walletSettings.storedPassword;
             this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
-            this.networkId = window.walletSettings.currentNetworkId;
+            this.networkId = window.walletSettings.network.id;
             this.isReadOnly = window.walletSettings.isReadOnly;
             if (window.walletSettings.network.maxGasPrice) {
               window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
@@ -330,7 +329,7 @@ export default {
               }
 
               //finally paas this data parameter to send Transaction
-              return this.tokenUtils.sendContractTransaction(this.networkId, {
+              return this.tokenUtils.sendContractTransaction({
                    contractAddress: contractAddress,
                    senderAddress: senderAddress,
                    gas: defaultGas,

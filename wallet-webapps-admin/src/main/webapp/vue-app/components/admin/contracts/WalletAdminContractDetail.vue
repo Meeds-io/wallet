@@ -74,7 +74,7 @@
                 <li>
                   <strong>
                     Owner
-                  </strong>: Upgrade contract, transfer ownership and send funds to Cauri contract.
+                  </strong>: Transfer ownership and send funds to Cauri contract.
                 </li>
               </ul>
             </div>
@@ -167,15 +167,6 @@
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
-
-          <upgrade-token-modal
-            v-if="contractDetails.isOwner && contractDetails.contractType === 1"
-            ref="upgrade"
-            :contract-details="contractDetails"
-            :wallet-address="walletAddress"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
         </v-flex>
         <v-btn
           icon
@@ -208,7 +199,6 @@
         <transactions-list
           id="transactionsList"
           ref="transactionsList"
-          :network-id="networkId"
           :account="contractDetails.address"
           :contract-details="contractDetails"
           :fiat-symbol="fiatSymbol"
@@ -332,7 +322,6 @@
       v-if="contractDetails.contractType === 0"
       id="transactionsList"
       ref="transactionsList"
-      :network-id="networkId"
       :account="contractDetails.address"
       :contract-details="contractDetails"
       :fiat-symbol="fiatSymbol"
@@ -345,24 +334,16 @@
 
 <script>
 import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
-import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
 
 export default {
   components: {
     ContractAdminModal,
-    UpgradeTokenModal,
   },
   props: {
     isDisplayOnly: {
       type: Boolean,
       default: function() {
         return false;
-      },
-    },
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
       },
     },
     refreshIndex: {
@@ -562,8 +543,6 @@ export default {
         if(index >= 0) {
           this.approvedWallets.splice(index, 1);
         }
-      } else if(methodName === 'upgrade') {
-        this.tokenUtils.retrieveContractDetails(this.walletAddress, contractDetails, true);
       }
     },
   },

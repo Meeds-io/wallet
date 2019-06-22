@@ -2,8 +2,8 @@ import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus, getTransactionReceipt, getTransaction, convertTokenAmountReceived} from './WalletUtils.js';
 import {getSavedContractDetails, retrieveContractDetails} from './TokenUtils.js';
 
-export function getLastNonce(networkId, walletAddress) {
-  return getLastPendingTransactionSent(networkId, walletAddress)
+export function getLastNonce(walletAddress) {
+  return getLastPendingTransactionSent(walletAddress)
     .then((lastPendingTransaction) => {
       if (!lastPendingTransaction || !lastPendingTransaction.hash) {
         return;
@@ -22,7 +22,7 @@ export function getLastNonce(networkId, walletAddress) {
     });
 }
 
-export function loadTransactions(networkId, account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
+export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
   }
@@ -36,7 +36,7 @@ export function loadTransactions(networkId, account, contractDetails, transactio
         if (loadedTransactions[storedTransaction.hash]) {
           loadingPromises.push(loadedTransactions[storedTransaction.hash]);
         } else {
-          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(networkId, account, contractDetails, transactions, storedTransaction, refreshCallback);
+          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(account, contractDetails, transactions, storedTransaction, refreshCallback);
           loadingPromises.push(loadingTransactionDetailsPromise);
         }
       });
@@ -134,7 +134,7 @@ function loadTransactionReceipt(transactionDetails) {
   }
 }
 
-function loadTransactionContractDetails(networkId, account, transactionDetails, accountDetails) {
+function loadTransactionContractDetails(account, transactionDetails, accountDetails) {
   // Is contract creation if contractAddress property is set in receipt
   transactionDetails.isContractCreation = transactionDetails.transaction && !transactionDetails.transaction.to && transactionDetails.receipt && transactionDetails.receipt.contractAddress;
 
@@ -148,7 +148,7 @@ function loadTransactionContractDetails(networkId, account, transactionDetails, 
   if (transactionDetails.contractAddress) {
     const cachedContractDetails = window.walletContractsDetails ? Object.values(window.walletContractsDetails).find((details) => details && details.address && transactionDetails.contractAddress.toLowerCase() === details.address.toLowerCase()) : null;
     return (
-      cachedContractDetails || getSavedContractDetails(transactionDetails.contractAddress, networkId).then((contractDetails) => {
+      cachedContractDetails || getSavedContractDetails(transactionDetails.contractAddress).then((contractDetails) => {
         if (contractDetails) {
           if (!window.walletContractsDetails) {
             window.walletContractsDetails = {};
@@ -163,7 +163,7 @@ function loadTransactionContractDetails(networkId, account, transactionDetails, 
                 address: transactionDetails.contractAddress,
                 icon: 'fa-file-contract',
                 isContract: true,
-                networkId: networkId,
+                networkId: window.walletSettings.network.id,
               };
               return retrieveContractDetails(account, contractDetails, false, true);
             }
@@ -201,9 +201,9 @@ function loadTransactionFee(transactionDetails) {
     .then((receipt) => (transactionDetails.receipt = receipt));
 }
 
-function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
-  if (!transactionDetails || !networkId || !walletAddress) {
-    console.debug('Wrong method parameters', networkId, walletAddress, transactionDetails);
+function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
+  if (!transactionDetails || !walletAddress) {
+    console.debug('Wrong method parameters', walletAddress, transactionDetails);
     return;
   }
 
@@ -212,7 +212,7 @@ function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddr
       transactionDetails.pending = false;
       transactionDetails.receipt = receipt;
       transactionDetails.timestamp = (block && block.timestamp) || transactionDetails.timestamp;
-      loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddress, accountDetails, transactions, transactionDetails).then(() => {
+      loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails).then(() => {
         watchLoadSuccess(transactionDetails);
       });
     });
@@ -221,7 +221,7 @@ function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddr
   return loadTransactionReceipt(transactionDetails)
     .then(() => {
       transactionDetails.status = transactionDetails.receipt && transactionDetails.receipt.status;
-      return loadTransactionContractDetails(networkId, walletAddress, transactionDetails, accountDetails);
+      return loadTransactionContractDetails(walletAddress, transactionDetails, accountDetails);
     })
     .then((contractDetails) => {
       if (contractDetails) {
@@ -445,7 +445,8 @@ function retrieveWalletDetails(transactionDetails, prefix) {
   }
 }
 
-function getLastPendingTransactionSent(networkId, address) {
+function getLastPendingTransactionSent(address) {
+  const networkId = window.walletSettings.network.id;
   return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?networkId=${networkId}&address=${address}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {

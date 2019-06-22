@@ -145,7 +145,6 @@
                     :overview-accounts="overviewAccountsToDisplay"
                     :principal-account="principalAccount"
                     :refresh-index="refreshIndex"
-                    :network-id="networkId"
                     :wallet-address="walletAddress"
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
@@ -171,7 +170,6 @@
                 ref="accountDetail"
                 :fiat-symbol="fiatSymbol"
                 :is-read-only="isReadOnly"
-                :network-id="networkId"
                 :wallet-address="walletAddress"
                 :contract-details="selectedAccount"
                 :selected-transaction-hash="selectedTransactionHash"
@@ -246,7 +244,6 @@ export default {
       principalAccount: null,
       showSettingsModal: false,
       gasPriceInEther: null,
-      networkId: null,
       browserWalletExists: false,
       walletAddress: null,
       selectedTransactionHash: null,
@@ -372,7 +369,6 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          this.networkId = window.walletSettings.currentNetworkId;
           this.walletAddress = window.localWeb3.eth.defaultAccount.toLowerCase();
 
           this.isReadOnly = window.walletSettings.isReadOnly;
@@ -492,7 +488,7 @@ export default {
       }
     },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress, this.networkId, false, false)
+      return this.tokenUtils.getContractDetails(this.walletAddress, false, false)
         .then((contractDetails, error) => {
           this.handleError(error);
           this.contractDetails = contractDetails;
