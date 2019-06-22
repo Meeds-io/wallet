@@ -394,7 +394,7 @@ export default {
             const contractDetails = this.contractDetails;
             const transfer =  contractDetails.contract.methods.transfer;
 
-            return sendContractTransaction(window.walletSettings.network.id, {
+            return sendContractTransaction({
               contractAddress: contractDetails.address,
               senderAddress: sender,
               gas: window.walletSettings.network.gasLimit,

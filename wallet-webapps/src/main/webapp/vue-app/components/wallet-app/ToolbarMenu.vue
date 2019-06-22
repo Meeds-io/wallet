@@ -12,7 +12,7 @@
       </v-icon>
     </v-btn>
     <v-btn
-      v-if="isMaximized && (!isSpace || isSpaceAdministrator)"
+      v-if="!isSpace || isSpaceAdministrator"
       id="walletAppMenuSettingsButton"
       class="mr-0 ml-0"
       icon
@@ -21,17 +21,6 @@
       @click="$emit('modify-settings')">
       <v-icon size="17px">
         fa-cog
-      </v-icon>
-    </v-btn>
-    <v-btn
-      v-if="!isMaximized"
-      id="walletAppMenuMaximizeButton"
-      icon
-      title="Open wallet application"
-      class="maximizeIcon ml-0"
-      @click="$emit('maximize')">
-      <v-icon size="15px" class="arrow-up-right">
-        fa-arrow-up
       </v-icon>
     </v-btn>
   </div>
@@ -50,12 +39,6 @@ export default {
       type: Boolean,
       default: function() {
         return false;
-      },
-    },
-    isMaximized: {
-      type: Boolean,
-      default: function() {
-        return true;
       },
     },
   },

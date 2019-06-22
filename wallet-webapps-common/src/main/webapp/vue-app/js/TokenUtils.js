@@ -14,6 +14,16 @@ export function getContractDetails(account, isAdministration) {
 }
 
 /*
+ * Refresh token balance of wallet address
+ */
+export function refreshTokenBalance(walletAddress, contractDetails) {
+  return contractDetails.contract.methods.balanceOf(walletAddress).call()
+    .then((balance) => {
+      contractDetails.balance = convertTokenAmountReceived(balance, contractDetails.decimals);
+    });
+}
+  
+/*
  * Retrieve an ERC20 contract instance at specified address
  */
 export function retrieveContractDetails(account, contractDetails, isAdministration) {
@@ -81,6 +91,11 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
     .catch((e) => {
       contractDetails.contractType = -1;
       console.debug('retrieveContractDetails method - error computing balance', e);
+    })
+    .then(() => window.localWeb3.eth.getBalance(account))
+    .then((balance) => {
+      balance = window.localWeb3.utils.fromWei(String(balance), 'ether');
+      contractDetails.etherBalance = balance;
     })
     .then(() => {
       return contractDetails.contractType < 0 ? null : contractDetails.symbol ? contractDetails.symbol : contractDetails.contract.methods.symbol().call();

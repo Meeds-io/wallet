@@ -62,13 +62,7 @@ export default {
         return {};
       },
     },
-    useNavigation: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    isReadonly: {
+    isReadOnly: {
       type: Boolean,
       default: function() {
         return false;
@@ -78,12 +72,6 @@ export default {
       type: Boolean,
       default: function() {
         return false;
-      },
-    },
-    contract: {
-      type: Object,
-      default: function() {
-        return {};
       },
     },
   },
@@ -100,7 +88,7 @@ export default {
       return this.contractDetails && this.contractDetails.etherBalance;
     },
     disabled() {
-      return this.isReadonly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
+      return this.isReadOnly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
   watch: {

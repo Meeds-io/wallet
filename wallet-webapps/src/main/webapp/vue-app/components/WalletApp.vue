@@ -6,21 +6,17 @@
     <main v-if="isWalletEnabled" id="walletEnabledContent">
       <v-layout>
         <v-flex>
-          <v-card :class="isMaximized && 'transparent'" flat>
+          <v-card transparent flat>
             <v-toolbar
-              :class="isMaximized ? 'mb-3' : 'no-padding'"
-              class="walletAppToolbar"
+              class="walletAppToolbar mb-3"
               color="white"
               flat
               dense>
-              <v-toolbar-title v-if="isSpace && isMaximized">
+              <v-toolbar-title v-if="isSpace">
                 Space Wallet
               </v-toolbar-title>
-              <v-toolbar-title v-else-if="isMaximized">
+              <v-toolbar-title v-else>
                 My Wallet
-              </v-toolbar-title>
-              <v-toolbar-title v-else class="head-container">
-                Wallet
               </v-toolbar-title>
               <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
                 <v-tooltip
@@ -43,10 +39,8 @@
               <toolbar-menu
                 ref="walletAppMenu"
                 :is-space="isSpace"
-                :is-maximized="isMaximized"
                 :is-space-administrator="isSpaceAdministrator"
                 @refresh="init()"
-                @maximize="maximize()"
                 @modify-settings="showSettingsModal = true" />
 
               <settings-modal
@@ -71,7 +65,6 @@
                 :wallet-address="walletAddress"
                 :refresh-index="refreshIndex"
                 :loading="loading"
-                :is-minimized="!isMaximized"
                 @loading="loading = true"
                 @end-loading="loading = false"
                 @refresh="init()"
@@ -94,19 +87,18 @@
                 row
                 wrap
                 class="ml-0 mr-0">
-                <v-flex md8 xs12>
+                <v-flex :class="(!isSpace || isSpaceAdministrator) && 'md8'" xs12>
                   <v-layout
                     row
                     wrap
                     class="ml-0 mr-0">
                     <v-flex xs12>
                       <wallet-summary
-                        v-if="walletAddress && accountsDetails[walletAddress]"
+                        v-if="walletAddress && contractDetails"
                         ref="walletSummary"
                         :wallet-address="walletAddress"
                         :contract-details="contractDetails"
                         @display-transactions="openAccountDetail"
-                        @refresh-balance="refreshBalance"
                         @refresh-token-balance="refreshTokenBalance"
                         @error="error = $event" />
                     </v-flex>
@@ -131,24 +123,20 @@
                   </v-layout>
                 </v-flex>
                 <v-flex
+                  v-if="!isSpace || isSpaceAdministrator"
                   md4
                   xs12
                   text-md-center
                   mt-1>
                   <summary-buttons
-                    v-if="walletAddress && !loading && accountsDetails[walletAddress]"
+                    v-if="walletAddress && !loading && contractDetails"
                     ref="walletSummaryActions"
-                    :is-maximized="isMaximized"
                     :is-space="isSpace"
                     :is-space-administrator="isSpaceAdministrator"
-                    :accounts-details="accountsDetails"
-                    :overview-accounts="overviewAccountsToDisplay"
-                    :principal-account="principalAccount"
-                    :refresh-index="refreshIndex"
+                    :contract-details="contractDetails"
                     :wallet-address="walletAddress"
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
-                    @refresh-balance="refreshBalance"
                     @refresh-token-balance="refreshTokenBalance"
                     @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
                     @error="error = $event" />
@@ -223,12 +211,6 @@ export default {
         return false;
       },
     },
-    isMaximized: {
-      type: Boolean,
-      default: function() {
-        return true;
-      },
-    },
   },
   data() {
     return {
@@ -241,7 +223,6 @@ export default {
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
       periodicityLabel: null,
-      principalAccount: null,
       showSettingsModal: false,
       gasPriceInEther: null,
       browserWalletExists: false,
@@ -250,7 +231,6 @@ export default {
       selectedContractMethodName: null,
       selectedAccount: null,
       fiatSymbol: '$',
-      accountsDetails: {},
       refreshIndex: 1,
       error: null,
       periodicity: 'month',
@@ -267,12 +247,7 @@ export default {
       return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(window.walletSettings.network.gasLimit, this.gasPriceInEther);
     },
     etherBalance() {
-      if (this.refreshIndex > 0 && this.walletAddress && this.accountsDetails && this.accountsDetails[this.walletAddress]) {
-        let balance = this.accountsDetails[this.walletAddress].balance;
-        balance = balance ? Number(balance) : 0;
-        return balance;
-      }
-      return 0;
+      return this.contractDetails && this.contractDetails.etherBalance || 0;
     },
   },
   watch: {
@@ -342,7 +317,6 @@ export default {
       this.error = null;
       this.seeAccountDetails = false;
       this.selectedAccount = null;
-      this.accountsDetails = {};
       this.walletAddress = null;
 
       return this.walletUtils.initSettings(this.isSpace)
@@ -374,14 +348,12 @@ export default {
           this.isReadOnly = window.walletSettings.isReadOnly;
           this.browserWalletExists = window.walletSettings.browserWalletExists;
 
-          this.principalAccount = window.walletSettings.defaultPrincipalAccount;
           this.fiatSymbol = window.walletSettings ? window.walletSettings.fiatSymbol : '$';
           this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.normalGasPrice), 'ether');
 
           if (window.walletSettings.network.maxGasPrice) {
             window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
           }
-          return this.refreshBalance();
         })
         .then((result, error) => {
           this.handleError(error);
@@ -414,78 +386,12 @@ export default {
         this.forceUpdate();
       });
     },
-
     forceUpdate() {
       this.refreshIndex++;
       this.$forceUpdate();
     },
-    disableYearButton() {
-
-      this.disabledYear = !this.disabledYear;
-
-      if (this.disabledYear === this.disabledMonth) {
-       this.disabledMonth = !this.disabledMonth;
-
-     }
-    },
-    disableMonthButton() {
-
-   this.disabledMonth = !this.disabledMonth;
-
-     if (this.disabledMonth === this.disabledYear) {
-      this.disabledYear = !this.disabledYear;
-
-
-      }
-    },
-    refreshBalance() {
-      const walletAddress = String(this.walletAddress);
-      return this.walletUtils.computeBalance(walletAddress)
-        .then((balanceDetails, error) => {
-          if (error) {
-            this.$set(this.accountsDetails, walletAddress, {
-              title: 'ether',
-              icon: 'warning',
-              balance: '0',
-              symbol: 'ether',
-              isContract: false,
-              address: walletAddress,
-              error: `Error retrieving balance of wallet: ${error}`,
-            });
-            this.forceUpdate();
-            this.handleError(error);
-          }
-          const accountDetails = {
-            title: 'ether',
-            icon: 'fab fa-ethereum',
-            symbol: 'ether',
-            isContract: false,
-            address: walletAddress,
-            balance: balanceDetails && balanceDetails.balance ? balanceDetails.balance : '0',
-            balanceFiat: balanceDetails && balanceDetails.balanceFiat ? balanceDetails.balanceFiat : '0',
-          };
-          this.$set(this.accountsDetails, walletAddress, accountDetails);
-          this.forceUpdate();
-          return accountDetails;
-        })
-        .catch((e) => {
-          console.debug('refreshBalance method - error', e);
-          this.$set(this.accountsDetails, walletAddress, {
-            title: 'ether',
-            icon: 'warning',
-            balance: 0,
-            symbol: 'ether',
-            isContract: false,
-            address: walletAddress,
-            error: `Error retrieving balance of wallet ${e}`,
-          });
-          throw e;
-        });
-    },
-    refreshTokenBalance(accountDetail) {
-      if (accountDetail) {
-        return this.tokenUtils.retrieveContractDetails(this.walletAddress, accountDetail, false).then(() => this.forceUpdate());
-      }
+    refreshTokenBalance() {
+      return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
     reloadContract() {
       return this.tokenUtils.getContractDetails(this.walletAddress, false, false)
@@ -503,7 +409,7 @@ export default {
       if (accountDetails.error) {
         this.error = 'Error displaying transactions list';
       } else {
-        this.selectedAccount = accountDetails;
+        this.selectedAccount = this.contractDetails;
         this.selectedTransactionHash = hash;
         this.selectedContractMethodName = methodName;
         this.seeAccountDetails = true;
@@ -520,9 +426,6 @@ export default {
       this.seeAccountDetails = false;
       this.seeAccountDetailsPermanent = false;
       this.selectedAccount = null;
-    },
-    maximize() {
-      window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
     },
     handleError(error) {
       if(error) {
@@ -542,7 +445,7 @@ export default {
           return;
         }
         $('.userNavigation').append(` \
-          <li id='myWalletTad' class='item${this.isMaximized ? ' active' : ''}'> \
+          <li id='myWalletTad' class='item active'> \
             <a href='${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet'> \
               <div class='uiIconAppWallet uiIconDefaultApp' /> \
               <span class='tabName'>My Wallet</span> \
