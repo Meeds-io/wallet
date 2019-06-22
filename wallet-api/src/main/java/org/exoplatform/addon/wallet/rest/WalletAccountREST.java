@@ -128,7 +128,7 @@ public class WalletAccountREST implements ResourceContainer {
    */
   @Path("enable")
   @GET
-  @RolesAllowed("administrators")
+  @RolesAllowed("rewarding")
   public Response enableWalletByAddress(@QueryParam("address") String address, @QueryParam("enable") boolean enable) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
@@ -151,7 +151,7 @@ public class WalletAccountREST implements ResourceContainer {
    */
   @Path("remove")
   @GET
-  @RolesAllowed("administrators")
+  @RolesAllowed("rewarding")
   public Response removeWalletByAddress(@QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
@@ -168,7 +168,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("setInitializationStatus")
   @GET
-  @RolesAllowed({ "administrators", "rewarding" })
+  @RolesAllowed({ "rewarding", "rewarding" })
   public Response setInitializationStatus(@QueryParam("address") String address, @QueryParam("status") String status) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
@@ -381,7 +381,7 @@ public class WalletAccountREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveOrDeleteAddressLabel")
-  @RolesAllowed({ "administrators", "rewarding" })
+  @RolesAllowed("rewarding")
   public Response saveOrDeleteAddressLabel(WalletAddressLabel label) {
     if (label == null) {
       LOG.warn("Bad request sent to server with empty data");
@@ -508,7 +508,7 @@ public class WalletAccountREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
-  @RolesAllowed({ "administrators", "rewarding" })
+  @RolesAllowed("rewarding")
   public Response getWallets() {
     try {
       return Response.ok(accountService.listWallets()).build();

@@ -21,7 +21,7 @@ import org.exoplatform.services.rest.resource.ResourceContainer;
  * This class provide a REST endpoint to compute rewards
  */
 @Path("/wallet/api/reward/")
-@RolesAllowed({ "rewarding", "administrators" })
+@RolesAllowed("rewarding")
 public class RewardBudgetREST implements ResourceContainer {
   private static final Log LOG = ExoLogger.getLogger(RewardBudgetREST.class);
 
@@ -40,7 +40,7 @@ public class RewardBudgetREST implements ResourceContainer {
   @GET
   @Path("compute")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response computeRewards(@QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       Set<WalletReward> rewards = rewardService.computeReward(periodDateInSeconds);
@@ -65,7 +65,7 @@ public class RewardBudgetREST implements ResourceContainer {
    */
   @GET
   @Path("send")
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response sendRewards(@QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       rewardService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());

@@ -82,7 +82,7 @@ public class WalletContractREST implements ResourceContainer {
    */
   @GET
   @Path("bin/{name}")
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response getBin(@PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
@@ -110,7 +110,7 @@ public class WalletContractREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("abi/{name}")
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response getAbi(@PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
@@ -136,7 +136,7 @@ public class WalletContractREST implements ResourceContainer {
    */
   @GET
   @Path("refresh")
-  @RolesAllowed("administrators")
+  @RolesAllowed("rewarding")
   public Response refreshContract() {
     try {
       contractService.refreshContractDetail();

@@ -44,6 +44,20 @@
                 </value>
               </collection>
             </field>
+            <field name="user">
+              <collection type="java.util.ArrayList">
+                <value>
+                  <object type="org.exoplatform.services.organization.OrganizationConfig$User">
+                    <field name="userName">
+                      <string>${exo.super.user}</string>
+                    </field>
+                    <field name="groups">
+                      <string>*:/platform/rewarding</string>
+                    </field>
+                  </object>
+                </value>
+              </collection>
+            </field>
           </object>
         </object-param>
       </init-params>

@@ -17,7 +17,7 @@ import org.exoplatform.services.rest.resource.ResourceContainer;
  * This class provide a REST endpoint to save/load reward pools
  */
 @Path("/wallet/api/reward/team")
-@RolesAllowed({ "rewarding", "administrators" })
+@RolesAllowed("rewarding")
 public class RewardTeamREST implements ResourceContainer {
   private static final Log  LOG = ExoLogger.getLogger(RewardTeamREST.class);
 
@@ -33,7 +33,7 @@ public class RewardTeamREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response listTeams() {
     try {
       return Response.ok(rewardTeamService.getTeams()).build();
@@ -52,7 +52,7 @@ public class RewardTeamREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("remove")
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response removeTeam(@QueryParam("id") Long id) {
     if (id == null || id == 0) {
       return Response.status(400).build();
@@ -77,7 +77,7 @@ public class RewardTeamREST implements ResourceContainer {
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response saveTeam(RewardTeam rewardTeam) {
     if (rewardTeam == null) {
       LOG.warn("Bad request sent to server with empty team");

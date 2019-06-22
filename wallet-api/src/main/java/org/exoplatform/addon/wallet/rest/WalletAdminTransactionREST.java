@@ -36,7 +36,7 @@ import org.exoplatform.services.rest.resource.ResourceContainer;
  * wallet
  */
 @Path("/wallet/api/admin/transaction")
-@RolesAllowed("administrators")
+@RolesAllowed("rewarding")
 public class WalletAdminTransactionREST implements ResourceContainer {
 
   private static final String     BAD_REQUEST_SENT_TO_SERVER_BY = "Bad request sent to server by '";
@@ -54,7 +54,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
    * @return REST response with status
    */
   @POST
-  @RolesAllowed("administrators")
+  @RolesAllowed("rewarding")
   public Response executeTransactionOnWallet(@FormParam("action") String action, @FormParam("address") String address) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(address)) {
@@ -87,7 +87,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
   @POST
   @Path("intiialize")
-  @RolesAllowed("administrators")
+  @RolesAllowed("rewarding")
   public Response intializeWallet(@FormParam("receiver") String receiver,
                                   @FormParam("etherAmount") double etherAmount,
                                   @FormParam("tokenAmount") double tokenAmount,

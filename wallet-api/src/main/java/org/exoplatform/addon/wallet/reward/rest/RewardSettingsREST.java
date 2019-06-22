@@ -20,7 +20,7 @@ import org.exoplatform.services.rest.resource.ResourceContainer;
  * This class provide a REST endpoint to save/load reward settings
  */
 @Path("/wallet/api/reward/settings")
-@RolesAllowed({ "rewarding", "administrators" })
+@RolesAllowed("rewarding")
 public class RewardSettingsREST implements ResourceContainer {
   private static final Log      LOG = ExoLogger.getLogger(RewardSettingsREST.class);
 
@@ -35,7 +35,7 @@ public class RewardSettingsREST implements ResourceContainer {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response getSettings() {
     try {
       RewardSettings settings = rewardSettingsService.getSettings();
@@ -55,7 +55,7 @@ public class RewardSettingsREST implements ResourceContainer {
   @POST
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response saveSettings(RewardSettings rewardSettings) {
     if (rewardSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
@@ -81,7 +81,7 @@ public class RewardSettingsREST implements ResourceContainer {
   @Path("getDates")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
   public Response getRewardDates(@QueryParam("periodType") String periodType,
                                  @QueryParam("dateInSeconds") long dateInSeconds) {
     if (dateInSeconds == 0) {
