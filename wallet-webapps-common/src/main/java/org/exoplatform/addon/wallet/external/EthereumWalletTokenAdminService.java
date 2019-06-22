@@ -65,7 +65,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private ListenerService                       listenerService;
 
-  private WalletService                         walletService;
+  private WalletContractService                 walletContractService;
 
   private EthereumClientConnectorForTransaction clientConnector;
 
@@ -105,7 +105,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       if (contractDetail == null) {
         LOG.warn("Can't find contract with address {} in configured blockchain", contractAddress);
       } else {
-        getWalletService().setConfiguredContractDetail(contractDetail);
+        getContractService().saveContractDetail(contractDetail);
       }
     }
   }
@@ -841,13 +841,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return getPrincipalContractDetail().getDecimals();
   }
 
-  private WalletService getWalletService() {
-    if (walletService == null) {
-      walletService = CommonsUtils.getService(WalletService.class);
-    }
-    return walletService;
-  }
-
   private WalletTransactionService getTransactionService() {
     if (transactionService == null) {
       transactionService = CommonsUtils.getService(WalletTransactionService.class);
@@ -867,6 +860,13 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       accountService = CommonsUtils.getService(WalletAccountService.class);
     }
     return accountService;
+  }
+
+  private WalletContractService getContractService() {
+    if (walletContractService == null) {
+      walletContractService = CommonsUtils.getService(WalletContractService.class);
+    }
+    return walletContractService;
   }
 
   private EthereumClientConnectorForTransaction getClientConnector() {

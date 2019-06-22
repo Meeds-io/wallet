@@ -178,7 +178,7 @@ public class EthereumTransactionDecoder {
     transactionDetail.setTo(receiverAddress);
 
     if (contractDetail == null && receiverAddress != null) {
-      contractDetail = contractService.getContractDetail(receiverAddress);
+      contractDetail = getContractService().getContractDetail(receiverAddress);
     }
 
     if (contractDetail != null && StringUtils.isNotBlank(contractDetail.getAddress())) {
@@ -208,7 +208,7 @@ public class EthereumTransactionDecoder {
 
     String toAddress = transactionReceipt == null ? null : transactionReceipt.getTo();
     if (contractDetail == null) {
-      contractDetail = contractService.getContractDetail(toAddress);
+      contractDetail = getContractService().getContractDetail(StringUtils.lowerCase(toAddress));
     }
     if (contractDetail == null || !StringUtils.equalsIgnoreCase(toAddress, contractDetail.getAddress())) {
       return;
@@ -424,4 +424,10 @@ public class EthereumTransactionDecoder {
     return accountService;
   }
 
+  public WalletContractService getContractService() {
+    if (contractService == null) {
+      contractService = CommonsUtils.getService(WalletContractService.class);
+    }
+    return contractService;
+  }
 }

@@ -98,8 +98,9 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     String contractDetailString = toJsonString(contractDetail);
     getSettingService().set(WALLET_CONTEXT,
                             WALLET_SCOPE,
-                            contractAddress,
+                            StringUtils.lowerCase(contractAddress),
                             SettingValue.create(contractDetailString));
+    getWalletService().setConfiguredContractDetail(contractDetail);
   }
 
   @Override
@@ -108,7 +109,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
       return null;
     }
 
-    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, address);
+    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
     if (contractDetailValue != null) {
       return fromJsonString((String) contractDetailValue.getValue(), ContractDetail.class);
     }
@@ -120,6 +121,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     GlobalSettings settings = getSettings();
     String contractAddress = settings.getContractAddress();
     ContractDetail contractDetail = getWalletTokenAdminService().loadContractDetailFromBlockchain(contractAddress);
+    saveContractDetail(contractDetail);
     getWalletService().setConfiguredContractDetail(contractDetail);
   }
 
