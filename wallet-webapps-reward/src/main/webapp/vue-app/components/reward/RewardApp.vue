@@ -144,7 +144,6 @@ export default {
       contractDetails: null,
       periodDatesDisplay: null,
       periodType: null,
-      networkId: null,
       walletAddress: null,
       originalWalletAddress: null,
       duplicatedWallets: [],
@@ -190,8 +189,8 @@ export default {
   },
   created() {
     this.init()
-      .then(() => (this.transactionEtherscanLink = this.walletUtils.getTransactionEtherscanlink(this.networkId)))
-      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink(this.networkId)));
+      .then(() => (this.transactionEtherscanLink = this.walletUtils.getTransactionEtherscanlink()))
+      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
   },
   methods: {
     init() {
@@ -217,9 +216,8 @@ export default {
         .then(() => {
           this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
           this.originalWalletAddress = window.walletSettings.wallet.address;
-          this.networkId = window.walletSettings.currentNetworkId;
 
-          return this.tokenUtils.getContractsDetails(this.walletAddress, this.networkId, true, true);
+          return this.tokenUtils.getContractsDetails(this.walletAddress, true, true);
         })
         .then((contracts) => (this.contracts = contracts ? contracts.filter((contract) => contract.isDefault) : []))
         .then(() => this.refreshRewardSettings())

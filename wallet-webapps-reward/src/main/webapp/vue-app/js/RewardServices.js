@@ -45,7 +45,8 @@ export function removeRewardTeam(id) {
   }).then((resp) => resp && resp.ok);
 }
 
-export function getRewardTransactions(networkId, periodType, startDateInSeconds) {
+export function getRewardTransactions(periodType, startDateInSeconds) {
+  const networkId = window.walletSettings.network.id;
   return fetch(`/portal/rest/wallet/api/reward/transaction/list?networkId=${networkId}&periodType=${periodType}&startDateInSeconds=${startDateInSeconds}`, {
     method: 'GET',
     credentials: 'include',

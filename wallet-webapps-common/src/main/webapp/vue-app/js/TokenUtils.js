@@ -1,12 +1,12 @@
 import {convertTokenAmountReceived, computeBalance} from './WalletUtils.js';
 import {getLastNonce} from './TransactionUtils.js';
 
-export function getContractDetails(account, netId, isAdministration) {
+export function getContractDetails(account, isAdministration) {
   if (window.walletSettings.contractAddress) {
     const contractDetails = window.walletSettings.contractDetail || {};
     contractDetails.address = window.walletSettings.contractAddress;
     contractDetails.icon = 'fa-file-contract';
-    contractDetails.networkId = netId;
+    contractDetails.networkId = window.walletSettings.network.id;
     contractDetails.isContract = true;
     return retrieveContractDetails(account, contractDetails, isAdministration);
   }
@@ -268,7 +268,7 @@ export function deployContract(contractInstance, account, gasLimit, gasPrice, tr
 /*
  * Retrieve contract details from eXo Platform server if exists
  */
-export function getSavedContractDetails(address, networkId) {
+export function getSavedContractDetails(address) {
   return fetch(`/portal/rest/wallet/api/contract/getContract?address=${address}`, {
     method: 'GET',
     credentials: 'include',
@@ -277,7 +277,7 @@ export function getSavedContractDetails(address, networkId) {
       if (resp && resp.ok) {
         return resp.json();
       } else {
-        throw new Error(`Error getting contract details from server with address ${address} on network with id ${networkId}`);
+        throw new Error(`Error getting contract details from server with address ${address}`);
       }
     })
     .then((contractDetails) => {
@@ -328,7 +328,8 @@ export function estimateContractDeploymentGas(instance) {
   });
 }
 
-export function getContractDeploymentTransactionsInProgress(networkId) {
+export function getContractDeploymentTransactionsInProgress() {
+  const networkId = window.walletSettings.network.id;
   const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${networkId}`;
   const storageValue = localStorage.getItem(STORAGE_KEY);
   if (storageValue === null) {
@@ -338,7 +339,8 @@ export function getContractDeploymentTransactionsInProgress(networkId) {
   }
 }
 
-export function removeContractDeploymentTransactionsInProgress(networkId, transactionHash) {
+export function removeContractDeploymentTransactionsInProgress(transactionHash) {
+  const networkId = window.walletSettings.network.id;
   const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${networkId}`;
   let storageValue = localStorage.getItem(STORAGE_KEY);
   if (storageValue === null) {
@@ -376,7 +378,9 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
   }
 }
 
-export function sendContractTransaction(networkId, txDetails, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
+export function sendContractTransaction(txDetails, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
+  const networkId = window.walletSettings.network.id;
+
   // suppose you want to call a function named myFunction of myContract
   const data = txDetails.method(...txDetails.parameters).encodeABI();
   const transactionToSend = {
@@ -387,7 +391,9 @@ export function sendContractTransaction(networkId, txDetails, hashCallback, rece
     gasPrice: txDetails.gasPrice,
   };
 
-  return getLastNonce(networkId, txDetails.senderAddress).then((nonce) => {
+  return getLastNonce(txDetails.senderAddress).then((nonce) => {
+    const networkId = window.walletSettings.network.id;
+
     // Increment manually nonce if we have the last transaction always pending
     if (nonce && Number(nonce) > 0) {
       transactionToSend.nonce = nonce + 1;

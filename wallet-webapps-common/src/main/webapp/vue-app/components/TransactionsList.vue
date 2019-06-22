@@ -798,12 +798,6 @@ export default {
     WalletAddress,
   },
   props: {
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
     fiatSymbol: {
       type: String,
       default: function() {
@@ -905,15 +899,9 @@ export default {
         });
       }
     },
-    networkId() {
-      if (this.networkId) {
-        this.transactionEtherscanLink = getTransactionEtherscanlink(this.networkId);
-        this.addressEtherscanLink = getAddressEtherscanlink(this.networkId);
-        this.tokenEtherscanLink = getTokenEtherscanlink(this.networkId);
-      }
-    },
   },
   created() {
+    this.networkId = window.walletSettings.network.id;
     if (!this.transactionEtherscanLink && this.networkId) {
       this.transactionEtherscanLink = getTransactionEtherscanlink(this.networkId);
       this.addressEtherscanLink = getAddressEtherscanlink(this.networkId);
@@ -969,7 +957,7 @@ export default {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.networkId, this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
+      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
         thiss.$emit('refresh-balance');
         thiss.forceUpdateList();
       })

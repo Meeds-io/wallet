@@ -262,7 +262,6 @@
       <account-detail
         ref="accountDetail"
         :fiat-symbol="fiatSymbol"
-        :network-id="networkId"
         :wallet-address="selectedWalletAddress"
         :contract-details="selectedWalletDetails"
         :selected-transaction-hash="selectedTransactionHash"
@@ -283,12 +282,6 @@ export default {
     InitializeAccountModal,
   },
   props: {
-    networkId: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     loading: {
       type: Boolean,
       default: function() {

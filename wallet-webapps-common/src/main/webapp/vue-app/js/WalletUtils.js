@@ -250,8 +250,7 @@ export function getTransaction(hash) {
 }
 
 export function computeNetwork() {
-  return window.localWeb3.eth.net
-    .getId()
+  return window.localWeb3.eth.net.getId()
     .then((networkId, error) => {
       if (error) {
         console.debug('Error computing network id', error);
@@ -394,7 +393,8 @@ export function rememberPassword(remember, password, address) {
   }
 }
 
-export function getAddressEtherscanlink(networkId) {
+export function getAddressEtherscanlink() {
+  const networkId = window.walletSettings.network.id;
   if (networkId) {
     switch (networkId) {
       case 1:
@@ -408,7 +408,8 @@ export function getAddressEtherscanlink(networkId) {
   return null;
 }
 
-export function getTokenEtherscanlink(networkId) {
+export function getTokenEtherscanlink() {
+  const networkId = window.walletSettings.network.id;
   if (networkId) {
     switch (networkId) {
       case 1:
@@ -422,7 +423,8 @@ export function getTokenEtherscanlink(networkId) {
   return null;
 }
 
-export function getTransactionEtherscanlink(networkId) {
+export function getTransactionEtherscanlink() {
+  const networkId = window.walletSettings.network.id;
   if (networkId) {
     switch (networkId) {
       case 1:

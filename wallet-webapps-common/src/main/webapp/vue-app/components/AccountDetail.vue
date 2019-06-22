@@ -55,7 +55,6 @@
     <transactions-list
       id="transactionsList"
       ref="transactionsList"
-      :network-id="networkId"
       :account="walletAddress"
       :contract-details="contractDetails"
       :fiat-symbol="fiatSymbol"
@@ -91,12 +90,6 @@ export default {
       type: Boolean,
       default: function() {
         return false;
-      },
-    },
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
       },
     },
     walletAddress: {

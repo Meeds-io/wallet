@@ -52,20 +52,6 @@
             {{ props.item.address }}
           </span>
         </td>
-        <td class="text-xs-right">
-          <v-progress-circular
-            v-if="props.item.isPending"
-            :width="3"
-            indeterminate
-            color="primary" />
-          <v-btn
-            v-else-if="isAdmin"
-            icon
-            ripple
-            @click="deleteContract(props.item, $event)">
-            <i class="uiIconTrash uiIconBlue"></i>
-          </v-btn>
-        </td>
       </template>
     </v-data-table>
 
@@ -184,12 +170,6 @@ export default {
           sortable: false,
           value: 'address',
         },
-        {
-          text: '',
-          align: 'center',
-          sortable: false,
-          value: 'action',
-        },
       ],
     };
   },
@@ -216,126 +196,11 @@ export default {
     },
   },
   methods: {
-    init(avoidReloading) {
-      const previouslyRetrievedContracts = this.contracts;
+    init() {
       this.contracts = [];
-      return (avoidReloading ? Promise.resolve(previouslyRetrievedContracts) : this.tokenUtils.getContractsDetails(this.walletAddress, true, true))
+      return this.tokenUtils.getContractsDetails(this.walletAddress, true, true)
         .then((contracts) => (this.contracts = contracts ? contracts.filter((contract) => contract.isDefault) : []))
-        .then(() => this.tokenUtils.getContractDeploymentTransactionsInProgress())
-        .then((contractsInProgress) => {
-          Object.keys(contractsInProgress).forEach((hash) => {
-            const contractInProgress = contractsInProgress[hash];
-            this.walletUtils.getTransactionReceipt(contractInProgress.hash).then((receipt) => {
-              if (!receipt) {
-                // pending transaction
-                this.contracts.push({
-                  name: contractInProgress.name,
-                  hash: contractInProgress.hash,
-                  address: 'Transaction in progress...',
-                  isPending: true,
-                });
-                const thiss = this;
-                this.walletUtils.watchTransactionStatus(contractInProgress.hash, () => {
-                  thiss.init();
-                });
-              } else if (receipt.status && receipt.contractAddress) {
-                const contractAddress = receipt.contractAddress.toLowerCase();
-                // success transaction
-                // Add contract as default if not yet present
-                if (contractInProgress.isDefault && !this.contracts.find((contract) => contract.address === contractAddress)) {
-                  // This may happen when the contract is already added in //
-                  if (window.walletSettings.defaultContractsToDisplay.indexOf(contractAddress)) {
-                    this.newTokenAddress = contractAddress;
-                    this.tokenUtils.removeContractDeploymentTransactionsInProgress(contractInProgress.hash);
-                    this.contractsModified();
-                  } else {
-                    // Save newly created contract as default
-                    return this.tokenUtils.saveContractAddress(this.walletAddress, contractAddress, contractInProgress.isDefault)
-                      .then((added, error) => {
-                        if (error) {
-                          throw error;
-                        }
-                        if (added) {
-                          this.newTokenAddress = contractAddress;
-                          this.tokenUtils.removeContractDeploymentTransactionsInProgress(this.networkId, contractInProgress.hash);
-                          this.contractsModified();
-                        } else {
-                          this.error = `Address ${contractAddress} is not recognized as ERC20 Token contract's address`;
-                        }
-                        this.loadingContracts = false;
-                      })
-                      .catch((err) => {
-                        console.debug('saveContractAddress method - error', err);
-                        this.loadingContracts = false;
-                        this.error = `${err}`;
-                      });
-                  }
-                } else {
-                  // The contract was already saved
-                  this.tokenUtils.removeContractDeploymentTransactionsInProgress(this.networkId, contractInProgress.hash);
-                }
-              } else {
-                // failed transaction
-                this.contracts.push({
-                  name: contractInProgress.name,
-                  hash: contractInProgress.hash,
-                  address: '',
-                  error: `Transaction failed on contract ${contractInProgress.name}`,
-                });
-              }
-            });
-          });
-        })
         .then(() => this.$emit('contracts-loaded', this.contracts));
-    },
-    contractsModified() {
-      this.init()
-        .then(() => (this.loadingContracts = false))
-        .catch((e) => {
-          console.debug('init method - error', e);
-          this.loadingContracts = false;
-          this.error = `Error adding new contract address: ${e}`;
-        });
-    },
-    deleteContract(item, event) {
-      if (!item || !item.address) {
-        this.error = "Contract doesn't have an address";
-      }
-      this.loadingContracts = true;
-      if (item.hash) {
-        this.tokenUtils.removeContractDeploymentTransactionsInProgress(this.networkId, item.hash);
-        this.contractsModified();
-      } else {
-        this.tokenUtils.removeContractAddressFromDefault(item.address)
-          .then((resp, error) => {
-            if (error) {
-              this.error = 'Error deleting contract as default';
-            } else {
-              return this.init();
-            }
-          })
-          .then(() => (this.loadingContracts = false))
-          .catch((e) => {
-            console.debug('removeContractAddressFromDefault method - error', e);
-            this.loadingContracts = false;
-            this.error = 'Error deleting contract as default';
-          });
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    },
-    updateList(address) {
-      this.loadingContracts = true;
-      if (address) {
-        this.newTokenAddress = address;
-      }
-      this.init()
-        .then(() => (this.loadingContracts = false))
-        .catch((e) => {
-          console.debug('init method - error', e);
-          this.loadingContracts = false;
-          this.error = `Error encountered: ${e}`;
-        });
     },
     openContractDetails(contractDetails) {
       if (contractDetails.error) {

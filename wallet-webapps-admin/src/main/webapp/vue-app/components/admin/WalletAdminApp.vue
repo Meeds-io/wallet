@@ -73,7 +73,6 @@
               value="wallets">
               <wallets-tab
                 ref="walletsTab"
-                :network-id="networkId"
                 :wallet-address="walletAddress"
                 :loading="loading"
                 :fiat-symbol="fiatSymbol"
@@ -102,7 +101,6 @@
               value="contracts">
               <contracts-tab
                 ref="contractsTab"
-                :network-id="networkId"
                 :wallet-address="walletAddress"
                 :loading="loading"
                 :fiat-symbol="fiatSymbol"

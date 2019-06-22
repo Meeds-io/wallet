@@ -86,13 +86,11 @@ export default {
             }
             this.needPassword = window.walletSettings.browserWalletExists && !window.walletSettings.storedPassword;
             this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
-            this.networkId = window.walletSettings.network.id;
             this.isReadOnly = window.walletSettings.isReadOnly;
             if (window.walletSettings.network.maxGasPrice) {
               window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
             }
             this.principalContractDetails = {
-              networkId: this.networkId,
               address: window.walletSettings.contractAddress,
               isContract: true,
               isDefault: true,
