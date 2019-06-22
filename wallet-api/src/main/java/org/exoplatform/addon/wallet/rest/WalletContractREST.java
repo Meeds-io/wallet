@@ -130,10 +130,8 @@ public class WalletContractREST implements ResourceContainer {
   }
 
   /**
-   * Save a new contract address to display it in wallet of all users and save
-   * contract name and symbol
+   * Refreshes token contract details from blockchain
    * 
-   * @param contractDetail contract detail to save
    * @return REST response with status
    */
   @GET

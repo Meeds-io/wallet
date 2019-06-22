@@ -107,7 +107,6 @@ public class TransactionStorage {
   /**
    * Return contract amount received during a period of time
    * 
-   * @param networkId
    * @param contractAddress
    * @param address
    * @param startDate

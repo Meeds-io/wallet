@@ -26,9 +26,9 @@ import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 public interface WalletService {
 
   /**
-   * Save global settings
+   * Save initial funds
    * 
-   * @param newGlobalSettings global settings to save
+   * @param initialFundsSettings initial funds to save
    */
 
   public void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings);
