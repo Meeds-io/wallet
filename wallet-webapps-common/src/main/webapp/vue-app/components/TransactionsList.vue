@@ -901,12 +901,9 @@ export default {
     },
   },
   created() {
-    this.networkId = window.walletSettings.network.id;
-    if (!this.transactionEtherscanLink && this.networkId) {
-      this.transactionEtherscanLink = getTransactionEtherscanlink(this.networkId);
-      this.addressEtherscanLink = getAddressEtherscanlink(this.networkId);
-      this.tokenEtherscanLink = getTokenEtherscanlink(this.networkId);
-    }
+    this.transactionEtherscanLink = getTransactionEtherscanlink();
+    this.addressEtherscanLink = getAddressEtherscanlink();
+    this.tokenEtherscanLink = getTokenEtherscanlink();
 
     if (this.account) {
       this.init().catch((error) => {

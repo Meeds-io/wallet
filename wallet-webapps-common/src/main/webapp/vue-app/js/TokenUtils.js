@@ -17,6 +17,7 @@ export function getContractDetails(account, isAdministration) {
  * Retrieve an ERC20 contract instance at specified address
  */
 export function retrieveContractDetails(account, contractDetails, isAdministration) {
+  contractDetails.networkId = window.walletSettings.network.id;
   contractDetails.retrievedAttributes = 0;
   let contractToSave = false;
   try {
@@ -329,8 +330,7 @@ export function estimateContractDeploymentGas(instance) {
 }
 
 export function getContractDeploymentTransactionsInProgress() {
-  const networkId = window.walletSettings.network.id;
-  const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${networkId}`;
+  const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${window.walletSettings.network.id}`;
   const storageValue = localStorage.getItem(STORAGE_KEY);
   if (storageValue === null) {
     return {};
@@ -340,8 +340,7 @@ export function getContractDeploymentTransactionsInProgress() {
 }
 
 export function removeContractDeploymentTransactionsInProgress(transactionHash) {
-  const networkId = window.walletSettings.network.id;
-  const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${networkId}`;
+  const STORAGE_KEY = `exo-wallet-contract-deployment-progress-${window.walletSettings.network.id}`;
   let storageValue = localStorage.getItem(STORAGE_KEY);
   if (storageValue === null) {
     return;
@@ -379,8 +378,6 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
 }
 
 export function sendContractTransaction(txDetails, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
-  const networkId = window.walletSettings.network.id;
-
   // suppose you want to call a function named myFunction of myContract
   const data = txDetails.method(...txDetails.parameters).encodeABI();
   const transactionToSend = {
@@ -392,8 +389,6 @@ export function sendContractTransaction(txDetails, hashCallback, receiptCallback
   };
 
   return getLastNonce(txDetails.senderAddress).then((nonce) => {
-    const networkId = window.walletSettings.network.id;
-
     // Increment manually nonce if we have the last transaction always pending
     if (nonce && Number(nonce) > 0) {
       transactionToSend.nonce = nonce + 1;
@@ -421,6 +416,14 @@ export function sendContractTransaction(txDetails, hashCallback, receiptCallback
           return errorCallback(error, receipt);
         }
       });
+  });
+}
+
+export function refreshContractOnServer() {
+  return fetch('/portal/rest/wallet/api/contract/refresh', {
+    method: 'GET',
+  }).then((resp) => {
+    return resp && resp.ok;
   });
 }
 
@@ -464,12 +467,4 @@ function getContractFiles(tokenName) {
         bin: contractBin
       }
     });
-}
-
-function refreshContractOnServer() {
-  return fetch('/portal/rest/wallet/api/contract/refresh', {
-    method: 'GET',
-  }).then((resp) => {
-    return resp && resp.ok;
-  });
 }

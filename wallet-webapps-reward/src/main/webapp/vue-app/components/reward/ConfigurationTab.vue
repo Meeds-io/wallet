@@ -19,25 +19,6 @@
         </div>
       </div>
 
-      <div class="text-xs-left rewardWalletConfiguration">
-        <span>
-          Token
-        </span>
-        <div id="selectedContractAddress" class="selectBoxVuetifyParent v-input">
-          <v-combobox
-            v-model="settingsToSave.contractAddress"
-            :disabled="!configurationEditable"
-            :items="contracts"
-            attach="#selectedContractAddress"
-            item-value="address"
-            item-text="name"
-            class="selectBoxVuetify"
-            hide-no-data
-            hide-selected
-            return-masked-value
-            small-chips />
-        </div>
-      </div>
       <v-card v-if="settingsToSave && settingsToSave.pluginSettings" flat>
         <v-container
           fluid
@@ -153,14 +134,6 @@
 import {saveRewardSettings} from '../../js/RewardServices.js';
 
 export default {
-  props: {
-    contracts: {
-      type: Array,
-      default: function() {
-        return [];
-      },
-    },
-  },
   data() {
     return {
       loadingSettings: false,
@@ -191,13 +164,6 @@ export default {
     };
   },
   computed: {
-    selectedContractDetails() {
-      if(!this.settingsToSave || !this.settingsToSave.contractAddress) {
-        return null;
-      }
-      const contractAddress = this.settingsToSave.contractAddress.toLowerCase();
-      return this.contracts && this.contracts.find(contract => contract.address &&  contract.address.toLowerCase() === contractAddress);
-    },
     selectedPeriodType() {
       if(!this.settingsToSave || !this.settingsToSave.periodType) {
         return this.periods[0];
@@ -210,7 +176,6 @@ export default {
       if (window.walletRewardSettings) {
         this.settingsToSave = Object.assign({}, window.walletRewardSettings);
         this.$nextTick().then(() =>{
-          this.settingsToSave.contractAddress = this.selectedContractDetails;
           this.settingsToSave.periodType = this.selectedPeriodType;
         });
       } else {
@@ -219,9 +184,6 @@ export default {
     },
     save() {
       const thiss = this;
-      if(this.settingsToSave.contractAddress) {
-        this.settingsToSave.contractAddress = this.settingsToSave.contractAddress.address;
-      }
       if(this.settingsToSave.periodType) {
         this.settingsToSave.periodType = this.settingsToSave.periodType.value;
       }

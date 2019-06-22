@@ -78,8 +78,7 @@
                 :fiat-symbol="fiatSymbol"
                 :refresh-index="refreshIndex"
                 :address-etherscan-link="addressEtherscanLink"
-                :principal-account-address="principalAccountAddress"
-                :principal-contract="principalContract"
+                :contract-details="contractDetails"
                 :is-admin="isAdmin"
                 @pending="pendingTransaction"
                 @wallets-loaded="wallets = $event" />
@@ -90,8 +89,8 @@
               <initial-funds-tab
                 ref="fundsTab"
                 :loading="loading"
-                :principal-contract="principalContract"
-                @save="saveGlobalSettings" />
+                :contract-details="contractDetails"
+                @saved="refreshSettings" />
             </v-tab-item>
             <v-tab-item
               id="packs"
@@ -136,9 +135,7 @@ export default {
       walletAddress: null,
       originalWalletAddress: null,
       refreshIndex: 1,
-      principalContract: null,
-      principalAccountAddress: null,
-      networkId: null,
+      contractDetails: null,
       isAdmin: null,
       addressEtherscanLink: null,
       contracts: [],
@@ -148,7 +145,7 @@ export default {
   },
   created() {
     this.init()
-      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink(this.networkId)));
+      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
   },
   methods: {
     init() {
@@ -165,11 +162,7 @@ export default {
             throw new Error('Wallet settings are empty for current user');
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
-          this.networkId = window.walletSettings.network.id;
           this.isAdmin = window.walletSettings.isAdmin;
-          if (window.walletSettings.defaultPrincipalAccount && window.walletSettings.defaultPrincipalAccount.indexOf('0x') === 0) {
-            this.principalAccountAddress = window.walletSettings.defaultPrincipalAccount;
-          }
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
@@ -189,12 +182,10 @@ export default {
         .then((wallets) => {
           this.wallets = wallets;
 
-          if (this.principalAccountAddress) {
-            return this.tokenUtils.retrieveContractDetails(this.walletAddress, {address: this.principalAccountAddress, networkId: this.networkId}, true)
+          this.contractDetails = window.walletSettings.contractDetail;
+          if (this.contractDetails) {
+            return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.contractDetails, true);
           }
-        })
-        .then((contractDetails) => {
-          this.principalContract = contractDetails;
         })
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
         .then(() => this.$refs && this.$refs.walletsTab && this.$refs.walletsTab.init(true))
@@ -225,9 +216,9 @@ export default {
       if (wallet) {
         if (transaction.contractAddress) {
           if(!transaction.contractMethodName || transaction.contractMethodName === 'transfer'  || transaction.contractMethodName === 'transferFrom' || transaction.contractMethodName === 'approve') {
-            this.$set(wallet, 'loadingBalancePrincipal', true);
+            this.$set(wallet, 'loadingTokenBalance', true);
           }
-          this.watchPendingTransaction(transaction, this.principalContract);
+          this.watchPendingTransaction(transaction, this.contractDetails);
         } else {
           this.$set(wallet, 'loadingBalance', true);
           this.watchPendingTransaction(transaction);
@@ -250,8 +241,7 @@ export default {
           if (transaction.contractMethodName === 'transferOwnership') {
             if (contractDetails && contractDetails.isContract && contractDetails.address && transaction.contractAddress && contractDetails.address.toLowerCase() === transaction.contractAddress.toLowerCase()) {
               this.$set(contractDetails, 'owner', transaction.to);
-              contractDetails.networkId = this.networkId;
-              return this.tokenUtils.saveContractAddressOnServer(contractDetails).then(() => this.init());
+              return this.tokenUtils.refreshContractOnServer().then(() => this.init());
             }
           } else if (transaction.contractMethodName === 'addAdmin' || transaction.contractMethodName === 'removeAdmin') {
             if (wallet) {
@@ -281,34 +271,8 @@ export default {
       this.refreshIndex++;
       this.$forceUpdate();
     },
-    saveGlobalSettings(initialFunds) {
-      this.loading = true;
-      return fetch('/portal/rest/wallet/api/settings/saveInitialFunds', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(initialFunds),
-      })
-        .then((resp) => {
-          if (resp && resp.ok) {
-            return resp.text();
-          } else {
-            throw new Error('Error saving global settings');
-          }
-        })
-        .then(() => {
-          window.setTimeout(() => {
-            this.init();
-          }, 200);
-        })
-        .catch((e) => {
-          this.loading = false;
-          console.debug('fetch settings - error', e);
-          this.error = 'Error saving global settings';
-        });
+    refreshSettings() {
+      this.init();
     },
   },
 };

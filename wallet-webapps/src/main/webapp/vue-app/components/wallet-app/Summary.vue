@@ -113,7 +113,7 @@ export default {
     contractDetails: {
       type: Object,
       default: function() {
-        return {};
+        return null;
       },
     },
   },

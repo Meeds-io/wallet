@@ -13,8 +13,6 @@ public class RewardSettings implements Serializable, Cloneable {
 
   private static final long         serialVersionUID = -8650247964730374760L;
 
-  private String                    contractAddress;
-
   private RewardPeriodType          periodType       = RewardPeriodType.DEFAULT;
 
   private Set<RewardPluginSettings> pluginSettings;
@@ -28,7 +26,7 @@ public class RewardSettings implements Serializable, Cloneable {
       Set<RewardPluginSettings> clonedPluginSettings =
                                                      pluginSettings == null ? null
                                                                             : (Set<RewardPluginSettings>) new HashSet<>(pluginSettings).clone();
-      return new RewardSettings(contractAddress, periodType, clonedPluginSettings);
+      return new RewardSettings(periodType, clonedPluginSettings);
     }
   }
 }

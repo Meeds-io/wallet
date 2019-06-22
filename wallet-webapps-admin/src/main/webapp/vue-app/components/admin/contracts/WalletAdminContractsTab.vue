@@ -198,8 +198,8 @@ export default {
   methods: {
     init() {
       this.contracts = [];
-      return this.tokenUtils.getContractsDetails(this.walletAddress, true, true)
-        .then((contracts) => (this.contracts = contracts ? contracts.filter((contract) => contract.isDefault) : []))
+      return this.tokenUtils.getContractDetails(this.walletAddress, true)
+        .then((contractDetails) => (this.contracts = (contractDetails && [contractDetails]) || []))
         .then(() => this.$emit('contracts-loaded', this.contracts));
     },
     openContractDetails(contractDetails) {

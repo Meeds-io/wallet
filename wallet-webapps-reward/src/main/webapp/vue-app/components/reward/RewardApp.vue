@@ -35,7 +35,7 @@
 
           <wallet-setup
             ref="walletSetup"
-            :wallet-address="originalWalletAddress"
+            :wallet-address="walletAddress"
             :loading="loading"
             is-administration
             @refresh="init()"
@@ -56,12 +56,6 @@
               </v-card-text>
             </v-card>
           </v-dialog>
-
-          <v-flex v-if="isContractDifferentFromPrincipal && !loading" class="text-xs-center">
-            <div class="alert alert-warning">
-              <i class="uiIconWarning"></i> You have chosen a token that is different from principal displayed token
-            </div>
-          </v-flex>
 
           <v-tabs v-model="selectedTab" grow>
             <v-tabs-slider color="primary" />
@@ -107,7 +101,6 @@
             <v-tab-item id="Configuration">
               <configuration-tab
                 ref="configurationTab"
-                :contracts="contracts"
                 @saved="refreshRewardSettings"
                 @error="error = $event" />
             </v-tab-item>
@@ -145,13 +138,11 @@ export default {
       periodDatesDisplay: null,
       periodType: null,
       walletAddress: null,
-      originalWalletAddress: null,
       duplicatedWallets: [],
       rewardSettings: {},
       totalRewards: [],
       teams: [],
       walletRewards: [],
-      contracts: [],
     };
   },
   computed: {
@@ -215,11 +206,9 @@ export default {
         })
         .then(() => {
           this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          this.originalWalletAddress = window.walletSettings.wallet.address;
-
-          return this.tokenUtils.getContractsDetails(this.walletAddress, true, true);
+          return this.tokenUtils.getContractDetails(this.walletAddress, true);
         })
-        .then((contracts) => (this.contracts = contracts ? contracts.filter((contract) => contract.isDefault) : []))
+        .then(contractDetails => this.contractDetails = contractDetails)
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
           console.debug('init method - error', e);
@@ -234,12 +223,6 @@ export default {
       return getRewardSettings()
         .then(settings => {
           this.rewardSettings = settings || {};
-          if (this.contracts && this.contracts.length && this.rewardSettings.contractAddress) {
-            const contractAddress = this.rewardSettings.contractAddress.toLowerCase();
-            this.contractDetails = this.contracts.find(contract  => contract && contract.address && contract.address.toLowerCase() === contractAddress);
-          } else {
-            this.contractDetails = null;
-          }
           this.periodType = this.rewardSettings.periodType;
           this.$refs.configurationTab.init();
           return this.$nextTick();

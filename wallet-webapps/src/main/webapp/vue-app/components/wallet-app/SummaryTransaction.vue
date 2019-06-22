@@ -1,7 +1,7 @@
 <template>
   <v-card class="walletSummaryBalance">
     <v-card-title class="title pb-1 pl-2 ellipsis">
-      Last transactions
+      Last transaction
     </v-card-title>
     <v-card-title class="lastTransactionBalance headline pt-0 pb-1">
       <template v-if="loadingTransaction">
@@ -57,7 +57,7 @@ export default {
   },
   computed: {
     lastTransactionSign() {
-      return (this.lastTransaction && this.lastTransaction.contractAmount && this.lastTransactionSent && '-') || '+';
+      return (this.lastTransaction && this.lastTransaction.contractAmount && ((this.lastTransaction.contractAmount < 0 && '-') || '+')) || '-';
     }
   },
   watch: {

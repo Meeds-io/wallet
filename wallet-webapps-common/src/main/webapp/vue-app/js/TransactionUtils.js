@@ -446,8 +446,7 @@ function retrieveWalletDetails(transactionDetails, prefix) {
 }
 
 function getLastPendingTransactionSent(address) {
-  const networkId = window.walletSettings.network.id;
-  return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?networkId=${networkId}&address=${address}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?address=${address}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         const contentType = resp.headers && resp.headers.get('content-type');

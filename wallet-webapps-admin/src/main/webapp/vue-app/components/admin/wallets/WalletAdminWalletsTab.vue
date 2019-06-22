@@ -96,22 +96,22 @@
                 display-no-address />
             </td>
             <td
-              v-if="principalContract"
+              v-if="contractDetails"
               class="clickable text-xs-center"
               @click="openAccountDetail(props.item)">
               <v-progress-circular
-                v-if="props.item.loadingBalancePrincipal"
+                v-if="props.item.loadingTokenBalance"
                 :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
                 color="primary"
                 indeterminate
                 size="20" />
               <span
-                v-else-if="loadingWallets && props.item.loadingBalancePrincipal !== false"
+                v-else-if="loadingWallets && props.item.loadingTokenBalance !== false"
                 title="Loading balance...">
                 loading...
               </span>
-              <template v-else-if="props.item.balancePrincipal">
-                {{ walletUtils.toFixed(props.item.balancePrincipal) }} {{ principalContract && principalContract.symbol ? principalContract.symbol : '' }}
+              <template v-else-if="props.item.tokenBalance">
+                {{ walletUtils.toFixed(props.item.tokenBalance) }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
               </template>
               <template v-else>
                 -
@@ -135,7 +135,7 @@
               </template>
             </td>
             <td
-              v-if="principalContract && principalContract.contractType && principalContract.contractType > 1"
+              v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1"
               class="clickable"
               @click="openAccountDetail(props.item)">
               <template v-if="props.item.type === 'user' || props.item.type === 'space'">
@@ -194,7 +194,7 @@
 
                   <template v-if="props.item.type === 'user' || props.item.type === 'space'">
                     <template v-if="useWalletAdmin">
-                      <template v-if="principalContract && principalContract.contractType && principalContract.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
+                      <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
                         <v-list-tile @click="openAcceptInitializationModal(props.item)">
                           <v-list-tile-title>Initialize wallet</v-list-tile-title>
                         </v-list-tile>
@@ -204,7 +204,7 @@
                         <v-divider />
                       </template>
 
-                      <template v-if="principalContract && principalContract.contractType && principalContract.contractType > 0 && (props.item.disapproved === true || props.item.disapproved === false)">
+                      <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 0 && (props.item.disapproved === true || props.item.disapproved === false)">
                         <v-list-tile v-if="props.item.disapproved === true" @click="openApproveModal(props.item)">
                           <v-list-tile-title>Approve wallet</v-list-tile-title>
                         </v-list-tile>
@@ -306,7 +306,7 @@ export default {
         return null;
       },
     },
-    principalContract: {
+    contractDetails: {
       type: Object,
       default: function() {
         return null;
@@ -361,9 +361,9 @@ export default {
           value: 'name',
         },
         {
-          text: 'Principal balance',
+          text: 'Token balance',
           align: 'center',
-          value: 'balancePrincipal',
+          value: 'tokenBalance',
         },
         {
           text: 'Ether balance',
@@ -405,25 +405,15 @@ export default {
         address: this.walletAddress,
       };
     },
-    accountsDetails() {
-      const accountsDetails = {};
-      if (this.principalContract && this.principalContract.address) {
-        accountsDetails[this.principalContract.address] = this.principalContract;
-      }
-      if (this.walletAddress) {
-        accountsDetails[this.walletAddress] = this.etherAccountDetails;
-      }
-      return accountsDetails;
-    },
     walletTableHeaders() {
       const walletTableHeaders = this.walletHeaders.slice();
       if (!this.isAdmin) {
         walletTableHeaders.splice(walletTableHeaders.length - 1, 1);
       }
-      if (!this.principalContract) {
+      if (!this.contractDetails) {
         walletTableHeaders.splice(4, 1);
       }
-      if (!this.principalContract || this.principalContract.contractType < 2) {
+      if (!this.contractDetails || this.contractDetails.contractType < 2) {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
@@ -464,7 +454,7 @@ export default {
   watch: {
     filteredWallets(value, oldValue) {
       if(value.length > 0 && (value.length !== oldValue.length || value[value.length -1].id !== oldValue[oldValue.length -1].id)) {
-        return this.retrieveWalletsBalances(this.principalContract, this.wallets);
+        return this.retrieveWalletsBalances(this.contractDetails, this.wallets);
       }
     },
     loadingWallets(value) {
@@ -498,8 +488,8 @@ export default {
       if (initialFunds && initialFunds.length) {
         const etherInitialFund = initialFunds.find((initialFund) => initialFund.address === 'ether');
         this.etherAmount = (etherInitialFund && etherInitialFund.amount) || 0;
-        if (this.principalContract && this.principalContract.address && this.principalContract.address.indexOf('0x') === 0) {
-          const tokenInitialFund = initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.principalContract.address.toLowerCase());
+        if (this.contractDetails && this.contractDetails.address && this.contractDetails.address.indexOf('0x') === 0) {
+          const tokenInitialFund = initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.contractDetails.address.toLowerCase());
           this.tokenAmount = (tokenInitialFund && tokenInitialFund.amount) || 0;
         }
       }
@@ -509,7 +499,7 @@ export default {
           this.wallets = wallets.sort(this.sortByName);
           this.useWalletAdmin = wallets.find(wallet => wallet && wallet.type && wallet.id && wallet.type.toLowerCase() === 'admin' && wallet.name.toLowerCase() === 'admin');
           // *async* approval retrieval
-          this.retrieveWalletsApproval(this.principalContract, this.wallets);
+          this.retrieveWalletsApproval(this.contractDetails, this.wallets);
         })
         .then(() => {
           this.$emit('wallets-loaded', this.wallets);
@@ -567,9 +557,9 @@ export default {
     },
     refreshWallet(wallet) {
       return this.addressRegistry.refreshWallet(wallet)
-        .then(() => this.loadWalletInitialization(this.principalContract, wallet))
-        .then(() => this.loadWalletApproval(this.principalContract, wallet))
-        .then(() => this.computeBalance(this.principalContract, wallet));
+        .then(() => this.loadWalletInitialization(this.contractDetails, wallet))
+        .then(() => this.loadWalletApproval(this.contractDetails, wallet))
+        .then(() => this.computeBalance(this.contractDetails, wallet));
     },
     loadWalletApproval(accountDetails, wallet) {
       if(!accountDetails || !accountDetails.contract || !accountDetails.contract || !wallet || !wallet.address) {
@@ -622,7 +612,7 @@ export default {
         .then(() => {
           // check if we should reload contract balance too
           if (accountDetails && accountDetails.contract && accountDetails.contract) {
-            this.$set(wallet, 'loadingBalancePrincipal', true);
+            this.$set(wallet, 'loadingTokenBalance', true);
             return accountDetails.contract.methods
               .balanceOf(wallet.address)
               .call()
@@ -632,11 +622,11 @@ export default {
                 }
                 balance = String(balance);
                 balance = this.walletUtils.convertTokenAmountReceived(balance, accountDetails.decimals);
-                this.$set(wallet, 'balancePrincipal', balance);
+                this.$set(wallet, 'tokenBalance', balance);
               })
               .finally(() => {
                 if (!ignoreUpdateLoadingBalanceParam) {
-                  this.$set(wallet, 'loadingBalancePrincipal', false);
+                  this.$set(wallet, 'loadingTokenBalance', false);
                 }
               });
           }
@@ -649,8 +639,8 @@ export default {
         .finally(() => {
           if (!ignoreUpdateLoadingBalanceParam) {
             this.$set(wallet, 'loadingBalance', false);
-            if (wallet.loadingBalancePrincipal && accountDetails && accountDetails.contract && accountDetails.contract) {
-              this.$set(wallet, 'loadingBalancePrincipal', false);
+            if (wallet.loadingTokenBalance && accountDetails && accountDetails.contract && accountDetails.contract) {
+              this.$set(wallet, 'loadingTokenBalance', false);
             }
           }
         });

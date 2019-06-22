@@ -104,7 +104,7 @@
                         v-if="walletAddress && accountsDetails[walletAddress]"
                         ref="walletSummary"
                         :wallet-address="walletAddress"
-                        :constract-details="contractDetails"
+                        :contract-details="contractDetails"
                         @display-transactions="openAccountDetail"
                         @refresh-balance="refreshBalance"
                         @refresh-token-balance="refreshTokenBalance"

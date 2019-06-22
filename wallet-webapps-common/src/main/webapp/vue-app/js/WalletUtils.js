@@ -394,48 +394,36 @@ export function rememberPassword(remember, password, address) {
 }
 
 export function getAddressEtherscanlink() {
-  const networkId = window.walletSettings.network.id;
-  if (networkId) {
-    switch (networkId) {
-      case 1:
-        return 'https://etherscan.io/address/';
-      case 3:
-        return 'https://ropsten.etherscan.io/address/';
-      default:
-        return '#';
-    }
+  switch (window.walletSettings.network.id) {
+    case 1:
+      return 'https://etherscan.io/address/';
+    case 3:
+      return 'https://ropsten.etherscan.io/address/';
+    default:
+      return '#';
   }
-  return null;
 }
 
 export function getTokenEtherscanlink() {
-  const networkId = window.walletSettings.network.id;
-  if (networkId) {
-    switch (networkId) {
-      case 1:
-        return 'https://etherscan.io/token/';
-      case 3:
-        return 'https://ropsten.etherscan.io/token/';
-      default:
-        return '#';
-    }
+  switch (window.walletSettings.network.id) {
+    case 1:
+      return 'https://etherscan.io/token/';
+    case 3:
+      return 'https://ropsten.etherscan.io/token/';
+    default:
+      return '#';
   }
-  return null;
 }
 
 export function getTransactionEtherscanlink() {
-  const networkId = window.walletSettings.network.id;
-  if (networkId) {
-    switch (networkId) {
-      case 1:
-        return 'https://etherscan.io/tx/';
-      case 3:
-        return 'https://ropsten.etherscan.io/tx/';
-      default:
-        return '#';
-    }
+  switch (window.walletSettings.network.id) {
+    case 1:
+      return 'https://etherscan.io/tx/';
+    case 3:
+      return 'https://ropsten.etherscan.io/tx/';
+    default:
+      return '#';
   }
-  return null;
 }
 
 export function getCurrentBrowserWallet() {
