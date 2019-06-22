@@ -54,11 +54,7 @@
                 :is-space="isSpace"
                 :open="showSettingsModal"
                 :app-loading="loading"
-                :fiat-symbol="fiatSymbol"
                 :display-reset-option="displayWalletResetOption"
-                :accounts-details="accountsDetails"
-                :overview-accounts="overviewAccounts"
-                :principal-account-address="principalAccount"
                 @copied="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
                 @close="showSettingsModal = false"
                 @settings-changed="init()" />
@@ -107,21 +103,8 @@
                       <wallet-summary
                         v-if="walletAddress && accountsDetails[walletAddress]"
                         ref="walletSummary"
-                        :is-maximized="isMaximized"
-                        :is-space="isSpace"
-                        :is-space-administrator="isSpaceAdministrator"
-                        :accounts-details="accountsDetails"
-                        :overview-accounts="overviewAccountsToDisplay"
-                        :principal-account="principalAccount"
-                        :refresh-index="refreshIndex"
-                        :network-id="networkId"
                         :wallet-address="walletAddress"
-                        :ether-balance="etherBalance"
-                        :total-balance="totalBalance"
-                        :total-fiat-balance="totalFiatBalance"
-                        :is-read-only="isReadOnly"
-                        :fiat-symbol="fiatSymbol"
-                        :loading="loading"
+                        :constract-details="contractDetails"
                         @display-transactions="openAccountDetail"
                         @refresh-balance="refreshBalance"
                         @refresh-token-balance="refreshTokenBalance"
@@ -141,7 +124,7 @@
                         class="transactionHistoryChart"
                         :periodicity="periodicity"
                         :wallet-address="walletAddress"
-                        :contract-details="accountsDetails && principalAccount && accountsDetails[principalAccount]"
+                        :contract-details="contractDetails"
                         @periodicity-label="periodicityLabel = $event"
                         @error="error = $event" />
                     </v-flex>
@@ -253,15 +236,12 @@ export default {
     return {
       isWalletEnabled: false,
       loading: true,
-      useMetamask: false,
       disabledYear: true,
       disabledMonth: false,
       isReadOnly: true,
       isSpaceAdministrator: false,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
-      overviewAccounts: [],
-      overviewAccountsToDisplay: [],
       periodicityLabel: null,
       principalAccount: null,
       showSettingsModal: false,
@@ -284,10 +264,10 @@ export default {
       return this.walletAddress;
     },
     displayWalletResetOption() {
-      return !this.loading && !this.error && this.walletAddress && !this.useMetamask && this.browserWalletExists;
+      return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
     displayEtherBalanceTooLow() {
-      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(window.walletSettings.userPreferences.defaultGas, this.gasPriceInEther);
+      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(window.walletSettings.network.gasLimit, this.gasPriceInEther);
     },
     etherBalance() {
       if (this.refreshIndex > 0 && this.walletAddress && this.accountsDetails && this.accountsDetails[this.walletAddress]) {
@@ -296,19 +276,6 @@ export default {
         return balance;
       }
       return 0;
-    },
-    totalFiatBalance() {
-      return Number(this.walletUtils.etherToFiat(this.totalBalance));
-    },
-    totalBalance() {
-      let balance = 0;
-      if (this.refreshIndex > 0 && this.walletAddress && this.accountsDetails) {
-        Object.keys(this.accountsDetails).forEach((key) => {
-          const accountDetail = this.accountsDetails[key];
-          balance += Number((accountDetail.isContract ? accountDetail.balanceInEther : accountDetail.balance) || 0);
-        });
-      }
-      return balance;
     },
   },
   watch: {
@@ -368,12 +335,7 @@ export default {
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);
-
-          if (this.useMetamask) {
-            this.error = `You can't send transaction because Metamask is disconnected`;
-          } else {
-            this.error = `You can't send transaction because your wallet is disconnected`;
-          }
+          this.error = `You can't send transaction because your wallet is disconnected`;
         });
     });
   },
@@ -389,16 +351,15 @@ export default {
       return this.walletUtils.initSettings(this.isSpace)
         .then((result, error) => {
           this.handleError(error);
-          if (!window.walletSettings || !window.walletSettings.isWalletEnabled) {
+          if (!window.walletSettings || !window.walletSettings.walletEnabled) {
             this.isWalletEnabled = false;
             this.forceUpdate();
             throw new Error('Wallet disabled for current user');
           } else {
             this.isWalletEnabled = true;
             this.initMenuApp();
-            this.useMetamask = window.walletSettings.userPreferences.useMetamask;
-            this.isSpaceAdministrator = window.walletSettings.isSpaceAdministrator;
-            if (window.walletSettings.userPreferences.walletAddress || this.useMetamask) {
+            this.isSpaceAdministrator = window.walletSettings.wallet.isSpaceAdministrator;
+            if (window.walletSettings.wallet.address) {
               this.forceUpdate();
             } else {
               throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
@@ -416,22 +377,19 @@ export default {
 
           this.isReadOnly = window.walletSettings.isReadOnly;
           this.browserWalletExists = window.walletSettings.browserWalletExists;
-          this.overviewAccounts = window.walletSettings.userPreferences.overviewAccounts || [];
-          this.overviewAccountsToDisplay = window.walletSettings.userPreferences.overviewAccountsToDisplay;
 
           this.principalAccount = window.walletSettings.defaultPrincipalAccount;
           this.fiatSymbol = window.walletSettings ? window.walletSettings.fiatSymbol : '$';
-          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(window.walletSettings.normalGasPrice), 'ether');
+          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.normalGasPrice), 'ether');
 
-          if (window.walletSettings.maxGasPrice) {
-            window.walletSettings.maxGasPriceEther = window.walletSettings.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.maxGasPrice), 'ether').toString();
+          if (window.walletSettings.network.maxGasPrice) {
+            window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
           }
-
           return this.refreshBalance();
         })
         .then((result, error) => {
           this.handleError(error);
-          return this.reloadContracts();
+          return this.reloadContract();
         })
         .then((result, error) => {
           this.handleError(error);
@@ -445,10 +403,8 @@ export default {
           const error = `${e}`;
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
-            if (!this.useMetamask) {
-              this.browserWalletExists = window.walletSettings.browserWalletExists = false;
-              this.walletAddress = null;
-            }
+            this.browserWalletExists = window.walletSettings.browserWalletExists = false;
+            this.walletAddress = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = 'Failed to load user settings';
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
@@ -486,7 +442,6 @@ export default {
 
       }
     },
-
     refreshBalance() {
       const walletAddress = String(this.walletAddress);
       return this.walletUtils.computeBalance(walletAddress)
@@ -536,21 +491,11 @@ export default {
         return this.tokenUtils.retrieveContractDetails(this.walletAddress, accountDetail, false).then(() => this.forceUpdate());
       }
     },
-    reloadContracts() {
-      return this.tokenUtils.getContractsDetails(this.walletAddress, this.networkId, false, false)
-        .then((contractsDetails, error) => {
+    reloadContract() {
+      return this.tokenUtils.getContractDetails(this.walletAddress, this.networkId, false, false)
+        .then((contractDetails, error) => {
           this.handleError(error);
-          if (contractsDetails && contractsDetails.length) {
-            contractsDetails.forEach((contractDetails) => {
-              if (contractDetails && contractDetails.address) {
-                if (this.accountsDetails[this.walletAddress]) {
-                  contractDetails.etherBalance = this.accountsDetails[this.walletAddress].balance;
-                }
-                this.$set(this.accountsDetails, contractDetails.address, contractDetails);
-              }
-            });
-            this.forceUpdate();
-          }
+          this.contractDetails = contractDetails;
         });
     },
     openAccountDetail(accountDetails, hash, methodName) {

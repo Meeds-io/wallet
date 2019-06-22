@@ -15,7 +15,6 @@ import TransactionsList from './components/TransactionsList.vue';
 import BackupModal from './components/WalletBackupModal.vue';
 import BrowserSetup from './components/WalletBrowserSetup.vue';
 import ImportKeyModal from './components/WalletImportKeyModal.vue';
-import MetamaskSetup from './components/WalletMetamaskSetup.vue';
 import ReceiveModal from './components/WalletReceiveModal.vue';
 import ResetModal from './components/WalletResetModal.vue';
 import RequestFundsModal from './components/WalletRequestFundsModal.vue';
@@ -56,7 +55,6 @@ const WalletCommon = {
     Vue.component('backup-modal', BackupModal);
     Vue.component('browser-setup', BrowserSetup);
     Vue.component('import-key-modal', ImportKeyModal);
-    Vue.component('metamask-setup', MetamaskSetup);
     Vue.component('receive-modal', ReceiveModal);
     Vue.component('reset-modal', ResetModal);
     Vue.component('request-funds-modal', RequestFundsModal);

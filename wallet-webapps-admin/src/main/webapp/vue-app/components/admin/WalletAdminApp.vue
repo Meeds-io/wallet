@@ -167,7 +167,7 @@ export default {
             throw new Error('Wallet settings are empty for current user');
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
-          this.networkId = window.walletSettings.defaultNetworkId;
+          this.networkId = window.walletSettings.network.id;
           this.isAdmin = window.walletSettings.isAdmin;
           if (window.walletSettings.defaultPrincipalAccount && window.walletSettings.defaultPrincipalAccount.indexOf('0x') === 0) {
             this.principalAccountAddress = window.walletSettings.defaultPrincipalAccount;
@@ -176,7 +176,7 @@ export default {
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
           this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          this.originalWalletAddress = window.walletSettings.userPreferences.walletAddress;
+          this.originalWalletAddress = window.walletSettings.wallet.address;
         })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
@@ -273,12 +273,9 @@ export default {
             thiss.$set(contractDetails, 'isPaused', transaction.contractMethodName === 'pause' ? true : false);
             thiss.$nextTick(thiss.forceUpdate);
           }
-          // Wait for Block synchronization with Metamask
-          setTimeout(() => {
-            if(wallet && thiss.$refs.walletsTab) {
-              thiss.$refs.walletsTab.refreshWallet(wallet);
-            }
-          }, 2000);
+          if(wallet && thiss.$refs.walletsTab) {
+            thiss.$refs.walletsTab.refreshWallet(wallet);
+          }
         }
       });
     },
@@ -286,41 +283,16 @@ export default {
       this.refreshIndex++;
       this.$forceUpdate();
     },
-    saveGlobalSettings(globalSettings) {
+    saveGlobalSettings(initialFunds) {
       this.loading = true;
-      const defaultInitialFundsMap = {};
-      if (!globalSettings.initialFunds) {
-        if (window.walletSettings.initialFunds && window.walletSettings.initialFunds.length) {
-          window.walletSettings.initialFunds.forEach((initialFund) => {
-            defaultInitialFundsMap[initialFund.address] = initialFund.amount;
-          });
-        }
-      }
-      const currentGlobalSettings = Object.assign({}, window.walletSettings, {initialFunds: defaultInitialFundsMap});
-      const globalSettingsToSave = Object.assign(currentGlobalSettings, globalSettings);
-      if(globalSettingsToSave.contractAbi) {
-        delete globalSettingsToSave.contractAbi;
-      }
-      if(globalSettingsToSave.contractBin) {
-        delete globalSettingsToSave.contractBin;
-      }
-      if(globalSettingsToSave.contractBin) {
-        delete globalSettingsToSave.contractBin;
-      }
-      if(globalSettingsToSave.userPreferences) {
-        delete globalSettingsToSave.userPreferences;
-      }
-      delete globalSettingsToSave.walletEnabled;
-      delete globalSettingsToSave.admin;
-
-      return fetch('/portal/rest/wallet/api/global-settings/save', {
+      return fetch('/portal/rest/wallet/api/settings/saveInitialFunds', {
         method: 'POST',
         credentials: 'include',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(globalSettingsToSave),
+        body: JSON.stringify(initialFunds),
       })
         .then((resp) => {
           if (resp && resp.ok) {
@@ -336,7 +308,7 @@ export default {
         })
         .catch((e) => {
           this.loading = false;
-          console.debug('fetch global-settings - error', e);
+          console.debug('fetch settings - error', e);
           this.error = 'Error saving global settings';
         });
     },

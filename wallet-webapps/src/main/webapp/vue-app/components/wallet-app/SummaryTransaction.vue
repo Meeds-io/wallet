@@ -77,7 +77,7 @@ export default {
         return;
       }
       this.loadingTransaction = true;
-      this.transactionUtils.getStoredTransactions(this.contractDetails.networkId, this.walletAddress, this.contractDetails.address, 10)
+      this.transactionUtils.getStoredTransactions(this.walletAddress, this.contractDetails.address, 10)
         .then(transactions => {
           this.lastTransaction = transactions && transactions.length && transactions[0];
           this.lastTransactionSent = (this.lastTransaction && this.lastTransaction.contractAmount && this.lastTransaction.from && (this.lastTransaction.from.toLowerCase() === this.walletAddress.toLowerCase()));

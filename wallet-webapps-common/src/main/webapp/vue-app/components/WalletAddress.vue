@@ -123,7 +123,7 @@ export default {
       if(!this.value) {
         return;
       }
-      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.defaultNetworkId);
+      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network.id);
 
       if (!window.walletSettings.userPreferences
           || !window.walletSettings.userPreferences.addresesLabels) {

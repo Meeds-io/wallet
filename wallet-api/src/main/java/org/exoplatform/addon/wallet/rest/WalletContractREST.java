@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.service.WalletContractService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -44,6 +45,33 @@ public class WalletContractREST implements ResourceContainer {
 
   public WalletContractREST(WalletContractService contractService) {
     this.contractService = contractService;
+  }
+
+  /**
+   * Return saved contract details by address
+   * 
+   * @param address token contract address
+   * @return REST Response with contract details
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("getContract")
+  @RolesAllowed("users")
+  public Response getContract(@QueryParam("address") String address) {
+    if (StringUtils.isBlank(address)) {
+      LOG.warn("Empty contract address");
+      return Response.status(400).build();
+    }
+    try {
+      ContractDetail contractDetail = contractService.getContractDetail(address);
+      if (contractDetail == null) {
+        contractDetail = new ContractDetail();
+      }
+      return Response.ok(contractDetail).build();
+    } catch (Exception e) {
+      LOG.warn("Error getting contract details: " + address, e);
+      return Response.serverError().build();
+    }
   }
 
   /**
@@ -108,8 +136,7 @@ public class WalletContractREST implements ResourceContainer {
    * @param contractDetail contract detail to save
    * @return REST response with status
    */
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
+  @GET
   @Path("refresh")
   @RolesAllowed("administrators")
   public Response refreshContract() {

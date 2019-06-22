@@ -19,7 +19,7 @@ export function gasToEther(amount, gasPriceInEther) {
 }
 
 export function sendPrivateKeyToServer(walletAddress, password, newPassword) {
-  walletAddress = walletAddress || window.walletSettings.userPreferences.walletAddress;
+  walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
     return Promise.reject(new Error("Can't find current wallet address"));
   }
@@ -50,7 +50,7 @@ export function sendPrivateKeyToServer(walletAddress, password, newPassword) {
 }
 
 export function removeServerSideBackup(walletAddress) {
-  walletAddress = walletAddress || window.walletSettings.userPreferences.walletAddress;
+  walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
     return Promise.reject(new Error("Can't find current wallet address"));
   }
@@ -64,7 +64,7 @@ export function removeServerSideBackup(walletAddress) {
 }
 
 export function retrievePrivateKeyFromServer(walletAddress) {
-  walletAddress = walletAddress || window.walletSettings.userPreferences.walletAddress;
+  walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
     return Promise.reject(new Error("Can't find current wallet address"));
   }
@@ -132,46 +132,8 @@ export function initWeb3(isSpace, isAdmin) {
     throw new Error(constants.ERROR_WALLET_SETTINGS_NOT_LOADED);
   }
 
-  if (window.walletSettings.userPreferences.useMetamask && window.ethereum && window.ethereum.isMetaMask && window.web3 && window.web3.isConnected && window.web3.isConnected()) {
-    const tempWeb3 = new LocalWeb3(window.web3.currentProvider);
-
-    try {
-      return checkMetamaskEnabled()
-        .then((accounts) => (window.walletSettings.detectedMetamaskAccount = tempWeb3.eth.defaultAccount = accounts && accounts.length && accounts[0] && accounts[0].toLowerCase()))
-        .then((address) => {
-          if (address) {
-            window.walletSettings.metamaskConnected = true;
-          } else {
-            window.walletSettings.metamaskConnected = false;
-          }
-
-          // Display wallet in read only mode when selected Metamask account is
-          // not the associated one
-          if ((isSpace && !window.walletSettings.isSpaceAdministrator) || !window.walletSettings.metamaskConnected || !tempWeb3.eth.defaultAccount || (!isAdmin && window.walletSettings.userPreferences.walletAddress && tempWeb3.eth.defaultAccount.toLowerCase() !== window.walletSettings.userPreferences.walletAddress)) {
-            createLocalWeb3Instance(isSpace, true);
-          } else {
-            window.localWeb3 = tempWeb3;
-            window.walletSettings.isReadOnly = false;
-          }
-          return checkNetworkStatus();
-        })
-        .catch((e) => {
-          console.debug('error retrieving metamask connection status. Consider Metamask as disconnected', e);
-
-          window.walletSettings.metamaskConnected = false;
-          createLocalWeb3Instance(isSpace, true);
-          return checkNetworkStatus();
-        })
-        .finally(() => {
-          window.walletSettings.enablingMetamaskAccountDone = true;
-        });
-    } catch (e) {
-      console.error('Error while enabling Metamask', e);
-    }
-  } else {
-    createLocalWeb3Instance(isSpace, window.walletSettings.userPreferences.useMetamask);
-    return checkNetworkStatus();
-  }
+  createLocalWeb3Instance(isSpace);
+  return checkNetworkStatus();
 }
 
 export function initSettings(isSpace, spaceGroup) {
@@ -179,7 +141,7 @@ export function initSettings(isSpace, spaceGroup) {
 
   clearCache();
 
-  return fetch(`/portal/rest/wallet/api/global-settings?networkId=0&spaceId=${spaceId}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/settings?spaceId=${spaceId}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
@@ -189,16 +151,21 @@ export function initSettings(isSpace, spaceGroup) {
     })
     .then((settings) => {
       window.walletSettings = window.walletSettings || {};
-      if (!settings || !(settings.isWalletEnabled || settings.isAdmin)) {
-        window.walletSettings = {isWalletEnabled: false};
+      if (!settings || !(settings.walletEnabled || settings.isAdmin)) {
+        window.walletSettings = {walletEnabled: false};
       }
 
-      window.walletSettings.userPreferences = {};
+      window.walletSettings.userPreferences = {currency: 'usd'};
+      window.walletSettings.wallet = {};
+      window.walletSettings.network = {};
+      window.walletSettings.contractDetail = {};
+
+      window.walletSettings = $.extend(window.walletSettings, settings);
       window.walletSettings = $.extend(window.walletSettings, settings);
     })
     .then(() => {
-      if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.userPreferences.walletAddress) {
-        return retrievePrivateKeyFromServer(window.walletSettings.userPreferences.walletAddress)
+      if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.wallet.address) {
+        return retrievePrivateKeyFromServer(window.walletSettings.wallet.address)
           .then((privateKey) => {
             if (!privateKey) {
               return;
@@ -210,11 +177,7 @@ export function initSettings(isSpace, spaceGroup) {
       }
     })
     .then(() => {
-      window.walletSettings.browserWalletExists = browserWalletExists(window.walletSettings.userPreferences.walletAddress);
-      window.walletSettings.enableDelegation = window.walletSettings.hasOwnProperty('enableDelegation') ? window.walletSettings.enableDelegation : true;
-      window.walletSettings.defaultGas = window.walletSettings.defaultGas || 35000;
-      window.walletSettings.userPreferences.defaultGas = window.walletSettings.userPreferences.defaultGas || window.walletSettings.defaultGas;
-      window.walletSettings.userPreferences.enableDelegation = window.walletSettings.userPreferences.hasOwnProperty('enableDelegation') ? window.walletSettings.userPreferences.enableDelegation : window.walletSettings.enableDelegation;
+      window.walletSettings.browserWalletExists = browserWalletExists(window.walletSettings.wallet.address);
 
       if (!window.walletSettings.defaultOverviewAccounts || !window.walletSettings.defaultOverviewAccounts.length) {
         if (window.walletSettings.defaultContractsToDisplay) {
@@ -243,9 +206,7 @@ export function initSettings(isSpace, spaceGroup) {
       }
 
       const accountId = getRemoteId(isSpace);
-      window.walletSettings.userPreferences.useMetamask = localStorage.getItem(`exo-wallet-${accountId}-metamask`) === 'true';
-
-      const address = window.walletSettings.userPreferences.walletAddress;
+      const address = window.walletSettings.wallet.address;
       if (address) {
         window.walletSettings.userP = localStorage.getItem(`exo-wallet-${address}-userp`);
         window.walletSettings.storedPassword = window.walletSettings.userP && window.walletSettings.userP.length > 0;
@@ -263,20 +224,6 @@ export function initSettings(isSpace, spaceGroup) {
       console.debug('initSettings method - error', e);
       throw e;
     });
-}
-
-export function enableMetamask(isSpace) {
-  const accountId = getRemoteId(isSpace);
-
-  localStorage.setItem(`exo-wallet-${accountId}-metamask`, 'true');
-  window.walletSettings.userPreferences.useMetamask = true;
-}
-
-export function disableMetamask(isSpace) {
-  const accountId = getRemoteId(isSpace);
-
-  localStorage.removeItem(`exo-wallet-${accountId}-metamask`);
-  window.walletSettings.userPreferences.useMetamask = false;
 }
 
 export function watchTransactionStatus(hash, transactionFinishedcallback) {
@@ -393,7 +340,7 @@ export function saveBrowserWallet(password, phrase, address, autoGenerated, save
   }
 
   if (!address) {
-    address = window.walletSettings.userPreferences.walletAddress;
+    address = window.walletSettings.wallet.address;
   }
 
   if (!password || !password.length) {
@@ -432,7 +379,7 @@ export function saveBrowserWallet(password, phrase, address, autoGenerated, save
 }
 
 export function rememberPassword(remember, password, address) {
-  address = address || window.walletSettings.userPreferences.walletAddress;
+  address = address || window.walletSettings.wallet.address;
   if (!address) {
     throw new Error("Can't find address of user");
   }
@@ -490,11 +437,11 @@ export function getTransactionEtherscanlink(networkId) {
 }
 
 export function getCurrentBrowserWallet() {
-  return window && window.localWeb3 && window.localWeb3.eth.accounts.wallet && window.walletSettings.userPreferences.walletAddress && window.localWeb3.eth.accounts.wallet[window.walletSettings.userPreferences.walletAddress];
+  return window && window.localWeb3 && window.localWeb3.eth.accounts.wallet && window.walletSettings.wallet.address && window.localWeb3.eth.accounts.wallet[window.walletSettings.wallet.address];
 }
 
 export function lockBrowserWallet(address) {
-  address = address || window.walletSettings.userPreferences.walletAddress;
+  address = address || window.walletSettings.wallet.address;
   if (address) {
     window.localWeb3.eth.accounts.wallet.remove(address);
   }
@@ -506,7 +453,7 @@ export function unlockBrowserWallet(password, phrase, address) {
   }
 
   if (!address || !address.length) {
-    address = window.walletSettings.userPreferences.walletAddress;
+    address = window.walletSettings.wallet.address;
   }
 
   if (!password || !password.length) {
@@ -536,29 +483,9 @@ function isWalletUnlocked(address) {
   return window.localWeb3.eth.accounts.wallet.length > 0 && window.localWeb3.eth.accounts.wallet[address] && window.localWeb3.eth.accounts.wallet[address].privateKey;
 }
 
-export function watchMetamaskAccount(address) {
-  if (window.watchMetamaskAccountInterval) {
-    clearInterval(window.watchMetamaskAccountInterval);
-  }
-
-  // In case account switched in Metamask
-  // See https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md
-  window.watchMetamaskAccountInterval = setInterval(function() {
-    if (!(window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.useMetamask) || !window || !window.ethereum || !window.web3) {
-      return;
-    }
-
-    window.walletSettings.detectedMetamaskAccount = window.web3 && window.web3.eth && window.web3.eth.defaultAccount && window.web3.eth.defaultAccount.toLowerCase();
-    if (window.walletSettings.detectedMetamaskAccount && window.walletSettings.detectedMetamaskAccount !== address) {
-      document.dispatchEvent(new CustomEvent('exo-wallet-metamask-changed'));
-      return;
-    }
-  }, 2000);
-}
-
 export function setWalletBackedUp(address, backedUp) {
   if (!address || !address.length) {
-    address = window.walletSettings.userPreferences.walletAddress;
+    address = window.walletSettings.wallet.address;
   }
   if (backedUp) {
     localStorage.setItem(`exo-wallet-${address}-userp-backedup`, 'true');
@@ -766,12 +693,12 @@ export function saveWalletInitializationStatus(address, status) {
     });
 }
 
-function createLocalWeb3Instance(isSpace, useMetamask) {
-  if (window.walletSettings.userPreferences.walletAddress) {
+function createLocalWeb3Instance(isSpace) {
+  if (window.walletSettings.wallet.address) {
     window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.providerURL));
-    window.localWeb3.eth.defaultAccount = window.walletSettings.userPreferences.walletAddress.toLowerCase();
+    window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
 
-    if (useMetamask || (isSpace && !window.walletSettings.isSpaceAdministrator)) {
+    if (isSpace && !window.walletSettings.wallet.isSpaceAdministrator) {
       window.walletSettings.isReadOnly = true;
     } else {
       window.walletSettings.isReadOnly = !window.walletSettings.browserWalletExists;
@@ -815,57 +742,16 @@ function checkNetworkStatus(waitTime, tentativesCount) {
     });
 }
 
-function checkMetamaskEnabled(waitTime) {
-  if (!waitTime) {
-    waitTime = 200;
-  }
-  if (!window.walletSettings) {
-    window.walletSettings = {};
-  }
-  if (window.walletSettings.metamaskEnableResponseRetrieved) {
-    return Promise.resolve([window.web3.eth.defaultAccount]);
-  }
-  // Test if Metamask is enabled: ethereum.enable operation can hang up forever
-  let accounts = null;
-  window.ethereum
-    .enable()
-    .then((enableAccounts) => {
-      accounts = enableAccounts ? enableAccounts : null;
-    })
-    .finally(() => {
-      // If enablement discarded by user
-      window.walletSettings.metamaskEnableResponseRetrieved = true;
-      console.debug('Response received from user');
-    });
-  console.debug('Checking ethereum.enable');
-  return new Promise((resolve) => setTimeout(resolve, waitTime))
-    .then(() => {
-      if (!window.walletSettings.metamaskEnableResponseRetrieved) {
-        console.debug('The ethereum.enable seems to hang up');
-        throw new Error();
-      } else {
-        console.debug('Metamask enable status: OK');
-        return accounts;
-      }
-    })
-    .catch((error) => {
-      // Wait for the second time for 2 seconds
-      waitTime = 2000;
-      console.debug('Reattempt to enable Metamask, wait time:', waitTime);
-      return checkMetamaskEnabled(waitTime);
-    });
-}
-
 function initSpaceAccount(spaceGroup) {
   return searchWalletByTypeAndId(spaceGroup, 'space').then((spaceObject, error) => {
     if (error) {
       throw error;
     }
     if (spaceObject && spaceObject.spaceAdministrator) {
-      return (window.walletSettings.isSpaceAdministrator = true);
+      return (window.walletSettings.wallet.isSpaceAdministrator = true);
     } else {
       window.walletSettings.isReadOnly = true;
-      return (window.walletSettings.isSpaceAdministrator = false);
+      return (window.walletSettings.wallet.isSpaceAdministrator = false);
     }
   });
 }

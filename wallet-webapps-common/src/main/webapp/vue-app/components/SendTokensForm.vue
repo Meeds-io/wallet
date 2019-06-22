@@ -165,7 +165,6 @@ export default {
       transactionMessage: '',
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       recipient: null,
       notificationId: null,
       isApprovedRecipient: true,
@@ -285,11 +284,10 @@ export default {
       this.transactionLabel = this.defaultLabel;
       this.transactionMessage = this.defaultMessage;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
       this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(() => {
         if (this.contractDetails && this.contractDetails.isPaused) {
           this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
@@ -313,7 +311,7 @@ export default {
             .transfer(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
             .estimateGas({
               from: this.contractDetails.contract.options.from,
-              gas: window.walletSettings.userPreferences.defaultGas,
+              gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
             })
             .then((estimatedGas) => {
@@ -355,7 +353,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
+      const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -379,7 +377,7 @@ export default {
           .transfer(this.recipient, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
           .estimateGas({
             from: this.contractDetails.contract.options.from,
-            gas: window.walletSettings.userPreferences.defaultGas,
+            gas: window.walletSettings.network.gasLimit,
             gasPrice: this.gasPrice,
           })
           .catch((e) => {
@@ -387,8 +385,8 @@ export default {
             return 0;
           })
           .then((estimatedGas) => {
-            if (estimatedGas > window.walletSettings.userPreferences.defaultGas) {
-              this.warning = `You have set a low gas ${window.walletSettings.userPreferences.defaultGas} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+            if (estimatedGas > window.walletSettings.network.gasLimit) {
+              this.warning = `You have set a low gas ${window.walletSettings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
               return;
             }
             const sender = this.contractDetails.contract.options.from;
@@ -396,16 +394,16 @@ export default {
             const contractDetails = this.contractDetails;
             const transfer =  contractDetails.contract.methods.transfer;
 
-            return sendContractTransaction(this.useMetamask, window.walletSettings.defaultNetworkId, {
+            return sendContractTransaction(window.walletSettings.network.id, {
               contractAddress: contractDetails.address,
               senderAddress: sender,
-              gas: window.walletSettings.userPreferences.defaultGas,
+              gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
               method: transfer,
               parameters: [receiver, convertTokenAmountToSend(this.amount, contractDetails.decimals).toString()],
             },
               (hash) => {
-                const gas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
+                const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
 
                 const pendingTransaction = {
                   hash: hash,
@@ -461,9 +459,7 @@ export default {
           })
           .finally(() => {
             this.loading = false;
-            if (!this.useMetamask) {
-              lockBrowserWallet();
-            }
+            lockBrowserWallet();
           });
       } catch (e) {
         console.debug('Web3 contract.transfer method - error', e);

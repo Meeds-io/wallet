@@ -47,7 +47,7 @@
     </v-card-title>
 
     <v-container
-      v-if="principalAccountDetails"
+      v-if="contractDetails"
       fluid
       grid-list-md
       pl-3
@@ -57,7 +57,7 @@
           md4
           xs12
           text-xs-center>
-          <summary-balance :contract-details="principalAccountDetails" />
+          <summary-balance :contract-details="contractDetails" />
         </v-flex>
         <v-flex
           offset-md1
@@ -68,7 +68,7 @@
           pl-0
           text-xs-center>
           <summary-reward
-            :contract-details="principalAccountDetails"
+            :contract-details="contractDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event, null, 'reward')"
             @error="$emit('error', $event)" />
@@ -82,7 +82,7 @@
           pl-0
           text-xs-center>
           <summary-transaction
-            :contract-details="principalAccountDetails"
+            :contract-details="contractDetails"
             :wallet-address="walletAddress"
             @display-transactions="$emit('display-transactions', $event)"
             @error="$emit('error', $event)" />
@@ -104,70 +104,16 @@ export default {
     SummaryTransaction,
   },
   props: {
-    accountsDetails: {
-      type: Object,
-      default: function() {
-        return {};
-      },
-    },
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
     walletAddress: {
       type: String,
       default: function() {
         return null;
       },
     },
-    isMaximized: {
-      type: Boolean,
+    contractDetails: {
+      type: Object,
       default: function() {
-        return false;
-      },
-    },
-    overviewAccounts: {
-      type: Array,
-      default: function() {
-        return [];
-      },
-    },
-    principalAccount: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
-    etherBalance: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    totalBalance: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    totalFiatBalance: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    fiatSymbol: {
-      type: String,
-      default: function() {
-        return '$';
-      },
-    },
-    isReadOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
+        return {};
       },
     },
   },
@@ -180,48 +126,16 @@ export default {
     };
   },
   computed: {
-    disableSendButton() {
-      return this.isReadOnly || !this.etherBalance || !Number(this.etherBalance);
-    },
     pendingTransactionsCount() {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
-    },
-    principalAccountDetails() {
-      if (this.principalAccount && this.accountsDetails[this.principalAccount]) {
-        return this.accountsDetails[this.principalAccount];
-      }
-      return null;
-    },
-    overviewAccountsArray() {
-      if(!this.overviewAccounts) {
-        return [];
-      }
-      const accountsList = [];
-      this.overviewAccounts.forEach((selectedValue) => {
-        if (selectedValue !== this.principalAccount) {
-          if (selectedValue === 'fiat') {
-            const accountDetails = Object.assign({}, this.accountsDetails[this.walletAddress]);
-            accountDetails.key = 'fiat';
-            accountsList.push(accountDetails);
-          } else if (selectedValue === 'ether') {
-            const accountDetails = Object.assign({}, this.accountsDetails[this.walletAddress]);
-            accountDetails.key = 'ether';
-            accountsList.push(accountDetails);
-          } else if (this.accountsDetails[selectedValue]) {
-            accountsList.push(this.accountsDetails[selectedValue]);
-          }
-        }
-      });
-
-      return accountsList;
     },
   },
   created() {
     this.loadPendingTransactions();
   },
   methods: {
-    init(isReadOnly) {
-      this.walletInitializationStatus = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.initializationState;
+    init() {
+      this.walletInitializationStatus = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.initializationState;
     },
     refreshBalance(accountDetails) {
       if (accountDetails && accountDetails.isContract) {
@@ -231,16 +145,16 @@ export default {
       }
     },
     requestAccessAuthorization() {
-      if(window.walletSettings.userPreferences.wallet) {
-        return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${window.walletSettings.userPreferences.wallet.address}`, {
+      if(window.walletSettings.wallet) {
+        return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${window.walletSettings.wallet.address}`, {
           credentials: 'include',
         }).then((resp) => {
           if(!resp || !resp.ok) {
             throw new Error('Error while requesting authorization for wallet');
           }
-          return this.adressRegistry.refreshWallet(window.walletSettings.userPreferences.wallet);
+          return this.adressRegistry.refreshWallet(window.walletSettings.wallet);
         }).then(() => {
-          this.walletInitializationStatus = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.initializationState;
+          this.walletInitializationStatus = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.initializationState;
         }).catch(e => {
           this.error = String(e);
         });
@@ -251,7 +165,6 @@ export default {
       const lastTransactions = {};
 
       return this.transactionUtils.loadTransactions(
-        this.networkId,
         this.walletAddress,
         null,
         lastTransactions,
@@ -267,7 +180,6 @@ export default {
       Object.keys(this.pendingTransactions).forEach((key) => delete this.pendingTransactions[key]);
 
       return this.transactionUtils.loadTransactions(
-        this.networkId,
         this.walletAddress,
         null,
         this.pendingTransactions,
@@ -276,8 +188,7 @@ export default {
         null,
         true,
         (transaction) => {
-          const contractDetails = transaction.to && this.accountsDetails[transaction.to.toLowerCase()];
-          this.refreshBalance(contractDetails);
+          this.refreshBalance(this.contractDetail);
           if (this.pendingTransactions[transaction.hash]) {
             delete this.pendingTransactions[transaction.hash];
           }

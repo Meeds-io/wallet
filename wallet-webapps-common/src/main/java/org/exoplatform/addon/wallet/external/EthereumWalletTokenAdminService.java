@@ -641,8 +641,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       ContractDetail contractDetail = new ContractDetail();
       contractDetail.setAddress(contractAddress);
       contractDetail.setNetworkId(getNetworkId());
-      BigInteger implementationVersion =
-                                       (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_IMPLEMENTATIONADDRESS);
+      BigInteger implementationVersion = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_VERSION);
       if (implementationVersion == null || implementationVersion.intValue() < 1) {
         return null;
       }
@@ -655,11 +654,12 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       contractDetail.setSymbol(symbol);
       String owner = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_OWNER);
       contractDetail.setOwner(owner);
-      BigInteger sellPrice = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_SETSELLPRICE);
+      BigInteger sellPrice = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_GETSELLPRICE);
       contractDetail.setSellPrice(String.valueOf(convertFromDecimals(sellPrice, 18)));
       return contractDetail;
     } catch (Exception e) {
-      throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress);
+      throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress,
+                                      e);
     }
   }
 

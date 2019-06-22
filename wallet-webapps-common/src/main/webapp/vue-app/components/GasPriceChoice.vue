@@ -38,13 +38,13 @@ export default {
   },
   watch: {
     choice() {
-      let gasPrice = window.walletSettings.minGasPrice;
+      let gasPrice = window.walletSettings.network.minGasPrice;
       switch (Number(this.choice)) {
         case 2:
-          gasPrice = window.walletSettings.normalGasPrice;
+          gasPrice = window.walletSettings.network.normalGasPrice;
           break;
         case 3:
-          gasPrice = window.walletSettings.maxGasPrice;
+          gasPrice = window.walletSettings.network.maxGasPrice;
           break;
       }
       this.$emit('changed', gasPrice);

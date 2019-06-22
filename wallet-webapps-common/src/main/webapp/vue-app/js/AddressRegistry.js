@@ -82,8 +82,8 @@ export function searchAddress(id, type) {
  * for space type }
  */
 export function searchWalletByTypeAndId(id, type) {
-  if (window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.id === id && window.walletSettings.userPreferences.wallet.type === type) {
-    return Promise.resolve(window.walletSettings.userPreferences.wallet);
+  if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.id === id && window.walletSettings.wallet.type === type) {
+    return Promise.resolve(window.walletSettings.wallet);
   }
 
   return fetch(`/portal/rest/wallet/api/account/detailsById?id=${id}&type=${type}`, {credentials: 'include'}).then((resp) => {
@@ -107,8 +107,8 @@ export function searchWalletByAddress(address, noCache) {
 
   address = address.toLowerCase();
 
-  if (!noCache && window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.wallet && window.walletSettings.userPreferences.wallet.address && window.walletSettings.userPreferences.wallet.address.toLowerCase() === address) {
-    return Promise.resolve(window.walletSettings.userPreferences.wallet);
+  if (!noCache && window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.wallet.address.toLowerCase() === address) {
+    return Promise.resolve(window.walletSettings.wallet);
   }
 
   return fetch(`/portal/rest/wallet/api/account/detailsByAddress?address=${address}`, {credentials: 'include'})

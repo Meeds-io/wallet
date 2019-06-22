@@ -155,7 +155,6 @@ export default {
       transactionHash: null,
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       loading: false,
       recipient: null,
       amount: null,
@@ -196,10 +195,9 @@ export default {
       this.transactionMessage = this.defaultMessage;
       this.transactionHash = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
     },
     sendEther() {
       this.error = null;
@@ -221,13 +219,13 @@ export default {
         return;
       }
 
-      const gas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
+      const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
       if (this.amount >= this.balance) {
         this.error = 'Unsufficient funds';
         return;
       }
 
-      const unlocked = this.useMetamask || unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
+      const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -292,9 +290,7 @@ export default {
         this.loading = false;
         this.error = truncateError(`Error sending ether: ${e}`);
       } finally {
-        if (!this.useMetamask) {
-          lockBrowserWallet();
-        }
+        lockBrowserWallet();
       }
     },
   },

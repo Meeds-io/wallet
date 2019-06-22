@@ -36,32 +36,6 @@
           :disabled="!browserWalletExists"
           label="Keep my keys safe on server"
           @change="$refs.confirmDialog.open()" />
-        <div class="no-wrap">
-          <v-switch
-            v-model="useMetamask"
-            label="Use metamask"
-            @change="changeMetamaskOption" />
-          <v-tooltip bottom>
-            <information-bubble slot="activator">
-              <v-btn
-                icon
-                small
-                class="mt-0 mb-2">
-                <v-icon small color="primary">fa-info-circle</v-icon>
-              </v-btn>
-              <template slot="content">
-                <a href="https://metamask.io" target="_blank">MetaMask</a>
-                is a browser extension to connect to Ethereum Network,
-                that let you manage several blockchain accounts.
-              </template>
-            </information-bubble>
-            <span>
-              <a href="https://metamask.io" target="_blank">MetaMask</a>
-              is a browser extension to connect to Ethereum Network,
-              that let you manage several blockchain accounts.
-            </span>
-          </v-tooltip>
-        </div>
       </div>
     </v-card-title>
 
@@ -97,7 +71,6 @@ export default {
     return {
       loading: false,
       hasKeyOnServerSide: false,
-      useMetamask: false,
       browserWalletExists: false,
     };
   },
@@ -115,19 +88,10 @@ export default {
   methods: {
     init() {
       this.hasKeyOnServerSide = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide;
-      this.useMetamask = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.useMetamask;
       this.browserWalletExists = window.walletSettings.browserWalletExists;
       if (this.$refs.walletResetModal) {
         this.$refs.walletResetModal.init();
       }
-    },
-    changeMetamaskOption() {
-      if (this.useMetamask) {
-        this.walletUtils.enableMetamask(this.isSpace);
-      } else {
-        this.walletUtils.disableMetamask(this.isSpace);
-      }
-      this.$emit('settings-changed');
     },
     saveKeysOnServer() {
       if (this.hasKeyOnServerSide) {

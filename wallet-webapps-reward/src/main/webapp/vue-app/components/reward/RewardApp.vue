@@ -216,7 +216,7 @@ export default {
         })
         .then(() => {
           this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          this.originalWalletAddress = window.walletSettings.userPreferences.walletAddress;
+          this.originalWalletAddress = window.walletSettings.wallet.address;
           this.networkId = window.walletSettings.currentNetworkId;
 
           return this.tokenUtils.getContractsDetails(this.walletAddress, this.networkId, true, true);

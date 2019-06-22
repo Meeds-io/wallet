@@ -12,7 +12,9 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -42,6 +44,8 @@ public class ServiceLoaderServlet extends HttpServlet {
       ClassLoader currentClassLoader = currentThread.getContextClassLoader();
       ClassLoader contextCL = getServletContext().getClassLoader();
       currentThread.setContextClassLoader(contextCL);
+      ExoContainerContext.setCurrentContainer(container);
+      RequestLifeCycle.begin(container);
       try {
         // Replace old bouncy castle provider by the newer version
         Class<?> class1 = contextCL.loadClass(BouncyCastleProvider.class.getName());
@@ -65,6 +69,7 @@ public class ServiceLoaderServlet extends HttpServlet {
         LOG.warn("Can't create service with class EthereumWalletTokenAdminService", e);
       } finally {
         currentThread.setContextClassLoader(currentClassLoader);
+        RequestLifeCycle.end();
       }
       executor.shutdown();
     }, 10, 10, TimeUnit.SECONDS);

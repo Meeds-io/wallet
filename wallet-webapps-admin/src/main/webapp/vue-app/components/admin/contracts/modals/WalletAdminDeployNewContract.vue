@@ -271,7 +271,6 @@ export default {
       newTokenDecimals: 18,
       newTokenInitialCoins: 0,
       createNewToken: false,
-      useMetamask: false,
       transactionHashByStep: {},
       contractAddressByStep: {},
       processedStep: {},
@@ -334,9 +333,8 @@ export default {
       this.contractInstancesByStep = {};
       this.gasByStep = {};
       this.processingStep = {};
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
-      this.gasPrice = window.walletSettings.normalGasPrice;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.gasPrice = window.walletSettings.network.normalGasPrice;
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.loadState();
     },
     initializeStep(stepToInitialize) {
@@ -424,7 +422,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(password));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(password));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;

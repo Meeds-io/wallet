@@ -3,7 +3,6 @@ package org.exoplatform.addon.wallet.model.settings;
 import java.io.Serializable;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.json.JSONArray;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 
@@ -29,7 +28,7 @@ public class GlobalSettings implements Serializable, Cloneable {
 
   @Exclude
   @ToString.Exclude
-  private JSONArray            contractAbi      = null;                      // NOSONAR
+  private String               contractAbi      = null;                      // NOSONAR
 
   @Exclude
   @ToString.Exclude

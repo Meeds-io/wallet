@@ -135,7 +135,7 @@ public class EthereumWalletService implements WalletService, Startable {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      this.configuredGlobalSettings.setContractAbi(contractService.getContractAbi());
+      this.configuredGlobalSettings.setContractAbi(contractService.getContractAbi().toString());
       this.configuredGlobalSettings.setContractBin(contractService.getContractBinary());
       this.computeInitialFundsSettings();
 

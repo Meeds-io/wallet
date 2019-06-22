@@ -20,7 +20,7 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.storage.AccountStorage</key>
+    <key>org.exoplatform.addon.wallet.storage.WalletStorage</key>
     <type>org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage</type>
   </component>
 
@@ -90,7 +90,7 @@
       <value-param>
         <name>networkURL</name>
         <description>Default used ethereum network URL</description>
-        <value>${exo.wallet.blockchain.network.https:https://mainnet.infura.io/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
+        <value>${exo.wallet.blockchain.network.http:https://mainnet.infura.io/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
       </value-param>
       <value-param>
         <name>networkWSURL</name>

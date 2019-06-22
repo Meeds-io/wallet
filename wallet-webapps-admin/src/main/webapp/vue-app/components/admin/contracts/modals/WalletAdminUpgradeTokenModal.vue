@@ -126,7 +126,6 @@ export default {
       storedPassword: false,
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       fiatSymbol: null,
       gasEstimation: null,
       gasPrice: 0,
@@ -168,11 +167,10 @@ export default {
       this.error = null;
       this.gasEstimation = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
       this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(this.estimateTransactionFee);
     },
     upgradeToken(estimateGas) {
@@ -328,7 +326,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -338,10 +336,7 @@ export default {
         .then(upgraded => {
           if (upgraded) {
             this.dialog = false;
-
-            if (!this.useMetamask) {
-              this.walletUtils.lockBrowserWallet();
-            }
+            this.walletUtils.lockBrowserWallet();
           }
         });
     },

@@ -206,7 +206,6 @@ export default {
       storedPassword: false,
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       autocompleteValue: null,
       inputValue: null,
       transactionLabel: '',
@@ -291,11 +290,10 @@ export default {
       this.transactionMessage = '';
       this.transactionHash = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
       this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(this.estimateTransactionFee);
     },
     preselectAutocomplete(id, type, address) {
@@ -315,7 +313,7 @@ export default {
       this.method(...this.argumentsForEstimation)
         .estimateGas({
           from: this.contractDetails.contract.options.from,
-          gas: window.walletSettings.userPreferences.defaultGas,
+          gas: window.walletSettings.network.gasLimit,
           gasPrice: this.gasPrice,
         })
         .then((estimatedGas) => {
@@ -345,7 +343,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -356,18 +354,18 @@ export default {
         this.method(...this.argumentsForEstimation)
           .estimateGas({
             from: this.contractDetails.contract.options.from,
-            gas: window.walletSettings.userPreferences.defaultGas,
+            gas: window.walletSettings.network.gasLimit,
             gasPrice: this.gasPrice,
           })
           .then((estimatedGas) => {
-            if (estimatedGas > window.walletSettings.userPreferences.defaultGas) {
-              this.warning = `You have set a low gas ${window.walletSettings.userPreferences.defaultGas} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+            if (estimatedGas > window.walletSettings.network.gasLimit) {
+              this.warning = `You have set a low gas ${window.walletSettings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
               return;
             }
             return this.method(...this.arguments)
               .send({
                 from: this.contractDetails.contract.options.from,
-                gas: window.walletSettings.userPreferences.defaultGas,
+                gas: window.walletSettings.network.gasLimit,
                 gasPrice: this.gasPrice,
               })
               .on('transactionHash', (hash) => {
@@ -375,7 +373,7 @@ export default {
                 const sender = this.contractDetails.contract.options.from;
                 const receiver = this.autocompleteValue ? this.autocompleteValue : this.contractDetails.address;
 
-                const gas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
+                const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
 
                 const pendingTransaction = {
                   hash: hash,
@@ -434,9 +432,7 @@ export default {
           })
           .finally(() => {
             this.loading = false;
-            if (!this.useMetamask) {
-              this.walletUtils.lockBrowserWallet();
-            }
+            this.walletUtils.lockBrowserWallet();
           });
       } catch (e) {
         console.debug('Error while sending admin transaction', e);

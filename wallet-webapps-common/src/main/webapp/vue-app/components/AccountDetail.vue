@@ -146,7 +146,6 @@ export default {
     return {
       // Avoid refreshing list and balance twice
       refreshing: false,
-      enableDelegation: false,
       error: null,
     };
   },
@@ -164,7 +163,6 @@ export default {
   watch: {
     contractDetails() {
       this.error = null;
-      this.enableDelegation = window.walletSettings.userPreferences.enableDelegation;
     },
   },
   methods: {

@@ -51,7 +51,7 @@ export default {
       this.incomeGradient.addColorStop(0.5, 'rgba(0, 231, 255, 0.25)');
       this.incomeGradient.addColorStop(1, 'rgba(0, 231, 255, 0)');
   
-      this.transactionUtils.getTransactionsAmounts(this.contractDetails.networkId ,this.contractDetails.address, this.walletAddress, this.periodicity)
+      this.transactionUtils.getTransactionsAmounts(this.contractDetails.address, this.walletAddress, this.periodicity)
         .then((transactionsData) => {
           this.$emit('periodicity-label', transactionsData.periodicityLabel);
           this.renderChart({

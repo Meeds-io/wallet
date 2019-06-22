@@ -2,11 +2,7 @@ import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus, getTransactionReceipt, getTransaction, convertTokenAmountReceived} from './WalletUtils.js';
 import {getSavedContractDetails, retrieveContractDetails} from './TokenUtils.js';
 
-export function getLastNonce(networkId, walletAddress, useMetamask) {
-  if (useMetamask) {
-    return Promise.resolve(null);
-  }
-
+export function getLastNonce(networkId, walletAddress) {
   return getLastPendingTransactionSent(networkId, walletAddress)
     .then((lastPendingTransaction) => {
       if (!lastPendingTransaction || !lastPendingTransaction.hash) {
@@ -31,7 +27,7 @@ export function loadTransactions(networkId, account, contractDetails, transactio
     transactionsLimit = 10;
   }
 
-  return getStoredTransactions(networkId, account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
+  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
     const loadedTransactions = Object.assign({}, transactions);
     const loadingPromises = [];
 
@@ -57,7 +53,7 @@ export function loadTransactions(networkId, account, contractDetails, transactio
 export function saveTransactionDetails(transaction, contractDetails) {
   try {
     const transationDetails = {
-      networkId: transaction.networkId ? transaction.networkId : window.walletSettings.defaultNetworkId,
+      networkId: transaction.networkId ? transaction.networkId : window.walletSettings.network.id,
       hash: transaction.hash ? transaction.hash : '',
       contractAddress: transaction.contractAddress,
       contractMethodName: transaction.contractMethodName,
@@ -87,9 +83,9 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
-export function getTransactionsAmounts(networkId, contractAddress, walletAddress, periodicity) {
+export function getTransactionsAmounts(contractAddress, walletAddress, periodicity) {
   const lang = window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language || 'en';
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?networkId=${networkId}&contractAddress=${contractAddress || ''}&address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?contractAddress=${contractAddress || ''}&address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
@@ -99,11 +95,11 @@ export function getTransactionsAmounts(networkId, contractAddress, walletAddress
     });
 }
 
-export function getStoredTransactions(networkId, account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
+export function getStoredTransactions(account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
   const transactionHashToSearch = filterObject && filterObject.hash;
   const transactionContractMethodName = filterObject && filterObject.contractMethodName;
   
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
   .then((resp) => {
     if (resp && resp.ok) {
       return resp.json();
@@ -152,8 +148,7 @@ function loadTransactionContractDetails(networkId, account, transactionDetails, 
   if (transactionDetails.contractAddress) {
     const cachedContractDetails = window.walletContractsDetails ? Object.values(window.walletContractsDetails).find((details) => details && details.address && transactionDetails.contractAddress.toLowerCase() === details.address.toLowerCase()) : null;
     return (
-      cachedContractDetails ||
-      getSavedContractDetails(transactionDetails.contractAddress, networkId).then((contractDetails) => {
+      cachedContractDetails || getSavedContractDetails(transactionDetails.contractAddress, networkId).then((contractDetails) => {
         if (contractDetails) {
           if (!window.walletContractsDetails) {
             window.walletContractsDetails = {};
@@ -289,7 +284,7 @@ function loadContractTransactionProperties(walletAddress, transactionDetails, co
   transactionDetails.by = transactionDetails.byAddress = transactionDetails.byAddress || transactionDetails.by;
 
   if (!abiDecoder.getABIs() || !abiDecoder.getABIs().length) {
-    abiDecoder.addABI(window.walletSettings.contractAbi);
+    abiDecoder.addABI(JSON.parse(window.walletSettings.contractAbi));
   }
 
   if (transactionDetails.transaction && !transactionDetails.contractMethodName) {
@@ -424,8 +419,8 @@ function retrieveWalletDetails(transactionDetails, prefix) {
     }
 
     transactionDetails[`${prefix}Address`] = transactionDetails[`${prefix}Address`].toLowerCase();
-    if (window.walletSettings.principalContractAdminAddress && transactionDetails[`${prefix}Address`] === window.walletSettings.principalContractAdminAddress.toLowerCase()) {
-      transactionDetails[`${prefix}DisplayName`] = window.walletSettings.principalContractAdminName;
+    if (window.walletSettings.contractDetail.address && transactionDetails[`${prefix}Address`] === window.walletSettings.contractDetail.address.toLowerCase()) {
+      transactionDetails[`${prefix}DisplayName`] = 'Admin';
     }
 
     if (transactionDetails[`${prefix}Wallet`]) {
