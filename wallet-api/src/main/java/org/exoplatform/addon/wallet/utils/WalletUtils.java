@@ -392,8 +392,7 @@ public class WalletUtils {
         return CommonsUtils.getCurrentDomain() + getMyWalletLink();
       } else {
         String groupId = space.getGroupId().split("/")[2];
-        return CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), groupId)
-            + "/EthereumSpaceWallet";
+        return CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), groupId) + "/SpaceWallet";
       }
     }
   }

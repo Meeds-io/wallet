@@ -191,6 +191,7 @@
       </depends>
       <depends>
         <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
       </depends>
       <depends>
         <module>abiDecoder</module>
