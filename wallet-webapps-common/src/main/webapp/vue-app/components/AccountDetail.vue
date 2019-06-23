@@ -182,11 +182,11 @@ export default {
         }
       });
     },
-    newTransactionPending(transaction, contractDetails) {
+    newTransactionPending(transaction) {
       if (this.$refs.transactionsList) {
         this.$refs.transactionsList.init(true);
       }
-      this.$emit('transaction-sent');
+      this.$emit('transaction-sent', transaction);
     },
   },
 };

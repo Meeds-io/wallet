@@ -140,7 +140,7 @@
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
                     @refresh-token-balance="refreshTokenBalance"
-                    @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
+                    @transaction-sent="newPendingTransaction"
                     @error="error = $event" />
                 </v-flex>
               </v-layout>
@@ -164,7 +164,6 @@
                 :contract-details="selectedAccount"
                 :selected-transaction-hash="selectedTransactionHash"
                 :selected-contract-method-name="selectedContractMethodName"
-                @transaction-sent="$refs && $refs.walletSummary && $refs.walletSummary.loadPendingTransactions()"
                 @back="back()" />
             </v-navigation-drawer>
           </v-card>
@@ -231,6 +230,7 @@ export default {
       walletAddress: null,
       selectedTransactionHash: null,
       selectedContractMethodName: null,
+      contractDetails: null,
       selectedAccount: null,
       initializationState: 'NONE',
       fiatSymbol: '$',
@@ -299,6 +299,9 @@ export default {
         .then((result, error) => {
           if (this.$refs.walletSummaryActions) {
             this.$refs.walletSummaryActions.init(this.isReadOnly);
+          }
+          if (this.$refs && this.$refs.walletSummary) {
+            this.$refs.walletSummary.loadPendingTransactions();
           }
           if (this.$refs.walletAccountsList) {
             this.$refs.walletAccountsList.checkOpenTransaction();
@@ -382,6 +385,7 @@ export default {
           }
         })
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
+        .then(this.$nextTick)
         .finally(() => {
           this.loading = false;
           this.$forceUpdate();
@@ -391,10 +395,10 @@ export default {
       return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress, false, false)
+      return this.tokenUtils.getContractDetails(this.walletAddress)
         .then((contractDetails, error) => {
           this.handleError(error);
-          this.contractDetails = contractDetails;
+          this.contractDetails = Object.assign({}, contractDetails);
         });
     },
     openAccountDetail(accountDetails, hash, methodName) {
@@ -428,6 +432,17 @@ export default {
       if(error) {
         throw error;
       }
+    },
+    newPendingTransaction(transaction) {
+      if (this.$refs && this.$refs.walletSummary) {
+        this.$refs.walletSummary.loadPendingTransactions();
+      }
+      this.walletUtils.watchTransactionStatus(transaction.hash, (receipt) => {
+        if (receipt && receipt.status) {
+          this.reloadContract()
+            .then(this.$refs.transactionHistoryChart.initializeChart);
+        }
+      });
     },
     initMenuApp() {
       if (!this.isWalletEnabled || this.isSpace) {

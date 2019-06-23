@@ -18,7 +18,7 @@
         :account="walletAddress"
         :is-read-only="isReadOnly"
         :contract-details="contractDetails"
-        @sent="$emit('transaction-sent')"
+        @sent="$emit('transaction-sent', $event)"
         @error="$emit('error', $event)" />
     </v-flex>
     <v-flex

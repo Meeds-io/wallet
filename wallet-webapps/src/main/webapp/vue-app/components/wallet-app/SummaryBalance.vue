@@ -4,7 +4,7 @@
       Current balance
     </v-card-title>
     <v-card-title class="tokenBalance pt-0 display-1">
-      {{ contractDetails.balance }} {{ contractDetails.symbol }}
+      {{ walletUtils.toFixed(contractDetails.balance) }} {{ contractDetails.symbol }}
     </v-card-title>
   </v-card>
 </template>
@@ -17,6 +17,14 @@ export default {
       default: function() {
         return {};
       },
+    },
+  },
+  computed: {
+    balance() {
+      return (this.contractDetails && this.contractDetails.balance) || 0;
+    },
+    symbol() {
+      return (this.contractDetails && this.contractDetails.symbol) || '';
     },
   },
 }
