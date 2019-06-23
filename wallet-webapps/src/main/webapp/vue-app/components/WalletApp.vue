@@ -99,6 +99,7 @@
                         :wallet-address="walletAddress"
                         :initialization-state="initializationState"
                         :contract-details="contractDetails"
+                        @refresh="init()"
                         @display-transactions="openAccountDetail"
                         @refresh-token-balance="refreshTokenBalance"
                         @error="error = $event" />
@@ -347,9 +348,7 @@ export default {
 
           this.isReadOnly = this.settings.isReadOnly;
           this.browserWalletExists = this.settings.browserWalletExists;
-
           this.initializationState = this.settings.wallet.initializationState;
-
           this.fiatSymbol = this.settings.fiatSymbol || '$';
           this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.normalGasPrice), 'ether');
 

@@ -147,15 +147,16 @@ export default {
       }
     },
     requestAccessAuthorization() {
-      return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${this.settings.wallet.address}`, {
+      return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${this.walletAddress}`, {
         credentials: 'include',
       }).then((resp) => {
         if(!resp || !resp.ok) {
           throw new Error('Error while requesting authorization for wallet');
         }
-        return this.adressRegistry.refreshWallet(this.settings.wallet);
-      }).catch(e => {
-        this.error = String(e);
+        this.$emit('refresh');
+      })
+      .catch(e => {
+        this.$emit('error', String(e));
       });
     },
     loadLastTransaction() {
