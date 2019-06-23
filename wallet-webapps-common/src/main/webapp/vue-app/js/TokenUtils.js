@@ -55,7 +55,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
   if (contractDetails.sellPrice) {
     contractDetails.sellPrice = Number(contractDetails.sellPrice);
   }
-  return (contractDetails.contractType > 1 ? contractDetails.contract.methods.version().call() : Promise.resolve(null))
+  return ((!isAdministration && contractDetails.contractType > 1) ? contractDetails.contract.methods.version().call() : Promise.resolve(null))
     .then((version) => {
       if (version !== true && version) {
         version = Number(version);
@@ -68,7 +68,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
     .catch((e) => {
       contractDetails.contractType = 0;
     })
-    .then(() => contractDetails.decimals || contractDetails.contract.methods.decimals().call())
+    .then(() => (!isAdministration && contractDetails.decimals) || contractDetails.contract.methods.decimals().call())
     .then((decimals) => {
       if (decimals) {
         decimals = Number(decimals);
@@ -98,7 +98,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       contractDetails.etherBalance = balance;
     })
     .then(() => {
-      return contractDetails.contractType < 0 ? null : contractDetails.symbol ? contractDetails.symbol : contractDetails.contract.methods.symbol().call();
+      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.symbol) ? contractDetails.symbol : contractDetails.contract.methods.symbol().call();
     })
     .then((symbol) => {
       if (symbol) {
@@ -112,7 +112,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       console.debug('retrieveContractDetails method - error retrieving symbol', contractDetails.address, new Error(e));
     })
     .then(() => {
-      return contractDetails.contractType < 0 ? null : contractDetails.hasOwnProperty('name') ? contractDetails.name : contractDetails.contract.methods.name().call();
+      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.hasOwnProperty('name')) ? contractDetails.name : contractDetails.contract.methods.name().call();
     })
     .then((name) => {
       if (name) {
@@ -127,7 +127,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       console.debug('retrieveContractDetails method - error retrieving name', contractDetails.address, new Error(e));
     })
     .then(() => {
-      return contractDetails.contractType < 0 ? null : contractDetails.hasOwnProperty('totalSupply') ? contractDetails.totalSupply : contractDetails.contract.methods.totalSupply().call();
+      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.hasOwnProperty('totalSupply')) ? contractDetails.totalSupply : contractDetails.contract.methods.totalSupply().call();
     })
     .then((totalSupply) => {
       if (totalSupply) {
@@ -153,20 +153,18 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
         return;
       }
       // Compute ERT Token attributes
-      return (contractDetails.sellPrice ? Promise.resolve(Number(contractDetails.sellPrice) * 1000000000000000000) : contractDetails.contract.methods.getSellPrice().call())
+      return ((!isAdministration && contractDetails.sellPrice) ? Promise.resolve(Number(contractDetails.sellPrice) * 1000000000000000000) : contractDetails.contract.methods.getSellPrice().call())
         .then((sellPrice) => {
-          if (sellPrice && !Number.isNaN(Number(sellPrice))) {
-            contractDetails.sellPrice = Number(sellPrice) / 1000000000000000000;
-          } else {
-            contractDetails.sellPrice = 0;
-          }
+          sellPrice = (sellPrice && Number(sellPrice) / Math.pow(10, 18)) || 0;
+          contractToSave = contractToSave || contractDetails.sellPrice !== sellPrice;
+          contractDetails.sellPrice = sellPrice;
           contractDetails.retrievedAttributes++;
         })
         .catch((e) => {
           console.debug('retrieveContractDetails method - error retrieving sellPrice', contractDetails.address, new Error(e));
         })
         .then(() => {
-          return contractDetails.owner ? contractDetails.owner : contractDetails.contract.methods.owner().call();
+          return (!isAdministration && contractDetails.owner) ? contractDetails.owner : contractDetails.contract.methods.owner().call();
         })
         .then((owner) => {
           if (owner) {
@@ -203,7 +201,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
           console.debug('retrieveContractDetails method - error retrieving getAdminLevel', contractDetails.address, new Error(e));
         })
         .then(() => {
-          return contractDetails.hasOwnProperty('isPaused') ? contractDetails.isPaused : contractDetails.contract.methods.isPaused().call();
+          return (!isAdministration && contractDetails.hasOwnProperty('isPaused')) ? contractDetails.isPaused : contractDetails.contract.methods.isPaused().call();
         })
         .then((isPaused) => {
           contractDetails.isPaused = isPaused ? true : false;

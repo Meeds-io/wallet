@@ -547,6 +547,7 @@ export default {
           this.approvedWallets.splice(index, 1);
         }
       }
+      return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.contractDetails, true);
     },
   },
 };
