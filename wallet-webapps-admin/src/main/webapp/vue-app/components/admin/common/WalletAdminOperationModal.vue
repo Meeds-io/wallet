@@ -215,6 +215,7 @@ export default {
       gasPrice: 0,
       warning: null,
       error: null,
+      settings: null,
     };
   },
   computed: {
@@ -289,11 +290,12 @@ export default {
       this.transactionLabel = '';
       this.transactionMessage = '';
       this.transactionHash = null;
+      this.settings = window.walletSettings || {network: {}}
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.network.minGasPrice;
+        this.gasPrice = this.settings.network.minGasPrice;
       }
-      this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
+      this.fiatSymbol = this.settings.fiatSymbol || '$';
+      this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;
       this.$nextTick(this.estimateTransactionFee);
     },
     preselectAutocomplete(id, type, address) {
@@ -313,7 +315,7 @@ export default {
       this.method(...this.argumentsForEstimation)
         .estimateGas({
           from: this.contractDetails.contract.options.from,
-          gas: window.walletSettings.network.gasLimit,
+          gas: this.settings.network.gasLimit,
           gasPrice: this.gasPrice,
         })
         .then((estimatedGas) => {
@@ -343,7 +345,7 @@ export default {
         return;
       }
 
-      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? this.settings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -354,18 +356,18 @@ export default {
         this.method(...this.argumentsForEstimation)
           .estimateGas({
             from: this.contractDetails.contract.options.from,
-            gas: window.walletSettings.network.gasLimit,
+            gas: this.settings.network.gasLimit,
             gasPrice: this.gasPrice,
           })
           .then((estimatedGas) => {
-            if (estimatedGas > window.walletSettings.network.gasLimit) {
-              this.warning = `You have set a low gas ${window.walletSettings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+            if (estimatedGas > this.settings.network.gasLimit) {
+              this.warning = `You have set a low gas ${this.settings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
               return;
             }
             return this.method(...this.arguments)
               .send({
                 from: this.contractDetails.contract.options.from,
-                gas: window.walletSettings.network.gasLimit,
+                gas: this.settings.network.gasLimit,
                 gasPrice: this.gasPrice,
               })
               .on('transactionHash', (hash) => {
@@ -373,7 +375,7 @@ export default {
                 const sender = this.contractDetails.contract.options.from;
                 const receiver = this.autocompleteValue ? this.autocompleteValue : this.contractDetails.address;
 
-                const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
+                const gas = this.settings.network.gasLimit || 35000;
 
                 const pendingTransaction = {
                   hash: hash,

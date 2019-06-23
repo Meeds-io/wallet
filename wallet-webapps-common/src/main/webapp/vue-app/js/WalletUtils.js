@@ -150,9 +150,11 @@ export function initSettings(isSpace, spaceGroup) {
       }
     })
     .then((settings) => {
-      window.walletSettings = window.walletSettings || {};
-      if (!settings || !(settings.walletEnabled || settings.isAdmin)) {
+      if (!settings || !(settings.walletEnabled || (settings.wallet && settings.admin))) {
         window.walletSettings = {walletEnabled: false};
+        return;
+      } else {
+        window.walletSettings = window.walletSettings || {};
       }
 
       window.walletSettings.userPreferences = {currency: 'usd'};
@@ -178,34 +180,6 @@ export function initSettings(isSpace, spaceGroup) {
     })
     .then(() => {
       window.walletSettings.browserWalletExists = browserWalletExists(window.walletSettings.wallet.address);
-
-      if (!window.walletSettings.defaultOverviewAccounts || !window.walletSettings.defaultOverviewAccounts.length) {
-        if (window.walletSettings.defaultContractsToDisplay) {
-          window.walletSettings.defaultOverviewAccounts = window.walletSettings.defaultContractsToDisplay.slice();
-          window.walletSettings.defaultOverviewAccounts.unshift('fiat', 'ether');
-        } else {
-          window.walletSettings.defaultOverviewAccounts = ['fiat', 'ether'];
-        }
-      }
-      window.walletSettings.defaultPrincipalAccount = window.walletSettings.defaultPrincipalAccount || window.walletSettings.defaultOverviewAccounts[0];
-      window.walletSettings.userPreferences.overviewAccounts = window.walletSettings.userPreferences.overviewAccounts || window.walletSettings.defaultOverviewAccounts || [];
-
-      // Remove contracts that are removed from administration
-      if (window.walletSettings.defaultContractsToDisplay && window.walletSettings.defaultContractsToDisplay.length) {
-        window.walletSettings.userPreferences.overviewAccounts = window.walletSettings.userPreferences.overviewAccounts.filter((contractAddress) => contractAddress && (contractAddress.trim().indexOf('0x') < 0 || window.walletSettings.defaultContractsToDisplay.indexOf(contractAddress.trim()) >= 0));
-      }
-
-      // Display configured default contracts to display in administration
-      window.walletSettings.userPreferences.overviewAccountsToDisplay = window.walletSettings.userPreferences.overviewAccounts.slice(0);
-      if (window.walletSettings.defaultOverviewAccounts && window.walletSettings.defaultOverviewAccounts.length) {
-        window.walletSettings.defaultOverviewAccounts.forEach((defaultOverviewAccount) => {
-          if (defaultOverviewAccount && defaultOverviewAccount.indexOf('0x') === 0 && window.walletSettings.userPreferences.overviewAccountsToDisplay.indexOf(defaultOverviewAccount) < 0) {
-            window.walletSettings.userPreferences.overviewAccountsToDisplay.unshift(defaultOverviewAccount);
-          }
-        });
-      }
-
-      const accountId = getRemoteId(isSpace);
       const address = window.walletSettings.wallet.address;
       if (address) {
         window.walletSettings.userP = localStorage.getItem(`exo-wallet-${address}-userp`);
@@ -214,6 +188,7 @@ export function initSettings(isSpace, spaceGroup) {
         window.walletSettings.userPreferences.backedUp = window.walletSettings.userPreferences.hasKeyOnServerSide || localStorage.getItem(`exo-wallet-${address}-userp-backedup`);
       }
 
+      const accountId = getRemoteId(isSpace);
       if (isSpace && accountId) {
         return initSpaceAccount(accountId).then(retrieveFiatExchangeRate);
       } else {
@@ -685,10 +660,10 @@ export function saveWalletInitializationStatus(address, status) {
 
 function createLocalWeb3Instance(isSpace) {
   if (window.walletSettings.wallet.address) {
-    window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.providerURL));
+    window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL));
     window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
 
-    if (isSpace && !window.walletSettings.wallet.isSpaceAdministrator) {
+    if (isSpace && !window.walletSettings.wallet.spaceAdministrator) {
       window.walletSettings.isReadOnly = true;
     } else {
       window.walletSettings.isReadOnly = !window.walletSettings.browserWalletExists;
@@ -738,10 +713,10 @@ function initSpaceAccount(spaceGroup) {
       throw error;
     }
     if (spaceObject && spaceObject.spaceAdministrator) {
-      return (window.walletSettings.wallet.isSpaceAdministrator = true);
+      return (window.walletSettings.wallet.spaceAdministrator = true);
     } else {
       window.walletSettings.isReadOnly = true;
-      return (window.walletSettings.wallet.isSpaceAdministrator = false);
+      return (window.walletSettings.wallet.spaceAdministrator = false);
     }
   });
 }

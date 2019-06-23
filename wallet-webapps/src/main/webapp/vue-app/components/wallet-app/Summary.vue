@@ -1,7 +1,7 @@
 <template>
   <v-flex id="walletSummary" class="elevation-0 mr-3">
     <v-card-title
-      v-if="walletInitializationStatus === 'NEW' || walletInitializationStatus === 'MODIFIED' || walletInitializationStatus === 'PENDING'"
+      v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
       primary-title
       class="pb-0">
       <v-spacer />
@@ -12,7 +12,7 @@
       <v-spacer />
     </v-card-title>
     <v-card-title
-      v-else-if="walletInitializationStatus === 'DENIED'"
+      v-else-if="initializationState === 'DENIED'"
       primary-title
       class="pb-0">
       <v-spacer />
@@ -110,6 +110,12 @@ export default {
         return null;
       },
     },
+    initializationState: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
     contractDetails: {
       type: Object,
       default: function() {
@@ -120,7 +126,6 @@ export default {
   data() {
     return {
       updatePendingTransactionsIndex: 1,
-      walletInitializationStatus: null,
       pendingTransactions: {},
       lastTransaction: null,
     };
@@ -134,9 +139,6 @@ export default {
     this.loadPendingTransactions();
   },
   methods: {
-    init() {
-      this.walletInitializationStatus = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.initializationState;
-    },
     refreshBalance(accountDetails) {
       if (accountDetails && accountDetails.isContract) {
         this.$emit('refresh-token-balance', accountDetails);
@@ -145,20 +147,16 @@ export default {
       }
     },
     requestAccessAuthorization() {
-      if(window.walletSettings.wallet) {
-        return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${window.walletSettings.wallet.address}`, {
-          credentials: 'include',
-        }).then((resp) => {
-          if(!resp || !resp.ok) {
-            throw new Error('Error while requesting authorization for wallet');
-          }
-          return this.adressRegistry.refreshWallet(window.walletSettings.wallet);
-        }).then(() => {
-          this.walletInitializationStatus = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.initializationState;
-        }).catch(e => {
-          this.error = String(e);
-        });
-      }
+      return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${this.settings.wallet.address}`, {
+        credentials: 'include',
+      }).then((resp) => {
+        if(!resp || !resp.ok) {
+          throw new Error('Error while requesting authorization for wallet');
+        }
+        return this.adressRegistry.refreshWallet(this.settings.wallet);
+      }).catch(e => {
+        this.error = String(e);
+      });
     },
     loadLastTransaction() {
       this.lastTransaction = null;

@@ -484,14 +484,12 @@ export default {
         return;
       }
 
-      const initialFunds = window.walletSettings.initialFunds;
-      if (initialFunds && initialFunds.length) {
-        const etherInitialFund = initialFunds.find((initialFund) => initialFund.address === 'ether');
-        this.etherAmount = (etherInitialFund && etherInitialFund.amount) || 0;
-        if (this.contractDetails && this.contractDetails.address && this.contractDetails.address.indexOf('0x') === 0) {
-          const tokenInitialFund = initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.contractDetails.address.toLowerCase());
-          this.tokenAmount = (tokenInitialFund && tokenInitialFund.amount) || 0;
-        }
+      const initialFunds = window.walletSettings.initialFunds.funds || {};
+      if (initialFunds['ether']) {
+        this.etherAmount = initialFunds['ether'];
+      }
+      if (this.contractDetails && this.contractDetails.address && initialFunds[this.contractDetails.address]) {
+        this.tokenAmount = initialFunds[this.contractDetails.address];
       }
 
       return this.walletUtils.getWallets()
@@ -718,7 +716,7 @@ export default {
     },
     openAcceptInitializationModal(wallet) {
       this.walletToProcess = wallet;
-      this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFundsRequestMessage, this.etherAmount, this.tokenAmount);
+      this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
     },
     openDenyInitializationModal(wallet) {
       this.walletToProcess = wallet;

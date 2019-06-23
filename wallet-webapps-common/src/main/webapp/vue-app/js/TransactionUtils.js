@@ -419,7 +419,7 @@ function retrieveWalletDetails(transactionDetails, prefix) {
     }
 
     transactionDetails[`${prefix}Address`] = transactionDetails[`${prefix}Address`].toLowerCase();
-    if (window.walletSettings.contractDetail.address && transactionDetails[`${prefix}Address`] === window.walletSettings.contractDetail.address.toLowerCase()) {
+    if (window.walletSettings.contractAddress && transactionDetails[`${prefix}Address`] === window.walletSettings.contractAddress.toLowerCase()) {
       transactionDetails[`${prefix}DisplayName`] = 'Admin';
     }
 

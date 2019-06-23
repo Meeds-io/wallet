@@ -152,7 +152,6 @@ export default {
       this.loading = true;
       this.showAddContractModal = false;
       this.forceUpdate();
-      this.selectedOverviewAccounts = [];
       this.error = null;
 
       return this.walletUtils.initSettings()
@@ -162,7 +161,7 @@ export default {
             throw new Error('Wallet settings are empty for current user');
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
-          this.isAdmin = window.walletSettings.isAdmin;
+          this.isAdmin = window.walletSettings.admin;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {

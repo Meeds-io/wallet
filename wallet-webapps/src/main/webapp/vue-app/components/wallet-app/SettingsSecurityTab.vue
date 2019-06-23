@@ -70,6 +70,7 @@ export default {
   data() {
     return {
       loading: false,
+      settings: false,
       hasKeyOnServerSide: false,
       browserWalletExists: false,
     };
@@ -87,8 +88,9 @@ export default {
   },
   methods: {
     init() {
-      this.hasKeyOnServerSide = window.walletSettings && window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide;
-      this.browserWalletExists = window.walletSettings.browserWalletExists;
+      this.settings = window.walletSettings || {userPreferences: {}};
+      this.hasKeyOnServerSide = this.settings.userPreferences.hasKeyOnServerSide;
+      this.browserWalletExists = this.settings.browserWalletExists;
       if (this.$refs.walletResetModal) {
         this.$refs.walletResetModal.init();
       }

@@ -220,7 +220,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
     .then(() => {
       if (contractDetails.contractType < 0 || contractDetails.retrievedAttributes === 0) {
         transformContracDetailsToFailed(contractDetails);
-      } else if (contractToSave && window.walletSettings.isAdmin) {
+      } else if (contractToSave && window.walletSettings.admin) {
         refreshContractOnServer();
       }
 

@@ -168,7 +168,12 @@ export default {
   },
   methods: {
     init() {
-      if (window.walletSettings.fundsHolder) {
+      const initialFunds = window.walletSettings.initialFunds || {};
+      this.fundsHolder = initialFunds.fundsHolder;
+      this.fundsHolderType = initialFunds.fundsHolderType || 'user';
+      this.requestMessage = initialFunds.requestMessage;
+
+      if (this.fundsHolder) {
         this.addressRegistry.searchUsers(this.fundsHolder, true).then((items) => {
           if (items) {
             this.fundsHolderOptions = items;
@@ -177,15 +182,11 @@ export default {
           }
         });
       }
-      const initialFunds = (window.walletSettings && window.walletSettings.initialFunds) || {};
 
-      this.fundsHolder = initialFunds.fundsHolder;
-      this.fundsHolderType = initialFunds.fundsHolderType;
-      this.requestMessage = initialFunds.requestMessage;
       this.reloadInitialFunds();
     },
     reloadInitialFunds() {
-      let initialFunds = (window.walletSettings && window.walletSettings.initialFunds) || {};
+      let initialFunds = window.walletSettings.initialFunds || {};
       initialFunds = Object.keys(initialFunds.funds).map(address => {return {address: address, amount: initialFunds.funds[address]};});
 
       const etherInitialFund = initialFunds.find((initialFund) => initialFund.address === 'ether');

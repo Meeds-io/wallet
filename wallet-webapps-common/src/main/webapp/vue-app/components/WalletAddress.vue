@@ -112,7 +112,7 @@ export default {
   },
   created() {
     this.init();
-    this.isAdmin = window.walletSettings && window.walletSettings.isAdmin;
+    this.isAdmin = window.walletSettings && window.walletSettings.admin;
     document.addEventListener('exo-wallet-label-changed', this.refresh);
   },
   methods: {

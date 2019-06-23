@@ -14,6 +14,7 @@ export default {
       walletAddress: null,
       principalContractDetails: null,
       error: null,
+      settings: null,
     };
   },
   created() {
@@ -58,14 +59,15 @@ export default {
         return this.walletUtils.initSettings(isSpace)
           .then((result, error) => {
             this.handleError(error);
-            if (!window.walletSettings || !window.walletSettings.walletEnabled) {
+            this.settings = window.walletSettings || {};
+            if (!this.settings.walletEnabled) {
               this.isWalletEnabled = false;
               this.isReadOnly = true;
               throw new Error('Wallet disabled for current user');
-            } else if (!window.walletSettings.wallet.address) {
+            } else if (!this.settings.wallet || !this.settings.wallet.address) {
               this.isReadOnly = true;
               throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
-            } else if (!window.walletSettings.contractAddress) {
+            } else if (!this.settings.contractAddress) {
               this.isReadOnly = true;
               throw new Error("Wallet principal account isn't configured");
             }
@@ -75,23 +77,23 @@ export default {
           })
           .then((result, error) => {
             this.handleError(error);
-            this.walletAddress = window.walletSettings.wallet.address;
+            this.walletAddress = this.settings.wallet.address;
 
             if(!this.walletAddress) {
               this.isReadOnly = true;
               throw new Error("No wallet is configured for current user");
-            } else if (!window.walletSettings.browserWalletExists) {
+            } else if (!this.settings.browserWalletExists) {
               this.isReadOnly = true;
               throw new Error("Wallet is in readonly state");
             }
-            this.needPassword = window.walletSettings.browserWalletExists && !window.walletSettings.storedPassword;
-            this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
-            this.isReadOnly = window.walletSettings.isReadOnly;
-            if (window.walletSettings.network.maxGasPrice) {
-              window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
+            this.needPassword = this.settings.browserWalletExists && !this.settings.storedPassword;
+            this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;
+            this.isReadOnly = this.settings.isReadOnly;
+            if (this.settings.network.maxGasPrice) {
+              this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
             }
             this.principalContractDetails = {
-              address: window.walletSettings.contractAddress,
+              address: this.settings.contractAddress,
               isContract: true,
               isDefault: true,
             };
@@ -212,7 +214,7 @@ export default {
         }
 
         try {
-          const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(password));
+          const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? this.settings.userP : this.walletUtils.hashCode(password));
           if (!unlocked) {
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
               detail : 'Wrong password'
@@ -233,8 +235,8 @@ export default {
           return;
         }
   
-        const gasPrice = window.walletSettings.network.minGasPrice;
-        const defaultGas = window.walletSettings.network.gasLimit;
+        const gasPrice = this.settings.network.minGasPrice;
+        const defaultGas = this.settings.network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
         const isApprovedAccount = this.principalContractDetails.contract.methods.isApprovedAccount;
         const contractAddress = this.principalContractDetails.address;

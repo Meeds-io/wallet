@@ -6,7 +6,7 @@
     <main v-if="isWalletEnabled" id="walletEnabledContent">
       <v-layout>
         <v-flex>
-          <v-card transparent flat>
+          <v-card flat class="transparent">
             <v-toolbar
               class="walletAppToolbar mb-3"
               color="white"
@@ -63,7 +63,7 @@
                 ref="walletSetup"
                 :is-space="isSpace"
                 :wallet-address="walletAddress"
-                :refresh-index="refreshIndex"
+                :initialization-state="initializationState"
                 :loading="loading"
                 @loading="loading = true"
                 @end-loading="loading = false"
@@ -97,6 +97,7 @@
                         v-if="walletAddress && contractDetails"
                         ref="walletSummary"
                         :wallet-address="walletAddress"
+                        :initialization-state="initializationState"
                         :contract-details="contractDetails"
                         @display-transactions="openAccountDetail"
                         @refresh-token-balance="refreshTokenBalance"
@@ -230,8 +231,9 @@ export default {
       selectedTransactionHash: null,
       selectedContractMethodName: null,
       selectedAccount: null,
+      initializationState: 'NONE',
       fiatSymbol: '$',
-      refreshIndex: 1,
+      settings: null,
       error: null,
       periodicity: 'month',
     };
@@ -244,7 +246,7 @@ export default {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
     displayEtherBalanceTooLow() {
-      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(window.walletSettings.network.gasLimit, this.gasPriceInEther);
+      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther);
     },
     etherBalance() {
       return this.contractDetails && this.contractDetails.etherBalance || 0;
@@ -294,16 +296,13 @@ export default {
       // Init application
       this.init()
         .then((result, error) => {
-          if (this.$refs.walletSummary) {
-            this.$refs.walletSummary.init();
-          }
           if (this.$refs.walletSummaryActions) {
             this.$refs.walletSummaryActions.init(this.isReadOnly);
           }
           if (this.$refs.walletAccountsList) {
             this.$refs.walletAccountsList.checkOpenTransaction();
           }
-          this.forceUpdate();
+          this.$forceUpdate();
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);
@@ -322,16 +321,17 @@ export default {
       return this.walletUtils.initSettings(this.isSpace)
         .then((result, error) => {
           this.handleError(error);
-          if (!window.walletSettings || !window.walletSettings.walletEnabled) {
+          this.settings = window.walletSettings || {wallet: {}, network: {}};
+          if (!this.settings.walletEnabled) {
             this.isWalletEnabled = false;
-            this.forceUpdate();
+            this.$forceUpdate();
             throw new Error('Wallet disabled for current user');
           } else {
             this.isWalletEnabled = true;
             this.initMenuApp();
-            this.isSpaceAdministrator = window.walletSettings.wallet.isSpaceAdministrator;
-            if (window.walletSettings.wallet.address) {
-              this.forceUpdate();
+            this.isSpaceAdministrator = this.settings.wallet.spaceAdministrator;
+            if (this.settings.wallet.address) {
+              this.$forceUpdate();
             } else {
               throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
             }
@@ -345,14 +345,16 @@ export default {
           this.handleError(error);
           this.walletAddress = window.localWeb3.eth.defaultAccount.toLowerCase();
 
-          this.isReadOnly = window.walletSettings.isReadOnly;
-          this.browserWalletExists = window.walletSettings.browserWalletExists;
+          this.isReadOnly = this.settings.isReadOnly;
+          this.browserWalletExists = this.settings.browserWalletExists;
 
-          this.fiatSymbol = window.walletSettings ? window.walletSettings.fiatSymbol : '$';
-          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.normalGasPrice), 'ether');
+          this.initializationState = this.settings.wallet.initializationState;
 
-          if (window.walletSettings.network.maxGasPrice) {
-            window.walletSettings.network.maxGasPriceEther = window.walletSettings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.network.maxGasPrice), 'ether').toString();
+          this.fiatSymbol = this.settings.fiatSymbol || '$';
+          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.normalGasPrice), 'ether');
+
+          if (this.settings.network.maxGasPrice) {
+            this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
           }
         })
         .then((result, error) => {
@@ -361,9 +363,8 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          this.forceUpdate();
+          this.$forceUpdate();
         })
-        .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
         .then(() => this.$nextTick())
         .then(() => this.$refs.transactionHistoryChart && this.$refs.transactionHistoryChart.initializeChart())
         .catch((e) => {
@@ -371,7 +372,7 @@ export default {
           const error = `${e}`;
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
-            this.browserWalletExists = window.walletSettings.browserWalletExists = false;
+            this.browserWalletExists = this.settings.browserWalletExists = false;
             this.walletAddress = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = 'Failed to load user settings';
@@ -381,14 +382,11 @@ export default {
             this.error = error;
           }
         })
-      .finally(() => {
-        this.loading = false;
-        this.forceUpdate();
-      });
-    },
-    forceUpdate() {
-      this.refreshIndex++;
-      this.$forceUpdate();
+        .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
+        .finally(() => {
+          this.loading = false;
+          this.$forceUpdate();
+        });
     },
     refreshTokenBalance() {
       return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);

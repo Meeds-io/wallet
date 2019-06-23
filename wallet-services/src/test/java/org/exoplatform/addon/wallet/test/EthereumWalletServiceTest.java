@@ -23,7 +23,7 @@ import org.exoplatform.container.PortalContainer;
 public class EthereumWalletServiceTest { // NOSONAR
 
   @Test
-  public static void testStart() {
+  public void testStart() {
     PortalContainer.getInstance();
   }
 }
