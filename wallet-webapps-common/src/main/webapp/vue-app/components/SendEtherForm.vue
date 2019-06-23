@@ -89,13 +89,13 @@
     <v-card-actions>
       <v-spacer />
       <button
-        :disabled="!account || loading || !recipient || !amount"
+        :disabled="disabled"
         :loading="loading"
         class="btn btn-primary mr-1"
         @click="sendEther">
         Send
       </button> <button
-        :disabled="!account || loading || !recipient || !amount"
+        :disabled="disabled"
         class="btn"
         color="secondary"
         @click="showQRCodeModal = true">
@@ -163,6 +163,11 @@ export default {
       mandatoryRule: [(v) => !!v || 'Field is required'],
     };
   },
+  computed: {
+    disabled() {
+      return !this.account || this.loading || !this.recipient || !this.amount;
+    }
+  },
   watch: {
     amount() {
       if (this.amount && $.isNumeric(this.amount)) {
@@ -174,17 +179,6 @@ export default {
   },
   methods: {
     init(recipient) {
-      this.$nextTick(() => {
-        if (this.$refs.autocomplete) {
-          this.$refs.autocomplete.clear();
-          if (recipient) {
-            this.$refs.autocomplete.selectItem(recipient);
-            this.$refs.amountInput.focus();
-          } else {
-            this.$refs.autocomplete.focus();
-          }
-        }
-      });
       this.loading = false;
       this.recipient = null;
       this.amount = null;
@@ -198,6 +192,20 @@ export default {
         this.gasPrice = window.walletSettings.network.minGasPrice;
       }
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
+
+      this.$nextTick(() => {
+        if (this.$refs.autocomplete) {
+          this.$refs.autocomplete.clear();
+          this.$nextTick(() => {
+            if (recipient) {
+              this.$refs.autocomplete.selectItem(recipient);
+              this.$refs.amountInput.focus();
+            } else {
+              this.$refs.autocomplete.focus();
+            }
+          });
+        }
+      });
     },
     sendEther() {
       this.error = null;

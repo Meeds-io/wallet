@@ -426,20 +426,18 @@ export default {
       return this.displayedWallets.length === this.limit;
     },
     displayedWallets() {
-      if (this.displayUsers && this.displayAdmin && this.displaySpaces && this.displayDisapprovedWallets && this.displayDisabledWallets && !this.search) {
-        return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
-      } else {
-        return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
-      }
+      return this.wallets.filter(this.isDisplayWallet).slice(0, this.limit);
     },
     filteredWallets() {
       if(this.displayedWallets && this.displayedWallets.length) {
         const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
         const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
+        // Set 'displayedWallet' attribute on wallets, used to know whether to retrieve
+        // wallet data from blockchain or not
         this.wallets.forEach((wallet, index) => {
-          wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+          wallet.displayedWallet = index < limit && this.displayedWallets.filter(displayedWallet => displayedWallet.technicalId === wallet.technicalId);
         });
-        return this.wallets.slice(0, limit);
+        return this.displayedWallets.slice(0, limit);
       } else {
         return [];
       }
@@ -520,6 +518,18 @@ export default {
         .then(() => this.retrieveWalletsApproval(accountDetails, wallets, ++i))
         // Stop loading wallets only when the first call is finished
         .finally(() => this.loadingWallets = !i && true);
+    },
+    isDisplayWallet(wallet) {
+      return wallet && wallet.address
+        && (this.displayUsers || wallet.type !== 'user')
+        && (this.displaySpaces || wallet.type !== 'space')
+        && (this.displayAdmin || wallet.type !== 'admin')
+        && (this.displayDisabledWallets || wallet.enabled)
+        && (this.displayDisapprovedWallets || !wallet.disapproved)
+        && (!this.search
+            || wallet.initializationState.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+            || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+            || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
     },
     retrieveWalletsBalances(accountDetails, wallets, i) {
       if(!wallets || !wallets.length) {

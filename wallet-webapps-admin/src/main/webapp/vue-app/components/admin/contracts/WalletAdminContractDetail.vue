@@ -402,10 +402,11 @@ export default {
   },
   methods: {
     successSendingEther() {
-      this.refreshBalance().then(() => {
-        this.$emit('success', this.contractDetails);
-        this.$forceUpdate();
-      });
+      this.refreshBalance()
+        .then(() => {
+          this.$emit('success', this.contractDetails);
+          this.$forceUpdate();
+        });
     },
     retrieveAccountDetails(wallet, ignoreApproved, ignoreAdmin) {
       if (!wallet.approved) {
@@ -471,12 +472,14 @@ export default {
       this.totalTransactionsCount = count;
     },
     refreshBalance() {
-      this.$set(this.contractDetails, 'loadingBalance', false);
       return this.walletUtils.computeBalance(this.contractDetails.address).then((contractBalance) => {
         if (contractBalance) {
           this.$set(this.contractDetails, 'contractBalance', contractBalance.balance);
           this.$set(this.contractDetails, 'contractBalanceFiat', contractBalance.balanceFiat);
         }
+      })
+      .finally(() => {
+        this.$set(this.contractDetails, 'loadingBalance', false);
       });
     },
     loadApprovedWalletsFromContract() {
