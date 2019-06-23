@@ -40,10 +40,7 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.organization.Group;
-import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.services.security.*;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.service.LinkProvider;
@@ -363,33 +360,27 @@ public class WalletUtils {
       throw new IllegalArgumentException("Username is mandatory");
     }
 
-    if (permissionExpression.contains(":")) {
-      throw new UnsupportedOperationException("Permission check with role/membershipType isn't implemented ");
-    } else if (permissionExpression.contains("/")) {
-      org.exoplatform.services.security.Identity identity = CommonsUtils.getService(IdentityRegistry.class).getIdentity(username);
-      if (identity != null) {
-        return identity.isMemberOf(permissionExpression);
-      }
-
-      Collection<Group> groupsOfUser;
+    org.exoplatform.services.security.Identity identity = CommonsUtils.getService(IdentityRegistry.class).getIdentity(username);
+    if (identity == null) {
       try {
-        groupsOfUser = CommonsUtils.getService(OrganizationService.class).getGroupHandler().findGroupsOfUser(username);
+        identity = CommonsUtils.getService(Authenticator.class).createIdentity(username);
       } catch (Exception e) {
-        LOG.warn("Error getting groups of user " + username);
-        return false;
+        LOG.warn("Error getting memberships of user {}", username, e);
       }
-      if (groupsOfUser == null || groupsOfUser.isEmpty()) {
-        return false;
-      }
-      for (Group group : groupsOfUser) {
-        if (permissionExpression.equals(group.getId())) {
-          return true;
-        }
-      }
+    }
+    if (identity == null) {
       return false;
+    }
+    MembershipEntry membership = null;
+    if (permissionExpression.contains(":")) {
+      String[] permissionExpressionParts = permissionExpression.split(":");
+      membership = new MembershipEntry(permissionExpressionParts[1], permissionExpressionParts[0]);
+    } else if (permissionExpression.contains("/")) {
+      membership = new MembershipEntry(permissionExpression);
     } else {
       return StringUtils.equals(username, permissionExpression);
     }
+    return identity.isMemberOf(membership);
   }
 
   public static String getWalletLink(String receiverType, String receiverId) {

@@ -199,12 +199,16 @@ public class EthereumWalletService implements WalletService, Startable {
     userSettings.setAdmin(isUserAdmin(currentUser));
     userSettings.setWalletEnabled(true);
 
-    if (StringUtils.isNotBlank(globalSettings.getAccessPermission())) {
-      Space space = getSpace(globalSettings.getAccessPermission());
+    String accessPermission = globalSettings.getAccessPermission();
+    if (StringUtils.isNotBlank(accessPermission)) {
+      Space space = getSpace(accessPermission);
       // Disable wallet for users not member of the permitted space members
-      if (space != null && !(getSpaceService().isMember(space, currentUser) || getSpaceService().isSuperManager(currentUser))) {
-        LOG.debug("Wallet is disabled for user {} because he's not member of space {}", currentUser, space.getPrettyName());
+      if (!isUserMemberOf(currentUser, accessPermission) && (space != null && !getSpaceService().isMember(space, currentUser))) {
+        LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
+                  currentUser,
+                  accessPermission);
         userSettings.setWalletEnabled(false);
+        return userSettings;
       }
     }
 

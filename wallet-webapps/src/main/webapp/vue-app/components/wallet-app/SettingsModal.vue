@@ -13,7 +13,7 @@
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Preferences
+            Security
           </span>
       </div>
       <v-card-text v-if="loading || appLoading" class="text-xs-center">
@@ -28,6 +28,7 @@
         </div>
         <v-flex>
           <v-tabs
+            v-if="selectedTab !== 'security'"
             ref="settingsTabs"
             v-model="selectedTab"
             class="pl-3 pr-3">

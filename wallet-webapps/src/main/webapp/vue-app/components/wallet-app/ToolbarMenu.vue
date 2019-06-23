@@ -20,7 +20,7 @@
       title="Settings"
       @click="$emit('modify-settings')">
       <v-icon size="17px">
-        fa-cog
+        fa-lock
       </v-icon>
     </v-btn>
   </div>
