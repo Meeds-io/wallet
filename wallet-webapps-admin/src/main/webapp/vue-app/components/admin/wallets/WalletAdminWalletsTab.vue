@@ -328,8 +328,6 @@ export default {
       displayUsers: true,
       displaySpaces: false,
       displayAdmin: false,
-      displayDisapprovedWallets: true,
-      displayDisabledWallets: false,
       selectedTransactionHash: null,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
@@ -395,6 +393,12 @@ export default {
     };
   },
   computed: {
+    displayDisapprovedWallets() {
+      return this.selectedWalletStatus && this.selectedWalletStatus.indexOf('Disapproved') >= 0;
+    },
+    displayDisabledWallets() {
+      return this.selectedWalletStatus && this.selectedWalletStatus.indexOf('Disabled') >= 0;
+    },
     etherAccountDetails() {
       return {
         title: 'ether',
@@ -422,31 +426,21 @@ export default {
       return this.displayedWallets.length === this.limit;
     },
     displayedWallets() {
-      if (this.selectedWalletStatus.length === 0) {
-        if (this.displayUsers && this.displayDisapprovedWallets && this.displaySpaces && this.displayDisabledWallets && this.displayAdmin && !this.search) {
-          return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
-        } else {
-          return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
-        }
+      if (this.displayUsers && this.displayAdmin && this.displaySpaces && this.displayDisapprovedWallets && this.displayDisabledWallets && !this.search) {
+        return this.wallets.filter(wallet => wallet && wallet.address).slice(0, this.limit);
       } else {
-        //TODO
-        return [];
+        return this.wallets.filter(wallet => wallet && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0)).slice(0, this.limit);
       }
     },
     filteredWallets() {
-      if (this.selectedWalletStatus.length === 0) {
-        if(this.displayedWallets && this.displayedWallets.length) {
-          const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
-          const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
-          this.wallets.forEach((wallet, index) => {
-            wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
-          });
-          return this.wallets.slice(0, limit);
-        } else {
-          return [];
-        }
+      if(this.displayedWallets && this.displayedWallets.length) {
+        const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
+        const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
+        this.wallets.forEach((wallet, index) => {
+          wallet.displayedWallet = index < limit && wallet.address && (this.displayDisapprovedWallets || !wallet.disapproved) && (this.displayUsers || wallet.type !== 'user') && (this.displaySpaces || wallet.type !== 'space') && (this.displayAdmin || wallet.type.toLowerCase() !== 'admin') && (this.displayDisabledWallets || wallet.enabled) && (!this.search || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0 || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+        });
+        return this.wallets.slice(0, limit);
       } else {
-        //TODO
         return [];
       }
     }
