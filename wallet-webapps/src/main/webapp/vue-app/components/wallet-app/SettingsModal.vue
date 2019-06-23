@@ -16,13 +16,13 @@
             Security
           </span>
       </div>
-      <v-card-text v-if="loading || appLoading" class="text-xs-center">
+      <v-card-text v-if="loading || appLoading" class="text-xs-center pt-0">
         <v-progress-circular
           color="primary"
           class="mb-2"
           indeterminate />
       </v-card-text>
-      <v-card-text v-show="!loading && !appLoading">
+      <v-card-text v-show="!loading && !appLoading" class="pt-0">
         <div v-if="error && !loading" class="alert alert-error v-content">
           <i class="uiIconError"></i>{{ error }}
         </div>
@@ -185,7 +185,9 @@ export default {
         this.walletAddress = this.settings.wallet.address;
 
         // Workaround to display slider on first popin open
-        this.$refs.settingsTabs.callSlider();
+        if (this.$refs.settingsTabs) {
+          this.$refs.settingsTabs.callSlider();
+        }
 
         this.dialog = true;
         this.$nextTick(() => {
