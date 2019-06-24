@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -600,4 +601,12 @@ public class WalletUtils {
     return CommonsUtils.getService(WalletService.class);
   }
 
+  public static final String formatNumber(Object amount, String lang) {
+    if (StringUtils.isBlank(lang)) {
+      lang = Locale.getDefault().getLanguage();
+    }
+    NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale(lang));
+    numberFormat.setMaximumFractionDigits(3);
+    return numberFormat.format(Double.parseDouble(amount.toString()));
+  }
 }
