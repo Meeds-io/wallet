@@ -12,7 +12,12 @@
           @configured="$emit('configured')" />
       </template>
       <template v-else>
-        <v-form ref="form">
+        <v-form
+          ref="form"
+          @submit="
+            $event.preventDefault();
+            $event.stopPropagation();
+          ">
           <v-text-field
             v-if="!loading"
             v-model="walletPassword"

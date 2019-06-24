@@ -28,7 +28,12 @@
         <i class="uiIconError"></i>{{ error }}
       </div>
       <v-card-text>
-        <v-form ref="form">
+        <v-form
+          ref="form"
+          @submit="
+            $event.preventDefault();
+            $event.stopPropagation();
+          ">
           <address-auto-complete
             ref="autocomplete"
             :disabled="loading"
