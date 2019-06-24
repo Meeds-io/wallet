@@ -172,6 +172,15 @@
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
+
+          <upgrade-token-modal
+            v-if="contractDetails.isOwner && contractDetails.contractType === 1"
+            ref="upgrade"
+            :contract-details="contractDetails"
+            :wallet-address="walletAddress"
+            @sent="newTransactionPending"
+            @success="successTransaction"
+            @error="transactionError" />
         </v-flex>
         <v-btn
           icon
@@ -339,10 +348,12 @@
 
 <script>
 import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
+import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
 
 export default {
   components: {
     ContractAdminModal,
+    UpgradeTokenModal,
   },
   props: {
     isDisplayOnly: {

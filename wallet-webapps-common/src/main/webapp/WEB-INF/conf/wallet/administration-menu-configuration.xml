@@ -30,7 +30,7 @@
       <init-params>
         <value-param>
           <name>extended.setup.navigation.file</name>
-          <value>war:/conf/wallet/portal/group/platform/rewarding/navigation.xml</value>
+          <value>war:/conf/wallet/portal/group/platform/rewarding/admin-navigation.xml</value>
         </value-param>
       </init-params>
     </component-plugin>

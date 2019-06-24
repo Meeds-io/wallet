@@ -19,7 +19,7 @@
 
           <wallet-setup
             ref="walletSetup"
-            :wallet-address="originalWalletAddress"
+            :wallet-address="walletAddress"
             :refresh-index="refreshIndex"
             :loading="loading"
             is-administration
@@ -59,11 +59,6 @@
               href="#packs">
               Cauri packs
             </v-tab>
-            <v-tab
-              key="contracts"
-              href="#contracts">
-              Cauri administration
-            </v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="selectedTab">
@@ -94,19 +89,6 @@
             <v-tab-item
               id="packs"
               value="packs" />
-            <v-tab-item
-              id="contracts"
-              value="contracts">
-              <contracts-tab
-                ref="contractsTab"
-                :wallet-address="walletAddress"
-                :loading="loading"
-                :fiat-symbol="fiatSymbol"
-                :address-etherscan-link="addressEtherscanLink"
-                :token-etherscan-link="tokenEtherscanLink"
-                :is-admin="isAdmin"
-                @pending-transaction="watchPendingTransaction" />
-            </v-tab-item>
           </v-tabs-items>
         </v-flex>
       </v-layout>
@@ -118,13 +100,11 @@
 <script>
 import WalletsTab from './wallets/WalletAdminWalletsTab.vue';
 import InitialFundsTab from './settings/WalletAdminInitialFundsTab.vue';
-import ContractsTab from './contracts/WalletAdminContractsTab.vue';
 
 export default {
   components: {
     WalletsTab,
     InitialFundsTab,
-    ContractsTab,
   },
   data() {
     return {
@@ -132,7 +112,6 @@ export default {
       selectedTab: 'wallets',
       fiatSymbol: '$',
       walletAddress: null,
-      originalWalletAddress: null,
       refreshIndex: 1,
       contractDetails: null,
       isAdmin: null,
@@ -164,8 +143,7 @@ export default {
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
-          this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          this.originalWalletAddress = window.walletSettings.wallet.address;
+          this.walletAddress = window.walletSettings.wallet.address;
         })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
@@ -188,7 +166,6 @@ export default {
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
         .then(() => this.$refs && this.$refs.walletsTab && this.$refs.walletsTab.init(true))
         .then(() => this.$refs.fundsTab && this.$refs.fundsTab.init())
-        .then(() => this.$refs.contractsTab && this.$refs.contractsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug(error);
