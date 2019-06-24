@@ -23,21 +23,18 @@
             multiple>
             <v-btn
               v-model="displayUsers"
-              color="#578DC9"
               value="users"
               class="btn py-2 px-2">
               Users
             </v-btn>
             <v-btn
               v-model="displaySpaces"
-              color="#578DC9"
               value="spaces"
               class="btn py-2 px-2">
               Spaces
             </v-btn>
             <v-btn
               v-model="displayAdmin"
-              color="#578DC9"
               value="admin"
               class="btn py-2 px-2">
               Admin
@@ -55,7 +52,10 @@
             multiple />
         </v-flex>
         <v-flex md2 xs12 />
-        <v-flex md3 xs12>
+        <v-flex
+          md3
+          pt-2
+          xs12>
           <v-text-field
             v-model="search"
             append-icon="search"
@@ -406,7 +406,7 @@ export default {
           value: '',
         },
       ],
-      userTypes: ['users'],
+      userTypes: ['users', 'spaces', 'admin'],
       walletStatus: [
         //'Enabled',
         'Disabled',
@@ -414,7 +414,7 @@ export default {
         'Disapproved',
         //'Deleted'
       ],
-      selectedWalletStatus: []
+      selectedWalletStatus: ['Disabled', 'Disapproved']
     };
   },
   computed: {
