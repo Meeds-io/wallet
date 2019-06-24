@@ -82,5 +82,4 @@ public interface WalletTokenAdminService {
   void reinit();
 
   ContractDetail loadContractDetailFromBlockchain(String contractAddress);
-
 }

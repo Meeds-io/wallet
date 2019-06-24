@@ -31,7 +31,6 @@ import org.exoplatform.portal.config.model.ApplicationType;
  * SpaceWallet portlet if the application registry was already populated
  */
 public class ApplicationRegistrySetupService implements StartableClusterAware {
-
   private static final String        SPACE_WALLET_APP_ID       = "wallet/SpaceWallet";
 
   private static final String        SPACE_WALLET_PORTLET_NAME = "SpaceWallet";
@@ -68,6 +67,7 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
         walletCategory.setName(WALLET_CATEGORY_NAME);
         walletCategory.setDescription("Wallet applications");
         walletCategory.setDisplayName(WALLET_CATEGORY_NAME);
+
         Application application = new Application();
         walletCategory.setApplications(Collections.singletonList(application));
         application.setAccessPermissions(new ArrayList<String>(EVERYONE_PERMISSION_LIST));

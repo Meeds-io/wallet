@@ -63,7 +63,8 @@ public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
       }
 
       String walletAddress = wallet.getAddress();
-      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress);
+      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress)
+          || getTokenTransactionService().isApprovedAccount(walletAddress);
       if (initializedWallet) {
         wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
       } else {

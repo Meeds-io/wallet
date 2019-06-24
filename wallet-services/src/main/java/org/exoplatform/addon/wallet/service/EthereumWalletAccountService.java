@@ -24,6 +24,9 @@ import org.exoplatform.social.core.identity.model.Identity;
 
 public class EthereumWalletAccountService implements WalletAccountService, Startable {
 
+  private static final Log        LOG                                     =
+                                      ExoLogger.getLogger(EthereumWalletAccountService.class);
+
   private static final String     USER_MESSAGE_IN_EXCEPTION               = "User '";
 
   private static final String     USER_MESSAGE_PREFIX                     = "User ";
@@ -31,9 +34,6 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
   private static final String     CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS = "Can't find wallet associated to address ";
 
   private static final String     ADDRESS_PARAMTER_IS_MANDATORY           = "address paramter is mandatory";
-
-  private static final Log        LOG                                     =
-                                      ExoLogger.getLogger(EthereumWalletAccountService.class);
 
   private WalletTokenAdminService tokenAdminService;
 

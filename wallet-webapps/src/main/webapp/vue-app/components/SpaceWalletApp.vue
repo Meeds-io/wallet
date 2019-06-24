@@ -1,4 +1,4 @@
-<template id="SpaceWalletApp">
+<template>
   <wallet-app :is-space="true" />
 </template>
 

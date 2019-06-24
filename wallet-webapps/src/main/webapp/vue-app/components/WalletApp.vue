@@ -1,6 +1,6 @@
 <template>
   <v-app
-    id="WalletApp"
+    :id="isSpace ? 'SpaceWalletApp' : 'WalletApp'"
     color="transaprent"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
