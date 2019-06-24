@@ -1,30 +1,32 @@
 <template>
   <v-flex id="walletSummary" class="elevation-0 mr-3">
-    <v-card-title
-      v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
-      primary-title
-      class="pb-0">
-      <v-spacer />
-      <div class="alert alert-info">
-        <i class="uiIconInfo"></i>
-        Almost done! Your wallet will be ready to use once an administrator approves it.
-      </div>
-      <v-spacer />
-    </v-card-title>
-    <v-card-title
-      v-else-if="initializationState === 'DENIED'"
-      primary-title
-      class="pb-0">
-      <v-spacer />
-      <div class="alert alert-info">
-        <i class="uiIconInfo"></i>
-        Wallet access is denied.
-        <button class="btn" @click="requestAccessAuthorization()">
-          Request authorization
-        </button>
-      </div>
-      <v-spacer />
-    </v-card-title>
+    <template v-if="!isSpace || isSpaceAdministrator">
+      <v-card-title
+        v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
+        primary-title
+        class="pb-0">
+        <v-spacer />
+        <div class="alert alert-info">
+          <i class="uiIconInfo"></i>
+          Almost done! Your wallet will be ready to use once an administrator approves it.
+        </div>
+        <v-spacer />
+      </v-card-title>
+      <v-card-title
+        v-else-if="initializationState === 'DENIED'"
+        primary-title
+        class="pb-0">
+        <v-spacer />
+        <div class="alert alert-info">
+          <i class="uiIconInfo"></i>
+          Wallet access is denied.
+          <button class="btn" @click="requestAccessAuthorization()">
+            Request authorization
+          </button>
+        </div>
+        <v-spacer />
+      </v-card-title>
+    </template>
 
     <v-card-title
       v-if="pendingTransactionsCount"
@@ -108,6 +110,18 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    isSpaceAdministrator: {
+      type: Boolean,
+      default: function() {
+        return false;
+      },
+    },
+    isSpace: {
+      type: Boolean,
+      default: function() {
+        return false;
       },
     },
     initializationState: {

@@ -97,6 +97,8 @@
                         v-if="walletAddress && contractDetails"
                         ref="walletSummary"
                         :wallet-address="walletAddress"
+                        :is-space="isSpace"
+                        :is-space-administrator="isSpaceAdministrator"
                         :initialization-state="initializationState"
                         :contract-details="contractDetails"
                         @refresh="init()"
