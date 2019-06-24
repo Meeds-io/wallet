@@ -28,69 +28,71 @@
       </v-card-title>
     </template>
 
-    <v-card-title
-      v-if="pendingTransactionsCount"
-      primary-title
-      class="pb-0">
-      <v-spacer />
-      <v-badge
-        color="red"
-        right
-        title="A transaction is in progress">
-        <span slot="badge">
-          {{ pendingTransactionsCount }}
-        </span>
-        <v-progress-circular
-          color="primary"
-          indeterminate
-          size="20" />
-      </v-badge>
-      <v-spacer />
-    </v-card-title>
-
-    <v-container
-      v-if="contractDetails"
-      fluid
-      grid-list-md
-      pl-3
-      pr-0>
-      <v-layout col wrap>
-        <v-flex
-          md4
-          xs12
-          text-xs-center>
-          <summary-balance :contract-details="contractDetails" />
-        </v-flex>
-        <v-flex
-          offset-md1
-          offset-xs0
-          md3
-          xs6
-          pr-0
-          pl-0
-          text-xs-center>
-          <summary-reward
-            :contract-details="contractDetails"
-            :wallet-address="walletAddress"
-            @display-transactions="$emit('display-transactions', $event, null, 'reward')"
-            @error="$emit('error', $event)" />
-        </v-flex>
-        <v-flex
-          offset-md1
-          offset-xs0
-          md3
-          xs6
-          pr-0
-          pl-0
-          text-xs-center>
-          <summary-transaction
-            :contract-details="contractDetails"
-            :wallet-address="walletAddress"
-            @display-transactions="$emit('display-transactions', $event)"
-            @error="$emit('error', $event)" />
-        </v-flex>
-      </v-layout>
-    </v-container>
+    <template v-if="initializationState !== 'DENIED'">
+      <v-card-title
+        v-if="pendingTransactionsCount"
+        primary-title
+        class="pb-0">
+        <v-spacer />
+        <v-badge
+          color="red"
+          right
+          title="A transaction is in progress">
+          <span slot="badge">
+            {{ pendingTransactionsCount }}
+          </span>
+          <v-progress-circular
+            color="primary"
+            indeterminate
+            size="20" />
+        </v-badge>
+        <v-spacer />
+      </v-card-title>
+  
+      <v-container
+        v-if="contractDetails"
+        fluid
+        grid-list-md
+        pl-3
+        pr-0>
+        <v-layout col wrap>
+          <v-flex
+            md4
+            xs12
+            text-xs-center>
+            <summary-balance :contract-details="contractDetails" />
+          </v-flex>
+          <v-flex
+            offset-md1
+            offset-xs0
+            md3
+            xs6
+            pr-0
+            pl-0
+            text-xs-center>
+            <summary-reward
+              :contract-details="contractDetails"
+              :wallet-address="walletAddress"
+              @display-transactions="$emit('display-transactions', $event, null, 'reward')"
+              @error="$emit('error', $event)" />
+          </v-flex>
+          <v-flex
+            offset-md1
+            offset-xs0
+            md3
+            xs6
+            pr-0
+            pl-0
+            text-xs-center>
+            <summary-transaction
+              :contract-details="contractDetails"
+              :wallet-address="walletAddress"
+              @display-transactions="$emit('display-transactions', $event)"
+              @error="$emit('error', $event)" />
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </template>
   </v-flex>
 </template>
 

@@ -53,18 +53,23 @@
               <ul>
                 <li>
                   <strong>
-                    Level 2
+                    Level 1
                   </strong>: send rewards of wallets
                 </li>
                 <li>
                   <strong>
+                    Level 2
+                  </strong>: send initial funds for wallets
+                </li>
+                <li>
+                  <strong>
                     Level 3
-                  </strong>: change vesting amount for wallets
+                  </strong>: increase vesting amount for wallets
                 </li>
                 <li>
                   <strong>
                     Level 4
-                  </strong>: approve/disapprove and send initial funds for wallets
+                  </strong>: approve/disapprove wallets 
                 </li>
                 <li>
                   <strong>

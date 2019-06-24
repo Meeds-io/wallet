@@ -87,7 +87,7 @@
                 row
                 wrap
                 class="ml-0 mr-0">
-                <v-flex :class="(!isSpace || isSpaceAdministrator) && 'md8'" xs12>
+                <v-flex :class="!walletReadonly && 'md8'" xs12>
                   <v-layout
                     row
                     wrap
@@ -106,28 +106,30 @@
                         @refresh-token-balance="refreshTokenBalance"
                         @error="error = $event" />
                     </v-flex>
-                    <v-flex xs12>
-                      <transaction-history-chart-summary
-                        v-if="!loading"
-                        ref="chartPeriodicityButtons"
-                        :periodicity-label="periodicityLabel"
-                        @periodicity-changed="periodicity = $event"
-                        @error="error = $event" />
-                    </v-flex>
-                    <v-flex xs12>
-                      <transaction-history-chart
-                        ref="transactionHistoryChart"
-                        class="transactionHistoryChart"
-                        :periodicity="periodicity"
-                        :wallet-address="walletAddress"
-                        :contract-details="contractDetails"
-                        @periodicity-label="periodicityLabel = $event"
-                        @error="error = $event" />
-                    </v-flex>
+                    <template v-if="initializationState !== 'DENIED'">
+                      <v-flex xs12>
+                        <transaction-history-chart-summary
+                          v-if="!loading"
+                          ref="chartPeriodicityButtons"
+                          :periodicity-label="periodicityLabel"
+                          @periodicity-changed="periodicity = $event"
+                          @error="error = $event" />
+                      </v-flex>
+                      <v-flex xs12>
+                        <transaction-history-chart
+                          ref="transactionHistoryChart"
+                          class="transactionHistoryChart"
+                          :periodicity="periodicity"
+                          :wallet-address="walletAddress"
+                          :contract-details="contractDetails"
+                          @periodicity-label="periodicityLabel = $event"
+                          @error="error = $event" />
+                      </v-flex>
+                    </template>
                   </v-layout>
                 </v-flex>
                 <v-flex
-                  v-if="!isSpace || isSpaceAdministrator"
+                  v-if="!walletReadonly"
                   md4
                   xs12
                   text-md-center
@@ -242,6 +244,9 @@ export default {
     };
   },
   computed: {
+    walletReadonly() {
+      return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
+    },
     displayAccountsList() {
       return this.walletAddress;
     },
