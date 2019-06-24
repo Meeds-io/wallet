@@ -406,7 +406,7 @@ export default {
           this.contractDetails = Object.assign({}, contractDetails);
         });
     },
-    openAccountDetail(hash, methodName) {
+    openAccountDetail(methodName, hash) {
       this.error = null;
       this.selectedAccount = this.contractDetails;
       this.selectedTransactionHash = hash;
@@ -451,7 +451,7 @@ export default {
             .replace(/=/g, '":"')}"}`
         );
         if (this.walletAddress && this.contractDetails && parameters && parameters.hash) {
-          this.openAccountDetail(parameters.hash);
+          this.openAccountDetail(null, parameters.hash);
         }
       }
     },

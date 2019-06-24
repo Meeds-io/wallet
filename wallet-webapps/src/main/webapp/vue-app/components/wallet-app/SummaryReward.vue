@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     displayTransactionList() {
-      this.$emit('display-transactions', this.contractDetails);
+      this.$emit('display-transactions');
     },
     refreshBalance() {
       if (!this.contractDetails || !this.contractDetails.contract || !this.walletAddress) {

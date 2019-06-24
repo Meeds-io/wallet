@@ -73,7 +73,7 @@
             <summary-reward
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
-              @display-transactions="$emit('display-transactions', $event, null, 'reward')"
+              @display-transactions="$emit('display-transactions', 'reward')"
               @error="$emit('error', $event)" />
           </v-flex>
           <v-flex
@@ -87,7 +87,7 @@
             <summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
-              @display-transactions="$emit('display-transactions', $event)"
+              @display-transactions="$emit('display-transactions')"
               @error="$emit('error', $event)" />
           </v-flex>
         </v-layout>

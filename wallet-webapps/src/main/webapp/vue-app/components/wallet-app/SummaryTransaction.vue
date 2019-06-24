@@ -70,7 +70,7 @@ export default {
   },
   methods: {
     displayTransactionList() {
-      this.$emit('display-transactions', this.contractDetails);
+      this.$emit('display-transactions');
     },
     refreshLastTransaction() {
       if (!this.contractDetails || !this.contractDetails.address || !this.walletAddress) {
