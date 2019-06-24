@@ -13,14 +13,12 @@
     <v-flex md6 text-xs-right>
       <v-btn-toggle v-model="periodicity" class="periodicityButtons">
         <v-btn
-          id="periodicityChangeYear"
           :disabled="periodicity === 'year'"
           value="year"
           flat>
           Year
         </v-btn>
         <v-btn
-          id="periodicityChangeMonth"
           :disabled="periodicity === 'month'"
           value="month"
           flat>

@@ -22,7 +22,6 @@
             :wallet-address="originalWalletAddress"
             :refresh-index="refreshIndex"
             :loading="loading"
-            class="mb-3"
             is-administration
             @refresh="init()"
             @error="error = $event" />

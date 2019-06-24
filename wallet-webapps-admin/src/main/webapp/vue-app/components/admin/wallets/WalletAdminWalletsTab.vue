@@ -370,7 +370,6 @@ export default {
     },
     useWalletAdmin() {
       return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.balance && Number(this.walletAdmin.balance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
-<<<<<<< HEAD
     },
     displayUsers() {
       return this.walletTypes && this.walletTypes.includes('user');
@@ -380,8 +379,6 @@ export default {
     },
     displayAdmin() {
       return this.walletTypes && this.walletTypes.includes('admin');
-=======
->>>>>>> Delete useless buttons in admin UI
     },
     displayDisapprovedWallets() {
       return this.walletStatuses && this.walletStatuses.includes('disapproved');
