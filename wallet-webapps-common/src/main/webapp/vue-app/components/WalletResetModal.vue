@@ -242,6 +242,7 @@ export default {
             if (thiss.rememberPasswordToChange) {
               rememberPassword(true, hashCode(thiss.walletPassword));
             } else {
+              saveBrowserWallet(thiss.newWalletPassword, null, null, false, thiss.rememberPassword);
               if (this.hasKeyOnServerSide) {
                 sendPrivateKeyToServer(null, this.walletPassword, this.newWalletPassword)
                   .then((result, error) => {
@@ -261,8 +262,6 @@ export default {
                   .finally(() => {
                     this.loading = false;
                   });
-              } else {
-                saveBrowserWallet(thiss.newWalletPassword, null, null, false, thiss.rememberPassword);
               }
               thiss.$emit('reseted');
             }
