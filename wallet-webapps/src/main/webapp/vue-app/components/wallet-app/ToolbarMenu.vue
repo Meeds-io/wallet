@@ -17,7 +17,7 @@
       class="mr-0 ml-0"
       icon
       flat
-      title="Settings"
+      title="Security"
       @click="$emit('modify-settings')">
       <v-icon size="17px">
         fa-lock
