@@ -13,7 +13,10 @@
     </div>
     <v-container>
       <v-layout>
-        <v-flex md3 xs12>
+        <v-flex
+          md3
+          pt-3
+          xs12>
           <v-btn-toggle
             v-model="userTypes"
             mandatory
@@ -49,8 +52,7 @@
             label="Wallet Status"
             single-line
             chips
-            multiple
-            @change="log" />
+            multiple />
         </v-flex>
         <v-flex md2 xs12 />
         <v-flex md3 xs12>
@@ -93,6 +95,23 @@
                 :deleted-user="props.item.deletedUser"
                 :disabled-user="props.item.disabledUser"
                 :avatar="props.item.avatar"
+                :display-name-only="true"
+                display-no-address />
+            </td>
+            <td class="clickable text-xs-left" @click="openAccountDetail(props.item)">
+              <profile-chip
+                :address="props.item.address"
+                :profile-id="props.item.id"
+                :profile-technical-id="props.item.technicalId"
+                :space-id="props.item.spaceId"
+                :profile-type="props.item.type"
+                :display-name="props.item.name"
+                :enabled="props.item.enabled"
+                :disapproved="props.item.disapproved"
+                :deleted-user="props.item.deletedUser"
+                :disabled-user="props.item.disabledUser"
+                :avatar="props.item.avatar"
+                display-status-only="true"
                 display-no-address />
             </td>
             <td
@@ -357,6 +376,12 @@ export default {
           align: 'left',
           sortable: true,
           value: 'name',
+        },
+        {
+          text: 'Wallet status',
+          align: 'left',
+          sortable: true,
+          value: 'walletStatus',
         },
         {
           text: 'Token balance',
