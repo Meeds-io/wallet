@@ -310,9 +310,7 @@ export default {
           if (this.$refs && this.$refs.walletSummary) {
             this.$refs.walletSummary.loadPendingTransactions();
           }
-          if (this.$refs.walletAccountsList) {
-            this.$refs.walletAccountsList.checkOpenTransaction();
-          }
+          this.checkOpenTransaction();
           this.$forceUpdate();
         })
         .catch((error) => {
@@ -408,27 +406,19 @@ export default {
           this.contractDetails = Object.assign({}, contractDetails);
         });
     },
-    openAccountDetail(accountDetails, hash, methodName) {
+    openAccountDetail(hash, methodName) {
       this.error = null;
-      if(!accountDetails) {
-        console.error(`Can't open empty account details`);
-        return;
-      }
-      if (accountDetails.error) {
-        this.error = 'Error displaying transactions list';
-      } else {
-        this.selectedAccount = this.contractDetails;
-        this.selectedTransactionHash = hash;
-        this.selectedContractMethodName = methodName;
-        this.seeAccountDetails = true;
+      this.selectedAccount = this.contractDetails;
+      this.selectedTransactionHash = hash;
+      this.selectedContractMethodName = methodName;
+      this.seeAccountDetails = true;
 
-        this.$nextTick(() => {
-          const thiss = this;
-          $('.v-overlay').on('click', (event) => {
-            thiss.back();
-          });
+      this.$nextTick(() => {
+        const thiss = this;
+        $('.v-overlay').on('click', (event) => {
+          thiss.back();
         });
-      }
+      });
     },
     back() {
       this.seeAccountDetails = false;
@@ -450,6 +440,20 @@ export default {
             .then(this.$refs.transactionHistoryChart.initializeChart);
         }
       });
+    },
+    checkOpenTransaction() {
+      if (document.location.search && document.location.search.length) {
+        const search = document.location.search.substring(1);
+        const parameters = JSON.parse(
+          `{"${decodeURI(search)
+            .replace(/"/g, '\\"')
+            .replace(/&/g, '","')
+            .replace(/=/g, '":"')}"}`
+        );
+        if (this.walletAddress && this.contractDetails && parameters && parameters.hash) {
+          this.openAccountDetail(parameters.hash);
+        }
+      }
     },
     initMenuApp() {
       if (!this.isWalletEnabled || this.isSpace) {

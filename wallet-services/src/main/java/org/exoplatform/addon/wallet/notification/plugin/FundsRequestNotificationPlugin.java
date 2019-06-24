@@ -69,7 +69,6 @@ public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
       if (contractDetail == null) {
         throw new IllegalStateException("Can't find contract with address " + contractAddress);
       }
-      requestAcceptURL += "&contract=" + contractDetail.getAddress();
       symbol = contractDetail.getSymbol();
     } else {
       symbol = "ether";
