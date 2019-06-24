@@ -94,7 +94,33 @@
                 :deleted-user="props.item.deletedUser"
                 :disabled-user="props.item.disabledUser"
                 :avatar="props.item.avatar"
-                display-no-address />
+                display-no-address
+                no-status />
+            </td>
+            <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
+              <template v-if="props.item.deletedUser">Deleted user</template>
+              <template v-else-if="props.item.disabledUser">Disabled user</template>
+              <template v-else-if="!props.item.enabled">Disabled</template>
+              <template v-else-if="props.item.initializationState === 'NEW'">New</template>
+              <template v-else-if="props.item.disapproved">Disapproved</template>
+              <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                <v-icon color="orange">
+                  warning
+                </v-icon>
+                Low ether balance
+              </template>
+              <template v-else-if="Number(props.item.tokenBalance) === 0">
+                <v-icon color="orange">
+                  warning
+                </v-icon>
+                No tokens
+              </template>
+              <v-icon
+                v-else
+                color="green"
+                title="OK">
+                fa-check-circle
+              </v-icon>
             </td>
             <td
               v-if="contractDetails"
@@ -338,6 +364,12 @@ export default {
           value: 'name',
         },
         {
+          text: 'Wallet status',
+          align: 'center',
+          sortable: true,
+          value: 'walletStatus',
+        },
+        {
           text: 'Token balance',
           align: 'center',
           value: 'tokenBalance',
@@ -348,7 +380,7 @@ export default {
           value: 'balance',
         },
         {
-          text: 'Initialization',
+          text: 'Initialization status',
           align: 'center',
           sortable: true,
           value: 'initializationState',

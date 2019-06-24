@@ -1,76 +1,15 @@
 <template>
   <a
-    v-if="displayNameOnly"
+    v-if="profileId"
     :id="id"
     :title="profileId"
     :href="url"
     rel="nofollow"
     target="_blank">
-    <template v-if="disapproved">
-      <del class="red--text">{{ displayName }}</del>
-    </template>
-    <template v-else-if="deletedUser">
-      <del class="red--text">{{ displayName }}</del>
-    </template>
-    <template v-else-if="disabledUser">
-      <del class="red--text">{{ displayName }}</del>
-    </template>
-    <template v-else-if="displayNoAddress && !address">
-      <del class="red--text">{{ displayName }}</del>
-    </template>
-    <template v-else-if="!enabled">
-      <del class="red--text">{{ displayName }}</del>
-    </template>
-    <template v-else-if="disabledInRewardPool">
-      {{ displayName }} <span class="red--text">(Disabled pool)</span>
-    </template>
-    <template v-else-if="initializationState !== 'INITIALIZED'">
-      {{ displayName }} <span class="orange--text">(Not initialized)</span>
-    </template>
-    <template v-else>
+    <template v-if="noStatus">
       {{ displayName }}
     </template>
-  </a>
-  <a
-    v-else-if="displayStatusOnly"
-    :id="id"
-    :title="profileId"
-    :href="url"
-    rel="nofollow"
-    target="_blank">
-    <template v-if="disapproved">
-      Disapproved
-    </template>
-    <template v-else-if="deletedUser">
-      Deleted
-    </template>
-    <template v-else-if="disabledUser">
-      Disabled user
-    </template>
-    <template v-else-if="displayNoAddress && !address">
-      No wallet
-    </template>
-    <template v-else-if="!enabled">
-      Disabled wallet
-    </template>
-    <template v-else-if="disabledInRewardPool">
-      <span class="red--text">(Disabled pool)</span>
-    </template>
-    <template v-else-if="initializationState !== 'INITIALIZED'">
-      <span class="orange--text">(Not initialized)</span>
-    </template>
-    <template v-else>
-      {{ displayName }}
-    </template>
-  </a>
-  <a
-    v-else-if="profileId"
-    :id="id"
-    :title="profileId"
-    :href="url"
-    rel="nofollow"
-    target="_blank">
-    <template v-if="disapproved">
+    <template v-else-if="disapproved">
       <del class="red--text">{{ displayName }}</del> (Disapproved)
     </template>
     <template v-else-if="deletedUser">
@@ -201,22 +140,16 @@ export default {
         return false;
       },
     },
+    noStatus: {
+      type: Boolean,
+      default: function() {
+        return false;
+      },
+    },
     initializationState: {
       type: String,
       default: function() {
         return 'INITIALIZED';
-      },
-    },
-    displayNameOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    displayStatusOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
       },
     },
   },
