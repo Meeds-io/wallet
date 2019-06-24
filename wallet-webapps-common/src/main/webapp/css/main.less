@@ -642,8 +642,6 @@
       .amount {
         line-height: 40px;
       }
-
-
   }
 
   .periodicityLabel {
@@ -691,7 +689,6 @@
     }
 
   }
-
   .transactionHistoryChart {
     height: 450px;
     width: 100%;
@@ -701,6 +698,16 @@
 
     canvas {
      width: 100% !important;
+    }
+  }
+  .periodicityButtons {
+    button {
+      padding: 8px 16px;
+
+      &[disabled] {
+        opacity: 1;
+        color: #333 !important;
+      }
     }
   }
 }

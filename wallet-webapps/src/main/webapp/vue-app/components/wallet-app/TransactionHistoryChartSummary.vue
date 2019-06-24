@@ -11,19 +11,19 @@
       {{ periodicityLabel }}
     </v-flex>
     <v-flex md6 text-xs-right>
-      <v-btn-toggle v-model="periodicity">
+      <v-btn-toggle v-model="periodicity" class="periodicityButtons">
         <v-btn
           id="periodicityChangeYear"
           :disabled="periodicity === 'year'"
           value="year"
-          class="btn py-2 px-2">
+          flat>
           Year
         </v-btn>
         <v-btn
           id="periodicityChangeMonth"
           :disabled="periodicity === 'month'"
           value="month"
-          class="btn py-2 px-2">
+          flat>
           Month
         </v-btn>
       </v-btn-toggle>
