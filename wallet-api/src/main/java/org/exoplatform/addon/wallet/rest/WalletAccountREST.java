@@ -168,7 +168,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("setInitializationStatus")
   @GET
-  @RolesAllowed({ "rewarding", "rewarding" })
+  @RolesAllowed("rewarding")
   public Response setInitializationStatus(@QueryParam("address") String address, @QueryParam("status") String status) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);

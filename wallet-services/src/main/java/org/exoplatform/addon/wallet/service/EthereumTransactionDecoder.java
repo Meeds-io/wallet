@@ -17,6 +17,7 @@
 package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.contract.ERTTokenV2.*;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.isWalletEmpty;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -395,6 +396,16 @@ public class EthereumTransactionDecoder {
           LOG.warn("Can't find contract method name of transaction {}", transactionDetail);
         }
       }
+    }
+    // Compute wallets
+    if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
+      transactionDetail.setFromWallet(getAccountService().getWalletByAddress(transactionDetail.getFrom()));
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
+      transactionDetail.setToWallet(getAccountService().getWalletByAddress(transactionDetail.getTo()));
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
+      transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
     }
   }
 

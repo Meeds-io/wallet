@@ -38,7 +38,7 @@ public class WalletTaskREST implements ResourceContainer {
   @GET
   @Path("list")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "users" })
+  @RolesAllowed("users")
   public Response listTasks() {
     ConversationState currentState = ConversationState.getCurrent();
     if (currentState == null || currentState.getIdentity() == null || currentState.getIdentity().getUserId() == null
@@ -69,7 +69,7 @@ public class WalletTaskREST implements ResourceContainer {
   @GET
   @Path("markCompleted")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding" })
+  @RolesAllowed("rewarding")
   public Response markCompleted(@QueryParam("taskId") long taskId) {
     try {
       walletTaskService.markCompleted(taskId);

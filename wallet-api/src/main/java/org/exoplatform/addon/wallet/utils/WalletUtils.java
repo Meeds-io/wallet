@@ -32,6 +32,7 @@ import org.json.*;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
@@ -393,7 +394,8 @@ public class WalletUtils {
         return CommonsUtils.getCurrentDomain() + getMyWalletLink();
       } else {
         String groupId = space.getGroupId().split("/")[2];
-        return CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), groupId) + "/SpaceWallet";
+        return CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), groupId)
+            + "/SpaceWallet";
       }
     }
   }
@@ -597,10 +599,6 @@ public class WalletUtils {
     return settings == null ? 0 : settings.getNetwork().getId();
   }
 
-  private static final WalletService getWalletService() {
-    return CommonsUtils.getService(WalletService.class);
-  }
-
   public static final String formatNumber(Object amount, String lang) {
     if (StringUtils.isBlank(lang)) {
       lang = Locale.getDefault().getLanguage();
@@ -609,4 +607,18 @@ public class WalletUtils {
     numberFormat.setMaximumFractionDigits(3);
     return numberFormat.format(Double.parseDouble(amount.toString()));
   }
+
+  public static final boolean hasKnownWalletInTransaction(TransactionDetail transactionDetail) {
+    return !isWalletEmpty(transactionDetail.getToWallet()) || !isWalletEmpty(transactionDetail.getFromWallet())
+        || !isWalletEmpty(transactionDetail.getByWallet());
+  }
+
+  public static final boolean isWalletEmpty(Wallet wallet) {
+    return wallet == null || StringUtils.isBlank(wallet.getAddress());
+  }
+
+  private static final WalletService getWalletService() {
+    return CommonsUtils.getService(WalletService.class);
+  }
+
 }

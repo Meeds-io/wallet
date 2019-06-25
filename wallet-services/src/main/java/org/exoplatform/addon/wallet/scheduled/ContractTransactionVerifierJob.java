@@ -127,7 +127,7 @@ public class ContractTransactionVerifierJob implements Job {
           }
 
           // Save decoded transaction details after chaging its attributes
-          if (changed) {
+          if (changed && hasKnownWalletInTransaction(transactionDetail)) {
             getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
             modifiedTransactionsCount++;
           }
@@ -145,7 +145,9 @@ public class ContractTransactionVerifierJob implements Job {
         // Save last verified block for contracts transactions
         saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
       }
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       LOG.error("Error while checking pending transactions", e);
     } finally {
       RequestLifeCycle.end();
@@ -164,8 +166,11 @@ public class ContractTransactionVerifierJob implements Job {
       if (transactionDetail == null) {
         throw new IllegalStateException("Empty transaction detail is returned");
       }
-      LOG.info("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
-      getTransactionService().saveTransactionDetail(transactionDetail, true);
+
+      if (hasKnownWalletInTransaction(transactionDetail)) {
+        LOG.info("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
+        getTransactionService().saveTransactionDetail(transactionDetail, true);
+      }
     } catch (Exception e) {
       processed = false;
       LOG.warn("Error processing transaction {}. It will be retried next time.", transactionHash, e);

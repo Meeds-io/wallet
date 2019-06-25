@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.hasKnownWalletInTransaction;
+
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
@@ -110,7 +112,9 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
       // Ensure that all fields are computed correctly
       getTransactionDecoderService().computeContractTransactionDetail(transactionDetail, transactionReceipt);
 
-      getTransactionService().saveTransactionDetail(transactionDetail, broadcastSavingTransaction);
+      if (hasKnownWalletInTransaction(transactionDetail)) {
+        getTransactionService().saveTransactionDetail(transactionDetail, broadcastSavingTransaction);
+      }
     } finally {
       RequestLifeCycle.end();
     }
