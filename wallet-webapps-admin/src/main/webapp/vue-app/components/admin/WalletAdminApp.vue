@@ -55,9 +55,10 @@
               Initial funds
             </v-tab>
             <v-tab
-              key="packs"
-              href="#packs">
-              Cauri packs
+              v-if="contractDetails"
+              key="contract"
+              href="#contract">
+              {{ contractDetails.adminLevel >= 4 ? 'Contract' : 'Transactions history' }}
             </v-tab>
           </v-tabs>
 
@@ -87,8 +88,20 @@
                 @saved="refreshSettings" />
             </v-tab-item>
             <v-tab-item
-              id="packs"
-              value="packs" />
+              v-if="contractDetails"
+              id="contract"
+              value="contract">
+              <contract-tab
+                ref="contractDetail"
+                :wallet-address="walletAddress"
+                :user-wallet="userWallet"
+                :contract-details="contractDetails"
+                :fiat-symbol="fiatSymbol"
+                :address-etherscan-link="addressEtherscanLink"
+                @back="back()"
+                @success="reloadContract"
+                @pending-transaction="pendingTransaction" />
+            </v-tab-item>
           </v-tabs-items>
         </v-flex>
       </v-layout>
@@ -100,11 +113,13 @@
 <script>
 import WalletsTab from './wallets/WalletAdminWalletsTab.vue';
 import InitialFundsTab from './settings/WalletAdminInitialFundsTab.vue';
+import ContractTab from './contracts/WalletAdminContractTab.vue';
 
 export default {
   components: {
     WalletsTab,
     InitialFundsTab,
+    ContractTab,
   },
   data() {
     return {
@@ -120,6 +135,12 @@ export default {
       wallets: [],
       anchor: document.URL.indexOf('#') >= 0 ? document.URL.split('#')[1] : null,
     };
+  },
+  computed: {
+    userWallet() {
+      const address = this.walletAddress && this.walletAddress.toLowerCase();
+      return this.wallets && this.wallets.find((wallet) => wallet && wallet.address && wallet.address.toLowerCase() === address);
+    }
   },
   created() {
     this.init()
@@ -154,15 +175,7 @@ export default {
             throw error;
           }
         })
-        .then(() => this.walletUtils.getWallets())
-        .then((wallets) => {
-          this.wallets = wallets;
-
-          this.contractDetails = window.walletSettings.contractDetail;
-          if (this.contractDetails) {
-            return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.contractDetails, true);
-          }
-        })
+        .then(() => this.reloadContract())
         .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
         .then(() => this.$refs && this.$refs.walletsTab && this.$refs.walletsTab.init(true))
         .then(() => this.$refs.fundsTab && this.$refs.fundsTab.init())
@@ -184,6 +197,10 @@ export default {
           this.loading = false;
           this.forceUpdate();
         });
+    },
+    reloadContract() {
+      return this.tokenUtils.getContractDetails(this.walletAddress, true)
+        .then(contractDetails => this.contractDetails = contractDetails);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();

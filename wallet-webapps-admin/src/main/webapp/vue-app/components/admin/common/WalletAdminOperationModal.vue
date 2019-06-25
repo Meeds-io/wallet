@@ -402,13 +402,13 @@ export default {
                 this.transactionUtils.saveTransactionDetails(pendingTransaction)
                   .then(() => {
                     // The transaction has been hashed and will be sent
-                    this.$emit('sent', pendingTransaction, this.contractDetails);
+                    this.$emit('sent', pendingTransaction);
                   });
 
                 const thiss = this;
                 // FIXME workaround when can't execute .then(...) method, especially in pause, unpause.
                 this.walletUtils.watchTransactionStatus(hash, () => {
-                  thiss.$emit('success', thiss.transactionHash, thiss.contractDetails, thiss.methodName, thiss.autocompleteValue, thiss.inputValue);
+                  thiss.$emit('success', thiss.transactionHash, thiss.methodName, thiss.autocompleteValue, thiss.inputValue);
                 });
                 this.dialog = false;
               })
@@ -422,7 +422,7 @@ export default {
                 }
               })
               .then(() => {
-                this.$emit('success', this.transactionHash, this.contractDetails, this.methodName, this.autocompleteValue, this.inputValue);
+                this.$emit('success', this.transactionHash, this.methodName, this.autocompleteValue, this.inputValue);
               })
               .finally(() => {
                 this.loading = false;

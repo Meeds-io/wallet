@@ -3,25 +3,23 @@
     v-if="contractDetails && contractDetails.title"
     id="accountDetail"
     class="text-xs-center white layout column">
-    <v-card-title class="align-start accountDetailSummary">
+    <v-card-title v-if="adminLevel >= 4" class="align-start accountDetailSummary">
       <v-layout column>
-        <v-flex id="accountDetailTitle" class="mt-3">
-          <div class="headline title align-start">
-            <v-icon class="primary--text accountDetailIcon">
-              {{ contractDetails.icon }}
-            </v-icon>
-            Contract Details: {{ contractDetails.title }}
-          </div>
-          <h3 v-if="contractDetails.contractBalanceFiat" class="font-weight-light">
-            Contract balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
-          </h3> <h4 v-if="contractDetails.owner" class="grey--text font-weight-light no-wrap">
-            Owner: <wallet-address :value="contractDetails.owner" display-label />
-          </h4> <h4 v-if="contractDetails.totalSupply" class="grey--text font-weight-light">
+        <v-flex
+          id="accountDetailTitle"
+          class="mt-3">
+          <h3 v-if="adminLevel >= 5 && contractDetails.contractBalanceFiat" class="font-weight-light">
+            {{ contractDetails.name }} - balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
+          </h3>
+          <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
             Total supply: {{ walletUtils.toFixed(totalSupply) }} {{ contractDetails && contractDetails.symbol }}
+          </h4>
+          <h4 class="grey--text font-weight-light no-wrap">
+            Owner: <wallet-address :value="contractDetails.owner" display-label />
           </h4>
         </v-flex>
 
-        <v-flex id="accountDetailActions">
+        <v-flex v-if="adminLevel >= 4" id="accountDetailActions">
           <!-- Send ether -->
           <send-ether-modal
             v-if="contractDetails.isOwner"
@@ -35,7 +33,7 @@
 
           <!-- add/remove admin -->
           <contract-admin-modal
-            v-if="contractDetails.adminLevel >= 5"
+            v-if="adminLevel >= 5"
             ref="addAdminModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -85,7 +83,7 @@
             </div>
           </contract-admin-modal>
           <contract-admin-modal
-            v-if="contractDetails.adminLevel >= 5"
+            v-if="adminLevel >= 5"
             ref="removeAdminModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -99,7 +97,7 @@
 
           <!-- approve/disapprove account -->
           <contract-admin-modal
-            v-if="contractDetails.adminLevel >= 4"
+            v-if="adminLevel >= 4"
             ref="approveAccountModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -111,7 +109,7 @@
             @success="successTransaction"
             @error="transactionError" />
           <contract-admin-modal
-            v-if="contractDetails.adminLevel >= 4"
+            v-if="adminLevel >= 4"
             ref="disapproveAccountModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -125,7 +123,7 @@
 
           <!-- pause/unpause contract -->
           <contract-admin-modal
-            v-if="!contractDetails.isPaused && contractDetails.adminLevel >= 5"
+            v-if="!contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -135,7 +133,7 @@
             @success="successTransaction"
             @error="transactionError" />
           <contract-admin-modal
-            v-if="contractDetails.isPaused && contractDetails.adminLevel >= 5"
+            v-if="contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -147,7 +145,7 @@
 
           <!-- set sell price -->
           <contract-admin-modal
-            v-if="contractDetails.adminLevel >= 5"
+            v-if="adminLevel >= 5"
             ref="setSellPriceModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -183,34 +181,23 @@
             @success="successTransaction"
             @error="transactionError" />
         </v-flex>
-        <v-btn
-          icon
-          class="rightIcon"
-          @click="$emit('back')">
-          <v-icon>
-            close
-          </v-icon>
-        </v-btn>
       </v-layout>
     </v-card-title>
 
-    <v-tabs
-      v-if="contractDetails.contractType > 0"
-      v-model="selectedTab"
-      grow>
-      <v-tabs-slider color="primary" />
-      <v-tab key="transactions">
+    <v-tabs v-model="selectedTab" grow>
+      <v-tabs-slider v-if="adminLevel >= 4" color="primary" />
+      <v-tab v-if="adminLevel >= 4" key="transactions" href="#transactions">
         Transactions{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
       </v-tab>
-      <v-tab v-if="contractDetails.contractType > 0" key="approvedAccounts">
+      <v-tab v-if="contractDetails.contractType > 0 && adminLevel >= 4" key="approvedAccounts" href="#approvedAccounts">
         Approved accounts
       </v-tab>
-      <v-tab v-if="contractDetails.contractType > 0" key="adminAccounts">
+      <v-tab v-if="contractDetails.contractType > 0 && adminLevel >= 5" key="adminAccounts" href="#adminAccounts">
         Admin accounts
       </v-tab>
     </v-tabs>
-    <v-tabs-items v-if="contractDetails.contractType > 0" v-model="selectedTab">
-      <v-tab-item key="transactions">
+    <v-tabs-items v-model="selectedTab">
+      <v-tab-item id="transactions" value="transactions">
         <transactions-list
           id="transactionsList"
           ref="transactionsList"
@@ -223,7 +210,10 @@
           @loaded="computeTransactionsCount"
           @error="error = $event" />
       </v-tab-item>
-      <v-tab-item v-if="contractDetails.contractType > 0" key="approvedAccountsTable">
+      <v-tab-item
+        v-if="contractDetails.contractType > 0 && adminLevel >= 4"
+        id="approvedAccounts"
+        value="approvedAccounts">
         <v-flex v-if="!loading" justify-center>
           <v-btn
             :loading="loadingApprovedWalletsFromContract"
@@ -278,7 +268,10 @@
           </template>
         </v-data-table>
       </v-tab-item>
-      <v-tab-item v-if="contractDetails.contractType > 0" key="adminAccountsTable">
+      <v-tab-item
+        v-if="contractDetails.contractType > 0 && adminLevel >= 5"
+        id="adminAccounts"
+        value="adminAccounts">
         <v-flex v-if="!loading" justify-center>
           <v-btn
             :loading="loadingAdminWalletsFromContract"
@@ -333,17 +326,6 @@
         </v-data-table>
       </v-tab-item>
     </v-tabs-items>
-    <transactions-list
-      v-if="contractDetails.contractType === 0"
-      id="transactionsList"
-      ref="transactionsList"
-      :account="contractDetails.address"
-      :contract-details="contractDetails"
-      :fiat-symbol="fiatSymbol"
-      :error="error"
-      display-full-transaction
-      @loaded="computeTransactionsCount"
-      @error="error = $event" />
   </v-flex>
 </template>
 
@@ -363,8 +345,8 @@ export default {
         return null;
       },
     },
-    fiatSymbol: {
-      type: String,
+    userWallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -372,7 +354,13 @@ export default {
     contractDetails: {
       type: Object,
       default: function() {
-        return {};
+        return null;
+      },
+    },
+    fiatSymbol: {
+      type: String,
+      default: function() {
+        return null;
       },
     },
     addressEtherscanLink: {
@@ -384,7 +372,7 @@ export default {
   },
   data() {
     return {
-      selectedTab: 0,
+      selectedTab: 'transactions',
       totalTransactionsCount: 0,
       approvedWallets: [],
       adminWallets: [],
@@ -395,21 +383,18 @@ export default {
     };
   },
   computed: {
+    adminLevel() {
+      return (this.contractDetails && this.contractDetails.adminLevel) || 0;
+    },
     totalSupply() {
       return this.contractDetails && this.contractDetails.totalSupply ? this.walletUtils.convertTokenAmountReceived(this.contractDetails.totalSupply, this.contractDetails.decimals) : 0;
-    },
-  },
-  watch: {
-    contractDetails() {
-      this.error = null;
-      this.totalTransactionsCount = 0;
     },
   },
   methods: {
     successSendingEther() {
       this.refreshBalance()
         .then(() => {
-          this.$emit('success', this.contractDetails);
+          this.$emit('success');
           this.$forceUpdate();
         });
     },
@@ -542,7 +527,7 @@ export default {
         return Promise.reject(e);
       }
     },
-    successTransaction(hash, contractDetails, methodName, autoCompleteValue, inputValue) {
+    successTransaction(hash, methodName, autoCompleteValue, inputValue) {
       if(methodName === 'disapproveAccount') {
         const index = this.approvedWallets.findIndex(wallet => wallet.address === autoCompleteValue);
         if(index >= 0) {

@@ -237,7 +237,7 @@ export default {
             this.gasEstimation = estimatedGas;
           } else {
             this.removeUpgradeState();
-            this.$emit('success', result && result.hash, this.contractDetails, 'upgrade');
+            this.$emit('success', result && result.hash, 'upgrade');
           }
           return true;
         })
