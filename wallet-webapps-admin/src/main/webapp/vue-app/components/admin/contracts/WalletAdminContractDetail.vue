@@ -174,10 +174,11 @@
             @error="transactionError" />
 
           <upgrade-token-modal
-            v-if="contractDetails.isOwner && contractDetails.contractType === 1"
+            v-if="contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :implementation-version="3"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />

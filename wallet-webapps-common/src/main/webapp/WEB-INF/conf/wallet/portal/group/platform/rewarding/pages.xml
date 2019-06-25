@@ -26,29 +26,44 @@
     <page>
         <name>walletAdministration</name>
         <title>Wallet adminsitration</title>
-        <access-permissions>*:/platform/rewarding</access-permissions>
-        <edit-permission>manager:/platform/administrators</edit-permission>
+        <access-permissions>member:/platform/rewarding</access-permissions>
+        <edit-permission>manager:/platform/rewarding</edit-permission>
         <portlet-application>
             <portlet>
                 <application-ref>wallet-admin</application-ref>
                 <portlet-ref>WalletAdmin</portlet-ref>
             </portlet>
             <title>Wallet adminsitration</title>
-            <access-permissions>manager:/platform/rewarding</access-permissions>
+            <access-permissions>member:/platform/rewarding</access-permissions>
             <show-info-bar>false</show-info-bar>
         </portlet-application>
     </page>
     <page>
         <name>rewardAdministration</name>
         <title>Reward administration</title>
-        <access-permissions>*:/platform/rewarding</access-permissions>
-        <edit-permission>manager:/platform/administrators</edit-permission>
+        <access-permissions>member:/platform/rewarding</access-permissions>
+        <edit-permission>manager:/platform/rewarding</edit-permission>
         <portlet-application>
             <portlet>
                 <application-ref>wallet-reward</application-ref>
                 <portlet-ref>RewardAdmin</portlet-ref>
             </portlet>
             <title>Reward administration</title>
+            <access-permissions>member:/platform/rewarding</access-permissions>
+            <show-info-bar>false</show-info-bar>
+        </portlet-application>
+    </page>
+    <page>
+        <name>contractAdministration</name>
+        <title>Contract administration</title>
+        <access-permissions>member:/platform/rewarding</access-permissions>
+        <edit-permission>manager:/platform/rewarding</edit-permission>
+        <portlet-application>
+            <portlet>
+                <application-ref>wallet-admin</application-ref>
+                <portlet-ref>WalletAdminToken</portlet-ref>
+            </portlet>
+            <title>Contract administration</title>
             <access-permissions>manager:/platform/rewarding</access-permissions>
             <show-info-bar>false</show-info-bar>
         </portlet-application>
