@@ -205,7 +205,7 @@ export default {
       return this.transactionFeeEther ? etherToFiat(this.transactionFeeEther) : 0;
     },
     transactionFeeToken() {
-      return !this.contractDetails || this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei);
+      return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei));
     },
   },
   watch: {
