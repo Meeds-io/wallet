@@ -12,7 +12,7 @@
             {{ contractDetails.name }} - balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
           </h3>
           <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
-            Total supply: {{ walletUtils.toFixed(totalSupply) }} {{ contractDetails && contractDetails.symbol }}
+            Token sell price: {{ contractDetails && contractDetails.sellPrice }} eth
           </h4>
           <h4 class="grey--text font-weight-light no-wrap">
             Owner: <wallet-address :value="contractDetails.owner" display-label />
@@ -186,13 +186,22 @@
 
     <v-tabs v-model="selectedTab" grow>
       <v-tabs-slider v-if="adminLevel >= 4" color="primary" />
-      <v-tab v-if="adminLevel >= 4" key="transactions" href="#transactions">
+      <v-tab
+        v-if="adminLevel >= 4"
+        key="transactions"
+        href="#transactions">
         Transactions{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
       </v-tab>
-      <v-tab v-if="contractDetails.contractType > 0 && adminLevel >= 4" key="approvedAccounts" href="#approvedAccounts">
+      <v-tab
+        v-if="contractDetails.contractType > 0 && adminLevel >= 4"
+        key="approvedAccounts"
+        href="#approvedAccounts">
         Approved accounts
       </v-tab>
-      <v-tab v-if="contractDetails.contractType > 0 && adminLevel >= 5" key="adminAccounts" href="#adminAccounts">
+      <v-tab
+        v-if="contractDetails.contractType > 0 && adminLevel >= 5"
+        key="adminAccounts"
+        href="#adminAccounts">
         Admin accounts
       </v-tab>
     </v-tabs>
