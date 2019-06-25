@@ -8,7 +8,7 @@
         <v-flex>
           <v-card class="applicationToolbar mb-3" flat>
             <v-flex class="pl-3 pr-3 pt-2 pb-2">
-              <strong>Wallet contracts</strong>
+              <strong>Wallet contract</strong>
             </v-flex>
           </v-card>
         </v-flex>
@@ -16,16 +16,6 @@
           <div v-if="error && !loading" class="alert alert-error v-content">
             <i class="uiIconError"></i>{{ error }}
           </div>
-
-          <wallet-setup
-            ref="walletSetup"
-            :wallet-address="walletAddress"
-            :refresh-index="refreshIndex"
-            :loading="loading"
-            class="mb-3"
-            is-administration
-            @refresh="init()"
-            @error="error = $event" />
 
           <v-dialog
             v-model="loading"
@@ -43,15 +33,24 @@
             </v-card>
           </v-dialog>
 
-          <contracts-tab
-            ref="contractsTab"
-            :network-id="networkId"
+          <wallet-setup
+            ref="walletSetup"
             :wallet-address="walletAddress"
+            :refresh-index="refreshIndex"
             :loading="loading"
+            is-administration
+            @refresh="init()"
+            @error="error = $event" />
+
+          <contract-detail
+            v-if="contractDetails"
+            ref="contractDetail"
+            :wallet-address="walletAddress"
+            :contract-details="contractDetails"
             :fiat-symbol="fiatSymbol"
+            :wallets="wallets"
             :address-etherscan-link="addressEtherscanLink"
-            :token-etherscan-link="tokenEtherscanLink"
-            :is-admin="isAdmin"
+            @back="back()"
             @pending-transaction="watchPendingTransaction" />
         </v-flex>
       </v-layout>
@@ -61,20 +60,18 @@
 </template>
 
 <script>
-import ContractsTab from './contracts/WalletAdminContractsTab.vue';
+import ContractDetail from './contracts/WalletAdminContractDetail.vue';
 
 export default {
   components: {
-    ContractsTab,
+    ContractDetail,
   },
   data() {
     return {
       loading: false,
-      isAdmin: false,
       fiatSymbol: '$',
       refreshIndex: 1,
       walletAddress: null,
-      networkId: null,
       tokenEtherscanLink: null,
       addressEtherscanLink: null,
     };
@@ -82,7 +79,7 @@ export default {
   created() {
     this.init()
       .then(() => (this.tokenEtherscanLink = this.walletUtils.getTokenEtherscanlink()))
-      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink(this.networkId)));
+      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
   },
   methods: {
     init() {
@@ -98,7 +95,6 @@ export default {
           throw new Error('Wallet settings are empty for current user');
         }
         this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
-        this.isAdmin = window.walletSettings.admin;
       })
       .then(() => this.walletUtils.initWeb3(false, true))
       .then(() => {
@@ -116,14 +112,10 @@ export default {
       .then(() => this.walletUtils.getWallets())
       .then((wallets) => {
         this.wallets = wallets;
-
-        this.contractDetails = window.walletSettings.contractDetail;
-        if (this.contractDetails) {
-          return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.contractDetails, true);
-        }
+        return this.tokenUtils.getContractDetails(this.walletAddress, true);
       })
+      .then(contractDetails => this.contractDetails = contractDetails)
       .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
-      .then(() => this.$refs.contractsTab && this.$refs.contractsTab.init())
       .catch((error) => {
         if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
           console.debug(error);
@@ -143,19 +135,19 @@ export default {
         this.forceUpdate();
       });
     },
-    watchPendingTransaction(transaction, contractDetails) {
+    watchPendingTransaction(transaction) {
       const thiss = this;
       this.walletUtils.watchTransactionStatus(transaction.hash, (receipt) => {
         if (receipt && receipt.status) {
           const wallet = thiss.wallets && thiss.wallets.find((wallet) => wallet && wallet.address && transaction.to && wallet.address.toLowerCase() === transaction.to.toLowerCase());
           if (transaction.contractMethodName === 'transferOwnership') {
-            if (contractDetails && contractDetails.isContract && contractDetails.address && transaction.contractAddress && contractDetails.address.toLowerCase() === transaction.contractAddress.toLowerCase()) {
-              this.$set(contractDetails, 'owner', transaction.to);
+            if (this.contractDetails && this.contractDetails.isContract && this.contractDetails.address && transaction.contractAddress && this.contractDetails.address.toLowerCase() === transaction.contractAddress.toLowerCase()) {
+              this.$set(this.contractDetails, 'owner', transaction.to);
               return this.tokenUtils.refreshContractOnServer().then(() => this.init());
             }
           } else if (transaction.contractMethodName === 'addAdmin' || transaction.contractMethodName === 'removeAdmin') {
             if (wallet) {
-              contractDetails.contract.methods
+              this.contractDetails.contract.methods
                 .getAdminLevel(wallet.address)
                 .call()
                 .then((level) => {
@@ -163,12 +155,12 @@ export default {
                     wallet.accountAdminLevel = {};
                   }
                   level = Number(level);
-                  thiss.$set(wallet.accountAdminLevel, contractDetails.address, level ? level : 'not admin');
+                  thiss.$set(wallet.accountAdminLevel, this.contractDetails.address, level ? level : 'not admin');
                   thiss.$nextTick(() => thiss.forceUpdate());
                 });
             }
           } else if (transaction.contractMethodName === 'unPause' || transaction.contractMethodName === 'pause') {
-            thiss.$set(contractDetails, 'isPaused', transaction.contractMethodName === 'pause' ? true : false);
+            thiss.$set(this.contractDetails, 'isPaused', transaction.contractMethodName === 'pause' ? true : false);
             thiss.$nextTick(thiss.forceUpdate);
           }
           if(wallet && thiss.$refs.walletsTab) {

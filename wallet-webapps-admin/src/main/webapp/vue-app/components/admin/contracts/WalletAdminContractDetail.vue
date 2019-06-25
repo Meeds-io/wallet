@@ -21,7 +21,7 @@
           </h4>
         </v-flex>
 
-        <v-flex v-if="!isDisplayOnly" id="accountDetailActions">
+        <v-flex id="accountDetailActions">
           <!-- Send ether -->
           <send-ether-modal
             v-if="contractDetails.isOwner"
@@ -357,18 +357,6 @@ export default {
     UpgradeTokenModal,
   },
   props: {
-    isDisplayOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    refreshIndex: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
     walletAddress: {
       type: String,
       default: function() {
@@ -468,17 +456,14 @@ export default {
       }
       return Promise.all(promises);
     },
-    newTransactionPending(transaction, contractDetails) {
-      if (!contractDetails) {
-        contractDetails = this.contractDetails;
-      }
+    newTransactionPending(transaction) {
+      this.$emit('pending-transaction', transaction);
       if (this.$refs.transactionsList) {
         this.$refs.transactionsList.init(true);
       }
       if (this.contractDetails && transaction.value > 0) {
         this.$set(this.contractDetails, 'loadingBalance', true);
       }
-      this.$emit('pending-transaction', transaction, contractDetails);
       this.$forceUpdate();
     },
     transactionError(error) {
