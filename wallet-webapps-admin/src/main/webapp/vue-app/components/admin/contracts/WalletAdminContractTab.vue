@@ -77,7 +77,7 @@
                 <li>
                   <strong>
                     Owner
-                  </strong>: Transfer ownership and send funds to Cauri contract.
+                  </strong>: Transfer ownership and upgrade contract.
                 </li>
               </ul>
             </div>
