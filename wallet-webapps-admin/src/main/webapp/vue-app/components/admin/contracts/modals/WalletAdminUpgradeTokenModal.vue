@@ -30,7 +30,7 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          Upgrade Token to version 2
+          Upgrade Token to version 3
         </span>
       </div>
 
@@ -238,6 +238,7 @@ export default {
           } else {
             this.removeUpgradeState();
             this.$emit('success', result && result.hash, 'upgrade');
+            return this.tokenUtils.refreshContractOnServer();
           }
           return true;
         })

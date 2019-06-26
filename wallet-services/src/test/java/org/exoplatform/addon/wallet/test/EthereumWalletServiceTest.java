@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.exoplatform.container.PortalContainer;
 
-public class EthereumWalletServiceTest { // NOSONAR
+public class EthereumWalletServiceTest {
 
   @Test
   public void testStart() {

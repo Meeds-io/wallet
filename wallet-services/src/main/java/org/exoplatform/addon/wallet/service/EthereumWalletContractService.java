@@ -38,14 +38,17 @@ public class EthereumWalletContractService implements WalletContractService, Sta
 
   private String                  contractBinary;
 
+  private SettingService          settingService;
+
   private WalletService           walletService;
 
   private WalletTokenAdminService walletTokenAdminService;
 
-  private SettingService          settingService;
-
-  public EthereumWalletContractService(ConfigurationManager configurationManager, InitParams params) {
+  public EthereumWalletContractService(SettingService settingService,
+                                       ConfigurationManager configurationManager,
+                                       InitParams params) {
     this.configurationManager = configurationManager;
+    this.settingService = settingService;
 
     if (params.containsKey(ABI_PATH_PARAMETER)) {
       contractAbiPath = params.getValueParam(ABI_PATH_PARAMETER).getValue();
@@ -96,10 +99,10 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
 
     String contractDetailString = toJsonString(contractDetail);
-    getSettingService().set(WALLET_CONTEXT,
-                            WALLET_SCOPE,
-                            StringUtils.lowerCase(contractAddress),
-                            SettingValue.create(contractDetailString));
+    settingService.set(WALLET_CONTEXT,
+                       WALLET_SCOPE,
+                       StringUtils.lowerCase(contractAddress),
+                       SettingValue.create(contractDetailString));
     getWalletService().setConfiguredContractDetail(contractDetail);
   }
 
@@ -109,7 +112,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
       return null;
     }
 
-    SettingValue<?> contractDetailValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
+    SettingValue<?> contractDetailValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
     if (contractDetailValue != null) {
       return fromJsonString((String) contractDetailValue.getValue(), ContractDetail.class);
     }
@@ -157,13 +160,6 @@ public class EthereumWalletContractService implements WalletContractService, Sta
       walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
     return walletTokenAdminService;
-  }
-
-  private SettingService getSettingService() {
-    if (settingService == null) {
-      settingService = CommonsUtils.getService(SettingService.class);
-    }
-    return settingService;
   }
 
 }

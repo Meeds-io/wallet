@@ -56,15 +56,15 @@ public class EthereumClientConnector {
 
   private boolean                  serviceStopping            = false;
 
-  private String                   websoketURL                = null;
+  private String                   websocketURL               = null;
 
   public EthereumClientConnector() {
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
   }
 
-  public void start(String websoketURL) {
-    this.websoketURL = websoketURL;
+  public void start(String websocketURL) {
+    this.websocketURL = websocketURL;
     this.serviceStarted = true;
 
     // Blockchain connection verifier
@@ -218,14 +218,14 @@ public class EthereumClientConnector {
   }
 
   public void waitConnection() throws InterruptedException {
-    if (this.serviceStarted && StringUtils.isBlank(websoketURL)) {
+    if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
       throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
     }
     if (this.serviceStopping) {
       throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
     }
     while (!isConnected()) {
-      if (this.serviceStarted && StringUtils.isBlank(websoketURL)) {
+      if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
         throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
       }
       if (this.serviceStopping) {
@@ -272,7 +272,7 @@ public class EthereumClientConnector {
       LOG.info("Stopping server, thus no new connection is attempted again");
       return false;
     }
-    String websocketProviderURL = websoketURL;
+    String websocketProviderURL = websocketURL;
     if (StringUtils.isBlank(websocketProviderURL)) {
       LOG.info("No configured URL for Ethereum Websocket connection");
       resetConnection();
@@ -290,21 +290,21 @@ public class EthereumClientConnector {
     this.connectionInProgress = true;
     try {
       if (this.web3j != null && this.web3jService != null && this.webSocketClient != null) {
-        LOG.info("Reconnect to blockchain endpoint {}", websoketURL);
+        LOG.info("Reconnect to blockchain endpoint {}", websocketURL);
         boolean reconnected = this.webSocketClient.reconnectBlocking();
         if (!reconnected) {
-          throw new IllegalStateException("Can't reconnect to ethereum blockchain: " + websoketURL);
+          throw new IllegalStateException("Can't reconnect to ethereum blockchain: " + websocketURL);
         }
       } else {
-        LOG.info("Connecting to Ethereum network endpoint {}", websoketURL);
-        this.webSocketClient = new WebSocketClient(new URI(websoketURL));
+        LOG.info("Connecting to Ethereum network endpoint {}", websocketURL);
+        this.webSocketClient = new WebSocketClient(new URI(websocketURL));
         this.webSocketClient.setConnectionLostTimeout(10);
         this.web3jService = new WebSocketService(webSocketClient, true);
         this.webSocketClient.setListener(getWebsocketListener());
         this.web3jService.connect();
         Thread.sleep(10000);
         web3j = Web3j.build(web3jService);
-        LOG.info("Connection established to Ethereum network endpoint {}", websoketURL);
+        LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
       }
       return true;
     } finally {
@@ -332,7 +332,7 @@ public class EthereumClientConnector {
   }
 
   private String getConnectionFailedMessage() {
-    return "Connection failed to " + websoketURL;
+    return "Connection failed to " + websocketURL;
   }
 
 }

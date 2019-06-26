@@ -55,7 +55,7 @@ const config = {
     web3: 'Web3'
   },
   plugins: [
-    new ExtractTextWebpackPlugin('css/wallet-v1.3.0-M04.css')
+    new ExtractTextWebpackPlugin('css/wallet-v1.0.0-M01.css')
   ]
 };
 

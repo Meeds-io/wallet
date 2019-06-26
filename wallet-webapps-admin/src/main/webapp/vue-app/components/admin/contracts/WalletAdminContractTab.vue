@@ -9,7 +9,7 @@
           id="accountDetailTitle"
           class="mt-3">
           <h3 v-if="adminLevel >= 5 && contractDetails.contractBalanceFiat" class="font-weight-light">
-            {{ contractDetails.name }} - balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
+            {{ contractDetails.name }} - version: {{ contractDetails.contractType }} - balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
           </h3>
           <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
             Token sell price: {{ contractDetails && contractDetails.sellPrice }} eth
