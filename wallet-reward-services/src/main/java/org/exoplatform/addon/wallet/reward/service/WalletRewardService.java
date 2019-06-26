@@ -33,6 +33,7 @@ import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -62,7 +63,6 @@ public class WalletRewardService implements RewardService {
 
   public WalletRewardService(WalletAccountService walletAccountService,
                              WalletTransactionService walletTransactionService,
-                             WalletTokenAdminService walletTokenAdminService,
                              RewardSettingsService rewardSettingsService,
                              RewardTransactionService rewardTransactionService,
                              RewardTeamService rewardTeamService) {
@@ -71,7 +71,6 @@ public class WalletRewardService implements RewardService {
     this.rewardSettingsService = rewardSettingsService;
     this.rewardTeamService = rewardTeamService;
     this.rewardTransactionService = rewardTransactionService;
-    this.walletTokenAdminService = walletTokenAdminService;
   }
 
   @Override
@@ -80,11 +79,11 @@ public class WalletRewardService implements RewardService {
     if (rewards == null || rewards.isEmpty()) {
       return;
     }
-    String adminWalletAddress = walletTokenAdminService.getAdminWalletAddress();
+    String adminWalletAddress = getTokenAdminService().getAdminWalletAddress();
     if (StringUtils.isBlank(adminWalletAddress)) {
       throw new IllegalStateException("No admin wallet is configured");
     }
-    if (walletTokenAdminService.getAdminLevel(adminWalletAddress) < 4) {
+    if (getTokenAdminService().getAdminLevel(adminWalletAddress) < 4) {
       throw new IllegalStateException("Configured admin wallet is not configured as admin on token. It must be a Token admin with level 4 at least.");
     }
 
@@ -133,7 +132,7 @@ public class WalletRewardService implements RewardService {
     }
     RewardPeriodType periodType = rewardSettings.getPeriodType();
     RewardPeriod periodOfTime = periodType.getPeriodOfTime(timeFromSeconds(periodDateInSeconds));
-    BigInteger adminTokenBalance = walletTokenAdminService.balanceOf(adminWalletAddress);
+    BigInteger adminTokenBalance = getTokenAdminService().balanceOf(adminWalletAddress);
     double adminBalance = convertFromDecimals(adminTokenBalance, contractDetail.getDecimals());
     double rewardsAmount = rewards.stream().mapToDouble(WalletReward::getTokensToSend).sum();
     if (rewardsAmount > adminBalance) {
@@ -148,7 +147,7 @@ public class WalletRewardService implements RewardService {
       transactionDetail.setLabel(transactionLabel);
       String transactionMessage = getTransactionMessage(walletReward, contractDetail, periodOfTime);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = walletTokenAdminService.reward(transactionDetail, username);
+      transactionDetail = getTokenAdminService().reward(transactionDetail, username);
       RewardTransaction rewardTransaction = walletReward.getRewardTransaction();
       if (rewardTransaction == null) {
         rewardTransaction = new RewardTransaction();
@@ -608,5 +607,19 @@ public class WalletRewardService implements RewardService {
       rewardMemberDetail.setPoolsUsed(true);
       rewardMemberDetails.add(rewardMemberDetail);
     });
+  }
+
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return walletTokenAdminService;
   }
 }

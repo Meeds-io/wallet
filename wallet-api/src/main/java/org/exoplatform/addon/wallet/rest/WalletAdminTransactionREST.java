@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -42,10 +43,6 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   private static final Log        LOG                           = ExoLogger.getLogger(WalletAdminTransactionREST.class);
 
   private WalletTokenAdminService walletTokenAdminService;
-
-  public WalletAdminTransactionREST(WalletTokenAdminService walletTokenAdminService) {
-    this.walletTokenAdminService = walletTokenAdminService;
-  }
 
   @POST
   @Path("intiialize")
@@ -74,12 +71,26 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = walletTokenAdminService.initialize(transactionDetail, currentUserId);
+      transactionDetail = getWalletTokenAdminService().initialize(transactionDetail, currentUserId);
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
       LOG.error("Error initializing wallet {}", receiver, e);
       return Response.serverError().build();
     }
+  }
+
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getWalletTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return walletTokenAdminService;
   }
 
 }
