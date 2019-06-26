@@ -24,7 +24,6 @@ import org.picocontainer.Startable;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
-import org.exoplatform.addon.wallet.service.mbean.EthereumWalletServiceManaged;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
@@ -37,7 +36,6 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.management.annotations.ManagedBy;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.model.Space;
@@ -46,7 +44,6 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 /**
  * A storage service to save/load information used by users and spaces wallets
  */
-@ManagedBy(EthereumWalletServiceManaged.class)
 public class EthereumWalletService implements WalletService, Startable {
 
   private static final Log        LOG                      = ExoLogger.getLogger(EthereumWalletService.class);
@@ -343,7 +340,7 @@ public class EthereumWalletService implements WalletService, Startable {
     SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
                                                                         WALLET_SCOPE,
                                                                         INITIAL_FUNDS_KEY_NAME);
-    if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() == null) {
+    if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
       this.configuredGlobalSettings.setInitialFunds(fromJsonString(initialFundsSettingsValue.getValue().toString(),
                                                                    InitialFundsSettings.class));
     }
