@@ -61,9 +61,9 @@ public interface WalletAccountService {
    *           the encrypted private key of wallet
    */
   void savePrivateKeyByTypeAndId(String type,
-                                        String remoteId,
-                                        String content,
-                                        String currentUser) throws IllegalAccessException;
+                                 String remoteId,
+                                 String content,
+                                 String currentUser) throws IllegalAccessException;
 
   /**
    * Retrieve wallet private key by identity type and remoteId
@@ -202,8 +202,8 @@ public interface WalletAccountService {
    *           wallet initialization status
    */
   void setInitializationStatus(String address,
-                                      WalletInitializationState initializationState,
-                                      String currentUserId) throws IllegalAccessException;
+                               WalletInitializationState initializationState,
+                               String currentUserId) throws IllegalAccessException;
 
   /**
    * Change wallet initialization status

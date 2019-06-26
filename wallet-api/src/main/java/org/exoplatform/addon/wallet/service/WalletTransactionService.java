@@ -37,28 +37,26 @@ public interface WalletTransactionService {
    *           wallet transactions
    */
   List<TransactionDetail> getTransactions(String address,
-                                                 String contractAddress,
-                                                 String contractMethodName,
-                                                 String hash,
-                                                 int limit,
-                                                 boolean onlyPending,
-                                                 boolean administration,
-                                                 String currentUser) throws IllegalAccessException;
+                                          String contractAddress,
+                                          String contractMethodName,
+                                          String hash,
+                                          int limit,
+                                          boolean onlyPending,
+                                          boolean administration,
+                                          String currentUser) throws IllegalAccessException;
 
   /**
    * Retrives the Transaction statistics of a user on a designated contract by
    * period of time
    * 
-   * @param contractAddress
    * @param address
    * @param periodicity
    * @param locale
    * @return
    */
-  TransactionStatistics getTransactionStatistics(String contractAddress,
-                                                        String address,
-                                                        String periodicity,
-                                                        Locale locale);
+  TransactionStatistics getTransactionStatistics(String address,
+                                                 String periodicity,
+                                                 Locale locale);
 
   /**
    * @param hash transaction hash
@@ -76,7 +74,7 @@ public interface WalletTransactionService {
    *           not the owner of the wallet
    */
   TransactionDetail getAddressLastPendingTransactionSent(String address,
-                                                                String currentUser) throws IllegalAccessException;
+                                                         String currentUser) throws IllegalAccessException;
 
   /**
    * Save transaction details in database
@@ -98,8 +96,8 @@ public interface WalletTransactionService {
    *           transaction to sender and receiver wallet
    */
   void saveTransactionDetail(TransactionDetail transactionDetail,
-                                    String currentUser,
-                                    boolean broadcastMinedTransaction) throws IllegalAccessException;
+                             String currentUser,
+                             boolean broadcastMinedTransaction) throws IllegalAccessException;
 
   /**
    * @return watched transactions count treated since the server startup

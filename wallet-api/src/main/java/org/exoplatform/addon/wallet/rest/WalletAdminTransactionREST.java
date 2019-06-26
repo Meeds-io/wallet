@@ -30,12 +30,11 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to manage transactions served by admin
- * wallet
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/admin/transaction")
 @RolesAllowed("rewarding")
+@Api(value = "/wallet/api/admin/transaction", description = "Manages admin wallet transactions to send on blockchain") // NOSONAR
 public class WalletAdminTransactionREST implements ResourceContainer {
 
   private static final String     BAD_REQUEST_SENT_TO_SERVER_BY = "Bad request sent to server by '";
@@ -51,11 +50,17 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @POST
   @Path("intiialize")
   @RolesAllowed("rewarding")
-  public Response intializeWallet(@FormParam("receiver") String receiver,
-                                  @FormParam("etherAmount") double etherAmount,
-                                  @FormParam("tokenAmount") double tokenAmount,
-                                  @FormParam("transactionLabel") String transactionLabel,
-                                  @FormParam("transactionMessage") String transactionMessage) {
+  @ApiOperation(value = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address", httpMethod = "POST", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response intializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                                  @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
+                                  @ApiParam(value = "token amount to send to wallet", required = false) @FormParam("tokenAmount") double tokenAmount,
+                                  @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
+                                  @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");

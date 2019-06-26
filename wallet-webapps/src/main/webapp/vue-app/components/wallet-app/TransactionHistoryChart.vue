@@ -14,12 +14,6 @@ export default {
         return null;
       },
     },
-    contractDetails: {
-      type: Object,
-      default: function() {
-        return null;
-      },
-    },
   },
   data () {
     return {
@@ -36,8 +30,8 @@ export default {
   },
   methods: {
     initializeChart() {
-      if (!this.walletAddress || !this.contractDetails || !this.contractDetails.address) {
-        console.debug('No default contract is selected yet', this.walletaddress, this.contractDetails);
+      if (!this.walletAddress) {
+        console.debug('No default contract is selected yet', this.walletaddress);
         return;
       }
       this.incomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
@@ -51,7 +45,7 @@ export default {
       this.incomeGradient.addColorStop(0.5, 'rgba(0, 231, 255, 0.25)');
       this.incomeGradient.addColorStop(1, 'rgba(0, 231, 255, 0)');
   
-      this.transactionUtils.getTransactionsAmounts(this.contractDetails.address, this.walletAddress, this.periodicity)
+      this.transactionUtils.getTransactionsAmounts(this.walletAddress, this.periodicity)
         .then((transactionsData) => {
           this.$emit('periodicity-label', transactionsData.periodicityLabel);
           this.renderChart({

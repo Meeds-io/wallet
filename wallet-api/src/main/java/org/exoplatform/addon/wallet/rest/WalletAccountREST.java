@@ -33,19 +33,16 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to retrieve detailed information about
- * users and spaces with the associated Ethereum account addresses
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/account")
+@Api(value = "/wallet/api/account", description = "Manages wallets objects associated to users, spaces and admin") // NOSONAR
 @RolesAllowed("users")
 public class WalletAccountREST implements ResourceContainer {
 
   private static final String  WALLET_NOT_FOUND_MESSAGE = "Wallet was not found with address {}";
 
-  private static final String  BAD_REQUEST_MESSAGE      = "Bad request sent to server with empty address";
-
-  private static final String  EMPTY_ADDRESS_ERROR      = "Bad request sent to server with empty address {}";
+  private static final String  EMPTY_ADDRESS_MESSAGE    = "Bad request sent to server with empty address";
 
   private static final Log     LOG                      = ExoLogger.getLogger(WalletAccountREST.class);
 
@@ -58,18 +55,18 @@ public class WalletAccountREST implements ResourceContainer {
     this.accountService = accountService;
   }
 
-  /**
-   * Retrieves the user or space details by username or space pretty name
-   * 
-   * @param remoteId username or space pretty name
-   * @param type 'user' or 'space'
-   * @return Rest Response with wallet details object
-   */
   @Path("detailsById")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response getWalletByTypeAndID(@QueryParam("id") String remoteId, @QueryParam("type") String type) {
+  @ApiOperation(value = "Retrieves the user or space wallet identified by username or space pretty name", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns the associated Wallet object, if not found it will return an empty object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getWalletByTypeAndID(@ApiParam(value = "username or space pretty name", required = true) @QueryParam("id") String remoteId,
+                                       @ApiParam(value = "'user' or 'space'", required = true) @QueryParam("type") String type) {
     if (StringUtils.isBlank(remoteId) || StringUtils.isBlank(type)) {
       LOG.warn("Bad request sent to server with id '{}' and type '{}'", remoteId, type);
       return Response.status(400).build();
@@ -87,20 +84,20 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Retrieves the user or space details associated to an address
-   * 
-   * @param address wallet address
-   * @return Rest Response with wallet details object
-   */
   @Path("detailsByAddress")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response getWalletByAddress(@QueryParam("address") String address) {
+  @ApiOperation(value = "Retrieves the user or space wallet identified by an address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns the associated Wallet object, if not found it will return an empty object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getWalletByAddress(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
     try {
       if (StringUtils.isBlank(address)) {
-        LOG.warn(EMPTY_ADDRESS_ERROR, address);
+        LOG.warn(EMPTY_ADDRESS_MESSAGE);
         return Response.status(400).build();
       }
       Wallet wallet = accountService.getWalletByAddress(address);
@@ -119,19 +116,19 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Enable/Disable wallet
-   * 
-   * @param address address of wallet to enable/disable
-   * @param enable if true enable wallet else disable it
-   * @return Rest Response of request
-   */
   @Path("enable")
   @GET
   @RolesAllowed("rewarding")
-  public Response enableWalletByAddress(@QueryParam("address") String address, @QueryParam("enable") boolean enable) {
+  @ApiOperation(value = "Enable or disable a wallet identified by its address", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response enableWalletByAddress(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
+                                        @ApiParam(value = "true to enable wallet, else false", required = true) @QueryParam("enable") boolean enable) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
       return Response.status(400).build();
     }
     try {
@@ -143,35 +140,23 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Remove the user or space details associated to an address
-   * 
-   * @param address wallet address to remove
-   * @return Rest Response of request
-   */
-  @Path("remove")
-  @GET
-  @RolesAllowed("rewarding")
-  public Response removeWalletByAddress(@QueryParam("address") String address) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
-      return Response.status(400).build();
-    }
-    try {
-      accountService.removeWalletByAddress(address, getCurrentUserId());
-      return Response.ok().build();
-    } catch (Exception e) {
-      LOG.error("Can't delete address '{}' association", address, e);
-      return Response.serverError().build();
-    }
-  }
-
   @Path("setInitializationStatus")
   @GET
   @RolesAllowed("rewarding")
-  public Response setInitializationStatus(@QueryParam("address") String address, @QueryParam("status") String status) {
+  @ApiOperation(value = "Modify initialization status of wallet", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response setInitializationStatus(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
+                                          @ApiParam(value = "intialization status: new, modified, pending, initialized or denied", required = true) @QueryParam("status") String status) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
+      return Response.status(400).build();
+    }
+    if (StringUtils.isBlank(status)) {
+      LOG.warn("Bad request sent to server with empty 'status' parameter");
       return Response.status(400).build();
     }
     try {
@@ -187,9 +172,15 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("requestAuthorization")
   @GET
-  public Response requestAuthorization(@QueryParam("address") String address) {
+  @ApiOperation(value = "Modify initialization status from DENIED to MODIFIED. This is used in case when a wallet has been denied access, in that case, a new authorization request can be done", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response requestAuthorization(@ApiParam(value = "wallet address to change its status", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
       return Response.status(400).build();
     }
     try {
@@ -203,17 +194,17 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Save address a user or space associated address
-   * 
-   * @param wallet wallet details to save
-   * @return Rest Response with saved pass phrase of wallet
-   */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveAddress")
   @RolesAllowed("users")
-  public Response saveWallet(Wallet wallet) {
+  @ApiOperation(value = "Associates a wallet address to a user or a space", httpMethod = "POST", consumes = "application/json", response = Response.class, notes = "returns the generated password for newly saved wallet")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveWallet(@ApiParam(value = "wallet details to save", required = true) Wallet wallet) {
     if (wallet == null) {
       LOG.warn("Bad request sent to server with empty data");
       return Response.status(400).build();
@@ -244,21 +235,23 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Save private key of a wallet in server side
-   * 
-   * @param address wallet address
-   * @param privateKey encrypted wallet private key
-   * @return Rest Response with operation status
-   */
   @POST
   @Path("savePrivateKey")
   @RolesAllowed("users")
-  public Response savePrivateKey(@FormParam("address") String address,
-                                 @FormParam("remoteId") String remoteId,
-                                 @FormParam("privateKey") String privateKey) {
+  @ApiOperation(value = "Save encrypted private key of a wallet", httpMethod = "POST", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response savePrivateKey(@ApiParam(value = "wallet address to save its encrypted private key", required = true) @FormParam("address") String address,
+                                 @ApiParam(value = "encrypted wallet private key", required = true) @FormParam("privateKey") String privateKey) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(BAD_REQUEST_MESSAGE);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
+      return Response.status(400).build();
+    }
+    if (StringUtils.isBlank(privateKey)) {
+      LOG.warn("Empty private key content");
       return Response.status(400).build();
     }
 
@@ -289,18 +282,18 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Get private key of a wallet stored in server side
-   * 
-   * @param address wallet address
-   * @return Rest Response with operation status
-   */
   @GET
   @Path("getPrivateKey")
   @RolesAllowed("users")
-  public Response getPrivateKey(@QueryParam("address") String address) {
+  @ApiOperation(value = "Get encrypted private key of a wallet", httpMethod = "GET", response = Response.class, notes = "returns encoded wallet private key in String format")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getPrivateKey(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(BAD_REQUEST_MESSAGE);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
       return Response.status(400).build();
     }
 
@@ -329,18 +322,18 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Get private key of a wallet stored in server side
-   * 
-   * @param address wallet address
-   * @return Rest Response with operation status
-   */
   @GET
   @Path("removePrivateKey")
   @RolesAllowed("users")
-  public Response removePrivateKey(@QueryParam("address") String address) {
+  @ApiOperation(value = "Removes associated private key of a wallet", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response removePrivateKey(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
-      LOG.warn(BAD_REQUEST_MESSAGE);
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
       return Response.status(400).build();
     }
 
@@ -371,18 +364,18 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Save wallet address label
-   * 
-   * @param label a label details to save for a given address
-   * @return Rest Response with saved label detail
-   */
   @POST
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveOrDeleteAddressLabel")
   @RolesAllowed("rewarding")
-  public Response saveOrDeleteAddressLabel(WalletAddressLabel label) {
+  @ApiOperation(value = "Saves or deletes a label associated to an address. If label is empty, then deletes it, else saves it.", httpMethod = "POST", consumes = "application/json", produces = "application/json", response = Response.class, notes = "returns saved label object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveOrDeleteAddressLabel(@ApiParam(value = "blockchain address label", required = true) WalletAddressLabel label) {
     if (label == null) {
       LOG.warn("Bad request sent to server with empty data");
       return Response.status(400).build();
@@ -397,17 +390,17 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Sends a fund request notifications
-   * 
-   * @param fundsRequest fund request details to send
-   * @return Rest Response of request
-   */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("requestFunds")
   @RolesAllowed("users")
-  public Response requestFunds(FundsRequest fundsRequest) {
+  @ApiOperation(value = "Sends a fund request to a user or space", httpMethod = "POST", consumes = "application/json", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response requestFunds(@ApiParam(value = "funds request object", required = true) FundsRequest fundsRequest) {
     if (fundsRequest == null) {
       LOG.warn("Bad request sent to server with empty funds request");
       return Response.status(400).build();
@@ -440,16 +433,16 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Mark a notification as sent
-   * 
-   * @param notificationId web notification id of fund request to mark as sent
-   * @return Rest Response of request
-   */
   @GET
   @Path("markFundRequestAsSent")
   @RolesAllowed("users")
-  public Response markFundRequestAsSent(@QueryParam("notificationId") String notificationId) {
+  @ApiOperation(value = "Mark a web notification of funds request as sent", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response markFundRequestAsSent(@ApiParam(value = "web notification id", required = true) @QueryParam("notificationId") String notificationId) {
     if (StringUtils.isBlank(notificationId)) {
       LOG.warn("Bad request sent to server with empty notificationId");
       return Response.status(400).build();
@@ -470,17 +463,17 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Returns fund request status
-   * 
-   * @param notificationId web notification id of fund request to check if sent
-   * @return Rest Response 'true' if sent else 'false'
-   */
   @GET
   @Path("fundRequestSent")
   @Produces(MediaType.TEXT_PLAIN)
   @RolesAllowed("users")
-  public Response isFundRequestSent(@QueryParam("notificationId") String notificationId) {
+  @ApiOperation(value = "Returns fund request status", httpMethod = "GET", response = Response.class, notes = "returns true if notification sent, else false")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response isFundRequestSent(@ApiParam(value = "web notification id", required = true) @QueryParam("notificationId") String notificationId) {
     if (StringUtils.isBlank(notificationId)) {
       LOG.warn("Bad request sent to server with empty notificationId");
       return Response.status(400).build();
@@ -500,15 +493,16 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Get list of wallet accounts
-   * 
-   * @return Rest Responseof type json with the list of wallets
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
   @RolesAllowed("rewarding")
+  @ApiOperation(value = "Get list of wallet accounts", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns array of wallets objects")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
   public Response getWallets() {
     try {
       return Response.ok(accountService.listWallets()).build();

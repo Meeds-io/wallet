@@ -328,8 +328,6 @@ export default {
       this.error = null;
       this.warning = null;
 
-      const setWalletInitialized = !this.isApprovedRecipient && Number(this.contractDetails.adminLevel) > 0; 
-
       if (!this.$refs.form.validate()) {
         return;
       }
@@ -435,11 +433,6 @@ export default {
                     );
                     this.$emit('close');
                   });
-
-                if (setWalletInitialized) {
-                  // *async* set wallet as initialized
-                  saveWalletInitializationStatus(pendingTransaction.to, 'INITIALIZED');
-                }
 
                 if (this.notificationId) {
                   markFundRequestAsSent(this.notificationId);

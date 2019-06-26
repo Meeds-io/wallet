@@ -31,12 +31,11 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to save/delete a contract as default
- * displayed contracts for end users
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/contract")
 @RolesAllowed("users")
+@Api(value = "/wallet/api/contract", description = "Manages internally stored token contract detail") // NOSONAR
 public class WalletContractREST implements ResourceContainer {
 
   private static final Log      LOG = ExoLogger.getLogger(WalletContractREST.class);
@@ -47,16 +46,16 @@ public class WalletContractREST implements ResourceContainer {
     this.contractService = contractService;
   }
 
-  /**
-   * Return saved contract details by address
-   * 
-   * @param address token contract address
-   * @return REST Response with contract details
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response getContract(@QueryParam("address") String address) {
+  @ApiOperation(value = "Retrieves stored contract details in internal datasource", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract detail object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getContract(@ApiParam(value = "contract address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn("Empty contract address");
       return Response.status(400).build();
@@ -73,16 +72,16 @@ public class WalletContractREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Return contract bin content
-   * 
-   * @param name contract name to retrieve
-   * @return REST Response with contract bin content
-   */
   @GET
   @Path("bin/{name}")
   @RolesAllowed("rewarding")
-  public Response getBin(@PathParam("name") String name) {
+  @ApiOperation(value = "Retrieves contract binary", httpMethod = "GET", response = Response.class, notes = "returns contract bin content")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getBin(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(400).build();
@@ -100,17 +99,17 @@ public class WalletContractREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Return contract abi content
-   * 
-   * @param name contract name to retrieve
-   * @return REST Response with contract abi content
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("abi/{name}")
   @RolesAllowed("rewarding")
-  public Response getAbi(@PathParam("name") String name) {
+  @ApiOperation(value = "Retrieves contract ABI", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract ABI object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getAbi(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(400).build();
@@ -128,14 +127,15 @@ public class WalletContractREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Refreshes token contract details from blockchain
-   * 
-   * @return REST response with status
-   */
   @GET
   @Path("refresh")
   @RolesAllowed("rewarding")
+  @ApiOperation(value = "Refreshes contract detail from blockchain and store it in internal datasource", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
   public Response refreshContract() {
     try {
       contractService.refreshContractDetail();

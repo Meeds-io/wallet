@@ -97,13 +97,9 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
   }
 
   @Override
-  public TransactionStatistics getTransactionStatistics(String contractAddress,
-                                                        String address,
+  public TransactionStatistics getTransactionStatistics(String address,
                                                         String periodicity,
                                                         Locale locale) {
-    if (StringUtils.isBlank(contractAddress)) {
-      throw new IllegalArgumentException("Empty contract address");
-    }
     if (StringUtils.isBlank(address)) {
       throw new IllegalArgumentException("Wallet address is mandatory");
     }
@@ -153,6 +149,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneOffset.systemDefault());
       ZonedDateTime endDateTime = getEndDate(startDate, periodicity);
 
+      String contractAddress = getContractAddress();
       double receivedContractAmount = transactionStorage.countReceivedContractAmount(contractAddress,
                                                                                      address,
                                                                                      startDateTime,

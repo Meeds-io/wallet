@@ -35,12 +35,11 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to retrieve detailed information about
- * users and spaces Ethereum transactions
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/transaction")
 @RolesAllowed("users")
+@Api(value = "/wallet/api/transaction", description = "Manages internally stored transactions") // NOSONAR
 public class WalletTransactionREST implements ResourceContainer {
 
   private static final String      EMPTY_ADDRESS_ERROR = "Bad request sent to server with empty address {}";
@@ -53,16 +52,17 @@ public class WalletTransactionREST implements ResourceContainer {
     this.transactionService = transactionService;
   }
 
-  /**
-   * Store transaction hash in sender, receiver and contract accounts
-   * 
-   * @param transactionDetail transaction details to save
-   * @return REST response with status
-   */
   @POST
   @Path("saveTransactionDetails")
+  @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response saveTransactionDetails(TransactionDetail transactionDetail) {
+  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveTransactionDetails(@ApiParam(value = "transaction detail object", required = true) TransactionDetail transactionDetail) {
     if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getHash())
         || StringUtils.isBlank(transactionDetail.getFrom())) {
       LOG.warn("Bad request sent to server with empty transaction details: {}",
@@ -83,17 +83,17 @@ public class WalletTransactionREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Get last pending transaction of an address
-   * 
-   * @param address wallet address to retrieve its transactions
-   * @return REST Response with the last pending transaction of an address
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getLastPendingTransactionSent")
   @RolesAllowed("users")
-  public Response getLastPendingTransactionSent(@QueryParam("address") String address) {
+  @ApiOperation(value = "Get last pending transaction sent from an address to blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns pending transaction detail")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getLastPendingTransactionSent(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();
@@ -113,29 +113,30 @@ public class WalletTransactionREST implements ResourceContainer {
     }
   }
 
-  /**
-   * @param contractAddress contract address
-   * @param address wallet address
-   * @param periodicity month / week
-   * @return REST Response with the transactions statistics of period of time
-   *         for a designated wallet
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactionsAmounts")
   @RolesAllowed("users")
-  public Response getTransactionsAmounts(@QueryParam("contractAddress") String contractAddress,
-                                         @QueryParam("address") String address,
-                                         @QueryParam("periodicity") String periodicity,
-                                         @QueryParam("lang") String lang) {
+  @ApiOperation(value = "Get token amounts sent per each period of time by a wallet identified by its address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction statistics object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getTransactionsAmounts(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
+                                         @ApiParam(value = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
+                                         @ApiParam(value = "user locale language", required = false) @QueryParam("lang") String lang) {
+    if (StringUtils.isBlank(periodicity)) {
+      LOG.warn("Bad request sent to server with empty periodicity parameter");
+      return Response.status(400).build();
+    }
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();
     }
 
     try {
-      TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(contractAddress,
-                                                                                                address,
+      TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(address,
                                                                                                 periodicity,
                                                                                                 new Locale(lang));
       return Response.ok(transactionStatistics).build();
@@ -145,30 +146,23 @@ public class WalletTransactionREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Get list of transactions of an address
-   * 
-   * @param address wallet address to retrieve its transactions
-   * @param contractAddress filtered contract address transactions
-   * @param hash transaction hash to include in the returned list
-   * @param limit transactions list limit
-   * @param onlyPending whether retrieve only pending transactions of wallet or
-   *          all
-   * @param administration whether include or not administrative transactions or
-   *          not
-   * @return REST Response with the list of transactions details
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactions")
   @RolesAllowed("users")
-  public Response getTransactions(@QueryParam("address") String address,
-                                  @QueryParam("contractAddress") String contractAddress,
-                                  @QueryParam("contractMethodName") String contractMethodName,
-                                  @QueryParam("hash") String hash,
-                                  @QueryParam("limit") int limit,
-                                  @QueryParam("pending") boolean onlyPending,
-                                  @QueryParam("administration") boolean administration) {
+  @ApiOperation(value = "Get list of transactions of an address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns list of transaction detail object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getTransactions(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
+                                  @ApiParam(value = "token contract address to filter with", required = false) @QueryParam("contractAddress") String contractAddress,
+                                  @ApiParam(value = "token contract method to filter with", required = false) @QueryParam("contractMethodName") String contractMethodName,
+                                  @ApiParam(value = "transaction hash to include in response", required = false) @QueryParam("hash") String hash,
+                                  @ApiParam(value = "limit transactions to retrieve", required = false) @QueryParam("limit") int limit,
+                                  @ApiParam(value = "whether to include only pending or not", required = false) @QueryParam("pending") boolean onlyPending,
+                                  @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
       return Response.status(400).build();

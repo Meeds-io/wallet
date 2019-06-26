@@ -22,7 +22,7 @@
         <v-flex v-if="adminLevel >= 4" id="accountDetailActions">
           <!-- Send ether -->
           <send-ether-modal
-            v-if="contractDetails.isOwner"
+            v-if="adminLevel >= 5"
             :account="walletAddress"
             :balance="contractDetails.balance"
             :recipient="contractDetails.address"

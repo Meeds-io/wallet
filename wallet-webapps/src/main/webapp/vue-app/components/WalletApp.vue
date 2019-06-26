@@ -121,7 +121,6 @@
                           class="transactionHistoryChart"
                           :periodicity="periodicity"
                           :wallet-address="walletAddress"
-                          :contract-details="contractDetails"
                           @periodicity-label="periodicityLabel = $event"
                           @error="error = $event" />
                       </v-flex>

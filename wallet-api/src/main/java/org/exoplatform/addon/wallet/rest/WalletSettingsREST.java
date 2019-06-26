@@ -30,10 +30,10 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to save/load user settings
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/settings")
+@Api(value = "/wallet/api/settings", description = "Manages wallet module settings") // NOSONAR
 public class WalletSettingsREST implements ResourceContainer {
 
   private static final Log LOG = ExoLogger.getLogger(WalletSettingsREST.class);
@@ -44,17 +44,15 @@ public class WalletSettingsREST implements ResourceContainer {
     this.walletService = walletService;
   }
 
-  /**
-   * Get global settings of aplication
-   * 
-   * @param spaceId space wallet id to display
-   * @return REST response with global settings with current user preferences
-   *         and current space settings
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  public Response getSettings(@QueryParam("spaceId") String spaceId) {
+  @ApiOperation(value = "Retrieves user settings by including space settings when added in parameters", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns user settings object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getSettings(@ApiParam(value = "Space pretty name", required = false) @QueryParam("spaceId") String spaceId) {
     String currentUser = getCurrentUserId();
     try {
       UserSettings userSettings = walletService.getUserSettings(spaceId, currentUser);
@@ -65,17 +63,17 @@ public class WalletSettingsREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Save intial funds settings
-   * 
-   * @param initialFundsSettings initial funds settings to save
-   * @return REST response with status
-   */
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveInitialFunds")
   @RolesAllowed("rewarding")
-  public Response saveInitialFundsSettings(InitialFundsSettings initialFundsSettings) {
+  @ApiOperation(value = "Saves initial funds settings", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveInitialFundsSettings(@ApiParam(value = "Intial funds settings", required = true) InitialFundsSettings initialFundsSettings) {
     if (initialFundsSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
       return Response.status(400).build();

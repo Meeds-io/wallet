@@ -13,11 +13,11 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to save/load reward pools
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/reward/team")
 @RolesAllowed("rewarding")
+@Api(value = "/wallet/api/reward/team", description = "Manage reward teams (pools)") // NOSONAR
 public class RewardTeamREST implements ResourceContainer {
   private static final Log  LOG = ExoLogger.getLogger(RewardTeamREST.class);
 
@@ -27,13 +27,15 @@ public class RewardTeamREST implements ResourceContainer {
     this.rewardTeamService = rewardTeamService;
   }
 
-  /**
-   * @return Reward teams with their members
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
   @RolesAllowed("rewarding")
+  @ApiOperation(value = "Get reward teams with their members", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns the list of reward team objects")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
   public Response listTeams() {
     try {
       return Response.ok(rewardTeamService.getTeams()).build();
@@ -43,17 +45,16 @@ public class RewardTeamREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Remove a reward Team/Pool by id
-   * 
-   * @param id
-   * @return
-   */
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
   @Path("remove")
   @RolesAllowed("rewarding")
-  public Response removeTeam(@QueryParam("id") Long id) {
+  @ApiOperation(value = "Remove a reward team", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response removeTeam(@ApiParam(value = "Reward team technical id", required = true) @QueryParam("id") Long id) {
     if (id == null || id == 0) {
       return Response.status(400).build();
     }
@@ -67,18 +68,18 @@ public class RewardTeamREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Add/modifiy a reward team
-   * 
-   * @param rewardTeam
-   * @return
-   */
   @POST
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("rewarding")
-  public Response saveTeam(RewardTeam rewardTeam) {
+  @ApiOperation(value = "Save a reward team", httpMethod = "POST", response = Response.class, consumes = "application/json", produces = "application/json", notes = "returns saved reward team object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveTeam(@ApiParam(value = "Reward team object", required = true) RewardTeam rewardTeam) {
     if (rewardTeam == null) {
       LOG.warn("Bad request sent to server with empty team");
       return Response.status(400).build();
