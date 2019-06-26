@@ -13,12 +13,12 @@ public interface WalletTransactionService {
   /**
    * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingTransactions();
+  List<TransactionDetail> getPendingTransactions();
 
   /**
    * @return transactions hashes that are marked as pensing in internal database
    */
-  public Set<String> getPendingTransactionHashes();
+  Set<String> getPendingTransactionHashes();
 
   /**
    * @param address wallet address
@@ -36,7 +36,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user isn't allowed to access
    *           wallet transactions
    */
-  public List<TransactionDetail> getTransactions(String address,
+  List<TransactionDetail> getTransactions(String address,
                                                  String contractAddress,
                                                  String contractMethodName,
                                                  String hash,
@@ -55,7 +55,7 @@ public interface WalletTransactionService {
    * @param locale
    * @return
    */
-  public TransactionStatistics getTransactionStatistics(String contractAddress,
+  TransactionStatistics getTransactionStatistics(String contractAddress,
                                                         String address,
                                                         String periodicity,
                                                         Locale locale);
@@ -65,7 +65,7 @@ public interface WalletTransactionService {
    * @return the transaction detail corresponding to the hash parameter,
    *         retrieved from internal database
    */
-  public TransactionDetail getTransactionByHash(String hash);
+  TransactionDetail getTransactionByHash(String hash);
 
   /**
    * @param address wallet address
@@ -75,7 +75,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user is not an admin and is
    *           not the owner of the wallet
    */
-  public TransactionDetail getAddressLastPendingTransactionSent(String address,
+  TransactionDetail getAddressLastPendingTransactionSent(String address,
                                                                 String currentUser) throws IllegalAccessException;
 
   /**
@@ -97,19 +97,19 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if current user is not allowed to save
    *           transaction to sender and receiver wallet
    */
-  public void saveTransactionDetail(TransactionDetail transactionDetail,
+  void saveTransactionDetail(TransactionDetail transactionDetail,
                                     String currentUser,
                                     boolean broadcastMinedTransaction) throws IllegalAccessException;
 
   /**
    * @return watched transactions count treated since the server startup
    */
-  public long getWatchedTreatedTransactionsCount();
+  long getWatchedTreatedTransactionsCount();
 
   /**
    * @return max days to wait until marking a non existing transaction on
    *         blockchain as failed
    */
-  public long getPendingTransactionMaxDays();
+  long getPendingTransactionMaxDays();
 
 }

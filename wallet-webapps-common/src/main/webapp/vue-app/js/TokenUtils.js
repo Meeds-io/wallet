@@ -283,7 +283,7 @@ export function deployContract(contractInstance, account, gasLimit, gasPrice, tr
  * Retrieve contract details from eXo Platform server if exists
  */
 export function getSavedContractDetails(address) {
-  return fetch(`/portal/rest/wallet/api/contract/getContract?address=${address}`, {
+  return fetch(`/portal/rest/wallet/api/contract?address=${address}`, {
     method: 'GET',
     credentials: 'include',
   })

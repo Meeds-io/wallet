@@ -15,7 +15,7 @@ public interface WalletTokenAdminService {
   /**
    * Generates admin account wallet and store it internally in eXo Server
    */
-  public void createAdminAccount();
+  void createAdminAccount();
 
   /**
    * Creates admin account wallet using provided private key and store it
@@ -26,17 +26,17 @@ public interface WalletTokenAdminService {
    * @throws IllegalAccessException if current user is not allowed to create
    *           admin wallet account
    */
-  public void createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
+  void createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
 
   /**
    * @return Admin wallet object
    */
-  public Wallet getAdminWallet();
+  Wallet getAdminWallet();
 
   /**
    * @return Admin wallet address
    */
-  public String getAdminWalletAddress();
+  String getAdminWalletAddress();
 
   /**
    * Send rewarded token amounts (on blockchain) to a receiver wallet address

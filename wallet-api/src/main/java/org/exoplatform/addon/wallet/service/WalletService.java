@@ -31,7 +31,7 @@ public interface WalletService {
    * @param initialFundsSettings initial funds to save
    */
 
-  public void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings);
+  void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings);
 
   /**
    * Retrieves global stored settings used for all users.
@@ -39,7 +39,7 @@ public interface WalletService {
    * @return {@link GlobalSettings} global settings of default watched
    *         blockchain network
    */
-  public GlobalSettings getSettings();
+  GlobalSettings getSettings();
 
   /**
    * Retrieves user settings including global setting, network settings and
@@ -51,7 +51,7 @@ public interface WalletService {
    * @return {@link UserSettings} user settings with user and space preferences
    *         included into it
    */
-  public UserSettings getUserSettings(String spaceId, String currentUser);
+  UserSettings getUserSettings(String spaceId, String currentUser);
 
   /**
    * Save user preferences of Wallet
@@ -59,7 +59,7 @@ public interface WalletService {
    * @param currentUser current user name to save its preferences
    * @param userPreferences user preferences to save
    */
-  public void saveUserPreferences(String currentUser, WalletSettings userPreferences);
+  void saveUserPreferences(String currentUser, WalletSettings userPreferences);
 
   /**
    * Save funds request and send notifications
@@ -69,7 +69,7 @@ public interface WalletService {
    * @throws IllegalAccessException if request sender is not allowed to send
    *           request to receiver wallet
    */
-  public void requestFunds(FundsRequest fundsRequest, String currentUser) throws IllegalAccessException;
+  void requestFunds(FundsRequest fundsRequest, String currentUser) throws IllegalAccessException;
 
   /**
    * Mark a fund request web notification as sent
@@ -80,7 +80,7 @@ public interface WalletService {
    * @throws IllegalAccessException if current user is not the targetted user of
    *           notification
    */
-  public void markFundRequestAsSent(String notificationId, String currentUser) throws IllegalAccessException;
+  void markFundRequestAsSent(String notificationId, String currentUser) throws IllegalAccessException;
 
   /**
    * Get fund request status
@@ -91,13 +91,13 @@ public interface WalletService {
    * @throws IllegalAccessException if current user is not the targetted user of
    *           notification
    */
-  public boolean isFundRequestSent(String notificationId, String currentUser) throws IllegalAccessException;
+  boolean isFundRequestSent(String notificationId, String currentUser) throws IllegalAccessException;
 
   /**
    * Sets contract detail object in global settings
    * 
    * @param contractDetail
    */
-  public void setConfiguredContractDetail(ContractDetail contractDetail);
+  void setConfiguredContractDetail(ContractDetail contractDetail);
 
 }

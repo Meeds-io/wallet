@@ -55,7 +55,6 @@ public class WalletContractREST implements ResourceContainer {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("getContract")
   @RolesAllowed("users")
   public Response getContract(@QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
