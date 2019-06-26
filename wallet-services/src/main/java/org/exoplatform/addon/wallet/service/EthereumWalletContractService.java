@@ -120,7 +120,7 @@ public class EthereumWalletContractService implements WalletContractService, Sta
   public void refreshContractDetail() {
     GlobalSettings settings = getSettings();
     String contractAddress = settings.getContractAddress();
-    ContractDetail contractDetail = getWalletTokenAdminService().loadContractDetailFromBlockchain(contractAddress);
+    ContractDetail contractDetail = getWalletTokenAdminService().getContractDetailFromBlockchain(contractAddress);
     saveContractDetail(contractDetail);
     getWalletService().setConfiguredContractDetail(contractDetail);
   }

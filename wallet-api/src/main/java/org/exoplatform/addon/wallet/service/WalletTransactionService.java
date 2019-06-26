@@ -5,6 +5,9 @@ import java.util.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 
+/**
+ * Manage stored transaction details in eXo internal datasource
+ */
 public interface WalletTransactionService {
 
   /**

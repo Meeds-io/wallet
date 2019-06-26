@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getContractAddress;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -49,7 +51,7 @@ public class NewWalletListener extends Listener<Wallet, Wallet> {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String contractAddress = getTokenTransactionService().getContractAddress();
+      String contractAddress = getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
         return;
       }

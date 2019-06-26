@@ -32,7 +32,7 @@ public class RewardBudgetREST implements ResourceContainer {
   }
 
   /**
-   * Compute rewards per period
+   * Compute rewards per period and return result in JSON object
    * 
    * @param periodDateInSeconds
    * @return
@@ -58,7 +58,7 @@ public class RewardBudgetREST implements ResourceContainer {
   }
 
   /**
-   * Compute rewards per period
+   * Send rewards in period identified by start date
    * 
    * @param periodDateInSeconds
    * @return

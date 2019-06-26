@@ -765,35 +765,6 @@ export default {
           });
       }
     },
-    processTransaction(wallet, action) {
-      this.error = null;
-
-      this.$set(wallet, 'pendingTransaction', (wallet.pendingTransaction || 0) + 1);
-      fetch('/portal/rest/wallet/api/admin/transaction', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: $.param({
-          action: action,
-          address: wallet.address,
-        }),
-      }).then((resp) => {
-        if (resp && resp.ok) {
-          return resp.text();
-        } else {
-          throw new Error(`Error processing action ${  action } on wallet ${  wallet.address}`);
-        }
-      }).then((hash) => {
-        if (hash) {
-          this.watchWalletTransaction(wallet, hash);
-        }
-      }).catch((error) => {
-        this.error = String(error);
-        this.$set(wallet, 'pendingTransaction', (wallet.pendingTransaction || 1) - 1);
-      });
-    },
     watchWalletTransaction(wallet, hash) {
       this.refreshWallet(wallet);
 
@@ -807,8 +778,6 @@ export default {
         this.enableWallet(this.walletToProcess, false);
       } else if (this.confirmAction === 'deny') {
         this.changeWalletInitializationStatus(this.walletToProcess, 'DENIED');
-      } else if (this.confirmAction === 'initialize') {
-        this.processTransaction(this.walletToProcess, this.confirmAction);
       }
     }
   },

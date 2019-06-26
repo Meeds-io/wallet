@@ -593,6 +593,14 @@ public class WalletUtils {
     return getWalletService().getSettings();
   }
 
+  public static final String getContractAddress() {
+    GlobalSettings settings = getSettings();
+    if (settings == null || StringUtils.isBlank(settings.getContractAddress())) {
+      throw new IllegalStateException("No principal contract address is configured");
+    }
+    return settings.getContractAddress();
+  }
+
   public static final long getNetworkId() {
     GlobalSettings settings = getSettings();
     return settings == null ? 0 : settings.getNetwork().getId();

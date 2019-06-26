@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.exoplatform.addon.wallet.model.*;
 
+/**
+ * A service to manage wallets of different types: user, space, admin
+ */
 public interface WalletAccountService {
 
   /**
@@ -221,6 +224,9 @@ public interface WalletAccountService {
    */
   public void createAdminAccount(String privateKey, String currentUser) throws IllegalAccessException;
 
+  /**
+   * Retrieves admin account password from configuration
+   */
   String getAdminAccountPassword();
 
 }

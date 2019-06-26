@@ -194,12 +194,6 @@
       <description>Manage wallet address modification process</description>
     </component-plugin>
     <component-plugin>
-      <name>exo.addon.wallet.addressAssociation.modification</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.ModifiedAdminWalletListener</type>
-      <description>Manage admin wallet modification process</description>
-    </component-plugin>
-    <component-plugin>
       <name>exo.addon.wallet.transaction.mined</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.addon.wallet.listener.TransactionNotificationListener</type>

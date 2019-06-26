@@ -47,7 +47,7 @@ public class RewardSettingsREST implements ResourceContainer {
   }
 
   /**
-   * Save global settings of reward
+   * Save settings of reward
    * 
    * @param rewardSettings
    * @return
@@ -81,7 +81,6 @@ public class RewardSettingsREST implements ResourceContainer {
   @Path("getDates")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed("rewarding")
   public Response getRewardDates(@QueryParam("periodType") String periodType,
                                  @QueryParam("dateInSeconds") long dateInSeconds) {
     if (dateInSeconds == 0) {

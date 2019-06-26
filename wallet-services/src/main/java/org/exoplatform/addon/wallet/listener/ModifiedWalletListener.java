@@ -16,11 +16,12 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getContractAddress;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
-import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -50,7 +51,7 @@ public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String contractAddress = getTokenTransactionService().getContractAddress();
+      String contractAddress = getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
         return;
       }
@@ -71,17 +72,6 @@ public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
         wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
       }
       getWalletAccountService().saveWallet(wallet);
-
-      // Disapprove old wallet
-      String oldAddress = oldWallet.getAddress();
-      if (!getTokenTransactionService().isAdminAccount(oldAddress)) {
-        String message = "Disapproving old wallet address associated to " + oldWallet.getType() + " "
-            + oldWallet.getId();
-        TransactionDetail transactionDetail = new TransactionDetail();
-        transactionDetail.setTo(oldAddress);
-        transactionDetail.setMessage(message);
-        getTokenTransactionService().disapproveAccount(transactionDetail, null);
-      }
     } finally {
       RequestLifeCycle.end();
     }

@@ -45,46 +45,6 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
   private WalletTokenAdminService walletTokenAdminService;
 
-  /**
-   * Send transaction to wallet identified by address with possible transaction
-   * types: - initialize - approve - disapprove
-   * 
-   * @param address Wallet address to process
-   * @param action Wallet address to process
-   * @return REST response with status
-   */
-  @POST
-  @RolesAllowed("rewarding")
-  public Response executeTransactionOnWallet(@FormParam("action") String action, @FormParam("address") String address) {
-    String currentUserId = getCurrentUserId();
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
-      return Response.status(400).build();
-    }
-    if (StringUtils.isBlank(action)) {
-      LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty action");
-      return Response.status(400).build();
-    }
-
-    TransactionDetail transactionDetail = null;
-    try {
-      if (StringUtils.equals(action, "initialize")) {
-        transactionDetail = getWalletTokenAdminService().initialize(address, currentUserId);
-      } else if (StringUtils.equals(action, "approve")) {
-        transactionDetail = getWalletTokenAdminService().approveAccount(address, currentUserId);
-      } else if (StringUtils.equals(action, "disapprove")) {
-        transactionDetail = getWalletTokenAdminService().disapproveAccount(address, currentUserId);
-      } else {
-        LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with action: " + action);
-        return Response.status(400).build();
-      }
-      return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
-    } catch (Exception e) {
-      LOG.error("Error processing action {} on wallet {}", action, address, e);
-      return Response.serverError().build();
-    }
-  }
-
   @POST
   @Path("intiialize")
   @RolesAllowed("rewarding")

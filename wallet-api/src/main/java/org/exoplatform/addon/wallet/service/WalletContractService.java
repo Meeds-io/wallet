@@ -6,6 +6,9 @@ import org.json.JSONArray;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 
+/**
+ * Manages token contract properties
+ */
 public interface WalletContractService {
 
   /**

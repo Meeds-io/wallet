@@ -26,6 +26,9 @@ import org.exoplatform.addon.wallet.model.reward.RewardTransaction;
 public interface RewardTransactionService {
 
   /**
+   * Get the list of transactions sent on blockchain of type 'reward' in a
+   * period of time
+   * 
    * @param periodType
    * @param startDateInSeconds
    * @return
@@ -34,7 +37,7 @@ public interface RewardTransactionService {
                                                        long startDateInSeconds);
 
   /**
-   * Save reward transaction
+   * Save reward transaction in eXo internal datasource
    * 
    * @param rewardTransaction
    */
