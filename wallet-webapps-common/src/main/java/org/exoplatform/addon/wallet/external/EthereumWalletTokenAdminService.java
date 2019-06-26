@@ -38,6 +38,8 @@ import org.exoplatform.social.core.identity.model.Identity;
 
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable {
 
+  private static final int                      ADMIN_WALLET_MIN_LEVEL                  = 2;
+
   private static final int                      POOLING_ATTEMPTS                        = 100;
 
   private static final int                      POOLING_ATTEMPT_PER_TX                  = 12000;
@@ -447,7 +449,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("No admin wallet is set");
     }
     int adminLevel = getAdminLevel(adminAddress);
-    if (adminLevel < 4) {
+    if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
       throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
     }
   }
