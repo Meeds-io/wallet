@@ -53,7 +53,11 @@ public class PendingTransactionVerifierJob implements Job {
                   pendingTransactions.size());
         long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
         for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
-          verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
+          try { // NOSONAR
+            verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
+          } catch (Exception e) {
+            LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
+          }
         }
       }
     } catch (Exception e) {
@@ -64,29 +68,26 @@ public class PendingTransactionVerifierJob implements Job {
     }
   }
 
-  private void verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail, long pendingTransactionMaxDays) {
+  private void verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
+                                                   long pendingTransactionMaxDays) throws Exception {
     String hash = pendingTransactionDetail.getHash();
-    try {
-      Transaction transaction = getEthereumClientConnector().getTransaction(hash);
-      String blockHash = transaction == null ? null : transaction.getBlockHash();
-      if (!StringUtils.isBlank(blockHash)
-          && !StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
-          && transaction.getBlockNumber() != null) {
-        getListenerService().broadcast(NEW_TRANSACTION_EVENT, transaction, null);
-      } else if (pendingTransactionMaxDays > 0) {
-        long creationTimestamp = pendingTransactionDetail.getTimestamp();
-        if (transaction == null && creationTimestamp > 0) {
-          Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
-          if (duration.toDays() >= pendingTransactionMaxDays) {
-            LOG.info("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
-                     hash,
-                     pendingTransactionMaxDays);
-            getListenerService().broadcast(NEW_TRANSACTION_EVENT, hash, null);
-          }
+    Transaction transaction = getEthereumClientConnector().getTransaction(hash);
+    String blockHash = transaction == null ? null : transaction.getBlockHash();
+    if (!StringUtils.isBlank(blockHash)
+        && !StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
+        && transaction.getBlockNumber() != null) {
+      getListenerService().broadcast(NEW_TRANSACTION_EVENT, transaction, null);
+    } else if (pendingTransactionMaxDays > 0) {
+      long creationTimestamp = pendingTransactionDetail.getTimestamp();
+      if (transaction == null && creationTimestamp > 0) {
+        Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+        if (duration.toDays() >= pendingTransactionMaxDays) {
+          LOG.info("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
+                   hash,
+                   pendingTransactionMaxDays);
+          getListenerService().broadcast(NEW_TRANSACTION_EVENT, hash, null);
         }
       }
-    } catch (Exception e) {
-      LOG.warn("Error treating pending transaction: {}", hash, e);
     }
   }
 

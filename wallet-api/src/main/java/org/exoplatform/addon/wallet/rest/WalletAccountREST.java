@@ -138,7 +138,7 @@ public class WalletAccountREST implements ResourceContainer {
       accountService.enableWalletByAddress(address, enable, getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Can't delete address '{}' association", address, e);
+      LOG.error("Can't delete address '{}' association", address, e);
       return Response.serverError().build();
     }
   }
@@ -161,7 +161,7 @@ public class WalletAccountREST implements ResourceContainer {
       accountService.removeWalletByAddress(address, getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Can't delete address '{}' association", address, e);
+      LOG.error("Can't delete address '{}' association", address, e);
       return Response.serverError().build();
     }
   }
@@ -180,7 +180,7 @@ public class WalletAccountREST implements ResourceContainer {
                                              getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Can't set wallet initialized status '{}'", status, e);
+      LOG.error("Can't set wallet initialized status '{}'", status, e);
       return Response.serverError().build();
     }
   }
@@ -198,7 +198,7 @@ public class WalletAccountREST implements ResourceContainer {
                                              getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Can't request authorization for wallet {}", address, e);
+      LOG.error("Can't request authorization for wallet {}", address, e);
       return Response.serverError().build();
     }
   }

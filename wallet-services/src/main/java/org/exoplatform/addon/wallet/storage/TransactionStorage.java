@@ -138,9 +138,7 @@ public class TransactionStorage {
     detail.setContractMethodName(entity.getContractMethodName());
     // FIXME Workaround for old bug when adding timestamp in seconds // NOSONAR
     if (entity.getCreatedDate() > 0 && entity.getCreatedDate() < MINIMUM_CREATED_DATE_MILLIS) {
-      if (LOG.isDebugEnabled()) {
-        LOG.warn("Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
-      }
+      LOG.debug("Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
       entity.setCreatedDate(entity.getCreatedDate() * 1000);
       walletTransactionDAO.update(entity);
     }
@@ -149,9 +147,7 @@ public class TransactionStorage {
         || StringUtils.isBlank(entity.getContractMethodName())
         || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_INITIALIZEACCOUNT)
         || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_SETSELLPRICE))) {
-      if (LOG.isDebugEnabled()) {
-        LOG.warn("[from DB] Transaction {} has a value in WEI, converting it to ether.", entity.getHash());
-      }
+      LOG.debug("[from DB] Transaction {} has a value in WEI, converting it to ether.", entity.getHash());
       entity.setValue(convertFromDecimals(new BigInteger(String.valueOf(entity.getValue())), ETHER_TO_WEI_DECIMALS));
       walletTransactionDAO.update(entity);
     }
@@ -192,10 +188,8 @@ public class TransactionStorage {
     if (detail.getTimestamp() == 0) {
       entity.setCreatedDate(System.currentTimeMillis());
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
-      if (LOG.isDebugEnabled()) {
-        LOG.warn("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
-                 entity.getHash());
-      }
+      LOG.debug("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
+                entity.getHash());
       detail.setTimestamp(entity.getCreatedDate() * 1000);
     }
     entity.setCreatedDate(detail.getTimestamp());

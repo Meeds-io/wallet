@@ -38,7 +38,7 @@ public class RewardTeamREST implements ResourceContainer {
     try {
       return Response.ok(rewardTeamService.getTeams()).build();
     } catch (Exception e) {
-      LOG.warn("Error getting computed reward", e);
+      LOG.error("Error getting computed reward", e);
       return Response.serverError().build();
     }
   }
@@ -62,7 +62,7 @@ public class RewardTeamREST implements ResourceContainer {
       LOG.info("{} removed reward pool {}", getCurrentUserId(), team.toString());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error removing reward pool with id: " + id, e);
+      LOG.error("Error removing reward pool with id: " + id, e);
       return Response.serverError().build();
     }
   }
@@ -88,7 +88,7 @@ public class RewardTeamREST implements ResourceContainer {
       LOG.info("{} saved reward pool {}", getCurrentUserId(), rewardTeam.getName());
       return Response.ok(rewardTeam).build();
     } catch (Exception e) {
-      LOG.warn("Error saving reward pool", e);
+      LOG.error("Error saving reward pool", e);
       return Response.serverError().build();
     }
   }

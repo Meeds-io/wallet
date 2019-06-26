@@ -103,6 +103,7 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
       }
       return messageInfo.body(body).end();
     } catch (Exception e) {
+      // Exception gets swallowed by upper services, thus log it here
       LOG.warn("An error occurred while building notification message", e);
       throw e;
     } finally {

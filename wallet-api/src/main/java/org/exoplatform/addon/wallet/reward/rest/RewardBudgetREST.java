@@ -46,7 +46,7 @@ public class RewardBudgetREST implements ResourceContainer {
       Set<WalletReward> rewards = rewardService.computeReward(periodDateInSeconds);
       return Response.ok(rewards).build();
     } catch (Exception e) {
-      LOG.warn("Error getting computed reward", e);
+      LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());
@@ -71,7 +71,7 @@ public class RewardBudgetREST implements ResourceContainer {
       rewardService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error getting computed reward", e);
+      LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());

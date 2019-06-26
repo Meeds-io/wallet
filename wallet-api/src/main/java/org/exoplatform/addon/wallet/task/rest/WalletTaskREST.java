@@ -49,7 +49,7 @@ public class WalletTaskREST implements ResourceContainer {
       Set<WalletAdminTask> tasks = walletTaskService.listTasks(currentState.getIdentity().getUserId());
       return Response.ok(tasks).build();
     } catch (Exception e) {
-      LOG.warn("Error getting listing tasks", e);
+      LOG.error("Error getting listing tasks", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());

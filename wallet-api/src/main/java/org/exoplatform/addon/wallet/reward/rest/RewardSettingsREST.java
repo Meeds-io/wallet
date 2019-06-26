@@ -41,7 +41,7 @@ public class RewardSettingsREST implements ResourceContainer {
       RewardSettings settings = rewardSettingsService.getSettings();
       return Response.ok(settings == null ? new RewardSettings() : settings).build();
     } catch (Exception e) {
-      LOG.warn("Error getting reward settings", e);
+      LOG.error("Error getting reward settings", e);
       return Response.serverError().build();
     }
   }
@@ -66,7 +66,7 @@ public class RewardSettingsREST implements ResourceContainer {
       LOG.info("{} saved reward settings '{}'", getCurrentUserId(), rewardSettings.toString());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error saving reward settings", e);
+      LOG.error("Error saving reward settings", e);
       return Response.serverError().build();
     }
   }

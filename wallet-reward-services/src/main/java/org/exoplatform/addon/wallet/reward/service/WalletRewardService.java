@@ -284,16 +284,7 @@ public class WalletRewardService implements RewardService {
       if (identityId == null || identityId == 0) {
         identityIdsIterator.remove();
       }
-      Wallet wallet = null;
-      try {
-        wallet = walletAccountService.getWalletByIdentityId(identityId);
-      } catch (Exception e) {
-        if (LOG.isDebugEnabled()) {
-          LOG.warn("Error while getting wallet of identity with id {}", identityId, e);
-        } else {
-          LOG.warn("Error while getting wallet of identity with id {}. Reason: {}", identityId, e.getMessage());
-        }
-      }
+      Wallet wallet = walletAccountService.getWalletByIdentityId(identityId);
       if (wallet == null) {
         identityIdsIterator.remove();
         continue;

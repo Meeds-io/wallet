@@ -80,7 +80,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       }
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
-      LOG.warn("Error processing action {} on wallet {}", action, address, e);
+      LOG.error("Error processing action {} on wallet {}", action, address, e);
       return Response.serverError().build();
     }
   }
@@ -109,7 +109,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       transactionDetail = getWalletTokenAdminService().initialize(transactionDetail, currentUserId);
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
-      LOG.warn("Error initializing wallet {}", receiver, e);
+      LOG.error("Error initializing wallet {}", receiver, e);
       return Response.serverError().build();
     }
   }

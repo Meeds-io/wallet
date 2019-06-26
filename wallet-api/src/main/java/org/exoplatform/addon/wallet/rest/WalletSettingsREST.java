@@ -60,7 +60,7 @@ public class WalletSettingsREST implements ResourceContainer {
       UserSettings userSettings = walletService.getUserSettings(spaceId, currentUser);
       return Response.ok(userSettings).build();
     } catch (Exception e) {
-      LOG.warn("Error getting settings for user {} and spaceId {}", currentUser, spaceId, e);
+      LOG.error("Error getting settings for user {} and spaceId {}", currentUser, spaceId, e);
       return Response.status(403).build();
     }
   }
@@ -86,7 +86,7 @@ public class WalletSettingsREST implements ResourceContainer {
       LOG.info("{} saved initialFunds settings details '{}'", getCurrentUserId(), initialFundsSettings.toString());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error saving global settings", e);
+      LOG.error("Error saving global settings", e);
       return Response.serverError().build();
     }
   }

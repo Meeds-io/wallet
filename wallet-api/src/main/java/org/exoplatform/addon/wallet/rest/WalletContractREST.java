@@ -69,7 +69,7 @@ public class WalletContractREST implements ResourceContainer {
       }
       return Response.ok(contractDetail).build();
     } catch (Exception e) {
-      LOG.warn("Error getting contract details: " + address, e);
+      LOG.error("Error getting contract details: " + address, e);
       return Response.serverError().build();
     }
   }
@@ -96,7 +96,7 @@ public class WalletContractREST implements ResourceContainer {
       String contractBin = contractService.getContractFileContent(name, "bin");
       return Response.ok(contractBin).build();
     } catch (Exception e) {
-      LOG.warn("Error retrieving contract BIN: " + name, e);
+      LOG.error("Error retrieving contract BIN: " + name, e);
       return Response.serverError().build();
     }
   }
@@ -124,7 +124,7 @@ public class WalletContractREST implements ResourceContainer {
       String contractAbi = contractService.getContractFileContent(name, "json");
       return Response.ok(contractAbi).build();
     } catch (Exception e) {
-      LOG.warn("Error retrieving contract ABI: " + name, e);
+      LOG.error("Error retrieving contract ABI: " + name, e);
       return Response.serverError().build();
     }
   }
@@ -143,7 +143,7 @@ public class WalletContractREST implements ResourceContainer {
       LOG.info("User {} is refreshing Token from blockchain", getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error refreshing Token from blockchain", e);
+      LOG.error("Error refreshing Token from blockchain", e);
       return Response.serverError().build();
     }
   }

@@ -266,7 +266,8 @@ public class WalletUtils {
         return getPermanentLink(space);
       }
     } catch (Exception e) {
-      LOG.error("Error getting profile link of {} {}", walletType, remoteId, e);
+      // Not blocker for processing contents
+      LOG.warn("Error getting profile link of {} {}", walletType, remoteId, e);
     }
     return StringUtils.isBlank(wallet.getName()) ? wallet.getAddress() : wallet.getName();
   }
@@ -439,7 +440,7 @@ public class WalletUtils {
     try {
       return StringUtils.isBlank(content) ? "" : URLEncoder.encode(content.trim(), "UTF-8");
     } catch (Exception e) {
-      return content;
+      throw new IllegalStateException("Error encoding content", e);
     }
   }
 
@@ -447,7 +448,7 @@ public class WalletUtils {
     try {
       return StringUtils.isBlank(content) ? "" : URLDecoder.decode(content.trim(), "UTF-8");
     } catch (Exception e) {
-      return content;
+      throw new IllegalStateException("Error decoding content", e);
     }
   }
 
@@ -483,7 +484,6 @@ public class WalletUtils {
   public static boolean isUserSpaceMember(String spaceId, String accesssor) {
     Space space = getSpace(spaceId);
     if (space == null) {
-      LOG.warn("Space not found with id '{}'", spaceId);
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
@@ -497,8 +497,7 @@ public class WalletUtils {
                                                 boolean throwException) throws IllegalAccessException {
     Space space = getSpace(spaceId);
     if (space == null) {
-      LOG.warn("Space not found with id '{}'", spaceId);
-      throw new IllegalStateException();
+      throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
     if (!spaceService.isManager(space, modifier) && !spaceService.isSuperManager(modifier)) {

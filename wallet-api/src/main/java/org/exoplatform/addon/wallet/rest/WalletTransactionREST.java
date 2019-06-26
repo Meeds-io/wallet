@@ -78,7 +78,7 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.warn("User {} is attempting to save transaction {}", currentUserId, transactionDetail, e);
       return Response.status(403).build();
     } catch (Exception e) {
-      LOG.warn("Error saving transaction message", e);
+      LOG.error("Error saving transaction message", e);
       return Response.serverError().build();
     }
   }
@@ -108,7 +108,7 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
       return Response.status(403).build();
     } catch (Exception e) {
-      LOG.warn("Error getting transactions of wallet " + address, e);
+      LOG.error("Error getting transactions of wallet " + address, e);
       return Response.serverError().build();
     }
   }
@@ -140,7 +140,7 @@ public class WalletTransactionREST implements ResourceContainer {
                                                                                                 new Locale(lang));
       return Response.ok(transactionStatistics).build();
     } catch (Exception e) {
-      LOG.warn("Error getting transactions statistics of wallet " + address, e);
+      LOG.error("Error getting transactions statistics of wallet " + address, e);
       return Response.serverError().build();
     }
   }
@@ -189,7 +189,7 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
       return Response.status(403).build();
     } catch (Exception e) {
-      LOG.warn("Error getting transactions of wallet " + address, e);
+      LOG.error("Error getting transactions of wallet " + address, e);
       return Response.serverError().build();
     }
   }
