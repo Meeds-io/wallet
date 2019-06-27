@@ -4,28 +4,28 @@
   https://jira.exoplatform.org/browse/PLF-8100
 
   <portlet-skin>
-    <application-name>exo-wallet</application-name>
+    <application-name>wallet</application-name>
     <portlet-name>Wallet</portlet-name>
     <skin-name>Enterprise</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 
   <portlet-skin>
-    <application-name>exo-wallet</application-name>
+    <application-name>wallet</application-name>
     <portlet-name>Wallet</portlet-name>
     <skin-name>Default</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 
   <portlet-skin>
-    <application-name>exo-wallet</application-name>
+    <application-name>wallet</application-name>
     <portlet-name>SpaceWallet</portlet-name>
     <skin-name>Enterprise</skin-name>
     <css-path>/css/wallet.css</css-path>
   </portlet-skin>
 
   <portlet-skin>
-    <application-name>exo-wallet</application-name>
+    <application-name>wallet</application-name>
     <portlet-name>SpaceWallet</portlet-name>
     <skin-name>Default</skin-name>
     <css-path>/css/wallet.css</css-path>
@@ -125,6 +125,10 @@
         <module>iePolyfills</module>
       </depends>
       <depends>
+        <module>vueChart</module>
+        <as>VueChart</as>
+      </depends>
+      <depends>
         <module>vuetify</module>
       </depends>
       <depends>
@@ -175,6 +179,10 @@
         <module>iePolyfills</module>
       </depends>
       <depends>
+        <module>vueChart</module>
+        <as>VueChart</as>
+      </depends>
+      <depends>
         <module>vuetify</module>
       </depends>
       <depends>
@@ -183,6 +191,7 @@
       </depends>
       <depends>
         <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
       </depends>
       <depends>
         <module>abiDecoder</module>

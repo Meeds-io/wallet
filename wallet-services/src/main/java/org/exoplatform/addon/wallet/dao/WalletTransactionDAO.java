@@ -16,6 +16,7 @@
  */
 package org.exoplatform.addon.wallet.dao;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -27,21 +28,36 @@ import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 
 public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, Long> {
 
-  private static final String HASH_PARAM             = "hash";
+  private static final String HASH_PARAM                 = "hash";
 
-  private static final String ADDRESS_PARAM          = "address";
+  private static final String START_DATE                 = "startDate";
 
-  private static final String CONTRACT_ADDRESS_PARAM = "contractAddress";
+  private static final String END_DATE                   = "endDate";
 
-  private static final String NETWORK_ID_PARAM       = "networkId";
+  private static final String ADDRESS_PARAM              = "address";
 
-  public List<TransactionEntity> getContractTransactions(long networkId, String contractAddress, int limit) {
+  private static final String CONTRACT_ADDRESS_PARAM     = "contractAddress";
+
+  private static final String CONTRACT_METHOD_NAME_PARAM = "methodName";
+
+  private static final String NETWORK_ID_PARAM           = "networkId";
+
+  public List<TransactionEntity> getContractTransactions(String contractAddress,
+                                                         String contractMethodName,
+                                                         int limit) {
     contractAddress = StringUtils.lowerCase(contractAddress);
 
-    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getContractTransactions",
+    String queryName = "WalletTransaction.getContractTransactions";
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      queryName = "WalletTransaction.getContractTransactionsWithMethodName";
+    }
+
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery(queryName,
                                                                               TransactionEntity.class);
-    query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(CONTRACT_ADDRESS_PARAM, contractAddress.toLowerCase());
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      query.setParameter(CONTRACT_METHOD_NAME_PARAM, contractMethodName);
+    }
     if (limit > 0) {
       query.setMaxResults(limit);
     }
@@ -51,6 +67,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
   public List<TransactionEntity> getWalletTransactions(long networkId,
                                                        String address,
                                                        String contractAddress,
+                                                       String contractMethodName,
                                                        int limit,
                                                        boolean pending,
                                                        boolean administration) {
@@ -71,6 +88,12 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     queryString.append("' OR tx.byAddress = '");
     queryString.append(address);
     queryString.append("')");
+
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      queryString.append(" AND tx.contractMethodName = '");
+      queryString.append(contractMethodName);
+      queryString.append("'");
+    }
 
     if (pending) {
       queryString.append(" AND tx.isPending = TRUE");
@@ -115,6 +138,38 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+  }
+
+  public double countReceivedContractAmount(String contractAddress,
+                                            String address,
+                                            ZonedDateTime startDate,
+                                            ZonedDateTime endDate) {
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countReceivedContractAmount",
+                                                                   Double.class);
+    query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    query.setParameter(START_DATE, toMilliSeconds(startDate));
+    query.setParameter(END_DATE, toMilliSeconds(endDate));
+    Double result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
+
+  public double countSentContractAmount(String contractAddress,
+                                        String address,
+                                        ZonedDateTime startDate,
+                                        ZonedDateTime endDate) {
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("WalletTransaction.countSentContractAmount",
+                                                                   Double.class);
+    query.setParameter(CONTRACT_ADDRESS_PARAM, StringUtils.lowerCase(contractAddress));
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    query.setParameter(START_DATE, toMilliSeconds(startDate));
+    query.setParameter(END_DATE, toMilliSeconds(endDate));
+    Double result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
+
+  private long toMilliSeconds(ZonedDateTime date) {
+    return date.toEpochSecond() * 1000;
   }
 
 }

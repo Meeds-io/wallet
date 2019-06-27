@@ -18,6 +18,7 @@
           title="Select a user, a space or an address to send to"
           autofocus
           required
+          ignore-current-user
           @item-selected="
             recipient = $event.address;
             $emit('receiver-selected', $event);
@@ -88,13 +89,13 @@
     <v-card-actions>
       <v-spacer />
       <button
-        :disabled="!account || loading || !recipient || !amount"
+        :disabled="disabled"
         :loading="loading"
         class="btn btn-primary mr-1"
         @click="sendEther">
         Send
       </button> <button
-        :disabled="!account || loading || !recipient || !amount"
+        :disabled="disabled"
         class="btn"
         color="secondary"
         @click="showQRCodeModal = true">
@@ -154,7 +155,6 @@ export default {
       transactionHash: null,
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       loading: false,
       recipient: null,
       amount: null,
@@ -162,6 +162,11 @@ export default {
       error: null,
       mandatoryRule: [(v) => !!v || 'Field is required'],
     };
+  },
+  computed: {
+    disabled() {
+      return !this.account || this.loading || !this.recipient || !this.amount;
+    }
   },
   watch: {
     amount() {
@@ -174,17 +179,6 @@ export default {
   },
   methods: {
     init(recipient) {
-      this.$nextTick(() => {
-        if (this.$refs.autocomplete) {
-          this.$refs.autocomplete.clear();
-          if (recipient) {
-            this.$refs.autocomplete.selectItem(recipient);
-            this.$refs.amountInput.focus();
-          } else {
-            this.$refs.autocomplete.focus();
-          }
-        }
-      });
       this.loading = false;
       this.recipient = null;
       this.amount = null;
@@ -195,14 +189,29 @@ export default {
       this.transactionMessage = this.defaultMessage;
       this.transactionHash = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
+
+      this.$nextTick(() => {
+        if (this.$refs.autocomplete) {
+          this.$refs.autocomplete.clear();
+          this.$nextTick(() => {
+            if (recipient) {
+              this.$refs.autocomplete.selectItem(recipient);
+              this.$refs.amountInput.focus();
+            } else {
+              this.$refs.autocomplete.focus();
+            }
+          });
+        }
+      });
     },
     sendEther() {
       this.error = null;
-      this.$refs.form.validate();
+      if (!this.$refs.form.validate()) {
+        return;
+      }
       if (!window.localWeb3.utils.isAddress(this.recipient)) {
         this.error = 'Invalid recipient address';
         return;
@@ -218,13 +227,13 @@ export default {
         return;
       }
 
-      const gas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
+      const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
       if (this.amount >= this.balance) {
         this.error = 'Unsufficient funds';
         return;
       }
 
-      const unlocked = this.useMetamask || unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
+      const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -289,9 +298,7 @@ export default {
         this.loading = false;
         this.error = truncateError(`Error sending ether: ${e}`);
       } finally {
-        if (!this.useMetamask) {
-          lockBrowserWallet();
-        }
+        lockBrowserWallet();
       }
     },
   },

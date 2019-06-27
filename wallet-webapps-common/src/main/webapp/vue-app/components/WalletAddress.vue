@@ -112,7 +112,7 @@ export default {
   },
   created() {
     this.init();
-    this.isAdmin = window.walletSettings && window.walletSettings.isAdmin;
+    this.isAdmin = window.walletSettings && window.walletSettings.admin;
     document.addEventListener('exo-wallet-label-changed', this.refresh);
   },
   methods: {
@@ -123,7 +123,7 @@ export default {
       if(!this.value) {
         return;
       }
-      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.defaultNetworkId);
+      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network.id);
 
       if (!window.walletSettings.userPreferences
           || !window.walletSettings.userPreferences.addresesLabels) {

@@ -10,17 +10,17 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.reward.model.*;
+import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.service.RewardSettingsService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to save/load reward settings
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/reward/settings")
-@RolesAllowed({ "rewarding", "administrators" })
+@RolesAllowed("rewarding")
+@Api(value = "/wallet/api/reward/settings", description = "Manage reward module settings") // NOSONAR
 public class RewardSettingsREST implements ResourceContainer {
   private static final Log      LOG = ExoLogger.getLogger(RewardSettingsREST.class);
 
@@ -30,33 +30,35 @@ public class RewardSettingsREST implements ResourceContainer {
     this.rewardSettingsService = rewardSettingsService;
   }
 
-  /**
-   * @return Reward general settings
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Get reward settings", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward settings object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
   public Response getSettings() {
     try {
       RewardSettings settings = rewardSettingsService.getSettings();
       return Response.ok(settings == null ? new RewardSettings() : settings).build();
     } catch (Exception e) {
-      LOG.warn("Error getting reward settings", e);
+      LOG.error("Error getting reward settings", e);
       return Response.serverError().build();
     }
   }
 
-  /**
-   * Save global settings of reward
-   * 
-   * @param rewardSettings
-   * @return
-   */
   @POST
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response saveSettings(RewardSettings rewardSettings) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Get reward settings", httpMethod = "POST", response = Response.class, produces = "application/json", notes = "returns reward settings object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveSettings(@ApiParam(value = "Reward settings object", required = true) RewardSettings rewardSettings) {
     if (rewardSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
       return Response.status(400).build();
@@ -66,24 +68,22 @@ public class RewardSettingsREST implements ResourceContainer {
       LOG.info("{} saved reward settings '{}'", getCurrentUserId(), rewardSettings.toString());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error saving reward settings", e);
+      LOG.error("Error saving reward settings", e);
       return Response.serverError().build();
     }
   }
 
-  /**
-   * Retrieves reward perdiod start and end dates
-   * 
-   * @param periodType
-   * @param dateInSeconds
-   * @return
-   */
   @Path("getDates")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response getRewardDates(@QueryParam("periodType") String periodType,
-                                 @QueryParam("dateInSeconds") long dateInSeconds) {
+  @ApiOperation(value = "Get dates corresponding to chosen period type and start date", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward period dates object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getRewardDates(@ApiParam(value = "Reward period type", required = true) @QueryParam("periodType") String periodType,
+                                 @ApiParam(value = "A chosen date to calculate its period", required = true) @QueryParam("dateInSeconds") long dateInSeconds) {
     if (dateInSeconds == 0) {
       LOG.warn("Bad request sent to server with empty 'dateInSeconds' parameter");
       return Response.status(400).build();

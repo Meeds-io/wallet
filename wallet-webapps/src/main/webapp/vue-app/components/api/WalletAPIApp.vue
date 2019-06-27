@@ -9,13 +9,12 @@ export default {
       isWalletEnabled: false,
       isWalletInitialized: false,
       loading: true,
-      networkId: false,
-      useMetamask: false,
       needPassword: false,
       isReadOnly: true,
       walletAddress: null,
       principalContractDetails: null,
       error: null,
+      settings: null,
     };
   },
   created() {
@@ -29,7 +28,6 @@ export default {
     }
 
     document.addEventListener('exo-wallet-init', this.init);
-    document.addEventListener('exo-wallet-metamask-changed', this.metamaskAccountChanged);
     document.addEventListener('exo-wallet-send-tokens', this.sendTokens);
 
     window.walletAddonInstalled = true;
@@ -37,11 +35,6 @@ export default {
     document.dispatchEvent(new CustomEvent('exo-wallet-installed'));
   },
   methods: {
-    metamaskAccountChanged(event) {
-      if(this.isWalletInitialized) {
-        this.init(event);
-      }
-    },
     init(event) {
       this.isWalletInitialized = true;
       document.dispatchEvent(new CustomEvent('exo-wallet-init-loading'));
@@ -66,14 +59,15 @@ export default {
         return this.walletUtils.initSettings(isSpace)
           .then((result, error) => {
             this.handleError(error);
-            if (!window.walletSettings || !window.walletSettings.isWalletEnabled) {
+            this.settings = window.walletSettings || {};
+            if (!this.settings.walletEnabled) {
               this.isWalletEnabled = false;
               this.isReadOnly = true;
               throw new Error('Wallet disabled for current user');
-            } else if (!window.walletSettings.userPreferences.walletAddress) {
+            } else if (!this.settings.wallet || !this.settings.wallet.address) {
               this.isReadOnly = true;
               throw new Error(this.constants.ERROR_WALLET_NOT_CONFIGURED);
-            } else if (!window.walletSettings.defaultPrincipalAccount) {
+            } else if (!this.settings.contractAddress) {
               this.isReadOnly = true;
               throw new Error("Wallet principal account isn't configured");
             }
@@ -83,31 +77,23 @@ export default {
           })
           .then((result, error) => {
             this.handleError(error);
-            this.useMetamask = window.walletSettings.userPreferences.useMetamask;
-            this.walletAddress = window.walletSettings.userPreferences.walletAddress;
+            this.walletAddress = this.settings.wallet.address;
 
             if(!this.walletAddress) {
               this.isReadOnly = true;
               throw new Error("No wallet is configured for current user");
-            } else if ((!this.useMetamask && !window.walletSettings.browserWalletExists)
-                || (this.useMetamask
-                    && (!window.web3
-                        || !window.web3.eth
-                        || !window.web3.eth.defaultAccount
-                        || window.web3.eth.defaultAccount.toLowerCase() !== this.walletAddress.toLowerCase()))) {
+            } else if (!this.settings.browserWalletExists) {
               this.isReadOnly = true;
               throw new Error("Wallet is in readonly state");
             }
-            this.needPassword = !this.useMetamask && window.walletSettings.browserWalletExists && !window.walletSettings.storedPassword;
-            this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
-            this.networkId = window.walletSettings.currentNetworkId;
-            this.isReadOnly = window.walletSettings.isReadOnly;
-            if (window.walletSettings.maxGasPrice) {
-              window.walletSettings.maxGasPriceEther = window.walletSettings.maxGasPriceEther || window.localWeb3.utils.fromWei(String(window.walletSettings.maxGasPrice), 'ether').toString();
+            this.needPassword = this.settings.browserWalletExists && !this.settings.storedPassword;
+            this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;
+            this.isReadOnly = this.settings.isReadOnly;
+            if (this.settings.network.maxGasPrice) {
+              this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
             }
             this.principalContractDetails = {
-              networkId: this.networkId,
-              address: window.walletSettings.defaultPrincipalAccount,
+              address: this.settings.contractAddress,
               isContract: true,
               isDefault: true,
             };
@@ -157,10 +143,6 @@ export default {
               symbol : this.principalContractDetails && this.principalContractDetails.symbol,
             };
             document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : result}));
-
-            if (this.useMetamask && window.walletSettings.enablingMetamaskAccountDone) {
-              this.$nextTick(() => this.walletUtils.watchMetamaskAccount(window.walletSettings.detectedMetamaskAccount));
-            }
           });
       } catch(e) {
         console.debug('init method - error', e);
@@ -232,7 +214,7 @@ export default {
         }
 
         try {
-          const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(password));
+          const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? this.settings.userP : this.walletUtils.hashCode(password));
           if (!unlocked) {
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
               detail : 'Wrong password'
@@ -253,8 +235,8 @@ export default {
           return;
         }
   
-        const gasPrice = window.walletSettings.minGasPrice;
-        const defaultGas = window.walletSettings.userPreferences.defaultGas;
+        const gasPrice = this.settings.network.minGasPrice;
+        const defaultGas = this.settings.network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
         const isApprovedAccount = this.principalContractDetails.contract.methods.isApprovedAccount;
         const contractAddress = this.principalContractDetails.address;
@@ -347,7 +329,7 @@ export default {
               }
 
               //finally paas this data parameter to send Transaction
-              return this.tokenUtils.sendContractTransaction(this.useMetamask, this.networkId, {
+              return this.tokenUtils.sendContractTransaction({
                    contractAddress: contractAddress,
                    senderAddress: senderAddress,
                    gas: defaultGas,
@@ -394,7 +376,7 @@ export default {
               this.loading = false;
               throw new Error(`Error sending tokens: ${this.walletUtils.truncateError(e)}`);
             })
-            .finally(() => this.useMetamask || this.walletUtils.lockBrowserWallet());
+            .finally(() => this.walletUtils.lockBrowserWallet());
           })
           .catch((error) => {
             console.debug('sendTokens method - error', error);

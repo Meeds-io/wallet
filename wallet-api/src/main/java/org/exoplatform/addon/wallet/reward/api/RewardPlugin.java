@@ -21,14 +21,35 @@ import java.util.Set;
 
 import org.exoplatform.container.component.BaseComponentPlugin;
 
+/**
+ * A reward plugin to manage rewarded points
+ */
 public abstract class RewardPlugin extends BaseComponentPlugin {
 
+  /**
+   * get reward plugin unique identifier
+   * 
+   * @return
+   */
   public String getPluginId() {
     return getName();
   }
 
+  /**
+   * Checks is the plugin is enabled
+   * 
+   * @return
+   */
   public abstract boolean isEnabled();
 
+  /**
+   * Retrieves earned points for identities in a certain period of time
+   * 
+   * @param identityIds
+   * @param startDateInSeconds
+   * @param endDateInSeconds
+   * @return
+   */
   public abstract Map<Long, Double> gtEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds);
 
 }

@@ -798,12 +798,6 @@ export default {
     WalletAddress,
   },
   props: {
-    networkId: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
     fiatSymbol: {
       type: String,
       default: function() {
@@ -835,6 +829,12 @@ export default {
       },
     },
     selectedTransactionHash: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
+    selectedContractMethodName: {
       type: String,
       default: function() {
         return null;
@@ -899,20 +899,11 @@ export default {
         });
       }
     },
-    networkId() {
-      if (this.networkId) {
-        this.transactionEtherscanLink = getTransactionEtherscanlink(this.networkId);
-        this.addressEtherscanLink = getAddressEtherscanlink(this.networkId);
-        this.tokenEtherscanLink = getTokenEtherscanlink(this.networkId);
-      }
-    },
   },
   created() {
-    if (!this.transactionEtherscanLink && this.networkId) {
-      this.transactionEtherscanLink = getTransactionEtherscanlink(this.networkId);
-      this.addressEtherscanLink = getAddressEtherscanlink(this.networkId);
-      this.tokenEtherscanLink = getTokenEtherscanlink(this.networkId);
-    }
+    this.transactionEtherscanLink = getTransactionEtherscanlink();
+    this.addressEtherscanLink = getAddressEtherscanlink();
+    this.tokenEtherscanLink = getTokenEtherscanlink();
 
     if (this.account) {
       this.init().catch((error) => {
@@ -959,7 +950,11 @@ export default {
     },
     loadRecentTransaction(limit) {
       const thiss = this;
-      return loadTransactions(this.networkId, this.account, this.contractDetails, this.transactions, false, limit, this.selectedTransactionHash, this.administration, () => {
+      const filterObject = {
+        hash: this.selectedTransactionHash,
+        contractMethodName: this.selectedContractMethodName,
+      };
+      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
         thiss.$emit('refresh-balance');
         thiss.forceUpdateList();
       })

@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.exoplatform.addon.wallet.model.*;
 
+/**
+ * A service to manage wallets of different types: user, space, admin
+ */
 public interface WalletAccountService {
 
   /**
@@ -11,14 +14,14 @@ public interface WalletAccountService {
    * 
    * @return list of associated wallets to users and spaces
    */
-  public Set<Wallet> listWallets();
+  Set<Wallet> listWallets();
 
   /**
    * Retrieve wallets count
    * 
    * @return associated wallets count
    */
-  public long getWalletsCount();
+  long getWalletsCount();
 
   /**
    * Retrieve wallet details by identity technical id
@@ -26,7 +29,7 @@ public interface WalletAccountService {
    * @param identityId User/Space identity technical id
    * @return {@link Wallet} wallet details identified by identity technical id
    */
-  public Wallet getWalletByIdentityId(long identityId);
+  Wallet getWalletByIdentityId(long identityId);
 
   /**
    * Retrieve wallet details by identity type and remoteId accessed by a user
@@ -36,7 +39,7 @@ public interface WalletAccountService {
    * @param currentUser current username saving wallet private key
    * @return {@link Wallet} wallet details identified by type and remote Id
    */
-  public Wallet getWalletByTypeAndId(String type, String remoteId, String currentUser);
+  Wallet getWalletByTypeAndId(String type, String remoteId, String currentUser);
 
   /**
    * Retrieve wallet details by identity type and remoteId
@@ -45,7 +48,7 @@ public interface WalletAccountService {
    * @param remoteId username or space pretty name
    * @return {@link Wallet} wallet details identified by type and remote Id
    */
-  public Wallet getWalletByTypeAndId(String type, String remoteId);
+  Wallet getWalletByTypeAndId(String type, String remoteId);
 
   /**
    * Save wallet private key for a wallet identified by identity type and
@@ -57,10 +60,10 @@ public interface WalletAccountService {
    * @throws IllegalAccessException when the current user is not allowed to save
    *           the encrypted private key of wallet
    */
-  public void savePrivateKeyByTypeAndId(String type,
-                                        String remoteId,
-                                        String content,
-                                        String currentUser) throws IllegalAccessException;
+  void savePrivateKeyByTypeAndId(String type,
+                                 String remoteId,
+                                 String content,
+                                 String currentUser) throws IllegalAccessException;
 
   /**
    * Retrieve wallet private key by identity type and remoteId
@@ -72,7 +75,7 @@ public interface WalletAccountService {
    * @throws IllegalAccessException when the current user is not allowed to get
    *           the encrypted private key of wallet
    */
-  public String getPrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
+  String getPrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
 
   /**
    * Retrieve wallet private key by identity type and remoteId
@@ -81,7 +84,7 @@ public interface WalletAccountService {
    * @param remoteId username or space pretty name
    * @return encrypted wallet private key identified by type and remote Id
    */
-  public String getPrivateKeyByTypeAndId(String type, String remoteId);
+  String getPrivateKeyByTypeAndId(String type, String remoteId);
 
   /**
    * Removes wallet private key by identity type and remoteId
@@ -92,7 +95,7 @@ public interface WalletAccountService {
    * @throws IllegalAccessException when the current user is not an owner of
    *           wallet
    */
-  public void removePrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
+  void removePrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
 
   /**
    * Retrieve wallet by address
@@ -100,14 +103,14 @@ public interface WalletAccountService {
    * @param address address of wallet to retrieve
    * @return {@link Wallet} wallet details identified by type and remote Id
    */
-  public Wallet getWalletByAddress(String address);
+  Wallet getWalletByAddress(String address);
 
   /**
    * Save wallet to storage
    * 
    * @param wallet wallet to save
    */
-  public void saveWallet(Wallet wallet);
+  void saveWallet(Wallet wallet);
 
   /**
    * Save wallet address to currentUser or to a space managed by current user
@@ -118,7 +121,7 @@ public interface WalletAccountService {
    * @throws IllegalAccessException when the current user is not able to save a
    *           new address to the wallet
    */
-  public void saveWalletAddress(Wallet wallet, String currentUser, boolean broadcast) throws IllegalAccessException;
+  void saveWalletAddress(Wallet wallet, String currentUser, boolean broadcast) throws IllegalAccessException;
 
   /**
    * Remove User or Space wallet address association
@@ -127,7 +130,7 @@ public interface WalletAccountService {
    * @param currentUser current username removing wallet details
    * @throws IllegalAccessException if current user is not an administrator
    */
-  public void removeWalletByAddress(String address, String currentUser) throws IllegalAccessException;
+  void removeWalletByAddress(String address, String currentUser) throws IllegalAccessException;
 
   /**
    * Remove wallet address association by type and remote id
@@ -137,7 +140,7 @@ public interface WalletAccountService {
    * @param currentUser current username saving wallet details
    * @throws IllegalAccessException
    */
-  public void removeWalletByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
+  void removeWalletByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
 
   /**
    * Enable/Disable User or Space wallet
@@ -147,7 +150,7 @@ public interface WalletAccountService {
    * @param currentUser username of current user making the operation
    * @throws IllegalAccessException if current user is not an administrator
    */
-  public void enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException;
+  void enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException;
 
   /**
    * Throws an exception if the user is not allowed to modify wallet information
@@ -158,7 +161,7 @@ public interface WalletAccountService {
    * @throws IllegalAccessException if current user is not allowed to modify
    *           wallet
    */
-  public void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException;
+  void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException;
 
   /**
    * Return true if user is accessing his wallet or is accessing a space that he
@@ -168,7 +171,7 @@ public interface WalletAccountService {
    * @param currentUser
    * @return
    */
-  public boolean isWalletOwner(Wallet wallet, String currentUser);
+  boolean isWalletOwner(Wallet wallet, String currentUser);
 
   /**
    * Saves label if label is not empty else, delete it
@@ -176,9 +179,9 @@ public interface WalletAccountService {
    * @param label label details object to process
    * @param currentUser current user making the label
    *          creation/modification/deletion
-   * @return {@link AddressLabel} saved or deleted label details
+   * @return {@link WalletAddressLabel} saved or deleted label details
    */
-  public AddressLabel saveOrDeleteAddressLabel(AddressLabel label, String currentUser);
+  WalletAddressLabel saveOrDeleteAddressLabel(WalletAddressLabel label, String currentUser);
 
   /**
    * List of labels that current user can access
@@ -186,7 +189,7 @@ public interface WalletAccountService {
    * @param currentUser current username accessing the list of addresses labels
    * @return a {@link Set} of label details
    */
-  public Set<AddressLabel> getAddressesLabelsVisibleBy(String currentUser);
+  Set<WalletAddressLabel> getAddressesLabelsVisibleBy(String currentUser);
 
   /**
    * Change wallet initialization status
@@ -198,9 +201,9 @@ public interface WalletAccountService {
    * @throws IllegalAccessException if current user is not allowed to modify
    *           wallet initialization status
    */
-  public void setInitializationStatus(String address,
-                                      WalletInitializationState initializationState,
-                                      String currentUserId) throws IllegalAccessException;
+  void setInitializationStatus(String address,
+                               WalletInitializationState initializationState,
+                               String currentUserId) throws IllegalAccessException;
 
   /**
    * Change wallet initialization status
@@ -209,7 +212,7 @@ public interface WalletAccountService {
    * @param initializationState wallet initialization status of type
    *          {@link WalletInitializationState}
    */
-  public void setInitializationStatus(String address, WalletInitializationState initializationState);
+  void setInitializationStatus(String address, WalletInitializationState initializationState);
 
   /**
    * Creates admin account wallet in server side
@@ -219,8 +222,11 @@ public interface WalletAccountService {
    * @throws IllegalAccessException if current user is not allowed to create
    *           admin wallet account
    */
-  public void createAdminAccount(String privateKey, String currentUser) throws IllegalAccessException;
+  void createAdminAccount(String privateKey, String currentUser) throws IllegalAccessException;
 
+  /**
+   * Retrieves admin account password from configuration
+   */
   String getAdminAccountPassword();
 
 }

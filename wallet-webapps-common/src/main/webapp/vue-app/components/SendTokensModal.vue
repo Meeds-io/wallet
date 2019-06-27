@@ -10,39 +10,22 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <v-bottom-nav
-      v-if="useNavigation"
+    <v-btn
       slot="activator"
       :disabled="disabled"
-      :value="true"
-      color="white"
-      class="elevation-0 buttomNavigation">
-      <v-btn
-        :disabled="disabled"
-        flat
-        value="send">
-        <span>
-          Send tokens
-        </span>
-        <v-icon>
-          send
-        </v-icon>
-      </v-btn>
-    </v-bottom-nav>
-    <button
-      v-else-if="!noButton"
-      slot="activator"
-      :disabled="disabled"
-      class="btn btn-primary mt-1 mb-1">
-      Send tokens
-    </button>
+      class="btn btn-primary">
+      <v-icon color="white" class="mr-1">
+        send
+      </v-icon>
+      Send
+    </v-btn>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Send Tokens
+            Send funds
           </span>
       </div>
       <send-tokens-form
@@ -60,7 +43,7 @@
 <script>
 import SendTokensForm from './SendTokensForm.vue';
 
-import {setDraggable} from '../js/WalletUtils.js';
+import {setDraggable, checkFundRequestStatus} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -79,19 +62,7 @@ export default {
         return {};
       },
     },
-    noButton: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    useNavigation: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    isReadonly: {
+    isReadOnly: {
       type: Boolean,
       default: function() {
         return false;
@@ -101,12 +72,6 @@ export default {
       type: Boolean,
       default: function() {
         return false;
-      },
-    },
-    contract: {
-      type: Object,
-      default: function() {
-        return {};
       },
     },
   },
@@ -123,7 +88,7 @@ export default {
       return this.contractDetails && this.contractDetails.etherBalance;
     },
     disabled() {
-      return this.isReadonly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
+      return this.isReadOnly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
   watch: {
@@ -140,6 +105,30 @@ export default {
         this.$refs.sendTokensForm.init();
       } else {
         this.$emit('close');
+      }
+    },
+  },
+  methods: {
+    prepareSendForm(receiver, receiverType, amount, notificationId, keepDialogOpen) {
+      if (!this.contractDetails) {
+        console.debug('prepareSendForm error - no accounts found');
+        return;
+      }
+
+      if (receiver && receiverType && notificationId) {
+        checkFundRequestStatus(notificationId).then((sent) => {
+          this.dialog = !sent;
+          return this.$nextTick(() => {
+            if (receiver) {
+              this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
+              this.$refs.sendTokensForm.amount = Number(amount);
+              this.$refs.sendTokensForm.notificationId = notificationId;
+            }
+          });
+        });
+      } else {
+        this.dialog = true;
+        this.$refs.sendTokensForm.init();
       }
     },
   },

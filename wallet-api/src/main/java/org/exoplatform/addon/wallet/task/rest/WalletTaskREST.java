@@ -11,18 +11,18 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.exoplatform.addon.wallet.task.model.WalletAdminTask;
+import org.exoplatform.addon.wallet.model.task.WalletAdminTask;
 import org.exoplatform.addon.wallet.task.service.WalletTaskService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.services.security.ConversationState;
 
-/**
- * This class provide a REST endpoint to manage wallet admin tasks
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/task")
 @RolesAllowed("users")
+@Api(value = "/wallet/api/task", description = "Manage wallet administration tasks") // NOSONAR
 public class WalletTaskREST implements ResourceContainer {
   private static final Log  LOG = ExoLogger.getLogger(WalletTaskREST.class);
 
@@ -32,13 +32,15 @@ public class WalletTaskREST implements ResourceContainer {
     this.walletTaskService = walletTaskService;
   }
 
-  /**
-   * @return list of wallet admin tasks in JSON format
-   */
   @GET
   @Path("list")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "users" })
+  @RolesAllowed("users")
+  @ApiOperation(value = "Get list of wallet administration tasks assigned to a user", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns list of wallet admin task objects")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
   public Response listTasks() {
     ConversationState currentState = ConversationState.getCurrent();
     if (currentState == null || currentState.getIdentity() == null || currentState.getIdentity().getUserId() == null
@@ -49,7 +51,7 @@ public class WalletTaskREST implements ResourceContainer {
       Set<WalletAdminTask> tasks = walletTaskService.listTasks(currentState.getIdentity().getUserId());
       return Response.ok(tasks).build();
     } catch (Exception e) {
-      LOG.warn("Error getting listing tasks", e);
+      LOG.error("Error getting listing tasks", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());
@@ -60,16 +62,15 @@ public class WalletTaskREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Marks a task identified by its technical id as completed
-   * @param taskId technical wallet task id
-   * @return HTTP Response corresponding to the operation status
-   */
   @GET
   @Path("markCompleted")
-  @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding" })
-  public Response markCompleted(@QueryParam("taskId") long taskId) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Marks a task identified by its technical id as completed", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns empty object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response markCompleted(@ApiParam(value = "Task technical id", required = true) @QueryParam("taskId") long taskId) {
     try {
       walletTaskService.markCompleted(taskId);
       return Response.ok().build();

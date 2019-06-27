@@ -35,7 +35,7 @@
           <v-divider />
           <v-list-tile v-for="reward in rewards" :key="reward.pluginId">
             <v-list-tile-content class="pl-3">{{ reward.points }} {{ reward.pluginId }} points rewarded:</v-list-tile-content>
-            <v-list-tile-content class="align-end">{{ toFixed(reward.amount) }} {{ symbol }}</v-list-tile-content>
+            <v-list-tile-content class="align-end">{{ walletUtils.toFixed(reward.amount) }} {{ symbol }}</v-list-tile-content>
           </v-list-tile>
         </template>
         <div v-else>

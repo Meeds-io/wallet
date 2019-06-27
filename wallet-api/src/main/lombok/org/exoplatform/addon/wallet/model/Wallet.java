@@ -4,11 +4,13 @@ import java.io.Serializable;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode.Exclude;
+import lombok.ToString;
 
 @Data
+@ToString
 public class Wallet implements Serializable, Cloneable {
 
-  private static final long serialVersionUID = 8011288624609310945L;
+  private static final long serialVersionUID     = 8011288624609310945L;
 
   // wallet user/space Remote ID
   private String            id;
@@ -31,9 +33,6 @@ public class Wallet implements Serializable, Cloneable {
   private String            address;
 
   @Exclude
-  private boolean           isSpaceAdministrator;
-
-  @Exclude
   private boolean           isEnabled;
 
   @Exclude
@@ -46,13 +45,19 @@ public class Wallet implements Serializable, Cloneable {
   private boolean           isDeletedUser;
 
   @Exclude
-  private boolean           hasKeyOnServerSide;
-
-  @Exclude
   private String            avatar;
 
   @Exclude
+  @ToString.Exclude
   private String            passPhrase;
+
+  @Exclude
+  @ToString.Exclude
+  private boolean           isSpaceAdministrator = false;
+
+  @Exclude
+  @ToString.Exclude
+  private boolean           hasPrivateKey        = false;
 
   @Override
   public Wallet clone() { // NOSONAR

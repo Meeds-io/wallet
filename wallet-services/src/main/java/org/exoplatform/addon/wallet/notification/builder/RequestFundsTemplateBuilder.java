@@ -53,6 +53,7 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
                                     TemplateContext.newChannelInstance(this.templateProvider.getChannelKey(), pluginId, language);
 
     String amount = notification.getValueOwnerParameter(AMOUNT);
+    amount = formatNumber(amount, language);
     String type = notification.getValueOwnerParameter(ACCOUNT_TYPE);
     String avatar = notification.getValueOwnerParameter(AVATAR);
     String receiver = notification.getValueOwnerParameter(RECEIVER);
@@ -102,6 +103,7 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
       }
       return messageInfo.body(body).end();
     } catch (Exception e) {
+      // Exception gets swallowed by upper services, thus log it here
       LOG.warn("An error occurred while building notification message", e);
       throw e;
     } finally {

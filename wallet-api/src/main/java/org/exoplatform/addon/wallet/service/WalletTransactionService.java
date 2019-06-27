@@ -1,28 +1,30 @@
 package org.exoplatform.addon.wallet.service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 
+/**
+ * Manage stored transaction details in eXo internal datasource
+ */
 public interface WalletTransactionService {
 
   /**
-   * @param networkId blockchain network id
    * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingTransactions(long networkId);
+  List<TransactionDetail> getPendingTransactions();
 
   /**
-   * @param networkId blockchain network id
    * @return transactions hashes that are marked as pensing in internal database
    */
-  public Set<String> getPendingTransactionHashes(long networkId);
+  Set<String> getPendingTransactionHashes();
 
   /**
-   * @param networkId blockchain network id
    * @param address wallet address
    * @param contractAddress contract address to use to filter transactions
+   * @param contractMethodName the contract method name to use to filter on
+   *          transactions
    * @param hash the transaction hash to include in resulted transactions
    * @param limit limit size of returned transactions unless the hash parameter
    *          is not null, in that case, continue searching in transactions list
@@ -34,24 +36,36 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user isn't allowed to access
    *           wallet transactions
    */
-  public List<TransactionDetail> getTransactions(long networkId,
-                                                 String address,
-                                                 String contractAddress,
-                                                 String hash,
-                                                 int limit,
-                                                 boolean onlyPending,
-                                                 boolean administration,
-                                                 String currentUser) throws IllegalAccessException;
+  List<TransactionDetail> getTransactions(String address,
+                                          String contractAddress,
+                                          String contractMethodName,
+                                          String hash,
+                                          int limit,
+                                          boolean onlyPending,
+                                          boolean administration,
+                                          String currentUser) throws IllegalAccessException;
+
+  /**
+   * Retrives the Transaction statistics of a user on a designated contract by
+   * period of time
+   * 
+   * @param address
+   * @param periodicity
+   * @param locale
+   * @return
+   */
+  TransactionStatistics getTransactionStatistics(String address,
+                                                 String periodicity,
+                                                 Locale locale);
 
   /**
    * @param hash transaction hash
    * @return the transaction detail corresponding to the hash parameter,
    *         retrieved from internal database
    */
-  public TransactionDetail getTransactionByHash(String hash);
+  TransactionDetail getTransactionByHash(String hash);
 
   /**
-   * @param networkId blockchain network id
    * @param address wallet address
    * @param currentUser user accessing last pending transaction of wallet
    * @return last transaction marked as pending in internal database
@@ -59,9 +73,8 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user is not an admin and is
    *           not the owner of the wallet
    */
-  public TransactionDetail getAddressLastPendingTransactionSent(long networkId,
-                                                                String address,
-                                                                String currentUser) throws IllegalAccessException;
+  TransactionDetail getAddressLastPendingTransactionSent(String address,
+                                                         String currentUser) throws IllegalAccessException;
 
   /**
    * Save transaction details in database
@@ -82,19 +95,19 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if current user is not allowed to save
    *           transaction to sender and receiver wallet
    */
-  public void saveTransactionDetail(TransactionDetail transactionDetail,
-                                    String currentUser,
-                                    boolean broadcastMinedTransaction) throws IllegalAccessException;
+  void saveTransactionDetail(TransactionDetail transactionDetail,
+                             String currentUser,
+                             boolean broadcastMinedTransaction) throws IllegalAccessException;
 
   /**
    * @return watched transactions count treated since the server startup
    */
-  public long getWatchedTreatedTransactionsCount();
+  long getWatchedTreatedTransactionsCount();
 
   /**
    * @return max days to wait until marking a non existing transaction on
    *         blockchain as failed
    */
-  public long getPendingTransactionMaxDays();
+  long getPendingTransactionMaxDays();
 
 }

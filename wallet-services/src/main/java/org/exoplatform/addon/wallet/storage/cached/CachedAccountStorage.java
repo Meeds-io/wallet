@@ -6,14 +6,14 @@ import org.exoplatform.addon.wallet.dao.WalletAccountDAO;
 import org.exoplatform.addon.wallet.dao.WalletPrivateKeyDAO;
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.WalletCacheKey;
-import org.exoplatform.addon.wallet.storage.AccountStorage;
+import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.commons.cache.future.Loader;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.web.security.codec.CodecInitializer;
 
-public class CachedAccountStorage extends AccountStorage {
+public class CachedAccountStorage extends WalletStorage {
 
   private FutureExoCache<WalletCacheKey, Wallet, Object> walletFutureCache = null;
 

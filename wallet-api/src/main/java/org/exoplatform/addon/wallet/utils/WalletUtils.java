@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.*;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
@@ -37,10 +42,7 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.organization.Group;
-import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.services.security.*;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.service.LinkProvider;
@@ -65,6 +67,8 @@ public class WalletUtils {
       'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1',
       '2', '3', '4', '5', '6', '7', '8', '9' };
 
+  public static final int                             ETHER_TO_WEI_DECIMALS                 = 18;
+
   public static final JsonParser                      JSON_PARSER                           = new JsonParserImpl();
 
   public static final JsonGenerator                   JSON_GENERATOR                        = new JsonGeneratorImpl();
@@ -72,38 +76,35 @@ public class WalletUtils {
   public static final String                          EMPTY_HASH                            =
                                                                  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-  public static final String                          DEFAULT_NETWORK_ID                    = "defaultNetworkId";
+  public static final String                          NETWORK_ID                            = "networkId";
 
-  public static final String                          DEFAULT_NETWORK_URL                   = "defaultNetworkURL";
+  public static final String                          NETWORK_URL                           = "networkURL";
 
-  public static final String                          DEFAULT_NETWORK_WS_URL                = "defaultNetworkWSURL";
+  public static final String                          NETWORK_WS_URL                        = "networkWSURL";
 
-  public static final String                          DEFAULT_ACCESS_PERMISSION             = "defaultAccessPermission";
+  public static final String                          ACCESS_PERMISSION                     = "accessPermission";
 
-  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME            =
-                                                                                 "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
+  public static final String                          TOKEN_ADDRESS                         = "tokenAddress";
 
-  public static final String                          DEFAULT_GAS                           = "defaultGas";
+  public static final String                          GAS_LIMIT                             = "gasLimit";
 
-  public static final String                          MIN_GAS_PRICE                         = "minGasPrice";
+  public static final String                          MIN_GAS_PRICE                         = "cheapGasPrice";
 
   public static final String                          NORMAL_GAS_PRICE                      = "normalGasPrice";
 
-  public static final String                          MAX_GAS_PRICE                         = "maxGasPrice";
+  public static final String                          MAX_GAS_PRICE                         = "fastGasPrice";
 
-  public static final String                          DEFAULT_CONTRACTS_ADDRESSES           = "defaultContractAddresses";
+  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME            = "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
 
   public static final String                          SCOPE_NAME                            = "ADDONS_ETHEREUM_WALLET";
 
-  public static final String                          GLOBAL_SETTINGS_KEY_NAME              = "GLOBAL_SETTINGS";
+  public static final String                          INITIAL_FUNDS_KEY_NAME                = "INITIAL_FUNDS";
 
   public static final String                          SETTINGS_KEY_NAME                     = "ADDONS_ETHEREUM_WALLET_SETTINGS";
 
   public static final Context                         WALLET_CONTEXT                        = Context.GLOBAL;
 
   public static final Scope                           WALLET_SCOPE                          = Scope.APPLICATION.id(SCOPE_NAME);
-
-  public static final String                          WALLET_DEFAULT_CONTRACTS_NAME         = "WALLET_DEFAULT_CONTRACTS";
 
   public static final String                          WALLET_USER_TRANSACTION_NAME          = "WALLET_USER_TRANSACTION";
 
@@ -115,14 +116,6 @@ public class WalletUtils {
 
   public static final String                          BIN_PATH_PARAMETER                    = "contract.bin.path";
 
-  public static final int                             GLOBAL_DATA_VERSION                   = 6;
-
-  public static final int                             USER_DATA_VERSION                     = 1;
-
-  public static final int                             DEFAULT_GAS_UPGRADE_VERSION           = 1;
-
-  public static final int                             DEFAULT_GAS_PRICE_UPGRADE_VERSION     = 1;
-
   public static final String                          ADMINISTRATORS_GROUP                  = "/platform/administrators";
 
   public static final String                          REWARDINGS_GROUP                      = "/platform/rewarding";
@@ -130,9 +123,6 @@ public class WalletUtils {
   public static final String                          WALLET_ADMIN_REMOTE_ID                = "admin";
 
   public static final String                          PRINCIPAL_CONTRACT_ADMIN_NAME         = "Admin";
-
-  public static final String                          GLOAL_SETTINGS_CHANGED_EVENT          =
-                                                                                   "exo.addon.wallet.settings.changed";
 
   public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT          =
                                                                                    "exo.addon.wallet.addressAssociation.new";
@@ -276,7 +266,8 @@ public class WalletUtils {
         return getPermanentLink(space);
       }
     } catch (Exception e) {
-      LOG.error("Error getting profile link of {} {}", walletType, remoteId, e);
+      // Not blocker for processing contents
+      LOG.warn("Error getting profile link of {} {}", walletType, remoteId, e);
     }
     return StringUtils.isBlank(wallet.getName()) ? wallet.getAddress() : wallet.getName();
   }
@@ -372,33 +363,27 @@ public class WalletUtils {
       throw new IllegalArgumentException("Username is mandatory");
     }
 
-    if (permissionExpression.contains(":")) {
-      throw new UnsupportedOperationException("Permission check with role/membershipType isn't implemented ");
-    } else if (permissionExpression.contains("/")) {
-      org.exoplatform.services.security.Identity identity = CommonsUtils.getService(IdentityRegistry.class).getIdentity(username);
-      if (identity != null) {
-        return identity.isMemberOf(permissionExpression);
-      }
-
-      Collection<Group> groupsOfUser;
+    org.exoplatform.services.security.Identity identity = CommonsUtils.getService(IdentityRegistry.class).getIdentity(username);
+    if (identity == null) {
       try {
-        groupsOfUser = CommonsUtils.getService(OrganizationService.class).getGroupHandler().findGroupsOfUser(username);
+        identity = CommonsUtils.getService(Authenticator.class).createIdentity(username);
       } catch (Exception e) {
-        LOG.warn("Error getting groups of user " + username);
-        return false;
+        LOG.warn("Error getting memberships of user {}", username, e);
       }
-      if (groupsOfUser == null || groupsOfUser.isEmpty()) {
-        return false;
-      }
-      for (Group group : groupsOfUser) {
-        if (permissionExpression.equals(group.getId())) {
-          return true;
-        }
-      }
+    }
+    if (identity == null) {
       return false;
+    }
+    MembershipEntry membership = null;
+    if (permissionExpression.contains(":")) {
+      String[] permissionExpressionParts = permissionExpression.split(":");
+      membership = new MembershipEntry(permissionExpressionParts[1], permissionExpressionParts[0]);
+    } else if (permissionExpression.contains("/")) {
+      membership = new MembershipEntry(permissionExpression);
     } else {
       return StringUtils.equals(username, permissionExpression);
     }
+    return identity.isMemberOf(membership);
   }
 
   public static String getWalletLink(String receiverType, String receiverId) {
@@ -411,7 +396,7 @@ public class WalletUtils {
       } else {
         String groupId = space.getGroupId().split("/")[2];
         return CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), groupId)
-            + "/EthereumSpaceWallet";
+            + "/SpaceWallet";
       }
     }
   }
@@ -455,7 +440,7 @@ public class WalletUtils {
     try {
       return StringUtils.isBlank(content) ? "" : URLEncoder.encode(content.trim(), "UTF-8");
     } catch (Exception e) {
-      return content;
+      throw new IllegalStateException("Error encoding content", e);
     }
   }
 
@@ -463,7 +448,7 @@ public class WalletUtils {
     try {
       return StringUtils.isBlank(content) ? "" : URLDecoder.decode(content.trim(), "UTF-8");
     } catch (Exception e) {
-      return content;
+      throw new IllegalStateException("Error decoding content", e);
     }
   }
 
@@ -499,7 +484,6 @@ public class WalletUtils {
   public static boolean isUserSpaceMember(String spaceId, String accesssor) {
     Space space = getSpace(spaceId);
     if (space == null) {
-      LOG.warn("Space not found with id '{}'", spaceId);
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
@@ -513,8 +497,7 @@ public class WalletUtils {
                                                 boolean throwException) throws IllegalAccessException {
     Space space = getSpace(spaceId);
     if (space == null) {
-      LOG.warn("Space not found with id '{}'", spaceId);
-      throw new IllegalStateException();
+      throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
     if (!spaceService.isManager(space, modifier) && !spaceService.isSuperManager(modifier)) {
@@ -575,20 +558,27 @@ public class WalletUtils {
       return;
     }
     wallet.setPassPhrase(null);
-    wallet.setHasKeyOnServerSide(false);
   }
 
-  public static final <T> T fromJsonString(String value, Class<T> resultClass) throws JsonException {
-    if (StringUtils.isBlank(value)) {
-      return null;
+  public static final <T> T fromJsonString(String value, Class<T> resultClass) {
+    try {
+      if (StringUtils.isBlank(value)) {
+        return null;
+      }
+      JsonDefaultHandler jsonDefaultHandler = new JsonDefaultHandler();
+      JSON_PARSER.parse(new ByteArrayInputStream(value.getBytes()), jsonDefaultHandler);
+      return ObjectBuilder.createObject(resultClass, jsonDefaultHandler.getJsonObject());
+    } catch (JsonException e) {
+      throw new IllegalStateException("Error creating object from string : " + value, e);
     }
-    JsonDefaultHandler jsonDefaultHandler = new JsonDefaultHandler();
-    JSON_PARSER.parse(new ByteArrayInputStream(value.getBytes()), jsonDefaultHandler);
-    return ObjectBuilder.createObject(resultClass, jsonDefaultHandler.getJsonObject());
   }
 
-  public static final String toJsonString(Object object) throws JsonException {
-    return JSON_GENERATOR.createJsonObject(object).toString();
+  public static final String toJsonString(Object object) {
+    try {
+      return JSON_GENERATOR.createJsonObject(object).toString();
+    } catch (JsonException e) {
+      throw new IllegalStateException("Error parsing object to string " + object, e);
+    }
   }
 
   public static final BigInteger convertToDecimals(double amount, int decimals) {
@@ -597,6 +587,45 @@ public class WalletUtils {
 
   public static final double convertFromDecimals(BigInteger amount, int decimals) {
     return BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
+  }
+
+  public static final GlobalSettings getSettings() {
+    return getWalletService().getSettings();
+  }
+
+  public static final String getContractAddress() {
+    GlobalSettings settings = getSettings();
+    if (settings == null || StringUtils.isBlank(settings.getContractAddress())) {
+      throw new IllegalStateException("No principal contract address is configured");
+    }
+    return settings.getContractAddress();
+  }
+
+  public static final long getNetworkId() {
+    GlobalSettings settings = getSettings();
+    return settings == null ? 0 : settings.getNetwork().getId();
+  }
+
+  public static final String formatNumber(Object amount, String lang) {
+    if (StringUtils.isBlank(lang)) {
+      lang = Locale.getDefault().getLanguage();
+    }
+    NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale(lang));
+    numberFormat.setMaximumFractionDigits(3);
+    return numberFormat.format(Double.parseDouble(amount.toString()));
+  }
+
+  public static final boolean hasKnownWalletInTransaction(TransactionDetail transactionDetail) {
+    return !isWalletEmpty(transactionDetail.getToWallet()) || !isWalletEmpty(transactionDetail.getFromWallet())
+        || !isWalletEmpty(transactionDetail.getByWallet());
+  }
+
+  public static final boolean isWalletEmpty(Wallet wallet) {
+    return wallet == null || StringUtils.isBlank(wallet.getAddress());
+  }
+
+  private static final WalletService getWalletService() {
+    return CommonsUtils.getService(WalletService.class);
   }
 
 }

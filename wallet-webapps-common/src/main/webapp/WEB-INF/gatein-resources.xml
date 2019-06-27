@@ -129,4 +129,31 @@
     </depends>
   </module>
 
+  <module>
+    <name>vueChart</name>
+    <as>VueChart</as>
+    <script>
+      <minify>false</minify>
+      <adapter>
+        (function() {
+          <include>/js/lib/vue-chartjs.min.js</include>
+          return VueChartJs;
+        })();
+      </adapter>
+    </script>
+    <depends>
+      <module>chart</module>
+      <as>Chart</as>
+    </depends>
+  </module>
+
+  <module>
+    <name>chart</name>
+    <as>Chart</as>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/Chart.bundle.min.js</path>
+    </script>
+  </module>
+
 </gatein-resources>

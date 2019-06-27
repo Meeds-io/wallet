@@ -2,77 +2,130 @@ package org.exoplatform.addon.wallet.service;
 
 import java.math.BigInteger;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 
+/**
+ * Communicates with blockchain to send transactions and retrieve information
+ * using admin wallet
+ */
 public interface WalletTokenAdminService {
 
   /**
-   * Creates admin account wallet in server side
+   * Generates admin account wallet and store it internally in eXo Server
+   */
+  void createAdminAccount();
+
+  /**
+   * Creates admin account wallet using provided private key and store it
+   * internally in eXo Server
    * 
    * @param privateKey admin account wallet private key
-   * @param currentUser current user creating wallet
+   * @param issuerUsername current user creating wallet
    * @throws IllegalAccessException if current user is not allowed to create
    *           admin wallet account
    */
-  public void createAdminAccount(String privateKey, String currentUser) throws IllegalAccessException;
+  void createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
 
   /**
    * @return Admin wallet object
    */
-  public Wallet getAdminWallet();
+  Wallet getAdminWallet();
 
   /**
    * @return Admin wallet address
    */
-  public String getAdminWalletAddress();
+  String getAdminWalletAddress();
 
-  BigInteger getEtherBalanceOf(String address) throws Exception;// NOSONAR
-
-  TransactionDetail reward(String receiver,
-                           double tokenAmount,
-                           double rewardAmount,
-                           String label,
-                           String message,
-                           String username) throws Exception;// NOSONAR
-
+  /**
+   * Send rewarded token amounts (on blockchain) to a receiver wallet address
+   * using 'Admin' wallet. The amount sent could be different from rewarded
+   * amount. A label and a message are associated to the transaction. Those
+   * properties aren't sent on blockchain, but stored in database. The
+   * transaction issuer will be stored in transaction details stored internally
+   * in eXo server.
+   * 
+   * @param transactionDetail
+   * @param issuerUsername
+   * @return
+   * @throws Exception
+   */
   TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
-  TransactionDetail transfer(String receiver,
-                             double tokenAmount,
-                             String label,
-                             String message,
-                             String issuerUsername,
-                             boolean enableChecksBeforeSending) throws Exception;// NOSONAR
-
-  TransactionDetail transfer(TransactionDetail transactionDetail,
-                             String issuerUsername,
-                             boolean enableChecksBeforeSending) throws Exception;// NOSONAR
-
-  TransactionDetail initialize(String receiver, String issuerUsername) throws Exception;// NOSONAR
-
+  /**
+   * Initializes (on blockchain) a receiver wallet address using 'Admin' wallet
+   * by using funds transmitted in transaction detail. The transaction issuer
+   * will be stored in transaction details inside eXo server only.
+   * 
+   * @param transactionDetail
+   * @param issuerUsername
+   * @return
+   * @throws Exception
+   */
   TransactionDetail initialize(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
-  TransactionDetail disapproveAccount(String receiver, String issuerUsername) throws Exception;// NOSONAR
-
-  TransactionDetail disapproveAccount(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
-
-  TransactionDetail approveAccount(String receiver, String issuerUsername) throws Exception;// NOSONAR
-
-  TransactionDetail approveAccount(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
-
+  /**
+   * Get token balance of a wallet address (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
   BigInteger balanceOf(String address) throws Exception;// NOSONAR
 
+  /**
+   * Get ether balance of a wallet address (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
+  BigInteger getEtherBalanceOf(String address) throws Exception;// NOSONAR
+
+  /**
+   * Checks whether the wallet is initialized or not (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
   boolean isInitializedAccount(String address) throws Exception;// NOSONAR
 
+  /**
+   * Checks whether a wallet address is an admin on token with at least level 1
+   * (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
   boolean isAdminAccount(String address) throws Exception;// NOSONAR
 
+  /**
+   * Get admin level of a wallet address from token (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
   int getAdminLevel(String address) throws Exception;// NOSONAR
 
+  /**
+   * Checks if a wallet address is approved on token (on blockchain)
+   * 
+   * @param address
+   * @return
+   * @throws Exception
+   */
   boolean isApprovedAccount(String address) throws Exception;// NOSONAR
 
-  String getContractAddress();
-
-  void reinit();
-
+  /**
+   * Retrieves contract details from blockchain, like: - Sell price - Owner -
+   * Symbol - Name ...
+   * 
+   * @param contractAddress
+   * @return
+   */
+  ContractDetail getContractDetailFromBlockchain(String contractAddress);
 }

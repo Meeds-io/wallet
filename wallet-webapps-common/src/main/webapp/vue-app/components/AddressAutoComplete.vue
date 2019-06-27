@@ -150,6 +150,12 @@ export default {
         return [];
       },
     },
+    ignoreCurrentUser: {
+      type: Boolean,
+      default: function() {
+        return false;
+      },
+    },
   },
   data() {
     return {
@@ -262,12 +268,14 @@ export default {
     },
   },
   created() {
-    searchWalletByTypeAndId(eXo.env.portal.userName, 'user').then((item) => {
-      if (item) {
-        item.id_type = `${item.type}_${item.id}`;
-        this.currentUserItem = item;
-      }
-    });
+    if (!this.ignoreCurrentUser) {
+      searchWalletByTypeAndId(eXo.env.portal.userName, 'user').then((item) => {
+        if (item) {
+          item.id_type = `${item.type}_${item.id}`;
+          this.currentUserItem = item;
+        }
+      });
+    }
   },
   methods: {
     focus() {

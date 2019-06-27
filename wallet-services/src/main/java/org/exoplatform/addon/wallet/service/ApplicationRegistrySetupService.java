@@ -20,6 +20,7 @@ import java.util.*;
 
 import org.exoplatform.application.registry.*;
 import org.exoplatform.commons.cluster.StartableClusterAware;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -27,13 +28,18 @@ import org.exoplatform.portal.config.model.ApplicationType;
 
 /**
  * This Service installs application registry category and application for
- * EthereumSpaceWallet portlet if the application registry was already populated
+ * SpaceWallet portlet if the application registry was already populated
  */
 public class ApplicationRegistrySetupService implements StartableClusterAware {
+  private static final String        SPACE_WALLET_APP_ID       = "wallet/SpaceWallet";
 
-  private static final List<String>  EVERYONE_PERMISSION_LIST = Collections.singletonList("Everyone");
+  private static final String        SPACE_WALLET_PORTLET_NAME = "SpaceWallet";
 
-  private static final String        WALLET_CATEGORY_NAME     = "EthereumWallet";
+  private static final List<String>  EVERYONE_PERMISSION_LIST  = Collections.singletonList("Everyone");
+
+  private static final String        OLD_WALLET_CATEGORY_NAME  = "EthereumWallet";
+
+  private static final String        WALLET_CATEGORY_NAME      = "Wallet";
 
   private ExoContainer               container;
 
@@ -41,34 +47,39 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
 
   private boolean                    isDone;
 
-  public ApplicationRegistrySetupService(PortalContainer container, ApplicationRegistryService applicationRegistryService) {
+  public ApplicationRegistrySetupService(PortalContainer container) {
     this.container = container;
-    this.applicationRegistryService = applicationRegistryService;
   }
 
   @Override
   public void start() {
     RequestLifeCycle.begin(container);
     try {
-      ApplicationCategory applicationCategory = applicationRegistryService.getApplicationCategory(WALLET_CATEGORY_NAME);
-      if (applicationCategory == null) {
-        applicationCategory = new ApplicationCategory();
-        applicationCategory.setAccessPermissions(EVERYONE_PERMISSION_LIST);
-        applicationCategory.setName(WALLET_CATEGORY_NAME);
-        applicationCategory.setDescription("Ethereum Wallet");
-        applicationCategory.setDisplayName("Ethereum Wallet");
+      ApplicationCategory oldCategory = getApplicationRegistryService().getApplicationCategory(OLD_WALLET_CATEGORY_NAME);
+      if (oldCategory != null) {
+        getApplicationRegistryService().remove(oldCategory);
+      }
+
+      ApplicationCategory walletCategory = getApplicationRegistryService().getApplicationCategory(WALLET_CATEGORY_NAME);
+      if (walletCategory == null) {
+        walletCategory = new ApplicationCategory();
+        walletCategory.setAccessPermissions(EVERYONE_PERMISSION_LIST);
+        walletCategory.setName(WALLET_CATEGORY_NAME);
+        walletCategory.setDescription("Wallet applications");
+        walletCategory.setDisplayName(WALLET_CATEGORY_NAME);
+
         Application application = new Application();
-        applicationCategory.setApplications(Collections.singletonList(application));
+        walletCategory.setApplications(Collections.singletonList(application));
         application.setAccessPermissions(new ArrayList<String>(EVERYONE_PERMISSION_LIST));
-        application.setDisplayName("Ethereum Space Wallet");
-        application.setDescription("Ethereum Space Wallet");
-        application.setApplicationName("EthereumSpaceWallet");
+        application.setDisplayName("Space Wallet");
+        application.setDescription("Space Wallet");
+        application.setApplicationName(SPACE_WALLET_PORTLET_NAME);
         application.setCategoryName(WALLET_CATEGORY_NAME);
-        application.setContentId("exo-ethereum-wallet/EthereumSpaceWallet");
+        application.setContentId(SPACE_WALLET_APP_ID);
         application.setType(ApplicationType.PORTLET);
 
-        applicationRegistryService.save(applicationCategory);
-        applicationRegistryService.save(applicationCategory, application);
+        getApplicationRegistryService().save(walletCategory);
+        getApplicationRegistryService().save(walletCategory, application);
       }
       this.isDone = true;
     } finally {
@@ -84,5 +95,12 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
   @Override
   public boolean isDone() {
     return isDone;
+  }
+
+  public ApplicationRegistryService getApplicationRegistryService() {
+    if (applicationRegistryService == null) {
+      applicationRegistryService = CommonsUtils.getService(ApplicationRegistryService.class);
+    }
+    return applicationRegistryService;
   }
 }

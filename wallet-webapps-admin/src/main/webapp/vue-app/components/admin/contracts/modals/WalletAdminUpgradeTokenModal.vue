@@ -30,7 +30,7 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          Upgrade Token to version 2
+          Upgrade Token to version 3
         </span>
       </div>
 
@@ -53,7 +53,7 @@
         </v-card-title>
         <v-card-title v-show="loading && step" class="pb-0">
           <v-spacer />
-          <div>Step {{ step }} / 4</div>
+          <div>Step {{ step }} / 3</div>
           <v-spacer />
         </v-card-title>
         <v-card-text class="pt-0">
@@ -78,7 +78,7 @@
               class="mt-3"
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-            <gas-price-choice :estimated-fee="`${toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
+            <gas-price-choice :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -112,6 +112,12 @@ export default {
         return null;
       },
     },
+    implementationVersion: {
+      type: Number,
+      default: function() {
+        return 0;
+      },
+    },
     contractDetails: {
       type: Object,
       default: function() {
@@ -126,10 +132,10 @@ export default {
       storedPassword: false,
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       fiatSymbol: null,
       gasEstimation: null,
       gasPrice: 0,
+      gasLimit: 4700000,
       step: 0,
       warning: null,
       error: null,
@@ -168,17 +174,15 @@ export default {
       this.error = null;
       this.gasEstimation = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
       this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(this.estimateTransactionFee);
     },
     upgradeToken(estimateGas) {
       const currentUpgradeState = this.getUpgradeState();
       let ertTokenV2Address = (estimateGas && '0x1111111111111111111111111111111111111111') || (currentUpgradeState && currentUpgradeState.ertTokenV2Address);
-      let ertTokenDataV2Address = (estimateGas && '0x1111111111111111111111111111111111111111') || (currentUpgradeState && currentUpgradeState.ertTokenDataV2Address);
       this.step = estimateGas ? 0 : (currentUpgradeState && currentUpgradeState.step) || 1;
 
       let estimatedGas = 0;
@@ -189,7 +193,7 @@ export default {
           if (estimateGas) {
             return this.tokenUtils.estimateContractDeploymentGas(ertTokenV2Instance);
           } else if (this.step < 2) {
-            return this.tokenUtils.deployContract(ertTokenV2Instance, this.walletAddress, 4700000, this.gasPrice);
+            return this.tokenUtils.deployContract(ertTokenV2Instance, this.walletAddress, this.gasLimit, this.gasPrice);
           }
         })
         .then((data, error) => {
@@ -210,76 +214,19 @@ export default {
             }
           }
         })
-        .then(() => this.tokenUtils.createNewContractInstanceByName('ERTTokenDataV2', this.contractDetails.address, ertTokenV2Address))
-        .then((ertTokenDataV2Instance) => {
-          if (estimateGas) {
-            return this.tokenUtils.estimateContractDeploymentGas(ertTokenDataV2Instance);
-          } else if (this.step < 3) {
-            this.step = 2;
-            return this.tokenUtils.deployContract(ertTokenDataV2Instance, this.walletAddress, 4700000, this.gasPrice);
-          }
-        })
-        .then((data, error) => {
-          if (error) {
-            throw error;
-          }
-
-          if (estimateGas) {
-            estimatedGas += parseInt(data * 1.1);
-          } else if (this.step < 3) {
-            if (!data || !data.options || !data.options.address) {
-              throw new Error('Cannot find address of newly deployed address');
-            } else {
-              ertTokenDataV2Address = data.options.address;
-              this.saveUpgradeState({
-                ertTokenV2Address: ertTokenV2Address,
-                ertTokenDataV2Address: ertTokenDataV2Address,
-                step: 3,
-              });
-            }
-          }
-        })
-        .then(() => this.step < 4 && this.contractDetails.contract.methods.upgradeData(2, ertTokenDataV2Address))
+        .then(() => this.contractDetails.contract.methods.upgradeImplementation(this.contractDetails.address, this.implementationVersion, ertTokenV2Address))
         .then((operation) => {
           if (estimateGas) {
             return operation.estimateGas({
               from: this.walletAddress,
-              gas: 4700000,
-              gasPrice: this.gasPrice,
-            });
-          } else if (this.step < 4) {
-            this.step = 3;
-            return operation.send({
-              from: this.walletAddress,
-              gas: 4700000,
-              gasPrice: this.gasPrice,
-            });
-          }
-        })
-        .then((gasEstimation) => {
-          if (estimateGas) {
-            estimatedGas += parseInt(gasEstimation * 1.1);
-          } else if (this.step < 4) {
-            this.saveUpgradeState({
-              ertTokenV2Address: ertTokenV2Address,
-              ertTokenDataV2Address: ertTokenDataV2Address,
-              step: 4,
-            });
-          }
-        })
-        .then(() => this.contractDetails.contract.methods.upgradeImplementation(this.contractDetails.address, 2, ertTokenV2Address))
-        .then((operation) => {
-          if (estimateGas) {
-            return operation.estimateGas({
-              from: this.walletAddress,
-              gas: 4700000,
+              gas: this.gasLimit,
               gasPrice: this.gasPrice,
             });
           } else {
-            this.step = 4;
+            this.step = 3;
             return operation.send({
               from: this.walletAddress,
-              gas: 4700000,
+              gas: this.gasLimit,
               gasPrice: this.gasPrice,
             });
           }
@@ -290,8 +237,8 @@ export default {
             this.gasEstimation = estimatedGas;
           } else {
             this.removeUpgradeState();
-            this.$emit('success', result && result.hash, this.contractDetails, 'upgrade');
-            // TODO add three trasactions in the list
+            this.$emit('success', result && result.hash, 'upgrade');
+            return this.tokenUtils.refreshContractOnServer();
           }
           return true;
         })
@@ -328,7 +275,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -338,10 +285,7 @@ export default {
         .then(upgraded => {
           if (upgraded) {
             this.dialog = false;
-
-            if (!this.useMetamask) {
-              this.walletUtils.lockBrowserWallet();
-            }
+            this.walletUtils.lockBrowserWallet();
           }
         });
     },

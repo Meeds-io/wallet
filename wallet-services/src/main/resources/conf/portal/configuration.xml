@@ -20,7 +20,7 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.storage.AccountStorage</key>
+    <key>org.exoplatform.addon.wallet.storage.WalletStorage</key>
     <type>org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage</type>
   </component>
 
@@ -83,29 +83,49 @@
     <type>org.exoplatform.addon.wallet.service.EthereumWalletService</type>
     <init-params>
       <value-param>
-        <name>defaultNetworkId</name>
+        <name>networkId</name>
         <description>Default used ethereum network ID</description>
-        <value>${exo.addon.wallet.defaultNetworkId:3}</value>
+        <value>${exo.wallet.blockchain.networkId:1}</value>
       </value-param>
       <value-param>
-        <name>defaultNetworkURL</name>
+        <name>networkURL</name>
         <description>Default used ethereum network URL</description>
-        <value>${exo.addon.wallet.defaultNetworkURL:https://ropsten.infura.io}</value>
+        <value>${exo.wallet.blockchain.network.http:https://mainnet.infura.io/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
       </value-param>
       <value-param>
-        <name>defaultNetworkWSURL</name>
+        <name>networkWSURL</name>
         <description>Default used ethereum network Websocket URL</description>
-        <value>${exo.addon.wallet.defaultNetworkWSURL:wss://ropsten.infura.io/ws}</value>
+        <value>${exo.wallet.blockchain.network.websocket:wss://mainnet.infura.io/ws/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
       </value-param>
       <value-param>
-        <name>defaultAccessPermission</name>
-        <description>Default access permission for wallet extension (only a space group id is allowed)</description>
-        <value>${exo.addon.wallet.defaultAccessPermission:}</value>
+        <name>tokenAddress</name>
+        <description>Token address to display for users</description>
+        <value>${exo.wallet.blockchain.token.address:0xc76987d43b77c45d51653b6eb110b9174acce8fb}</value>
       </value-param>
       <value-param>
-        <name>defaultGas</name>
+        <name>gasLimit</name>
+        <description>Blockchain transaction gas limit</description>
+        <value>${exo.wallet.transaction.gas.limit:150000}</value>
+      </value-param>
+      <value-param>
+        <name>cheapGasPrice</name>
         <description>Default used gas for transactions</description>
-        <value>${exo.addon.wallet.defaultGas:150000}</value>
+        <value>${exo.wallet.transaction.gas.cheapPrice:4000000000}</value>
+      </value-param>
+      <value-param>
+        <name>normalGasPrice</name>
+        <description>Default used gas for transactions</description>
+        <value>${exo.wallet.transaction.gas.normalPrice:8000000000}</value>
+      </value-param>
+      <value-param>
+        <name>fastGasPrice</name>
+        <description>Default used gas for transactions</description>
+        <value>${exo.wallet.transaction.gas.fastPrice:15000000000}</value>
+      </value-param>
+      <value-param>
+        <name>accessPermission</name>
+        <description>Default access permission for wallet extension</description>
+        <value>${exo.wallet.accessPermission:}</value>
       </value-param>
     </init-params>
   </component>
@@ -115,7 +135,7 @@
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletGlobalSettingsREST</type>
+    <type>org.exoplatform.addon.wallet.rest.WalletSettingsREST</type>
   </component>
 
   <component>
@@ -156,12 +176,6 @@
   <external-component-plugins>
     <target-component>org.exoplatform.services.listener.ListenerService</target-component>
     <component-plugin>
-      <name>exo.addon.wallet.settings.changed</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.GlobalSettingsModificationListener</type>
-      <description>To change listening network when WS Network URL changed in settings</description>
-    </component-plugin>
-    <component-plugin>
       <name>exo.addon.wallet.transaction.loaded</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.addon.wallet.listener.BlockchainTransactionProcessorListener</type>
@@ -178,12 +192,6 @@
       <set-method>addListener</set-method>
       <type>org.exoplatform.addon.wallet.listener.ModifiedWalletListener</type>
       <description>Manage wallet address modification process</description>
-    </component-plugin>
-    <component-plugin>
-      <name>exo.addon.wallet.addressAssociation.modification</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.ModifiedAdminWalletListener</type>
-      <description>Manage admin wallet modification process</description>
     </component-plugin>
     <component-plugin>
       <name>exo.addon.wallet.transaction.mined</name>

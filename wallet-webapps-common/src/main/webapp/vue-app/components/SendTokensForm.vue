@@ -21,6 +21,7 @@
           input-placeholder="Select a user, a space or an address to send to"
           autofocus
           required
+          ignore-current-user
           @item-selected="
             recipient = $event.address;
             $emit('receiver-selected', $event);
@@ -119,7 +120,7 @@ import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
 import GasPriceChoice from './GasPriceChoice.vue';
 
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
 
@@ -164,8 +165,8 @@ export default {
       transactionMessage: '',
       walletPassword: '',
       walletPasswordShow: false,
-      useMetamask: false,
       recipient: null,
+      notificationId: null,
       isApprovedRecipient: true,
       canSendToken: true,
       amount: null,
@@ -204,7 +205,7 @@ export default {
       return this.transactionFeeEther ? etherToFiat(this.transactionFeeEther) : 0;
     },
     transactionFeeToken() {
-      return !this.contractDetails || this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei);
+      return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei));
     },
   },
   watch: {
@@ -274,6 +275,7 @@ export default {
       this.showQRCodeModal = false;
       this.recipient = null;
       this.amount = null;
+      this.notificationId = null;
       this.warning = null;
       this.error = null;
       this.walletPassword = '';
@@ -282,11 +284,10 @@ export default {
       this.transactionLabel = this.defaultLabel;
       this.transactionMessage = this.defaultMessage;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.minGasPrice;
+        this.gasPrice = window.walletSettings.network.minGasPrice;
       }
-      this.useMetamask = window.walletSettings.userPreferences.useMetamask;
       this.fiatSymbol = window.walletSettings.fiatSymbol;
-      this.storedPassword = this.useMetamask || (window.walletSettings.storedPassword && window.walletSettings.browserWalletExists);
+      this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(() => {
         if (this.contractDetails && this.contractDetails.isPaused) {
           this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
@@ -310,7 +311,7 @@ export default {
             .transfer(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
             .estimateGas({
               from: this.contractDetails.contract.options.from,
-              gas: window.walletSettings.userPreferences.defaultGas,
+              gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
             })
             .then((estimatedGas) => {
@@ -327,9 +328,9 @@ export default {
       this.error = null;
       this.warning = null;
 
-      const setWalletInitialized = !this.isApprovedRecipient && Number(this.contractDetails.adminLevel) > 0; 
-
-      this.$refs.form.validate();
+      if (!this.$refs.form.validate()) {
+        return;
+      }
       if (this.contractDetails && this.contractDetails.isPaused) {
         this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
         return;
@@ -350,7 +351,7 @@ export default {
         return;
       }
 
-      const unlocked = this.useMetamask || unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
+      const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = 'Wrong password';
         return;
@@ -374,7 +375,7 @@ export default {
           .transfer(this.recipient, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
           .estimateGas({
             from: this.contractDetails.contract.options.from,
-            gas: window.walletSettings.userPreferences.defaultGas,
+            gas: window.walletSettings.network.gasLimit,
             gasPrice: this.gasPrice,
           })
           .catch((e) => {
@@ -382,8 +383,8 @@ export default {
             return 0;
           })
           .then((estimatedGas) => {
-            if (estimatedGas > window.walletSettings.userPreferences.defaultGas) {
-              this.warning = `You have set a low gas ${window.walletSettings.userPreferences.defaultGas} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+            if (estimatedGas > window.walletSettings.network.gasLimit) {
+              this.warning = `You have set a low gas ${window.walletSettings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
               return;
             }
             const sender = this.contractDetails.contract.options.from;
@@ -391,16 +392,16 @@ export default {
             const contractDetails = this.contractDetails;
             const transfer =  contractDetails.contract.methods.transfer;
 
-            return sendContractTransaction(this.useMetamask, window.walletSettings.defaultNetworkId, {
+            return sendContractTransaction({
               contractAddress: contractDetails.address,
               senderAddress: sender,
-              gas: window.walletSettings.userPreferences.defaultGas,
+              gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
               method: transfer,
               parameters: [receiver, convertTokenAmountToSend(this.amount, contractDetails.decimals).toString()],
             },
               (hash) => {
-                const gas = window.walletSettings.userPreferences.defaultGas ? window.walletSettings.userPreferences.defaultGas : 35000;
+                const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
 
                 const pendingTransaction = {
                   hash: hash,
@@ -433,9 +434,8 @@ export default {
                     this.$emit('close');
                   });
 
-                if (setWalletInitialized) {
-                  // *async* set wallet as initialized
-                  saveWalletInitializationStatus(pendingTransaction.to, 'INITIALIZED');
+                if (this.notificationId) {
+                  markFundRequestAsSent(this.notificationId);
                 }
               },
               null,
@@ -452,9 +452,7 @@ export default {
           })
           .finally(() => {
             this.loading = false;
-            if (!this.useMetamask) {
-              lockBrowserWallet();
-            }
+            lockBrowserWallet();
           });
       } catch (e) {
         console.debug('Web3 contract.transfer method - error', e);

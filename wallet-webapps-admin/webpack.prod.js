@@ -5,9 +5,7 @@ const webpackCommonConfig = require('./webpack.common.js');
 const config = merge(webpackCommonConfig, {
   mode: 'production',
   entry: {
-    walletAdminSettings: './src/main/webapp/vue-app/walletAdminSettings.js',
-    walletAdminContracts: './src/main/webapp/vue-app/walletAdminContracts.js',
-    walletAdminWallets: './src/main/webapp/vue-app/walletAdminWallets.js'
+    walletAdmin : './src/main/webapp/vue-app/walletAdmin.js'
   },
   output: {
     path: path.join(__dirname, 'target/wallet-admin/'),

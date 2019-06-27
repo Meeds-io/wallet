@@ -18,8 +18,8 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.Collection;
 
+import org.exoplatform.addon.wallet.model.reward.RewardSettings;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
-import org.exoplatform.addon.wallet.reward.model.RewardSettings;
 
 /**
  * A storage service to save/load reward transactions

@@ -36,10 +36,10 @@
           <h4>Eligible users: <strong>{{ eligibleUsersCount }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>Total budget: <strong>{{ toFixed(totalBudget) }} {{ symbol }}</strong></h4>
+          <h4>Total budget: <strong>{{ walletUtils.toFixed(totalBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>Sent tokens: <strong>{{ toFixed(sentBudget) }} {{ symbol }}</strong></h4>
+          <h4>Sent tokens: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex
           v-for="totalReward in totalRewards"
@@ -159,10 +159,10 @@
               v-if="props.item.tokensSent"
               class="grey--text text--darken-1"
               title="Amount sent">
-              {{ toFixed(props.item.tokensSent) }} {{ symbol }}
+              {{ walletUtils.toFixed(props.item.tokensSent) }} {{ symbol }}
             </span>
             <span v-else-if="props.item.tokensToSend" title="Amount to send">
-              {{ toFixed(props.item.tokensToSend) }} {{ symbol }}
+              {{ walletUtils.toFixed(props.item.tokensToSend) }} {{ symbol }}
             </span>
             <span
               v-else
@@ -391,7 +391,7 @@ export default {
         this.filteredIdentitiesList.forEach((wallet) => {
           result += wallet.tokensSent ? (wallet.tokensSent ? Number(wallet.tokensSent) : 0) : (wallet.tokensToSend && wallet.tokensToSend > 0 ? Number(wallet.tokensToSend) : 0);
         });
-        return this.toFixed(result);
+        return this.walletUtils.toFixed(result);
       } else {
         return 0;
       }

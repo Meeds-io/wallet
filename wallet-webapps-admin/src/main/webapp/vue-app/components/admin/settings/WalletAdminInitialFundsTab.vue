@@ -58,9 +58,9 @@
       </v-flex>
 
       <v-textarea
-        id="initialFundsRequestMessage"
-        v-model="initialFundsRequestMessage"
-        name="initialFundsRequestMessage"
+        id="requestMessage"
+        v-model="requestMessage"
+        name="requestMessage"
         label="Initial funds default message"
         placeholder="You can enter a default message to send with initial funds"
         class="mt-4 mb-0"
@@ -106,7 +106,7 @@ export default {
         return false;
       },
     },
-    principalContract: {
+    contractDetails: {
       type: Object,
       default: function() {
         return null;
@@ -116,6 +116,7 @@ export default {
   data() {
     return {
       fundsHolder: '',
+      fundsHolderType: 'user',
       fundsHolderOptions: [],
       fundsHolderSearchTerm: null,
       isLoadingSuggestions: false,
@@ -137,7 +138,7 @@ export default {
     };
   },
   watch: {
-    principalContract() {
+    contractDetails() {
       this.reloadInitialFunds();
     },
     fundsHolderSearchTerm() {
@@ -167,8 +168,12 @@ export default {
   },
   methods: {
     init() {
-      if (window.walletSettings.fundsHolder) {
-        this.fundsHolder = window.walletSettings.fundsHolder;
+      const initialFunds = window.walletSettings.initialFunds || {};
+      this.fundsHolder = initialFunds.fundsHolder;
+      this.fundsHolderType = initialFunds.fundsHolderType || 'user';
+      this.requestMessage = initialFunds.requestMessage;
+
+      if (this.fundsHolder) {
         this.addressRegistry.searchUsers(this.fundsHolder, true).then((items) => {
           if (items) {
             this.fundsHolderOptions = items;
@@ -177,15 +182,14 @@ export default {
           }
         });
       }
-      this.initialFundsRequestMessage = window.walletSettings.initialFundsRequestMessage;
+
       this.reloadInitialFunds();
     },
     reloadInitialFunds() {
-      if (!window.walletSettings) {
-        return [];
-      }
+      let initialFunds = window.walletSettings.initialFunds || {};
+      initialFunds = Object.keys(initialFunds.funds).map(address => {return {address: address, amount: initialFunds.funds[address]};});
 
-      const etherInitialFund = window.walletSettings.initialFunds && window.walletSettings.initialFunds.find((initialFund) => initialFund.address === 'ether');
+      const etherInitialFund = initialFunds.find((initialFund) => initialFund.address === 'ether');
       const etherAmount = (etherInitialFund && etherInitialFund.amount) || 0;
       this.initialFunds = [{
         name: 'ether',
@@ -193,12 +197,12 @@ export default {
         amount: etherAmount
       }];
 
-      if (this.principalContract && this.principalContract.value && this.principalContract.value.indexOf('0x') === 0) {
-        const tokenInitialFund = window.walletSettings.initialFunds && window.walletSettings.initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.principalContract.value.toLowerCase());
+      if (this.contractDetails && this.contractDetails.address && this.contractDetails.address.indexOf('0x') === 0) {
+        const tokenInitialFund = initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.contractDetails.address.toLowerCase());
         const tokenAmount = (tokenInitialFund && tokenInitialFund.amount) || 0;
         this.initialFunds.push({
-          name: this.principalContract.text,
-          address: this.principalContract.value,
+          name: this.contractDetails.name,
+          address: this.contractDetails.address,
           amount: tokenAmount
         });
       }
@@ -210,13 +214,36 @@ export default {
           initialFundsMap[initialFund.address] = initialFund.amount;
         });
       }
-      const globalSettings = {
+      const initialFunds = {
         fundsHolder: this.fundsHolder,
-        fundsHolderType: 'user',
-        initialFundsRequestMessage: this.initialFundsRequestMessage,
-        initialFunds: initialFundsMap,
+        fundsHolderType: this.fundsHolderType,
+        requestMessage: this.requestMessage,
+        funds: initialFundsMap,
       };
-      this.$emit('save', globalSettings);
+
+      this.loading = true;
+      return fetch('/portal/rest/wallet/api/settings/saveInitialFunds', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(initialFunds),
+      })
+        .then((resp) => {
+          if (resp && resp.ok) {
+            return resp.text();
+          } else {
+            throw new Error('Error saving global settings');
+          }
+        })
+        .then(() => this.$emit('saved', initialFunds))
+        .catch((e) => {
+          this.loading = false;
+          console.debug('fetch settings - error', e);
+          this.error = 'Error saving global settings';
+        });
     },
   },
 };

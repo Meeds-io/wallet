@@ -45,19 +45,6 @@ export function removeRewardTeam(id) {
   }).then((resp) => resp && resp.ok);
 }
 
-export function getRewardTransactions(networkId, periodType, startDateInSeconds) {
-  return fetch(`/portal/rest/wallet/api/reward/transaction/list?networkId=${networkId}&periodType=${periodType}&startDateInSeconds=${startDateInSeconds}`, {
-    method: 'GET',
-    credentials: 'include',
-  }).then((resp) => {
-    if (resp && resp.ok) {
-      return resp.json();
-    } else {
-      throw new Error('Error getting reward transactions');
-    }
-  });
-}
-
 export function getRewardDates(date, periodType) {
   // convert from milliseconds to seconds
   date = parseInt(date.getTime() / 1000);

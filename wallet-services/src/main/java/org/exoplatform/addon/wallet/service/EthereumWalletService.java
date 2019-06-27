@@ -18,15 +18,12 @@ package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
-import org.exoplatform.addon.wallet.service.mbean.EthereumWalletServiceManaged;
+import org.exoplatform.addon.wallet.model.settings.*;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
@@ -39,8 +36,6 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.management.annotations.ManagedBy;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.model.Space;
@@ -49,10 +44,9 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 /**
  * A storage service to save/load information used by users and spaces wallets
  */
-@ManagedBy(EthereumWalletServiceManaged.class)
 public class EthereumWalletService implements WalletService, Startable {
 
-  private static final Log        LOG = ExoLogger.getLogger(EthereumWalletService.class);
+  private static final Log        LOG                      = ExoLogger.getLogger(EthereumWalletService.class);
 
   private ExoContainer            container;
 
@@ -68,85 +62,68 @@ public class EthereumWalletService implements WalletService, Startable {
 
   private WebNotificationStorage  webNotificationStorage;
 
-  private ListenerService         listenerService;
-
-  private GlobalSettings          defaultSettings;
-
-  private GlobalSettings          storedSettings;
+  private GlobalSettings          configuredGlobalSettings = new GlobalSettings();
 
   public EthereumWalletService(EthereumClientConnector clientConnector,
                                WalletContractService contractService,
                                WalletAccountService accountService,
-                               SettingService settingService,
-                               SpaceService spaceService,
                                WebNotificationStorage webNotificationStorage,
                                PortalContainer container,
                                InitParams params) {
     this.container = container;
-    this.settingService = settingService;
     this.clientConnector = clientConnector;
     this.accountService = accountService;
     this.contractService = contractService;
-    this.spaceService = spaceService;
     this.webNotificationStorage = webNotificationStorage;
 
-    this.defaultSettings = new GlobalSettings();
-    this.defaultSettings.setDataVersion(GLOBAL_DATA_VERSION);
-
-    if (params.containsKey(DEFAULT_NETWORK_ID)) {
-      String value = params.getValueParam(DEFAULT_NETWORK_ID).getValue();
+    if (params.containsKey(NETWORK_ID)) {
+      String value = params.getValueParam(NETWORK_ID).getValue();
       long defaultNetworkId = Long.parseLong(value);
-      this.defaultSettings.setDefaultNetworkId(defaultNetworkId);
+      this.configuredGlobalSettings.getNetwork().setId(defaultNetworkId);
     }
 
-    if (params.containsKey(DEFAULT_NETWORK_URL)) {
-      String defaultNetworkURL = params.getValueParam(DEFAULT_NETWORK_URL).getValue();
-      this.defaultSettings.setProviderURL(defaultNetworkURL);
+    if (params.containsKey(NETWORK_URL)) {
+      String defaultNetworkURL = params.getValueParam(NETWORK_URL).getValue();
+      this.configuredGlobalSettings.getNetwork().setProviderURL(defaultNetworkURL);
     }
 
-    if (params.containsKey(DEFAULT_NETWORK_WS_URL)) {
-      String defaultNetworkWsURL = params.getValueParam(DEFAULT_NETWORK_WS_URL).getValue();
-      this.defaultSettings.setWebsocketProviderURL(defaultNetworkWsURL);
+    if (params.containsKey(NETWORK_WS_URL)) {
+      String defaultNetworkWsURL = params.getValueParam(NETWORK_WS_URL).getValue();
+      this.configuredGlobalSettings.getNetwork().setWebsocketProviderURL(defaultNetworkWsURL);
     }
 
-    if (params.containsKey(DEFAULT_ACCESS_PERMISSION)) {
-      String defaultAccessPermission = params.getValueParam(DEFAULT_ACCESS_PERMISSION).getValue();
-      this.defaultSettings.setAccessPermission(defaultAccessPermission);
+    if (params.containsKey(ACCESS_PERMISSION)) {
+      String defaultAccessPermission = params.getValueParam(ACCESS_PERMISSION).getValue();
+      this.configuredGlobalSettings.setAccessPermission(defaultAccessPermission);
     }
 
-    if (params.containsKey(DEFAULT_GAS)) {
-      String value = params.getValueParam(DEFAULT_GAS).getValue();
-      long defaultGas = Long.parseLong(value);
-      this.defaultSettings.setDefaultGas(defaultGas);
+    if (params.containsKey(GAS_LIMIT)) {
+      String value = params.getValueParam(GAS_LIMIT).getValue();
+      long gasLimit = Long.parseLong(value);
+      this.configuredGlobalSettings.getNetwork().setGasLimit(gasLimit);
     }
 
     if (params.containsKey(MIN_GAS_PRICE)) {
       String value = params.getValueParam(MIN_GAS_PRICE).getValue();
       long minGasPrice = Long.parseLong(value);
-      this.defaultSettings.setMinGasPrice(minGasPrice);
+      this.configuredGlobalSettings.getNetwork().setMinGasPrice(minGasPrice);
     }
 
     if (params.containsKey(NORMAL_GAS_PRICE)) {
       String value = params.getValueParam(NORMAL_GAS_PRICE).getValue();
       long normalGasPrice = Long.parseLong(value);
-      this.defaultSettings.setNormalGasPrice(normalGasPrice);
+      this.configuredGlobalSettings.getNetwork().setNormalGasPrice(normalGasPrice);
     }
 
     if (params.containsKey(MAX_GAS_PRICE)) {
       String value = params.getValueParam(MAX_GAS_PRICE).getValue();
       long maxGasPrice = Long.parseLong(value);
-      this.defaultSettings.setMaxGasPrice(maxGasPrice);
+      this.configuredGlobalSettings.getNetwork().setMaxGasPrice(maxGasPrice);
     }
 
-    if (params.containsKey(DEFAULT_CONTRACTS_ADDRESSES)) {
-      String defaultContractsToDisplay = params.getValueParam(DEFAULT_CONTRACTS_ADDRESSES).getValue();
-      if (StringUtils.isNotBlank(defaultContractsToDisplay)) {
-        Set<String> defaultContracts = Arrays.stream(defaultContractsToDisplay.split(","))
-                                             .map(contractAddress -> contractAddress.trim().toLowerCase())
-                                             .filter(contractAddress -> !contractAddress.isEmpty())
-                                             .collect(Collectors.toSet());
-        this.defaultSettings.setDefaultContractsToDisplay(defaultContracts);
-      }
+    if (params.containsKey(TOKEN_ADDRESS)) {
+      String contractAddress = params.getValueParam(TOKEN_ADDRESS).getValue();
+      this.configuredGlobalSettings.setContractAddress(contractAddress);
     }
   }
 
@@ -155,13 +132,25 @@ public class EthereumWalletService implements WalletService, Startable {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      GlobalSettings settings = getSettings();
+      this.configuredGlobalSettings.setContractAbi(contractService.getContractAbi().toString());
+      this.configuredGlobalSettings.setContractBin(contractService.getContractBinary());
+      this.computeInitialFundsSettings();
+
+      String contractAddress = this.configuredGlobalSettings.getContractAddress();
+      if (StringUtils.isBlank(contractAddress)) {
+        return;
+      }
+
+      ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
+      this.configuredGlobalSettings.setContractDetail(contractDetail);
 
       // start connection to blockchain
-      clientConnector.start(settings);
+      this.clientConnector.start(this.configuredGlobalSettings.getNetwork().getWebsocketProviderURL());
 
-      // check global settings upgrade
-      checkDataToUpgrade(settings);
+      // TODO if stored contractDetail is empty, its computing // NOSONAR
+      // is moved to EthereumWalletTokenAdminService because we can't access
+      // blockchain from here see package-info of
+      // EthereumWalletTokenAdminService class for more details
     } finally {
       RequestLifeCycle.end();
     }
@@ -173,98 +162,50 @@ public class EthereumWalletService implements WalletService, Startable {
   }
 
   @Override
-  public void saveSettings(GlobalSettings newGlobalSettings) {
-    if (newGlobalSettings == null) {
-      throw new IllegalArgumentException("globalSettings parameter is mandatory");
-    }
-
-    GlobalSettings oldGlobalSettings = getSettings();
-    saveSettings(newGlobalSettings, oldGlobalSettings.getDataVersion());
+  public void setConfiguredContractDetail(ContractDetail contractDetail) {
+    this.configuredGlobalSettings.setContractDetail(contractDetail);
   }
 
   @Override
-  public void saveSettings(GlobalSettings newGlobalSettings, Integer dataVersion) {
-    if (newGlobalSettings == null) {
-      throw new IllegalArgumentException("globalSettings parameter is mandatory");
+  public void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings) {
+    if (initialFundsSettings == null) {
+      throw new IllegalArgumentException("initialFundsSettings parameter is mandatory");
     }
 
-    GlobalSettings oldGlobalSettings = getSettings();
+    LOG.debug("Saving initial funds settings: {}", initialFundsSettings);
 
-    newGlobalSettings.setDataVersion(dataVersion);
-
-    // Delete computed data
-    newGlobalSettings.setUserPreferences(null);
-    newGlobalSettings.setContractAbi(null);
-    newGlobalSettings.setContractBin(null);
-    newGlobalSettings.setWalletEnabled(false);
-    newGlobalSettings.setAdmin(false);
-
-    LOG.debug("Saving new global settings", newGlobalSettings.toJSONString(false));
-
-    settingService.set(WALLET_CONTEXT,
-                       WALLET_SCOPE,
-                       GLOBAL_SETTINGS_KEY_NAME,
-                       SettingValue.create(newGlobalSettings.toJSONString(false)));
+    getSettingService().set(WALLET_CONTEXT,
+                            WALLET_SCOPE,
+                            INITIAL_FUNDS_KEY_NAME,
+                            SettingValue.create(toJsonString(initialFundsSettings)));
 
     // Clear cached in memory stored settings
-    this.storedSettings = null;
-
-    try {
-      getListenerService().broadcast(GLOAL_SETTINGS_CHANGED_EVENT, oldGlobalSettings, newGlobalSettings);
-    } catch (Exception e) {
-      LOG.error("An error occurred while broadcasting wallet settings modification event", e);
-    }
+    this.configuredGlobalSettings.setInitialFunds(initialFundsSettings);
   }
 
   @Override
   public GlobalSettings getSettings() {
-    if (this.storedSettings != null) {
-      retrieveContractsPreferences(this.storedSettings, this.storedSettings.getDefaultNetworkId());
-      // Retrieve stored global settings from memory
-      return this.storedSettings;
-    } else {
-      this.storedSettings = getSettings(null);
-    }
-    return this.storedSettings.clone();
+    return this.configuredGlobalSettings.clone();
   }
 
   @Override
-  public GlobalSettings getSettings(Long networkId) {
-    GlobalSettings globalSettings = null;
-    if (this.storedSettings == null) {
-      globalSettings = getSettings(networkId, null, null);
-    } else {
-      globalSettings = this.storedSettings.clone();
-    }
-    if (globalSettings == null) {
-      globalSettings = defaultSettings.clone();
-    }
-    if ((networkId == null || networkId == 0) && globalSettings.getDefaultNetworkId() != null) {
-      networkId = globalSettings.getDefaultNetworkId();
-    }
-    retrieveContractsPreferences(globalSettings, networkId);
-    return globalSettings;
-  }
+  public UserSettings getUserSettings(String spaceId, String currentUser) {
+    GlobalSettings globalSettings = getSettings();
 
-  @Override
-  public GlobalSettings getSettings(Long networkId, String spaceId, String currentUser) {
-    GlobalSettings globalSettings = null;
-    if (StringUtils.isBlank(currentUser)) {
-      // Retrieve settings without computed user data
-      return getStoredGlobalSettings();
-    } else {
-      globalSettings = getSettings(networkId);
-    }
+    UserSettings userSettings = new UserSettings(globalSettings);
+    userSettings.setAdmin(isUserAdmin(currentUser));
+    userSettings.setWalletEnabled(true);
 
-    globalSettings.setAdmin(isUserAdmin(currentUser));
-    globalSettings.setWalletEnabled(true);
-
-    if (StringUtils.isNotBlank(globalSettings.getAccessPermission())) {
-      Space space = getSpace(globalSettings.getAccessPermission());
+    String accessPermission = globalSettings.getAccessPermission();
+    if (StringUtils.isNotBlank(accessPermission)) {
+      Space space = getSpace(accessPermission);
       // Disable wallet for users not member of the permitted space members
-      if (space != null && !(spaceService.isMember(space, currentUser) || spaceService.isSuperManager(currentUser))) {
-        LOG.debug("Wallet is disabled for user {} because he's not member of space {}", currentUser, space.getPrettyName());
-        globalSettings.setWalletEnabled(false);
+      if (!isUserMemberOf(currentUser, accessPermission) && (space != null && !getSpaceService().isMember(space, currentUser))) {
+        LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
+                  currentUser,
+                  accessPermission);
+        userSettings.setWalletEnabled(false);
+        return userSettings;
       }
     }
 
@@ -273,55 +214,52 @@ public class EthereumWalletService implements WalletService, Startable {
       wallet = accountService.getWalletByTypeAndId(WalletType.SPACE.getId(), spaceId, currentUser);
       if (wallet != null && !canAccessWallet(wallet, currentUser)) {
         LOG.warn("User {} is not allowed to display space wallet {}", currentUser, spaceId);
-        globalSettings.setWalletEnabled(false);
+        userSettings.setWalletEnabled(false);
       }
     } else {
       wallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser, currentUser);
     }
 
     if (wallet != null) {
-      globalSettings.setWalletEnabled(globalSettings.isWalletEnabled() && wallet.isEnabled());
+      userSettings.setWalletEnabled(userSettings.isWalletEnabled() && wallet.isEnabled());
     }
 
-    if (globalSettings.isWalletEnabled() || globalSettings.isAdmin()) {
+    if (userSettings.isWalletEnabled() || userSettings.isAdmin()) {
       // Append user preferences
-      SettingValue<?> userSettingsValue = settingService.get(Context.USER.id(currentUser), WALLET_SCOPE, SETTINGS_KEY_NAME);
-      WalletPreferences userSettings = null;
+      SettingValue<?> userSettingsValue = getSettingService().get(Context.USER.id(currentUser), WALLET_SCOPE, SETTINGS_KEY_NAME);
+      WalletSettings walletSettings = null;
       if (userSettingsValue != null && userSettingsValue.getValue() != null) {
-        userSettings = WalletPreferences.parseStringToObject(userSettingsValue.getValue().toString());
-        checkDataToUpgrade(currentUser, userSettings);
+        walletSettings = fromJsonString(userSettingsValue.getValue().toString(), WalletSettings.class);
       } else {
-        userSettings = new WalletPreferences();
+        walletSettings = new WalletSettings();
       }
-      globalSettings.setUserPreferences(userSettings);
+      userSettings.setUserPreferences(walletSettings);
 
+      // Append user wallet settings
       if (wallet != null) {
+        walletSettings.setWalletAddress(wallet.getAddress());
         if (accountService.isWalletOwner(wallet, currentUser)) {
-          userSettings.setPhrase(wallet.getPassPhrase());
-          userSettings.setHasKeyOnServerSide(wallet.isHasKeyOnServerSide());
+          walletSettings.setPhrase(wallet.getPassPhrase());
+          walletSettings.setHasKeyOnServerSide(wallet.isHasPrivateKey());
         } else {
           hideWalletOwnerPrivateInformation(wallet);
         }
-
-        userSettings.setWalletAddress(wallet.getAddress());
         userSettings.setWallet(wallet);
       }
-      userSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));
-      globalSettings.setContractAbi(contractService.getContractAbi());
-      globalSettings.setContractBin(contractService.getContractBinary());
+      walletSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));
     }
-    return globalSettings;
+    return userSettings;
   }
 
   @Override
-  public void saveUserPreferences(String currentUser, WalletPreferences userPreferences) {
+  public void saveUserPreferences(String currentUser, WalletSettings userPreferences) {
     if (userPreferences == null) {
       throw new IllegalArgumentException("userPreferences parameter is mandatory");
     }
-    settingService.set(Context.USER.id(currentUser),
-                       WALLET_SCOPE,
-                       SETTINGS_KEY_NAME,
-                       SettingValue.create(userPreferences.toJSONString()));
+    getSettingService().set(Context.USER.id(currentUser),
+                            WALLET_SCOPE,
+                            SETTINGS_KEY_NAME,
+                            SettingValue.create(toJsonString(userPreferences)));
   }
 
   @Override
@@ -347,8 +285,7 @@ public class EthereumWalletService implements WalletService, Startable {
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
     GlobalSettings settings = getSettings();
     if (!StringUtils.isBlank(fundsRequest.getContract())) {
-      ContractDetail contractDetail =
-                                    contractService.getContractDetail(fundsRequest.getContract(), settings.getDefaultNetworkId());
+      ContractDetail contractDetail = settings.getContractDetail();
       if (contractDetail == null) {
         throw new IllegalStateException("Bad request sent to server with invalid contract address (O ly default addresses are permitted)");
       }
@@ -399,82 +336,27 @@ public class EthereumWalletService implements WalletService, Startable {
     return Boolean.parseBoolean(fundRequestSentString);
   }
 
-  private GlobalSettings getStoredGlobalSettings() {
-    GlobalSettings globalSettings = null;
-    // Global settings computing
-    SettingValue<?> globalSettingsValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, GLOBAL_SETTINGS_KEY_NAME);
-    if (globalSettingsValue != null && globalSettingsValue.getValue() != null) {
-      globalSettings = GlobalSettings.parseStringToObject(defaultSettings, globalSettingsValue.getValue().toString());
-    }
-    return globalSettings;
-  }
-
-  private void retrieveContractsPreferences(GlobalSettings globalSettings, Long networkId) {
-    if ((networkId == null || networkId == 0) && globalSettings.getDefaultNetworkId() != null) {
-      networkId = globalSettings.getDefaultNetworkId();
-    }
-
-    // Retrieve default contracts to display for all users
-    globalSettings.setDefaultContractsToDisplay(contractService.getDefaultContractsAddresses(networkId));
-
-    // Generic global settings computing
-    String defaultPrincipalAccount = globalSettings.getDefaultPrincipalAccount();
-    if (StringUtils.isNotBlank(defaultPrincipalAccount)) {
-      ContractDetail principalContractDetails = contractService.getContractDetail(defaultPrincipalAccount, networkId);
-      globalSettings.setPrincipalContractAdminAddress(principalContractDetails == null ? null
-                                                                                       : principalContractDetails.getOwner());
+  private void computeInitialFundsSettings() {
+    SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
+                                                                        WALLET_SCOPE,
+                                                                        INITIAL_FUNDS_KEY_NAME);
+    if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
+      this.configuredGlobalSettings.setInitialFunds(fromJsonString(initialFundsSettingsValue.getValue().toString(),
+                                                                   InitialFundsSettings.class));
     }
   }
 
-  private void checkDataToUpgrade(String username, WalletPreferences userPreferences) {
-    try {
-      int userDataVersion = userPreferences.getDataVersion() == null ? 0 : userPreferences.getDataVersion();
-      if (userDataVersion < USER_DATA_VERSION) {
-
-        // Upgrade default gas for new contract to upgrade
-        if (userPreferences.getDataVersion() < DEFAULT_GAS_UPGRADE_VERSION) {
-          userPreferences.setDefaultGas(defaultSettings.getDefaultGas());
-        }
-
-        userPreferences.setDataVersion(USER_DATA_VERSION);
-        saveUserPreferences(username, userPreferences);
-        LOG.info("User {} preferences has been upgraded to version {}", username, USER_DATA_VERSION);
-      }
-    } catch (Exception e) {
-      LOG.warn("Can't upgrade data of user preferences: " + username, e);
+  private SettingService getSettingService() {
+    if (settingService == null) {
+      settingService = CommonsUtils.getService(SettingService.class);
     }
+    return settingService;
   }
 
-  private void checkDataToUpgrade(GlobalSettings globalSettings) {
-    try {
-      int globalDataVersion = globalSettings.getDataVersion() == null ? 0 : globalSettings.getDataVersion();
-      if (globalDataVersion < GLOBAL_DATA_VERSION) {
-
-        // Upgrade default gas for new contract to upgrade
-        if (globalSettings.getDataVersion() < DEFAULT_GAS_UPGRADE_VERSION) {
-          globalSettings.setDefaultGas(defaultSettings.getDefaultGas());
-        }
-
-        // Upgrade default gas price to avoid excessive gas price on Main Net
-        if (globalSettings.getDataVersion() < DEFAULT_GAS_PRICE_UPGRADE_VERSION) {
-          globalSettings.setMinGasPrice(defaultSettings.getMinGasPrice());
-          globalSettings.setNormalGasPrice(defaultSettings.getNormalGasPrice());
-          globalSettings.setMaxGasPrice(defaultSettings.getMaxGasPrice());
-        }
-
-        saveSettings(globalSettings, GLOBAL_DATA_VERSION);
-        LOG.info("Global preferences has been upgraded to version {}", GLOBAL_DATA_VERSION);
-      }
-    } catch (Exception e) {
-      LOG.warn("Can't upgrade global settings", e);
+  private SpaceService getSpaceService() {
+    if (spaceService == null) {
+      spaceService = CommonsUtils.getService(SpaceService.class);
     }
+    return spaceService;
   }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
-  }
-
 }

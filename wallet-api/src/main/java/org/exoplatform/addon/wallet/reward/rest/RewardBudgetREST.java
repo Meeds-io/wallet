@@ -10,18 +10,18 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.exoplatform.addon.wallet.reward.model.WalletReward;
+import org.exoplatform.addon.wallet.model.reward.WalletReward;
 import org.exoplatform.addon.wallet.reward.service.RewardService;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to compute rewards
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/reward/")
-@RolesAllowed({ "rewarding", "administrators" })
+@RolesAllowed("rewarding")
+@Api(value = "/wallet/api/reward", description = "Manage wallet rewards") // NOSONAR
 public class RewardBudgetREST implements ResourceContainer {
   private static final Log LOG = ExoLogger.getLogger(RewardBudgetREST.class);
 
@@ -31,22 +31,21 @@ public class RewardBudgetREST implements ResourceContainer {
     this.rewardService = rewardService;
   }
 
-  /**
-   * Compute rewards per period
-   * 
-   * @param periodDateInSeconds
-   * @return
-   */
   @GET
   @Path("compute")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response computeRewards(@QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Compute rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns a set of wallet reward object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       Set<WalletReward> rewards = rewardService.computeReward(periodDateInSeconds);
       return Response.ok(rewards).build();
     } catch (Exception e) {
-      LOG.warn("Error getting computed reward", e);
+      LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());
@@ -57,21 +56,20 @@ public class RewardBudgetREST implements ResourceContainer {
     }
   }
 
-  /**
-   * Compute rewards per period
-   * 
-   * @param periodDateInSeconds
-   * @return
-   */
   @GET
   @Path("send")
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response sendRewards(@QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Send rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, notes = "return empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response sendRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       rewardService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error getting computed reward", e);
+      LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());

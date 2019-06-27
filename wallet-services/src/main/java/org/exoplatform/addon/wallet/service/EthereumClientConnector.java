@@ -32,7 +32,6 @@ import org.web3j.protocol.websocket.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.exoplatform.addon.wallet.model.GlobalSettings;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -49,8 +48,6 @@ public class EthereumClientConnector {
 
   private WebSocketService         web3jService               = null;
 
-  private GlobalSettings           globalSettings             = null;
-
   private ScheduledExecutorService connectionVerifierExecutor = null;
 
   private boolean                  connectionInProgress       = false;
@@ -59,13 +56,15 @@ public class EthereumClientConnector {
 
   private boolean                  serviceStopping            = false;
 
+  private String                   websocketURL               = null;
+
   public EthereumClientConnector() {
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
   }
 
-  public void start(GlobalSettings storedSettings) {
-    this.globalSettings = storedSettings;
+  public void start(String websocketURL) {
+    this.websocketURL = websocketURL;
     this.serviceStarted = true;
 
     // Blockchain connection verifier
@@ -160,30 +159,6 @@ public class EthereumClientConnector {
   }
 
   /**
-   * Change currently used globalSettings and re-init
-   * 
-   * @param newGlobalSettings newly saved global settings
-   */
-  public void changeSettings(GlobalSettings newGlobalSettings) {
-    if (newGlobalSettings == null) {
-      throw new IllegalArgumentException("GlobalSettings argument is mandatory");
-    }
-    if (this.globalSettings == null) {
-      // not yet initialized
-      return;
-    }
-    GlobalSettings oldGlobalSettings = this.globalSettings;
-    this.globalSettings = newGlobalSettings;
-
-    // If web socket connection changed, then close current connection and let
-    // the executor job re-init a new one
-    if (StringUtils.isBlank(newGlobalSettings.getWebsocketProviderURL())
-        || !StringUtils.equals(newGlobalSettings.getWebsocketProviderURL(), oldGlobalSettings.getWebsocketProviderURL())) {
-      resetConnection();
-    }
-  }
-
-  /**
    * @return true if the connection to the blockchain is established
    */
   public boolean isConnected() {
@@ -243,14 +218,14 @@ public class EthereumClientConnector {
   }
 
   public void waitConnection() throws InterruptedException {
-    if (this.serviceStarted && StringUtils.isBlank(getWebsocketProviderURL())) {
+    if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
       throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
     }
     if (this.serviceStopping) {
       throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
     }
     while (!isConnected()) {
-      if (this.serviceStarted && StringUtils.isBlank(getWebsocketProviderURL())) {
+      if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
         throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
       }
       if (this.serviceStopping) {
@@ -259,10 +234,6 @@ public class EthereumClientConnector {
       LOG.info("Wait until Websocket connection to blockchain is established to retrieve information");
       Thread.sleep(5000);
     }
-  }
-
-  private String getWebsocketProviderURL() {
-    return globalSettings == null ? null : globalSettings.getWebsocketProviderURL();
   }
 
   private void resetConnection() {
@@ -301,7 +272,7 @@ public class EthereumClientConnector {
       LOG.info("Stopping server, thus no new connection is attempted again");
       return false;
     }
-    String websocketProviderURL = getWebsocketProviderURL();
+    String websocketProviderURL = websocketURL;
     if (StringUtils.isBlank(websocketProviderURL)) {
       LOG.info("No configured URL for Ethereum Websocket connection");
       resetConnection();
@@ -319,21 +290,21 @@ public class EthereumClientConnector {
     this.connectionInProgress = true;
     try {
       if (this.web3j != null && this.web3jService != null && this.webSocketClient != null) {
-        LOG.info("Reconnect to blockchain endpoint {}", getWebsocketProviderURL());
+        LOG.info("Reconnect to blockchain endpoint {}", websocketURL);
         boolean reconnected = this.webSocketClient.reconnectBlocking();
         if (!reconnected) {
-          throw new IllegalStateException("Can't reconnect to ethereum blockchain: " + getWebsocketProviderURL());
+          throw new IllegalStateException("Can't reconnect to ethereum blockchain: " + websocketURL);
         }
       } else {
-        LOG.info("Connecting to Ethereum network endpoint {}", getWebsocketProviderURL());
-        this.webSocketClient = new WebSocketClient(new URI(getWebsocketProviderURL()));
+        LOG.info("Connecting to Ethereum network endpoint {}", websocketURL);
+        this.webSocketClient = new WebSocketClient(new URI(websocketURL));
         this.webSocketClient.setConnectionLostTimeout(10);
         this.web3jService = new WebSocketService(webSocketClient, true);
         this.webSocketClient.setListener(getWebsocketListener());
         this.web3jService.connect();
         Thread.sleep(10000);
         web3j = Web3j.build(web3jService);
-        LOG.info("Connection established to Ethereum network endpoint {}", getWebsocketProviderURL());
+        LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
       }
       return true;
     } finally {
@@ -361,7 +332,7 @@ public class EthereumClientConnector {
   }
 
   private String getConnectionFailedMessage() {
-    return "Connection failed to " + getWebsocketProviderURL();
+    return "Connection failed to " + websocketURL;
   }
 
 }

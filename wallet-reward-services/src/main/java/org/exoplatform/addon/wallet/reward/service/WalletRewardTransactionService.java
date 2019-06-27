@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.WalletType;
-import org.exoplatform.addon.wallet.reward.model.RewardTransaction;
-import org.exoplatform.addon.wallet.reward.service.RewardTransactionService;
+import org.exoplatform.addon.wallet.model.reward.RewardTransaction;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -45,9 +44,7 @@ public class WalletRewardTransactionService implements RewardTransactionService 
   }
 
   @Override
-  public List<RewardTransaction> getRewardTransactions(Long networkId,
-                                                       String periodType,
-                                                       long startDateInSeconds) {
+  public List<RewardTransaction> getRewardTransactions(String periodType, long startDateInSeconds) {
     String periodTransactionsParamName = getPeriodTransactionsParamName(periodType, startDateInSeconds);
     SettingValue<?> periodTransactionsValue =
                                             settingService.get(REWARD_CONTEXT, REWARD_SCOPE, periodTransactionsParamName);
@@ -62,7 +59,6 @@ public class WalletRewardTransactionService implements RewardTransactionService 
         long receiverIdentityId = receiverIdentity == null ? 0 : Long.parseLong(receiverIdentity.getId());
         rewardTransaction.setReceiverIdentityId(receiverIdentityId);
       }
-      rewardTransaction.setNetworkId(networkId);
       return rewardTransaction;
     }).collect(Collectors.toList());
   }
@@ -71,9 +67,6 @@ public class WalletRewardTransactionService implements RewardTransactionService 
   public void saveRewardTransaction(RewardTransaction rewardTransaction) {
     if (rewardTransaction == null) {
       throw new IllegalArgumentException("rewardTransaction parameter is mandatory");
-    }
-    if (rewardTransaction.getNetworkId() == 0) {
-      throw new IllegalArgumentException("transaction NetworkId parameter is mandatory");
     }
     if (StringUtils.isBlank(rewardTransaction.getHash())) {
       throw new IllegalArgumentException("transaction hash parameter is mandatory");

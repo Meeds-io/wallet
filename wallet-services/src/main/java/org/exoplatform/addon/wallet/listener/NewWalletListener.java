@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getContractAddress;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -34,11 +36,11 @@ import org.exoplatform.services.listener.*;
 @Asynchronous
 public class NewWalletListener extends Listener<Wallet, Wallet> {
 
-  private WalletAccountService          walletAccountService;
+  private WalletAccountService    walletAccountService;
 
   private WalletTokenAdminService tokenTransactionService;
 
-  private ExoContainer                  container;
+  private ExoContainer            container;
 
   public NewWalletListener(PortalContainer container) {
     this.container = container;
@@ -49,13 +51,14 @@ public class NewWalletListener extends Listener<Wallet, Wallet> {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String contractAddress = getTokenTransactionService().getContractAddress();
+      String contractAddress = getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
         return;
       }
       Wallet wallet = event.getData();
       String walletAddress = wallet.getAddress();
-      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress);
+      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress)
+          || getTokenTransactionService().isApprovedAccount(walletAddress);
       if (initializedWallet) {
         wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
       } else {

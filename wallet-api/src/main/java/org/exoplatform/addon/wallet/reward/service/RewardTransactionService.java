@@ -18,7 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.List;
 
-import org.exoplatform.addon.wallet.reward.model.RewardTransaction;
+import org.exoplatform.addon.wallet.model.reward.RewardTransaction;
 
 /**
  * A storage service to save/load reward transactions
@@ -26,17 +26,18 @@ import org.exoplatform.addon.wallet.reward.model.RewardTransaction;
 public interface RewardTransactionService {
 
   /**
-   * @param networkId
+   * Get the list of transactions sent on blockchain of type 'reward' in a
+   * period of time
+   * 
    * @param periodType
    * @param startDateInSeconds
    * @return
    */
-  public List<RewardTransaction> getRewardTransactions(Long networkId,
-                                                       String periodType,
+  public List<RewardTransaction> getRewardTransactions(String periodType,
                                                        long startDateInSeconds);
 
   /**
-   * Save reward transaction
+   * Save reward transaction in eXo internal datasource
    * 
    * @param rewardTransaction
    */

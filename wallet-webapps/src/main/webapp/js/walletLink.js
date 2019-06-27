@@ -16,7 +16,7 @@ $( document ).ready(function() {
     }
   }
 
-  return fetch(`/portal/rest/wallet/api/global-settings`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/settings`, {credentials: 'include'})
     .then(resp =>  {
       if (resp && resp.ok) {
         return resp.json();
@@ -25,7 +25,7 @@ $( document ).ready(function() {
       }
     })
     .then(settings => {
-      if(settings.isWalletEnabled) {
+      if(settings.walletEnabled) {
         initWalletTipTip(0);
       } else {
         console.debug("Wallet disabled for current user");

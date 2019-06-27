@@ -2,12 +2,8 @@ import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus, getTransactionReceipt, getTransaction, convertTokenAmountReceived} from './WalletUtils.js';
 import {getSavedContractDetails, retrieveContractDetails} from './TokenUtils.js';
 
-export function getLastNonce(networkId, walletAddress, useMetamask) {
-  if (useMetamask) {
-    return Promise.resolve(null);
-  }
-
-  return getLastPendingTransactionSent(networkId, walletAddress)
+export function getLastNonce(walletAddress) {
+  return getLastPendingTransactionSent(walletAddress)
     .then((lastPendingTransaction) => {
       if (!lastPendingTransaction || !lastPendingTransaction.hash) {
         return;
@@ -26,12 +22,12 @@ export function getLastNonce(networkId, walletAddress, useMetamask) {
     });
 }
 
-export function loadTransactions(networkId, account, contractDetails, transactions, onlyPending, transactionsLimit, transactionHashToSearch, isAdministration, refreshCallback) {
+export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
   }
 
-  return getStoredTransactions(networkId, account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, transactionHashToSearch, onlyPending, isAdministration).then((storedTransactions) => {
+  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
     const loadedTransactions = Object.assign({}, transactions);
     const loadingPromises = [];
 
@@ -40,7 +36,7 @@ export function loadTransactions(networkId, account, contractDetails, transactio
         if (loadedTransactions[storedTransaction.hash]) {
           loadingPromises.push(loadedTransactions[storedTransaction.hash]);
         } else {
-          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(networkId, account, contractDetails, transactions, storedTransaction, refreshCallback);
+          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(account, contractDetails, transactions, storedTransaction, refreshCallback);
           loadingPromises.push(loadingTransactionDetailsPromise);
         }
       });
@@ -57,7 +53,7 @@ export function loadTransactions(networkId, account, contractDetails, transactio
 export function saveTransactionDetails(transaction, contractDetails) {
   try {
     const transationDetails = {
-      networkId: transaction.networkId ? transaction.networkId : window.walletSettings.defaultNetworkId,
+      networkId: transaction.networkId ? transaction.networkId : window.walletSettings.network.id,
       hash: transaction.hash ? transaction.hash : '',
       contractAddress: transaction.contractAddress,
       contractMethodName: transaction.contractMethodName,
@@ -87,6 +83,38 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
+export function getTransactionsAmounts(walletAddress, periodicity) {
+  const lang = window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language || 'en';
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
+    .then((resp) => {
+      if (resp && resp.ok) {
+        return resp.json();
+      } else {
+        return null;
+      }
+    });
+}
+
+export function getStoredTransactions(account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
+  const transactionHashToSearch = filterObject && filterObject.hash;
+  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
+  
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+  .then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      return null;
+    }
+  })
+  .then((transactions) => {
+    return transactions && transactions.length ? transactions : [];
+  })
+  .catch((error) => {
+    throw new Error('Error retrieving transactions list', error);
+  });
+}
+
 function loadTransactionReceipt(transactionDetails) {
   if (transactionDetails.transaction && transactionDetails.receipt) {
     return Promise.resolve();
@@ -106,7 +134,7 @@ function loadTransactionReceipt(transactionDetails) {
   }
 }
 
-function loadTransactionContractDetails(networkId, account, transactionDetails, accountDetails) {
+function loadTransactionContractDetails(account, transactionDetails, accountDetails) {
   // Is contract creation if contractAddress property is set in receipt
   transactionDetails.isContractCreation = transactionDetails.transaction && !transactionDetails.transaction.to && transactionDetails.receipt && transactionDetails.receipt.contractAddress;
 
@@ -120,8 +148,7 @@ function loadTransactionContractDetails(networkId, account, transactionDetails, 
   if (transactionDetails.contractAddress) {
     const cachedContractDetails = window.walletContractsDetails ? Object.values(window.walletContractsDetails).find((details) => details && details.address && transactionDetails.contractAddress.toLowerCase() === details.address.toLowerCase()) : null;
     return (
-      cachedContractDetails ||
-      getSavedContractDetails(transactionDetails.contractAddress, networkId).then((contractDetails) => {
+      cachedContractDetails || getSavedContractDetails(transactionDetails.contractAddress).then((contractDetails) => {
         if (contractDetails) {
           if (!window.walletContractsDetails) {
             window.walletContractsDetails = {};
@@ -136,7 +163,7 @@ function loadTransactionContractDetails(networkId, account, transactionDetails, 
                 address: transactionDetails.contractAddress,
                 icon: 'fa-file-contract',
                 isContract: true,
-                networkId: networkId,
+                networkId: window.walletSettings.network.id,
               };
               return retrieveContractDetails(account, contractDetails, false, true);
             }
@@ -174,9 +201,9 @@ function loadTransactionFee(transactionDetails) {
     .then((receipt) => (transactionDetails.receipt = receipt));
 }
 
-function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
-  if (!transactionDetails || !networkId || !walletAddress) {
-    console.debug('Wrong method parameters', networkId, walletAddress, transactionDetails);
+function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
+  if (!transactionDetails || !walletAddress) {
+    console.debug('Wrong method parameters', walletAddress, transactionDetails);
     return;
   }
 
@@ -185,7 +212,7 @@ function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddr
       transactionDetails.pending = false;
       transactionDetails.receipt = receipt;
       transactionDetails.timestamp = (block && block.timestamp) || transactionDetails.timestamp;
-      loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddress, accountDetails, transactions, transactionDetails).then(() => {
+      loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails).then(() => {
         watchLoadSuccess(transactionDetails);
       });
     });
@@ -194,7 +221,7 @@ function loadTransactionDetailsFromContractAndWatchPending(networkId, walletAddr
   return loadTransactionReceipt(transactionDetails)
     .then(() => {
       transactionDetails.status = transactionDetails.receipt && transactionDetails.receipt.status;
-      return loadTransactionContractDetails(networkId, walletAddress, transactionDetails, accountDetails);
+      return loadTransactionContractDetails(walletAddress, transactionDetails, accountDetails);
     })
     .then((contractDetails) => {
       if (contractDetails) {
@@ -257,7 +284,7 @@ function loadContractTransactionProperties(walletAddress, transactionDetails, co
   transactionDetails.by = transactionDetails.byAddress = transactionDetails.byAddress || transactionDetails.by;
 
   if (!abiDecoder.getABIs() || !abiDecoder.getABIs().length) {
-    abiDecoder.addABI(window.walletSettings.contractAbi);
+    abiDecoder.addABI(JSON.parse(window.walletSettings.contractAbi));
   }
 
   if (transactionDetails.transaction && !transactionDetails.contractMethodName) {
@@ -392,8 +419,8 @@ function retrieveWalletDetails(transactionDetails, prefix) {
     }
 
     transactionDetails[`${prefix}Address`] = transactionDetails[`${prefix}Address`].toLowerCase();
-    if (window.walletSettings.principalContractAdminAddress && transactionDetails[`${prefix}Address`] === window.walletSettings.principalContractAdminAddress.toLowerCase()) {
-      transactionDetails[`${prefix}DisplayName`] = window.walletSettings.principalContractAdminName;
+    if (window.walletSettings.contractAddress && transactionDetails[`${prefix}Address`] === window.walletSettings.contractAddress.toLowerCase()) {
+      transactionDetails[`${prefix}DisplayName`] = 'Admin';
     }
 
     if (transactionDetails[`${prefix}Wallet`]) {
@@ -418,25 +445,8 @@ function retrieveWalletDetails(transactionDetails, prefix) {
   }
 }
 
-function getStoredTransactions(networkId, account, contractAddress, limit, transactionHashToSearch, onlyPending, isAdministration) {
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?networkId=${networkId}&address=${account}&contractAddress=${contractAddress || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
-    .then((resp) => {
-      if (resp && resp.ok) {
-        return resp.json();
-      } else {
-        return null;
-      }
-    })
-    .then((transactions) => {
-      return transactions && transactions.length ? transactions : [];
-    })
-    .catch((error) => {
-      throw new Error('Error retrieving transactions list', error);
-    });
-}
-
-function getLastPendingTransactionSent(networkId, address) {
-  return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?networkId=${networkId}&address=${address}`, {credentials: 'include'})
+function getLastPendingTransactionSent(address) {
+  return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?address=${address}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         const contentType = resp.headers && resp.headers.get('content-type');

@@ -13,10 +13,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
-import org.exoplatform.addon.wallet.service.WalletAccountService;
-import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
-import org.exoplatform.addon.wallet.storage.AccountStorage;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
+import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
@@ -26,6 +24,9 @@ import org.exoplatform.social.core.identity.model.Identity;
 
 public class EthereumWalletAccountService implements WalletAccountService, Startable {
 
+  private static final Log        LOG                                     =
+                                      ExoLogger.getLogger(EthereumWalletAccountService.class);
+
   private static final String     USER_MESSAGE_IN_EXCEPTION               = "User '";
 
   private static final String     USER_MESSAGE_PREFIX                     = "User ";
@@ -34,12 +35,9 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private static final String     ADDRESS_PARAMTER_IS_MANDATORY           = "address paramter is mandatory";
 
-  private static final Log        LOG                                     =
-                                      ExoLogger.getLogger(EthereumWalletAccountService.class);
-
   private WalletTokenAdminService tokenAdminService;
 
-  private AccountStorage          accountStorage;
+  private WalletStorage           accountStorage;
 
   private AddressLabelStorage     labelStorage;
 
@@ -47,7 +45,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private String                  adminAccountPassword;
 
-  public EthereumWalletAccountService(AccountStorage walletAccountStorage,
+  public EthereumWalletAccountService(WalletStorage walletAccountStorage,
                                       AddressLabelStorage labelStorage,
                                       InitParams params) {
     this.accountStorage = walletAccountStorage;
@@ -56,6 +54,22 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
         && StringUtils.isNotBlank(params.getValueParam(ADMIN_KEY_PARAMETER).getValue())) {
       this.adminAccountPassword = params.getValueParam(ADMIN_KEY_PARAMETER).getValue();
     }
+  }
+
+  @Override
+  public void start() {
+    Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+    if (provider == null) {
+      LOG.info("No BouncyCastleProvider defined, register new one");
+      provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
+      Security.addProvider(provider);
+    }
+    LOG.info("Start wallet with BouncyCastleProvider version: {}", provider.getVersion());
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
   }
 
   @Override
@@ -389,7 +403,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
   }
 
   @Override
-  public AddressLabel saveOrDeleteAddressLabel(AddressLabel label, String currentUser) {
+  public WalletAddressLabel saveOrDeleteAddressLabel(WalletAddressLabel label, String currentUser) {
     if (label == null) {
       throw new IllegalArgumentException("Label is empty");
     }
@@ -399,7 +413,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
       if (identity == null) {
         throw new IllegalStateException("Can't find identity of user " + currentUser);
       }
-      AddressLabel storedLabel = labelStorage.getLabel(labelId);
+      WalletAddressLabel storedLabel = labelStorage.getLabel(labelId);
       if (storedLabel == null) {
         label.setId(0);
       } else if (!StringUtils.equals(identity.getId(), String.valueOf(storedLabel.getIdentityId()))) {
@@ -422,7 +436,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
   }
 
   @Override
-  public Set<AddressLabel> getAddressesLabelsVisibleBy(String currentUser) {
+  public Set<WalletAddressLabel> getAddressesLabelsVisibleBy(String currentUser) {
     if (!isUserAdmin(currentUser)) {
       return Collections.emptySet();
     }
@@ -491,22 +505,6 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
       listenerService = CommonsUtils.getService(ListenerService.class);
     }
     return listenerService;
-  }
-
-  @Override
-  public void start() {
-    Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-    if (provider == null) {
-      LOG.info("No BouncyCastleProvider defined, register new one");
-      provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
-      Security.addProvider(provider);
-    }
-    LOG.info("Start wallet with BouncyCastleProvider version: {}", provider.getVersion());
-  }
-
-  @Override
-  public void stop() {
-    // Nothing to stop
   }
 
 }

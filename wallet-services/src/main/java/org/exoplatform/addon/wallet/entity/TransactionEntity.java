@@ -13,7 +13,10 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_TRANSACTION")
 @NamedQueries({
-    @NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC"),
+    @NamedQuery(name = "WalletTransaction.countReceivedContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.toAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate"),
+    @NamedQuery(name = "WalletTransaction.countSentContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.fromAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate"),
+    @NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC"),
+    @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
     @NamedQuery(name = "WalletTransaction.getAddressLastPendingTransactionSent", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address AND tx.isPending = TRUE ORDER BY tx.createdDate DESC"),

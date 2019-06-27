@@ -68,7 +68,7 @@
               <boolean>true</boolean>
             </field>
             <field name="importMode">
-              <string>merge</string>
+              <string>OVERWRITE</string>
             </field>
             <field name="predefinedOwner">
               <collection type="java.util.HashSet">

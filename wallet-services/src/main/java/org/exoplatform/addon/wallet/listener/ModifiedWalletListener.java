@@ -16,9 +16,12 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getContractAddress;
+
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.WalletInitializationState;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -33,11 +36,11 @@ import org.exoplatform.services.listener.*;
 @Asynchronous
 public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
 
-  private WalletAccountService          walletAccountService;
+  private WalletAccountService    walletAccountService;
 
   private WalletTokenAdminService tokenTransactionService;
 
-  private ExoContainer                  container;
+  private ExoContainer            container;
 
   public ModifiedWalletListener(PortalContainer container) {
     this.container = container;
@@ -48,31 +51,27 @@ public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String contractAddress = getTokenTransactionService().getContractAddress();
+      String contractAddress = getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
         return;
       }
       Wallet wallet = event.getData();
       Wallet oldWallet = event.getSource();
+      if (oldWallet == null || wallet == null || StringUtils.isBlank(wallet.getAddress())
+          || StringUtils.isBlank(oldWallet.getAddress())
+          || StringUtils.equalsIgnoreCase(wallet.getAddress(), oldWallet.getAddress())) {
+        return;
+      }
+
       String walletAddress = wallet.getAddress();
-      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress);
+      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress)
+          || getTokenTransactionService().isApprovedAccount(walletAddress);
       if (initializedWallet) {
         wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
       } else {
         wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
       }
       getWalletAccountService().saveWallet(wallet);
-
-      // Disapprove old wallet
-      String oldAddress = oldWallet.getAddress();
-      if (!getTokenTransactionService().isAdminAccount(oldAddress)) {
-        String message = "Disapproving old wallet address associated to " + oldWallet.getType() + " "
-            + oldWallet.getId();
-        TransactionDetail transactionDetail = new TransactionDetail();
-        transactionDetail.setTo(oldAddress);
-        transactionDetail.setMessage(message);
-        getTokenTransactionService().disapproveAccount(transactionDetail, null);
-      }
     } finally {
       RequestLifeCycle.end();
     }

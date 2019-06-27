@@ -18,6 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.convertFromDecimals;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getSettings;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -27,8 +28,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.reward.*;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
-import org.exoplatform.addon.wallet.reward.model.*;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
@@ -46,15 +49,11 @@ public class WalletRewardService implements RewardService {
   private static final String      DEFAULT_REWARD_MESSAGE_TEMPLATE =
                                                                    "You have earned {amount} {symbol} in reward for your {rewardCount} {pluginName} {earned in pool_label} for period: {startDate} to {endDate}";
 
-  private WalletService            walletService;
-
   private WalletAccountService     walletAccountService;
 
   private WalletTransactionService walletTransactionService;
 
-  private WalletTokenAdminService  walletTokenTransactionService;
-
-  private WalletContractService    walletContractService;
+  private WalletTokenAdminService  walletTokenAdminService;
 
   private RewardSettingsService    rewardSettingsService;
 
@@ -62,17 +61,13 @@ public class WalletRewardService implements RewardService {
 
   private RewardTransactionService rewardTransactionService;
 
-  public WalletRewardService(WalletService walletService,
-                             WalletAccountService walletAccountService,
-                             WalletContractService walletContractService,
+  public WalletRewardService(WalletAccountService walletAccountService,
                              WalletTransactionService walletTransactionService,
                              RewardSettingsService rewardSettingsService,
                              RewardTransactionService rewardTransactionService,
                              RewardTeamService rewardTeamService) {
-    this.walletService = walletService;
     this.walletAccountService = walletAccountService;
     this.walletTransactionService = walletTransactionService;
-    this.walletContractService = walletContractService;
     this.rewardSettingsService = rewardSettingsService;
     this.rewardTeamService = rewardTeamService;
     this.rewardTransactionService = rewardTransactionService;
@@ -84,11 +79,11 @@ public class WalletRewardService implements RewardService {
     if (rewards == null || rewards.isEmpty()) {
       return;
     }
-    String adminWalletAddress = getTokenTransactionService().getAdminWalletAddress();
+    String adminWalletAddress = getTokenAdminService().getAdminWalletAddress();
     if (StringUtils.isBlank(adminWalletAddress)) {
       throw new IllegalStateException("No admin wallet is configured");
     }
-    if (getTokenTransactionService().getAdminLevel(adminWalletAddress) < 4) {
+    if (getTokenAdminService().getAdminLevel(adminWalletAddress) < 4) {
       throw new IllegalStateException("Configured admin wallet is not configured as admin on token. It must be a Token admin with level 4 at least.");
     }
 
@@ -126,33 +121,23 @@ public class WalletRewardService implements RewardService {
     if (rewards.isEmpty()) {
       throw new IllegalStateException("No rewards to send for selected period");
     }
-    GlobalSettings settings = walletService.getSettings();
-
+    GlobalSettings settings = getSettings();
+    ContractDetail contractDetail = settings.getContractDetail();
+    if (contractDetail == null) {
+      throw new IllegalStateException("Token with address " + settings.getContractAddress() + "wasn't found");
+    }
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
       throw new IllegalStateException("No reward settings is found");
     }
     RewardPeriodType periodType = rewardSettings.getPeriodType();
     RewardPeriod periodOfTime = periodType.getPeriodOfTime(timeFromSeconds(periodDateInSeconds));
-
-    String contractAddress = settings.getDefaultPrincipalAccount();
-    if (StringUtils.isBlank(contractAddress) || !contractAddress.startsWith("0x")) {
-      throw new IllegalStateException("No token is configured");
-    }
-    ContractDetail contractDetail = walletContractService.getContractDetail(contractAddress,
-                                                                            settings.getDefaultNetworkId());
-    if (contractDetail == null) {
-      throw new IllegalStateException("Token with address " + contractAddress + "wasn't found");
-    }
-
-    BigInteger adminTokenBalance = getTokenTransactionService().balanceOf(adminWalletAddress);
+    BigInteger adminTokenBalance = getTokenAdminService().balanceOf(adminWalletAddress);
     double adminBalance = convertFromDecimals(adminTokenBalance, contractDetail.getDecimals());
-
     double rewardsAmount = rewards.stream().mapToDouble(WalletReward::getTokensToSend).sum();
     if (rewardsAmount > adminBalance) {
       throw new IllegalStateException("Admin doesn't have enough funds to send rewards");
     }
-
     for (WalletReward walletReward : rewards) {
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(walletReward.getWallet().getAddress());
@@ -162,13 +147,12 @@ public class WalletRewardService implements RewardService {
       transactionDetail.setLabel(transactionLabel);
       String transactionMessage = getTransactionMessage(walletReward, contractDetail, periodOfTime);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = getTokenTransactionService().reward(transactionDetail, username);
+      transactionDetail = getTokenAdminService().reward(transactionDetail, username);
       RewardTransaction rewardTransaction = walletReward.getRewardTransaction();
       if (rewardTransaction == null) {
         rewardTransaction = new RewardTransaction();
       }
       rewardTransaction.setHash(transactionDetail.getHash());
-      rewardTransaction.setNetworkId(settings.getDefaultNetworkId());
       rewardTransaction.setPeriodType(periodType.name());
       rewardTransaction.setReceiverId(walletReward.getWallet().getId());
       rewardTransaction.setReceiverType(walletReward.getWallet().getType());
@@ -228,11 +212,7 @@ public class WalletRewardService implements RewardService {
       }
     }
 
-    GlobalSettings settings = walletService.getSettings();
-    long networkId = settings.getDefaultNetworkId();
-
-    List<RewardTransaction> rewardTransactions = rewardTransactionService.getRewardTransactions(networkId,
-                                                                                                periodType.name(),
+    List<RewardTransaction> rewardTransactions = rewardTransactionService.getRewardTransactions(periodType.name(),
                                                                                                 periodOfTime.getStartDateInSeconds());
 
     Set<WalletReward> walletRewards = new HashSet<>();
@@ -304,16 +284,7 @@ public class WalletRewardService implements RewardService {
       if (identityId == null || identityId == 0) {
         identityIdsIterator.remove();
       }
-      Wallet wallet = null;
-      try {
-        wallet = walletAccountService.getWalletByIdentityId(identityId);
-      } catch (Exception e) {
-        if (LOG.isDebugEnabled()) {
-          LOG.warn("Error while getting wallet of identity with id {}", identityId, e);
-        } else {
-          LOG.warn("Error while getting wallet of identity with id {}. Reason: {}", identityId, e.getMessage());
-        }
-      }
+      Wallet wallet = walletAccountService.getWalletByIdentityId(identityId);
       if (wallet == null) {
         identityIdsIterator.remove();
         continue;
@@ -638,10 +609,17 @@ public class WalletRewardService implements RewardService {
     });
   }
 
-  private WalletTokenAdminService getTokenTransactionService() {
-    if (walletTokenTransactionService == null) {
-      walletTokenTransactionService = CommonsUtils.getService(WalletTokenAdminService.class);
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
-    return walletTokenTransactionService;
+    return walletTokenAdminService;
   }
 }

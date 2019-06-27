@@ -5,19 +5,19 @@ import java.util.stream.Collectors;
 
 import org.exoplatform.addon.wallet.dao.AddressLabelDAO;
 import org.exoplatform.addon.wallet.entity.AddressLabelEntity;
-import org.exoplatform.addon.wallet.model.AddressLabel;
+import org.exoplatform.addon.wallet.model.WalletAddressLabel;
 
 public class AddressLabelStorage {
 
-  private AddressLabelDAO   addressLabelDAO;
+  private AddressLabelDAO         addressLabelDAO;
 
-  private Set<AddressLabel> allLabels;
+  private Set<WalletAddressLabel> allLabels;
 
   public AddressLabelStorage(AddressLabelDAO addressLabelDAO) {
     this.addressLabelDAO = addressLabelDAO;
   }
 
-  public Set<AddressLabel> getAllLabels() {
+  public Set<WalletAddressLabel> getAllLabels() {
     if (this.allLabels != null) {
       return this.allLabels;
     }
@@ -31,7 +31,7 @@ public class AddressLabelStorage {
     return this.allLabels;
   }
 
-  public AddressLabel saveLabel(AddressLabel label) {
+  public WalletAddressLabel saveLabel(WalletAddressLabel label) {
     if (label == null) {
       throw new IllegalArgumentException("label is mandatory");
     }
@@ -46,18 +46,18 @@ public class AddressLabelStorage {
     return fromEntity(entity);
   }
 
-  public AddressLabel getLabel(long id) {
+  public WalletAddressLabel getLabel(long id) {
     return fromEntity(addressLabelDAO.find(id));
   }
 
-  public void removeLabel(AddressLabel label) {
+  public void removeLabel(WalletAddressLabel label) {
     if (label.getId() > 0) {
       addressLabelDAO.delete(toEntity(label));
       this.allLabels = null;
     }
   }
 
-  private AddressLabelEntity toEntity(AddressLabel label) {
+  private AddressLabelEntity toEntity(WalletAddressLabel label) {
     if (label == null) {
       return null;
     }
@@ -69,14 +69,14 @@ public class AddressLabelStorage {
     return entity;
   }
 
-  private AddressLabel fromEntity(AddressLabelEntity entity) {
+  private WalletAddressLabel fromEntity(AddressLabelEntity entity) {
     if (entity == null) {
       return null;
     }
-    return new AddressLabel(entity.getId(),
-                            entity.getIdentityId(),
-                            entity.getLabel(),
-                            entity.getAddress());
+    return new WalletAddressLabel(entity.getId(),
+                                  entity.getIdentityId(),
+                                  entity.getLabel(),
+                                  entity.getAddress());
   }
 
 }

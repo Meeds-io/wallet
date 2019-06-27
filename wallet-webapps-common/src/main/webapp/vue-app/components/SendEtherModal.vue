@@ -75,7 +75,7 @@ export default {
         return null;
       },
     },
-    isReadonly: {
+    isReadOnly: {
       type: Boolean,
       default: function() {
         return false;
@@ -119,7 +119,7 @@ export default {
   },
   computed: {
     disabled() {
-      return this.isReadonly || !this.balance || Number(this.balance) === 0;
+      return this.isReadOnly || !this.balance || Number(this.balance) === 0;
     },
   },
   watch: {

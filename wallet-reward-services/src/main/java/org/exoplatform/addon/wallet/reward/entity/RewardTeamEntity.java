@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.addon.wallet.reward.model.RewardBudgetType;
+import org.exoplatform.addon.wallet.model.reward.RewardBudgetType;
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
 @Entity(name = "RewardTeam")

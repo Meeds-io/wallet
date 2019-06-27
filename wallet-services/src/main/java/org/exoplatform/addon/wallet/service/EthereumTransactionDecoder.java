@@ -17,6 +17,7 @@
 package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.contract.ERTTokenV2.*;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.isWalletEmpty;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -30,7 +31,9 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.WalletInitializationState;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -115,16 +118,14 @@ public class EthereumTransactionDecoder {
     CONTRACT_METHODS_BY_SIG.put(DATA_UPGRADED_SIGNATURE, FUNC_UPGRADEDATA);
   }
 
-  private EthereumWalletContractService contractService;
+  private WalletAccountService    accountService;
 
-  private WalletAccountService          accountService;
+  private WalletContractService   contractService;
 
-  private EthereumClientConnector       ethereumClientConnector;
+  private EthereumClientConnector ethereumClientConnector;
 
-  public EthereumTransactionDecoder(EthereumClientConnector ethereumClientConnector,
-                                    EthereumWalletContractService contractService) {
+  public EthereumTransactionDecoder(EthereumClientConnector ethereumClientConnector) {
     this.ethereumClientConnector = ethereumClientConnector;
-    this.contractService = contractService;
   }
 
   public TransactionDetail computeTransactionDetail(long networkId,
@@ -163,7 +164,7 @@ public class EthereumTransactionDecoder {
     }
 
     Block block = ethereumClientConnector.getBlock(transaction.getBlockHash());
-    transactionDetail.setTimestamp(block.getTimestamp().longValue());
+    transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
 
     String senderAddress = transaction.getFrom();
     transactionDetail.setFrom(senderAddress);
@@ -178,18 +179,24 @@ public class EthereumTransactionDecoder {
     transactionDetail.setTo(receiverAddress);
 
     if (contractDetail == null && receiverAddress != null) {
-      contractDetail = contractService.getContractDetail(receiverAddress, transactionDetail.getNetworkId());
+      contractDetail = getContractService().getContractDetail(receiverAddress);
     }
 
-    if (contractDetail != null) {
+    if (contractDetail != null && StringUtils.isNotBlank(contractDetail.getAddress())) {
       transactionDetail.setContractAddress(contractDetail.getAddress());
-      computeContractTransactionDetail(transactionDetail, transactionReceipt);
+      computeContractTransactionDetail(contractDetail, transactionDetail, transactionReceipt);
     }
 
     return transactionDetail;
   }
 
   public void computeContractTransactionDetail(TransactionDetail transactionDetail,
+                                               TransactionReceipt transactionReceipt) {
+    computeContractTransactionDetail(null, transactionDetail, transactionReceipt);
+  }
+
+  public void computeContractTransactionDetail(ContractDetail contractDetail,
+                                               TransactionDetail transactionDetail,
                                                TransactionReceipt transactionReceipt) {
     List<org.web3j.protocol.core.methods.response.Log> logs = transactionReceipt == null ? null : transactionReceipt.getLogs();
     transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
@@ -200,10 +207,11 @@ public class EthereumTransactionDecoder {
       return;
     }
 
-    String contractAddress = transactionReceipt == null ? null : transactionReceipt.getTo();
-    ContractDetail contractDetail =
-                                  contractService.getContractDetail(contractAddress, transactionDetail.getNetworkId());
+    String toAddress = transactionReceipt == null ? null : transactionReceipt.getTo();
     if (contractDetail == null) {
+      contractDetail = getContractService().getContractDetail(StringUtils.lowerCase(toAddress));
+    }
+    if (contractDetail == null || !StringUtils.equalsIgnoreCase(toAddress, contractDetail.getAddress())) {
       return;
     }
     Integer contractDecimals = contractDetail.getDecimals();
@@ -226,6 +234,9 @@ public class EthereumTransactionDecoder {
         String topic = topics.get(0);
         LOG.debug("Treating transaction {} with {} topics", hash, topics.size());
         String methodName = CONTRACT_METHODS_BY_SIG.get(topic);
+        if (StringUtils.isBlank(methodName)) {
+          continue;
+        }
         transactionDetail.setContractMethodName(methodName);
         if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
           EventValues parameters = extractEventParameters(TRANSFER_EVENT, log);
@@ -386,6 +397,16 @@ public class EthereumTransactionDecoder {
         }
       }
     }
+    // Compute wallets
+    if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
+      transactionDetail.setFromWallet(getAccountService().getWalletByAddress(transactionDetail.getFrom()));
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
+      transactionDetail.setToWallet(getAccountService().getWalletByAddress(transactionDetail.getTo()));
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
+      transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
+    }
   }
 
   @SuppressWarnings("rawtypes")
@@ -414,4 +435,10 @@ public class EthereumTransactionDecoder {
     return accountService;
   }
 
+  public WalletContractService getContractService() {
+    if (contractService == null) {
+      contractService = CommonsUtils.getService(WalletContractService.class);
+    }
+    return contractService;
+  }
 }

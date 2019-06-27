@@ -20,12 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.exoplatform.addon.wallet.model.reward.RewardTeam;
+import org.exoplatform.addon.wallet.model.reward.RewardTeamMember;
 import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamMemberEntity;
-import org.exoplatform.addon.wallet.reward.model.RewardTeam;
-import org.exoplatform.addon.wallet.reward.model.RewardTeamMember;
-import org.exoplatform.addon.wallet.reward.service.RewardTeamService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;

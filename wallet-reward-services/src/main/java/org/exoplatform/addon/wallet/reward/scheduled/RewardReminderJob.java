@@ -6,9 +6,9 @@ import java.util.*;
 
 import org.quartz.*;
 
-import org.exoplatform.addon.wallet.reward.model.*;
+import org.exoplatform.addon.wallet.model.reward.*;
+import org.exoplatform.addon.wallet.model.task.WalletAdminTask;
 import org.exoplatform.addon.wallet.reward.service.RewardSettingsService;
-import org.exoplatform.addon.wallet.task.model.WalletAdminTask;
 import org.exoplatform.addon.wallet.task.service.WalletTaskService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;

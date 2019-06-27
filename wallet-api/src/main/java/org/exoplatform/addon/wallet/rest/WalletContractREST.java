@@ -31,12 +31,11 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to save/delete a contract as default
- * displayed contracts for end users
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/contract")
 @RolesAllowed("users")
+@Api(value = "/wallet/api/contract", description = "Manages internally stored token contract detail") // NOSONAR
 public class WalletContractREST implements ResourceContainer {
 
   private static final Log      LOG = ExoLogger.getLogger(WalletContractREST.class);
@@ -47,44 +46,42 @@ public class WalletContractREST implements ResourceContainer {
     this.contractService = contractService;
   }
 
-  /**
-   * Return saved contract details by address
-   * 
-   * @param address token contract address
-   * @param networkId token contract blockchain network id
-   * @return REST Response with contract details
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("getContract")
   @RolesAllowed("users")
-  public Response getContract(@QueryParam("address") String address, @QueryParam("networkId") Long networkId) {
+  @ApiOperation(value = "Retrieves stored contract details in internal datasource", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract detail object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getContract(@ApiParam(value = "contract address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn("Empty contract address");
       return Response.status(400).build();
     }
     try {
-      ContractDetail contractDetail = contractService.getContractDetail(address, networkId);
+      ContractDetail contractDetail = contractService.getContractDetail(address);
       if (contractDetail == null) {
         contractDetail = new ContractDetail();
       }
       return Response.ok(contractDetail).build();
     } catch (Exception e) {
-      LOG.warn("Error getting contract details: " + address + " on network with id " + networkId, e);
+      LOG.error("Error getting contract details: " + address, e);
       return Response.serverError().build();
     }
   }
 
-  /**
-   * Return contract bin content
-   * 
-   * @param name contract name to retrieve
-   * @return REST Response with contract bin content
-   */
   @GET
   @Path("bin/{name}")
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response getBin(@PathParam("name") String name) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Retrieves contract binary", httpMethod = "GET", response = Response.class, notes = "returns contract bin content")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getBin(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(400).build();
@@ -97,22 +94,22 @@ public class WalletContractREST implements ResourceContainer {
       String contractBin = contractService.getContractFileContent(name, "bin");
       return Response.ok(contractBin).build();
     } catch (Exception e) {
-      LOG.warn("Error retrieving contract BIN: " + name, e);
+      LOG.error("Error retrieving contract BIN: " + name, e);
       return Response.serverError().build();
     }
   }
 
-  /**
-   * Return contract abi content
-   * 
-   * @param name contract name to retrieve
-   * @return REST Response with contract abi content
-   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("abi/{name}")
-  @RolesAllowed({ "rewarding", "administrators" })
-  public Response getAbi(@PathParam("name") String name) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Retrieves contract ABI", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract ABI object")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getAbi(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(400).build();
@@ -125,72 +122,27 @@ public class WalletContractREST implements ResourceContainer {
       String contractAbi = contractService.getContractFileContent(name, "json");
       return Response.ok(contractAbi).build();
     } catch (Exception e) {
-      LOG.warn("Error retrieving contract ABI: " + name, e);
+      LOG.error("Error retrieving contract ABI: " + name, e);
       return Response.serverError().build();
     }
   }
 
-  /**
-   * Save a new contract address to display it in wallet of all users and save
-   * contract name and symbol
-   * 
-   * @param contractDetail contract detail to save
-   * @return REST response with status
-   */
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("save")
-  @RolesAllowed("administrators")
-  public Response saveContract(ContractDetail contractDetail) {
-    if (contractDetail == null) {
-      LOG.warn("Can't save empty contract");
-      return Response.status(400).build();
-    }
-    if (contractDetail.getAddress() == null) {
-      LOG.warn("Can't save empty address for contract");
-      return Response.status(400).build();
-    }
-    if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() == 0) {
-      LOG.warn("Can't remove empty network id for contract");
-      return Response.status(400).build();
-    }
-    contractDetail.setAddress(contractDetail.getAddress().toLowerCase());
+  @GET
+  @Path("refresh")
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Refreshes contract detail from blockchain and store it in internal datasource", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response refreshContract() {
     try {
-      contractService.saveContract(contractDetail);
-      LOG.info("{} saved contract details '{}'", getCurrentUserId(), contractDetail.toJSONString());
+      contractService.refreshContractDetail();
+      LOG.info("User {} is refreshing Token from blockchain", getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
-      LOG.warn("Error saving contract as default: " + contractDetail.getAddress(), e);
-      return Response.serverError().build();
-    }
-  }
-
-  /**
-   * Removes a contract address from default contracts displayed in wallet of
-   * all users
-   * 
-   * @param address cotnract address to remove
-   * @param networkId blockchain network id where contract is deployed
-   * @return REST response with status
-   */
-  @POST
-  @Path("remove")
-  @RolesAllowed("administrators")
-  public Response removeContract(@FormParam("address") String address, @FormParam("networkId") Long networkId) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn("Can't remove empty address for contract");
-      return Response.status(400).build();
-    }
-    if (networkId == null || networkId == 0) {
-      LOG.warn("Can't remove empty network id for contract");
-      return Response.status(400).build();
-    }
-    try {
-      contractService.removeDefaultContract(address.toLowerCase(), networkId);
-      LOG.info("{} removed contract details '{}'", getCurrentUserId(), address);
-      return Response.ok().build();
-    } catch (Exception e) {
-      LOG.warn("Error removing default contract: " + address, e);
+      LOG.error("Error refreshing Token from blockchain", e);
       return Response.serverError().build();
     }
   }

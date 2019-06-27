@@ -6,7 +6,10 @@
     :href="url"
     rel="nofollow"
     target="_blank">
-    <template v-if="disapproved">
+    <template v-if="noStatus">
+      {{ displayName }}
+    </template>
+    <template v-else-if="disapproved">
       <del class="red--text">{{ displayName }}</del> (Disapproved)
     </template>
     <template v-else-if="deletedUser">
@@ -132,6 +135,12 @@ export default {
       },
     },
     disabledUser: {
+      type: Boolean,
+      default: function() {
+        return false;
+      },
+    },
+    noStatus: {
       type: Boolean,
       default: function() {
         return false;

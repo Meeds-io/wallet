@@ -26,7 +26,8 @@
         "EthereumQRPlugin": true,
         "isMaximized": true,
         "abiDecoder": true,
-        "WalletCommon": true
+        "WalletCommon": true,
+        "VueChart": true
     },
     "parserOptions": {
         "sourceType": "module",

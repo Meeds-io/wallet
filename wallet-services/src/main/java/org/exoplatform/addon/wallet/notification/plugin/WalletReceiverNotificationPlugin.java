@@ -20,8 +20,8 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.util.List;
 
-import org.exoplatform.addon.wallet.model.TransactionNotificationType;
 import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.transaction.TransactionNotificationType;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;

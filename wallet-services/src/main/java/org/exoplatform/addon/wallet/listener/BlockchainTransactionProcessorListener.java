@@ -16,13 +16,15 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.hasKnownWalletInTransaction;
+
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import org.exoplatform.addon.wallet.model.MinedTransactionDetail;
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.MinedTransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
@@ -100,17 +102,19 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
       // Ensure that stored transaction has a timestamp
       if (transactionDetail.getTimestamp() == 0) {
         if (blockTimestamp != null) {
-          transactionDetail.setTimestamp(blockTimestamp);
+          transactionDetail.setTimestamp(blockTimestamp * 1000);
         } else if (StringUtils.isNotBlank(blockHash)) {
           Block block = getEthereumClientConnector().getBlock(blockHash);
-          transactionDetail.setTimestamp(block.getTimestamp().longValue());
+          transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
         }
       }
 
       // Ensure that all fields are computed correctly
       getTransactionDecoderService().computeContractTransactionDetail(transactionDetail, transactionReceipt);
 
-      getTransactionService().saveTransactionDetail(transactionDetail, broadcastSavingTransaction);
+      if (hasKnownWalletInTransaction(transactionDetail)) {
+        getTransactionService().saveTransactionDetail(transactionDetail, broadcastSavingTransaction);
+      }
     } finally {
       RequestLifeCycle.end();
     }

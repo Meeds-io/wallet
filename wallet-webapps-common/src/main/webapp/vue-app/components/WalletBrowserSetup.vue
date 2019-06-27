@@ -10,15 +10,14 @@
           :is-space="isSpace"
           :wallet-address="walletAddress"
           @configured="$emit('configured')" />
-        <div>
-          Or
-        </div>
-        <a href="javascript:void(0);" @click="switchToMetamask">
-          Use metamask
-        </a>
       </template>
       <template v-else>
-        <v-form ref="form">
+        <v-form
+          ref="form"
+          @submit="
+            $event.preventDefault();
+            $event.stopPropagation();
+          ">
           <v-text-field
             v-if="!loading"
             v-model="walletPassword"
@@ -49,7 +48,7 @@
 <script>
 import WalletImportKeyModal from './WalletImportKeyModal.vue';
 
-import {enableMetamask, initEmptyWeb3Instance, saveBrowserWalletInstance} from '../js/WalletUtils.js';
+import {initEmptyWeb3Instance, saveBrowserWalletInstance} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -116,7 +115,7 @@ export default {
         initEmptyWeb3Instance();
       }
       if (window.walletSettings && window.walletSettings.userPreferences) {
-        this.walletAddress = window.walletSettings.userPreferences.walletAddress;
+        this.walletAddress = window.walletSettings.wallet.address;
       }
     },
     createWallet() {
@@ -147,10 +146,6 @@ export default {
           this.$emit('error', 'Error saving new Wallet address');
           this.loadingWalletBrowser = false;
         });
-    },
-    switchToMetamask() {
-      enableMetamask(this.isSpace);
-      this.$emit('configured');
     },
   },
 };

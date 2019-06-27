@@ -45,7 +45,7 @@
       <span>Eligible pools users: <strong>{{ eligiblePoolsUsersCount }}</strong></span>
     </h4>
     <h4 v-show="!selectedTeam" class="text-xs-center">
-      <span>Total pools budget: <strong>{{ toFixed(poolsBudget) }} {{ symbol }}</strong></span>
+      <span>Total pools budget: <strong>{{ walletUtils.toFixed(poolsBudget) }} {{ symbol }}</strong></span>
     </h4>
     <v-container
       v-show="!selectedTeam"
@@ -114,7 +114,7 @@
                     Fixed budget per member:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
-                    {{ Number(toFixed(props.item.rewardPerMember)) }} {{ symbol }}
+                    {{ Number(walletUtils.toFixed(props.item.rewardPerMember)) }} {{ symbol }}
                   </v-list-tile-content>
                 </v-list-tile>
                 <v-list-tile v-if="props.item.rewardType === 'COMPUTED'">
@@ -159,7 +159,7 @@
                     </strong>
                   </v-list-tile-content>
                   <v-list-tile-content v-else class="align-end">
-                    {{ Number(toFixed(props.item.computedBudget)) }} {{ symbol }}
+                    {{ Number(walletUtils.toFixed(props.item.computedBudget)) }} {{ symbol }}
                   </v-list-tile-content>
                 </v-list-tile>
                 <v-list-tile>
@@ -174,7 +174,7 @@
                     </strong>
                   </v-list-tile-content>
                   <v-list-tile-content v-else class="align-end">
-                    {{ toFixed(Number(props.item.computedBudget) / props.item.validMembersWallets.length) }} {{ symbol }}
+                    {{ walletUtils.toFixed(Number(props.item.computedBudget) / props.item.validMembersWallets.length) }} {{ symbol }}
                   </v-list-tile-content>
                 </v-list-tile>
               </v-list>

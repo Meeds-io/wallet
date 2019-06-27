@@ -1,4 +1,4 @@
-<% String openURL = HASH == null ? BASE_URL : BASE_URL + "?hash=" + HASH + "&contract=" + CONTRACT_ADDRESS; %>
+<% String openURL = HASH == null ? BASE_URL : BASE_URL + "?hash=" + HASH; %>
 <li class="$READ clearfix" data-id="$NOTIFICATION_ID">
   <div class="media">
     <div class="avatarXSmall pull-left">

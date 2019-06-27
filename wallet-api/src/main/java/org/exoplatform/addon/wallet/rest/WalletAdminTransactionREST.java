@@ -24,75 +24,40 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.model.TransactionDetail;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 
-/**
- * This class provide a REST endpoint to manage transactions served by admin
- * wallet
- */
+import io.swagger.annotations.*;
+
 @Path("/wallet/api/admin/transaction")
-@RolesAllowed("administrators")
+@RolesAllowed("rewarding")
+@Api(value = "/wallet/api/admin/transaction", description = "Manages admin wallet transactions to send on blockchain") // NOSONAR
 public class WalletAdminTransactionREST implements ResourceContainer {
 
   private static final String     BAD_REQUEST_SENT_TO_SERVER_BY = "Bad request sent to server by '";
 
   private static final Log        LOG                           = ExoLogger.getLogger(WalletAdminTransactionREST.class);
 
-  private WalletTokenAdminService tokenTransactionService;
-
-  /**
-   * Send transaction to wallet identified by address with possible transaction
-   * types: - initialize - approve - disapprove
-   * 
-   * @param address Wallet address to process
-   * @param action Wallet address to process
-   * @return REST response with status
-   */
-  @POST
-  @RolesAllowed("administrators")
-  public Response executeTransactionOnWallet(@FormParam("action") String action, @FormParam("address") String address) {
-    String currentUserId = getCurrentUserId();
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
-      return Response.status(400).build();
-    }
-    if (StringUtils.isBlank(action)) {
-      LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty action");
-      return Response.status(400).build();
-    }
-
-    TransactionDetail transactionDetail = null;
-    try {
-      if (StringUtils.equals(action, "initialize")) {
-        transactionDetail = getTokenTransactionService().initialize(address, currentUserId);
-      } else if (StringUtils.equals(action, "approve")) {
-        transactionDetail = getTokenTransactionService().approveAccount(address, currentUserId);
-      } else if (StringUtils.equals(action, "disapprove")) {
-        transactionDetail = getTokenTransactionService().disapproveAccount(address, currentUserId);
-      } else {
-        LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with action: " + action);
-        return Response.status(400).build();
-      }
-      return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
-    } catch (Exception e) {
-      LOG.warn("Error processing action {} on wallet {}", action, address, e);
-      return Response.serverError().build();
-    }
-  }
+  private WalletTokenAdminService walletTokenAdminService;
 
   @POST
   @Path("intiialize")
-  @RolesAllowed("administrators")
-  public Response intializeWallet(@FormParam("receiver") String receiver,
-                                  @FormParam("etherAmount") double etherAmount,
-                                  @FormParam("tokenAmount") double tokenAmount,
-                                  @FormParam("transactionLabel") String transactionLabel,
-                                  @FormParam("transactionMessage") String transactionMessage) {
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address", httpMethod = "POST", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response intializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                                  @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
+                                  @ApiParam(value = "token amount to send to wallet", required = false) @FormParam("tokenAmount") double tokenAmount,
+                                  @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
+                                  @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
@@ -106,19 +71,26 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = getTokenTransactionService().initialize(transactionDetail, currentUserId);
+      transactionDetail = getWalletTokenAdminService().initialize(transactionDetail, currentUserId);
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
-      LOG.warn("Error initializing wallet {}", receiver, e);
+      LOG.error("Error initializing wallet {}", receiver, e);
       return Response.serverError().build();
     }
   }
 
-  private WalletTokenAdminService getTokenTransactionService() {
-    if (tokenTransactionService == null) {
-      tokenTransactionService = CommonsUtils.getService(WalletTokenAdminService.class);
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getWalletTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
-    return tokenTransactionService;
+    return walletTokenAdminService;
   }
 
 }
