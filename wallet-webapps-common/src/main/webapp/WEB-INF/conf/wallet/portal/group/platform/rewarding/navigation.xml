@@ -44,11 +44,6 @@
                 <label>Reward</label>
                 <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
             </node>
-            <node>
-                <name>contractAdministration</name>
-                <label>Contract</label>
-                <page-reference>group::/platform/rewarding::contractAdministration</page-reference>
-            </node>
         </node>
     </page-nodes>
 </node-navigation>

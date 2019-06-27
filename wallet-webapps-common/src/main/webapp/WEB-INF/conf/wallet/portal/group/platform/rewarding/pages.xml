@@ -53,19 +53,4 @@
             <show-info-bar>false</show-info-bar>
         </portlet-application>
     </page>
-    <page>
-        <name>contractAdministration</name>
-        <title>Contract administration</title>
-        <access-permissions>member:/platform/rewarding</access-permissions>
-        <edit-permission>manager:/platform/rewarding</edit-permission>
-        <portlet-application>
-            <portlet>
-                <application-ref>wallet-admin</application-ref>
-                <portlet-ref>WalletAdminToken</portlet-ref>
-            </portlet>
-            <title>Contract administration</title>
-            <access-permissions>manager:/platform/rewarding</access-permissions>
-            <show-info-bar>false</show-info-bar>
-        </portlet-application>
-    </page>
 </page-set>
