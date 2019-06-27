@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.external;
+package org.exoplatform.addon.wallet.service.blockchain;
 
 import java.io.IOException;
 import java.security.Provider;
@@ -64,9 +64,9 @@ public class ServiceLoaderServlet extends HttpServlet {
         container.registerComponentInstance(WalletTokenAdminService.class,
                                             service);
         service.start();
-        LOG.debug("EthereumWalletTokenAdminService instance created.");
+        LOG.debug(EthereumWalletTokenAdminService.class.getSimpleName(), " service instance created");
       } catch (Exception e) {
-        LOG.warn("Can't create service with class EthereumWalletTokenAdminService", e);
+        LOG.warn("Error registering service into portal container", e);
       } finally {
         currentThread.setContextClassLoader(currentClassLoader);
         RequestLifeCycle.end();

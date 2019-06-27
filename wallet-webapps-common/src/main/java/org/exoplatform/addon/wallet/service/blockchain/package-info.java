@@ -11,4 +11,4 @@
  * 
  * See PLF-8123
  */
-package org.exoplatform.addon.wallet.external;
+package org.exoplatform.addon.wallet.service.blockchain;

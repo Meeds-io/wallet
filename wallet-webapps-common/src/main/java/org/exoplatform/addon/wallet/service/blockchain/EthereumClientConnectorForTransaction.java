@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.addon.wallet.external;
+package org.exoplatform.addon.wallet.service.blockchain;
 
 import java.io.IOException;
 import java.net.URI;
@@ -201,23 +201,26 @@ public class EthereumClientConnectorForTransaction {
     return new WebSocketListener() {
       @Override
       public void onMessage(String message) throws IOException {
-        LOG.debug("A new message is received in testConnection method");
+        LOG.debug("A new message is received from blockchain: {}", message);
       }
 
       @Override
       public void onError(Exception e) {
-        LOG.warn(getConnectionFailedMessage());
+        if (LOG.isDebugEnabled()) {
+          LOG.warn(getConnectionFailedMessage(), e);
+        } else {
+          LOG.warn(getConnectionFailedMessage());
+        }
       }
 
       @Override
       public void onClose() {
-        LOG.debug("Websocket connection closed for testConnection method");
+        LOG.debug("Websocket connection closed");
+      }
+
+      private String getConnectionFailedMessage() {
+        return "Connection failed to " + getWebsocketProviderURL();
       }
     };
   }
-
-  private String getConnectionFailedMessage() {
-    return "Connection failed to " + getWebsocketProviderURL();
-  }
-
 }

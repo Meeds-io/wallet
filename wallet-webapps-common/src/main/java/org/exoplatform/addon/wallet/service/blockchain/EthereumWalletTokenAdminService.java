@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.external;
+package org.exoplatform.addon.wallet.service.blockchain;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
