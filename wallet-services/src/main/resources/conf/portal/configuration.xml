@@ -44,7 +44,7 @@
       <value-param>
         <name>admin.wallet.key</name>
         <description>Admin wallet password encryption for first security level</description>
-        <value>${exo.addon.wallet.admin.key:changeThisKey}</value>
+        <value>${exo.wallet.admin.key:changeThisKey}</value>
       </value-param>
     </init-params>
   </component>
@@ -56,7 +56,7 @@
       <value-param>
         <name>transaction.pending.maxDays</name>
         <description>Maximum days to wait until transaction is added to blockchain, if exxceeding this duration, transaction will be marked as failed</description>
-        <value>${exo.addon.wallet.transaction.pending.maxDays:3}</value>
+        <value>${exo.wallet.transaction.pending.maxDays:3}</value>
       </value-param>
     </init-params>
   </component>
@@ -68,12 +68,12 @@
       <value-param>
         <name>contract.abi.path</name>
         <description>Token Contract ABI path</description>
-        <value>${exo.addon.wallet.contract.abi.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.json}</value>
+        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.json}</value>
       </value-param>
       <value-param>
         <name>contract.bin.path</name>
         <description>Token Contract BIN path</description>
-        <value>${exo.addon.wallet.contract.bin.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.bin}</value>
+        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.bin}</value>
       </value-param>
     </init-params>
   </component>
@@ -170,6 +170,15 @@
           <value>org.exoplatform.addon.wallet.plugin.WalletAdminIdentityProvider</value>
         </values-param>
       </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.commons.api.settings.ExoFeatureService</target-component>
+    <component-plugin>
+      <name>wallet</name>
+      <set-method>addFeaturePlugin</set-method>
+      <type>org.exoplatform.addon.wallet.plugin.WalletFeaturePlugin</type>
     </component-plugin>
   </external-component-plugins>
 
@@ -464,7 +473,7 @@
           <property name="jobName" value="PendingTransactionVerifierJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.addon.wallet.scheduled.PendingTransactionVerifierJob"/>
-          <property name="expression" value="${exo.addon.wallet.PendingTransactionVerifierJob.expression:0/10 * * * * ?}"/>
+          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0/10 * * * * ?}"/>
         </properties-param>
       </init-params>
     </component-plugin>
@@ -480,7 +489,7 @@
           <property name="jobName" value="ContractTransactionVerifierJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.addon.wallet.scheduled.ContractTransactionVerifierJob"/>
-          <property name="expression" value="${exo.addon.wallet.ContractTransactionVerifierJob.expression:0 0 * ? * * *}"/>
+          <property name="expression" value="${exo.wallet.ContractTransactionVerifierJob.expression:0 0 * ? * * *}"/>
         </properties-param>
       </init-params>
     </component-plugin>

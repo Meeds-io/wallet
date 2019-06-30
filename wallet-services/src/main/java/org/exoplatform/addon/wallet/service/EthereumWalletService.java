@@ -38,7 +38,6 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
 
 /**
@@ -194,19 +193,15 @@ public class EthereumWalletService implements WalletService, Startable {
 
     UserSettings userSettings = new UserSettings(globalSettings);
     userSettings.setAdmin(isUserAdmin(currentUser));
-    userSettings.setWalletEnabled(true);
 
     String accessPermission = globalSettings.getAccessPermission();
-    if (StringUtils.isNotBlank(accessPermission)) {
-      Space space = getSpace(accessPermission);
-      // Disable wallet for users not member of the permitted space members
-      if (!isUserMemberOf(currentUser, accessPermission) && (space != null && !getSpaceService().isMember(space, currentUser))) {
-        LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
-                  currentUser,
-                  accessPermission);
-        userSettings.setWalletEnabled(false);
-        return userSettings;
-      }
+    boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
+    userSettings.setWalletEnabled(walletEnabled);
+    if (!walletEnabled) {
+      LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
+                currentUser,
+                accessPermission);
+      return userSettings;
     }
 
     Wallet wallet = null;

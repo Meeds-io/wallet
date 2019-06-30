@@ -348,14 +348,24 @@ public class WalletUtils {
   }
 
   public static final boolean isUserAdmin(String username) {
-    return isUserMemberOf(username, ADMINISTRATORS_GROUP);
+    return isUserMemberOfGroupOrUser(username, ADMINISTRATORS_GROUP);
   }
 
   public static final boolean isUserRewardingAdmin(String username) {
-    return isUserMemberOf(username, REWARDINGS_GROUP);
+    return isUserMemberOfGroupOrUser(username, REWARDINGS_GROUP);
   }
 
-  public static final boolean isUserMemberOf(String username, String permissionExpression) {
+  public static final boolean isUserMemberOfSpaceOrGroupOrUser(String username, String accessPermission) {
+    boolean isMember = true;
+    if (StringUtils.isNotBlank(accessPermission)) {
+      Space space = getSpace(accessPermission);
+      isMember = (space != null && getSpaceService().isMember(space, username))
+          || isUserMemberOfGroupOrUser(username, accessPermission);
+    }
+    return isMember;
+  }
+
+  public static final boolean isUserMemberOfGroupOrUser(String username, String permissionExpression) {
     if (StringUtils.isBlank(permissionExpression)) {
       throw new IllegalArgumentException("Permission expression is mandatory");
     }
@@ -379,7 +389,7 @@ public class WalletUtils {
       String[] permissionExpressionParts = permissionExpression.split(":");
       membership = new MembershipEntry(permissionExpressionParts[1], permissionExpressionParts[0]);
     } else if (permissionExpression.contains("/")) {
-      membership = new MembershipEntry(permissionExpression);
+      membership = new MembershipEntry(permissionExpression, MembershipEntry.ANY_TYPE);
     } else {
       return StringUtils.equals(username, permissionExpression);
     }
@@ -626,6 +636,10 @@ public class WalletUtils {
 
   private static final WalletService getWalletService() {
     return CommonsUtils.getService(WalletService.class);
+  }
+
+  private static final SpaceService getSpaceService() {
+    return CommonsUtils.getService(SpaceService.class);
   }
 
 }

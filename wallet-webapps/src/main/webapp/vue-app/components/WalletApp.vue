@@ -336,7 +336,6 @@ export default {
             throw new Error('Wallet disabled for current user');
           } else {
             this.isWalletEnabled = true;
-            this.initMenuApp();
             this.isSpaceAdministrator = this.settings.wallet.spaceAdministrator;
             if (this.settings.wallet.address) {
               this.$forceUpdate();
@@ -453,28 +452,6 @@ export default {
           this.openAccountDetail(null, parameters.hash);
         }
       }
-    },
-    initMenuApp() {
-      if (!this.isWalletEnabled || this.isSpace) {
-        return;
-      }
-      this.$nextTick(() => {
-        if ($('#myWalletTad').length) {
-          return;
-        }
-        if (!$('.userNavigation .item').length) {
-          setTimeout(this.initMenuApp, 500);
-          return;
-        }
-        $('.userNavigation').append(` \
-          <li id='myWalletTad' class='item active'> \
-            <a href='${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet'> \
-              <div class='uiIconAppWallet uiIconDefaultApp' /> \
-              <span class='tabName'>My Wallet</span> \
-            </a> \
-          </li>`);
-        $(window).trigger('resize');
-      });
     },
   },
 };
