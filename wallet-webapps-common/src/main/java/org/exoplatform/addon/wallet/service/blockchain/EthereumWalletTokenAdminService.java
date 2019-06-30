@@ -3,6 +3,7 @@ package org.exoplatform.addon.wallet.service.blockchain;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.response.EmptyTransactionReceipt;
 import org.web3j.tx.response.QueuingTransactionReceiptProcessor;
+import org.web3j.utils.Convert.Unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -283,12 +285,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
     }
     String receiver = transactionDetail.getTo();
-    double amount = transactionDetail.getContractAmount();
     if (StringUtils.isBlank(receiver)) {
       throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    if (amount < 0) {
-      throw new IllegalArgumentException("token amount parameter has to be a positive amount");
     }
 
     checkAdminWalletIsValid();
@@ -336,6 +334,49 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setFrom(adminWalletAddress);
     transactionDetail.setContractAddress(contractAddress);
     transactionDetail.setContractMethodName(ERTTokenV2.FUNC_INITIALIZEACCOUNT);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setAdminOperation(false);
+    transactionDetail.setPending(true);
+
+    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    return transactionDetail;
+  }
+
+  @Override
+  public TransactionDetail sendEther(TransactionDetail transactionDetail, String currentUserId) throws Exception {
+    if (transactionDetail == null) {
+      throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
+    }
+    String receiverAddress = transactionDetail.getTo();
+    if (StringUtils.isBlank(receiverAddress)) {
+      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
+    }
+    if (transactionDetail.getValue() < 0) {
+      throw new IllegalArgumentException("ether amount parameter has to be a positive amount");
+    }
+
+    checkAdminWalletIsValid();
+
+    setIssuer(transactionDetail, currentUserId);
+
+    String adminWalletAddress = getAdminWalletAddress();
+    BigInteger etherAmount = transactionDetail.getValueDecimal(18);
+
+    BigInteger adminEtherBalance = getEtherBalanceOf(adminWalletAddress);
+    if (adminEtherBalance.compareTo(etherAmount) < 0) {
+      throw new IllegalStateException("Wallet admin hasn't enough ether to initialize " + etherAmount.longValue() + " WEI to "
+          + receiverAddress);
+    }
+
+    String transactionHash = executeSendEtherTransaction(transactionDetail.getTo(), transactionDetail.getValue());
+
+    if (StringUtils.isBlank(transactionHash)) {
+      throw new IllegalStateException(TRANSACTION_HASH_IS_EMPTY + transactionDetail);
+    }
+
+    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(adminWalletAddress);
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
@@ -451,6 +492,31 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     int adminLevel = getAdminLevel(adminAddress);
     if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
       throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
+    }
+  }
+
+  private String executeSendEtherTransaction(String receiverAddress, double amountInEther) throws Exception { // NOSONAR
+    Thread currentThread = Thread.currentThread();
+    ClassLoader currentClassLoader = currentThread.getContextClassLoader();
+    currentThread.setContextClassLoader(this.classLoader);
+    try {
+      Credentials adminCredentials = getAdminCredentials();
+      if (adminCredentials == null) {
+        throw new IllegalStateException("Admin credentials are empty");
+      }
+      Web3j web3j = getClientConnector().getWeb3j();
+      TransactionReceipt receipt = Transfer.sendFunds(web3j,
+                                                      adminCredentials,
+                                                      receiverAddress,
+                                                      BigDecimal.valueOf(amountInEther),
+                                                      Unit.ETHER)
+                                           .send();
+      if (receipt == null) {
+        throw new IllegalStateException("Transaction receipt is null");
+      }
+      return receipt.getTransactionHash();
+    } finally {
+      currentThread.setContextClassLoader(currentClassLoader);
     }
   }
 

@@ -16,10 +16,10 @@
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
           <template v-if="wallet && wallet.name">
-            Initialize wallet to {{ wallet.name }}
+            Send ether to {{ wallet.name }}
           </template>
           <template v-else>
-            Initialize wallet
+            Send ether
           </template>
         </span>
       </div>
@@ -43,15 +43,6 @@
               name="etherAmount"
               label="Ether amount"
               placeholder="Set ether amount to send"
-              class="mt-3" />
-
-            <v-text-field
-              v-if="dialog"
-              v-model="tokenAmount"
-              :disabled="loading"
-              name="tokenAmount"
-              label="Token amount"
-              placeholder="Set token amount to send"
               class="mt-3" />
 
             <v-text-field
@@ -108,20 +99,18 @@ export default {
       loading: false,
       wallet: null,
       etherAmount: null,
-      tokenAmount: null,
       transactionLabel: null,
       transactionMessage: null,
       error: null,
     };
   },
   methods: {
-    open(wallet, initialFundsMessage, etherAmount, tokenAmount) {
+    open(wallet, initialFundsMessage, etherAmount) {
       if (!wallet) {
         return;
       }
       this.wallet = wallet;
       this.etherAmount = etherAmount;
-      this.tokenAmount = tokenAmount;
       this.transactionLabel = `Initialize wallet of ${this.wallet.type} ${this.wallet.name}`;
       this.transactionMessage = initialFundsMessage;
 
@@ -132,7 +121,7 @@ export default {
     },
     send() {
       this.loading = true;
-      fetch('/portal/rest/wallet/api/admin/transaction/intiialize', {
+      fetch('/portal/rest/wallet/api/admin/transaction/sendEther', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -141,7 +130,6 @@ export default {
         body: $.param({
           receiver: this.wallet.address,
           etherAmount: this.etherAmount,
-          tokenAmount: this.tokenAmount,
           transactionLabel: this.transactionLabel,
           transactionMessage: this.transactionMessage,
         }),
@@ -149,7 +137,7 @@ export default {
         if (resp && resp.ok) {
           return resp.text();
         } else {
-          throw new Error(`Error intiializing wallet ${this.wallet.address}`);
+          throw new Error(`Error sending ether to wallet ${this.wallet.address}`);
         }
       }).then((hash) => {
         this.$emit('sent', hash);

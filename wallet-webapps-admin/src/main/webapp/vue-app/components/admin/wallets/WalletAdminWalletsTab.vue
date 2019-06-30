@@ -229,6 +229,12 @@
                       </v-list-tile>
                       <v-divider />
                     </template>
+                    <template v-else-if="useWalletAdmin && Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                      <v-list-tile @click="openAcceptSendEtherModal(props.item)">
+                        <v-list-tile-title>Send ether</v-list-tile-title>
+                      </v-list-tile>
+                      <v-divider />
+                    </template>
 
                     <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
                       <v-list-tile-title>Disable wallet</v-list-tile-title>
@@ -256,7 +262,11 @@
 
     <initialize-account-modal
       ref="initAccountModal"
-      @sent="walletInitialized" />
+      @sent="walletPendingTransaction" />
+
+    <send-ether-modal
+      ref="sendEtherModal"
+      @sent="walletPendingTransaction" />
 
     <!-- The selected account detail -->
     <v-navigation-drawer
@@ -285,10 +295,12 @@
 
 <script>
 import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
+import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
 
 export default {
   components: {
     InitializeAccountModal,
+    SendEtherModal,
   },
   props: {
     loading: {
@@ -720,7 +732,7 @@ export default {
         })
         .catch(e => this.error = String(e));
     },
-    walletInitialized(hash) {
+    walletPendingTransaction(hash) {
       this.error = null;
       if (hash) {
         this.$set(this.walletToProcess, 'pendingTransaction', (this.walletToProcess.pendingTransaction || 0) + 1);
@@ -730,6 +742,10 @@ export default {
     openAcceptInitializationModal(wallet) {
       this.walletToProcess = wallet;
       this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
+    },
+    openAcceptSendEtherModal(wallet) {
+      this.walletToProcess = wallet;
+      this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount);
     },
     openDenyInitializationModal(wallet) {
       this.walletToProcess = wallet;
