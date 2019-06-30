@@ -16,7 +16,7 @@
       class="elevation-0 buttomNavigation">
       <v-btn flat value="send">
         <span>
-          Upgrade Token
+          Upgrade {{ contractDetails && contractDetails.name }}
         </span>
         <v-icon>
           send
@@ -30,7 +30,7 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          Upgrade Token to version 3
+          Upgrade {{ contractDetails && contractDetails.name }} to version 3
         </span>
       </div>
 

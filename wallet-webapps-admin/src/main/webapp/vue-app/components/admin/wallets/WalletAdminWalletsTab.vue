@@ -113,7 +113,7 @@
                 <v-icon color="orange">
                   warning
                 </v-icon>
-                No tokens
+                No {{ contractDetails && contractDetails.name }}
               </template>
               <v-icon
                 v-else
@@ -362,7 +362,13 @@ export default {
       tokenAmount: null,
       limit: 10,
       pageSize: 10,
-      walletHeaders: [
+      walletTypes: ['user', 'admin'],
+      walletStatuses: ['disapproved'],
+    };
+  },
+  computed: {
+    walletHeaders() {
+      return [
         {
           text: '',
           align: 'center',
@@ -382,7 +388,7 @@ export default {
           value: 'walletStatus',
         },
         {
-          text: 'Token balance',
+          text: `${this.contractDetails && this.contractDetails.name} balance`,
           align: 'center',
           value: 'tokenBalance',
         },
@@ -403,12 +409,8 @@ export default {
           sortable: false,
           value: '',
         },
-      ],
-      walletTypes: ['user', 'admin'],
-      walletStatuses: ['disapproved'],
-    };
-  },
-  computed: {
+      ];
+    },
     walletAdmin() {
       return this.wallets && this.wallets.find(wallet => wallet && wallet.type === 'admin');
     },

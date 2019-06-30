@@ -49,9 +49,9 @@
               v-if="dialog"
               v-model="tokenAmount"
               :disabled="loading"
+              :label="`${contractDetails && contractDetails.name} amount`"
+              :placeholder="`Set ${contractDetails && contractDetails.name} amount to send`"
               name="tokenAmount"
-              label="Token amount"
-              placeholder="Set token amount to send"
               class="mt-3" />
 
             <v-text-field
