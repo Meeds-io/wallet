@@ -69,15 +69,15 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
                                                        String contractAddress,
                                                        String contractMethodName,
                                                        int limit,
-                                                       boolean pending,
-                                                       boolean administration) {
+                                                       boolean onlyPending,
+                                                       boolean includeAdministrationTransactions) {
 
     address = StringUtils.lowerCase(address);
     contractAddress = StringUtils.lowerCase(contractAddress);
     StringBuilder queryString = new StringBuilder("SELECT tx FROM WalletTransaction tx WHERE tx.networkId = ");
     queryString.append(networkId);
 
-    if (!administration) {
+    if (!includeAdministrationTransactions) {
       queryString.append(" AND tx.isAdminOperation = FALSE");
     }
 
@@ -95,7 +95,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
       queryString.append("'");
     }
 
-    if (pending) {
+    if (onlyPending) {
       queryString.append(" AND tx.isPending = TRUE");
     }
 
@@ -169,7 +169,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
   }
 
   private long toMilliSeconds(ZonedDateTime date) {
-    return date.toEpochSecond() * 1000;
+    return date.toInstant().toEpochMilli();
   }
 
 }

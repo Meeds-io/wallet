@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.addon.wallet.test;
+package org.exoplatform.addon.wallet.test.service;
 
 import static org.junit.Assert.*;
 
@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.test.BaseWalletTest;
 
 public class EthereumWalletServiceTest extends BaseWalletTest {
 
