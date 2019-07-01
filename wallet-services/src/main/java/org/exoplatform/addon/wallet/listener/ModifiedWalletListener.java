@@ -55,23 +55,23 @@ public class ModifiedWalletListener extends Listener<Wallet, Wallet> {
       if (StringUtils.isBlank(contractAddress)) {
         return;
       }
-      Wallet wallet = event.getData();
+      Wallet newWallet = event.getData();
       Wallet oldWallet = event.getSource();
-      if (oldWallet == null || wallet == null || StringUtils.isBlank(wallet.getAddress())
+      if (oldWallet == null || newWallet == null || StringUtils.isBlank(newWallet.getAddress())
           || StringUtils.isBlank(oldWallet.getAddress())
-          || StringUtils.equalsIgnoreCase(wallet.getAddress(), oldWallet.getAddress())) {
+          || StringUtils.equalsIgnoreCase(newWallet.getAddress(), oldWallet.getAddress())) {
         return;
       }
 
-      String walletAddress = wallet.getAddress();
-      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(walletAddress)
-          || getTokenTransactionService().isApprovedAccount(walletAddress);
+      String newWalletAddress = newWallet.getAddress();
+      boolean initializedWallet = getTokenTransactionService().isInitializedAccount(newWalletAddress)
+          || getTokenTransactionService().isApprovedAccount(newWalletAddress);
       if (initializedWallet) {
-        wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
+        newWallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
       } else {
-        wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
+        newWallet.setInitializationState(WalletInitializationState.MODIFIED.name());
       }
-      getWalletAccountService().saveWallet(wallet);
+      getWalletAccountService().saveWallet(newWallet);
     } finally {
       RequestLifeCycle.end();
     }
