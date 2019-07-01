@@ -98,29 +98,31 @@
                 no-status />
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
-              <template v-if="props.item.deletedUser">Deleted user</template>
-              <template v-else-if="props.item.disabledUser">Disabled user</template>
-              <template v-else-if="!props.item.enabled">Disabled</template>
-              <template v-else-if="props.item.initializationState === 'NEW'">New</template>
-              <template v-else-if="props.item.disapproved">Disapproved</template>
-              <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
-                <v-icon color="orange">
-                  warning
+              <template v-if="!loadingWallets">
+                <template v-if="props.item.deletedUser">Deleted user</template>
+                <template v-else-if="props.item.disabledUser">Disabled user</template>
+                <template v-else-if="!props.item.enabled">Disabled</template>
+                <template v-else-if="props.item.initializationState === 'NEW'">New</template>
+                <template v-else-if="props.item.disapproved">Disapproved</template>
+                <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
+                  <v-icon color="orange">
+                    warning
+                  </v-icon>
+                  Low ether balance
+                </template>
+                <template v-else-if="Number(props.item.tokenBalance) === 0">
+                  <v-icon color="orange">
+                    warning
+                  </v-icon>
+                  No {{ contractDetails && contractDetails.name }}
+                </template>
+                <v-icon
+                  v-else
+                  color="green"
+                  title="OK">
+                  fa-check-circle
                 </v-icon>
-                Low ether balance
               </template>
-              <template v-else-if="Number(props.item.tokenBalance) === 0">
-                <v-icon color="orange">
-                  warning
-                </v-icon>
-                No {{ contractDetails && contractDetails.name }}
-              </template>
-              <v-icon
-                v-else
-                color="green"
-                title="OK">
-                fa-check-circle
-              </v-icon>
             </td>
             <td
               v-if="contractDetails"
@@ -509,13 +511,9 @@ export default {
         return;
       }
 
-      const initialFunds = window.walletSettings.initialFunds.funds || {};
-      if (initialFunds['ether']) {
-        this.etherAmount = initialFunds['ether'];
-      }
-      if (this.contractDetails && this.contractDetails.address && initialFunds[this.contractDetails.address]) {
-        this.tokenAmount = initialFunds[this.contractDetails.address];
-      }
+      const initialFunds = window.walletSettings.initialFunds || {};
+      this.etherAmount = initialFunds.etherAmount || 0;
+      this.tokenAmount = initialFunds.tokenAmount || 0;
 
       return this.walletUtils.getWallets()
         .then((wallets) => {
@@ -597,8 +595,8 @@ export default {
     },
     refreshWallet(wallet) {
       return this.addressRegistry.refreshWallet(wallet)
-        .then(() => this.loadWalletInitialization(wallet))
         .then(() => this.loadWalletApproval(wallet))
+        .then(() => this.loadWalletInitialization(wallet))
         .then(() => this.computeBalance(wallet));
     },
     loadWalletApproval(wallet) {
@@ -620,17 +618,15 @@ export default {
       if(!this.contractDetails || !this.contractDetails.contract || !this.contractDetails.contract || !wallet || !wallet.address) {
         return Promise.resolve(null);
       }
+
       return this.contractDetails.contract.methods.isInitializedAccount(wallet.address).call()
         .then((initialized) => {
-          const oldInitializationState = wallet.initializationState;
-          const newInitializationState = initialized ? 'INITIALIZED' : 'MODIFIED';
+          // Consider wallet as initialized if it's approved or initialized
+          initialized = initialized || !wallet.disapproved;
 
-          if (!initialized && oldInitializationState === 'INITIALIZED') {
-            this.changeWalletInitializationStatus(wallet, 'MODIFIED');
-            this.$set(wallet, 'initializationState', newInitializationState);
-          } else if(initialized && oldInitializationState !== 'INITIALIZED') {
+          if (initialized && wallet.initializationState !== 'INITIALIZED') {
             this.changeWalletInitializationStatus(wallet, 'INITIALIZED');
-            this.$set(wallet, 'initializationState', newInitializationState);
+            this.$set(wallet, 'initializationState', 'INITIALIZED');
           }
         });
     },

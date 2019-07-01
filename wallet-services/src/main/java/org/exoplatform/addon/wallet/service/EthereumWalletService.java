@@ -18,6 +18,8 @@ package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.math.BigInteger;
+
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
 
@@ -332,10 +334,37 @@ public class EthereumWalletService implements WalletService, Startable {
     SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
                                                                         WALLET_SCOPE,
                                                                         INITIAL_FUNDS_KEY_NAME);
+
+    InitialFundsSettings initialFundsSettings = null;
     if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
-      this.configuredGlobalSettings.setInitialFunds(fromJsonString(initialFundsSettingsValue.getValue().toString(),
-                                                                   InitialFundsSettings.class));
+      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(),
+                                            InitialFundsSettings.class);
+    } else {
+      initialFundsSettings = new InitialFundsSettings();
     }
+    computeInitialEtherFund(initialFundsSettings);
+    this.configuredGlobalSettings.setInitialFunds(initialFundsSettings);
+  }
+
+  private void computeInitialEtherFund(InitialFundsSettings initialFundsSettings) {
+    NetworkSettings network = this.configuredGlobalSettings.getNetwork();
+    long gasLimit = 150000L; // Default max gas per contract transaction
+    long gasPrice = 15000000000L; // Default max gas price per contract
+                                  // transaction
+    if (network != null) {
+      if (network.getGasLimit() != null && network.getGasLimit() > 0) {
+        gasLimit = network.getGasLimit();
+      }
+      if (network.getMaxGasPrice() != null && network.getMaxGasPrice() > 0) {
+        gasPrice = network.getMaxGasPrice();
+      }
+    }
+    BigInteger etherAmountInWEI = new BigInteger(String.valueOf(gasLimit)).multiply(new BigInteger(String.valueOf(gasPrice)));
+    double etherInitialFund = convertFromDecimals(etherAmountInWEI, ETHER_TO_WEI_DECIMALS);
+    double etherAmountMaxDecimals = 3; // max decimals to use in ether initial
+                                       // funds
+    double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
+    initialFundsSettings.setEtherAmount(Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals);
   }
 
   private SettingService getSettingService() {

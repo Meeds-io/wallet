@@ -37,12 +37,12 @@
             ">
             <v-text-field
               v-if="dialog"
-              v-model="etherAmount"
+              v-model="etherAmountLabel"
               :autofocus="dialog"
-              :disabled="loading"
               name="etherAmount"
               label="Ether amount"
               placeholder="Set ether amount to send"
+              disabled
               class="mt-3" />
 
             <v-text-field
@@ -104,6 +104,14 @@ export default {
       error: null,
     };
   },
+  computed: {
+    etherAmountLabel() {
+      return this.etherAmountInFiat ? `${this.etherAmount} (${this.etherAmountInFiat} ${window.walletSettings.fiatSymbol})` : this.etherAmount;
+    },
+    etherAmountInFiat() {
+      return (this.etherAmount && this.walletUtils.etherToFiat(this.etherAmount)) || 0;
+    },
+  },
   methods: {
     open(wallet, initialFundsMessage, etherAmount) {
       if (!wallet) {
@@ -129,7 +137,6 @@ export default {
         },
         body: $.param({
           receiver: this.wallet.address,
-          etherAmount: this.etherAmount,
           transactionLabel: this.transactionLabel,
           transactionMessage: this.transactionMessage,
         }),

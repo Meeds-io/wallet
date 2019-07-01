@@ -17,6 +17,7 @@
 package org.exoplatform.addon.wallet.rest;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.getCurrentUserId;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getSettings;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -24,6 +25,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -89,7 +91,6 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       @ApiResponse(code = 403, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendEther(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
-                            @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
                             @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
                             @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
@@ -99,15 +100,21 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     }
 
     try {
+      GlobalSettings settings = getSettings();
+      if (settings == null || settings.getInitialFunds() == null || settings.getInitialFunds().getEtherAmount() <= 0) {
+        throw new IllegalStateException("Can't send ether to wallet " + receiver
+            + " because no default ether amount is configured in settings: " + settings);
+      }
+
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
-      transactionDetail.setValue(etherAmount);
+      transactionDetail.setValue(settings.getInitialFunds().getEtherAmount());
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendEther(transactionDetail, currentUserId);
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
-      LOG.error("Error initializing wallet {}", receiver, e);
+      LOG.error("Error sending ether to wallet {}", receiver, e);
       return Response.serverError().build();
     }
   }

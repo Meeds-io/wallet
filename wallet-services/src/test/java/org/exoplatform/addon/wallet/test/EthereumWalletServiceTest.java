@@ -16,14 +16,12 @@
  */
 package org.exoplatform.addon.wallet.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
-import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
-import org.exoplatform.addon.wallet.model.settings.NetworkSettings;
+import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.service.*;
 
 public class EthereumWalletServiceTest extends BaseWalletTest {
@@ -59,7 +57,12 @@ public class EthereumWalletServiceTest extends BaseWalletTest {
     assertNotNull("Contract ABI should have been computed after container startup", settings.getContractAbi());
     assertNotNull("Contract BIN should have been computed after container startup", settings.getContractBin());
     assertNotNull("Default contract address shouldn't be null", settings.getContractAddress());
-    assertNotNull("Default initial funds settings shouldn't be null", settings.getInitialFunds());
+    InitialFundsSettings initialFunds = settings.getInitialFunds();
+    assertNotNull("Default initial funds settings shouldn't be null", initialFunds);
+    assertNotNull("Default initial ether fund setting shouldn't be null", initialFunds.getEtherAmount());
+    assertEquals("Unexpected default initial token fund amount", 0, initialFunds.getTokenAmount(), 0);
+    assertEquals("Unexpected default initial ether fund amount", 0.003, initialFunds.getEtherAmount(), 0);
+    assertNull("Unexpected default initial fund holder", initialFunds.getFundsHolder());
     NetworkSettings networkSettings = settings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
     assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
