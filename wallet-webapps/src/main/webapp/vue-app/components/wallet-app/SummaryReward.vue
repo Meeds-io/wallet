@@ -13,7 +13,7 @@
       <v-container v-else fluid>
         <v-layout row>
           <v-flex grow class="amount">
-            {{ rewardBalance }} {{ contractDetails.symbol }}
+            {{ toFixed(rewardBalance) }} {{ contractDetails.symbol }}
           </v-flex>
           <v-flex shrink>
             <v-btn

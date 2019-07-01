@@ -16,7 +16,7 @@
         grid-list-sm>
         <v-layout row>
           <v-flex grow class="amount">
-            {{ lastTransactionSign }}{{ lastTransaction && lastTransaction.contractAmount }} {{ contractDetails.symbol }}
+            {{ lastTransactionSign }}{{ lastTransaction && toFixed(lastTransaction.contractAmount) }} {{ contractDetails.symbol }}
           </v-flex>
           <v-flex shrink>
             <v-btn
