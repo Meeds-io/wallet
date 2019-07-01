@@ -38,7 +38,6 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.social.core.space.spi.SpaceService;
 
 /**
  * A storage service to save/load information used by users and spaces wallets
@@ -56,8 +55,6 @@ public class EthereumWalletService implements WalletService, Startable {
   private WalletAccountService    accountService;
 
   private SettingService          settingService;
-
-  private SpaceService            spaceService;
 
   private WebNotificationStorage  webNotificationStorage;
 
@@ -346,12 +343,5 @@ public class EthereumWalletService implements WalletService, Startable {
       settingService = CommonsUtils.getService(SettingService.class);
     }
     return settingService;
-  }
-
-  private SpaceService getSpaceService() {
-    if (spaceService == null) {
-      spaceService = CommonsUtils.getService(SpaceService.class);
-    }
-    return spaceService;
   }
 }

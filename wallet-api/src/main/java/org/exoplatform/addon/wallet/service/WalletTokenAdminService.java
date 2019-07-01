@@ -76,7 +76,7 @@ public interface WalletTokenAdminService {
    * @return
    * @throws Exception
    */
-  TransactionDetail sendEther(TransactionDetail transactionDetail, String issuerUsername) throws Exception;
+  TransactionDetail sendEther(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
   /**
    * Get token balance of a wallet address (on blockchain)
