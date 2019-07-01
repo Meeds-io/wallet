@@ -113,8 +113,19 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
 
     SettingValue<?> contractDetailValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
-    if (contractDetailValue != null) {
-      return fromJsonString((String) contractDetailValue.getValue(), ContractDetail.class);
+    if (contractDetailValue != null && contractDetailValue.getValue() != null) {
+      String value = contractDetailValue.getValue().toString();
+      try {
+        return fromJsonString(value, ContractDetail.class);
+      } catch (Exception e) {
+        LOG.debug("Remove old data stored in settings service for wallet with address '{}', having as value '{}'",
+                  address,
+                  value,
+                  e);
+        // Remove value coming from old data
+        settingService.remove(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
+        return null;
+      }
     }
     return null;
   }
