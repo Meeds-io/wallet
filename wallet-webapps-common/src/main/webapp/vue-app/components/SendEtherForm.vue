@@ -24,24 +24,16 @@
             $emit('receiver-selected', $event);
           " />
 
-        <v-container
-          flat
-          fluid
-          grid-list-lg
-          class="mt-4 pl-2">
-          <v-layout row wrap>
-            <v-text-field
-              ref="amountInput"
-              v-model.number="amount"
-              :disabled="loading"
-              name="amount"
-              label="Amount"
-              placeholder="Select an amount of ethers to send"
-              required
-              @input="$emit('amount-selected', amount)" />
-            <slot></slot>
-          </v-layout>
-        </v-container>
+        <v-text-field
+          ref="amountInput"
+          v-model.number="amount"
+          :disabled="loading"
+          name="amount"
+          label="Amount"
+          placeholder="Select an amount of ethers to send"
+          required
+          @input="$emit('amount-selected', amount)" />
+
         <v-text-field
           v-if="!storedPassword"
           v-model="walletPassword"
