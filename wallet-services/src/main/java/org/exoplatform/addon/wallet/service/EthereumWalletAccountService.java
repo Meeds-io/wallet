@@ -256,7 +256,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
-    if (!isUserAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException("Current user " + currentUser + " attempts to delete wallet with address " + address
           + " of "
           + wallet.getType() + " " + wallet.getId());
@@ -272,7 +272,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
     if (StringUtils.isBlank(remoteId)) {
       throw new IllegalArgumentException("remote id parameter is mandatory");
     }
-    if (!isUserAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException("Current user " + currentUser + " attempts to delete wallet of "
           + type + " " + remoteId);
     }
@@ -298,7 +298,8 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
-    if (!isUserAdmin(currentUser)) {
+    // Only 'rewarding' group members can change wallets
+    if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
           + " of "
           + wallet.getType() + " " + wallet.getId());
@@ -325,7 +326,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
 
-    if (!isUserAdmin(currentUser) && !isUserRewardingAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       // The only authorized initialization transition allowed to a regular user
       // is to request to initialize his wallet when it has been denied by an
       // administrator
@@ -364,7 +365,8 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   @Override
   public void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
-    if (isUserAdmin(currentUser)) {
+    // 'rewarding' group members can change all wallets
+    if (isUserRewardingAdmin(currentUser)) {
       return;
     }
 
@@ -437,7 +439,7 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   @Override
   public Set<WalletAddressLabel> getAddressesLabelsVisibleBy(String currentUser) {
-    if (!isUserAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       return Collections.emptySet();
     }
     return labelStorage.getAllLabels();
@@ -454,7 +456,8 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
     if (type.isSpace()) {
       checkUserIsSpaceManager(remoteId, currentUser, true);
     } else if (type.isAdmin()) {
-      if (!isUserAdmin(currentUser)) {
+      // Only 'rewarding' group members can access and change 'Admin' wallet
+      if (!isUserRewardingAdmin(currentUser)) {
         throw new IllegalAccessException(USER_MESSAGE_IN_EXCEPTION + currentUser + "' attempts to " + operationMessage
             + " of admin");
       }

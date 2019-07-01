@@ -228,7 +228,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       throw new IllegalStateException("Can't find contract with address " + contractAddress);
     }
 
-    if (!isUserAdmin(currentUser) && !isUserRewardingAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException("User " + currentUser + " attempts to access contract transactions with address "
           + contractAddress);
     }
@@ -288,7 +288,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     } else if (!displayTransactionsLabel(senderWallet, currentUser)) {
       transactionDetail.setLabel(null);
     }
-    if (transactionDetail.getIssuerId() > 0 && (isUserAdmin(currentUser) || isUserRewardingAdmin(currentUser))) {
+    if (transactionDetail.getIssuerId() > 0 && isUserRewardingAdmin(currentUser)) {
       Wallet issuerWallet = accountService.getWalletByIdentityId(transactionDetail.getIssuerId());
       transactionDetail.setIssuer(issuerWallet);
     }
@@ -296,12 +296,12 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
   private boolean displayTransactionsLabel(Wallet senderWallet, String currentUserId) {
     if (senderWallet == null) {
-      return isUserAdmin(currentUserId);
+      return isUserRewardingAdmin(currentUserId);
     }
     String accountId = senderWallet.getId();
     String accountType = senderWallet.getType();
     if (StringUtils.isBlank(accountId) || StringUtils.isBlank(accountType)) {
-      return isUserAdmin(currentUserId);
+      return isUserRewardingAdmin(currentUserId);
     }
 
     if (WalletType.isSpace(senderWallet.getType())) {

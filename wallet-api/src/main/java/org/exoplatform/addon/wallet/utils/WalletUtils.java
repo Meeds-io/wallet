@@ -480,15 +480,15 @@ public class WalletUtils {
   public static boolean canAccessWallet(Wallet wallet, String currentUser) {
     String remoteId = wallet.getId();
     WalletType type = WalletType.getType(wallet.getType());
-    boolean isUserAdmin = isUserAdmin(currentUser);
-
+    boolean isUserAdmin = isUserRewardingAdmin(currentUser);
+    // 'rewarding' group members can access to all wallets
     if (isUserAdmin) {
       return true;
     }
 
+    // For 'Admin' wallet, only 'rewarding' group members can access it
     return (type.isUser() && StringUtils.equals(currentUser, remoteId))
-        || (type.isSpace() && isUserSpaceMember(wallet.getId(), currentUser))
-        || (type.isAdmin() && (isUserAdmin(currentUser) || isUserRewardingAdmin(currentUser)));
+        || (type.isSpace() && isUserSpaceMember(wallet.getId(), currentUser));
   }
 
   public static boolean isUserSpaceMember(String spaceId, String accesssor) {

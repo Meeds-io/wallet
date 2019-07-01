@@ -133,7 +133,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     ClassLoader currentClassLoader = currentThread.getContextClassLoader();
     currentThread.setContextClassLoader(this.classLoader);
     try {
-      if (!isUserAdmin(currentUser)) {
+      if (!isUserRewardingAdmin(currentUser)) {
         throw new IllegalAccessException("User " + currentUser + " is not allowed to create admin wallet");
       }
 

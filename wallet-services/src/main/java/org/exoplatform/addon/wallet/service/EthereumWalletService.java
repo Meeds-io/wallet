@@ -192,7 +192,7 @@ public class EthereumWalletService implements WalletService, Startable {
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);
-    userSettings.setAdmin(isUserAdmin(currentUser));
+    userSettings.setAdmin(isUserRewardingAdmin(currentUser));
 
     String accessPermission = globalSettings.getAccessPermission();
     boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
