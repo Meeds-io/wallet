@@ -406,7 +406,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     setIssuer(transactionDetail, issuerUsername);
 
     if (!isApprovedAccount(receiverAddress)) {
-      throw new IllegalStateException("Wallet receiver {} is not approved yet, thus no transfer is allowed");
+      String receiver = transactionDetail.getToWallet() == null
+          || StringUtils.isBlank(transactionDetail.getToWallet().getName()) ? receiverAddress
+                                                                            : transactionDetail.getToWallet().getName();
+      throw new IllegalStateException("Wallet receiver " + receiver + " is not approved yet, thus no transfer is allowed");
     }
 
     int decimals = getDecimals();
