@@ -14,7 +14,7 @@ import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 
-public class BaseWalletTest {
+public abstract class BaseWalletTest {
 
   protected static PortalContainer container;
 

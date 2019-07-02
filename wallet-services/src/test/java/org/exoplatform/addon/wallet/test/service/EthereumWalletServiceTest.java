@@ -16,14 +16,22 @@
  */
 package org.exoplatform.addon.wallet.test.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-
-import org.exoplatform.addon.wallet.model.settings.*;
-import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
+import org.exoplatform.addon.wallet.model.settings.InitialFundsSettings;
+import org.exoplatform.addon.wallet.model.settings.NetworkSettings;
+import org.exoplatform.addon.wallet.service.EthereumWalletService;
+import org.exoplatform.addon.wallet.service.WalletAccountService;
+import org.exoplatform.addon.wallet.service.WalletContractService;
+import org.exoplatform.addon.wallet.service.WalletService;
+import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
+import org.junit.Test;
 
 public class EthereumWalletServiceTest extends BaseWalletTest {
 
@@ -68,11 +76,57 @@ public class EthereumWalletServiceTest extends BaseWalletTest {
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
     assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
     assertNotNull("Default blockchain network gas limit shouldn't be null", networkSettings.getGasLimit());
-    assertNotNull("Default blockchain tansaction minimum gas price shouldn't be null", networkSettings.getMinGasPrice());
-    assertNotNull("Default blockchain tansaction normal gas price shouldn't be null", networkSettings.getNormalGasPrice());
-    assertNotNull("Default blockchain tansaction maximum gas price shouldn't be null", networkSettings.getMaxGasPrice());
+    assertNotNull("Default blockchain tansaction minimum gas price shouldn't be null",
+                  networkSettings.getMinGasPrice());
+    assertNotNull("Default blockchain tansaction normal gas price shouldn't be null",
+                  networkSettings.getNormalGasPrice());
+    assertNotNull("Default blockchain tansaction maximum gas price shouldn't be null",
+                  networkSettings.getMaxGasPrice());
     assertNotNull("Default blockchain network http URL shouldn't be null", networkSettings.getProviderURL());
-    assertNotNull("Default blockchain network websocket URL shouldn't be null", networkSettings.getWebsocketProviderURL());
+    assertNotNull("Default blockchain network websocket URL shouldn't be null",
+                  networkSettings.getWebsocketProviderURL());
+  }
+  
+
+  /**
+   * Test save initial funds settings
+   */
+  @Test
+  public void testSaveInitialFundsSettings() {
+    EthereumWalletService ethereumWalletService = getService(EthereumWalletService.class);
+    InitialFundsSettings initialFundsSettings = new InitialFundsSettings();
+    int tokenAmount = 5000;
+    String fundsHolder = "root";
+    String fundsHolderType = "user";
+    initialFundsSettings.setTokenAmount(tokenAmount);
+    initialFundsSettings.setFundsHolder(fundsHolder);
+    initialFundsSettings.setFundsHolderType(fundsHolderType);
+    initialFundsSettings.setRequestMessage("Initial fund message");
+
+    ethereumWalletService.saveInitialFundsSettings(initialFundsSettings);
+
+    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, ethereumWalletService);
+
+    tokenAmount = 50;
+    initialFundsSettings.setTokenAmount(tokenAmount);
+    ethereumWalletService.saveInitialFundsSettings(initialFundsSettings);
+
+    // Re-compute settings from DB
+    ethereumWalletService.start();
+    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, ethereumWalletService);
+  }
+
+  private void checkInitialFunds(int tokenAmount,
+                                  String fundsHolder,
+                                  String fundsHolderType,
+                                  WalletService walletService) {
+    GlobalSettings settings = walletService.getSettings();
+    assertNotNull("Settings service shouldn't be null", settings);
+    InitialFundsSettings initialFunds = settings.getInitialFunds();
+    assertNotNull("Initial found shouldn't be null", initialFunds);
+    assertEquals("Funds Holder shouldn't be null", fundsHolder, initialFunds.getFundsHolder());
+    assertEquals("Token Amount are not equals", tokenAmount, initialFunds.getTokenAmount(), 0);
+    assertEquals("Funds Holder type shouldn't be null", fundsHolderType, initialFunds.getFundsHolderType());
   }
 
 }
