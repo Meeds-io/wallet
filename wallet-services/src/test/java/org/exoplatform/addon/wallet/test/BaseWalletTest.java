@@ -11,6 +11,9 @@ import org.junit.*;
 
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
+import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.model.WalletAddressLabel;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 
@@ -51,6 +54,17 @@ public abstract class BaseWalletTest {
           walletTransactionDAO.delete((TransactionEntity) entity);
         } else if (entity instanceof AddressLabelEntity) {
           addressLabelDAO.delete((AddressLabelEntity) entity);
+        } else if (entity instanceof WalletAddressLabel) {
+          AddressLabelEntity labelEntity = addressLabelDAO.find(((WalletAddressLabel) entity).getId());
+          addressLabelDAO.delete(labelEntity);
+        } else if (entity instanceof TransactionDetail) {
+          TransactionEntity transactionEntity = walletTransactionDAO.find(((TransactionDetail) entity).getId());
+          walletTransactionDAO.delete(transactionEntity);
+        } else if (entity instanceof Wallet) {
+          WalletEntity walletEntity = walletAccountDAO.find(((Wallet) entity).getTechnicalId());
+          walletAccountDAO.delete(walletEntity);
+        } else {
+          throw new IllegalStateException("Entity not managed" + entity);
         }
       }
     }

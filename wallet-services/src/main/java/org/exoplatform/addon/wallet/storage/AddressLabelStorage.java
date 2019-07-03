@@ -58,9 +58,6 @@ public class AddressLabelStorage {
   }
 
   private AddressLabelEntity toEntity(WalletAddressLabel label) {
-    if (label == null) {
-      return null;
-    }
     AddressLabelEntity entity = new AddressLabelEntity();
     entity.setId(label.getId() == 0 ? null : label.getId());
     entity.setIdentityId(label.getIdentityId());

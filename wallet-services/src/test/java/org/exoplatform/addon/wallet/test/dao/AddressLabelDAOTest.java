@@ -38,7 +38,7 @@ public class AddressLabelDAOTest extends BaseWalletTest {
     assertNotNull(addressLabelDAO);
 
     List<AddressLabelEntity> allAddressLabels = addressLabelDAO.findAll();
-    assertNotNull("Returned lables list shouldn't be null", allAddressLabels);
-    assertEquals("Returned lables should be empty", 0, allAddressLabels.size());
+    assertNotNull("Returned labels list shouldn't be null", allAddressLabels);
+    assertEquals("Returned labels should be empty", 0, allAddressLabels.size());
   }
 }

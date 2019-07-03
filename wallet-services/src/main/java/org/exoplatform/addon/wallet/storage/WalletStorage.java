@@ -88,15 +88,16 @@ public class WalletStorage {
   /**
    * @param wallet wallet details to save
    * @param isNew whether this is a new wallet association or not
+   * @return saved wallet entity
    */
-  public void saveWallet(Wallet wallet, boolean isNew) {
+  public Wallet saveWallet(Wallet wallet, boolean isNew) {
     WalletEntity walletEntity = toEntity(wallet);
-
     if (isNew) {
-      walletAccountDAO.create(walletEntity);
+      walletEntity = walletAccountDAO.create(walletEntity);
     } else {
-      walletAccountDAO.update(walletEntity);
+      walletEntity = walletAccountDAO.update(walletEntity);
     }
+    return fromEntity(walletEntity);
   }
 
   /**
