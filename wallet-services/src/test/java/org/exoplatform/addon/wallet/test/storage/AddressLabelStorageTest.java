@@ -28,6 +28,12 @@ import org.exoplatform.addon.wallet.test.BaseWalletTest;
 
 public class AddressLabelStorageTest extends BaseWalletTest {
 
+  private long   identityId = 1L;
+
+  private String address    = "walletAddress";
+
+  private String labelText  = "label";
+
   /**
    * Check that service is instantiated and functional
    */
@@ -48,10 +54,12 @@ public class AddressLabelStorageTest extends BaseWalletTest {
   public void testSaveLabel() {
     AddressLabelStorage addressLabelStorage = getService(AddressLabelStorage.class);
 
-    long identityId = 2L;
-    String address = "walletAddress";
-    String labelText = "label";
-
+    try {
+      addressLabelStorage.saveLabel(null);
+      fail("Saving a null label should throws an exeption");
+    } catch (Exception e) {
+      // Expected
+    }
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
     walletAddressLabel.setAddress(address);
     walletAddressLabel.setIdentityId(identityId);
@@ -68,6 +76,23 @@ public class AddressLabelStorageTest extends BaseWalletTest {
     Set<WalletAddressLabel> allLabels = addressLabelStorage.getAllLabels();
     assertNotNull("Returned labels list shouldn't be null", allLabels);
     assertEquals("Returned labels should return 1 label", 1, allLabels.size());
+
+    walletAddressLabel = addressLabelStorage.getAllLabels().iterator().next();
+    checkLabelContent(walletAddressLabel, identityId, labelText, address);
+
+    labelText = "new label";
+    try {
+      walletAddressLabel.setLabel(labelText);
+      walletAddressLabel = addressLabelStorage.saveLabel(walletAddressLabel);
+      checkLabelContent(walletAddressLabel, identityId, labelText, address);
+      allLabels = addressLabelStorage.getAllLabels();
+      assertEquals("Returned labels should return 1 label", 1, allLabels.size());
+
+      walletAddressLabel = addressLabelStorage.getAllLabels().iterator().next();
+      checkLabelContent(walletAddressLabel, identityId, labelText, address);
+    } finally {
+      labelText = "label";
+    }
   }
 
   /**
@@ -76,10 +101,6 @@ public class AddressLabelStorageTest extends BaseWalletTest {
   @Test
   public void testRemoveLabel() {
     AddressLabelStorage addressLabelStorage = getService(AddressLabelStorage.class);
-
-    long identityId = 2L;
-    String address = "walletAddress";
-    String labelText = "label";
 
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
     walletAddressLabel.setAddress(address);

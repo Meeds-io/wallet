@@ -18,7 +18,6 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.web.security.codec.AbstractCodec;
 import org.exoplatform.web.security.codec.CodecInitializer;
-import org.exoplatform.web.security.security.TokenServiceInitializationException;
 
 public class WalletStorage {
   private static final Log    LOG = ExoLogger.getLogger(WalletStorage.class);
@@ -35,7 +34,7 @@ public class WalletStorage {
 
     try {
       this.codec = codecInitializer.getCodec();
-    } catch (TokenServiceInitializationException e) {
+    } catch (Exception e) {
       LOG.error("Error initializing codecs", e);
     }
   }
@@ -112,25 +111,46 @@ public class WalletStorage {
     return fromEntity(walletEntity);
   }
 
+  /**
+   * Find Wallet encoded private key by wallet identifier.
+   * 
+   * @param walletId wallet unique identifier that is equals to identity ID
+   * @return private key encoded content
+   */
   public String getWalletPrivateKey(long walletId) {
-    WalletEntity walletEntity = walletAccountDAO.find(walletId);
-    if (walletEntity != null && walletEntity.getPrivateKey() != null
-        && StringUtils.isNotBlank(walletEntity.getPrivateKey().getKeyContent())) {
-      String privateKey = walletEntity.getPrivateKey().getKeyContent();
+    WalletPrivateKeyEntity privateKeyEntity = privateKeyDAO.findByWalletId(walletId);
+    if (privateKeyEntity != null && StringUtils.isNotBlank(privateKeyEntity.getKeyContent())) {
+      String privateKey = privateKeyEntity.getKeyContent();
       return decodeWalletKey(privateKey);
     }
     return null;
   }
 
+  /**
+   * Remove Wallet encoded private key by wallet identifier
+   * 
+   * @param walletId wallet unique identifier that is equals to identity ID
+   */
   public void removeWalletPrivateKey(long walletId) {
-    WalletEntity walletEntity = walletAccountDAO.find(walletId);
-    WalletPrivateKeyEntity privateKey = walletEntity == null ? null : walletEntity.getPrivateKey();
-    if (privateKey != null) {
-      privateKeyDAO.delete(privateKey);
+    WalletPrivateKeyEntity privateKeyEntity = privateKeyDAO.findByWalletId(walletId);
+    if (privateKeyEntity != null) {
+      WalletEntity wallet = privateKeyEntity.getWallet();
+      privateKeyDAO.delete(privateKeyEntity);
+      wallet.setPrivateKey(null);
+      walletAccountDAO.update(wallet);
     }
   }
 
+  /**
+   * Save wallet private key
+   * 
+   * @param walletId
+   * @param content
+   */
   public void saveWalletPrivateKey(long walletId, String content) {
+    if (StringUtils.isBlank(content)) {
+      throw new IllegalArgumentException("content is mandatory");
+    }
     WalletEntity walletEntity = walletAccountDAO.find(walletId);
     if (walletEntity == null) {
       throw new IllegalStateException("Wallet with id " + walletId + " wasn't found");
@@ -140,6 +160,7 @@ public class WalletStorage {
       privateKey = new WalletPrivateKeyEntity();
       privateKey.setId(null);
       privateKey.setWallet(walletEntity);
+      walletEntity.setPrivateKey(privateKey);
     } else if (StringUtils.isNotBlank(privateKey.getKeyContent())) {
       LOG.info("Replacing wallet {}/{} private key", walletEntity.getType(), walletEntity.getId());
     }
@@ -166,7 +187,12 @@ public class WalletStorage {
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
-    wallet.setHasPrivateKey(walletEntity.getPrivateKey() != null);
+    if (walletEntity.getPrivateKey() == null) {
+      WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
+      wallet.setHasPrivateKey(privateKey != null);
+    } else {
+      wallet.setHasPrivateKey(true);
+    }
 
     Identity identity = getIdentityById(walletEntity.getId());
     computeWalletFromIdentity(wallet, identity);

@@ -28,15 +28,17 @@ import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 
 public class WalletStorageTest extends BaseWalletTest {
-  long    identityId          = 1L;
+  private static final String WALLET_PRIVATE_KEY_CONTENT = "Wallet-Private-Key-Encrypted-With-Password";
 
-  String  address             = "walletAddress";
+  long                        identityId                 = 1L;
 
-  String  phrase              = "passphrase";
+  String                      address                    = "walletAddress";
 
-  String  initializationState = WalletInitializationState.INITIALIZED.name();
+  String                      phrase                     = "passphrase";
 
-  boolean isEnabled           = true;
+  String                      initializationState        = WalletInitializationState.INITIALIZED.name();
+
+  boolean                     isEnabled                  = true;
 
   /**
    * Check that service is instantiated and functional
@@ -48,6 +50,19 @@ public class WalletStorageTest extends BaseWalletTest {
 
     long walletsCount = walletStorage.getWalletsCount();
     assertEquals("Returned wallets count should be 0", 0, walletsCount);
+  }
+
+  /**
+   * Check that constructor don't throws an exception even when all parameters
+   * are null
+   */
+  @Test
+  public void testNoExceptionThrownOnConstructor() {
+    try {
+      new WalletStorage(null, null, null);
+    } catch (Exception e) {
+      fail("Shouldn't throw an exception on constructor, even if all parameters are null");
+    }
   }
 
   /**
@@ -86,7 +101,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     Wallet wallet = newWallet();
 
-    wallet = walletStorage.saveWallet(wallet, isEnabled);
+    wallet = walletStorage.saveWallet(wallet, true);
     assertNotNull(wallet);
     walletStorage.removeWallet(identityId);
     Set<Wallet> listWallets = walletStorage.listWallets();
@@ -103,7 +118,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     Wallet wallet = newWallet();
 
-    wallet = walletStorage.saveWallet(wallet, isEnabled);
+    wallet = walletStorage.saveWallet(wallet, true);
 
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
@@ -124,7 +139,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     Wallet wallet = newWallet();
 
-    wallet = walletStorage.saveWallet(wallet, isEnabled);
+    wallet = walletStorage.saveWallet(wallet, true);
 
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
@@ -149,7 +164,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     Wallet wallet = newWallet();
 
-    wallet = walletStorage.saveWallet(wallet, isEnabled);
+    wallet = walletStorage.saveWallet(wallet, true);
 
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
@@ -160,6 +175,103 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = listWallets.iterator().next();
     checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+  }
+
+  /**
+   * Check wallet private key storage: save
+   */
+  @Test
+  public void testSaveWalletPrivateKey() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Wallet wallet = newWallet();
+
+    wallet = walletStorage.saveWallet(wallet, true);
+
+    assertNotNull(wallet);
+    this.entitiesToClean.add(wallet);
+
+    try {
+      walletStorage.saveWalletPrivateKey(0, WALLET_PRIVATE_KEY_CONTENT);
+      fail("No wallet associated to 222 id, thus an exception should be thrown");
+    } catch (Exception e) {
+      // Expected
+    }
+
+    try {
+      walletStorage.saveWalletPrivateKey(identityId, null);
+      fail("No wallet key content, thus an exception should be thrown");
+    } catch (Exception e) {
+      // Expected
+    }
+
+    walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), WALLET_PRIVATE_KEY_CONTENT);
+
+    walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), WALLET_PRIVATE_KEY_CONTENT);
+
+    wallet = walletStorage.getWalletByIdentityId(identityId);
+    assertTrue(wallet.isHasPrivateKey());
+    String content = walletStorage.getWalletPrivateKey(identityId);
+    assertEquals(WALLET_PRIVATE_KEY_CONTENT, content);
+
+    String newContent = WALLET_PRIVATE_KEY_CONTENT + 1;
+    walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), newContent);
+    content = walletStorage.getWalletPrivateKey(identityId);
+    assertEquals(newContent, content);
+
+    wallet = walletStorage.getWalletByIdentityId(identityId);
+    assertTrue(wallet.isHasPrivateKey());
+  }
+
+  /**
+   * Check wallet private key storage: get encrypted private key
+   */
+  @Test
+  public void testGetWalletPrivateKey() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Wallet wallet = newWallet();
+
+    wallet = walletStorage.saveWallet(wallet, true);
+
+    assertNotNull(wallet);
+    this.entitiesToClean.add(wallet);
+
+    long walletId = wallet.getTechnicalId();
+    walletStorage.saveWalletPrivateKey(walletId, WALLET_PRIVATE_KEY_CONTENT);
+
+    String content = walletStorage.getWalletPrivateKey(walletId);
+    assertEquals(WALLET_PRIVATE_KEY_CONTENT, content);
+  }
+
+  /**
+   * Check wallet private key storage: get encrypted private key
+   */
+  @Test
+  public void testRemoveWalletPrivateKey() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Wallet wallet = newWallet();
+
+    wallet = walletStorage.saveWallet(wallet, true);
+
+    assertNotNull(wallet);
+    this.entitiesToClean.add(wallet);
+
+    long walletId = wallet.getTechnicalId();
+    walletStorage.saveWalletPrivateKey(walletId, WALLET_PRIVATE_KEY_CONTENT);
+
+    String content = walletStorage.getWalletPrivateKey(walletId);
+    assertNotNull(content);
+    wallet = walletStorage.getWalletByIdentityId(walletId);
+    assertTrue(wallet.isHasPrivateKey());
+
+    walletStorage.removeWalletPrivateKey(walletId);
+    content = walletStorage.getWalletPrivateKey(walletId);
+    assertNull(content);
+
+    wallet = walletStorage.getWalletByIdentityId(walletId);
+    assertFalse(wallet.isHasPrivateKey());
   }
 
   private void checkWalletContent(Wallet wallet,

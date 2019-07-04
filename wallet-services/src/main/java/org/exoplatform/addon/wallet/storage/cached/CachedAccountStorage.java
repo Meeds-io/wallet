@@ -85,11 +85,11 @@ public class CachedAccountStorage extends WalletStorage {
   public void removeWalletPrivateKey(long walletId) {
     super.removeWalletPrivateKey(walletId);
 
-    Wallet wallet = getWalletByIdentityId(walletId);
+    Wallet wallet = super.getWalletByIdentityId(walletId);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
+      this.walletFutureCache.remove(new WalletCacheKey(walletId));
       this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
-      this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
     }
   }
 
@@ -97,11 +97,12 @@ public class CachedAccountStorage extends WalletStorage {
   public void saveWalletPrivateKey(long walletId, String content) {
     super.saveWalletPrivateKey(walletId, content);
 
-    Wallet wallet = getWalletByIdentityId(walletId);
+    this.walletFutureCache.remove(new WalletCacheKey(walletId));
+
+    Wallet wallet = super.getWalletByIdentityId(walletId);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
       this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
-      this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
     }
   }
 

@@ -25,9 +25,9 @@ public class AddressLabelStorage {
     if (allLabelsEntities == null || allLabelsEntities.isEmpty()) {
       return Collections.emptySet();
     }
-    this.allLabels = allLabelsEntities.stream()
-                                      .map(this::fromEntity)
-                                      .collect(Collectors.toSet());
+    this.allLabels = Collections.unmodifiableSet(allLabelsEntities.stream()
+                                                                  .map(this::fromEntity)
+                                                                  .collect(Collectors.toSet()));
     return this.allLabels;
   }
 

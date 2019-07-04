@@ -112,7 +112,7 @@ import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
 import GasPriceChoice from './GasPriceChoice.vue';
 
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus, markFundRequestAsSent} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
 

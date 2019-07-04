@@ -14,12 +14,17 @@ import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.WalletAddressLabel;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 
 public abstract class BaseWalletTest {
 
   protected static PortalContainer container;
+
+  private static final Log         LOG             = ExoLogger.getLogger(BaseWalletTest.class);
 
   protected List<Serializable>     entitiesToClean = new ArrayList<>();
 
@@ -44,6 +49,9 @@ public abstract class BaseWalletTest {
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
+    RequestLifeCycle.end();
+    RequestLifeCycle.begin(container);
+
     if (!entitiesToClean.isEmpty()) {
       for (Serializable entity : entitiesToClean) {
         if (entity instanceof WalletEntity) {
@@ -61,25 +69,42 @@ public abstract class BaseWalletTest {
           TransactionEntity transactionEntity = walletTransactionDAO.find(((TransactionDetail) entity).getId());
           walletTransactionDAO.delete(transactionEntity);
         } else if (entity instanceof Wallet) {
-          WalletEntity walletEntity = walletAccountDAO.find(((Wallet) entity).getTechnicalId());
+          long walletId = ((Wallet) entity).getTechnicalId();
+          WalletEntity walletEntity = walletAccountDAO.find(walletId);
           walletAccountDAO.delete(walletEntity);
+
+          WalletPrivateKeyEntity walletPrivateKey = walletPrivateKeyDAO.find(walletId);
+          if (walletPrivateKey != null) {
+            walletPrivateKeyDAO.delete(walletPrivateKey);
+          }
         } else {
           throw new IllegalStateException("Entity not managed" + entity);
         }
       }
     }
+
+    int walletCount = walletAccountDAO.findAll().size();
+    int walletPrivateKeyCount = walletPrivateKeyDAO.findAll().size();
+    int walletAddressLabelsCount = addressLabelDAO.findAll().size();
+    int walletTransactionsCount = walletTransactionDAO.findAll().size();
+
+    LOG.info("objects count wallets = {}, private keys = {}, address labels = {}, transactions count = {}",
+             walletCount,
+             walletPrivateKeyCount,
+             walletAddressLabelsCount,
+             walletTransactionsCount);
     assertEquals("The previous test didn't cleaned wallets entities correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
-                 walletAccountDAO.findAll().size());
+                 walletCount);
     assertEquals("The previous test didn't cleaned wallet addresses labels correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
-                 addressLabelDAO.findAll().size());
+                 walletAddressLabelsCount);
     assertEquals("The previous test didn't cleaned wallets private keys entities correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
-                 walletPrivateKeyDAO.findAll().size());
+                 walletPrivateKeyCount);
     assertEquals("The previous test didn't cleaned wallets transactions entities correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
-                 walletTransactionDAO.findAll().size());
+                 walletTransactionsCount);
 
     RequestLifeCycle.end();
   }
@@ -169,6 +194,55 @@ public abstract class BaseWalletTest {
     transactionEntity = walletTransactionDAO.create(transactionEntity);
     entitiesToClean.add(transactionEntity);
     return transactionEntity;
+  }
+
+  protected TransactionDetail createTransactionDetail(String hash,
+                                                      String contractAddress,
+                                                      String contractMethodName,
+                                                      double contractAmount,
+                                                      double value,
+                                                      String fromAddress,
+                                                      String toAddress,
+                                                      String byAddress,
+                                                      long issuerIdentityId,
+                                                      String label,
+                                                      String message,
+                                                      boolean isSuccess,
+                                                      boolean isPending,
+                                                      boolean isAdminOperation,
+                                                      long createdDate) {
+
+    if (StringUtils.isBlank(hash)) {
+      hash = "0x" + randon.nextDouble();
+    }
+    if (StringUtils.isBlank(fromAddress)) {
+      fromAddress = "0x" + randon.nextInt(1000);
+    }
+    if (createdDate == 0) {
+      createdDate = ZonedDateTime.now().toInstant().toEpochMilli();
+    }
+
+    TransactionStorage transactionStorage = getService(TransactionStorage.class);
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setNetworkId(1);
+    transactionDetail.setHash(StringUtils.lowerCase(hash));
+    transactionDetail.setContractAddress(StringUtils.lowerCase(contractAddress));
+    transactionDetail.setContractMethodName(contractMethodName);
+    transactionDetail.setContractAmount(contractAmount);
+    transactionDetail.setValue(value);
+    transactionDetail.setFrom(StringUtils.lowerCase(fromAddress));
+    transactionDetail.setTo(StringUtils.lowerCase(toAddress));
+    transactionDetail.setBy(StringUtils.lowerCase(byAddress));
+    transactionDetail.setIssuerId(issuerIdentityId);
+    transactionDetail.setLabel(label);
+    transactionDetail.setMessage(message);
+    transactionDetail.setSucceeded(isSuccess);
+    transactionDetail.setPending(isPending);
+    transactionDetail.setAdminOperation(isAdminOperation);
+    transactionDetail.setTimestamp(createdDate);
+    transactionStorage.saveTransactionDetail(transactionDetail);
+    entitiesToClean.add(transactionDetail);
+    return transactionDetail;
   }
 
   public <T> T getService(Class<T> componentType) {
