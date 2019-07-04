@@ -27,6 +27,7 @@
             :balance="contractDetails.balance"
             :recipient="contractDetails.address"
             use-navigation
+            disabled-recipient
             @success="successSendingEther"
             @sent="newTransactionPending"
             @error="transactionError" />

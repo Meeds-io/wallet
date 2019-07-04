@@ -182,13 +182,20 @@ export default {
       if (!value) {
         return;
       }
-      if (!this.noAddress && window.localWeb3.utils.isAddress(value)) {
+      const isAddress = window.localWeb3.utils.isAddress(value);
+      if (isAddress && !this.noAddress) {
         this.items.push({
           address: value,
           name: value,
           id: value,
         });
-      } else if (value && value.length) {
+      } else if (isAddress && window.walletSettings && window.walletSettings.contractDetail && value.trim().toLowerCase() === window.walletSettings.contractAddress) {
+        this.items.push({
+          address: value,
+          name: window.walletSettings.contractDetail.name,
+          id: value,
+        });
+      } else if(value.length) {
         this.isLoadingSuggestions = true;
         return searchWallets(value).then((data) => {
           this.items = data;
@@ -307,8 +314,19 @@ export default {
       return true;
     },
     selectItem(id, type) {
+      const isAddress = id && window.localWeb3.utils.isAddress(id);
       if (!id) {
         this.$refs.selectAutoComplete.selectItem(null);
+      } else if (isAddress && window.walletSettings && window.walletSettings.contractDetail && id.trim().toLowerCase() === window.walletSettings.contractAddress) {
+        const item = {
+            address: id,
+            name: window.walletSettings.contractDetail.name,
+            id: id,
+          };
+          this.items.push(item);
+          if (this.$refs.selectAutoComplete) {
+            this.$refs.selectAutoComplete.selectItem(item);
+          }
       } else if (type) {
         return searchWalletByTypeAndId(id, type).then((item) => {
           item.id_type = item.type && item.id ? `${item.type}_${item.id}` : null;

@@ -34,6 +34,7 @@
           label="Amount"
           required
           placeholder="Select an amount of tokens to send"
+          class="mt-3"
           @input="$emit('amount-selected', amount)" />
 
         <v-text-field
@@ -49,7 +50,7 @@
           counter
           required
           autocomplete="current-passord"
-          class="mb-2"
+          class="mt-3"
           @click:append="walletPasswordShow = !walletPasswordShow" />
         <gas-price-choice :estimated-fee="transactionFeeString" @changed="gasPrice = $event" />
         <v-text-field

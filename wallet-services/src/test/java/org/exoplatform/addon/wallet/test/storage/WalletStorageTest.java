@@ -16,8 +16,7 @@
  */
 package org.exoplatform.addon.wallet.test.storage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.Set;
 
@@ -60,12 +59,22 @@ public class WalletStorageTest extends BaseWalletTest {
 
     Wallet wallet = newWallet();
 
-    wallet = walletStorage.saveWallet(wallet, isEnabled);
+    wallet = walletStorage.saveWallet(wallet, true);
 
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
     checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+
+    initializationState = WalletInitializationState.DENIED.name();
+    try {
+      wallet.setInitializationState(initializationState);
+      wallet = walletStorage.saveWallet(wallet, false);
+
+      checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+    } finally {
+      initializationState = WalletInitializationState.INITIALIZED.name();
+    }
   }
 
   /**
@@ -101,6 +110,9 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = walletStorage.getWalletByAddress(address);
     checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+
+    wallet = walletStorage.getWalletByAddress("new-address");
+    assertNull("Shouldn't find wallet with not recognized address", wallet);
   }
 
   /**
@@ -119,6 +131,9 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = walletStorage.getWalletByIdentityId(identityId);
     checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+
+    wallet = walletStorage.getWalletByIdentityId(1523);
+    assertNull(wallet);
   }
 
   /**
@@ -128,6 +143,10 @@ public class WalletStorageTest extends BaseWalletTest {
   public void testListWallets() {
     WalletStorage walletStorage = getService(WalletStorage.class);
 
+    Set<Wallet> listWallets = walletStorage.listWallets();
+    assertNotNull(listWallets);
+    assertEquals(0, listWallets.size());
+
     Wallet wallet = newWallet();
 
     wallet = walletStorage.saveWallet(wallet, isEnabled);
@@ -135,7 +154,7 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    Set<Wallet> listWallets = walletStorage.listWallets();
+    listWallets = walletStorage.listWallets();
     assertNotNull(listWallets);
     assertEquals(1, listWallets.size());
 
