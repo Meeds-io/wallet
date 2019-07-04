@@ -34,12 +34,8 @@
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.service.EthereumTransactionDecoder</type>
-  </component>
-
-  <component>
     <key>org.exoplatform.addon.wallet.service.WalletAccountService</key>
-    <type>org.exoplatform.addon.wallet.service.EthereumWalletAccountService</type>
+    <type>org.exoplatform.addon.wallet.service.WalletAccountServiceImpl</type>
     <init-params>
       <value-param>
         <name>admin.wallet.key</name>
@@ -51,7 +47,7 @@
 
   <component>
     <key>org.exoplatform.addon.wallet.service.WalletTransactionService</key>
-    <type>org.exoplatform.addon.wallet.service.EthereumWalletTransactionService</type>
+    <type>org.exoplatform.addon.wallet.service.WalletTransactionServiceImpl</type>
     <init-params>
       <value-param>
         <name>transaction.pending.maxDays</name>
@@ -63,7 +59,7 @@
 
   <component>
     <key>org.exoplatform.addon.wallet.service.WalletContractService</key>
-    <type>org.exoplatform.addon.wallet.service.EthereumWalletContractService</type>
+    <type>org.exoplatform.addon.wallet.service.WalletContractServiceImpl</type>
     <init-params>
       <value-param>
         <name>contract.abi.path</name>
@@ -80,7 +76,7 @@
 
   <component>
     <key>org.exoplatform.addon.wallet.service.WalletService</key>
-    <type>org.exoplatform.addon.wallet.service.EthereumWalletService</type>
+    <type>org.exoplatform.addon.wallet.service.WalletServiceImpl</type>
     <init-params>
       <value-param>
         <name>networkId</name>
@@ -128,10 +124,6 @@
         <value>${exo.wallet.accessPermission:}</value>
       </value-param>
     </init-params>
-  </component>
-
-  <component>
-    <type>org.exoplatform.addon.wallet.service.EthereumClientConnector</type>
   </component>
 
   <component>
@@ -184,12 +176,6 @@
 
   <external-component-plugins>
     <target-component>org.exoplatform.services.listener.ListenerService</target-component>
-    <component-plugin>
-      <name>exo.addon.wallet.transaction.loaded</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.BlockchainTransactionProcessorListener</type>
-      <description>Listening to transactions coming from configured ethereum network</description>
-    </component-plugin>
     <component-plugin>
       <name>exo.addon.wallet.addressAssociation.new</name>
       <set-method>addListener</set-method>
@@ -455,42 +441,6 @@
           <description>Change logs of Wallet RDBMS</description>
           <value>db/changelog/wallet-rdbms.db.changelog-master.xml</value>
         </values-param>
-      </init-params>
-    </component-plugin>
-  </external-component-plugins>
-
-  <external-component-plugins>
-    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Add a job to verify if mined transactions notifications aren't sent</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for wallet transaction stored status verifier</description>
-          <property name="jobName" value="PendingTransactionVerifierJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.addon.wallet.scheduled.PendingTransactionVerifierJob"/>
-          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0/10 * * * * ?}"/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Add a job to verify if mined contract transactions are added in database</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for contract stored transactions verifier</description>
-          <property name="jobName" value="ContractTransactionVerifierJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.addon.wallet.scheduled.ContractTransactionVerifierJob"/>
-          <property name="expression" value="${exo.wallet.ContractTransactionVerifierJob.expression:0 0 * ? * * *}"/>
-        </properties-param>
       </init-params>
     </component-plugin>
   </external-component-plugins>

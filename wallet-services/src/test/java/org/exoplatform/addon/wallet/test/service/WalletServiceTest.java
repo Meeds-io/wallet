@@ -16,24 +16,17 @@
  */
 package org.exoplatform.addon.wallet.test.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
-import org.exoplatform.addon.wallet.model.settings.InitialFundsSettings;
-import org.exoplatform.addon.wallet.model.settings.NetworkSettings;
-import org.exoplatform.addon.wallet.service.EthereumWalletService;
-import org.exoplatform.addon.wallet.service.WalletAccountService;
-import org.exoplatform.addon.wallet.service.WalletContractService;
-import org.exoplatform.addon.wallet.service.WalletService;
-import org.exoplatform.addon.wallet.service.WalletTransactionService;
-import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.junit.Test;
+import org.picocontainer.Startable;
 
-public class EthereumWalletServiceTest extends BaseWalletTest {
+import org.exoplatform.addon.wallet.model.settings.*;
+import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.test.BaseWalletTest;
+
+public class WalletServiceTest extends BaseWalletTest {
 
   /**
    * Test if container has properly started
@@ -86,14 +79,13 @@ public class EthereumWalletServiceTest extends BaseWalletTest {
     assertNotNull("Default blockchain network websocket URL shouldn't be null",
                   networkSettings.getWebsocketProviderURL());
   }
-  
 
   /**
    * Test save initial funds settings
    */
   @Test
   public void testSaveInitialFundsSettings() {
-    EthereumWalletService ethereumWalletService = getService(EthereumWalletService.class);
+    WalletService walletService = getService(WalletService.class);
     InitialFundsSettings initialFundsSettings = new InitialFundsSettings();
     int tokenAmount = 5000;
     String fundsHolder = "root";
@@ -103,17 +95,17 @@ public class EthereumWalletServiceTest extends BaseWalletTest {
     initialFundsSettings.setFundsHolderType(fundsHolderType);
     initialFundsSettings.setRequestMessage("Initial fund message");
 
-    ethereumWalletService.saveInitialFundsSettings(initialFundsSettings);
+    walletService.saveInitialFundsSettings(initialFundsSettings);
 
-    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, ethereumWalletService);
+    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, walletService);
 
     tokenAmount = 50;
     initialFundsSettings.setTokenAmount(tokenAmount);
-    ethereumWalletService.saveInitialFundsSettings(initialFundsSettings);
+    walletService.saveInitialFundsSettings(initialFundsSettings);
 
     // Re-compute settings from DB
-    ethereumWalletService.start();
-    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, ethereumWalletService);
+    ((Startable) walletService).start();
+    checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, walletService);
   }
 
   private void checkInitialFunds(int tokenAmount,

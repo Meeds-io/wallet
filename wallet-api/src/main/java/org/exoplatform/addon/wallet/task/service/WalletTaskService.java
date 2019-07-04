@@ -34,7 +34,7 @@ public interface WalletTaskService {
   public Set<WalletAdminTask> listTasks(String currentUser);
 
   /**
-   * @param taskType
+   * @param taskType task type
    * @return a task by identified type
    */
   public Set<WalletAdminTask> getTasksByType(String taskType);

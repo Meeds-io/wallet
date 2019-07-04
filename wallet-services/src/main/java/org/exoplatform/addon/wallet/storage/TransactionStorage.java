@@ -107,10 +107,11 @@ public class TransactionStorage {
   /**
    * Return contract amount received during a period of time
    * 
-   * @param contractAddress
-   * @param address
-   * @param startDate
-   * @param endDate
+   * @param contractAddress blockchain contract address
+   * @param address wallet address
+   * @param startDate start date of selected period
+   * @param endDate end date of selected period
+   * @return sum of token amounts received during selected period
    */
   public double countReceivedContractAmount(String contractAddress,
                                             String address,

@@ -23,9 +23,9 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
 
-public class EthereumWalletTransactionService implements WalletTransactionService {
+public class WalletTransactionServiceImpl implements WalletTransactionService {
 
-  private static final Log      LOG               = ExoLogger.getLogger(EthereumWalletTransactionService.class);
+  private static final Log      LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
 
   private static final String   YEAR_PERIODICITY  = "year";
 
@@ -45,10 +45,10 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
   private long                  pendingTransactionMaxDays;
 
-  public EthereumWalletTransactionService(WalletAccountService accountService,
-                                          TransactionStorage transactionStorage,
-                                          WalletContractService contractService,
-                                          InitParams params) {
+  public WalletTransactionServiceImpl(WalletAccountService accountService,
+                                      TransactionStorage transactionStorage,
+                                      WalletContractService contractService,
+                                      InitParams params) {
     this.transactionStorage = transactionStorage;
     this.accountService = accountService;
     this.contractService = contractService;

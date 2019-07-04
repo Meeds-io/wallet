@@ -29,9 +29,10 @@ public interface RewardTransactionService {
    * Get the list of transactions sent on blockchain of type 'reward' in a
    * period of time
    * 
-   * @param periodType
-   * @param startDateInSeconds
-   * @return
+   * @param periodType period type: week, month...
+   * @param startDateInSeconds start timestamp of the period used to reward
+   *          wallets
+   * @return list of sent Reward transactions
    */
   public List<RewardTransaction> getRewardTransactions(String periodType,
                                                        long startDateInSeconds);
@@ -39,7 +40,7 @@ public interface RewardTransactionService {
   /**
    * Save reward transaction in eXo internal datasource
    * 
-   * @param rewardTransaction
+   * @param rewardTransaction to save in DB
    */
   public void saveRewardTransaction(RewardTransaction rewardTransaction);
 }

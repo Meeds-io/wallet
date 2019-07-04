@@ -22,10 +22,10 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 
-public class EthereumWalletAccountService implements WalletAccountService, Startable {
+public class WalletAccountServiceImpl implements WalletAccountService, Startable {
 
   private static final Log        LOG                                     =
-                                      ExoLogger.getLogger(EthereumWalletAccountService.class);
+                                      ExoLogger.getLogger(WalletAccountServiceImpl.class);
 
   private static final String     USER_MESSAGE_IN_EXCEPTION               = "User '";
 
@@ -45,9 +45,9 @@ public class EthereumWalletAccountService implements WalletAccountService, Start
 
   private String                  adminAccountPassword;
 
-  public EthereumWalletAccountService(WalletStorage walletAccountStorage,
-                                      AddressLabelStorage labelStorage,
-                                      InitParams params) {
+  public WalletAccountServiceImpl(WalletStorage walletAccountStorage,
+                                  AddressLabelStorage labelStorage,
+                                  InitParams params) {
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)

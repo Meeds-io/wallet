@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.addon.wallet.service;
+package org.exoplatform.addon.wallet.blockchain.service;
+
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getWebsocketURL;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.picocontainer.Startable;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
@@ -32,13 +35,14 @@ import org.web3j.protocol.websocket.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 /**
  * A Web3j connector class to interact with Ethereum Blockchain
  */
-public class EthereumClientConnector {
+public class EthereumClientConnector implements ExoBlockchainTransactionService, Startable {
 
   private static final Log         LOG                        = ExoLogger.getLogger(EthereumClientConnector.class);
 
@@ -56,11 +60,25 @@ public class EthereumClientConnector {
 
   private boolean                  serviceStopping            = false;
 
+  private ClassLoader              webappClassLoader          = null;
+
   private String                   websocketURL               = null;
 
-  public EthereumClientConnector() {
+  public EthereumClientConnector(ClassLoader webappClassLoader) {
+    this.webappClassLoader = webappClassLoader;
+
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
+  }
+
+  @Override
+  public ClassLoader getWebappClassLoader() {
+    return webappClassLoader;
+  }
+
+  @Override
+  public void start() {
+    this.start(getWebsocketURL());
   }
 
   public void start(String websocketURL) {
@@ -80,6 +98,7 @@ public class EthereumClientConnector {
     }, 5, 10, TimeUnit.SECONDS);
   }
 
+  @Override
   public void stop() {
     this.serviceStopping = true;
     connectionVerifierExecutor.shutdownNow();
@@ -167,8 +186,8 @@ public class EthereumClientConnector {
 
   /**
    * @return last mined block number from blockchain
-   * @throws InterruptedException
-   * @throws IOException
+   * @throws InterruptedException when waiting for blockchain is interrupted
+   * @throws IOException when error sending transaction on blockchain
    */
   public long getLastestBlockNumber() throws InterruptedException, IOException {
     waitConnection();

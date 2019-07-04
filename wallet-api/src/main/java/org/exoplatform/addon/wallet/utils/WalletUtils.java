@@ -136,8 +136,7 @@ public class WalletUtils {
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT         =
                                                                                     "exo.addon.wallet.transaction.mined";
 
-  public static final String                          NEW_TRANSACTION_EVENT                 =
-                                                                            "exo.addon.wallet.transaction.loaded";
+  public static final String                          NEW_TRANSACTION_EVENT                 = "exo.addon.wallet.transaction.loaded";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS          = "transaction.pending.maxDays";
 
@@ -613,7 +612,12 @@ public class WalletUtils {
 
   public static final long getNetworkId() {
     GlobalSettings settings = getSettings();
-    return settings == null ? 0 : settings.getNetwork().getId();
+    return settings == null || settings.getNetwork() == null ? 0 : settings.getNetwork().getId();
+  }
+
+  public static final String getWebsocketURL() {
+    GlobalSettings settings = getSettings();
+    return settings == null || settings.getNetwork() == null ? null : settings.getNetwork().getWebsocketProviderURL();
   }
 
   public static final String formatNumber(Object amount, String lang) {

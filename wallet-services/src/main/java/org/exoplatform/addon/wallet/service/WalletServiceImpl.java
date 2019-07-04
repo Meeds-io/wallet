@@ -44,32 +44,28 @@ import org.exoplatform.services.log.Log;
 /**
  * A storage service to save/load information used by users and spaces wallets
  */
-public class EthereumWalletService implements WalletService, Startable {
+public class WalletServiceImpl implements WalletService, Startable {
 
-  private static final Log        LOG                      = ExoLogger.getLogger(EthereumWalletService.class);
+  private static final Log       LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
 
-  private ExoContainer            container;
+  private ExoContainer           container;
 
-  private EthereumClientConnector clientConnector;
+  private WalletContractService  contractService;
 
-  private WalletContractService   contractService;
+  private WalletAccountService   accountService;
 
-  private WalletAccountService    accountService;
+  private SettingService         settingService;
 
-  private SettingService          settingService;
+  private WebNotificationStorage webNotificationStorage;
 
-  private WebNotificationStorage  webNotificationStorage;
+  private GlobalSettings         configuredGlobalSettings = new GlobalSettings();
 
-  private GlobalSettings          configuredGlobalSettings = new GlobalSettings();
-
-  public EthereumWalletService(EthereumClientConnector clientConnector,
-                               WalletContractService contractService,
-                               WalletAccountService accountService,
-                               WebNotificationStorage webNotificationStorage,
-                               PortalContainer container,
-                               InitParams params) {
+  public WalletServiceImpl(WalletContractService contractService,
+                           WalletAccountService accountService,
+                           WebNotificationStorage webNotificationStorage,
+                           PortalContainer container,
+                           InitParams params) {
     this.container = container;
-    this.clientConnector = clientConnector;
     this.accountService = accountService;
     this.contractService = contractService;
     this.webNotificationStorage = webNotificationStorage;
@@ -142,9 +138,6 @@ public class EthereumWalletService implements WalletService, Startable {
       ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
       this.configuredGlobalSettings.setContractDetail(contractDetail);
 
-      // start connection to blockchain
-      this.clientConnector.start(this.configuredGlobalSettings.getNetwork().getWebsocketProviderURL());
-
       // TODO if stored contractDetail is empty, its computing // NOSONAR
       // is moved to EthereumWalletTokenAdminService because we can't access
       // blockchain from here see package-info of
@@ -156,7 +149,7 @@ public class EthereumWalletService implements WalletService, Startable {
 
   @Override
   public void stop() {
-    clientConnector.stop();
+    // Nothing to stop
   }
 
   @Override
@@ -373,4 +366,5 @@ public class EthereumWalletService implements WalletService, Startable {
     }
     return settingService;
   }
+
 }
