@@ -40,7 +40,7 @@ public class ExoBlockchainTransactionAspect {
    * @param point processing point
    * @return result of processing point after its execution
    * @throws Throwable if processing point throws an exception or the webapp
-   *           class loader isn't founds
+   *           class loader isn't found
    */
   @Around("execution(* *(..)) && @annotation(org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction)")
   public Object around(ProceedingJoinPoint point) throws Throwable {

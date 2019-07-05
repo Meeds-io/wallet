@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -85,7 +86,9 @@ public class TransactionStorageTest extends BaseWalletTest {
     String contractMethodName = "transfer";
     String firstAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
 
-    generateTransactions(firstAddress, contractAddress, contractMethodName);
+    List<TransactionEntity> generatedTransactions = generateTransactions(firstAddress, contractAddress, contractMethodName);
+    List<String> transactionHashList =
+                                     generatedTransactions.stream().map(TransactionEntity::getHash).collect(Collectors.toList());
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
 
@@ -149,6 +152,19 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                             includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
+    String oldestTransactionHash = transactionHashList.get(0);
+    transactions = transactionStorage.getWalletTransactions(1,
+                                                            firstAddress,
+                                                            null,
+                                                            null,
+                                                            oldestTransactionHash,
+                                                            10,
+                                                            false,
+                                                            true);
+    assertEquals("Returned wallet transactions list should include all transactions, even if limit = 10, the selected hash must be included in result",
+                 60,
+                 transactions.size());
+
     // Filter on only pending transactions
     includeAdministrationTransactions = false;
     transactions = transactionStorage.getWalletTransactions(1,
@@ -192,6 +208,7 @@ public class TransactionStorageTest extends BaseWalletTest {
   @Test
   public void testGetTransactionByHash() {
     String hashOfTX = "0x51a6e8ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceadb";
+    long createdDateInSeconds = System.currentTimeMillis() / 1000;
     createTransactionDetail(hashOfTX,
                             null,
                             null,
@@ -200,17 +217,23 @@ public class TransactionStorageTest extends BaseWalletTest {
                             "from",
                             "to",
                             "by",
-                            0,
+                            1,
                             "label",
                             "message",
                             true, // isSuccess
                             true, // isPending
                             true, // isAdminOperation
-                            System.currentTimeMillis());
+                            createdDateInSeconds); // Simulate storing timestamp
+                                                   // in seconds
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hashOfTX);
     assertNotNull("Can't find previously saved transaction with given hash", transactionDetail);
+
+    long createdDateInMilliSeconds = createdDateInSeconds * 1000;
+    assertEquals("Created date should be returned in milliseconds even if it's saved using seconds",
+                 createdDateInMilliSeconds,
+                 transactionDetail.getTimestamp());
 
     transactionDetail =
                       transactionStorage.getTransactionByHash("0x111111ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceaaa");
@@ -231,6 +254,39 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     TransactionEntity lastTX = transactions.get(transactions.size() - 2);
     assertEquals("Last pending transaction isn't coherent", transactionDetail.getHash(), lastTX.getHash());
+  }
+
+  /**
+   * Test count received contract amounts
+   */
+  @Test
+  public void testSaveTransactionDetail() {
+    TransactionDetail transactionDetail = createTransactionDetail(null,
+                                                                  null,
+                                                                  null,
+                                                                  0, // token
+                                                                     // amount
+                                                                  0, // ether
+                                                                     // amount
+                                                                  "from",
+                                                                  "to",
+                                                                  "by",
+                                                                  0,
+                                                                  "label",
+                                                                  "message",
+                                                                  true, // isSuccess
+                                                                  true, // isPending
+                                                                  true, // isAdminOperation
+                                                                  0);
+
+    TransactionStorage transactionStorage = getService(TransactionStorage.class);
+    TransactionDetail savedTransactionDetail = transactionStorage.getTransactionByHash(transactionDetail.getHash());
+    assertEquals("Stored transaction detail is not equals to built one", transactionDetail, savedTransactionDetail);
+
+    transactionDetail.setContractMethodName("transfer");
+    transactionStorage.saveTransactionDetail(transactionDetail);
+    savedTransactionDetail = transactionStorage.getTransactionByHash(transactionDetail.getHash());
+    assertEquals("Stored transaction detail is not equals to updated one", transactionDetail, savedTransactionDetail);
   }
 
   /**

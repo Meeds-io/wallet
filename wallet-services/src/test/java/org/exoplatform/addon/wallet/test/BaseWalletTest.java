@@ -164,7 +164,7 @@ public abstract class BaseWalletTest {
                                                 long createdDate) {
 
     if (StringUtils.isBlank(hash)) {
-      hash = "0x" + randon.nextDouble();
+      hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
       fromAddress = "0x" + randon.nextInt(1000);
@@ -213,7 +213,7 @@ public abstract class BaseWalletTest {
                                                       long createdDate) {
 
     if (StringUtils.isBlank(hash)) {
-      hash = "0x" + randon.nextDouble();
+      hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
       fromAddress = "0x" + randon.nextInt(1000);
@@ -243,6 +243,14 @@ public abstract class BaseWalletTest {
     transactionStorage.saveTransactionDetail(transactionDetail);
     entitiesToClean.add(transactionDetail);
     return transactionDetail;
+  }
+
+  protected String generateTransactionHash() {
+    StringBuilder hashStringBuffer = new StringBuilder("0x");
+    for (int i = 0; i < 64; i++) {
+      hashStringBuffer.append(Integer.toHexString(randon.nextInt(16)));
+    }
+    return hashStringBuffer.toString();
   }
 
   public <T> T getService(Class<T> componentType) {

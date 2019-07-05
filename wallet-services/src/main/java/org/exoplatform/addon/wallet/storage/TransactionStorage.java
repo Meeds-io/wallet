@@ -191,7 +191,7 @@ public class TransactionStorage {
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
       LOG.debug("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
                 entity.getHash());
-      detail.setTimestamp(entity.getCreatedDate() * 1000);
+      detail.setTimestamp(detail.getTimestamp() * 1000);
     }
     entity.setCreatedDate(detail.getTimestamp());
     if (detail.getIssuer() != null) {
