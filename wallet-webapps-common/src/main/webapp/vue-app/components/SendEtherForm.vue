@@ -12,7 +12,7 @@
         ">
         <address-auto-complete
           ref="autocomplete"
-          :disabled="loading"
+          :disabled="loading || disabledRecipient"
           input-label="Recipient"
           input-placeholder="Select a user, a space or an address to send to"
           title="Select a user, a space or an address to send to"
@@ -24,24 +24,17 @@
             $emit('receiver-selected', $event);
           " />
 
-        <v-container
-          flat
-          fluid
-          grid-list-lg
-          class="mt-4 pl-2">
-          <v-layout row wrap>
-            <v-text-field
-              ref="amountInput"
-              v-model.number="amount"
-              :disabled="loading"
-              name="amount"
-              label="Amount"
-              placeholder="Select an amount of ethers to send"
-              required
-              @input="$emit('amount-selected', amount)" />
-            <slot></slot>
-          </v-layout>
-        </v-container>
+        <v-text-field
+          ref="amountInput"
+          v-model.number="amount"
+          :disabled="loading"
+          name="amount"
+          label="Amount"
+          placeholder="Select an amount of ethers to send"
+          required
+          class="mt-3"
+          @input="$emit('amount-selected', amount)" />
+
         <v-text-field
           v-if="!storedPassword"
           v-model="walletPassword"
@@ -55,8 +48,9 @@
           counter
           required
           autocomplete="current-passord"
-          class="mb-2"
+          class="mt-3"
           @click:append="walletPasswordShow = !walletPasswordShow" />
+        <gas-price-choice @changed="gasPrice = $event" />
         <v-text-field
           v-model="transactionLabel"
           :disabled="loading"
@@ -74,7 +68,6 @@
           rows="3"
           flat
           no-resize />
-        <gas-price-choice @changed="gasPrice = $event" />
       </v-form>
 
       <qr-code-modal
@@ -143,6 +136,12 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    disabledRecipient: {
+      type: Boolean,
+      default: function() {
+        return false;
       },
     },
   },

@@ -48,28 +48,45 @@ public interface WalletTokenAdminService {
    * 
    * @param transactionDetail
    * @param issuerUsername
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
   /**
    * Initializes (on blockchain) a receiver wallet address using 'Admin' wallet
-   * by using funds transmitted in transaction detail. The transaction issuer
-   * will be stored in transaction details inside eXo server only.
+   * by using funds transmitted in transaction detail. The transaction issuer,
+   * label and message will be stored in transaction details inside eXo server
+   * only.
    * 
    * @param transactionDetail
    * @param issuerUsername
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   TransactionDetail initialize(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
   /**
+   * Send ether (on blockchain) to a receiver wallet address using 'Admin'
+   * wallet. The transaction issuer, label and message will be stored in
+   * transaction details inside eXo server only.
+   * 
+   * @param transactionDetail
+   * @param issuerUsername
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
+   * @throws Exception
+   */
+  TransactionDetail sendEther(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
+
+  /**
    * Get token balance of a wallet address (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   BigInteger balanceOf(String address) throws Exception;// NOSONAR
@@ -78,7 +95,8 @@ public interface WalletTokenAdminService {
    * Get ether balance of a wallet address (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   BigInteger getEtherBalanceOf(String address) throws Exception;// NOSONAR
@@ -87,7 +105,8 @@ public interface WalletTokenAdminService {
    * Checks whether the wallet is initialized or not (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   boolean isInitializedAccount(String address) throws Exception;// NOSONAR
@@ -97,7 +116,8 @@ public interface WalletTokenAdminService {
    * (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   boolean isAdminAccount(String address) throws Exception;// NOSONAR
@@ -106,7 +126,8 @@ public interface WalletTokenAdminService {
    * Get admin level of a wallet address from token (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   int getAdminLevel(String address) throws Exception;// NOSONAR
@@ -115,7 +136,8 @@ public interface WalletTokenAdminService {
    * Checks if a wallet address is approved on token (on blockchain)
    * 
    * @param address
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    * @throws Exception
    */
   boolean isApprovedAccount(String address) throws Exception;// NOSONAR
@@ -125,7 +147,9 @@ public interface WalletTokenAdminService {
    * Symbol - Name ...
    * 
    * @param contractAddress
-   * @return
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
    */
   ContractDetail getContractDetailFromBlockchain(String contractAddress);
+
 }

@@ -18,6 +18,8 @@ package org.exoplatform.addon.wallet.service;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.math.BigInteger;
+
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
 
@@ -38,40 +40,32 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.social.core.space.model.Space;
-import org.exoplatform.social.core.space.spi.SpaceService;
 
 /**
  * A storage service to save/load information used by users and spaces wallets
  */
-public class EthereumWalletService implements WalletService, Startable {
+public class WalletServiceImpl implements WalletService, Startable {
 
-  private static final Log        LOG                      = ExoLogger.getLogger(EthereumWalletService.class);
+  private static final Log       LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
 
-  private ExoContainer            container;
+  private ExoContainer           container;
 
-  private EthereumClientConnector clientConnector;
+  private WalletContractService  contractService;
 
-  private WalletContractService   contractService;
+  private WalletAccountService   accountService;
 
-  private WalletAccountService    accountService;
+  private SettingService         settingService;
 
-  private SettingService          settingService;
+  private WebNotificationStorage webNotificationStorage;
 
-  private SpaceService            spaceService;
+  private GlobalSettings         configuredGlobalSettings = new GlobalSettings();
 
-  private WebNotificationStorage  webNotificationStorage;
-
-  private GlobalSettings          configuredGlobalSettings = new GlobalSettings();
-
-  public EthereumWalletService(EthereumClientConnector clientConnector,
-                               WalletContractService contractService,
-                               WalletAccountService accountService,
-                               WebNotificationStorage webNotificationStorage,
-                               PortalContainer container,
-                               InitParams params) {
+  public WalletServiceImpl(WalletContractService contractService,
+                           WalletAccountService accountService,
+                           WebNotificationStorage webNotificationStorage,
+                           PortalContainer container,
+                           InitParams params) {
     this.container = container;
-    this.clientConnector = clientConnector;
     this.accountService = accountService;
     this.contractService = contractService;
     this.webNotificationStorage = webNotificationStorage;
@@ -144,9 +138,6 @@ public class EthereumWalletService implements WalletService, Startable {
       ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
       this.configuredGlobalSettings.setContractDetail(contractDetail);
 
-      // start connection to blockchain
-      this.clientConnector.start(this.configuredGlobalSettings.getNetwork().getWebsocketProviderURL());
-
       // TODO if stored contractDetail is empty, its computing // NOSONAR
       // is moved to EthereumWalletTokenAdminService because we can't access
       // blockchain from here see package-info of
@@ -158,7 +149,7 @@ public class EthereumWalletService implements WalletService, Startable {
 
   @Override
   public void stop() {
-    clientConnector.stop();
+    // Nothing to stop
   }
 
   @Override
@@ -193,20 +184,16 @@ public class EthereumWalletService implements WalletService, Startable {
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);
-    userSettings.setAdmin(isUserAdmin(currentUser));
-    userSettings.setWalletEnabled(true);
+    userSettings.setAdmin(isUserRewardingAdmin(currentUser));
 
     String accessPermission = globalSettings.getAccessPermission();
-    if (StringUtils.isNotBlank(accessPermission)) {
-      Space space = getSpace(accessPermission);
-      // Disable wallet for users not member of the permitted space members
-      if (!isUserMemberOf(currentUser, accessPermission) && (space != null && !getSpaceService().isMember(space, currentUser))) {
-        LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
-                  currentUser,
-                  accessPermission);
-        userSettings.setWalletEnabled(false);
-        return userSettings;
-      }
+    boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
+    userSettings.setWalletEnabled(walletEnabled);
+    if (!walletEnabled) {
+      LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
+                currentUser,
+                accessPermission);
+      return userSettings;
     }
 
     Wallet wallet = null;
@@ -340,10 +327,37 @@ public class EthereumWalletService implements WalletService, Startable {
     SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
                                                                         WALLET_SCOPE,
                                                                         INITIAL_FUNDS_KEY_NAME);
+
+    InitialFundsSettings initialFundsSettings = null;
     if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
-      this.configuredGlobalSettings.setInitialFunds(fromJsonString(initialFundsSettingsValue.getValue().toString(),
-                                                                   InitialFundsSettings.class));
+      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(),
+                                            InitialFundsSettings.class);
+    } else {
+      initialFundsSettings = new InitialFundsSettings();
     }
+    computeInitialEtherFund(initialFundsSettings);
+    this.configuredGlobalSettings.setInitialFunds(initialFundsSettings);
+  }
+
+  private void computeInitialEtherFund(InitialFundsSettings initialFundsSettings) {
+    NetworkSettings network = this.configuredGlobalSettings.getNetwork();
+    long gasLimit = 150000L; // Default max gas per contract transaction
+    long gasPrice = 15000000000L; // Default max gas price per contract
+                                  // transaction
+    if (network != null) {
+      if (network.getGasLimit() != null && network.getGasLimit() > 0) {
+        gasLimit = network.getGasLimit();
+      }
+      if (network.getMaxGasPrice() != null && network.getMaxGasPrice() > 0) {
+        gasPrice = network.getMaxGasPrice();
+      }
+    }
+    BigInteger etherAmountInWEI = new BigInteger(String.valueOf(gasLimit)).multiply(new BigInteger(String.valueOf(gasPrice)));
+    double etherInitialFund = convertFromDecimals(etherAmountInWEI, ETHER_TO_WEI_DECIMALS);
+    double etherAmountMaxDecimals = 3; // max decimals to use in ether initial
+                                       // funds
+    double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
+    initialFundsSettings.setEtherAmount(Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals);
   }
 
   private SettingService getSettingService() {
@@ -353,10 +367,4 @@ public class EthereumWalletService implements WalletService, Startable {
     return settingService;
   }
 
-  private SpaceService getSpaceService() {
-    if (spaceService == null) {
-      spaceService = CommonsUtils.getService(SpaceService.class);
-    }
-    return spaceService;
-  }
 }

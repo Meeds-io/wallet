@@ -29,17 +29,21 @@ public interface RewardService {
    * Compute rewards swicth configurations for the list of identities passed in
    * parameters
    * 
-   * @param periodDateInSeconds
-   * @return
+   * @param periodDateInSeconds a timestamp in seconds inside the period time
+   *          that will be retrieved
+   * @return a {@link Set} of {@link WalletReward} with the details of sent
+   *         tokens and tokens to send
    */
   public Set<WalletReward> computeReward(long periodDateInSeconds);
 
   /**
    * Send rewards transactions
    * 
-   * @param periodDateInSeconds
+   * @param periodDateInSeconds a timestamp in seconds inside the period time
+   *          that will be retrieved
    * @param username current username sending rewards
-   * @throws Exception
+   * @throws Exception if an error occurs while sending the rewards transactions
+   *           on blockchain
    */
   public void sendRewards(long periodDateInSeconds, String username) throws Exception; // NOSONAR
 

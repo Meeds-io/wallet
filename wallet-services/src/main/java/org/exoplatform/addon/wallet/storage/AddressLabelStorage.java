@@ -25,9 +25,9 @@ public class AddressLabelStorage {
     if (allLabelsEntities == null || allLabelsEntities.isEmpty()) {
       return Collections.emptySet();
     }
-    this.allLabels = allLabelsEntities.stream()
-                                      .map(this::fromEntity)
-                                      .collect(Collectors.toSet());
+    this.allLabels = Collections.unmodifiableSet(allLabelsEntities.stream()
+                                                                  .map(this::fromEntity)
+                                                                  .collect(Collectors.toSet()));
     return this.allLabels;
   }
 
@@ -58,9 +58,6 @@ public class AddressLabelStorage {
   }
 
   private AddressLabelEntity toEntity(WalletAddressLabel label) {
-    if (label == null) {
-      return null;
-    }
     AddressLabelEntity entity = new AddressLabelEntity();
     entity.setId(label.getId() == 0 ? null : label.getId());
     entity.setIdentityId(label.getIdentityId());

@@ -107,10 +107,11 @@ public class TransactionStorage {
   /**
    * Return contract amount received during a period of time
    * 
-   * @param contractAddress
-   * @param address
-   * @param startDate
-   * @param endDate
+   * @param contractAddress blockchain contract address
+   * @param address wallet address
+   * @param startDate start date of selected period
+   * @param endDate end date of selected period
+   * @return sum of token amounts received during selected period
    */
   public double countReceivedContractAmount(String contractAddress,
                                             String address,
@@ -190,7 +191,7 @@ public class TransactionStorage {
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
       LOG.debug("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
                 entity.getHash());
-      detail.setTimestamp(entity.getCreatedDate() * 1000);
+      detail.setTimestamp(detail.getTimestamp() * 1000);
     }
     entity.setCreatedDate(detail.getTimestamp());
     if (detail.getIssuer() != null) {

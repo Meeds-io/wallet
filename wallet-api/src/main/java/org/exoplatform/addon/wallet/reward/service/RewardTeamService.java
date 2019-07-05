@@ -41,7 +41,7 @@ public interface RewardTeamService {
   /**
    * Remove a reward Team/Pool by id
    * 
-   * @param id
+   * @param id Team technical ID
    * @return removed reward team
    */
   public RewardTeam removeTeam(Long id);

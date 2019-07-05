@@ -15,9 +15,11 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          Initialize wallet of 
-          <template v-if="wallet">
-            {{ wallet.name }}
+          <template v-if="wallet && wallet.name">
+            Initialize wallet to {{ wallet.name }}
+          </template>
+          <template v-else>
+            Initialize wallet
           </template>
         </span>
       </div>
@@ -47,9 +49,9 @@
               v-if="dialog"
               v-model="tokenAmount"
               :disabled="loading"
+              :label="`${contractDetails && contractDetails.name} amount`"
+              :placeholder="`Set ${contractDetails && contractDetails.name} amount to send`"
               name="tokenAmount"
-              label="Token amount"
-              placeholder="Set token amount to send"
               class="mt-3" />
 
             <v-text-field

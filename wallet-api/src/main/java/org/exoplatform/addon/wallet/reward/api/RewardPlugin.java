@@ -29,7 +29,7 @@ public abstract class RewardPlugin extends BaseComponentPlugin {
   /**
    * get reward plugin unique identifier
    * 
-   * @return
+   * @return reward plugin ID
    */
   public String getPluginId() {
     return getName();
@@ -38,17 +38,18 @@ public abstract class RewardPlugin extends BaseComponentPlugin {
   /**
    * Checks is the plugin is enabled
    * 
-   * @return
+   * @return whether the plugin is enabled or not
    */
   public abstract boolean isEnabled();
 
   /**
    * Retrieves earned points for identities in a certain period of time
    * 
-   * @param identityIds
-   * @param startDateInSeconds
-   * @param endDateInSeconds
-   * @return
+   * @param identityIds identity ids of wallets to consider in computation
+   * @param startDateInSeconds start timestamp in seconds of reward period
+   * @param endDateInSeconds end timestamp in seconds of reward period
+   * @return a {@link Map} of identity ID with the sum of tokens to send as
+   *         reward
    */
   public abstract Map<Long, Double> gtEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds);
 

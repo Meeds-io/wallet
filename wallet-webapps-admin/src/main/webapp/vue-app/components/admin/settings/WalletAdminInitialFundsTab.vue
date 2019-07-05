@@ -3,59 +3,28 @@
     class="text-xs-center pr-3 pl-3 pt-2"
     flat>
     <v-card-title>
-      The following settings manages the funds holder and the amount of initial funds to send for a user that has created a new wallet for the first time. You can choose to set initial funds for a token to 0 so that no funds will be send. The funds holder will receive a notification per user per currency (ether and/or token).
+      The following settings manages the funds amounts to send to wallets newly created.
+      The initial ether amount is preconfigured to allow users to use their wallets using {{ contractDetails && contractDetails.name }}.
     </v-card-title>
     <v-card-text>
-      <v-flex id="fundsHolderAutoComplete" class="contactAutoComplete">
-        <v-autocomplete
-          ref="fundsHolderAutoComplete"
-          v-model="fundsHolder"
-          :items="fundsHolderOptions"
-          :loading="isLoadingSuggestions"
-          :search-input.sync="fundsHolderSearchTerm"
-          attach="#fundsHolderAutoComplete"
-          label="Wallet funds holder"
-          class="contactAutoComplete"
-          placeholder="Start typing to Search a user"
-          content-class="contactAutoCompleteContent"
-          max-width="100%"
-          item-text="name"
-          item-value="id"
-          hide-details
-          hide-selected
-          chips
-          cache-items
-          dense
-          flat>
-          <template slot="no-data">
-            <v-list-tile>
-              <v-list-tile-title>
-                Search for a <strong>
-                  user
-                </strong>
-              </v-list-tile-title>
-            </v-list-tile>
-          </template>
+      <v-text-field
+        v-model="etherAmountLabel"
+        name="etherAmount"
+        label="Ether initial fund"
+        required
+        readonly
+        placeholder="Select an amount of tokens to send"
+        title="Minimum ether amount to send to wallets to enable it"
+        @input="$emit('amount-selected', amount)" />
 
-          <template slot="selection" slot-scope="{item, selected}">
-            <v-chip :selected="selected" class="autocompleteSelectedItem">
-              <span>
-                {{ item.name }}
-              </span>
-            </v-chip>
-          </template>
-
-          <template slot="item" slot-scope="{item}">
-            <v-list-tile-avatar
-              v-if="item.avatar"
-              tile
-              size="20">
-              <img :src="item.avatar">
-            </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.name" />
-          </template>
-        </v-autocomplete>
-      </v-flex>
+      <v-text-field
+        v-model.number="tokenAmount"
+        :label="`${contractDetails && contractDetails.name} initial fund`"
+        :disabled="loading"
+        name="tokenAmount"
+        required
+        placeholder="Select an amount of tokens to send"
+        @input="$emit('amount-selected', amount)" />
 
       <v-textarea
         id="requestMessage"
@@ -67,26 +36,6 @@
         rows="7"
         flat
         no-resize />
-    </v-card-text>
-
-    <v-card-text class="text-xs-left">
-      <v-label light>
-        Default amount of automatic initial funds request
-      </v-label>
-      <v-data-table
-        :headers="initialFundsHeaders"
-        :items="initialFunds"
-        :sortable="false"
-        hide-actions>
-        <template slot="items" slot-scope="props">
-          <td class="text-xs-left">
-            {{ props.item.name ? props.item.name : props.item.address }}
-          </td>
-          <td>
-            <v-text-field v-model="props.item.amount" single-line />
-          </td>
-        </template>
-      </v-data-table>
     </v-card-text>
     <v-card-actions>
       <v-spacer />
@@ -115,110 +64,42 @@ export default {
   },
   data() {
     return {
-      fundsHolder: '',
-      fundsHolderType: 'user',
-      fundsHolderOptions: [],
-      fundsHolderSearchTerm: null,
+      etherAmount: 0,
+      tokenAmount: 0,
+      requestMessage: null,
       isLoadingSuggestions: false,
-      initialFunds: [],
-      initialFundsHeaders: [
-        {
-          text: 'Name',
-          align: 'left',
-          sortable: false,
-          value: 'name',
-        },
-        {
-          text: 'Amount',
-          align: 'center',
-          sortable: false,
-          value: 'amount',
-        },
-      ],
     };
+  },
+  computed: {
+    etherAmountLabel() {
+      return this.etherAmountInFiat ? `${this.etherAmount} (${this.etherAmountInFiat} ${window.walletSettings.fiatSymbol})` : this.etherAmount;
+    },
+    etherAmountInFiat() {
+      return (this.etherAmount && this.walletUtils.etherToFiat(this.etherAmount)) || 0;
+    },
   },
   watch: {
     contractDetails() {
       this.reloadInitialFunds();
     },
-    fundsHolderSearchTerm() {
-      if (!this.fundsHolderSearchTerm || !this.fundsHolderSearchTerm.length) {
-        return;
-      }
-      this.isLoadingSuggestions = true;
-      this.addressRegistry.searchUsers(this.fundsHolderSearchTerm, true)
-        .then((items) => {
-          if (items) {
-            this.fundsHolderOptions = items;
-          } else {
-            this.fundsHolderOptions = [];
-          }
-          this.isLoadingSuggestions = false;
-        })
-        .catch((e) => {
-          console.debug('searchUsers method - error', e);
-          this.isLoadingSuggestions = false;
-        });
-    },
-    fundsHolder(newValue, oldValue) {
-      if (oldValue) {
-        this.fundsHolderSearchTerm = null;
-      }
-    },
   },
   methods: {
     init() {
       const initialFunds = window.walletSettings.initialFunds || {};
-      this.fundsHolder = initialFunds.fundsHolder;
-      this.fundsHolderType = initialFunds.fundsHolderType || 'user';
       this.requestMessage = initialFunds.requestMessage;
-
-      if (this.fundsHolder) {
-        this.addressRegistry.searchUsers(this.fundsHolder, true).then((items) => {
-          if (items) {
-            this.fundsHolderOptions = items;
-          } else {
-            this.fundsHolderOptions = [];
-          }
-        });
-      }
-
       this.reloadInitialFunds();
     },
     reloadInitialFunds() {
-      let initialFunds = window.walletSettings.initialFunds || {};
-      initialFunds = Object.keys(initialFunds.funds).map(address => {return {address: address, amount: initialFunds.funds[address]};});
+      const initialFunds = window.walletSettings.initialFunds || {};
 
-      const etherInitialFund = initialFunds.find((initialFund) => initialFund.address === 'ether');
-      const etherAmount = (etherInitialFund && etherInitialFund.amount) || 0;
-      this.initialFunds = [{
-        name: 'ether',
-        address: 'ether',
-        amount: etherAmount
-      }];
-
-      if (this.contractDetails && this.contractDetails.address && this.contractDetails.address.indexOf('0x') === 0) {
-        const tokenInitialFund = initialFunds.find((initialFund) => initialFund.address && initialFund.address.toLowerCase() === this.contractDetails.address.toLowerCase());
-        const tokenAmount = (tokenInitialFund && tokenInitialFund.amount) || 0;
-        this.initialFunds.push({
-          name: this.contractDetails.name,
-          address: this.contractDetails.address,
-          amount: tokenAmount
-        });
-      }
+      this.etherAmount = initialFunds.etherAmount || 0;
+      this.tokenAmount = initialFunds.tokenAmount || 0;
     },
     save() {
-      const initialFundsMap = {};
-      if (this.initialFunds && this.initialFunds.length) {
-        this.initialFunds.forEach((initialFund) => {
-          initialFundsMap[initialFund.address] = initialFund.amount;
-        });
-      }
       const initialFunds = {
-        fundsHolder: this.fundsHolder,
-        fundsHolderType: this.fundsHolderType,
         requestMessage: this.requestMessage,
-        funds: initialFundsMap,
+        etherAmount: this.etherAmount,
+        tokenAmount: this.tokenAmount,
       };
 
       this.loading = true;

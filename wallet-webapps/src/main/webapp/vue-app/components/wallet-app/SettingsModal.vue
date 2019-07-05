@@ -65,7 +65,7 @@
                     ref="qrCode"
                     :to="walletAddress"
                     title="Address QR Code"
-                    information="You can send this Wallet address or QR code to other users to send you ether and tokens" />
+                    information="You can send this Wallet address or QR code to other users to send you crypto-currencies" />
                   <div class="text-xs-center">
                     <wallet-address :value="walletAddress" :allow-edit="false" />
                   </div>

@@ -98,29 +98,31 @@
                 no-status />
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
-              <template v-if="props.item.deletedUser">Deleted user</template>
-              <template v-else-if="props.item.disabledUser">Disabled user</template>
-              <template v-else-if="!props.item.enabled">Disabled</template>
-              <template v-else-if="props.item.initializationState === 'NEW'">New</template>
-              <template v-else-if="props.item.disapproved">Disapproved</template>
-              <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
-                <v-icon color="orange">
-                  warning
+              <template v-if="!loadingWallets">
+                <template v-if="props.item.deletedUser">Deleted user</template>
+                <template v-else-if="props.item.disabledUser">Disabled user</template>
+                <template v-else-if="!props.item.enabled">Disabled</template>
+                <template v-else-if="props.item.initializationState === 'NEW'">New</template>
+                <template v-else-if="props.item.disapproved">Disapproved</template>
+                <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
+                  <v-icon color="orange">
+                    warning
+                  </v-icon>
+                  Low ether balance
+                </template>
+                <template v-else-if="Number(props.item.tokenBalance) === 0">
+                  <v-icon color="orange">
+                    warning
+                  </v-icon>
+                  No {{ contractDetails && contractDetails.name }}
+                </template>
+                <v-icon
+                  v-else
+                  color="green"
+                  title="OK">
+                  fa-check-circle
                 </v-icon>
-                Low ether balance
               </template>
-              <template v-else-if="Number(props.item.tokenBalance) === 0">
-                <v-icon color="orange">
-                  warning
-                </v-icon>
-                No tokens
-              </template>
-              <v-icon
-                v-else
-                color="green"
-                title="OK">
-                fa-check-circle
-              </v-icon>
             </td>
             <td
               v-if="contractDetails"
@@ -229,6 +231,12 @@
                       </v-list-tile>
                       <v-divider />
                     </template>
+                    <template v-else-if="useWalletAdmin && Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                      <v-list-tile @click="openAcceptSendEtherModal(props.item)">
+                        <v-list-tile-title>Send ether</v-list-tile-title>
+                      </v-list-tile>
+                      <v-divider />
+                    </template>
 
                     <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
                       <v-list-tile-title>Disable wallet</v-list-tile-title>
@@ -256,7 +264,11 @@
 
     <initialize-account-modal
       ref="initAccountModal"
-      @sent="walletInitialized" />
+      @sent="walletPendingTransaction" />
+
+    <send-ether-modal
+      ref="sendEtherModal"
+      @sent="walletPendingTransaction" />
 
     <!-- The selected account detail -->
     <v-navigation-drawer
@@ -285,10 +297,12 @@
 
 <script>
 import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
+import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
 
 export default {
   components: {
     InitializeAccountModal,
+    SendEtherModal,
   },
   props: {
     loading: {
@@ -350,7 +364,13 @@ export default {
       tokenAmount: null,
       limit: 10,
       pageSize: 10,
-      walletHeaders: [
+      walletTypes: ['user', 'admin'],
+      walletStatuses: ['disapproved'],
+    };
+  },
+  computed: {
+    walletHeaders() {
+      return [
         {
           text: '',
           align: 'center',
@@ -370,7 +390,7 @@ export default {
           value: 'walletStatus',
         },
         {
-          text: 'Token balance',
+          text: `${this.contractDetails && this.contractDetails.name} balance`,
           align: 'center',
           value: 'tokenBalance',
         },
@@ -391,12 +411,8 @@ export default {
           sortable: false,
           value: '',
         },
-      ],
-      walletTypes: ['user', 'admin'],
-      walletStatuses: ['disapproved'],
-    };
-  },
-  computed: {
+      ];
+    },
     walletAdmin() {
       return this.wallets && this.wallets.find(wallet => wallet && wallet.type === 'admin');
     },
@@ -495,13 +511,9 @@ export default {
         return;
       }
 
-      const initialFunds = window.walletSettings.initialFunds.funds || {};
-      if (initialFunds['ether']) {
-        this.etherAmount = initialFunds['ether'];
-      }
-      if (this.contractDetails && this.contractDetails.address && initialFunds[this.contractDetails.address]) {
-        this.tokenAmount = initialFunds[this.contractDetails.address];
-      }
+      const initialFunds = window.walletSettings.initialFunds || {};
+      this.etherAmount = initialFunds.etherAmount || 0;
+      this.tokenAmount = initialFunds.tokenAmount || 0;
 
       return this.walletUtils.getWallets()
         .then((wallets) => {
@@ -583,8 +595,8 @@ export default {
     },
     refreshWallet(wallet) {
       return this.addressRegistry.refreshWallet(wallet)
-        .then(() => this.loadWalletInitialization(wallet))
         .then(() => this.loadWalletApproval(wallet))
+        .then(() => this.loadWalletInitialization(wallet))
         .then(() => this.computeBalance(wallet));
     },
     loadWalletApproval(wallet) {
@@ -606,17 +618,15 @@ export default {
       if(!this.contractDetails || !this.contractDetails.contract || !this.contractDetails.contract || !wallet || !wallet.address) {
         return Promise.resolve(null);
       }
+
       return this.contractDetails.contract.methods.isInitializedAccount(wallet.address).call()
         .then((initialized) => {
-          const oldInitializationState = wallet.initializationState;
-          const newInitializationState = initialized ? 'INITIALIZED' : 'MODIFIED';
+          // Consider wallet as initialized if it's approved or initialized
+          initialized = initialized || !wallet.disapproved;
 
-          if (!initialized && oldInitializationState === 'INITIALIZED') {
-            this.changeWalletInitializationStatus(wallet, 'MODIFIED');
-            this.$set(wallet, 'initializationState', newInitializationState);
-          } else if(initialized && oldInitializationState !== 'INITIALIZED') {
+          if (initialized && wallet.initializationState !== 'INITIALIZED') {
             this.changeWalletInitializationStatus(wallet, 'INITIALIZED');
-            this.$set(wallet, 'initializationState', newInitializationState);
+            this.$set(wallet, 'initializationState', 'INITIALIZED');
           }
         });
     },
@@ -720,7 +730,7 @@ export default {
         })
         .catch(e => this.error = String(e));
     },
-    walletInitialized(hash) {
+    walletPendingTransaction(hash) {
       this.error = null;
       if (hash) {
         this.$set(this.walletToProcess, 'pendingTransaction', (this.walletToProcess.pendingTransaction || 0) + 1);
@@ -730,6 +740,10 @@ export default {
     openAcceptInitializationModal(wallet) {
       this.walletToProcess = wallet;
       this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
+    },
+    openAcceptSendEtherModal(wallet) {
+      this.walletToProcess = wallet;
+      this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount);
     },
     openDenyInitializationModal(wallet) {
       this.walletToProcess = wallet;

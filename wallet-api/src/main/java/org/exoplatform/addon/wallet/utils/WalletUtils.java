@@ -136,8 +136,7 @@ public class WalletUtils {
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT         =
                                                                                     "exo.addon.wallet.transaction.mined";
 
-  public static final String                          NEW_TRANSACTION_EVENT                 =
-                                                                            "exo.addon.wallet.transaction.loaded";
+  public static final String                          NEW_TRANSACTION_EVENT                 = "exo.addon.wallet.transaction.loaded";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS          = "transaction.pending.maxDays";
 
@@ -348,14 +347,24 @@ public class WalletUtils {
   }
 
   public static final boolean isUserAdmin(String username) {
-    return isUserMemberOf(username, ADMINISTRATORS_GROUP);
+    return isUserMemberOfGroupOrUser(username, ADMINISTRATORS_GROUP);
   }
 
   public static final boolean isUserRewardingAdmin(String username) {
-    return isUserMemberOf(username, REWARDINGS_GROUP);
+    return isUserMemberOfGroupOrUser(username, REWARDINGS_GROUP);
   }
 
-  public static final boolean isUserMemberOf(String username, String permissionExpression) {
+  public static final boolean isUserMemberOfSpaceOrGroupOrUser(String username, String accessPermission) {
+    boolean isMember = true;
+    if (StringUtils.isNotBlank(accessPermission)) {
+      Space space = getSpace(accessPermission);
+      isMember = (space != null && getSpaceService().isMember(space, username))
+          || isUserMemberOfGroupOrUser(username, accessPermission);
+    }
+    return isMember;
+  }
+
+  public static final boolean isUserMemberOfGroupOrUser(String username, String permissionExpression) {
     if (StringUtils.isBlank(permissionExpression)) {
       throw new IllegalArgumentException("Permission expression is mandatory");
     }
@@ -379,7 +388,7 @@ public class WalletUtils {
       String[] permissionExpressionParts = permissionExpression.split(":");
       membership = new MembershipEntry(permissionExpressionParts[1], permissionExpressionParts[0]);
     } else if (permissionExpression.contains("/")) {
-      membership = new MembershipEntry(permissionExpression);
+      membership = new MembershipEntry(permissionExpression, MembershipEntry.ANY_TYPE);
     } else {
       return StringUtils.equals(username, permissionExpression);
     }
@@ -470,15 +479,15 @@ public class WalletUtils {
   public static boolean canAccessWallet(Wallet wallet, String currentUser) {
     String remoteId = wallet.getId();
     WalletType type = WalletType.getType(wallet.getType());
-    boolean isUserAdmin = isUserAdmin(currentUser);
-
+    boolean isUserAdmin = isUserRewardingAdmin(currentUser);
+    // 'rewarding' group members can access to all wallets
     if (isUserAdmin) {
       return true;
     }
 
+    // For 'Admin' wallet, only 'rewarding' group members can access it
     return (type.isUser() && StringUtils.equals(currentUser, remoteId))
-        || (type.isSpace() && isUserSpaceMember(wallet.getId(), currentUser))
-        || (type.isAdmin() && (isUserAdmin(currentUser) || isUserRewardingAdmin(currentUser)));
+        || (type.isSpace() && isUserSpaceMember(wallet.getId(), currentUser));
   }
 
   public static boolean isUserSpaceMember(String spaceId, String accesssor) {
@@ -603,7 +612,12 @@ public class WalletUtils {
 
   public static final long getNetworkId() {
     GlobalSettings settings = getSettings();
-    return settings == null ? 0 : settings.getNetwork().getId();
+    return settings == null || settings.getNetwork() == null ? 0 : settings.getNetwork().getId();
+  }
+
+  public static final String getWebsocketURL() {
+    GlobalSettings settings = getSettings();
+    return settings == null || settings.getNetwork() == null ? null : settings.getNetwork().getWebsocketProviderURL();
   }
 
   public static final String formatNumber(Object amount, String lang) {
@@ -626,6 +640,10 @@ public class WalletUtils {
 
   private static final WalletService getWalletService() {
     return CommonsUtils.getService(WalletService.class);
+  }
+
+  private static final SpaceService getSpaceService() {
+    return CommonsUtils.getService(SpaceService.class);
   }
 
 }

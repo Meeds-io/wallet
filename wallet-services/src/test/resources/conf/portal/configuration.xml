@@ -9,6 +9,11 @@
   </component>
 
   <component>
+    <key>org.exoplatform.social.core.manager.IdentityManager</key>
+    <type>org.exoplatform.addon.wallet.test.mock.IdentityManagerMock</type>
+  </component>
+
+  <component>
     <type>org.exoplatform.web.security.codec.CodecInitializer</type>
     <init-params>
       <value-param>

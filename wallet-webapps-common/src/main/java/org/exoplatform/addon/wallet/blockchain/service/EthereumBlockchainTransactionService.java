@@ -14,12 +14,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.addon.wallet.service;
+package org.exoplatform.addon.wallet.blockchain.service;
 
 import static org.exoplatform.addon.wallet.contract.ERTTokenV2.*;
-import static org.exoplatform.addon.wallet.utils.WalletUtils.isWalletEmpty;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,120 +32,243 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class EthereumTransactionDecoder {
+public class EthereumBlockchainTransactionService implements BlockchainTransactionService, ExoBlockchainTransactionService {
 
-  private static final Log                 LOG                              =
-                                               ExoLogger.getLogger(EthereumTransactionDecoder.class);
+  private static final Log                 LOG                        =
+                                               ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
 
-  private static final String              FUNC_DEPOSIT_FUNDS               = "depositFunds";
+  private static final String              FUNC_DEPOSIT_FUNDS         = "depositFunds";
 
-  private static final String              TRANSFER_SIGNATURE               =
-                                                              org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.TRANSFER_EVENT);
+  private static final String              TRANSFER_SIG               = EventEncoder.encode(ERTTokenV2.TRANSFER_EVENT);
 
-  private static final String              APPROVAL_SIGNATURE               =
-                                                              org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.APPROVAL_EVENT);
+  private static final String              APPROVAL_SIG               = EventEncoder.encode(ERTTokenV2.APPROVAL_EVENT);
 
-  private static final String              ADDED_ADMIN_METHOD_SIGNATURE     =
-                                                                        org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.ADDEDADMIN_EVENT);
+  private static final String              ADDED_ADMIN_METHOD_SIG     = EventEncoder.encode(ERTTokenV2.ADDEDADMIN_EVENT);
 
-  private static final String              REMOVED_ADMIN_SIGNATURE          =
-                                                                   org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
+  private static final String              REMOVED_ADMIN_SIG          = EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
 
-  private static final String              APPROVED_ACCOUNT_SIGNATURE       =
-                                                                      org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
+  private static final String              APPROVED_ACCOUNT_SIG       = EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
 
-  private static final String              DISAPPROVED_ACCOUNT_SIGNATURE    =
-                                                                         org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
+  private static final String              DISAPPROVED_ACCOUNT_SIG    = EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
 
-  private static final String              CONTRACT_PAUSED_SIGNATURE        =
-                                                                     org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
+  private static final String              CONTRACT_PAUSED_SIG        = EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
 
-  private static final String              CONTRACT_UNPAUSED_SIGNATURE      =
-                                                                       org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
+  private static final String              CONTRACT_UNPAUSED_SIG      = EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
 
-  private static final String              DEPOSIT_RECEIVED_SIGNATURE       =
-                                                                      org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
+  private static final String              DEPOSIT_RECEIVED_SIG       = EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
 
-  private static final String              TOKEN_PRICE_CHANGED_SIGNATURE    =
-                                                                         org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
+  private static final String              TOKEN_PRICE_CHANGED_SIG    = EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
 
-  private static final String              TRANSFER_OWNERSHIP_SIGNATURE     =
-                                                                        org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
+  private static final String              TRANSFER_OWNERSHIP_SIG     = EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
 
-  private static final String              ACCOUNT_INITIALIZATION_SIGNATURE =
-                                                                            org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
+  private static final String              ACCOUNT_INITIALIZATION_SIG = EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
 
-  private static final String              ACCOUNT_REWARD_SIGNATURE         =
-                                                                    org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
+  private static final String              ACCOUNT_REWARD_SIG         = EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
 
-  private static final String              ACCOUNT_VESTED_SIGNATURE         =
-                                                                    org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
+  private static final String              ACCOUNT_VESTED_SIG         = EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
 
-  private static final String              TRANSFER_VESTING_SIGNATURE       =
-                                                                      org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
+  private static final String              TRANSFER_VESTING_SIG       = EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
 
-  private static final String              UPGRADED_SIGNATURE               =
-                                                              org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
+  private static final String              UPGRADED_SIG               = EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
 
-  private static final String              DATA_UPGRADED_SIGNATURE          =
-                                                                   org.exoplatform.addon.wallet.fork.EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
+  private static final String              DATA_UPGRADED_SIG          = EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
 
-  private static final Map<String, String> CONTRACT_METHODS_BY_SIG          = new HashMap<>();
+  private static final Map<String, String> CONTRACT_METHODS_BY_SIG    = new HashMap<>();
 
   static {
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIGNATURE, FUNC_TRANSFER);
-    CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIGNATURE, FUNC_APPROVE);
-    CONTRACT_METHODS_BY_SIG.put(ADDED_ADMIN_METHOD_SIGNATURE, FUNC_ADDADMIN);
-    CONTRACT_METHODS_BY_SIG.put(REMOVED_ADMIN_SIGNATURE, FUNC_REMOVEADMIN);
-    CONTRACT_METHODS_BY_SIG.put(APPROVED_ACCOUNT_SIGNATURE, FUNC_APPROVEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(DISAPPROVED_ACCOUNT_SIGNATURE, FUNC_DISAPPROVEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(CONTRACT_PAUSED_SIGNATURE, FUNC_PAUSE);
-    CONTRACT_METHODS_BY_SIG.put(CONTRACT_UNPAUSED_SIGNATURE, FUNC_UNPAUSE);
-    CONTRACT_METHODS_BY_SIG.put(DEPOSIT_RECEIVED_SIGNATURE, FUNC_DEPOSIT_FUNDS);
-    CONTRACT_METHODS_BY_SIG.put(TOKEN_PRICE_CHANGED_SIGNATURE, FUNC_SETSELLPRICE);
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIGNATURE, FUNC_TRANSFEROWNERSHIP);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_INITIALIZATION_SIGNATURE, FUNC_INITIALIZEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_REWARD_SIGNATURE, FUNC_REWARD);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_VESTED_SIGNATURE, FUNC_TRANSFORMTOVESTED);
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_VESTING_SIGNATURE, FUNC_TRANSFER);
-    CONTRACT_METHODS_BY_SIG.put(UPGRADED_SIGNATURE, FUNC_UPGRADEIMPLEMENTATION);
-    CONTRACT_METHODS_BY_SIG.put(DATA_UPGRADED_SIGNATURE, FUNC_UPGRADEDATA);
+    CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, FUNC_TRANSFER);
+    CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIG, FUNC_APPROVE);
+    CONTRACT_METHODS_BY_SIG.put(ADDED_ADMIN_METHOD_SIG, FUNC_ADDADMIN);
+    CONTRACT_METHODS_BY_SIG.put(REMOVED_ADMIN_SIG, FUNC_REMOVEADMIN);
+    CONTRACT_METHODS_BY_SIG.put(APPROVED_ACCOUNT_SIG, FUNC_APPROVEACCOUNT);
+    CONTRACT_METHODS_BY_SIG.put(DISAPPROVED_ACCOUNT_SIG, FUNC_DISAPPROVEACCOUNT);
+    CONTRACT_METHODS_BY_SIG.put(CONTRACT_PAUSED_SIG, FUNC_PAUSE);
+    CONTRACT_METHODS_BY_SIG.put(CONTRACT_UNPAUSED_SIG, FUNC_UNPAUSE);
+    CONTRACT_METHODS_BY_SIG.put(DEPOSIT_RECEIVED_SIG, FUNC_DEPOSIT_FUNDS);
+    CONTRACT_METHODS_BY_SIG.put(TOKEN_PRICE_CHANGED_SIG, FUNC_SETSELLPRICE);
+    CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIG, FUNC_TRANSFEROWNERSHIP);
+    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_INITIALIZATION_SIG, FUNC_INITIALIZEACCOUNT);
+    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_REWARD_SIG, FUNC_REWARD);
+    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_VESTED_SIG, FUNC_TRANSFORMTOVESTED);
+    CONTRACT_METHODS_BY_SIG.put(TRANSFER_VESTING_SIG, FUNC_TRANSFER);
+    CONTRACT_METHODS_BY_SIG.put(UPGRADED_SIG, FUNC_UPGRADEIMPLEMENTATION);
+    CONTRACT_METHODS_BY_SIG.put(DATA_UPGRADED_SIG, FUNC_UPGRADEDATA);
   }
 
-  private WalletAccountService    accountService;
+  private EthereumClientConnector  ethereumClientConnector;
 
-  private WalletContractService   contractService;
+  private WalletAccountService     accountService;
 
-  private EthereumClientConnector ethereumClientConnector;
+  private WalletContractService    contractService;
 
-  public EthereumTransactionDecoder(EthereumClientConnector ethereumClientConnector) {
+  private WalletTransactionService transactionService;
+
+  private SettingService           settingService;
+
+  private ListenerService          listenerService;
+
+  private ClassLoader              webappClassLoader;
+
+  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector, ClassLoader webappClassLoader) {
     this.ethereumClientConnector = ethereumClientConnector;
+    this.webappClassLoader = webappClassLoader;
   }
 
-  public TransactionDetail computeTransactionDetail(long networkId,
-                                                    String hash,
+  @Override
+  public ClassLoader getWebappClassLoader() {
+    return webappClassLoader;
+  }
+
+  @Override
+  @ExoBlockchainTransaction
+  public void checkPendingTransactions() {
+    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+    if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
+      LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
+                pendingTransactions.size());
+      long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
+      for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
+        try { // NOSONAR
+          verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
+        } catch (Exception e) {
+          LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
+        }
+      }
+    }
+  }
+
+  @Override
+  @ExoBlockchainTransaction
+  public void scanNewerBlocks() throws InterruptedException, IOException {
+    GlobalSettings settings = getSettings();
+    if (settings == null) {
+      LOG.debug("Empty settings, skip contract transaction verification");
+      return;
+    }
+    long networkId = settings.getNetwork().getId();
+    if (settings.getNetwork().getId() == 0) {
+      LOG.debug("Empty network id in settings, skip contract transaction verification");
+      return;
+    }
+    String wsURL = settings.getNetwork().getWebsocketProviderURL();
+    if (StringUtils.isBlank(wsURL)) {
+      LOG.debug("Empty Websocket URL in settings, skip contract transaction verification");
+      return;
+    }
+    ContractDetail contractDetail = settings.getContractDetail();
+    if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress())) {
+      LOG.debug("Empty token address in settings, skip contract transaction verification");
+      return;
+    }
+
+    long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+    long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
+    if (lastEthereumBlockNumber <= lastWatchedBlockNumber) {
+      LOG.debug("No new blocks to verify. last watched = {}. last blockchain block = {}",
+                lastWatchedBlockNumber,
+                lastEthereumBlockNumber);
+      return;
+    }
+
+    boolean processed = true;
+    String contractAddress = contractDetail.getAddress();
+    Set<String> transactionHashes = ethereumClientConnector.getContractTransactions(contractAddress,
+                                                                                    lastWatchedBlockNumber,
+                                                                                    lastEthereumBlockNumber);
+
+    LOG.debug("{} transactions has been found on contract {} between block {} and {}",
+              transactionHashes.size(),
+              contractAddress,
+              lastWatchedBlockNumber,
+              lastEthereumBlockNumber);
+
+    int addedTransactionsCount = 0;
+    int modifiedTransactionsCount = 0;
+    for (String transactionHash : transactionHashes) {
+      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      if (transactionDetail == null) {
+        processed = processTransaction(transactionHash, contractDetail) && processed;
+        if (processed) {
+          addedTransactionsCount++;
+        }
+      } else {
+        LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
+        boolean changed = false;
+
+        // Verify that the transaction has been decoded
+        if (StringUtils.isBlank(transactionDetail.getContractAddress())
+            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
+          transactionDetail.setContractAddress(contractAddress);
+          computeTransactionDetail(transactionDetail, contractDetail);
+          changed = true;
+        }
+
+        // Broadcast event and send notifications when the transaction was
+        // marked as pending
+        boolean braodcastSavingTransaction = transactionDetail.isPending();
+        transactionDetail.setPending(false);
+        changed = changed || braodcastSavingTransaction;
+
+        // If the transaction wasn't marked as succeeded, try to verify the
+        // status from Blockchain again
+        if (!transactionDetail.isSucceeded()) {
+          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
+          transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+          changed = true;
+        }
+
+        // Save decoded transaction details after chaging its attributes
+        if (changed && hasKnownWalletInTransaction(transactionDetail)) {
+          getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
+          modifiedTransactionsCount++;
+        }
+      }
+    }
+
+    LOG.debug("{} added and {} modified transactions has been stored using contract {} between block {} and {}",
+              addedTransactionsCount,
+              modifiedTransactionsCount,
+              contractAddress,
+              lastWatchedBlockNumber,
+              lastEthereumBlockNumber);
+
+    if (processed) {
+      // Save last verified block for contracts transactions
+      saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
+    }
+  }
+
+  @Override
+  @ExoBlockchainTransaction
+  public TransactionDetail computeTransactionDetail(String hash,
                                                     ContractDetail contractDetail) throws InterruptedException {
     if (StringUtils.isBlank(hash)) {
       throw new IllegalArgumentException("Transaction hash is empty");
     }
-    if (networkId <= 0) {
-      throw new IllegalArgumentException("Unknown network id: " + networkId);
-    }
 
     TransactionDetail transactionDetail = new TransactionDetail();
-    transactionDetail.setNetworkId(networkId);
+    transactionDetail.setNetworkId(getNetworkId());
     transactionDetail.setHash(hash);
     return computeTransactionDetail(transactionDetail, contractDetail);
   }
 
+  @Override
+  @ExoBlockchainTransaction
   public TransactionDetail computeTransactionDetail(TransactionDetail transactionDetail,
                                                     ContractDetail contractDetail) throws InterruptedException {
     if (transactionDetail == null) {
@@ -190,14 +315,16 @@ public class EthereumTransactionDecoder {
     return transactionDetail;
   }
 
+  @Override
+  @ExoBlockchainTransaction
   public void computeContractTransactionDetail(TransactionDetail transactionDetail,
-                                               TransactionReceipt transactionReceipt) {
-    computeContractTransactionDetail(null, transactionDetail, transactionReceipt);
+                                               Object transactionReceipt) {
+    computeContractTransactionDetail(null, transactionDetail, (TransactionReceipt) transactionReceipt);
   }
 
-  public void computeContractTransactionDetail(ContractDetail contractDetail,
-                                               TransactionDetail transactionDetail,
-                                               TransactionReceipt transactionReceipt) {
+  private void computeContractTransactionDetail(ContractDetail contractDetail,
+                                                TransactionDetail transactionDetail,
+                                                TransactionReceipt transactionReceipt) {
     List<org.web3j.protocol.core.methods.response.Log> logs = transactionReceipt == null ? null : transactionReceipt.getLogs();
     transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
     if (!transactionDetail.isSucceeded()) {
@@ -412,7 +539,7 @@ public class EthereumTransactionDecoder {
   @SuppressWarnings("rawtypes")
   private static EventValues extractEventParameters(Event event, org.web3j.protocol.core.methods.response.Log log) {
     List<String> topics = log.getTopics();
-    String encodedEventSignature = org.exoplatform.addon.wallet.fork.EventEncoder.encode(event);
+    String encodedEventSignature = EventEncoder.encode(event);
     if (!topics.get(0).equals(encodedEventSignature)) {
       return null;
     }
@@ -428,6 +555,91 @@ public class EthereumTransactionDecoder {
     return new EventValues(indexedValues, nonIndexedValues);
   }
 
+  private void verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
+                                                   long pendingTransactionMaxDays) throws Exception {
+    String hash = pendingTransactionDetail.getHash();
+    Transaction transaction = ethereumClientConnector.getTransaction(hash);
+    String blockHash = transaction == null ? null : transaction.getBlockHash();
+    if (!StringUtils.isBlank(blockHash)
+        && !StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
+        && transaction.getBlockNumber() != null) {
+      getListenerService().broadcast(NEW_TRANSACTION_EVENT, transaction, null);
+    } else if (pendingTransactionMaxDays > 0) {
+      long creationTimestamp = pendingTransactionDetail.getTimestamp();
+      if (transaction == null && creationTimestamp > 0) {
+        Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+        if (duration.toDays() >= pendingTransactionMaxDays) {
+          LOG.info("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
+                   hash,
+                   pendingTransactionMaxDays);
+          getListenerService().broadcast(NEW_TRANSACTION_EVENT, hash, null);
+        }
+      }
+    }
+  }
+
+  private boolean processTransaction(String transactionHash, ContractDetail contractDetail) {
+    boolean processed = true;
+    try {
+      LOG.debug(" - treating transaction {} that doesn't exist on database.", transactionHash);
+
+      TransactionDetail transactionDetail = computeTransactionDetail(transactionHash,
+                                                                     contractDetail);
+      if (transactionDetail == null) {
+        throw new IllegalStateException("Empty transaction detail is returned");
+      }
+
+      if (hasKnownWalletInTransaction(transactionDetail)) {
+        LOG.info("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
+        getTransactionService().saveTransactionDetail(transactionDetail, true);
+      }
+    } catch (Exception e) {
+      processed = false;
+      LOG.warn("Error processing transaction {}. It will be retried next time.", transactionHash, e);
+    }
+    return processed;
+  }
+
+  private long getLastWatchedBlockNumber(long networkId) {
+    SettingValue<?> lastBlockNumberValue =
+                                         getSettingService().get(WALLET_CONTEXT,
+                                                                 WALLET_SCOPE,
+                                                                 LAST_BLOCK_NUMBER_KEY_NAME + networkId);
+    if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
+      return Long.valueOf(lastBlockNumberValue.getValue().toString());
+    }
+    return 0;
+  }
+
+  private void saveLastWatchedBlockNumber(long networkId, long lastWatchedBlockNumber) {
+    LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
+    getSettingService().set(WALLET_CONTEXT,
+                            WALLET_SCOPE,
+                            LAST_BLOCK_NUMBER_KEY_NAME + networkId,
+                            SettingValue.create(lastWatchedBlockNumber));
+  }
+
+  private SettingService getSettingService() {
+    if (settingService == null) {
+      settingService = CommonsUtils.getService(SettingService.class);
+    }
+    return settingService;
+  }
+
+  private WalletTransactionService getTransactionService() {
+    if (transactionService == null) {
+      transactionService = CommonsUtils.getService(WalletTransactionService.class);
+    }
+    return transactionService;
+  }
+
+  private ListenerService getListenerService() {
+    if (listenerService == null) {
+      listenerService = CommonsUtils.getService(ListenerService.class);
+    }
+    return listenerService;
+  }
+
   private WalletAccountService getAccountService() {
     if (accountService == null) {
       accountService = CommonsUtils.getService(WalletAccountService.class);
@@ -435,7 +647,7 @@ public class EthereumTransactionDecoder {
     return accountService;
   }
 
-  public WalletContractService getContractService() {
+  private WalletContractService getContractService() {
     if (contractService == null) {
       contractService = CommonsUtils.getService(WalletContractService.class);
     }

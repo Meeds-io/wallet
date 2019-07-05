@@ -16,7 +16,7 @@
 
   <servlet>
     <servlet-name>ServiceLoaderServlet</servlet-name>
-    <servlet-class>org.exoplatform.addon.wallet.service.blockchain.ServiceLoaderServlet</servlet-class>
+    <servlet-class>org.exoplatform.addon.wallet.blockchain.service.ServiceLoaderServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
 

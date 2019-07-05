@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.addon.wallet.listener;
+package org.exoplatform.addon.wallet.blockchain.listener;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.hasKnownWalletInTransaction;
 
@@ -23,9 +23,12 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
+import org.exoplatform.addon.wallet.blockchain.service.EthereumClientConnector;
 import org.exoplatform.addon.wallet.model.transaction.MinedTransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
+import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -38,20 +41,29 @@ import org.exoplatform.services.log.Log;
  * A listener to process newly detected transactions coming from configured
  * network
  */
-public class BlockchainTransactionProcessorListener extends Listener<Object, TransactionReceipt> {
+public class BlockchainTransactionProcessorListener extends Listener<Object, TransactionReceipt>
+    implements ExoBlockchainTransactionService {
 
-  private static final Log           LOG = ExoLogger.getLogger(BlockchainTransactionProcessorListener.class);
+  private static final Log          LOG = ExoLogger.getLogger(BlockchainTransactionProcessorListener.class);
 
-  private WalletTransactionService   transactionService;
+  private WalletTransactionService  transactionService;
 
-  private EthereumTransactionDecoder ethereumTransactionDecoder;
+  private BlockchainTransactionService transactionDecoder;
 
-  private EthereumClientConnector    ethereumClientConnector;
+  private EthereumClientConnector   ethereumClientConnector;
 
-  private ExoContainer               container;
+  private ExoContainer              container;
 
-  public BlockchainTransactionProcessorListener(PortalContainer container) {
+  private ClassLoader               webappClassLoader;
+
+  public BlockchainTransactionProcessorListener(PortalContainer container, ClassLoader webappClassLoader) {
     this.container = container;
+    this.webappClassLoader = webappClassLoader;
+  }
+
+  @Override
+  public ClassLoader getWebappClassLoader() {
+    return webappClassLoader;
   }
 
   @Override
@@ -109,6 +121,11 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
         }
       }
 
+      if (getTransactionDecoderService() == null) {
+        LOG.debug("TransactionDecoderService is not yet injected in container, skip blockchain transaction processing");
+        return;
+      }
+
       // Ensure that all fields are computed correctly
       getTransactionDecoderService().computeContractTransactionDetail(transactionDetail, transactionReceipt);
 
@@ -143,11 +160,11 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
     return transactionService;
   }
 
-  private EthereumTransactionDecoder getTransactionDecoderService() {
-    if (ethereumTransactionDecoder == null) {
-      ethereumTransactionDecoder = CommonsUtils.getService(EthereumTransactionDecoder.class);
+  private BlockchainTransactionService getTransactionDecoderService() {
+    if (transactionDecoder == null) {
+      transactionDecoder = CommonsUtils.getService(BlockchainTransactionService.class);
     }
-    return ethereumTransactionDecoder;
+    return transactionDecoder;
   }
 
 }

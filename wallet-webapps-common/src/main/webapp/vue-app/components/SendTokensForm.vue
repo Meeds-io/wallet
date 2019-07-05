@@ -27,23 +27,15 @@
             $emit('receiver-selected', $event);
           " />
 
-        <v-container
-          flat
-          fluid
-          grid-list-lg
-          class="mt-4 pl-2">
-          <v-layout row wrap>
-            <v-text-field
-              v-model.number="amount"
-              :disabled="loading"
-              name="amount"
-              label="Amount"
-              required
-              placeholder="Select an amount of tokens to send"
-              @input="$emit('amount-selected', amount)" />
-            <slot></slot>
-          </v-layout>
-        </v-container>
+        <v-text-field
+          v-model.number="amount"
+          :disabled="loading"
+          name="amount"
+          label="Amount"
+          required
+          placeholder="Select an amount of tokens to send"
+          class="mt-3"
+          @input="$emit('amount-selected', amount)" />
 
         <v-text-field
           v-if="!storedPassword"
@@ -58,7 +50,7 @@
           counter
           required
           autocomplete="current-passord"
-          class="mb-2"
+          class="mt-3"
           @click:append="walletPasswordShow = !walletPasswordShow" />
         <gas-price-choice :estimated-fee="transactionFeeString" @changed="gasPrice = $event" />
         <v-text-field
@@ -120,7 +112,7 @@ import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
 import GasPriceChoice from './GasPriceChoice.vue';
 
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, saveWalletInitializationStatus, markFundRequestAsSent} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
 

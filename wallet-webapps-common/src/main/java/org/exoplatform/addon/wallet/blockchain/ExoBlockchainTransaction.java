@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 eXo Platform SAS.
+ * Copyright (C) 2019 eXo Platform SAS.
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
@@ -16,9 +16,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+package org.exoplatform.addon.wallet.blockchain;
 
-package org.exoplatform.addon.wallet.fork;
+import java.lang.annotation.*;
 
-// This package is added as workaround because of embedded bouncycastle version
-// inside eXo Platform
-// eXo Platform issue: https://jira.exoplatform.org/browse/PLF-8123
+/**
+ * This annotation is a workaround used on methods that will be invoked inside
+ * webapp to by changing ClassLoader context on current thread to use newer
+ * version of bouncycastle dependency, see PLF-8123
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ExoBlockchainTransaction {
+}

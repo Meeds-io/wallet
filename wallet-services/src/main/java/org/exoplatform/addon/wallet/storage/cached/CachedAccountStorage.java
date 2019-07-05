@@ -52,14 +52,14 @@ public class CachedAccountStorage extends WalletStorage {
   }
 
   @Override
-  public void saveWallet(Wallet wallet, boolean isNew) {
+  public Wallet saveWallet(Wallet wallet, boolean isNew) {
     String oldAddress = null;
     if (!isNew) {
       // Retrieve old wallet address
       Wallet oldWallet = getWalletByIdentityId(wallet.getTechnicalId());
       oldAddress = oldWallet == null ? null : oldWallet.getAddress();
     }
-    super.saveWallet(wallet, isNew);
+    Wallet newWallet = super.saveWallet(wallet, isNew);
 
     // Remove cached wallet
     this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
@@ -67,6 +67,8 @@ public class CachedAccountStorage extends WalletStorage {
     if (StringUtils.isNotBlank(oldAddress) && !StringUtils.equalsIgnoreCase(oldAddress, wallet.getAddress())) {
       this.walletFutureCache.remove(new WalletCacheKey(oldAddress));
     }
+
+    return newWallet;
   }
 
   @Override
@@ -83,11 +85,11 @@ public class CachedAccountStorage extends WalletStorage {
   public void removeWalletPrivateKey(long walletId) {
     super.removeWalletPrivateKey(walletId);
 
-    Wallet wallet = getWalletByIdentityId(walletId);
+    Wallet wallet = super.getWalletByIdentityId(walletId);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
+      this.walletFutureCache.remove(new WalletCacheKey(walletId));
       this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
-      this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
     }
   }
 
@@ -95,11 +97,12 @@ public class CachedAccountStorage extends WalletStorage {
   public void saveWalletPrivateKey(long walletId, String content) {
     super.saveWalletPrivateKey(walletId, content);
 
-    Wallet wallet = getWalletByIdentityId(walletId);
+    this.walletFutureCache.remove(new WalletCacheKey(walletId));
+
+    Wallet wallet = super.getWalletByIdentityId(walletId);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
       this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
-      this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
     }
   }
 

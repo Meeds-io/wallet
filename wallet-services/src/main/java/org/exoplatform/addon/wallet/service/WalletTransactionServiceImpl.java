@@ -23,9 +23,9 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
 
-public class EthereumWalletTransactionService implements WalletTransactionService {
+public class WalletTransactionServiceImpl implements WalletTransactionService {
 
-  private static final Log      LOG               = ExoLogger.getLogger(EthereumWalletTransactionService.class);
+  private static final Log      LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
 
   private static final String   YEAR_PERIODICITY  = "year";
 
@@ -45,10 +45,10 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
   private long                  pendingTransactionMaxDays;
 
-  public EthereumWalletTransactionService(WalletAccountService accountService,
-                                          TransactionStorage transactionStorage,
-                                          WalletContractService contractService,
-                                          InitParams params) {
+  public WalletTransactionServiceImpl(WalletAccountService accountService,
+                                      TransactionStorage transactionStorage,
+                                      WalletContractService contractService,
+                                      InitParams params) {
     this.transactionStorage = transactionStorage;
     this.accountService = accountService;
     this.contractService = contractService;
@@ -228,7 +228,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
       throw new IllegalStateException("Can't find contract with address " + contractAddress);
     }
 
-    if (!isUserAdmin(currentUser) && !isUserRewardingAdmin(currentUser)) {
+    if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException("User " + currentUser + " attempts to access contract transactions with address "
           + contractAddress);
     }
@@ -288,7 +288,7 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
     } else if (!displayTransactionsLabel(senderWallet, currentUser)) {
       transactionDetail.setLabel(null);
     }
-    if (transactionDetail.getIssuerId() > 0 && (isUserAdmin(currentUser) || isUserRewardingAdmin(currentUser))) {
+    if (transactionDetail.getIssuerId() > 0 && isUserRewardingAdmin(currentUser)) {
       Wallet issuerWallet = accountService.getWalletByIdentityId(transactionDetail.getIssuerId());
       transactionDetail.setIssuer(issuerWallet);
     }
@@ -296,12 +296,12 @@ public class EthereumWalletTransactionService implements WalletTransactionServic
 
   private boolean displayTransactionsLabel(Wallet senderWallet, String currentUserId) {
     if (senderWallet == null) {
-      return isUserAdmin(currentUserId);
+      return isUserRewardingAdmin(currentUserId);
     }
     String accountId = senderWallet.getId();
     String accountType = senderWallet.getType();
     if (StringUtils.isBlank(accountId) || StringUtils.isBlank(accountType)) {
-      return isUserAdmin(currentUserId);
+      return isUserRewardingAdmin(currentUserId);
     }
 
     if (WalletType.isSpace(senderWallet.getType())) {

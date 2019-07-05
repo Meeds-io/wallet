@@ -60,7 +60,7 @@ public class RewardTransaction implements Serializable {
   /**
    * Determine the value to store on transactions list.
    * 
-   * @return
+   * @return String to store representing the reward transaction
    */
   public String getToStoreValue() {
     if (StringUtils.isBlank(receiverType)) {

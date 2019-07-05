@@ -50,6 +50,7 @@
         ref="sendEtherForm"
         :account="account"
         :balance="balance"
+        :disabled-recipient="disabledRecipient"
         class="pt-4"
         @success="$emit('success', $event)"
         @sent="$emit('sent', $event)"
@@ -109,6 +110,12 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    disabledRecipient: {
+      type: Boolean,
+      default: function() {
+        return false;
       },
     },
   },

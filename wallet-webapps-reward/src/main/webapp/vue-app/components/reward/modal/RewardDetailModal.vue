@@ -22,11 +22,11 @@
         </v-list-tile>
         <v-list-tile v-if="wallet.tokensSent">
           <v-list-tile-content>Rewards sent:</v-list-tile-content>
-          <v-list-tile-content class="align-end">{{ wallet.tokensSent }} {{ symbol }}</v-list-tile-content>
+          <v-list-tile-content class="align-end">{{ walletUtils.toFixed(wallet.tokensSent) }} {{ symbol }}</v-list-tile-content>
         </v-list-tile>
         <v-list-tile v-if="wallet.tokensToSend">
           <v-list-tile-content>Computed rewards to send:</v-list-tile-content>
-          <v-list-tile-content class="align-end">{{ wallet.tokensToSend }} {{ symbol }}</v-list-tile-content>
+          <v-list-tile-content class="align-end">{{ walletUtils.toFixed(wallet.tokensToSend) }} {{ symbol }}</v-list-tile-content>
         </v-list-tile>
         <template v-if="rewards.length">
           <v-list-tile>

@@ -21,10 +21,10 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class EthereumWalletContractService implements WalletContractService, Startable {
+public class WalletContractServiceImpl implements WalletContractService, Startable {
 
   private static final Log        LOG                                    =
-                                      ExoLogger.getLogger(EthereumWalletContractService.class);
+                                      ExoLogger.getLogger(WalletContractServiceImpl.class);
 
   private static final String     ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE = "address parameter is mandatory";
 
@@ -44,9 +44,9 @@ public class EthereumWalletContractService implements WalletContractService, Sta
 
   private WalletTokenAdminService walletTokenAdminService;
 
-  public EthereumWalletContractService(SettingService settingService,
-                                       ConfigurationManager configurationManager,
-                                       InitParams params) {
+  public WalletContractServiceImpl(SettingService settingService,
+                                   ConfigurationManager configurationManager,
+                                   InitParams params) {
     this.configurationManager = configurationManager;
     this.settingService = settingService;
 
@@ -113,8 +113,19 @@ public class EthereumWalletContractService implements WalletContractService, Sta
     }
 
     SettingValue<?> contractDetailValue = settingService.get(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
-    if (contractDetailValue != null) {
-      return fromJsonString((String) contractDetailValue.getValue(), ContractDetail.class);
+    if (contractDetailValue != null && contractDetailValue.getValue() != null) {
+      String value = contractDetailValue.getValue().toString();
+      try {
+        return fromJsonString(value, ContractDetail.class);
+      } catch (Exception e) {
+        LOG.debug("Remove old data stored in settings service for wallet with address '{}', having as value '{}'",
+                  address,
+                  value,
+                  e);
+        // Remove value coming from old data
+        settingService.remove(WALLET_CONTEXT, WALLET_SCOPE, StringUtils.lowerCase(address));
+        return null;
+      }
     }
     return null;
   }
