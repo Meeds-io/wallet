@@ -39,7 +39,7 @@
           <h4>Total budget: <strong>{{ walletUtils.toFixed(totalBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>Sent tokens: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
+          <h4>Sent {{ contractDetails && contractDetails.name }}: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex
           v-for="totalReward in totalRewards"
@@ -294,7 +294,11 @@ export default {
       loading: false,
       sendingRewards: false,
       selectedWallet: null,
-      identitiesHeaders: [
+    };
+  },
+  computed: {
+    identitiesHeaders() {
+      return [
         {
           text: '',
           align: 'right',
@@ -327,7 +331,7 @@ export default {
           value: 'status',
         },
         {
-          text: 'Tokens',
+          text: (this.contractDetails && this.contractDetails.name),
           align: 'center',
           sortable: true,
           value: 'tokensToSend',
@@ -340,10 +344,8 @@ export default {
           value: 'actions',
           width: '80px',
         },
-      ],
-    };
-  },
-  computed: {
+      ];
+    },
     sendingRewardsDisabled() {
       if (!this.walletRewards || !this.walletRewards.length) {
         return true;
