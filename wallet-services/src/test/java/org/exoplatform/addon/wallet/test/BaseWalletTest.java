@@ -11,8 +11,7 @@ import org.junit.*;
 
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
-import org.exoplatform.addon.wallet.model.Wallet;
-import org.exoplatform.addon.wallet.model.WalletAddressLabel;
+import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.container.PortalContainer;
@@ -24,11 +23,23 @@ public abstract class BaseWalletTest {
 
   protected static PortalContainer container;
 
-  private static final Log         LOG             = ExoLogger.getLogger(BaseWalletTest.class);
+  private static final Log         LOG                  = ExoLogger.getLogger(BaseWalletTest.class);
 
-  protected List<Serializable>     entitiesToClean = new ArrayList<>();
+  protected static final long      IDENTITY_ID          = 1L;
 
-  private Random                   randon          = new Random(1);
+  protected static final String    ADDRESS              = "walletAddress";
+
+  protected static final String    PHRASE               = "passphrase";
+
+  protected static final String    INITIALIZATION_STATE = WalletInitializationState.INITIALIZED.name();
+
+  protected static final boolean   IS_ENABLED           = true;
+
+  protected static final String    CURRENT_USER         = "root1";
+
+  protected List<Serializable>     entitiesToClean      = new ArrayList<>();
+
+  private Random                   randon               = new Random(1);
 
   @BeforeClass
   public static void beforeTest() {
@@ -253,7 +264,18 @@ public abstract class BaseWalletTest {
     return hashStringBuffer.toString();
   }
 
-  public <T> T getService(Class<T> componentType) {
+  protected <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
   }
+
+  protected Wallet newWallet() {
+    Wallet wallet = new Wallet();
+    wallet.setTechnicalId(IDENTITY_ID);
+    wallet.setAddress(ADDRESS);
+    wallet.setPassPhrase(PHRASE);
+    wallet.setEnabled(IS_ENABLED);
+    wallet.setInitializationState(INITIALIZATION_STATE);
+    return wallet;
+  }
+
 }

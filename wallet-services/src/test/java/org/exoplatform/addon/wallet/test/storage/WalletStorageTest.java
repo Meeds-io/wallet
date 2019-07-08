@@ -30,16 +30,6 @@ import org.exoplatform.addon.wallet.test.BaseWalletTest;
 public class WalletStorageTest extends BaseWalletTest {
   private static final String WALLET_PRIVATE_KEY_CONTENT = "Wallet-Private-Key-Encrypted-With-Password";
 
-  long                        identityId                 = 1L;
-
-  String                      address                    = "walletAddress";
-
-  String                      phrase                     = "passphrase";
-
-  String                      initializationState        = WalletInitializationState.INITIALIZED.name();
-
-  boolean                     isEnabled                  = true;
-
   /**
    * Check that service is instantiated and functional
    */
@@ -79,17 +69,13 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+    checkWalletContent(wallet, IDENTITY_ID, ADDRESS, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
-    initializationState = WalletInitializationState.DENIED.name();
-    try {
-      wallet.setInitializationState(initializationState);
-      wallet = walletStorage.saveWallet(wallet, false);
+    String newInitializationState = WalletInitializationState.DENIED.name();
+    wallet.setInitializationState(newInitializationState);
+    wallet = walletStorage.saveWallet(wallet, false);
 
-      checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
-    } finally {
-      initializationState = WalletInitializationState.INITIALIZED.name();
-    }
+    checkWalletContent(wallet, IDENTITY_ID, ADDRESS, PHRASE, newInitializationState, IS_ENABLED);
   }
 
   /**
@@ -103,7 +89,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = walletStorage.saveWallet(wallet, true);
     assertNotNull(wallet);
-    walletStorage.removeWallet(identityId);
+    walletStorage.removeWallet(IDENTITY_ID);
     Set<Wallet> listWallets = walletStorage.listWallets();
     assertNotNull(listWallets);
     assertEquals(0, listWallets.size());
@@ -123,8 +109,8 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    wallet = walletStorage.getWalletByAddress(address);
-    checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+    wallet = walletStorage.getWalletByAddress(ADDRESS);
+    checkWalletContent(wallet, IDENTITY_ID, ADDRESS, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
     wallet = walletStorage.getWalletByAddress("new-address");
     assertNull("Shouldn't find wallet with not recognized address", wallet);
@@ -144,8 +130,8 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    wallet = walletStorage.getWalletByIdentityId(identityId);
-    checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+    wallet = walletStorage.getWalletByIdentityId(IDENTITY_ID);
+    checkWalletContent(wallet, IDENTITY_ID, ADDRESS, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
     wallet = walletStorage.getWalletByIdentityId(1523);
     assertNull(wallet);
@@ -174,7 +160,7 @@ public class WalletStorageTest extends BaseWalletTest {
     assertEquals(1, listWallets.size());
 
     wallet = listWallets.iterator().next();
-    checkWalletContent(wallet, identityId, address, phrase, initializationState, isEnabled);
+    checkWalletContent(wallet, IDENTITY_ID, ADDRESS, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
   }
 
   /**
@@ -199,7 +185,7 @@ public class WalletStorageTest extends BaseWalletTest {
     }
 
     try {
-      walletStorage.saveWalletPrivateKey(identityId, null);
+      walletStorage.saveWalletPrivateKey(IDENTITY_ID, null);
       fail("No wallet key content, thus an exception should be thrown");
     } catch (Exception e) {
       // Expected
@@ -209,17 +195,17 @@ public class WalletStorageTest extends BaseWalletTest {
 
     walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), WALLET_PRIVATE_KEY_CONTENT);
 
-    wallet = walletStorage.getWalletByIdentityId(identityId);
+    wallet = walletStorage.getWalletByIdentityId(IDENTITY_ID);
     assertTrue(wallet.isHasPrivateKey());
-    String content = walletStorage.getWalletPrivateKey(identityId);
+    String content = walletStorage.getWalletPrivateKey(IDENTITY_ID);
     assertEquals(WALLET_PRIVATE_KEY_CONTENT, content);
 
     String newContent = WALLET_PRIVATE_KEY_CONTENT + 1;
     walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), newContent);
-    content = walletStorage.getWalletPrivateKey(identityId);
+    content = walletStorage.getWalletPrivateKey(IDENTITY_ID);
     assertEquals(newContent, content);
 
-    wallet = walletStorage.getWalletByIdentityId(identityId);
+    wallet = walletStorage.getWalletByIdentityId(IDENTITY_ID);
     assertTrue(wallet.isHasPrivateKey());
   }
 
@@ -274,27 +260,17 @@ public class WalletStorageTest extends BaseWalletTest {
     assertFalse(wallet.isHasPrivateKey());
   }
 
-  private void checkWalletContent(Wallet wallet,
-                                  long identityId,
-                                  String address,
-                                  String phrase,
-                                  String initializationState,
-                                  boolean isEnabled) {
+  protected void checkWalletContent(Wallet wallet,
+                                    long identityId,
+                                    String address,
+                                    String phrase,
+                                    String initializationState,
+                                    boolean isEnabled) {
     assertEquals(identityId, wallet.getTechnicalId());
     assertEquals(address.toLowerCase(), wallet.getAddress().toLowerCase());
     assertEquals(phrase, wallet.getPassPhrase());
     assertEquals(initializationState, wallet.getInitializationState());
     assertEquals(isEnabled, wallet.isEnabled());
-  }
-
-  private Wallet newWallet() {
-    Wallet wallet = new Wallet();
-    wallet.setTechnicalId(identityId);
-    wallet.setAddress(address);
-    wallet.setPassPhrase(phrase);
-    wallet.setEnabled(isEnabled);
-    wallet.setInitializationState(initializationState);
-    return wallet;
   }
 
 }

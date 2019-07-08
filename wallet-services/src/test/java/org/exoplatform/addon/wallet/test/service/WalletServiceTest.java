@@ -19,14 +19,15 @@ package org.exoplatform.addon.wallet.test.service;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import org.picocontainer.Startable;
+
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.junit.Test;
-import org.picocontainer.Startable;
 
 public class WalletServiceTest extends BaseWalletTest {
 
@@ -133,11 +134,7 @@ public class WalletServiceTest extends BaseWalletTest {
     contractDetail.setSellPrice(sellPrice);
     walletService.setConfiguredContractDetail(contractDetail);
 
-    checkContractDetais(address, decimals, name, owner, symbol, sellPrice, contractType);
-
-    // Re-compute Contract detail from DB
-    contractDetail = null;
-    ((Startable) walletService).start();
+    checkContractDetails(address, decimals, name, owner, symbol, sellPrice, contractType);
   }
 
   /**
@@ -161,18 +158,17 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Data version are not equals", dataVersion, userSettings.getUserPreferences().getDataVersion());
 
   }
-  
+
   /**
-   * Test get User Settings 
+   * Test get User Settings
    */
   @Test
-  public void testgetUserSettings() {
+  public void testGetUserSettings() {
     WalletService walletService = getService(WalletService.class);
-    String currentUser = "root0";
 
-    UserSettings userSettings = new UserSettings(walletService.getSettings());
-    userSettings = walletService.getUserSettings(null, currentUser);
-    assertNotNull("User settings shouldn't be null", userSettings); 
+    UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER);
+    assertNotNull("User settings shouldn't be null", userSettings);
+    // TODO continue test on returned attributes values
   }
 
   private void checkInitialFunds(int tokenAmount,
@@ -188,13 +184,13 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Funds Holder type shouldn't be null", fundsHolderType, initialFunds.getFundsHolderType());
   }
 
-  private void checkContractDetais(String address,
-                                   int decimals,
-                                   String name,
-                                   String owner,
-                                   String symbol,
-                                   String sellPrice,
-                                   String contractType) {
+  private void checkContractDetails(String address,
+                                    int decimals,
+                                    String name,
+                                    String owner,
+                                    String symbol,
+                                    String sellPrice,
+                                    String contractType) {
     WalletService walletService = getService(WalletService.class);
     GlobalSettings settings = walletService.getSettings();
     assertNotNull("Settings service shouldn't be null", settings);
