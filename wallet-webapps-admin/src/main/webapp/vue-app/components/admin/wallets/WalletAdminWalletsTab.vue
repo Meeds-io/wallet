@@ -536,8 +536,8 @@ export default {
     },
     sortByName(a, b) {
       // To use same Vuetify datable sort algorithm
-      const sortA = a.name.toLocaleLowerCase();
-      const sortB = b.name.toLocaleLowerCase();
+      const sortA = a.name && a.name.toLocaleLowerCase();
+      const sortB = b.name && b.name.toLocaleLowerCase();
       return (sortA > sortB && 1) || (sortA < sortB && (-1)) || 0; // NOSONAR
     },
     retrieveWalletsApproval(wallets, i) {

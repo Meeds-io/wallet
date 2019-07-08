@@ -136,7 +136,8 @@ public class WalletUtils {
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT         =
                                                                                     "exo.addon.wallet.transaction.mined";
 
-  public static final String                          NEW_TRANSACTION_EVENT                 = "exo.addon.wallet.transaction.loaded";
+  public static final String                          NEW_TRANSACTION_EVENT                 =
+                                                                            "exo.addon.wallet.transaction.loaded";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS          = "transaction.pending.maxDays";
 
@@ -540,8 +541,10 @@ public class WalletUtils {
       }
     } else if (walletType.isSpace()) {
       Space space = getSpace(identity.getRemoteId());
-      wallet.setName(space.getDisplayName());
-      wallet.setSpaceId(Long.parseLong(space.getId()));
+      if (space != null) {
+        wallet.setName(space.getDisplayName());
+        wallet.setSpaceId(Long.parseLong(space.getId()));
+      }
     }
   }
 
