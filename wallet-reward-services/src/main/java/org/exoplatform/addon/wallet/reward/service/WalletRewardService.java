@@ -204,7 +204,7 @@ public class WalletRewardService implements RewardService {
       }
       RewardPluginSettings rewardPluginSettings = getPluginSetting(pluginSettings, rewardPlugin.getPluginId());
       if (rewardPluginSettings != null) {
-        Map<Long, Double> earnedPoints = rewardPlugin.gtEarnedPoints(identityIds,
+        Map<Long, Double> earnedPoints = rewardPlugin.getEarnedPoints(identityIds,
                                                                      periodOfTime.getStartDateInSeconds(),
                                                                      periodOfTime.getEndDateInSeconds());
         Set<Long> validIdentityIdsToUse = rewardPluginSettings.isUsePools() ? walletsWithEnabledTeam : enabledIdentityIds;
