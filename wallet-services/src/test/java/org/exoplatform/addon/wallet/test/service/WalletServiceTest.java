@@ -19,12 +19,14 @@ package org.exoplatform.addon.wallet.test.service;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.picocontainer.Startable;
-
+import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
+import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.junit.Test;
+import org.picocontainer.Startable;
 
 public class WalletServiceTest extends BaseWalletTest {
 
@@ -108,10 +110,75 @@ public class WalletServiceTest extends BaseWalletTest {
     checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, walletService);
   }
 
+  /**
+   * Test set configured contract detail
+   */
+  @Test
+  public void testSetConfiguredContractDetail() {
+    WalletService walletService = getService(WalletService.class);
+    ContractDetail contractDetail = new ContractDetail();
+    String address = "0xc76987D43b77C45d51653b6eB110b9174aCCE8fb";
+    int decimals = 100;
+    String name = "Contract";
+    String owner = "Root";
+    String symbol = "C";
+    String sellPrice = "1000";
+    String contractType = "Contract V2";
+    contractDetail.setContractType(contractType);
+    contractDetail.setAddress(address);
+    contractDetail.setDecimals(decimals);
+    contractDetail.setName(name);
+    contractDetail.setOwner(owner);
+    contractDetail.setSymbol(symbol);
+    contractDetail.setSellPrice(sellPrice);
+    walletService.setConfiguredContractDetail(contractDetail);
+
+    checkContractDetais(address, decimals, name, owner, symbol, sellPrice, contractType);
+
+    // Re-compute Contract detail from DB
+    contractDetail = null;
+    ((Startable) walletService).start();
+  }
+
+  /**
+   * Test save user preferences
+   */
+  @Test
+  public void testSaveUserPreferences() {
+    WalletService walletService = getService(WalletService.class);
+    WalletSettings userPreferences = new WalletSettings();
+    String currentUser = "root0";
+    Integer dataVersion = 2;
+    String phrase = "save User";
+
+    userPreferences.setPhrase(phrase);
+    userPreferences.setDataVersion(dataVersion);
+    walletService.saveUserPreferences(currentUser, userPreferences);
+
+    IdentityManagerMock identityManagerMock = getService(IdentityManagerMock.class);
+    identityManagerMock.getOrCreateIdentity(OrganizationIdentityProvider.NAME, currentUser, false);
+    UserSettings userSettings = walletService.getUserSettings(null, currentUser);
+    assertEquals("Data version are not equals", dataVersion, userSettings.getUserPreferences().getDataVersion());
+
+  }
+  
+  /**
+   * Test get User Settings 
+   */
+  @Test
+  public void testgetUserSettings() {
+    WalletService walletService = getService(WalletService.class);
+    String currentUser = "root0";
+
+    UserSettings userSettings = new UserSettings(walletService.getSettings());
+    userSettings = walletService.getUserSettings(null, currentUser);
+    assertNotNull("User settings shouldn't be null", userSettings); 
+  }
+
   private void checkInitialFunds(int tokenAmount,
-                                  String fundsHolder,
-                                  String fundsHolderType,
-                                  WalletService walletService) {
+                                 String fundsHolder,
+                                 String fundsHolderType,
+                                 WalletService walletService) {
     GlobalSettings settings = walletService.getSettings();
     assertNotNull("Settings service shouldn't be null", settings);
     InitialFundsSettings initialFunds = settings.getInitialFunds();
@@ -119,6 +186,27 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Funds Holder shouldn't be null", fundsHolder, initialFunds.getFundsHolder());
     assertEquals("Token Amount are not equals", tokenAmount, initialFunds.getTokenAmount(), 0);
     assertEquals("Funds Holder type shouldn't be null", fundsHolderType, initialFunds.getFundsHolderType());
+  }
+
+  private void checkContractDetais(String address,
+                                   int decimals,
+                                   String name,
+                                   String owner,
+                                   String symbol,
+                                   String sellPrice,
+                                   String contractType) {
+    WalletService walletService = getService(WalletService.class);
+    GlobalSettings settings = walletService.getSettings();
+    assertNotNull("Settings service shouldn't be null", settings);
+    ContractDetail contract = settings.getContractDetail();
+    assertNotNull("Contract shouldn't be null", contract);
+    assertEquals("Address are not equals", address, contract.getAddress());
+    assertEquals("decimals are not equals", decimals, contract.getDecimals(), 0);
+    assertEquals("Contract name are not equals", name, contract.getName());
+    assertEquals("Owner are not equals", owner, contract.getOwner());
+    assertEquals("Symbol are not equals", symbol, contract.getSymbol());
+    assertEquals("SellPrice are not equals", sellPrice, contract.getSellPrice());
+    assertEquals("ContractType are not equals", contractType, contract.getContractType());
   }
 
 }
