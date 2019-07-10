@@ -123,6 +123,13 @@ public abstract class BaseWalletTest {
   protected List<TransactionEntity> generateTransactions(String walletAddress,
                                                          String contractAddress,
                                                          String contractMethodName) {
+    return generateTransactions(walletAddress, contractAddress, contractMethodName, 0);
+  }
+
+  protected List<TransactionEntity> generateTransactions(String walletAddress,
+                                                         String contractAddress,
+                                                         String contractMethodName,
+                                                         long offsetTime) {
     String secondAddress = "0xeaaaec7864af9e581a85ce3987d026be0f509ac9";
     String thirdAddress = "0xeaaaec7864af9e581a85ce3987d026be0f509ac9";
 
@@ -152,7 +159,7 @@ public abstract class BaseWalletTest {
                                                true, // isSuccess
                                                i % 2 == 0, // isPending
                                                i % 2 == 1, // isAdminOperation
-                                               System.currentTimeMillis());
+                                               System.currentTimeMillis() + offsetTime);
       transactionEntities.add(tx);
     }
     return transactionEntities;
