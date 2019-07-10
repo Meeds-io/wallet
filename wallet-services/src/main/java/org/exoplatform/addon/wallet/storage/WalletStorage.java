@@ -49,7 +49,10 @@ public class WalletStorage {
     if (walletEntities == null || walletEntities.isEmpty()) {
       return Collections.emptySet();
     } else {
-      return walletEntities.stream().map(this::fromEntity).collect(Collectors.toSet());
+      return walletEntities.stream()
+                           .map(this::fromEntity)
+                           .filter(wallet -> StringUtils.isNotBlank(wallet.getType()))
+                           .collect(Collectors.toSet());
     }
   }
 

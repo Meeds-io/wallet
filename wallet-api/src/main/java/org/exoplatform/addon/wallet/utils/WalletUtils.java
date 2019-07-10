@@ -327,20 +327,24 @@ public class WalletUtils {
       }
       Identity identity = getIdentityByTypeAndId(type, remoteId);
       if (identity == null) {
-        throw new IllegalStateException("Can't find identity with id " + remoteId + " and type " + type);
+        wallet.setEnabled(false);
+        wallet.setDeletedUser(true);
+      } else {
+        wallet.setType(type.getId());
+        wallet.setId(identity.getRemoteId());
+        wallet.setTechnicalId(Long.parseLong(identity.getId()));
       }
-      wallet.setType(type.getId());
-      wallet.setId(identity.getRemoteId());
-      wallet.setTechnicalId(Long.parseLong(identity.getId()));
     } else {
       // Compute type and remoteId from technicalId
       Identity identity = getIdentityById(wallet.getTechnicalId());
       if (identity == null) {
-        throw new IllegalStateException("Can't find identity with identity id " + wallet.getTechnicalId());
+        wallet.setEnabled(false);
+        wallet.setDeletedUser(true);
+      } else {
+        WalletType type = WalletType.getType(identity.getProviderId());
+        wallet.setType(type.getId());
+        wallet.setId(identity.getRemoteId());
       }
-      WalletType type = WalletType.getType(identity.getProviderId());
-      wallet.setType(type.getId());
-      wallet.setId(identity.getRemoteId());
     }
   }
 
@@ -520,6 +524,8 @@ public class WalletUtils {
 
   public static final void computeWalletFromIdentity(Wallet wallet, Identity identity) {
     if (identity == null) {
+      wallet.setDeletedUser(true);
+      wallet.setEnabled(false);
       return;
     }
     WalletType walletType = WalletType.getType(identity.getProviderId());
