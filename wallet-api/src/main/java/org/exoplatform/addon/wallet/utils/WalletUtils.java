@@ -522,6 +522,9 @@ public class WalletUtils {
   }
 
   public static final void computeWalletFromIdentity(Wallet wallet, Identity identity) {
+    if (identity == null) {
+      return;
+    }
     WalletType walletType = WalletType.getType(identity.getProviderId());
     wallet.setId(identity.getRemoteId());
     wallet.setTechnicalId(Long.parseLong(identity.getId()));
