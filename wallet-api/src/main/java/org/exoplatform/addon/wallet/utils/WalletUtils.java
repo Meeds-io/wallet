@@ -348,10 +348,6 @@ public class WalletUtils {
     }
   }
 
-  public static final boolean isUserAdmin(String username) {
-    return isUserMemberOfGroupOrUser(username, ADMINISTRATORS_GROUP);
-  }
-
   public static final boolean isUserRewardingAdmin(String username) {
     return isUserMemberOfGroupOrUser(username, REWARDINGS_GROUP);
   }

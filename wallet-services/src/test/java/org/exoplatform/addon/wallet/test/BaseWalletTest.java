@@ -39,7 +39,7 @@ public abstract class BaseWalletTest {
 
   protected List<Serializable>     entitiesToClean      = new ArrayList<>();
 
-  private Random                   randon               = new Random(1);
+  private Random                   random               = new Random(1);
 
   @BeforeClass
   public static void beforeTest() {
@@ -185,7 +185,7 @@ public abstract class BaseWalletTest {
       hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
-      fromAddress = "0x" + randon.nextInt(1000);
+      fromAddress = "0x" + random.nextInt(1000);
     }
     if (createdDate == 0) {
       createdDate = ZonedDateTime.now().toInstant().toEpochMilli();
@@ -234,7 +234,7 @@ public abstract class BaseWalletTest {
       hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
-      fromAddress = "0x" + randon.nextInt(1000);
+      fromAddress = "0x" + random.nextInt(1000);
     }
     if (createdDate == 0) {
       createdDate = ZonedDateTime.now().toInstant().toEpochMilli();
@@ -266,7 +266,7 @@ public abstract class BaseWalletTest {
   protected String generateTransactionHash() {
     StringBuilder hashStringBuffer = new StringBuilder("0x");
     for (int i = 0; i < 64; i++) {
-      hashStringBuffer.append(Integer.toHexString(randon.nextInt(16)));
+      hashStringBuffer.append(Integer.toHexString(random.nextInt(16)));
     }
     return hashStringBuffer.toString();
   }

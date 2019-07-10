@@ -237,13 +237,13 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     String address = "address";
     String contractMethodName = "reward";
 
-    generateTransactions(address, contractAddress, contractMethodName);
+    generateTransactions(address, contractAddress, contractMethodName, -1000);
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
     ZonedDateTime end = ZonedDateTime.now();
 
-    generateTransactions(address, contractAddress, contractMethodName);
+    generateTransactions(address, contractAddress, contractMethodName, 1000);
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     double receivedAmount = walletTransactionDAO.countReceivedContractAmount(contractAddress, address, start, end);
@@ -259,13 +259,13 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     String address = "address";
     String contractMethodName = "transfer";
 
-    generateTransactions(address, contractAddress, contractMethodName);
+    generateTransactions(address, contractAddress, contractMethodName, -1000);
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
     ZonedDateTime end = ZonedDateTime.now();
 
-    generateTransactions(address, contractAddress, contractMethodName);
+    generateTransactions(address, contractAddress, contractMethodName, 1000);
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     double sentAmount = walletTransactionDAO.countSentContractAmount(contractAddress, address, start, end);
