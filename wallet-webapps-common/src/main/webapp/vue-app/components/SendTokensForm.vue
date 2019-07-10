@@ -33,7 +33,7 @@
           name="amount"
           label="Amount"
           required
-          placeholder="Select an amount of tokens to send"
+          placeholder="Select an amount to send"
           class="mt-3"
           @input="$emit('amount-selected', amount)" />
 

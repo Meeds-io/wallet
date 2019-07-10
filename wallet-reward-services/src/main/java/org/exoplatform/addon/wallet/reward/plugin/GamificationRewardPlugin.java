@@ -61,7 +61,7 @@ public class GamificationRewardPlugin extends RewardPlugin {
   }
 
   @Override
-  public Map<Long, Double> gtEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds) {
+  public Map<Long, Double> getEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds) {
     HashMap<Long, Double> earnedPoints = new HashMap<>();
     if (identityIds == null || identityIds.isEmpty()) {
       return earnedPoints;

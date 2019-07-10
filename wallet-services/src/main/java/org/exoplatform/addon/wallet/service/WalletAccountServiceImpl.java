@@ -91,7 +91,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     Identity identity = getIdentityById(identityId);
     if (identity == null) {
-      throw new IllegalArgumentException("Can't find identity with id " + identityId);
+      LOG.debug("Can't find identity with id {}", identityId);
+      return null;
     }
     return getWalletOfIdentity(identity);
   }
@@ -124,7 +125,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     Identity identity = getIdentityByTypeAndId(accountType, remoteId);
     if (identity == null) {
-      throw new IllegalArgumentException("Can't find identity with id " + remoteId + " and type " + accountType.getId());
+      LOG.debug("Can't find identity with id {} and type {}. It may be removed.", remoteId, accountType.getId());
+      return null;
     }
     return getWalletOfIdentity(identity);
   }
@@ -278,7 +280,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     Identity identity = getIdentityByTypeAndId(WalletType.getType(type), remoteId);
     if (identity == null) {
-      throw new IllegalStateException("Can't find identity with type/id: " + type + "/" + remoteId);
+      LOG.debug("Can't find identity with type/id: {}/{}", type, remoteId);
+      return;
     }
     long identityId = Long.parseLong(identity.getId());
     Wallet wallet = accountStorage.getWalletByIdentityId(identityId);

@@ -86,7 +86,7 @@ public class ServiceLoaderServlet extends HttpServlet {
         LOG.debug("Blockchain Service instances created");
 
         ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
-        listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container, contextCL));
+        listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));
 
         addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
                                   "Configuration for wallet transaction stored status verifier",

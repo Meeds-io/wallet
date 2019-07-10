@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2018 eXo Platform SAS. This is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License 
+  for more details. You should have received a copy of the GNU Lesser General Public License along with this software; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF site: http://www.fsf.org. -->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
+
+  <component>
+    <type>org.exoplatform.addon.wallet.dao.AddressLabelDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.dao.WalletAccountDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.dao.WalletTransactionDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.dao.WalletPrivateKeyDAO</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.storage.WalletStorage</key>
+    <type>org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.storage.TransactionStorage</key>
+    <type>org.exoplatform.addon.wallet.storage.cached.CachedTransactionStorage</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.storage.AddressLabelStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.service.WalletAccountService</key>
+    <type>org.exoplatform.addon.wallet.service.WalletAccountServiceImpl</type>
+    <init-params>
+      <value-param>
+        <name>admin.wallet.key</name>
+        <description>Admin wallet password encryption for first security level</description>
+        <value>${exo.wallet.admin.key:changeThisKey}</value>
+      </value-param>
+    </init-params>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.service.WalletTransactionService</key>
+    <type>org.exoplatform.addon.wallet.service.WalletTransactionServiceImpl</type>
+    <init-params>
+      <value-param>
+        <name>transaction.pending.maxDays</name>
+        <description>Maximum days to wait until transaction is added to blockchain, if exxceeding this duration, transaction will be marked as failed</description>
+        <value>${exo.wallet.transaction.pending.maxDays:3}</value>
+      </value-param>
+    </init-params>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.service.WalletContractService</key>
+    <type>org.exoplatform.addon.wallet.service.WalletContractServiceImpl</type>
+    <init-params>
+      <value-param>
+        <name>contract.abi.path</name>
+        <description>Token Contract ABI path</description>
+        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.json}</value>
+      </value-param>
+      <value-param>
+        <name>contract.bin.path</name>
+        <description>Token Contract BIN path</description>
+        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.bin}</value>
+      </value-param>
+    </init-params>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.service.WalletService</key>
+    <type>org.exoplatform.addon.wallet.service.WalletServiceImpl</type>
+    <init-params>
+      <value-param>
+        <name>networkId</name>
+        <description>Default used ethereum network ID</description>
+        <value>${exo.wallet.blockchain.networkId:1}</value>
+      </value-param>
+      <value-param>
+        <name>networkURL</name>
+        <description>Default used ethereum network URL</description>
+        <value>${exo.wallet.blockchain.network.http:https://mainnet.infura.io/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
+      </value-param>
+      <value-param>
+        <name>networkWSURL</name>
+        <description>Default used ethereum network Websocket URL</description>
+        <value>${exo.wallet.blockchain.network.websocket:wss://mainnet.infura.io/ws/v3/a1ac85aea9ce4be88e9e87dad7c01d40}</value>
+      </value-param>
+      <value-param>
+        <name>tokenAddress</name>
+        <description>Token address to display for users</description>
+        <value>${exo.wallet.blockchain.token.address:0xc76987d43b77c45d51653b6eb110b9174acce8fb}</value>
+      </value-param>
+      <value-param>
+        <name>gasLimit</name>
+        <description>Blockchain transaction gas limit</description>
+        <value>${exo.wallet.transaction.gas.limit:150000}</value>
+      </value-param>
+      <value-param>
+        <name>cheapGasPrice</name>
+        <description>Default used gas for transactions</description>
+        <value>${exo.wallet.transaction.gas.cheapPrice:4000000000}</value>
+      </value-param>
+      <value-param>
+        <name>normalGasPrice</name>
+        <description>Default used gas for transactions</description>
+        <value>${exo.wallet.transaction.gas.normalPrice:8000000000}</value>
+      </value-param>
+      <value-param>
+        <name>fastGasPrice</name>
+        <description>Default used gas for transactions</description>
+        <value>${exo.wallet.transaction.gas.fastPrice:15000000000}</value>
+      </value-param>
+      <value-param>
+        <name>accessPermission</name>
+        <description>Default access permission for wallet extension</description>
+        <value>${exo.wallet.accessPermission:}</value>
+      </value-param>
+    </init-params>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.rest.WalletSettingsREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.rest.WalletAccountREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.rest.WalletContractREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.rest.WalletTransactionREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.rest.WalletAdminTransactionREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.plugin.WalletAdminIdentityProvider</type>
+  </component>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.social.core.manager.IdentityManager</target-component>
+    <component-plugin>
+      <name>WalletAdminIdentityProvider plugin</name>
+      <set-method>registerIdentityProviders</set-method>
+      <type>org.exoplatform.social.core.identity.IdentityProviderPlugin</type>
+      <init-params>
+        <values-param>
+          <name>providers</name>
+          <value>org.exoplatform.addon.wallet.plugin.WalletAdminIdentityProvider</value>
+        </values-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.commons.api.settings.ExoFeatureService</target-component>
+    <component-plugin>
+      <name>wallet</name>
+      <set-method>addFeaturePlugin</set-method>
+      <type>org.exoplatform.addon.wallet.plugin.WalletFeaturePlugin</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.addon.wallet.addressAssociation.new</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.addon.wallet.listener.NewWalletListener</type>
+      <description>Manage wallet address creation process</description>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.addon.wallet.addressAssociation.modification</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.addon.wallet.listener.ModifiedWalletListener</type>
+      <description>Manage wallet address modification process</description>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.addon.wallet.transaction.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.addon.wallet.listener.TransactionNotificationListener</type>
+      <description>Send transaction mined notification to sender and receiver</description>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.commons.api.persistence.DataInitializer</target-component>
+    <component-plugin>
+      <name>WalletRDBMSChangeLogsPlugin</name>
+      <set-method>addChangeLogsPlugin</set-method>
+      <type>org.exoplatform.commons.persistence.impl.ChangeLogsPlugin</type>
+      <init-params>
+        <values-param>
+          <name>changelogs</name>
+          <description>Change logs of Wallet RDBMS</description>
+          <value>db/changelog/wallet-rdbms.db.changelog-master.xml</value>
+        </values-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+</configuration>

@@ -127,16 +127,14 @@ public class WalletUtils {
   public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT          =
                                                                                    "exo.addon.wallet.addressAssociation.new";
 
-  public static final String                          ADMIN_WALLET_MODIFIED_EVENT           =
-                                                                                  "exo.addon.wallet.admin.modified";
-
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT       =
                                                                                       "exo.addon.wallet.addressAssociation.modification";
 
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT         =
                                                                                     "exo.addon.wallet.transaction.mined";
 
-  public static final String                          NEW_TRANSACTION_EVENT                 = "exo.addon.wallet.transaction.loaded";
+  public static final String                          NEW_TRANSACTION_EVENT                 =
+                                                                            "exo.addon.wallet.transaction.loaded";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS          = "transaction.pending.maxDays";
 
@@ -329,25 +327,25 @@ public class WalletUtils {
       }
       Identity identity = getIdentityByTypeAndId(type, remoteId);
       if (identity == null) {
-        throw new IllegalStateException("Can't find identity with id " + remoteId + " and type " + type);
+        wallet.setEnabled(false);
+        wallet.setDeletedUser(true);
+      } else {
+        wallet.setType(type.getId());
+        wallet.setId(identity.getRemoteId());
+        wallet.setTechnicalId(Long.parseLong(identity.getId()));
       }
-      wallet.setType(type.getId());
-      wallet.setId(identity.getRemoteId());
-      wallet.setTechnicalId(Long.parseLong(identity.getId()));
     } else {
       // Compute type and remoteId from technicalId
       Identity identity = getIdentityById(wallet.getTechnicalId());
       if (identity == null) {
-        throw new IllegalStateException("Can't find identity with identity id " + wallet.getTechnicalId());
+        wallet.setEnabled(false);
+        wallet.setDeletedUser(true);
+      } else {
+        WalletType type = WalletType.getType(identity.getProviderId());
+        wallet.setType(type.getId());
+        wallet.setId(identity.getRemoteId());
       }
-      WalletType type = WalletType.getType(identity.getProviderId());
-      wallet.setType(type.getId());
-      wallet.setId(identity.getRemoteId());
     }
-  }
-
-  public static final boolean isUserAdmin(String username) {
-    return isUserMemberOfGroupOrUser(username, ADMINISTRATORS_GROUP);
   }
 
   public static final boolean isUserRewardingAdmin(String username) {
@@ -521,6 +519,11 @@ public class WalletUtils {
   }
 
   public static final void computeWalletFromIdentity(Wallet wallet, Identity identity) {
+    if (identity == null) {
+      wallet.setDeletedUser(true);
+      wallet.setEnabled(false);
+      return;
+    }
     WalletType walletType = WalletType.getType(identity.getProviderId());
     wallet.setId(identity.getRemoteId());
     wallet.setTechnicalId(Long.parseLong(identity.getId()));
@@ -540,8 +543,10 @@ public class WalletUtils {
       }
     } else if (walletType.isSpace()) {
       Space space = getSpace(identity.getRemoteId());
-      wallet.setName(space.getDisplayName());
-      wallet.setSpaceId(Long.parseLong(space.getId()));
+      if (space != null) {
+        wallet.setName(space.getDisplayName());
+        wallet.setSpaceId(Long.parseLong(space.getId()));
+      }
     }
   }
 

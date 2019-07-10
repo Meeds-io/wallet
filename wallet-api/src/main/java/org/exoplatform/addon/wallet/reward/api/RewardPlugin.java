@@ -40,10 +40,12 @@ public abstract class RewardPlugin extends BaseComponentPlugin {
    * 
    * @return whether the plugin is enabled or not
    */
-  public abstract boolean isEnabled();
+  public boolean isEnabled() {
+    return true;
+  }
 
   /**
-   * Retrieves earned points for identities in a certain period of time
+   * Retrieves earned points for identities in a selected period of time
    * 
    * @param identityIds identity ids of wallets to consider in computation
    * @param startDateInSeconds start timestamp in seconds of reward period
@@ -51,6 +53,6 @@ public abstract class RewardPlugin extends BaseComponentPlugin {
    * @return a {@link Map} of identity ID with the sum of tokens to send as
    *         reward
    */
-  public abstract Map<Long, Double> gtEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds);
+  public abstract Map<Long, Double> getEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds);
 
 }

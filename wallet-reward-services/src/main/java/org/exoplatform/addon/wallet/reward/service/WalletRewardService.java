@@ -83,8 +83,8 @@ public class WalletRewardService implements RewardService {
     if (StringUtils.isBlank(adminWalletAddress)) {
       throw new IllegalStateException("No admin wallet is configured");
     }
-    if (getTokenAdminService().getAdminLevel(adminWalletAddress) < 4) {
-      throw new IllegalStateException("Configured admin wallet is not configured as admin on token. It must be a Token admin with level 4 at least.");
+    if (getTokenAdminService().getAdminLevel(adminWalletAddress) < 2) {
+      throw new IllegalStateException("Configured admin wallet is not configured as admin on token. It must be a Token admin with level 2 at least.");
     }
 
     Iterator<WalletReward> rewardedWalletsIterator = rewards.iterator();
@@ -204,7 +204,7 @@ public class WalletRewardService implements RewardService {
       }
       RewardPluginSettings rewardPluginSettings = getPluginSetting(pluginSettings, rewardPlugin.getPluginId());
       if (rewardPluginSettings != null) {
-        Map<Long, Double> earnedPoints = rewardPlugin.gtEarnedPoints(identityIds,
+        Map<Long, Double> earnedPoints = rewardPlugin.getEarnedPoints(identityIds,
                                                                      periodOfTime.getStartDateInSeconds(),
                                                                      periodOfTime.getEndDateInSeconds());
         Set<Long> validIdentityIdsToUse = rewardPluginSettings.isUsePools() ? walletsWithEnabledTeam : enabledIdentityIds;

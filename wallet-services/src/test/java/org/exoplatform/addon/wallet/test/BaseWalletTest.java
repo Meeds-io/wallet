@@ -11,8 +11,7 @@ import org.junit.*;
 
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
-import org.exoplatform.addon.wallet.model.Wallet;
-import org.exoplatform.addon.wallet.model.WalletAddressLabel;
+import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.container.PortalContainer;
@@ -24,11 +23,23 @@ public abstract class BaseWalletTest {
 
   protected static PortalContainer container;
 
-  private static final Log         LOG             = ExoLogger.getLogger(BaseWalletTest.class);
+  private static final Log         LOG                  = ExoLogger.getLogger(BaseWalletTest.class);
 
-  protected List<Serializable>     entitiesToClean = new ArrayList<>();
+  protected static final long      IDENTITY_ID          = 1L;
 
-  private Random                   randon          = new Random(1);
+  protected static final String    ADDRESS              = "walletAddress";
+
+  protected static final String    PHRASE               = "passphrase";
+
+  protected static final String    INITIALIZATION_STATE = WalletInitializationState.INITIALIZED.name();
+
+  protected static final boolean   IS_ENABLED           = true;
+
+  protected static final String    CURRENT_USER         = "root1";
+
+  protected List<Serializable>     entitiesToClean      = new ArrayList<>();
+
+  private Random                   random               = new Random(1);
 
   @BeforeClass
   public static void beforeTest() {
@@ -112,6 +123,13 @@ public abstract class BaseWalletTest {
   protected List<TransactionEntity> generateTransactions(String walletAddress,
                                                          String contractAddress,
                                                          String contractMethodName) {
+    return generateTransactions(walletAddress, contractAddress, contractMethodName, 0);
+  }
+
+  protected List<TransactionEntity> generateTransactions(String walletAddress,
+                                                         String contractAddress,
+                                                         String contractMethodName,
+                                                         long offsetTime) {
     String secondAddress = "0xeaaaec7864af9e581a85ce3987d026be0f509ac9";
     String thirdAddress = "0xeaaaec7864af9e581a85ce3987d026be0f509ac9";
 
@@ -141,7 +159,7 @@ public abstract class BaseWalletTest {
                                                true, // isSuccess
                                                i % 2 == 0, // isPending
                                                i % 2 == 1, // isAdminOperation
-                                               System.currentTimeMillis());
+                                               System.currentTimeMillis() + offsetTime);
       transactionEntities.add(tx);
     }
     return transactionEntities;
@@ -167,7 +185,7 @@ public abstract class BaseWalletTest {
       hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
-      fromAddress = "0x" + randon.nextInt(1000);
+      fromAddress = "0x" + random.nextInt(1000);
     }
     if (createdDate == 0) {
       createdDate = ZonedDateTime.now().toInstant().toEpochMilli();
@@ -216,7 +234,7 @@ public abstract class BaseWalletTest {
       hash = generateTransactionHash();
     }
     if (StringUtils.isBlank(fromAddress)) {
-      fromAddress = "0x" + randon.nextInt(1000);
+      fromAddress = "0x" + random.nextInt(1000);
     }
     if (createdDate == 0) {
       createdDate = ZonedDateTime.now().toInstant().toEpochMilli();
@@ -248,12 +266,23 @@ public abstract class BaseWalletTest {
   protected String generateTransactionHash() {
     StringBuilder hashStringBuffer = new StringBuilder("0x");
     for (int i = 0; i < 64; i++) {
-      hashStringBuffer.append(Integer.toHexString(randon.nextInt(16)));
+      hashStringBuffer.append(Integer.toHexString(random.nextInt(16)));
     }
     return hashStringBuffer.toString();
   }
 
-  public <T> T getService(Class<T> componentType) {
+  protected <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
   }
+
+  protected Wallet newWallet() {
+    Wallet wallet = new Wallet();
+    wallet.setTechnicalId(IDENTITY_ID);
+    wallet.setAddress(ADDRESS);
+    wallet.setPassPhrase(PHRASE);
+    wallet.setEnabled(IS_ENABLED);
+    wallet.setInitializationState(INITIALIZATION_STATE);
+    return wallet;
+  }
+
 }
