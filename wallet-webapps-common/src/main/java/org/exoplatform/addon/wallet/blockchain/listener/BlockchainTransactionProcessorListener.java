@@ -23,7 +23,6 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.blockchain.service.EthereumClientConnector;
 import org.exoplatform.addon.wallet.model.transaction.MinedTransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
@@ -41,29 +40,20 @@ import org.exoplatform.services.log.Log;
  * A listener to process newly detected transactions coming from configured
  * network
  */
-public class BlockchainTransactionProcessorListener extends Listener<Object, TransactionReceipt>
-    implements ExoBlockchainTransactionService {
+public class BlockchainTransactionProcessorListener extends Listener<Object, TransactionReceipt> {
 
-  private static final Log          LOG = ExoLogger.getLogger(BlockchainTransactionProcessorListener.class);
+  private static final Log             LOG = ExoLogger.getLogger(BlockchainTransactionProcessorListener.class);
 
-  private WalletTransactionService  transactionService;
+  private WalletTransactionService     transactionService;
 
   private BlockchainTransactionService transactionDecoder;
 
-  private EthereumClientConnector   ethereumClientConnector;
+  private EthereumClientConnector      ethereumClientConnector;
 
-  private ExoContainer              container;
+  private ExoContainer                 container;
 
-  private ClassLoader               webappClassLoader;
-
-  public BlockchainTransactionProcessorListener(PortalContainer container, ClassLoader webappClassLoader) {
+  public BlockchainTransactionProcessorListener(PortalContainer container) {
     this.container = container;
-    this.webappClassLoader = webappClassLoader;
-  }
-
-  @Override
-  public ClassLoader getWebappClassLoader() {
-    return webappClassLoader;
   }
 
   @Override

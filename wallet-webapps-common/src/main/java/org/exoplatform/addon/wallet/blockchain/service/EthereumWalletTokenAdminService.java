@@ -35,7 +35,6 @@ import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.portal.config.UserACL;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -66,8 +65,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   private ClassLoader              webappClassLoader;
 
   private UserACL                  userACL;
-
-  private ListenerService          listenerService;
 
   private WalletContractService    walletContractService;
 
@@ -187,9 +184,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     try {
       String walletJson = toJsonString(adminWallet);
       getAccountStorage().saveWalletPrivateKey(identityId, walletJson);
-      getListenerService().broadcast(ADMIN_WALLET_MODIFIED_EVENT,
-                                     wallet.clone(),
-                                     null);
       this.isReadOnlyContract = false;
     } catch (Exception e) {
       // Make sure to delete corresponding wallet when the private key isn't
@@ -687,13 +681,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private EthereumClientConnector getClientConnector() {
     return clientConnector;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
   }
 
   private UserACL getUserACL() {
