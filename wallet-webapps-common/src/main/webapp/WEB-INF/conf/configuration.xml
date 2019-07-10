@@ -31,5 +31,6 @@
   <import profiles="all">war:/conf/wallet/application-registry-configuration.xml</import>
   <import profiles="all">war:/conf/wallet/administration-menu-configuration.xml</import>
   <import profiles="all">war:/conf/wallet/user-page-configuration.xml</import>
+  <import profiles="all">war:/conf/wallet/notification-configuration.xml</import>
 
 </configuration>
