@@ -198,7 +198,7 @@
 
   <external-component-plugins>
     <target-component>org.exoplatform.commons.api.notification.service.setting.PluginSettingService</target-component>
-    <component-plugin profiles="all">
+    <component-plugin>
       <name>notification.groups</name>
       <set-method>registerGroupConfig</set-method>
       <type>org.exoplatform.commons.api.notification.plugin.GroupProviderPlugin</type>
