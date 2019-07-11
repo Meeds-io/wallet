@@ -1,11 +1,13 @@
 package org.exoplatform.addon.wallet.model.reward;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.decodeString;
-import static org.exoplatform.addon.wallet.utils.WalletUtils.encodeString;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
+
+import org.exoplatform.addon.wallet.model.WalletType;
+import org.exoplatform.social.core.identity.model.Identity;
 
 import lombok.*;
 import lombok.EqualsAndHashCode.Exclude;
@@ -63,13 +65,20 @@ public class RewardTransaction implements Serializable {
    * @return String to store representing the reward transaction
    */
   public String getToStoreValue() {
-    if (StringUtils.isBlank(receiverType)) {
-      throw new IllegalStateException("receiverType is mandatory");
+    Identity receiverIdentity = null;
+    if (receiverIdentityId > 0) {
+      receiverIdentity = getIdentityById(receiverIdentityId);
+    } else {
+      if (StringUtils.isBlank(receiverType)) {
+        throw new IllegalStateException("receiverType is mandatory");
+      }
+      if (StringUtils.isBlank(receiverId)) {
+        throw new IllegalStateException("receiverId is mandatory");
+      }
+      receiverIdentity = getIdentityByTypeAndId(WalletType.getType(receiverType), receiverId);
     }
-    if (StringUtils.isBlank(receiverId)) {
-      throw new IllegalStateException("receiverId is mandatory");
-    }
-    return hash + ";" + encodeString(receiverType) + ";" + encodeString(receiverId) + ";" + tokensSent + ";" + receiverIdentityId;
+    // ;;; kept for retro compatibility
+    return hash + ";;;" + tokensSent + ";" + receiverIdentity.getId();
   }
 
   @Override

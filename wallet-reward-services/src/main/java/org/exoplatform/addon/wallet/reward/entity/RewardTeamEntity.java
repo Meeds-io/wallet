@@ -37,9 +37,6 @@ public class RewardTeamEntity implements Serializable {
   @Column(name = "TEAM_BUDGET")
   private Double                      budget;
 
-  @Column(name = "TEAM_MEMBER_REWARD")
-  private Double                      rewardPerMember;
-
   @Column(name = "TEAM_SPACE_ID")
   private Long                        spaceId;
 
@@ -98,14 +95,6 @@ public class RewardTeamEntity implements Serializable {
 
   public void setManager(Long manager) {
     this.manager = manager;
-  }
-
-  public Double getRewardPerMember() {
-    return rewardPerMember;
-  }
-
-  public void setRewardPerMember(Double rewardPerMember) {
-    this.rewardPerMember = rewardPerMember;
   }
 
   public RewardBudgetType getRewardType() {

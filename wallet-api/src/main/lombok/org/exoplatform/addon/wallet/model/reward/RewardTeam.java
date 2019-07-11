@@ -28,9 +28,6 @@ public class RewardTeam implements Serializable {
   private Double                 budget;
 
   @Exclude
-  private Double                 rewardPerMember;
-
-  @Exclude
   private Long                   spaceId;
 
   @Exclude

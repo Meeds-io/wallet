@@ -130,11 +130,11 @@
               xs12
               sm6>
               <v-text-field
-                v-model="budgetPerMember"
+                v-model="budget"
                 placeholder="Enter the fixed budget per pool member"
                 type="number"
                 class="pt-0 pb-0"
-                name="budgetPerMember" />
+                name="budget" />
             </v-flex>
           </v-radio-group>
         </v-flex>
@@ -274,7 +274,6 @@ export default {
     description: '',
     rewardType: 'COMPUTED',
     budget: '',
-    budgetPerMember: '',
     computedBudget: 0,
     memberSelection: null,
     manager: null,
@@ -392,7 +391,6 @@ export default {
       this.name = (this.team && this.team.name) || '';
       this.description = (this.team && this.team.description) || '';
       this.rewardType = (this.team && this.team.rewardType) || 'COMPUTED';
-      this.budgetPerMember = (this.team && this.team.rewardPerMember) || '';
       this.budget = (this.team && this.team.budget) || '';
       this.computedBudget = (this.team && this.team.computedBudget) || '0';
       this.manager = null;
@@ -486,8 +484,7 @@ export default {
           name: this.name,
           description: this.description,
           rewardType: this.rewardType,
-          budget: this.budget && this.rewardType === 'FIXED' ? Number(this.budget) : 0,
-          rewardPerMember: this.budgetPerMember && this.rewardType === 'FIXED_PER_MEMBER' ? Number(this.budgetPerMember) : 0,
+          budget: (this.budget && Number(this.budget)) || 0,
           spacePrettyName: this.rewardTeamSpace,
           spaceId: this.rewardTeamSpaceId,
           members: members,

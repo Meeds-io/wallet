@@ -24,7 +24,7 @@ public class RewardPluginSettings implements Serializable, Cloneable {
   private boolean           usePools;
 
   @Exclude
-  private RewardBudgetType  budgetType;
+  private RewardBudgetType  budgetType       = RewardBudgetType.DEFAULT;
 
   @Exclude
   private double            amount;

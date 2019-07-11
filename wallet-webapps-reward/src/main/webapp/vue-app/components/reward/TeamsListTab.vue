@@ -114,7 +114,7 @@
                     Fixed budget per member:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
-                    {{ Number(walletUtils.toFixed(props.item.rewardPerMember)) }} {{ symbol }}
+                    {{ Number(walletUtils.toFixed(props.item.budget)) }} {{ symbol }}
                   </v-list-tile-content>
                 </v-list-tile>
                 <v-list-tile v-if="props.item.rewardType === 'COMPUTED'">

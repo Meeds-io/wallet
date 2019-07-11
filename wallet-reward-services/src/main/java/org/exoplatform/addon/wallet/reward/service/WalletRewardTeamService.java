@@ -84,7 +84,6 @@ public class WalletRewardTeamService implements RewardTeamService {
     teamEntity.setDescription(rewardTeam.getDescription());
     teamEntity.setBudget(rewardTeam.getBudget());
     teamEntity.setRewardType(rewardTeam.getRewardType());
-    teamEntity.setRewardPerMember(rewardTeam.getRewardPerMember());
     teamEntity.setDisabled(rewardTeam.isDisabled());
     if (rewardTeam.getManager() != null && rewardTeam.getManager().getIdentityId() != 0) {
       teamEntity.setManager(rewardTeam.getManager().getIdentityId());
@@ -113,7 +112,6 @@ public class WalletRewardTeamService implements RewardTeamService {
     rewardTeam.setBudget(teamEntity.getBudget());
     rewardTeam.setManager(getRewardTeamMember(teamEntity.getManager()));
     rewardTeam.setRewardType(teamEntity.getRewardType());
-    rewardTeam.setRewardPerMember(teamEntity.getRewardPerMember());
     rewardTeam.setDisabled(teamEntity.getDisabled());
     if (teamEntity.getSpaceId() != null && teamEntity.getSpaceId() != 0) {
       SpaceService spaceService = CommonsUtils.getService(SpaceService.class);

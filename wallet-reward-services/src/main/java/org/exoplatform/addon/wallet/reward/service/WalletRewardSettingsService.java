@@ -129,6 +129,21 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   }
 
   @Override
+  public void registerPlugin(RewardPlugin rewardPlugin) {
+    rewardPlugins.put(rewardPlugin.getPluginId(), rewardPlugin);
+
+    // Purge cached settings
+    this.rewardSettings = null;
+  }
+
+  public void unregisterPlugin(String pluginId) {
+    rewardPlugins.remove(pluginId);
+
+    // Purge cached settings
+    this.rewardSettings = null;
+  }
+
+  @Override
   public Collection<RewardPlugin> getRewardPlugins() {
     return rewardPlugins.values();
   }
@@ -136,11 +151,6 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   @Override
   public RewardPlugin getRewardPlugin(String pluginId) {
     return rewardPlugins.get(pluginId);
-  }
-
-  @Override
-  public void registerPlugin(RewardPlugin rewardPlugin) {
-    rewardPlugins.put(rewardPlugin.getPluginId(), rewardPlugin);
   }
 
   @Override

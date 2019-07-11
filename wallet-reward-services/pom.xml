@@ -7,11 +7,24 @@
   </parent>
   <artifactId>wallet-reward-services</artifactId>
   <name>eXo Add-on:: Wallet - Reward Services</name>
+  <properties>
+    <exo.test.coverage.ratio>0.75</exo.test.coverage.ratio>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-api</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>wallet-services</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.wallet</groupId>
+      <artifactId>ert-contract</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>javax.annotation</groupId>
@@ -47,6 +60,27 @@
       <artifactId>social-component-core-jpa</artifactId>
       <scope>provided</scope>
     </dependency>
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.exoplatform.commons</groupId>
+      <artifactId>commons-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>wallet-reward-services</finalName>
@@ -67,6 +101,17 @@
                 <version>1.9.1</version>
             </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <exo.properties.url>classpath:/conf/configuration.properties</exo.properties.url>
+            <exo.profiles>hsqldb</exo.profiles>
+            <exo.files.storage.dir>target/files</exo.files.storage.dir>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
