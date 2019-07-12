@@ -17,6 +17,7 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
+import org.exoplatform.addon.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.addon.wallet.reward.test.service.WalletRewardSettingsServiceTest;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -78,6 +79,8 @@ public abstract class BaseWalletRewardTest {
                                                                  }
                                                                };
 
+  private static RewardSettings           defaultSettings      = null;
+
   public static Map<Long, Double> getEarnedPoints(Set<Long> identityIds) {
     return identityIds.stream().collect(Collectors.toMap(Function.identity(), x -> x.doubleValue()));
   }
@@ -91,6 +94,9 @@ public abstract class BaseWalletRewardTest {
     container = PortalContainer.getInstance();
     assertNotNull("Container shouldn't be null", container);
     assertTrue("Container should have been started", container.isStarted());
+
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    defaultSettings = rewardSettingsService.getSettings();
   }
 
   @Before
@@ -105,6 +111,10 @@ public abstract class BaseWalletRewardTest {
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     RewardTeamDAO rewardTeamDAO = getService(RewardTeamDAO.class);
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+
+    RewardSettings storedSettings = rewardSettingsService.getSettings();
+    assertEquals(defaultSettings, storedSettings);
 
     RequestLifeCycle.end();
     RequestLifeCycle.begin(container);
@@ -171,7 +181,7 @@ public abstract class BaseWalletRewardTest {
     RequestLifeCycle.end();
   }
 
-  protected <T> T getService(Class<T> componentType) {
+  protected static <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
   }
 

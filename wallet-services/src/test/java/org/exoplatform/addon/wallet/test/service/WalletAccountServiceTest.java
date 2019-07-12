@@ -2,14 +2,14 @@ package org.exoplatform.addon.wallet.test.service;
 
 import static org.junit.Assert.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
+import java.util.Set;
 
-import org.exoplatform.addon.wallet.model.Wallet;
-import org.exoplatform.addon.wallet.model.WalletType;
+import org.apache.commons.lang3.StringUtils;
+import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.services.listener.ListenerService;
+import org.junit.Test;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
 
@@ -37,8 +37,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     Wallet wallet = newWallet();
     walletAccountService.saveWallet(wallet);
     Wallet walletTest = walletAccountService.getWalletByAddress(ADDRESS);
-    assertEquals("Unexpected value of wallet initialization state", INITIALIZATION_STATE, walletTest.getInitializationState());
-    assertEquals("Unexpected value of wallet passPhrase",
+    assertEquals("Wallet initialization state shouldn't be null", INITIALIZATION_STATE, walletTest.getInitializationState());
+    assertEquals("Wallet passPhrase shouldn't be null",
                  PHRASE,
                  walletTest.getPassPhrase());
     entitiesToClean.add(wallet);
@@ -70,7 +70,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     walletAccountService.saveWallet(wallet);
     long walletCount = walletAccountService.getWalletsCount();
-    assertEquals("Unexpected returned wallets count", 1, walletCount);
+    assertEquals("Returned wallets count shouldn't be 0", 1, walletCount);
     entitiesToClean.add(wallet);
   }
 
@@ -84,7 +84,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     walletAccountService.saveWallet(wallet);
     Wallet walletTest = walletAccountService.getWalletByAddress(ADDRESS);
-    assertNotNull("Wallet not found with saved address", walletTest);
+    assertNotNull("Shouldn't find wallet with not recognized address", walletTest);
     entitiesToClean.add(wallet);
   }
 
@@ -99,7 +99,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     walletAccountService.saveWallet(wallet);
 
     Wallet walletTest = walletAccountService.getWalletByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
-    assertNotNull("Wallet not found with saved type and id", walletTest);
+    assertNotNull("Shouldn't find wallet with not recognized type and id", walletTest);
     entitiesToClean.add(wallet);
   }
 
@@ -131,7 +131,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     wallet = walletAccountService.getWalletByIdentityId(wallet.getTechnicalId());
 
     Boolean testOwner = walletAccountService.isWalletOwner(wallet, CURRENT_USER);
-    assertTrue("Wallet should be owner", testOwner);
+    assertEquals("Your aren't the owner of wallet", testOwner, true);
     entitiesToClean.add(wallet);
   }
 
@@ -155,8 +155,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
                                                                       CURRENT_USER,
                                                                       CURRENT_USER);
-    assertNotNull("Wallet private key shouldn't be null", privateKey);
-    assertEquals("Unexpected wallet private key value", content, privateKey);
+    assertEquals("Wallet private key should be equal", content, privateKey);
     entitiesToClean.add(wallet);
   }
 
@@ -175,7 +174,147 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     long technicalId = wallet.getTechnicalId();
     wallet = walletAccountService.getWalletByIdentityId(technicalId);
     assertNotNull("IdentityId Shouldn't be null", technicalId);
-    assertEquals("Unexpected wallet technichal Id", IDENTITY_ID, technicalId);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test list of wallet
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testListWallets() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    Set<Wallet> wallets = walletAccountService.listWallets();
+    assertNotNull("Wallet list Shouldn't be empty", wallets);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test check save wallet removePrivateKeyByTypeAndId
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testCheckCanSaveWallet() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    walletAccountService.isWalletOwner(wallet, CURRENT_USER);
+    Wallet walletTest = walletAccountService.getWalletByIdentityId(wallet.getTechnicalId());
+
+    walletAccountService.checkCanSaveWallet(wallet, null, CURRENT_USER);
+    // assertEquals("Wallet can be saved", isNew, false);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test remove private key by Type and Id
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testRemovePrivateKeyByTypeAndId() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    walletAccountService.isWalletOwner(wallet, CURRENT_USER);
+    String content = "Save private key";
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, content, CURRENT_USER);
+    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
+    assertNotNull("Private key shouldn't be null", privateKey);
+
+    walletAccountService.removePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
+    String privateKeyTset = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
+    assertNull("Private key should be null after remove", privateKeyTset);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test save or delete address label
+   */
+  @Test
+  public void testSaveOrDeleteAddressLabel() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
+    String label = "Save address label";
+    int identityId = 1;
+    walletAddressLabel.setAddress(ADDRESS);
+    walletAddressLabel.setIdentityId(identityId);
+    walletAddressLabel.setLabel(label);
+
+    WalletAddressLabel labelTset = walletAccountService.saveOrDeleteAddressLabel(walletAddressLabel, CURRENT_USER);
+    assertNotNull("Wallet address label shouldn't be null", labelTset);
+    entitiesToClean.add(labelTset);
+  }
+
+  /**
+   * Test get addresses labels
+   */
+  @Test
+  public void testGetAddressesLabelsVisibleBy() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
+    String label = "Save address label";
+    int identityId = 1;
+    walletAddressLabel.setAddress(ADDRESS);
+    walletAddressLabel.setIdentityId(identityId);
+    walletAddressLabel.setLabel(label);
+
+    WalletAddressLabel labelTset = walletAccountService.saveOrDeleteAddressLabel(walletAddressLabel, CURRENT_USER);
+    assertNotNull("Wallet address label shouldn't be null", labelTset);
+    Set<WalletAddressLabel> walletTestLabel = walletAccountService.getAddressesLabelsVisibleBy(CURRENT_USER);
+    assertNotNull("Wallet address label Shouldn't be empty", walletTestLabel);
+    entitiesToClean.add(labelTset);
+  }
+
+  /**
+   * Test get private key by type, remoteId and user
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testGetPrivateKeyByTypeAndIdAndUser() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+
+    String content = "Save private key";
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
+                                                   CURRENT_USER,
+                                                   content,
+                                                   CURRENT_USER);
+    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
+                                                                      CURRENT_USER,
+                                                                      CURRENT_USER);
+    assertNotNull("Wallet private key shouldn't be null", privateKey);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test get private key by type and remoteId
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testGetPrivateKeyByTypeAndId() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+
+    String content = "Save private key";
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
+                                                   CURRENT_USER,
+                                                   content,
+                                                   CURRENT_USER);
+    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
+                                                                      CURRENT_USER);
+    assertNotNull("Wallet private key shouldn't be null", privateKey);
     entitiesToClean.add(wallet);
   }
 }

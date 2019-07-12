@@ -59,10 +59,11 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     assertEquals(enabledWalletsCount, computedRewards.size());
 
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
+    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
     try {
-      RewardSettings newSettings = cloneSettings(defaultSettings);
+      // Build new settings
+      RewardSettings newSettings = cloneSettings(rewardSettingsService.getSettings());
 
       Set<RewardPluginSettings> newPluginSettings = newSettings.getPluginSettings();
       long amount = 3l;
@@ -255,18 +256,17 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     contractDetail.setContractType("3");
     contractDetail.setNetworkId(1l);
     contractDetail.setSellPrice("0.002");
-    walletService.getSettings();
     walletService.setConfiguredContractDetail(contractDetail);
 
     long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 04)
                                                                  .atEndOfMonth()
                                                                  .atStartOfDay());
 
-    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
+    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
     try {
       // Build new settings
-      RewardSettings newSettings = cloneSettings(defaultSettings);
+      RewardSettings newSettings = cloneSettings(rewardSettingsService.getSettings());
       Set<RewardPluginSettings> newPluginSettings = newSettings.getPluginSettings();
 
       newSettings.setPeriodType(RewardPeriodType.MONTH);
