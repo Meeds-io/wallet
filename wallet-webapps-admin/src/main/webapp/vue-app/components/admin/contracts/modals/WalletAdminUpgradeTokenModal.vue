@@ -16,7 +16,7 @@
       class="elevation-0 buttomNavigation">
       <v-btn flat value="send">
         <span>
-          Upgrade {{ contractDetails && contractDetails.name }}
+          {{ $t('exoplatform.wallet.button.upgradeContract', {0: contractDetails && contractDetails.name}) }}
         </span>
         <v-icon>
           send
@@ -30,7 +30,7 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          Upgrade {{ contractDetails && contractDetails.name }} to version 3
+          {{ $t('exoplatform.wallet.button.upgradeContract', {0: contractDetails && contractDetails.name}) }}
         </span>
       </div>
 
@@ -53,7 +53,7 @@
         </v-card-title>
         <v-card-title v-show="loading && step" class="pb-0">
           <v-spacer />
-          <div>Step {{ step }} / 3</div>
+          <div>{{ $t('exoplatform.wallet.label.step') }} {{ step }} / 3</div>
           <v-spacer />
         </v-card-title>
         <v-card-text class="pt-0">
@@ -69,10 +69,10 @@
               :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
               :type="walletPasswordShow ? 'text' : 'password'"
               :disabled="loading"
-              autofocus
+              :label="$t('exoplatform.wallet.label.walletPassword')"
+              :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
-              label="Wallet password"
-              placeholder="Enter your wallet password"
+              autofocus
               counter
               required
               class="mt-3"
@@ -88,13 +88,14 @@
             :loading="loading"
             class="btn btn-primary mr-1"
             @click="send">
-            Upgrade
-          </button> <button
+            {{ $t('exoplatform.wallet.button.upgrade') }}
+          </button>
+          <button
             :disabled="loading"
             class="btn"
             color="secondary"
             @click="dialog = false">
-            Close
+            {{ $t('exoplatform.wallet.button.close') }}
           </button>
           <v-spacer />
         </v-card-actions>
@@ -204,7 +205,7 @@ export default {
             estimatedGas += parseInt(data * 1.1);
           } else if (this.step < 2) {
             if (!data || !data.options || !data.options.address) {
-              throw new Error('Cannot find address of newly deployed address');
+              throw new Error(this.$t('exoplatform.wallet.warning.notFoundContractAddress'));
             } else {
               ertTokenV2Address = data.options.address;
               this.saveUpgradeState({
@@ -244,7 +245,7 @@ export default {
         })
         .catch((e) => {
           console.debug('deployContract method - error', e);
-          this.error = `Error during contract upgrade: ${this.walletUtils.truncateError(String(e))}`;
+          this.error = this.$t('exoplatform.wallet.warning.contractUpgradeError', {0: this.walletUtils.truncateError(String(e))});
         })
         .finally(() => {
           this.loading = false;
@@ -277,7 +278,7 @@ export default {
 
       const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
-        this.error = 'Wrong password';
+        this.error = this.$t('exoplatform.wallet.warning.wrongPassword');
         return;
       }
 

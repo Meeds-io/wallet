@@ -9,13 +9,13 @@
           id="accountDetailTitle"
           class="mt-3">
           <h3 v-if="adminLevel >= 5 && contractDetails.contractBalanceFiat" class="font-weight-light">
-            {{ contractDetails.name }} - version: {{ contractDetails.contractType }} - balance: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
+            {{ contractDetails.name }} - {{ $t('exoplatform.wallet.label.version') }}: {{ contractDetails.contractType }} - {{ $t('exoplatform.wallet.label.balance') }}: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
           </h3>
           <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
-            <b>{{ contractDetails && contractDetails.name }}</b> sell price: {{ contractDetails && contractDetails.sellPrice }} eth
+            <b>{{ contractDetails && contractDetails.name }}</b> {{ $t('exoplatform.wallet.label.sellPrice') }}: {{ contractDetails && contractDetails.sellPrice }} ether
           </h4>
           <h4 class="grey--text font-weight-light no-wrap">
-            Owner: <wallet-address :value="contractDetails.owner" display-label />
+            {{ $t('exoplatform.wallet.label.owner') }}: <wallet-address :value="contractDetails.owner" display-label />
           </h4>
         </v-flex>
 
@@ -38,47 +38,47 @@
             ref="addAdminModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.addAdmin')"
+            :autocomplete-label="$t('exoplatform.wallet.label.account')"
+            :autocomplete-placeholder="$t('exoplatform.wallet.label.addAdminPlaceHolder')"
+            :input-label="$t('exoplatform.wallet.label.habilitationLevel')"
+            :input-placeholder="$t('exoplatform.wallet.label.habilitationLevelPlaceHolder')"
             method-name="addAdmin"
-            title="Add administrator"
-            autocomplete-label="Administrator account"
-            autocomplete-placeholder="Choose an administrator account to add"
-            input-label="Habilitation level"
-            input-placeholder="Choose a value between 1 and 5"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError">
             <div class="alert alert-info">
-              <i class="uiIconInfo"></i>Habilitation levels:
+              <i class="uiIconInfo"></i>{{ $t('exoplatform.wallet.label.habilitationLevels') }}:
               <ul>
                 <li>
                   <strong>
-                    Level 1
-                  </strong>: send rewards of wallets
+                    {{ $t('exoplatform.wallet.label.level') }} 1
+                  </strong>: {{ $t('exoplatform.wallet.message.level1Habilitation') }}
                 </li>
                 <li>
                   <strong>
-                    Level 2
-                  </strong>: send initial funds for wallets
+                    {{ $t('exoplatform.wallet.label.level') }} 2
+                  </strong>: {{ $t('exoplatform.wallet.message.level2Habilitation') }}
                 </li>
                 <li>
                   <strong>
-                    Level 3
-                  </strong>: increase vesting amount for wallets
+                    {{ $t('exoplatform.wallet.label.level') }} 3
+                  </strong>: {{ $t('exoplatform.wallet.message.level3Habilitation') }}
                 </li>
                 <li>
                   <strong>
-                    Level 4
-                  </strong>: approve/disapprove wallets 
+                    {{ $t('exoplatform.wallet.label.level') }} 4
+                  </strong>: {{ $t('exoplatform.wallet.message.level4Habilitation') }}
                 </li>
                 <li>
                   <strong>
-                    Level 5
-                  </strong>: set sell price, manage administrators, pause/unpause contract and send ether to contract.
+                    {{ $t('exoplatform.wallet.label.level') }} 5
+                  </strong>: {{ $t('exoplatform.wallet.message.level5Habilitation') }}
                 </li>
                 <li>
                   <strong>
-                    Owner
-                  </strong>: Transfer ownership and upgrade contract.
+                    {{ $t('exoplatform.wallet.label.owner') }}
+                  </strong>: {{ $t('exoplatform.wallet.message.ownerHabilitation') }}
                 </li>
               </ul>
             </div>
@@ -88,10 +88,10 @@
             ref="removeAdminModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.removeAdmin')"
+            :autocomplete-label="$t('exoplatform.wallet.label.account')"
+            :autocomplete-placeholder="$t('exoplatform.wallet.label.removeAdminPlaceHolder')"
             method-name="removeAdmin"
-            title="Remove administrator"
-            autocomplete-label="Administrator account"
-            autocomplete-placeholder="Choose an administrator account to remove"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -102,10 +102,10 @@
             ref="approveAccountModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.approveAccount')"
+            :autocomplete-label="$t('exoplatform.wallet.label.account')"
+            :autocomplete-placeholder="$t('exoplatform.wallet.label.approveAccountPlaceHolder')"
             method-name="approveAccount"
-            title="Approve account"
-            autocomplete-label="Account"
-            autocomplete-placeholder="Choose a user or space to approve"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -114,10 +114,10 @@
             ref="disapproveAccountModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.disapproveAccount')"
+            :autocomplete-label="$t('exoplatform.wallet.label.account')"
+            :autocomplete-placeholder="$t('exoplatform.wallet.label.disapproveAccountPlaceHolder')"
             method-name="disapproveAccount"
-            title="Disapprove account"
-            autocomplete-label="Account"
-            autocomplete-placeholder="Choose a user or space to disapprove"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -128,8 +128,8 @@
             ref="pauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.pauseContract')"
             method-name="pause"
-            title="Pause contract"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -138,8 +138,8 @@
             ref="unPauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.unPauseContract')"
             method-name="unPause"
-            title="Unpause contract"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -150,10 +150,10 @@
             ref="setSellPriceModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.setSellPrice')"
+            :input-label="$t('exoplatform.wallet.label.sellPriceOfToken', {0: `${contractDetails && contractDetails.name}`})"
+            :input-placeholder="$t('exoplatform.wallet.label.sellPriceOfTokenInEther', {0: `${contractDetails && contractDetails.name}`})"
             method-name="setSellPrice"
-            title="Set sell price"
-            :input-label="`${contractDetails && contractDetails.name} sell price`"
-            :input-placeholder="`${contractDetails && contractDetails.name} sell price in ether`"
             convert-wei
             @sent="newTransactionPending"
             @success="successTransaction"
@@ -164,10 +164,10 @@
             ref="transferOwnership"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
+            :title="$t('exoplatform.wallet.button.transferOwnership')"
+            :autocomplete-label="$t('exoplatform.wallet.label.newTokenOwner')"
+            :autocomplete-placeholder="$t('exoplatform.wallet.label.newTokenOwnerPlaceHolder')"
             method-name="transferOwnership"
-            title="Transfer ownership"
-            autocomplete-label="New owner"
-            autocomplete-placeholder="Choose a new owner of the contract"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -191,19 +191,19 @@
         v-if="adminLevel >= 4"
         key="transactions"
         href="#transactions">
-        Transactions{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
+        {{ $t('exoplatform.wallet.title.transactions') }}{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
       </v-tab>
       <v-tab
         v-if="contractDetails.contractType > 0 && adminLevel >= 4"
         key="approvedAccounts"
         href="#approvedAccounts">
-        Approved accounts
+        {{ $t('exoplatform.wallet.title.approvedAccounts') }}
       </v-tab>
       <v-tab
         v-if="contractDetails.contractType > 0 && adminLevel >= 5"
         key="adminAccounts"
         href="#adminAccounts">
-        Admin accounts
+        {{ $t('exoplatform.wallet.title.adminAccounts') }}
       </v-tab>
     </v-tabs>
     <v-tabs-items v-model="selectedTab">
@@ -230,7 +230,7 @@
             color="primary"
             flat
             @click="loadApprovedWalletsFromContract">
-            Load all from contract
+            {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
           </v-btn>
         </v-flex>
         <v-data-table
@@ -262,7 +262,7 @@
               </td>
               <td v-if="$refs.disapproveAccountModal">
                 <span v-if="props.item.accountAdminLevel && props.item.accountAdminLevel[contractDetails.address] != 'not admin' && props.item.accountAdminLevel[contractDetails.address] >= 1">
-                  Admin level: {{ props.item.accountAdminLevel[contractDetails.address] }}
+                  {{ $t('exoplatform.wallet.label.adminLevel') }}: {{ props.item.accountAdminLevel[contractDetails.address] }}
                 </span>
                 <v-btn
                   v-else
@@ -288,7 +288,7 @@
             color="primary"
             flat
             @click="loadAdminWalletsFromContract">
-            Load all from contract
+            {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
           </v-btn>
         </v-flex>
         <v-data-table
@@ -319,7 +319,7 @@
                   :avatar="props.item.avatar" />
               </td>
               <td>
-                {{ props.item.accountAdminLevel[contractDetails.address] }} level
+                {{ $t('exoplatform.wallet.label.level') }} {{ props.item.accountAdminLevel[contractDetails.address] }}
               </td>
               <td v-if="$refs.removeAdminModal">
                 <v-btn

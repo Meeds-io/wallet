@@ -77,9 +77,9 @@
               :type="walletPasswordShow ? 'text' : 'password'"
               :disabled="loading"
               :autofocus="!inputLabel && !autocompleteLabel"
+              :label="$t('exoplatform.wallet.label.walletPassword')"
+              :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
-              label="Wallet password"
-              placeholder="Enter your wallet password"
               counter
               class="mt-3"
               autocomplete="current-passord"
@@ -93,16 +93,16 @@
               :disabled="loading"
               :class="inputLabel || 'mt-3'"
               :autofocus="!inputLabel && !autocompleteLabel && storedPassword"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceHolder')"
               type="text"
-              name="transactionLabel"
-              label="Label (Optional)"
-              placeholder="Enter label for your transaction" />
+              name="transactionLabel" />
             <v-textarea
               v-model="transactionMessage"
               :disabled="loading"
+              :label="$t('exoplatform.wallet.label.transactionMessage')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceHolder')"
               name="transactionMessage"
-              label="Message (Optional)"
-              placeholder="Enter a custom message to send with your transaction"
               class="mt-4"
               rows="3"
               flat
@@ -118,13 +118,13 @@
             :loading="loading"
             class="btn btn-primary mr-1"
             @click="send">
-            Send
+            {{ $t('exoplatform.wallet.button.send') }}
           </button> <button
             :disabled="loading"
             class="btn"
             color="secondary"
             @click="dialog = false">
-            Close
+            {{ $t('exoplatform.wallet.button.close') }}
           </button>
           <v-spacer />
         </v-card-actions>
@@ -331,23 +331,23 @@ export default {
       this.warning = null;
 
       if (!this.storedPassword && (!this.walletPassword || !this.walletPassword.length)) {
-        this.error = 'Password field is mandatory';
+        this.error = this.$t('exoplatform.wallet.warning.passwordFieldMandatory');
         return;
       }
 
       if (this.autocompleteLabel && !window.localWeb3.utils.isAddress(this.autocompleteValue)) {
-        this.error = `Invalid input value for field ${this.autocompleteLabel}`;
+        this.error = this.$t('exoplatform.wallet.warning.invalidValueForField', {0: this.autocompleteLabel});
         return;
       }
 
       if (this.inputLabel && !this.inputValue) {
-        this.error = `Invalid input value for field ${this.inputLabel}`;
+        this.error = this.$t('exoplatform.wallet.warning.invalidValueForField', {0: this.inputLabel});
         return;
       }
 
       const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? this.settings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
-        this.error = 'Wrong password';
+        this.error = this.$t('exoplatform.wallet.warning.wrongPassword');
         return;
       }
 

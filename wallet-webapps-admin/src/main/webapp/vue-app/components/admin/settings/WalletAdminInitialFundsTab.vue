@@ -3,35 +3,34 @@
     class="text-xs-center pr-3 pl-3 pt-2"
     flat>
     <v-card-title>
-      The following settings manages the funds amounts to send to wallets newly created.
-      The initial ether amount is preconfigured to allow users to use their wallets using {{ contractDetails && contractDetails.name }}.
+      {{ $t('exoplatform.wallet.info.initialFundsIntroduction', {0: contractDetails && contractDetails.name}) }}
     </v-card-title>
     <v-card-text>
       <v-text-field
         v-model="etherAmountLabel"
+        :title="$t('exoplatform.wallet.message.etherInitialFunds')"
+        :label="$t('exoplatform.wallet.label.etherInitialFunds')"
+        :placeholder="$t('exoplatform.wallet.label.etherInitialFundsPlaceholder')"
         name="etherAmount"
-        label="Ether initial fund"
         required
         readonly
-        placeholder="Select an amount of tokens to send"
-        title="Minimum ether amount to send to wallets to enable it"
         @input="$emit('amount-selected', amount)" />
 
       <v-text-field
         v-model.number="tokenAmount"
-        :label="`${contractDetails && contractDetails.name} initial fund`"
+        :label="$t('exoplatform.wallet.label.tokenInitialFunds', {0: contractDetails && contractDetails.name})"
+        :placeholder="$t('exoplatform.wallet.label.tokenInitialFundsPlaceholder')"
         :disabled="loading"
         name="tokenAmount"
         required
-        placeholder="Select an amount of tokens to send"
         @input="$emit('amount-selected', amount)" />
 
       <v-textarea
         id="requestMessage"
         v-model="requestMessage"
+        :label="$t('exoplatform.wallet.label.initialFundsMessageInputPlaceholder')"
+        :placeholder="$t('exoplatform.wallet.label.initialFundsMessageInputPlaceholder')"
         name="requestMessage"
-        label="Initial funds default message"
-        placeholder="You can enter a default message to send with initial funds"
         class="mt-4 mb-0"
         rows="7"
         flat
@@ -40,7 +39,7 @@
     <v-card-actions>
       <v-spacer />
       <button class="btn btn-primary mb-3" @click="save">
-        Save
+        {{ $t('exoplatform.wallet.button.save') }}
       </button>
       <v-spacer />
     </v-card-actions>
@@ -116,14 +115,14 @@ export default {
           if (resp && resp.ok) {
             return resp.text();
           } else {
-            throw new Error('Error saving global settings');
+            throw new Error('Error saving settings');
           }
         })
         .then(() => this.$emit('saved', initialFunds))
         .catch((e) => {
           this.loading = false;
           console.debug('fetch settings - error', e);
-          this.error = 'Error saving global settings';
+          this.error = this.$t('exoplatform.wallet.warning.errorSavingSettings');
         });
     },
   },
