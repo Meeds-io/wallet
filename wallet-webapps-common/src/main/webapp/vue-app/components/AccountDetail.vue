@@ -11,7 +11,7 @@
               {{ contractDetails.icon }}
             </v-icon>
             <span v-if="wallet">
-              Wallet transactions of:
+              {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
               <profile-chip
                 ref="profileChip"
                 :profile-technical-id="wallet.technicalId"

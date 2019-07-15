@@ -1,15 +1,21 @@
 package org.exoplatform.addon.wallet.test.service;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getIdentityById;
 import static org.junit.Assert.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.services.listener.ListenerService;
+import org.exoplatform.services.security.*;
+import org.exoplatform.social.core.identity.model.Identity;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
 
@@ -51,8 +57,38 @@ public class WalletAccountServiceTest extends BaseWalletTest {
    */
   @Test
   public void testSaveWalletAddress() throws IllegalAccessException {
-    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    WalletAccountService walletAccountService = getService(WalletAccountService.class); 
+    try {
+      Wallet walletTest = new Wallet();
+      walletTest.setTechnicalId(IDENTITY_ID);
+      walletTest.setAddress("");
+      walletTest.setPassPhrase(PHRASE);
+      walletTest.setEnabled(IS_ENABLED);
+      walletTest.setInitializationState(INITIALIZATION_STATE);
+      walletAccountService.saveWalletAddress(walletTest, CURRENT_USER, true);
+      entitiesToClean.add(walletTest);
+    } catch (Exception e) {   
+   // Expected, wallet address is mandatory
+    }
+      
     Wallet wallet = newWallet();
+    try {
+      walletAccountService.saveWalletAddress(null, CURRENT_USER, true);
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null
+    }
+    
+    try {
+      Wallet walletTest = new Wallet();
+      walletTest.setTechnicalId(IDENTITY_ID);
+      walletTest.setAddress("walletUser");
+      walletTest.setPassPhrase(PHRASE);
+      walletTest.setEnabled(IS_ENABLED);
+      walletTest.setInitializationState(INITIALIZATION_STATE);
+      walletAccountService.saveWalletAddress(walletTest, CURRENT_USER, true);
+      entitiesToClean.add(walletTest);
+    } catch (Exception e) {   
+    }
 
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
     String addressTest = walletAccountService.getWalletByAddress(ADDRESS).getAddress();
@@ -70,7 +106,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     walletAccountService.saveWallet(wallet);
     long walletCount = walletAccountService.getWalletsCount();
-    assertEquals("Returned wallets count shouldn't be 0", 1, walletCount);
+    assertEquals("Returned wallets count should be 1", 1, walletCount);
     entitiesToClean.add(wallet);
   }
 
@@ -83,6 +119,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     Wallet wallet = newWallet();
 
     walletAccountService.saveWallet(wallet);
+    try {
+      String address =null;
+      walletAccountService.getWalletByAddress(address);
+    } catch (Exception e) {   
+   // Expected, address shouldn't be null
+    }
+    
     Wallet walletTest = walletAccountService.getWalletByAddress(ADDRESS);
     assertNotNull("Shouldn't find wallet with not recognized address", walletTest);
     entitiesToClean.add(wallet);
@@ -105,14 +148,28 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
   /**
    * Test get wallet by type and Id
+   * @throws IllegalAccessException 
    */
   @Test
-  public void testGetWalletByTypeAndId() {
+  public void testGetWalletByTypeAndId() throws IllegalAccessException {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
-
+    try {
+      String remoteId ="";
+      Wallet walletTest = walletAccountService.getWalletByTypeAndId(WalletType.USER.name(), remoteId);
+      assertNull( walletTest);
+    } catch (Exception e) {   
+   // Expected, remoteId is mandatory 
+    }
+    
+    try {
+      String remoteId ="test";
+      walletAccountService.getWalletByTypeAndId(WalletType.USER.name(), remoteId);
+    } catch (Exception e) {
+   // Expected, Can't find identity with remoteId = -1
+    }
+    
     walletAccountService.saveWallet(wallet);
-
     Wallet walletTest = walletAccountService.getWalletByTypeAndId(WalletType.USER.name(), CURRENT_USER);
     assertNotNull("Shouldn't find wallet with not recognized type and id", walletTest);
     entitiesToClean.add(wallet);
@@ -128,6 +185,11 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     walletAccountService.saveWallet(wallet);
 
+    try {
+      walletAccountService.isWalletOwner(null, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null
+    }
     wallet = walletAccountService.getWalletByIdentityId(wallet.getTechnicalId());
 
     Boolean testOwner = walletAccountService.isWalletOwner(wallet, CURRENT_USER);
@@ -144,10 +206,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   public void testSavePrivateKeyByTypeAndIdAndContent() throws IllegalAccessException {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
-
-    String content = "Save private key";
-
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    try {
+      walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), "root0", "content", "root0");
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null or TechnicalId < 1
+    }   
+    String content = "Save private key";
     walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
                                                    CURRENT_USER,
                                                    content,
@@ -169,12 +234,26 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
 
+    try {
+      long identityId = 0;
+      walletAccountService.getWalletByIdentityId(identityId);
+      assertNull( wallet);
+    } catch (Exception e) {   
+   // Expected, identityId is mandatory 
+    }
+    
+    try {
+      long identityId = -1;
+      walletAccountService.getWalletByIdentityId(identityId);
+    } catch (Exception e) {
+   // Expected, Can't find identity with identityId = -1
+    }
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
-
-    long technicalId = wallet.getTechnicalId();
-    wallet = walletAccountService.getWalletByIdentityId(technicalId);
-    assertNotNull("IdentityId Shouldn't be null", technicalId);
+    long identityId = wallet.getTechnicalId();
+    wallet = walletAccountService.getWalletByIdentityId(identityId);
+    assertNotNull("IdentityId Shouldn't be null", identityId);
     entitiesToClean.add(wallet);
+
   }
 
   /**
@@ -202,12 +281,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   public void testCheckCanSaveWallet() throws IllegalAccessException {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
-    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
     walletAccountService.isWalletOwner(wallet, CURRENT_USER);
-    Wallet walletTest = walletAccountService.getWalletByIdentityId(wallet.getTechnicalId());
-
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
     walletAccountService.checkCanSaveWallet(wallet, null, CURRENT_USER);
-    // assertEquals("Wallet can be saved", isNew, false);
+
+    Wallet walletTest = walletAccountService.getWalletByTypeAndId(wallet.getType(), CURRENT_USER, CURRENT_USER);
+    assertNotNull("Wallet can't be saved", walletTest);
     entitiesToClean.add(wallet);
   }
 
@@ -226,7 +306,11 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, content, CURRENT_USER);
     String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
     assertNotNull("Private key shouldn't be null", privateKey);
-
+    try {
+      walletAccountService.removePrivateKeyByTypeAndId(WalletType.USER.name(), "root0", "root0");
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null or TechnicalId < 1
+    } 
     walletAccountService.removePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
     String privateKeyTset = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
     assertNull("Private key should be null after remove", privateKeyTset);
@@ -280,14 +364,28 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   public void testGetPrivateKeyByTypeAndIdAndUser() throws IllegalAccessException {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
-
     String content = "Save private key";
 
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
     walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
                                                    CURRENT_USER,
                                                    content,
                                                    CURRENT_USER);
+    try {
+      walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), "root0", "root0");
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null or TechnicalId < 1
+    } 
+    
+    try {
+      walletAccountService.getPrivateKeyByTypeAndId(WalletType.ADMIN.name(),
+                                                    CURRENT_USER,
+                                                    CURRENT_USER);
+    } catch (Exception e) {
+   // Expected, user is not allowed to access private key of admin
+    }
+    
     String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
                                                                       CURRENT_USER,
                                                                       CURRENT_USER);
@@ -308,13 +406,278 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     String content = "Save private key";
 
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
     walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
                                                    CURRENT_USER,
                                                    content,
                                                    CURRENT_USER);
+    try {
+      walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), "root0");
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null or TechnicalId < 1
+    } 
     String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
                                                                       CURRENT_USER);
     assertNotNull("Wallet private key shouldn't be null", privateKey);
     entitiesToClean.add(wallet);
   }
+
+  /**
+   * Test remove wallet by address
+   * 
+   * @throws Exception
+   */
+  @Test
+  public void testRemoveWalletByAddress() throws Exception {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    MembershipEntry entry = new MembershipEntry("/platform/rewarding", MembershipEntry.ANY_TYPE);
+    Set<MembershipEntry> entryTest = new HashSet();
+    entryTest.add(entry);
+    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
+    identityRegistry.register(identity);
+
+    try {
+      walletAccountService.removeWalletByAddress(null, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet address is mandatory
+    }
+      
+    Wallet wallet = newWallet();
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
+    try {
+      walletAccountService.removeWalletByAddress("", CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet shouldn't be null
+    }
+    
+    try {
+      walletAccountService.removeWalletByAddress(ADDRESS, "root2");
+    } catch (Exception e) {   
+   // Expected, user is not user rewarding admin
+    }
+    walletAccountService.removeWalletByAddress(ADDRESS, CURRENT_USER);
+    Set<Wallet> wallets = walletAccountService.listWallets();
+    assertEquals("Wallet list Should be empty", wallets.size(), 0);
+  }
+
+  /**
+   * Test remove wallet by type and id
+   * 
+   * @throws Exception
+   */
+  @Test
+  public void testRemoveWalletByTypeAndId() throws Exception {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    MembershipEntry entry = new MembershipEntry("/platform/rewarding", MembershipEntry.ANY_TYPE);
+    Set<MembershipEntry> entryTest = new HashSet();
+    entryTest.add(entry);
+    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
+    identityRegistry.register(identity);
+
+    Wallet wallet = newWallet();
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
+    try {
+      walletAccountService.removeWalletByTypeAndId("", CURRENT_USER, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet type is mandatory
+    }
+    
+    try {
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "", CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet remoteId is mandatory
+    }
+       
+    try {
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "root2", "root2");
+    } catch (Exception e) {   
+   // Expected,is not user rewarding admin
+    }
+    
+    try {
+      walletAccountService.removeWalletByTypeAndId("Wallet", "User", CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, Can't find identity with type/id
+    }
+    
+    
+    try {
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "root3", CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, can't find wallet with this remoteId 
+    }
+    
+    String type = wallet.getType();
+    walletAccountService.removeWalletByTypeAndId(type, CURRENT_USER, CURRENT_USER);
+    Set<Wallet> wallets = walletAccountService.listWallets();
+    assertEquals("Wallet list Should be empty", wallets.size(), 0);
+  }
+
+  /**
+   * Test enable wallet by address
+   * 
+   * @throws Exception
+   */
+  @Test
+  public void testEnableWalletByAddress() throws Exception {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    MembershipEntry entry = new MembershipEntry("/platform/rewarding", MembershipEntry.ANY_TYPE);
+    Set<MembershipEntry> entryTest = new HashSet();
+    entryTest.add(entry);
+    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
+    identityRegistry.register(identity);
+
+    Wallet wallet = newWallet();
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    assertNotNull(wallet);
+    try {
+      walletAccountService.enableWalletByAddress(null, true, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet address is mandatory
+    }
+    
+    try {
+      walletAccountService.enableWalletByAddress("walletAdressUser", true, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, Can't find wallet associated to address 
+    }
+    
+    try {
+      walletAccountService.enableWalletByAddress(ADDRESS, true, "root2");
+    } catch (Exception e) {   
+   // Expected, user is not user rewarding admin
+    }
+    walletAccountService.enableWalletByAddress(ADDRESS, true, CURRENT_USER);
+    assertEquals("Wallet Should be enabled", wallet.isEnabled(), true);
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test set initialization status
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testSetInitializationStatus() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+
+    Wallet wallet = newWallet();
+    assertNotNull(wallet);
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+
+    try {
+      walletAccountService.setInitializationStatus(null, WalletInitializationState.NEW, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, wallet address is mandatory
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, "");
+    } catch (Exception e) {   
+   // Expected, Modifier username is mandatory
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus(ADDRESS, null, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, initializationState is mandatory
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus("walletAdressUser", WalletInitializationState.NEW, CURRENT_USER);
+    } catch (Exception e) {   
+   // Expected, Can't find wallet associated to address 
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, "root2");
+    } catch (Exception e) {   
+   // Expected, user is not user rewarding admin 
+    }
+    
+    walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, CURRENT_USER);
+    assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test set initialization status wallet
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testSetInitializationStatusWallet() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+
+    Wallet wallet = newWallet();
+    assertNotNull(wallet);
+
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    
+    try {
+      walletAccountService.setInitializationStatus(null, WalletInitializationState.NEW);
+    } catch (Exception e) {   
+   // Expected, wallet address is mandatory
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus(ADDRESS, null);
+    } catch (Exception e) {   
+   // Expected, initializationState is mandatory
+    }
+    
+    try {
+      walletAccountService.setInitializationStatus("walletAdressUser", WalletInitializationState.NEW);
+    } catch (Exception e) {   
+   // Expected, Can't find wallet associated to address 
+    }
+    
+    walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW);
+    assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
+    entitiesToClean.add(wallet);
+  }
+
+  /**
+   * Test create admin account
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testCreateAdminAccount() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER);
+    identityRegistry.register(identity);
+    WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
+    tokenAdminService.createAdminAccount("SaveAdminAccount", CURRENT_USER);
+    container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
+    // Check admin account creation
+    Mockito.verify(tokenAdminService).createAdminAccount("SaveAdminAccount", CURRENT_USER);
+  }
+
+  /**
+   * Test get admin account password
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testGetAdminAccountPassword() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    String password = walletAccountService.getAdminAccountPassword();
+    assertNotNull(password);
+  }
+
 }

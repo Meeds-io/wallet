@@ -241,9 +241,9 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
-    ZonedDateTime end = ZonedDateTime.now();
+    ZonedDateTime end = ZonedDateTime.now().plusSeconds(1);
 
-    generateTransactions(address, contractAddress, contractMethodName, 1000);
+    generateTransactions(address, contractAddress, contractMethodName, 3000);
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     double receivedAmount = walletTransactionDAO.countReceivedContractAmount(contractAddress, address, start, end);
@@ -263,9 +263,9 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
-    ZonedDateTime end = ZonedDateTime.now();
+    ZonedDateTime end = ZonedDateTime.now().plusSeconds(1);
 
-    generateTransactions(address, contractAddress, contractMethodName, 1000);
+    generateTransactions(address, contractAddress, contractMethodName, 3000);
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     double sentAmount = walletTransactionDAO.countSentContractAmount(contractAddress, address, start, end);

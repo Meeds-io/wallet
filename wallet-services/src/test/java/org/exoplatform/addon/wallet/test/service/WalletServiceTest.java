@@ -16,6 +16,7 @@
  */
 package org.exoplatform.addon.wallet.test.service;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,9 @@ import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
+import org.exoplatform.commons.api.notification.model.NotificationInfo;
+import org.exoplatform.commons.api.notification.model.PluginKey;
+import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.junit.Test;
@@ -275,6 +279,49 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Symbol are not equals", symbol, contract.getSymbol());
     assertEquals("SellPrice are not equals", sellPrice, contract.getSellPrice());
     assertEquals("ContractType are not equals", contractType, contract.getContractType());
+  }
+
+  /**
+   * Test mark fund request as sent
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testMarkFundRequestAsSent() throws IllegalAccessException {
+    WalletService walletService = getService(WalletService.class);
+    WebNotificationStorage webNotification = getService(WebNotificationStorage.class);
+
+    String title = "Notification";
+    NotificationInfo notification = new NotificationInfo().key(PluginKey.key(FUNDS_REQUEST_NOTIFICATION_ID));
+    notification.setFrom(CURRENT_USER);
+    notification.setTo(CURRENT_USER);
+    notification.setTitle(title);
+    webNotification.save(notification);
+    walletService.markFundRequestAsSent(notification.getId(), CURRENT_USER);
+    assertEquals(CURRENT_USER, notification.getFrom());
+    assertEquals("Notification title are not equals", title, notification.getTitle());
+    assertEquals(CURRENT_USER, notification.getTo());
+  }
+
+  /**
+   * Test is fund request sent
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testIsFundRequestSent() throws IllegalAccessException {
+    WalletService walletService = getService(WalletService.class);
+    WebNotificationStorage webNotification = getService(WebNotificationStorage.class);
+
+    String title = "Notification";
+    NotificationInfo notification = new NotificationInfo().key(PluginKey.key(FUNDS_REQUEST_NOTIFICATION_ID));
+    notification.setFrom(CURRENT_USER);
+    notification.setTo(CURRENT_USER);
+    notification.setTitle(title);
+    webNotification.save(notification);
+    Boolean isFundsRequestSent = walletService.isFundRequestSent(notification.getId(), CURRENT_USER);
+    assertEquals("ContractType are not equals", isFundsRequestSent, false);
+
   }
 
 }
