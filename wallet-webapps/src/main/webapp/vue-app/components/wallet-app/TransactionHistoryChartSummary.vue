@@ -16,13 +16,13 @@
           :disabled="periodicity === 'year'"
           value="year"
           flat>
-          Year
+          {{ $t('exoplatform.wallet.chart.year') }}
         </v-btn>
         <v-btn
           :disabled="periodicity === 'month'"
           value="month"
           flat>
-          Month
+          {{ $t('exoplatform.wallet.chart.month') }}
         </v-btn>
       </v-btn-toggle>
     </v-flex>
@@ -42,7 +42,6 @@ export default {
  data() {
     return {
       periodicity: 'month',
-      months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
     };
   },
   watch: {

@@ -13,7 +13,7 @@
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Security
+            {{ $t('exoplatform.wallet.title.security') }}
           </span>
       </div>
       <v-card-text v-if="loading || appLoading" class="text-xs-center pt-0">
@@ -36,13 +36,13 @@
             <v-tab
               key="security"
               href="#security">
-              Security
+              {{ $t('exoplatform.wallet.title.security') }}
             </v-tab>
             <v-tab
               v-if="selectedTab === 'keys'"
               key="keys"
               href="#keys">
-              Manage keys
+              {{ $t('exoplatform.wallet.title.manageKeys') }}
             </v-tab>
           </v-tabs>
           <v-tabs-items v-model="selectedTab">
@@ -64,8 +64,8 @@
                   <qr-code
                     ref="qrCode"
                     :to="walletAddress"
-                    title="Address QR Code"
-                    information="You can send this Wallet address or QR code to other users to send you crypto-currencies" />
+                    :title="$t('exoplatform.wallet.title.addressQRCode')"
+                    :information="$t('exoplatform.wallet.info.addressQRCode')" />
                   <div class="text-xs-center">
                     <wallet-address :value="walletAddress" :allow-edit="false" />
                   </div>
@@ -101,7 +101,7 @@
           :disabled="loading"
           class="btn"
           @click="dialog = false">
-          Close
+          {{ $t('exoplatform.wallet.button.close') }}
         </button>
         <v-spacer />
       </v-card-actions>
@@ -161,8 +161,6 @@ export default {
       hasKeyOnServerSide: false,
       browserWalletExists: false,
       backedUp: false,
-      etherAccount: {text: 'Ether', value: 'ether', disabled: false},
-      fiatAccount: {text: 'Fiat ($, €...)', value: 'fiat', disabled: false},
     };
   },
   watch: {

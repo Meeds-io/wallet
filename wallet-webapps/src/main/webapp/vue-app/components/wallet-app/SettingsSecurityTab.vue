@@ -4,18 +4,18 @@
       <div>
         <h4 class="no-wrap">
           <v-icon small class="mb-1">fa-unlock</v-icon>
-          <span>Password</span>
+          <span>{{ $t('exoplatform.wallet.label.password') }}</span>
           <v-tooltip v-if="!browserWalletExists" bottom>
             <v-icon slot="activator" color="orange">warning</v-icon>
             <span>
-              No wallet keys was found, thus you can't manage passwords.
+              {{ $t('exoplatform.wallet.warning.noPrivateKey') }}
             </span>
           </v-tooltip>
         </h4>
-        <h5>Add an extra layer of security by using a dedicated password for your wallet.</h5>
+        <h5>{{ $t('exoplatform.wallet.message.securityPasswordManagement') }}</h5>
         <reset-modal
           ref="walletResetModal"
-          button-label="Reset wallet password"
+          :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
           display-remember-me
           @reseted="$emit('settings-changed')" />
       </div>
@@ -24,17 +24,17 @@
       <div>
         <h4>
           <v-icon small>fa-key</v-icon>
-          Encryption keys
+          {{ $t('exoplatform.wallet.label.encryptionKeys') }}
         </h4>
-        <h5>Keys are used to secure your wallet transactions. We can keep them safe for you on server, or you can manage them yourself.</h5>
+        <h5>{{ $t('exoplatform.wallet.message.encryptionKeysManagement') }}</h5>
         <button class="btn" @click="$emit('manage-keys')">
           <v-icon small>fa-qrcode</v-icon>
-          Manage Keys
+          {{ $t('exoplatform.wallet.button.manageKeys') }}
         </button>
         <v-switch
           v-model="hasKeyOnServerSide"
           :disabled="!browserWalletExists"
-          label="Keep my keys safe on server"
+          :label="$t('exoplatform.wallet.button.keepMyKeysSafeOnServer')"
           @change="$refs.confirmDialog.open()" />
       </div>
     </v-card-title>
@@ -45,7 +45,7 @@
       :message="confirmMessage"
       :title="confirmTitle"
       :ok-label="confirmOkLabel"
-      cancel-label="Cancel"
+      :cancel-label="$t('exoplatform.wallet.button.cancel')"
       @ok="saveKeysOnServer"
       @closed="init" />
   </v-card>
@@ -77,13 +77,13 @@ export default {
   },
   computed: {
     confirmMessage() {
-      return this.hasKeyOnServerSide ? 'Would you like to store private keys on server?' : 'Would you like to delete stored keys from server ?'
+      return this.hasKeyOnServerSide ? this.$t('exoplatform.wallet.message.storePrivateKeyOnServer') : this.$t('exoplatform.wallet.message.deletePrivateKeyFromServer');
     },
     confirmTitle() {
-      return this.hasKeyOnServerSide ? 'Save keys on server?' : 'Remove keys from server?'
+      return this.hasKeyOnServerSide ? this.$t('exoplatform.wallet.label.storePrivateKeyOnServer') : this.$t('exoplatform.wallet.label.deletePrivateKeyFromServer');
     },
     confirmOkLabel() {
-      return this.hasKeyOnServerSide ? 'Save' : 'Delete'
+      return this.hasKeyOnServerSide ? this.$t('exoplatform.wallet.button.save') : this.$t('exoplatform.wallet.button.delete');
     },
   },
   methods: {

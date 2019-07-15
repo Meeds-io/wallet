@@ -23,6 +23,7 @@
         "localWeb3": true,
         "Vue": true,
         "Vuetify": true,
+        "exoi18n": true,
         "EthereumQRPlugin": true,
         "isMaximized": true,
         "abiDecoder": true,
