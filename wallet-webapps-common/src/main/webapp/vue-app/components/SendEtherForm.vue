@@ -13,9 +13,9 @@
         <address-auto-complete
           ref="autocomplete"
           :disabled="loading || disabledRecipient"
-          input-label="Recipient"
-          input-placeholder="Select a user, a space or an address to send to"
-          title="Select a user, a space or an address to send to"
+          :input-label="$t('exoplatform.wallet.label.recipient')"
+          :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
+          :title="$t('exoplatform.wallet.label.recipientPlaceholder')"
           autofocus
           required
           ignore-current-user
@@ -28,9 +28,9 @@
           ref="amountInput"
           v-model.number="amount"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.etherAmount')"
+          :placeholder="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
           name="amount"
-          label="Amount"
-          placeholder="Select an amount of ethers to send"
           required
           class="mt-3"
           @input="$emit('amount-selected', amount)" />
@@ -42,9 +42,9 @@
           :type="walletPasswordShow ? 'text' : 'password'"
           :disabled="loading"
           :rules="mandatoryRule"
+          :label="$t('exoplatform.wallet.label.walletPassword')"
+          :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
           name="walletPassword"
-          label="Wallet password"
-          placeholder="Enter your wallet password"
           counter
           required
           autocomplete="current-passord"
@@ -54,16 +54,16 @@
         <v-text-field
           v-model="transactionLabel"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.transactionLabel')"
+          :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
           type="text"
-          name="transactionLabel"
-          label="Label (Optional)"
-          placeholder="Enter label for your transaction" />
+          name="transactionLabel" />
         <v-textarea
           v-model="transactionMessage"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.transactionMessage')"
+          :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
           name="etherTransactionMessage"
-          label="Message (Optional)"
-          placeholder="Enter a custom message to send to the receiver with your transaction"
           class="mt-4"
           rows="3"
           flat
@@ -75,8 +75,8 @@
         :to="recipient"
         :amount="amount"
         :open="showQRCodeModal"
-        title="Send Ether QR Code"
-        information="You can scan this QR code by using a different application that supports QR code transaction generation to send ethers"
+        :title="$t('exoplatform.wallet.title.sendEtherQRCode')"
+        :information="$t('exoplatform.wallet.message.sendEtherQRCodeMessage')"
         @close="showQRCodeModal = false" />
     </v-card-text>
     <v-card-actions>
@@ -86,13 +86,13 @@
         :loading="loading"
         class="btn btn-primary mr-1"
         @click="sendEther">
-        Send
+        {{ $t('exoplatform.wallet.button.send') }}
       </button> <button
         :disabled="disabled"
         class="btn"
         color="secondary"
         @click="showQRCodeModal = true">
-        QRCode
+        {{ $t('exoplatform.wallet.button.qrCode') }}
       </button>
       <v-spacer />
     </v-card-actions>
@@ -159,7 +159,7 @@ export default {
       amount: null,
       gasPrice: 0,
       error: null,
-      mandatoryRule: [(v) => !!v || 'Field is required'],
+      mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
     };
   },
   computed: {
@@ -170,7 +170,7 @@ export default {
   watch: {
     amount() {
       if (this.amount && $.isNumeric(this.amount)) {
-        this.error = this.balance >= this.amount ? null : 'Unsufficient funds';
+        this.error = this.balance >= this.amount ? null : this.$t('exoplatform.wallet.warning.unsufficientFunds');
       } else {
         this.error = null;
       }
@@ -212,29 +212,29 @@ export default {
         return;
       }
       if (!window.localWeb3.utils.isAddress(this.recipient)) {
-        this.error = 'Invalid recipient address';
+        this.error = this.$t('exoplatform.wallet.warning.invalidReciepientAddress');
         return;
       }
 
       if (!this.amount || isNaN(parseInt(this.amount)) || !isFinite(this.amount) || this.amount <= 0) {
-        this.error = 'Invalid amount';
+        this.error = this.$t('exoplatform.wallet.warning.invalidAmount');
         return;
       }
 
       if (!this.storedPassword && (!this.walletPassword || !this.walletPassword.length)) {
-        this.error = 'Password field is mandatory';
+        this.error = this.$t('exoplatform.wallet.warning.requiredPassword');
         return;
       }
 
       const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
       if (this.amount >= this.balance) {
-        this.error = 'Unsufficient funds';
+        this.error = this.$t('exoplatform.wallet.warning.unsufficientFunds');
         return;
       }
 
       const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
-        this.error = 'Wrong password';
+        this.error = this.$t('exoplatform.wallet.warning.wrongPassword');
         return;
       }
 

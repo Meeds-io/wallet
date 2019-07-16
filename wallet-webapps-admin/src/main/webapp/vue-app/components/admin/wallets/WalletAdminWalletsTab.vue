@@ -99,7 +99,7 @@
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
               <template v-if="!loadingWallets">
-                <template v-if="props.item.deletedUser">{{ $t('exoplatform.wallet.label.deletedUser') }}</template>
+                <template v-if="props.item.deletedUser">{{ $t('exoplatform.wallet.label.deletedIdentity') }}</template>
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>

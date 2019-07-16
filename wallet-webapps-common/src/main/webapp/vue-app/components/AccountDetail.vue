@@ -34,10 +34,10 @@
           </h4>
           <h3 v-else class="font-weight-light">
             <template v-if="selectedContractMethodName === 'reward'">
-              Reward balance: {{ rewardBalance }}
+              {{ $t('exoplatform.wallet.label.rewardBalance') }}: {{ rewardBalance }}
             </template>
             <template v-else>
-              Balance: {{ balance }}
+              {{ $t('exoplatform.wallet.label.balance') }}: {{ balance }}
             </template>
           </h3>
         </v-flex>

@@ -29,9 +29,7 @@
             {{ noDataLabel }}
           </v-list-tile-title>
           <v-list-tile-title v-else>
-            Search for a <strong>
-              Wallet
-            </strong> of space or user
+            {{ $t('exoplatform.wallet.label.searchForWallet') }}
           </v-list-tile-title>
         </v-list-tile>
       </template>
@@ -40,7 +38,7 @@
         <v-chip
           v-if="item.avatar"
           :selected="selected"
-          :title="addressLoad === 'error' ? `the recipient is disabled or has't a valid wallet yet` : ''"
+          :title="addressLoad === 'error' ? $t('exoplatform.wallet.warning.walletRecipientIsInvalid') : ''"
           class="autocompleteSelectedItem"
           @input="selectItem(item)">
           <v-progress-circular
@@ -50,7 +48,7 @@
             class="mr-2" />
           <v-icon
             v-else-if="item.enabled === false || item.deletedUser || item.disabledUser"
-            :title="(item.disabledUser && 'Disabled user') || (item.deletedUser && 'Deleted space') || (item.enabled === false && 'Wallet is disabled')"
+            :title="(item.disabledUser && $t('exoplatform.wallet.label.disabledUser')) || (item.deletedUser && $t('exoplatform.wallet.label.deletedIdentity')) || (item.enabled === false && $t('exoplatform.wallet.label.disabledWallet'))"
             class="mr-2"
             color="orange"
             size="15">
@@ -58,7 +56,7 @@
           </v-icon>
           <v-icon
             v-else-if="addressLoad === 'error'"
-            title="Invalid address"
+            :title="$t('exoplatform.wallet.warning.invalidAddress')"
             class="mr-2"
             color="red"
             size="15">

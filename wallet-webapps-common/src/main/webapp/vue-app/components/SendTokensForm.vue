@@ -17,8 +17,8 @@
         <address-auto-complete
           ref="autocomplete"
           :disabled="loading"
-          input-label="Recipient"
-          input-placeholder="Select a user, a space or an address to send to"
+          :input-label="$t('exoplatform.wallet.label.recipient')"
+          :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
           autofocus
           required
           ignore-current-user
@@ -30,10 +30,10 @@
         <v-text-field
           v-model.number="amount"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.amount')"
+          :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
           name="amount"
-          label="Amount"
           required
-          placeholder="Select an amount to send"
           class="mt-3"
           @input="$emit('amount-selected', amount)" />
 
@@ -44,9 +44,9 @@
           :type="walletPasswordShow ? 'text' : 'password'"
           :disabled="loading"
           :rules="mandatoryRule"
+          :label="$t('exoplatform.wallet.label.walletPassword')"
+          :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
           name="walletPassword"
-          label="Wallet password"
-          placeholder="Enter your wallet password"
           counter
           required
           autocomplete="current-passord"
@@ -56,16 +56,16 @@
         <v-text-field
           v-model="transactionLabel"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.transactionLabel')"
+          :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
           type="text"
-          name="transactionLabel"
-          label="Label (Optional)"
-          placeholder="Enter label for your transaction" />
+          name="transactionLabel" />
         <v-textarea
           v-model="transactionMessage"
           :disabled="loading"
+          :label="$t('exoplatform.wallet.label.transactionMessage')"
+          :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
           name="tokenTransactionMessage"
-          label="Message (Optional)"
-          placeholder="Enter a custom message to send to the receiver with your transaction"
           class="mt-4"
           rows="3"
           flat
@@ -82,9 +82,9 @@
         :args-values="[recipient, amount]"
         :open="showQRCodeModal"
         :function-payable="false"
+        :title="$t('exoplatform.wallet.title.sendTokenQRCode')"
+        :information="$t('exoplatform.wallet.message.sendTokenQRCodeMessage')"
         function-name="transfer"
-        title="Send Tokens QR Code"
-        information="You can scan this QR code by using a different application that supports QR code transaction generation to send tokens"
         @close="showQRCodeModal = false" />
     </v-card-text>
     <v-card-actions>
@@ -94,13 +94,13 @@
         :loading="loading"
         class="btn btn-primary mr-1"
         @click="sendTokens">
-        Send
+        {{ $t('exoplatform.wallet.button.send') }}
       </button> <button
         :disabled="loading || !recipient || !amount || !canSendToken"
         class="btn"
         color="secondary"
         @click="showQRCodeModal = true">
-        QRCode
+        {{ $t('exoplatform.wallet.button.qrCode') }}
       </button>
       <v-spacer />
     </v-card-actions>
@@ -168,7 +168,7 @@ export default {
       warning: null,
       information: null,
       error: null,
-      mandatoryRule: [(v) => !!v || 'Field is required'],
+      mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
     };
   },
   computed: {
@@ -203,7 +203,7 @@ export default {
   watch: {
     contractDetails() {
       if (this.contractDetails && this.contractDetails.isPaused) {
-        this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
+        this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
       }
     },
     amount() {
@@ -237,10 +237,10 @@ export default {
             .then((isApproved) => {
               this.isApprovedRecipient = isApproved;
               if (this.contractDetails && this.contractDetails.isPaused) {
-                this.warning = `Contract '${this.contractDetails.name}' is paused, thus you can't send tokens`;
+                this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
                 this.canSendToken = false;
               } else if (!this.isApprovedRecipient) {
-                this.warning = `The recipient isn't approved to receive tokens`;
+                this.warning = this.$t('exoplatform.wallet.warning.recipientIsDisapproved');
                 this.canSendToken = false;
               } else {
                 this.canSendToken = true;
@@ -282,7 +282,7 @@ export default {
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(() => {
         if (this.contractDetails && this.contractDetails.isPaused) {
-          this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
+          this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
         } else {
           if (this.contractDetails && this.contractDetails.address && !this.contractDetails.hasOwnProperty('isApproved')) {
             // Load contract details in async mode for adminLevel test
@@ -324,38 +324,37 @@ export default {
         return;
       }
       if (this.contractDetails && this.contractDetails.isPaused) {
-        this.warning = `Contract '${this.contractDetails.name}' is paused, thus you will be unable to send tokens`;
+        this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
         return;
       }
 
       if (!window.localWeb3.utils.isAddress(this.recipient)) {
-        this.error = 'Invalid recipient address';
+        this.error = this.$t('exoplatform.wallet.warning.invalidReciepientAddress');
         return;
       }
 
       if (!this.amount || isNaN(parseFloat(this.amount)) || !isFinite(this.amount) || this.amount <= 0) {
-        this.error = 'Invalid amount';
+        this.error = this.$t('exoplatform.wallet.warning.invalidAmount');
         return;
       }
 
       if (!this.storedPassword && (!this.walletPassword || !this.walletPassword.length)) {
-        this.error = 'Password field is mandatory';
+        this.error = this.$t('exoplatform.wallet.warning.requiredPassword');
         return;
       }
 
       const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
       if (!unlocked) {
-        this.error = 'Wrong password';
+        this.error = this.$t('exoplatform.wallet.warning.wrongPassword');
         return;
       }
 
       if (this.contractDetails.balance < this.amount) {
-        this.error = 'Unsufficient funds';
+        this.error = this.$t('exoplatform.wallet.warning.unsufficientFunds');
         return;
       }
 
       if (!this.canSendToken) {
-        this.error = "Can't send token, please verify previous errors or contact your administrator";
         return;
       }
 
@@ -376,7 +375,7 @@ export default {
           })
           .then((estimatedGas) => {
             if (estimatedGas > window.walletSettings.network.gasLimit) {
-              this.warning = `You have set a low gas ${window.walletSettings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+              this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
               return;
             }
             const sender = this.contractDetails.contract.options.from;
@@ -435,12 +434,12 @@ export default {
               (error, receipt) => {
                 console.debug('Web3 contract.transfer method - error', error);
                 // The transaction has failed
-                this.error = `Error sending tokens: ${truncateError(error)}`;
+                this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(error)}`;
               });
           })
           .catch((e) => {
             console.debug('Web3 contract.transfer method - error', e);
-            this.error = `Error sending tokens: ${truncateError(e)}`;
+            this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
           })
           .finally(() => {
             this.loading = false;
@@ -449,7 +448,7 @@ export default {
       } catch (e) {
         console.debug('Web3 contract.transfer method - error', e);
         this.loading = false;
-        this.error = `Error sending tokens: ${truncateError(e)}`;
+        this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
       }
     },
     checkErrors() {

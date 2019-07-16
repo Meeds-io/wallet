@@ -39,7 +39,7 @@
               v-if="dialog"
               v-model="etherAmountLabel"
               :autofocus="dialog"
-              :label="$t('exoplatform.wallet.label.etherAmountPlaceHolder')"
+              :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
               :placeholder="$t('exoplatform.wallet.label.etherAmount')"
               name="etherAmount"
               disabled
@@ -50,7 +50,7 @@
               v-model="transactionLabel"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.transactionLabel')"
-              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
               type="text"
               class="mt-3" />
@@ -59,7 +59,7 @@
               v-model="transactionMessage"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.transactionMessage')"
-              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
               class="mt-4"
               rows="3"

@@ -35,7 +35,7 @@
               v-model="etherAmount"
               :autofocus="dialog"
               :disabled="loading"
-              :label="$t('exoplatform.wallet.label.etherAmountPlaceHolder')"
+              :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
               :placeholder="$t('exoplatform.wallet.label.etherAmount')"
               name="etherAmount"
               class="mt-3" />
@@ -45,7 +45,7 @@
               v-model="tokenAmount"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.tokenAmount', {0: contractDetails && contractDetails.name})"
-              :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceHolder', {0: contractDetails && contractDetails.name})"
+              :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceholder', {0: contractDetails && contractDetails.name})"
               name="tokenAmount"
               class="mt-3" />
 
@@ -54,7 +54,7 @@
               v-model="transactionLabel"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.transactionLabel')"
-              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
               type="text"
               class="mt-3" />
@@ -63,7 +63,7 @@
               v-model="transactionMessage"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.transactionMessage')"
-              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
               class="mt-4"
               rows="3"

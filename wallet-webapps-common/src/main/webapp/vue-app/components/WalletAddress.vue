@@ -27,7 +27,7 @@
     <a
       v-else
       :href="addressEtherscanLink && `${addressEtherscanLink}${value}` || '#'"
-      :title="addressEtherscanLink && 'Open on etherscan' || ''"
+      :title="addressEtherscanLink && $t('exoplatform.wallet.label.openOnEtherscan') || ''"
       :class="!allowCopy && 'mr-4'"
       target="_blank"
       class="walletAddressLabel ellipsis mr-2">
@@ -46,8 +46,8 @@
         id="walletAddressEdit"
         :key="`icon-${isEditing}`"
         :color="isEditing ? 'success' : 'info'"
+        :title="$t('exoplatform.wallet.label.editAddressLabel')"
         class="walletAddressEdit"
-        title="Edit label"
         size="16"
         @click="editOrSave">
         {{ isEditing ? 'fa-check-circle' : 'fa-pencil-alt' }}

@@ -10,25 +10,25 @@
       {{ displayName }}
     </template>
     <template v-else-if="disapproved">
-      <del class="red--text">{{ displayName }}</del> (Disapproved)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disapproved') }})
     </template>
     <template v-else-if="deletedUser">
-      <del class="red--text">{{ displayName }}</del> (Deleted)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.deletedIdentity') }})
     </template>
     <template v-else-if="disabledUser">
-      <del class="red--text">{{ displayName }}</del> (Disabled user)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disabledUser') }})
     </template>
     <template v-else-if="displayNoAddress && !address">
-      <del class="red--text">{{ displayName }}</del> (No wallet)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.noWallet') }})
     </template>
     <template v-else-if="!enabled">
-      <del class="red--text">{{ displayName }}</del> (Disabled wallet)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disabledWallet') }})
     </template>
     <template v-else-if="disabledInRewardPool">
-      {{ displayName }} <span class="red--text">(Disabled pool)</span>
+      {{ displayName }} <span class="red--text">({{ $t('exoplatform.wallet.label.disabledPool') }})</span>
     </template>
     <template v-else-if="initializationState !== 'INITIALIZED'">
-      {{ displayName }} <span class="orange--text">(Not initialized)</span>
+      {{ displayName }} <span class="orange--text">({{ $t('exoplatform.wallet.label.exoplatform.wallet.label.notInitialized') }})</span>
     </template>
     <template v-else>
       {{ displayName }}
@@ -39,7 +39,7 @@
       {{ displayName }}
     </template>
     <span v-else>
-      <del class="red--text">{{ displayName }}</del> (Disabled)
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.exoplatform.wallet.label.disabledWallet') }})
     </span>
   </code>
   <wallet-address
@@ -158,20 +158,22 @@ export default {
       id: `chip${parseInt(Math.random() * 10000)
         .toString()
         .toString()}`,
-      labels: {
-        CancelRequest: 'Cancel Request',
-        Confirm: 'Confirm',
-        Connect: 'Connect',
-        Ignore: 'Ignore',
-        RemoveConnection: 'Remove Connection',
-        StatusTitle: 'Loading...',
-        join: 'Join',
-        leave: 'Leave',
-        members: 'Members',
-      },
     };
   },
   computed: {
+    labels() {
+      return {
+        CancelRequest: this.$t('exoplatform.wallet.label.profile.CancelRequest'),
+        Confirm: this.$t('exoplatform.wallet.label.profile.Confirm'),
+        Connect: this.$t('exoplatform.wallet.label.profile.Connect'),
+        Ignore: this.$t('exoplatform.wallet.label.profile.Ignore'),
+        RemoveConnection: this.$t('exoplatform.wallet.label.profile.RemoveConnection'),
+        StatusTitle: this.$t('exoplatform.wallet.label.profile.StatusTitle'),
+        join: this.$t('exoplatform.wallet.label.profile.join'),
+        leave: this.$t('exoplatform.wallet.label.profile.leave'),
+        members: this.$t('exoplatform.wallet.label.profile.members'),
+      };
+    },
     url() {
       if (!this.profileType || this.profileType === 'user') {
         return `${eXo.env.portal.context}/${eXo.env.portal.portalName}/profile/${this.profileId}`;

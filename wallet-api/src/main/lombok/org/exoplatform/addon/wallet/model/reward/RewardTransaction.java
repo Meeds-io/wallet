@@ -54,7 +54,8 @@ public class RewardTransaction implements Serializable {
       transaction.setTokensSent(StringUtils.isBlank(tokensSentString) ? 0 : Double.parseDouble(tokensSentString));
 
       String receiverIdentityId = transactionDetailsArray.length > 4 ? transactionDetailsArray[4] : null;
-      transaction.setReceiverIdentityId(StringUtils.isBlank(receiverIdentityId) ? 0 : Long.parseLong(receiverIdentityId));
+      transaction.setReceiverIdentityId(StringUtils.isBlank(receiverIdentityId)
+          || StringUtils.equals("null", receiverIdentityId) ? 0 : Long.parseLong(receiverIdentityId));
     }
     return transaction;
   }

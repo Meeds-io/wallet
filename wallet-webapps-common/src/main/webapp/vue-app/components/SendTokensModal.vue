@@ -17,7 +17,7 @@
       <v-icon color="white" class="mr-1">
         send
       </v-icon>
-      Send
+      {{ $t('exoplatform.wallet.button.send') }}
     </v-btn>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
@@ -25,7 +25,7 @@
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Send funds
+            {{ $t('exoplatform.wallet.button.sendfunds') }}
           </span>
       </div>
       <send-tokens-form

@@ -14,7 +14,7 @@
       <v-icon>
         reply
       </v-icon>
-      Request
+      {{ $t('exoplatform.wallet.button.request') }}
     </v-btn>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
@@ -22,7 +22,7 @@
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Request funds
+            {{ $t('exoplatform.wallet.button.requestFunds') }}
           </span>
       </div> <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
@@ -38,8 +38,8 @@
             ref="autocomplete"
             :disabled="loading"
             :autofocus="dialog"
-            input-label="Recipient"
-            input-placeholder="Select a recipient for your funds request"
+            :input-label="$t('exoplatform.wallet.label.recipient')"
+            :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
             required
             ignore-current-user
             @item-selected="recipient = $event" />
@@ -48,18 +48,18 @@
             v-model.number="amount"
             :disabled="loading"
             :rules="amoutRules"
+            :label="$t('exoplatform.wallet.label.amount')"
+            :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
             name="amount"
-            label="Amount"
-            placeholder="Select a suggested amount to request funds"
             class="mt-4" />
   
           <v-textarea
             id="requestMessage"
             v-model="requestMessage"
             :disabled="loading"
+            :label="$t('exoplatform.wallet.label.requestFundsMessage')"
+            :placeholder="$t('exoplatform.wallet.label.requestFundsMessagePlaceholder')"
             name="requestMessage"
-            label="Request message (Optional)"
-            placeholder="You can enter a custom message to send with your request"
             class="mt-4"
             rows="7"
             flat
@@ -72,13 +72,13 @@
           :disabled="loading"
           class="btn btn-primary"
           @click="requestFunds">
-          Send request
+          {{ $t('exoplatform.wallet.button.sendRequest') }}
         </button>
         <button
           :disabled="loading"
           class="btn ml-2"
           @click="dialog = false">
-          Close
+          {{ $t('exoplatform.wallet.button.close') }}
         </button>
         <v-spacer />
       </v-card-actions>
@@ -117,7 +117,7 @@ export default {
       requestMessage: '',
       loading: false,
       dialog: false,
-      amoutRules: [(v) => !!v || 'Field is required', (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || 'Invalid amount'],
+      amoutRules: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField'), (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || this.$t('exoplatform.wallet.warning.invalidAmount')],
     };
   },
   watch: {
@@ -141,12 +141,12 @@ export default {
         return;
       }
       if (!this.contractDetails) {
-        this.error = 'Please select a valid account';
+        this.error = this.t('exoplatform.wallet.warning.contractIsMandatory');
         return;
       }
 
       if (!this.recipient) {
-        this.error = 'Please select a receipient to your request';
+        this.error = this.t('exoplatform.wallet.warning.invalidReciepientAddress');
         return;
       }
 
@@ -171,13 +171,13 @@ export default {
           if (resp && resp.ok) {
             this.dialog = false;
           } else {
-            this.error = 'Error requesting funds';
+            this.error = this.$t('exoplatform.wallet.error.errorRequestingFunds');
           }
           this.loading = false;
         })
         .catch((e) => {
           console.debug('requestFunds method - error', e);
-          this.error = `Error while proceeding: ${e}`;
+          this.error = `this.$t('exoplatform.wallet.error.errorProceeding'): ${e}`;
           this.loading = false;
         });
     },

@@ -94,14 +94,14 @@
               :class="inputLabel || 'mt-3'"
               :autofocus="!inputLabel && !autocompleteLabel && storedPassword"
               :label="$t('exoplatform.wallet.label.transactionLabel')"
-              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               type="text"
               name="transactionLabel" />
             <v-textarea
               v-model="transactionMessage"
               :disabled="loading"
               :label="$t('exoplatform.wallet.label.transactionMessage')"
-              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceHolder')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
               class="mt-4"
               rows="3"

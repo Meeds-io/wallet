@@ -22,7 +22,7 @@
         flat
         value="send">
         <span>
-          Send Ether
+          {{ $t('exoplatform.wallet.button.sendEther') }}
         </span>
         <v-icon>
           send
@@ -35,16 +35,17 @@
       :disabled="disabled"
       :dark="!disabled"
       class="btn btn-primary mt-1 mb-1">
-      Send Ether
+      {{ $t('exoplatform.wallet.button.sendEther') }}
     </button>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Send Ether
-          </span>
+          @click="dialog = false"></a>
+        <span class="PopupTitle popupTitle">
+          {{ $t('exoplatform.wallet.button.sendEther') }}
+        </span>
       </div>
       <send-ether-form
         ref="sendEtherForm"
