@@ -11,36 +11,38 @@
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Reward details of {{ wallet.type }}  {{ wallet.name }}
-          </span>
+          @click="dialog = false">
+        </a>
+        <span class="PopupTitle popupTitle">
+          {{ $t('exoplatform.wallet.title.rewardDetailsOfWallet', {0: wallet.wallet.name}) }}
+        </span>
       </div>
       <v-list dense>
         <v-list-tile>
-          <v-list-tile-content>Period:</v-list-tile-content>
+          <v-list-tile-content>{{ $t('exoplatform.wallet.label.period') }}:</v-list-tile-content>
           <v-list-tile-content class="align-end">{{ period }}</v-list-tile-content>
         </v-list-tile>
         <v-list-tile v-if="wallet.tokensSent">
-          <v-list-tile-content>Rewards sent:</v-list-tile-content>
+          <v-list-tile-content>{{ $t('exoplatform.wallet.label.rewardsSent') }}:</v-list-tile-content>
           <v-list-tile-content class="align-end">{{ walletUtils.toFixed(wallet.tokensSent) }} {{ symbol }}</v-list-tile-content>
         </v-list-tile>
         <v-list-tile v-if="wallet.tokensToSend">
-          <v-list-tile-content>Computed rewards to send:</v-list-tile-content>
+          <v-list-tile-content>{{ $t('exoplatform.wallet.label.computedRewardsToSend') }}:</v-list-tile-content>
           <v-list-tile-content class="align-end">{{ walletUtils.toFixed(wallet.tokensToSend) }} {{ symbol }}</v-list-tile-content>
         </v-list-tile>
         <template v-if="rewards.length">
           <v-list-tile>
-            <v-list-tile-content>Rewards computing (with current configuration):</v-list-tile-content>
+            <v-list-tile-content>{{ $t('exoplatform.wallet.label.computedRewardsDetails') }}:</v-list-tile-content>
           </v-list-tile>
           <v-divider />
           <v-list-tile v-for="reward in rewards" :key="reward.pluginId">
-            <v-list-tile-content class="pl-3">{{ reward.points }} {{ reward.pluginId }} points rewarded:</v-list-tile-content>
+            <v-list-tile-content class="pl-3">{{ $t('exoplatform.wallet.label.rewardPluginPointDetails', {0: reward.points, 1: reward.pluginId}) }}:</v-list-tile-content>
             <v-list-tile-content class="align-end">{{ walletUtils.toFixed(reward.amount) }} {{ symbol }}</v-list-tile-content>
           </v-list-tile>
         </template>
         <div v-else>
           <div class="alert alert-info">
-            <i class="uiIconInfo"></i>No rewards
+            <i class="uiIconInfo"></i>{{ $t('exoplatform.wallet.label.noRewards') }}
           </div>
         </div>
       </v-list>

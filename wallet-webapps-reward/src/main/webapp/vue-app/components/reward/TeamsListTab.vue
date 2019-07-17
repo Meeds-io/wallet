@@ -2,7 +2,7 @@
   <v-flex flat transparent>
     <v-flex v-if="duplicatedWallets && duplicatedWallets.length" class="text-xs-center">
       <div class="alert alert-warning">
-        <i class="uiIconWarning"></i> Some users are members of multiple pools, the budget computing could be wrong:
+        <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.poolMemberDuplicated') }}:
         <ul>
           <li v-for="duplicatedWallet in duplicatedWallets" :key="duplicatedWallet.id">
             <code>{{ duplicatedWallet.name }}</code>
@@ -14,8 +14,8 @@
       ref="deleteTeamConfirm"
       :loading="loading"
       :message="deletePoolMessage"
-      title="Delete pool confirmation"
-      ok-label="Delete"
+      :title="$t('exoplatform.wallet.label.deletePoolConfirmation')"
+      :ok-label="$t('exoplatform.wallet.button.delete')"
       cancel-label="Cancel"
       @ok="removeTeam(teamToDelete.id)" />
     <add-team-form
@@ -30,7 +30,7 @@
       id="addTeamButton"
       class="text-xs-left ml-3">
       <v-btn
-        title="Add a new pool"
+        :title="$t('exoplatform.wallet.button.addNewPool')"
         color="primary"
         class="btn btn-primary"
         icon
@@ -42,10 +42,10 @@
       </v-btn>
     </div>
     <h4 v-show="!selectedTeam" class="text-xs-center">
-      <span>Eligible pools users: <strong>{{ eligiblePoolsUsersCount }}</strong></span>
+      <span>{{ $t('exoplatform.wallet.label.eligiblePoolsUsers') }}: <strong>{{ eligiblePoolsUsersCount }}</strong></span>
     </h4>
     <h4 v-show="!selectedTeam" class="text-xs-center">
-      <span>Total pools budget: <strong>{{ walletUtils.toFixed(poolsBudget) }} {{ symbol }}</strong></span>
+      <span>{{ $t('exoplatform.wallet.label.totalPoolsBudget') }}: <strong>{{ walletUtils.toFixed(poolsBudget) }} {{ symbol }}</strong></span>
     </h4>
     <v-container
       v-show="!selectedTeam"
@@ -87,7 +87,7 @@
                     {{ props.item.description }}
                   </h4>
                   <h4 v-else>
-                    <i>No description</i>
+                    <i>{{ $t('exoplatform.wallet.label.noDescription') }}</i>
                   </h4>
                 </v-chip>
               </v-card-title>
@@ -95,7 +95,7 @@
               <v-list dense class="pb-0">
                 <v-list-tile>
                   <v-list-tile-content>
-                    Members:
+                    {{ $t('exoplatform.wallet.label.poolMembers') }}:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
                     {{ props.item.members ? props.item.members.length : 0 }}
@@ -103,7 +103,7 @@
                 </v-list-tile>
                 <v-list-tile v-if="props.item.rewardType === 'FIXED'">
                   <v-list-tile-content>
-                    Fixed total budget:
+                    {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
                     {{ props.item.budget }} {{ symbol }}
@@ -111,6 +111,7 @@
                 </v-list-tile>
                 <v-list-tile v-if="props.item.rewardType === 'FIXED_PER_MEMBER'">
                   <v-list-tile-content>
+                    {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
                     Fixed budget per member:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
@@ -119,10 +120,10 @@
                 </v-list-tile>
                 <v-list-tile v-if="props.item.rewardType === 'COMPUTED'">
                   <v-list-tile-content>
-                    Budget:
+                    {{ $t('exoplatform.wallet.label.budget') }}:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
-                    Computed
+                    {{ $t('exoplatform.wallet.label.computed') }}:
                   </v-list-tile-content>
                 </v-list-tile>
                 <v-list-tile>
@@ -141,7 +142,7 @@
                 </v-list-tile>
                 <v-list-tile>
                   <v-list-tile-content>
-                    Eligible members:
+                    {{ $t('exoplatform.wallet.label.eligiblePoolMembers') }}:
                   </v-list-tile-content>
                   <v-list-tile-content class="align-end">
                     {{ props.item.validMembersWallets ? props.item.validMembersWallets.length : 0 }} / {{ props.item.members ? props.item.members.length : 0 }}
@@ -149,7 +150,7 @@
                 </v-list-tile>
                 <v-list-tile>
                   <v-list-tile-content>
-                    Budget:
+                    {{ $t('exoplatform.wallet.label.budget') }}:
                   </v-list-tile-content>
                   <v-list-tile-content
                     v-if="!Number(props.item.computedBudget) || !props.item.validMembersWallets || !props.item.validMembersWallets.length"
@@ -164,7 +165,7 @@
                 </v-list-tile>
                 <v-list-tile>
                   <v-list-tile-content>
-                    Budget per member:
+                    {{ $t('exoplatform.wallet.label.budgetPerMember') }}:
                   </v-list-tile-content>
                   <v-list-tile-content
                     v-if="!Number(props.item.computedBudget) || !props.item.validMembersWallets || !props.item.validMembersWallets.length"
@@ -186,28 +187,28 @@
                 flat
                 color="primary"
                 @click="selectedTeam = props.item">
-                Edit
+                {{ $t('exoplatform.wallet.button.edit') }}
               </v-btn>
               <v-btn
                 v-else
                 flat
                 color="primary"
                 @click="selectedTeam = props.item">
-                View
+                {{ $t('exoplatform.wallet.button.view') }}
               </v-btn>
               <v-btn
                 v-if="props.item.id && props.item.disabled"
                 flat
                 color="primary"
                 @click="disableTeam(props.item, false)">
-                Enable
+                {{ $t('exoplatform.wallet.button.enable') }}
               </v-btn>
               <v-btn
                 v-else-if="props.item.id"
                 flat
                 color="primary"
                 @click="disableTeam(props.item, true)">
-                Disable
+                {{ $t('exoplatform.wallet.button.disable') }}
               </v-btn>
               <v-btn
                 v-if="props.item.id"
@@ -217,7 +218,7 @@
                   teamToDelete = props.item;
                   $refs.deleteTeamConfirm.open();
                 ">
-                Delete
+                {{ $t('exoplatform.wallet.button.delete') }}
               </v-btn>
               <v-spacer />
             </v-card-actions>
@@ -309,7 +310,7 @@ export default {
         })
         .catch((e) => {
           console.debug('Error getting teams list', e);
-          this.error = 'Error getting teams list, please contact your administrator';
+          this.error = this.$t('exoplatform.wallet.error.errorRetrievingPool');
         });
     },
     disableTeam(team, disable) {
@@ -327,7 +328,7 @@ export default {
         })
         .catch((e) => {
           console.debug('Error saving pool', e);
-          this.error = 'Error saving pool, please contact your administrator.';
+          this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
         })
         .finally(() => {
           this.loading = false;
@@ -343,12 +344,12 @@ export default {
             this.teamToDelete = null;
             return this.refreshTeams(true);
           } else {
-            this.error = 'Error removing team';
+            this.error = this.$t('exoplatform.wallet.error.errorRemovingPool');
           }
         })
         .catch((e) => {
           console.debug('Error getting team with id', id, e);
-          this.error = 'Error removing team';
+          this.error = this.$t('exoplatform.wallet.error.errorRemovingPool');
         });
     },
   },

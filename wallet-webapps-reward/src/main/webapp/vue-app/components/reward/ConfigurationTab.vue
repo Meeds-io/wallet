@@ -3,7 +3,7 @@
     <v-card-text>
       <div class="text-xs-left rewardWalletConfiguration">
         <span>
-          Periodicity:
+          {{ $t('exoplatform.wallet.label.periodicity') }}:
         </span>
         <div id="selectedPeriodType" class="selectBoxVuetifyParent v-input">
           <v-combobox
@@ -39,7 +39,7 @@
                 <v-card-text class="pt-0 pb-0">
                   <div class="text-xs-left rewardWalletConfiguration">
                     <span>
-                      Minimal threshold to reward users:
+                      {{ $t('exoplatform.wallet.label.rewardThreshold') }}:
                     </span>
                     <v-text-field
                       v-model.number="pluginSetting.threshold"
@@ -51,49 +51,49 @@
                     <v-checkbox
                       v-model="pluginSetting.usePools"
                       :disabled="!configurationEditable"
-                      label="Use pools" />
+                      :label="$t('exoplatform.wallet.label.usePools')" />
                   </div>
                   <div class="text-xs-left mt-4">
                     <div>
-                      The reward budget is set:
+                      {{ $t('exoplatform.wallet.label.rewardBudgetBy') }}:
                     </div>
                     <v-flex class="ml-4">
                       <v-radio-group v-model="pluginSetting.budgetType">
                         <v-radio
                           :disabled="!configurationEditable"
-                          value="FIXED"
-                          label="By a fixed budget of" />
+                          :label="$t('exoplatform.wallet.label.rewardFixedBudget')"
+                          value="FIXED" />
                         <v-flex v-if="pluginSetting.budgetType === 'FIXED'" class="rewardWalletConfiguration mb-2">
                           <v-text-field
                             v-model.number="pluginSetting.amount"
                             :disabled="!configurationEditable"
-                            placeholder="Enter the fixed total budget"
+                            :placeholder="$t('exoplatform.wallet.label.rewardFixedBudgetPlaceholder')"
                             type="number"
                             class="pt-0 pb-0"
                             name="totalBudget" />
                         </v-flex>
                         <v-radio
                           :disabled="!configurationEditable"
-                          value="FIXED_PER_MEMBER"
-                          label="By a fixed budget per eligible member" />
+                          :label="$t('exoplatform.wallet.label.rewardFixedBudgetPlaceholder')"
+                          value="FIXED_PER_MEMBER" />
                         <v-flex v-if="pluginSetting.budgetType === 'FIXED_PER_MEMBER'" class="rewardWalletConfiguration mb-2">
                           <v-text-field
                             v-model.number="pluginSetting.amount"
                             :disabled="!configurationEditable"
-                            placeholder="Enter the fixed budget per eligible member on period"
+                            :placeholder="$t('exoplatform.wallet.label.rewardFixedBudgetPerMemberPlaceholder')"
                             type="number"
                             class="pt-0 pb-0"
                             name="budgetPerMember" />
                         </v-flex>
                         <v-radio
                           :disabled="!configurationEditable"
-                          value="FIXED_PER_POINT"
-                          label="By a fixed budget per point" />
+                          :label="$t('exoplatform.wallet.label.rewardFixedBudgetPerPoint')"
+                          value="FIXED_PER_POINT" />
                         <v-flex v-if="pluginSetting.budgetType === 'FIXED_PER_POINT'" class="rewardWalletConfiguration mb-2">
                           <v-text-field
                             v-model.number="pluginSetting.amount"
                             :disabled="!configurationEditable"
-                            placeholder="Enter the fixed budget per aquired point"
+                            :placeholder="$t('exoplatform.wallet.label.rewardFixedBudgetPerPointPlaceholder')"
                             type="number"
                             class="pt-0 pb-0"
                             name="budgetPerPoint" />
@@ -113,17 +113,17 @@
       <v-btn
         v-if="configurationEditable"
         :loading="loadingSettings"
-        class="btn btn-primary ml-2"
+        class="btn btn-primary px-2"
         dark
         @click="save">
-        Save
+        {{ $t('exoplatform.wallet.button.save') }}
       </v-btn>
       <v-btn
         v-else
         class="btn btn-primary ml-2"
         dark
         @click="configurationEditable = true">
-        Edit
+        {{ $t('exoplatform.wallet.button.edit') }}
       </v-btn>
       <v-spacer />
     </v-card-actions>
@@ -173,6 +173,8 @@ export default {
   },
   methods: {
     init() {
+      this.configurationEditable = false;
+
       if (window.walletRewardSettings) {
         this.settingsToSave = Object.assign({}, window.walletRewardSettings);
         this.$nextTick().then(() =>{
@@ -201,7 +203,7 @@ export default {
           })
           .catch((error) => {
             console.debug("Error while saving 'reward settings'", error);
-            thiss.$emit('error', "Error while saving 'reward settings'");
+            thiss.$emit('error', this.$t('exoplatform.wallet.error.errorSavingRewardSettings'));
           })
           .finally(() => {
             thiss.loadingSettings = false;
