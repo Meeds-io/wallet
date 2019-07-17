@@ -627,6 +627,9 @@ export default {
           if (initialized && wallet.initializationState !== 'INITIALIZED') {
             this.changeWalletInitializationStatus(wallet, 'INITIALIZED');
             this.$set(wallet, 'initializationState', 'INITIALIZED');
+          } else if (!initialized && wallet.initializationState === 'INITIALIZED') {
+            this.changeWalletInitializationStatus(wallet, 'MODIFIED');
+            this.$set(wallet, 'initializationState', 'MODIFIED');
           }
         });
     },
