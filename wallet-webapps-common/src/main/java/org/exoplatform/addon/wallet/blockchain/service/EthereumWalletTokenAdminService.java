@@ -2,6 +2,7 @@ package org.exoplatform.addon.wallet.blockchain.service;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -77,6 +78,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   private WalletTransactionService transactionService;
 
   private ERTTokenV2               ertInstance;
+
+  private TransactionManager       contractTransactionManager;
 
   private boolean                  isReadOnlyContract;
 
@@ -550,7 +553,17 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return response.send();
   }
 
-  private ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws InterruptedException {
+  private ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws InterruptedException,
+                                                                                               IOException {
+    if (contractTransactionManager instanceof FastRawTransactionManager) {
+      FastRawTransactionManager fastRawTransactionManager = (FastRawTransactionManager) contractTransactionManager;
+      BigInteger transactionCount = getClientConnector().getWeb3j()
+                                                        .ethGetTransactionCount(fastRawTransactionManager.getFromAddress(),
+                                                                                DefaultBlockParameterName.PENDING)
+                                                        .send()
+                                                        .getTransactionCount();
+      fastRawTransactionManager.setNonce(transactionCount.add(BigInteger.valueOf(1)));
+    }
     // Retrieve cached contract instance
     if (this.ertInstance != null) {
       if (this.isReadOnlyContract && writeOperation) {
@@ -566,7 +579,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     GlobalSettings settings = getSettings();
     ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(settings.getNetwork().getMinGasPrice()),
                                                             BigInteger.valueOf(DEFAULT_ADMIN_GAS));
-    TransactionManager contractTransactionManager = getTransactionManager(adminCredentials);
+    contractTransactionManager = getTransactionManager(adminCredentials);
     this.ertInstance = ERTTokenV2.load(contractAddress,
                                        getClientConnector().getWeb3j(),
                                        contractTransactionManager,
