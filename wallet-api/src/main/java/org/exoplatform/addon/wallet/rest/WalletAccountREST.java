@@ -218,7 +218,7 @@ public class WalletAccountREST implements ResourceContainer {
               wallet.getAddress());
     try {
       Wallet storedWallet = accountService.getWalletByTypeAndId(wallet.getType(), wallet.getId(), currentUserId);
-      if (storedWallet == null) {
+      if (storedWallet == null || StringUtils.isBlank(storedWallet.getAddress())) {
         accountService.saveWalletAddress(wallet, currentUserId, true);
         return Response.ok(wallet.getPassPhrase()).build();
       } else {
@@ -226,7 +226,7 @@ public class WalletAccountREST implements ResourceContainer {
         accountService.saveWalletAddress(storedWallet, currentUserId, true);
         return Response.ok(storedWallet.getPassPhrase()).build();
       }
-    } catch (IllegalAccessException | IllegalStateException e) {
+    } catch (IllegalAccessException e) {
       return Response.status(403).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving address: User " + currentUserId + " attempts to save address of "

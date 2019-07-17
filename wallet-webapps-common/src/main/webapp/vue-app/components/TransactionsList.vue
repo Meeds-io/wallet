@@ -4,7 +4,6 @@
       <div v-if="error && !loading" class="alert alert-error">
         <i class="uiIconError"></i>{{ error }}
       </div>
-      {{ $t('exoplatform.wallet.button.sendEther') }}
 
       <div v-if="loading" class="grey--text">
         {{ $t('exoplatform.wallet.message.loadingRecentTransactions') }}...

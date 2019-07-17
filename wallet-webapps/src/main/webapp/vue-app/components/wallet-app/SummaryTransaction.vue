@@ -57,7 +57,7 @@ export default {
   },
   computed: {
     lastTransactionSign() {
-      return (this.lastTransaction && this.lastTransaction.contractAmount && ((this.lastTransactionSent && '-') || '+')) || '-';
+      return (this.lastTransaction && this.lastTransaction.contractAmount && ((this.lastTransactionSent && '-') || '+')) || '';
     }
   },
   watch: {

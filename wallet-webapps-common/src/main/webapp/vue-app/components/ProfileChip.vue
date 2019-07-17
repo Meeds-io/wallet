@@ -2,7 +2,7 @@
   <a
     v-if="profileId"
     :id="id"
-    :title="profileId"
+    :title="address"
     :href="url"
     rel="nofollow"
     target="_blank">
