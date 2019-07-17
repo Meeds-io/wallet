@@ -528,13 +528,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     @SuppressWarnings("unchecked")
     RemoteCall<TransactionReceipt> response =
                                             (RemoteCall<TransactionReceipt>) methodToInvoke.invoke(contractInstance, arguments);
-    response.observable()
-            .doOnError(error -> LOG.error("Error while sending transaction on contract with address {}, operation: {}, arguments: {}",
-                                          contractAddress,
-                                          methodName,
-                                          arguments,
-                                          error));
-
     TransactionReceipt receipt = response.send();
     if (receipt == null) {
       throw new IllegalStateException("Transaction receipt is null");
@@ -554,12 +547,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Can't find method " + methodName + " in Token instance");
     }
     RemoteCall<?> response = (RemoteCall<?>) methodToInvoke.invoke(contractInstance, arguments);
-    response.observable()
-            .doOnError(error -> LOG.error("Error while calling method {} on contract with address {}, arguments: {}",
-                                          methodName,
-                                          contractAddress,
-                                          arguments,
-                                          error));
     return response.send();
   }
 
