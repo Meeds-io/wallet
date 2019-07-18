@@ -30,8 +30,6 @@ public class AddressLabelStorageTest extends BaseWalletTest {
 
   private long   identityId = 1L;
 
-  private String address    = "walletAddress";
-
   private String labelText  = "label";
 
   /**
@@ -61,35 +59,34 @@ public class AddressLabelStorageTest extends BaseWalletTest {
       // Expected
     }
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
-    walletAddressLabel.setAddress(address);
+    walletAddressLabel.setAddress(ADDRESS);
     walletAddressLabel.setIdentityId(identityId);
     walletAddressLabel.setLabel(labelText);
 
     walletAddressLabel = addressLabelStorage.saveLabel(walletAddressLabel);
-    checkLabelContent(walletAddressLabel, identityId, labelText, address);
+    entitiesToClean.add(walletAddressLabel);
+    checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
 
     walletAddressLabel = addressLabelStorage.getLabel(walletAddressLabel.getId());
-    checkLabelContent(walletAddressLabel, identityId, labelText, address);
-
-    this.entitiesToClean.add(walletAddressLabel);
+    checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
 
     Set<WalletAddressLabel> allLabels = addressLabelStorage.getAllLabels();
     assertNotNull("Returned labels list shouldn't be null", allLabels);
     assertEquals("Returned labels should return 1 label", 1, allLabels.size());
 
     walletAddressLabel = addressLabelStorage.getAllLabels().iterator().next();
-    checkLabelContent(walletAddressLabel, identityId, labelText, address);
+    checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
 
     labelText = "new label";
     try {
       walletAddressLabel.setLabel(labelText);
       walletAddressLabel = addressLabelStorage.saveLabel(walletAddressLabel);
-      checkLabelContent(walletAddressLabel, identityId, labelText, address);
+      checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
       allLabels = addressLabelStorage.getAllLabels();
       assertEquals("Returned labels should return 1 label", 1, allLabels.size());
 
       walletAddressLabel = addressLabelStorage.getAllLabels().iterator().next();
-      checkLabelContent(walletAddressLabel, identityId, labelText, address);
+      checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
     } finally {
       labelText = "label";
     }
@@ -103,14 +100,17 @@ public class AddressLabelStorageTest extends BaseWalletTest {
     AddressLabelStorage addressLabelStorage = getService(AddressLabelStorage.class);
 
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
-    walletAddressLabel.setAddress(address);
+    walletAddressLabel.setAddress(ADDRESS);
     walletAddressLabel.setIdentityId(identityId);
     walletAddressLabel.setLabel(labelText);
 
     walletAddressLabel = addressLabelStorage.saveLabel(walletAddressLabel);
-    checkLabelContent(walletAddressLabel, identityId, labelText, address);
+    assertNotNull(walletAddressLabel);
+    entitiesToClean.add(walletAddressLabel);
+    checkLabelContent(walletAddressLabel, identityId, labelText, ADDRESS);
 
     addressLabelStorage.removeLabel(walletAddressLabel);
+    entitiesToClean.remove(walletAddressLabel);
 
     Set<WalletAddressLabel> allLabels = addressLabelStorage.getAllLabels();
     assertNotNull("Returned labels list shouldn't be null", allLabels);

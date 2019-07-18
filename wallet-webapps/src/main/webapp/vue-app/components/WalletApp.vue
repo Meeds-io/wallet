@@ -13,10 +13,10 @@
               flat
               dense>
               <v-toolbar-title v-if="isSpace">
-                Space Wallet
+                {{ $t('exoplatform.wallet.title.spaceWallet') }}
               </v-toolbar-title>
               <v-toolbar-title v-else>
-                My Wallet
+                {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
               <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
                 <v-tooltip
@@ -29,7 +29,7 @@
                     warning
                   </v-icon>
                   <span>
-                    No enough funds to send transactions
+                    {{ $t('exoplatform.wallet.warning.noEnoughFunds') }}
                   </span>
                 </v-tooltip>
               </div>
@@ -181,7 +181,8 @@
           <v-card-title class="transparent" flat>
             <v-spacer />
             <div class="alert alert-warning">
-              <i class="uiIconWarning"></i> You don't have enough privileges to use Wallet application.
+              <i class="uiIconWarning"></i>
+              {{ $t('exoplatform.wallet.warning.noEnoughPrivileges') }}
             </div>
             <v-spacer />
           </v-card-title>
@@ -314,7 +315,7 @@ export default {
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);
-          this.error = `You can't send transaction because your wallet is disconnected`;
+          this.error = this.$t('exoplatform.wallet.warning.walletDisconnected');
         });
     });
   },
@@ -333,7 +334,7 @@ export default {
           if (!this.settings.walletEnabled) {
             this.isWalletEnabled = false;
             this.$forceUpdate();
-            throw new Error('Wallet disabled for current user');
+            throw new Error(this.$t('exoplatform.wallet.warning.walletDisconnected'));
           } else {
             this.isWalletEnabled = true;
             this.isSpaceAdministrator = this.settings.wallet.spaceAdministrator;
@@ -380,9 +381,9 @@ export default {
             this.browserWalletExists = this.settings.browserWalletExists = false;
             this.walletAddress = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
-            this.error = 'Failed to load user settings';
+            this.error = this.$t('exoplatform.wallet.warning.walletInitializationFailure');
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
-            this.error = 'Failed to connect to network';
+            this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
             this.error = error;
           }

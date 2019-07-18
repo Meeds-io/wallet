@@ -18,6 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.REWARD_CONTEXT;
 import static org.exoplatform.addon.wallet.utils.RewardUtils.REWARD_SCOPE;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.getIdentityById;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.getIdentityByTypeAndId;
 
 import java.util.Arrays;
@@ -52,13 +53,15 @@ public class WalletRewardTransactionService implements RewardTransactionService 
     String[] periodTransactionsArray = periodTransactionsString.isEmpty() ? new String[0] : periodTransactionsString.split(",");
     return Arrays.stream(periodTransactionsArray).map(transaction -> {
       RewardTransaction rewardTransaction = RewardTransaction.fromStoredValue(transaction);
-      if (rewardTransaction.getReceiverIdentityId() == 0 && StringUtils.isNotBlank(rewardTransaction.getReceiverId())
-          && StringUtils.isNotBlank(rewardTransaction.getReceiverType())) {
-        Identity receiverIdentity = getIdentityByTypeAndId(WalletType.getType(rewardTransaction.getReceiverType()),
-                                                           rewardTransaction.getReceiverId());
-        long receiverIdentityId = receiverIdentity == null ? 0 : Long.parseLong(receiverIdentity.getId());
-        rewardTransaction.setReceiverIdentityId(receiverIdentityId);
+      Identity receiverIdentity = null;
+      if (rewardTransaction.getReceiverIdentityId() > 0) {
+        receiverIdentity = getIdentityById(rewardTransaction.getReceiverIdentityId());
+      } else {
+        receiverIdentity = getIdentityByTypeAndId(WalletType.getType(rewardTransaction.getReceiverType()),
+                                                  rewardTransaction.getReceiverId());
       }
+      long receiverIdentityId = receiverIdentity == null ? 0 : Long.parseLong(receiverIdentity.getId());
+      rewardTransaction.setReceiverIdentityId(receiverIdentityId);
       return rewardTransaction;
     }).collect(Collectors.toList());
   }
@@ -77,11 +80,13 @@ public class WalletRewardTransactionService implements RewardTransactionService 
     if (rewardTransaction.getStartDateInSeconds() == 0) {
       throw new IllegalArgumentException("transaction 'period start date' parameter is mandatory");
     }
-    if (StringUtils.isBlank(rewardTransaction.getReceiverType())) {
-      throw new IllegalArgumentException("transaction ReceiverType parameter is mandatory");
-    }
-    if (StringUtils.isBlank(rewardTransaction.getReceiverId())) {
-      throw new IllegalArgumentException("transaction ReceiverId parameter is mandatory");
+    if (rewardTransaction.getReceiverIdentityId() == 0) {
+      if (StringUtils.isBlank(rewardTransaction.getReceiverType())) {
+        throw new IllegalArgumentException("transaction ReceiverType parameter is mandatory");
+      }
+      if (StringUtils.isBlank(rewardTransaction.getReceiverId())) {
+        throw new IllegalArgumentException("transaction ReceiverId parameter is mandatory");
+      }
     }
 
     String rewardPeriodTransactionsParamName = getPeriodTransactionsParamName(rewardTransaction.getPeriodType(),

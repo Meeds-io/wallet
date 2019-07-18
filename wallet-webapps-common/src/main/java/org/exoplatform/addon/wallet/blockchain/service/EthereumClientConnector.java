@@ -92,7 +92,11 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
           return;
         }
       } catch (Throwable e) {
-        LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
+        if (LOG.isDebugEnabled()) {
+          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e);
+        } else {
+          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
+        }
         return;
       }
     }, 5, 10, TimeUnit.SECONDS);

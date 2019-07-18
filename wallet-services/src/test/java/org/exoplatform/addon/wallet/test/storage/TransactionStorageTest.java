@@ -304,11 +304,11 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
-    ZonedDateTime end = ZonedDateTime.now();
+    ZonedDateTime end = ZonedDateTime.now().plusSeconds(1);
 
     // Make sure that creation time is one second after period of selected
     // period of time
-    generateTransactions(address, contractAddress, contractMethodName, 1000);
+    generateTransactions(address, contractAddress, contractMethodName, 3000);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     double receivedAmount = transactionStorage.countReceivedContractAmount(contractAddress, address, start, end);
@@ -330,11 +330,11 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     ZonedDateTime start = ZonedDateTime.now();
     generateTransactions(address, contractAddress, contractMethodName);
-    ZonedDateTime end = ZonedDateTime.now();
+    ZonedDateTime end = ZonedDateTime.now().plusSeconds(1);
 
     // Make sure that creation time is one second after period of selected
     // period of time
-    generateTransactions(address, contractAddress, contractMethodName, 1000);
+    generateTransactions(address, contractAddress, contractMethodName, 3000);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     double sentAmount = transactionStorage.countSentContractAmount(contractAddress, address, start, end);

@@ -42,7 +42,7 @@ public class AddressLabelStorage {
       entity = addressLabelDAO.update(entity);
     }
 
-    this.allLabels = null;
+    clearCache();
     return fromEntity(entity);
   }
 
@@ -53,8 +53,12 @@ public class AddressLabelStorage {
   public void removeLabel(WalletAddressLabel label) {
     if (label.getId() > 0) {
       addressLabelDAO.delete(toEntity(label));
-      this.allLabels = null;
     }
+    clearCache();
+  }
+
+  public void clearCache() {
+    this.allLabels = null;
   }
 
   private AddressLabelEntity toEntity(WalletAddressLabel label) {

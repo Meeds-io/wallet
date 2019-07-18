@@ -52,7 +52,7 @@ export default {
             labels: transactionsData.labels,
             datasets: [
               {
-                label: 'Income',
+                label: this.$t('exoplatform.wallet.chart.Income'),
                 borderColor: '#05CBE1',
                 pointBackgroundColor: 'white',
                 pointBorderColor: 'white',
@@ -60,7 +60,7 @@ export default {
                 backgroundColor: this.incomeGradient,
                 data: transactionsData.income,
               },{
-                label: 'Outcome',
+                label: this.$t('exoplatform.wallet.chart.Outcome'),
                 borderColor: '#FC2525',
                 pointBackgroundColor: 'white',
                 pointBorderColor: 'white',

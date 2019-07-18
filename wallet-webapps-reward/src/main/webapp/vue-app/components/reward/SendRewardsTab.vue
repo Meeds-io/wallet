@@ -18,7 +18,7 @@
         <v-text-field
           slot="activator"
           v-model="periodDatesDisplay"
-          label="Select the period date"
+          :label="$t('exoplatform.wallet.label.selectPeriodDate')"
           prepend-icon="event" />
         <v-date-picker
           v-model="selectedDate"
@@ -33,34 +33,34 @@
         wrap
         class="text-xs-center">
         <v-flex md4 xs12>
-          <h4>Eligible users: <strong>{{ eligibleUsersCount }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.eligibleUsers') }}: <strong>{{ eligibleUsersCount }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>Total budget: <strong>{{ walletUtils.toFixed(totalBudget) }} {{ symbol }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.totalBudget') }}: <strong>{{ walletUtils.toFixed(totalBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>Sent {{ contractDetails && contractDetails.name }}: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.sent') }} {{ contractDetails && contractDetails.name }}: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex
           v-for="totalReward in totalRewards"
           :key="totalReward.pluginId"
           md4
           xs12>
-          <h4>Total {{ totalReward.pluginId }}: <strong>{{ totalReward.total }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.total') }} {{ totalReward.pluginId }}: <strong>{{ totalReward.total }}</strong></h4>
         </v-flex>
       </v-layout>
     </v-container>
     <v-container>
       <v-layout>
         <v-flex md4 xs12>
-          <v-switch v-model="displayDisabledUsers" label="Display disabled users" />
+          <v-switch v-model="displayDisabledUsers" :label="$t('exoplatform.wallet.label.displayDisabledUsers')" />
         </v-flex>
       </v-layout>
       <v-flex>
         <v-text-field
           v-model="search"
+          :label="$t('exoplatform.wallet.label.searchRewardWalletsPlaceholder')"
           append-icon="search"
-          label="Search in name, pools, wallet address"
           single-line
           hide-details />
       </v-flex>
@@ -103,7 +103,7 @@
             <ul v-if="props.item.rewardTeams && props.item.rewardTeams.length">
               <li v-for="team in props.item.rewardTeams" :key="team.id">
                 <template v-if="team.disabled">
-                  <del class="red--text">{{ team.name }}</del> (Disabled)
+                  <del class="red--text">{{ team.name }}</del> ({{ $t('exoplatform.wallet.label.disabledPool') }})
                 </template>
                 <template v-else>
                   {{ team.name }}
@@ -118,9 +118,9 @@
             <a
               v-if="props.item.rewardTransaction && props.item.rewardTransaction.hash"
               :href="`${transactionEtherscanLink}${props.item.rewardTransaction.hash}`"
-              target="_blank"
-              title="Open in etherscan">
-              Open in etherscan
+              :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+              target="_blank">
+              {{ $t('exoplatform.wallet.label.openOnEtherscan') }}
             </a> <span v-else>
               -
             </span>
@@ -129,13 +129,13 @@
             <template v-if="!props.item.rewardTransaction || !props.item.rewardTransaction.status">
               <v-icon
                 v-if="!props.item.wallet.address"
-                color="warning"
-                title="No address">
+                :title="$t('exoplatform.wallet.label.noAddress')"
+                color="warning">
                 warning
               </v-icon>
               <v-icon
                 v-else-if="!props.item.tokensToSend"
-                :title="`No enough earned points`"
+                :title="$t('exoplatform.wallet.label.noEnoughEarnedPoints')"
                 color="warning">
                 warning
               </v-icon>
@@ -157,26 +157,26 @@
           <td class="text-xs-center">
             <span
               v-if="props.item.tokensSent"
-              class="grey--text text--darken-1"
-              title="Amount sent">
+              :title="$t('exoplatform.wallet.label.amountSent')"
+              class="grey--text text--darken-1">
               {{ walletUtils.toFixed(props.item.tokensSent) }} {{ symbol }}
             </span>
-            <span v-else-if="props.item.tokensToSend" title="Amount to send">
+            <span v-else-if="props.item.tokensToSend" :title="$t('exoplatform.wallet.label.amountToSend')">
               {{ walletUtils.toFixed(props.item.tokensToSend) }} {{ symbol }}
             </span>
             <span
               v-else
-              class="grey--text text--darken-1"
-              title="No rewards for selected period">
+              :title="$t('exoplatform.wallet.label.noRewardsForPeriod')"
+              class="grey--text text--darken-1">
               0 {{ symbol }}
             </span>
           </td>
           <td>
             <v-btn
               :disabled="!props.item.rewards || !props.item.rewards.length"
+              :title="$t('exoplatform.wallet.label.displayRewardDetails')"
               icon
               small
-              title="Display reward details"
               @click="selectedWallet = props.item">
               <v-icon :color="(props.item.rewards && props.item.rewards.length) && 'primary'" size="16">fa-info-circle</v-icon>
             </v-btn>
@@ -186,7 +186,7 @@
       <template slot="footer">
         <td :colspan="identitiesHeaders.length - 2">
           <strong>
-            Total
+            {{ $t('exoplatform.wallet.label.total') }}
           </strong>
         </td>
         <td colspan="2">
@@ -204,7 +204,7 @@
         :disabled="sendingRewardsDisabled"
         class="btn btn-primary pl-2 pr-2"
         @click="sendRewards">
-        Send rewards
+        {{ $t('exoplatform.wallet.button.sendRewards') }}
       </v-btn>
       <v-spacer />
     </v-card-actions>
@@ -307,25 +307,25 @@ export default {
           width: '36px',
         },
         {
-          text: 'Name',
+          text: this.$t('exoplatform.wallet.label.name'),
           align: 'left',
           sortable: true,
           value: 'name',
         },
         {
-          text: 'Pools',
+          text: this.$t('exoplatform.wallet.label.pools'),
           align: 'center',
           sortable: false,
           value: 'rewardTeams',
         },
         {
-          text: 'Transaction',
+          text: this.$t('exoplatform.wallet.label.transaction'),
           align: 'center',
           sortable: true,
           value: 'hash',
         },
         {
-          text: 'Status',
+          text: this.$t('exoplatform.wallet.label.status'),
           align: 'center',
           sortable: true,
           value: 'status',

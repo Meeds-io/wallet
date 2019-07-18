@@ -20,7 +20,6 @@ public class Wallet implements Serializable, Cloneable {
   private String            type;
 
   // Social Identity Id === Wallet technical id
-  @Exclude
   private long              technicalId;
 
   @Exclude

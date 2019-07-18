@@ -73,7 +73,7 @@ export default {
         );
         if (parameters && parameters.receiver && parameters.receiver_type) {
           if (this.isReadOnly || isReadOnly) {
-            throw new Error('Your wallet is in readonly state');
+            throw new Error(this.$t('exoplatform.wallet.warning.walletReadonly'));
           }
           this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
         }

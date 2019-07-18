@@ -13,8 +13,8 @@
           sm6>
           <v-text-field
             v-model="name"
-            label="Pool name *"
-            placeholder="Enter pool name"
+            :label="$t('exoplatform.wallet.label.poolName')"
+            :placeholder="$t('exoplatform.wallet.label.poolNamePlaceholder')"
             name="name"
             required
             autofocus />
@@ -26,8 +26,8 @@
           sm6>
           <v-text-field
             v-model="description"
-            label="Pool description"
-            placeholder="Enter pool description"
+            :label="$t('exoplatform.wallet.label.poolDescription')"
+            :placeholder="$t('exoplatform.wallet.label.poolDescriptionPlaceholder')"
             name="description" />
         </v-flex>
 
@@ -43,10 +43,10 @@
             :items="rewardTeamSpaceOptions"
             :loading="isLoadingSpaceSuggestions"
             :search-input.sync="rewardTeamSpaceSearchTerm"
+            :label="$t('exoplatform.wallet.label.poolSpace')"
+            :placeholder="$t('exoplatform.wallet.label.poolSpacePlaceholder')"
             attach="#rewardTeamSpaceAutoComplete"
-            label="Pool space (optional, add its members in pool and display avatar)"
             class="contactAutoComplete"
-            placeholder="Start typing to Search a space"
             content-class="contactAutoCompleteContent bigContactAutoComplete"
             max-width="100%"
             item-text="name"
@@ -60,9 +60,7 @@
             <template slot="no-data">
               <v-list-tile>
                 <v-list-tile-title>
-                  Search for a <strong>
-                    Space
-                  </strong>
+                  {{ $t('exoplatform.wallet.label.poolSpaceSearchPlaceholder') }}
                 </v-list-tile-title>
               </v-list-tile>
             </template>
@@ -103,23 +101,23 @@
         <address-auto-complete
           v-if="!viewOnly"
           ref="managerAutocomplete"
-          input-label="Pool manager"
-          input-placeholder="Select a pool manager"
-          no-data-label="Search for a user"
+          :input-label="$t('exoplatform.wallet.label.poolManager')"
+          :input-placeholder="$t('exoplatform.wallet.label.poolManagerPlaceholder')"
+          :no-data-label="$t('exoplatform.wallet.label.poolManagerSearchPlaceholder')"
           no-address
           big-field
           class="xs12 sm6"
           @item-selected="manager = $event && $event.id" />
 
         <v-flex v-if="!viewOnly" xs12>
-          <v-radio-group v-model="rewardType" label="Reward pool members">
-            <v-radio value="COMPUTED" label="By computing pool reward from total budget" />
-            <v-radio value="FIXED" label="By a total fixed budget (not retained from global budget)" />
+          <v-radio-group v-model="rewardType" :label="$t('exoplatform.wallet.label.poolMembers')">
+            <v-radio value="COMPUTED" :label="$t('exoplatform.wallet.label.rewardPoolComputedBudget')" />
+            <v-radio value="FIXED" :label="$t('exoplatform.wallet.label.rewardPoolFixedBudget')" />
             <v-flex xs12 sm6>
               <v-text-field
                 v-if="rewardType === 'FIXED'"
                 v-model="budget"
-                placeholder="Enter the pool fixed budget"
+                :placeholder="$t('exoplatform.wallet.label.rewardFixedBudgetPlaceholder')"
                 type="number"
                 class="pt-0 pb-0"
                 name="budget" />
@@ -130,11 +128,11 @@
               xs12
               sm6>
               <v-text-field
-                v-model="budgetPerMember"
-                placeholder="Enter the fixed budget per pool member"
+                v-model="budget"
+                :placeholder="$t('exoplatform.wallet.label.rewardFixedBudgetPerMemberPlaceholder')"
                 type="number"
                 class="pt-0 pb-0"
-                name="budgetPerMember" />
+                name="budget" />
             </v-flex>
           </v-radio-group>
         </v-flex>
@@ -144,9 +142,9 @@
             v-if="!viewOnly"
             ref="memberAutocomplete"
             :ignore-items="members"
-            input-label="Pool members"
-            input-placeholder="Add new member"
-            no-data-label="Search for a user"
+            :input-label="$t('exoplatform.wallet.label.poolMembers')"
+            :input-placeholder="$t('exoplatform.wallet.label.poolMemberPlaceholder')"
+            :no-data-label="$t('exoplatform.wallet.label.poolMemberSearchPlaceholder')"
             no-address
             big-field
             @item-selected="addMember($event)" />
@@ -158,7 +156,7 @@
             <template slot="no-data">
               <tr>
                 <td colspan="3" class="text-xs-center">
-                  No pool members
+                  {{ $t('exoplatform.wallet.label.noMembersInPool') }}
                 </td>
               </tr>
             </template>
@@ -167,13 +165,13 @@
             <template slot="headers" slot-scope="props">
               <tr>
                 <th colspan="2" class="text-xs-center">
-                  Name
+                  {{ $t('exoplatform.wallet.label.name') }}
                 </th>
                 <th class="text-xs-right">
                   <v-btn
                     v-if="!viewOnly"
+                    :title="$t('exoplatform.wallet.button.deleteAll')"
                     icon
-                    title="Delete all"
                     @click="members = []">
                     <v-icon>
                       delete
@@ -207,8 +205,8 @@
                 <td class="text-xs-right">
                   <v-btn
                     v-if="!viewOnly"
+                    :title="$t('exoplatform.wallet.button.delete')"
                     icon
-                    title="Delete"
                     @click="deleteMember(props.item)">
                     <v-icon>
                       delete
@@ -229,13 +227,13 @@
         class="btn btn-primary mr-1"
         dark
         @click="save">
-        Save
+        {{ $t('exoplatform.wallet.button.save') }}
       </v-btn>
       <v-btn
         class="btn"
         color="white"
         @click="$emit('close')">
-        Close
+        {{ $t('exoplatform.wallet.button.close') }}
       </v-btn>
       <v-spacer />
     </v-card-actions>
@@ -274,7 +272,6 @@ export default {
     description: '',
     rewardType: 'COMPUTED',
     budget: '',
-    budgetPerMember: '',
     computedBudget: 0,
     memberSelection: null,
     manager: null,
@@ -392,7 +389,6 @@ export default {
       this.name = (this.team && this.team.name) || '';
       this.description = (this.team && this.team.description) || '';
       this.rewardType = (this.team && this.team.rewardType) || 'COMPUTED';
-      this.budgetPerMember = (this.team && this.team.rewardPerMember) || '';
       this.budget = (this.team && this.team.budget) || '';
       this.computedBudget = (this.team && this.team.computedBudget) || '0';
       this.manager = null;
@@ -455,7 +451,7 @@ export default {
     save() {
       this.error = null;
       if (!this.name) {
-        this.error = 'Pool name is mandatory';
+        this.error = this.$t('exoplatform.wallet.warning.poolNameIsMandatory');
         return;
       }
 
@@ -465,7 +461,7 @@ export default {
           nameAlreadyExists = nameAlreadyExists || team.name.toLowerCase() === this.name.toLowerCase();
         });
         if (nameAlreadyExists) {
-          this.error = 'Pool name already exists';
+          this.error = this.$t('exoplatform.wallet.warning.poolNameAlreadyExists');
           return;
         }
       }
@@ -486,8 +482,7 @@ export default {
           name: this.name,
           description: this.description,
           rewardType: this.rewardType,
-          budget: this.budget && this.rewardType === 'FIXED' ? Number(this.budget) : 0,
-          rewardPerMember: this.budgetPerMember && this.rewardType === 'FIXED_PER_MEMBER' ? Number(this.budgetPerMember) : 0,
+          budget: (this.budget && Number(this.budget)) || 0,
           spacePrettyName: this.rewardTeamSpace,
           spaceId: this.rewardTeamSpaceId,
           members: members,
@@ -503,19 +498,19 @@ export default {
               this.$emit('saved', addedTeam);
             } else {
               console.debug('Error saving pool, response code is NOK');
-              this.error = 'Error saving pool, please contact your administrator.';
+              this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
             }
           })
           .catch((e) => {
             console.debug('Error saving pool', e);
-            this.error = 'Error saving pool, please contact your administrator.';
+            this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
           })
           .finally(() => {
             this.loading = false;
           });
       } catch (e) {
         console.debug('Error saving pool', e);
-        this.error = 'Error saving pool, please contact your administrator.';
+        this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
         this.loading = false;
       }
     },

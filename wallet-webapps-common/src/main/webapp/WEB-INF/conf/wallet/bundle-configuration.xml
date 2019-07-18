@@ -31,12 +31,12 @@
         <init-params>
           <values-param>
             <name>classpath.resources</name>
-            <value>locale.portlet.WalletPortlet</value>
+            <value>locale.addon.Wallet</value>
             <value>locale.notification.WalletNotification</value>
           </values-param>
           <values-param>
             <name>portal.resource.names</name>
-            <value>locale.portlet.WalletPortlet</value>
+            <value>locale.addon.Wallet</value>
             <value>locale.notification.WalletNotification</value>
           </values-param>
         </init-params>

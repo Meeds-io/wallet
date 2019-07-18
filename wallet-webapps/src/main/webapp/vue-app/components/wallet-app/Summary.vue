@@ -8,7 +8,7 @@
         <v-spacer />
         <div class="alert alert-info">
           <i class="uiIconInfo"></i>
-          Almost done! Your wallet will be ready to use once an administrator approves it.
+          {{ $t('exoplatform.wallet.info.pendingInitialization') }}
         </div>
         <v-spacer />
       </v-card-title>
@@ -19,9 +19,9 @@
         <v-spacer />
         <div class="alert alert-info">
           <i class="uiIconInfo"></i>
-          Wallet access is denied.
+          {{ $t('exoplatform.wallet.info.initializationAccessDenied') }}
           <button class="btn" @click="requestAccessAuthorization()">
-            Request authorization
+            {{ $t('exoplatform.wallet.button.requestAuthorization') }}
           </button>
         </div>
         <v-spacer />
@@ -35,9 +35,9 @@
         class="pb-0">
         <v-spacer />
         <v-badge
+          :title="$t('exoplatform.wallet.message.transactionInProgress')"
           color="red"
-          right
-          title="A transaction is in progress">
+          right>
           <span slot="badge">
             {{ pendingTransactionsCount }}
           </span>
@@ -167,7 +167,7 @@ export default {
         credentials: 'include',
       }).then((resp) => {
         if(!resp || !resp.ok) {
-          throw new Error('Error while requesting authorization for wallet');
+          throw new Error(this.$t('exoplatform.wallet.error.errorRequestingAuthorization'));
         }
         this.$emit('refresh');
       })

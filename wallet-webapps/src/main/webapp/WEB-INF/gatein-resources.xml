@@ -55,6 +55,15 @@
         <path>/js/walletAPI.bundle.js</path>
       </script>
       <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
         <module>jquery</module>
         <as>$</as>
       </depends>
@@ -63,7 +72,7 @@
         <as>WalletCommon</as>
       </depends>
       <depends>
-        <module>walletJQueryUI</module>
+        <module>jQueryUI</module>
       </depends>
       <depends>
         <module>fetchPolyfill</module>
@@ -73,9 +82,6 @@
       </depends>
       <depends>
         <module>iePolyfills</module>
-      </depends>
-      <depends>
-        <module>vuetify</module>
       </depends>
       <depends>
         <module>Web3</module>
@@ -105,6 +111,15 @@
         <path>/js/wallet.bundle.js</path>
       </script>
       <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
         <module>jquery</module>
         <as>$</as>
       </depends>
@@ -127,9 +142,6 @@
       <depends>
         <module>vueChart</module>
         <as>VueChart</as>
-      </depends>
-      <depends>
-        <module>vuetify</module>
       </depends>
       <depends>
         <module>Web3</module>
@@ -159,6 +171,15 @@
         <path>/js/spaceWallet.bundle.js</path>
       </script>
       <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
         <module>jquery</module>
         <as>$</as>
       </depends>
@@ -181,9 +202,6 @@
       <depends>
         <module>vueChart</module>
         <as>VueChart</as>
-      </depends>
-      <depends>
-        <module>vuetify</module>
       </depends>
       <depends>
         <module>Web3</module>

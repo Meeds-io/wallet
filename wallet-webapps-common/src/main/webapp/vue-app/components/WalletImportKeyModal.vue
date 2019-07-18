@@ -12,16 +12,17 @@
       slot="activator"
       href="javascript:void(0);"
       @click="dialog = true">
-      {{ walletAddress ? 'Restore your wallet' : 'Restore existing wallet' }}
+      {{ walletAddress ? $t('exoplatform.wallet.title.restoreWalletModal') : $t('exoplatform.wallet.title.restoreExistingWalletModal') }}
     </a>
     <v-card class="elevation-12">
       <div class="popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
-            Restore wallet
-          </span>
+          @click="dialog = false"></a>
+        <span class="PopupTitle popupTitle">
+          {{ $t('exoplatform.wallet.button.restoreWallet') }}
+        </span>
       </div>
       <v-card-text>
         <div v-if="error" class="alert alert-error v-content">
@@ -45,12 +46,14 @@
             v-if="walletAddress"
             for="walletPrivateKey"
             class="mb-3">
-            <span>Please enter the private key for the following wallet (Find your private key in Backup section):</span>
+            <span>
+              {{ $t('exoplatform.wallet.message.enterPrivateKeyMessage') }}:
+            </span>
             <br>
             <code>{{ walletAddress }}</code>
           </label>
           <label v-else for="walletPrivateKey">
-            This is the private key to import a new wallet address
+            {{ $t('exoplatform.wallet.message.importNewPrivateKeyMessage') }}:
           </label>
           <v-text-field
             v-if="dialog"
@@ -59,9 +62,9 @@
             :rules="[rules.priv]"
             :type="walletPrivateKeyShow ? 'text' : 'password'"
             :disabled="loading"
+            :label="$t('exoplatform.wallet.label.walletPrivateKey')"
+            :placeholder="$t('exoplatform.wallet.label.walletPrivateKeyPlaceholder')"
             name="walletPrivateKey"
-            label="Wallet private key"
-            placeholder="Enter your wallet private key"
             autocomplete="off"
             autofocus
             @click:append="walletPrivateKeyShow = !walletPrivateKeyShow" />
@@ -71,9 +74,9 @@
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             :disabled="loading"
-            label="Wallet password"
+            :label="$t('exoplatform.wallet.label.walletPassword')"
+            :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
             name="walletPassword"
-            placeholder="Enter your wallet password"
             counter
             autocomplete="current-passord"
             autofocus
@@ -86,12 +89,13 @@
           :disabled="loading"
           class="btn btn-primary mr-1"
           @click="importWallet">
-          Import
-        </button> <button
+          {{ $t('exoplatform.wallet.button.import') }}
+        </button>
+        <button
           :disabled="loading"
           class="btn"
           @click="dialog = false">
-          Close
+          {{ $t('exoplatform.wallet.button.close') }}
         </button>
         <v-spacer />
       </v-card-actions>
@@ -180,12 +184,12 @@ export default {
               });
           } else {
             thiss.loading = false;
-            thiss.error = `Private key doesn't match address ${thiss.walletAddress}`;
+            thiss.error = this.$t('exoplatform.wallet.error.wrongPrivateKey', {0: thiss.walletAddress});
           }
         } catch (e) {
           thiss.loading = false;
           console.debug('Error importing private key', e);
-          thiss.error = `Error saving new Wallet address`;
+          thiss.error = this.$t('exoplatform.wallet.error.errorImportingPrivateKey');
         }
       }, 200);
     },

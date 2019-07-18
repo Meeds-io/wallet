@@ -28,11 +28,17 @@
       <module>vue</module>
     </depends>
     <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
       <module>jquery</module>
       <as>$</as>
     </depends>
     <depends>
-      <module>walletJQueryUI</module>
+      <module>jQueryUI</module>
     </depends>
     <depends>
       <module>fetchPolyfill</module>
@@ -42,9 +48,6 @@
     </depends>
     <depends>
       <module>iePolyfills</module>
-    </depends>
-    <depends>
-      <module>vuetify</module>
     </depends>
     <depends>
       <module>Web3</module>
@@ -62,17 +65,6 @@
     </depends>
     <depends>
       <module>spacePopupPlugin</module>
-    </depends>
-  </module>
-
-  <module>
-    <name>vuetify</name>
-    <script>
-      <minify>false</minify>
-      <path>/js/lib/vuetify.min.js</path>
-    </script>
-    <depends>
-      <module>vue</module>
     </depends>
   </module>
 
@@ -113,46 +105,6 @@
           return Web3;
         })();
       </adapter>
-    </script>
-  </module>
-
-  <module>
-    <name>walletJQueryUI</name>
-    <as>JQueryUI</as>
-    <script>
-      <minify>false</minify>
-      <path>/js/lib/jquery-ui-1.18.12.min.js</path>
-    </script>
-    <depends>
-      <module>jquery</module>
-      <as>jQuery</as>
-    </depends>
-  </module>
-
-  <module>
-    <name>vueChart</name>
-    <as>VueChart</as>
-    <script>
-      <minify>false</minify>
-      <adapter>
-        (function() {
-          <include>/js/lib/vue-chartjs.min.js</include>
-          return VueChartJs;
-        })();
-      </adapter>
-    </script>
-    <depends>
-      <module>chart</module>
-      <as>Chart</as>
-    </depends>
-  </module>
-
-  <module>
-    <name>chart</name>
-    <as>Chart</as>
-    <script>
-      <minify>false</minify>
-      <path>/js/lib/Chart.bundle.min.js</path>
     </script>
   </module>
 

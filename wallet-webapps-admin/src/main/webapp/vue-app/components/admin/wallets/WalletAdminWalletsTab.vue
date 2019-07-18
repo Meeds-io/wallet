@@ -13,7 +13,7 @@
     </div>
     <div v-if="!loading && !useWalletAdmin" class="alert alert-warning v-content">
       <i class="uiIconWarning"></i>
-      Admin wallet isn't initialized yet, you will be able to manage wallets approval lifecycle
+      {{ $t('exoplatform.wallet.warning.adminWalletNotInitialized') }}
     </div>
     <v-container>
       <v-layout>
@@ -25,13 +25,13 @@
             multiple
             flat>
             <v-btn value="user">
-              Users
+              {{ $t('exoplatform.wallet.label.users') }}
             </v-btn>
             <v-btn value="space">
-              Spaces
+              {{ $t('exoplatform.wallet.label.spaces') }}
             </v-btn>
             <v-btn value="admin">
-              Admin
+              {{ $t('exoplatform.wallet.label.admin') }}
             </v-btn>
           </v-btn-toggle>
         </v-flex>
@@ -45,10 +45,10 @@
             multiple
             flat>
             <v-btn value="disabled">
-              Disabled
+              {{ $t('exoplatform.wallet.label.disabled') }}
             </v-btn>
             <v-btn value="disapproved">
-              Disapproved
+              {{ $t('exoplatform.wallet.label.disapproved') }}
             </v-btn>
           </v-btn-toggle>
         </v-flex>
@@ -58,8 +58,8 @@
           xs12>
           <v-text-field
             v-model="search"
+            :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
             append-icon="search"
-            label="Search in name, address"
             class="pt-0" />
         </v-flex>
       </v-layout>
@@ -99,27 +99,27 @@
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
               <template v-if="!loadingWallets">
-                <template v-if="props.item.deletedUser">Deleted user</template>
-                <template v-else-if="props.item.disabledUser">Disabled user</template>
-                <template v-else-if="!props.item.enabled">Disabled</template>
-                <template v-else-if="props.item.initializationState === 'NEW'">New</template>
-                <template v-else-if="props.item.disapproved">Disapproved</template>
+                <template v-if="props.item.deletedUser">{{ $t('exoplatform.wallet.label.deletedIdentity') }}</template>
+                <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
+                <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
+                <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
+                <template v-else-if="props.item.disapproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
                 <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
                   <v-icon color="orange">
                     warning
                   </v-icon>
-                  Low ether balance
+                  {{ $t('exoplatform.wallet.warning.lowEtherAmiount') }}
                 </template>
                 <template v-else-if="Number(props.item.tokenBalance) === 0">
                   <v-icon color="orange">
                     warning
                   </v-icon>
-                  No {{ contractDetails && contractDetails.name }}
+                  {{ $t('exoplatform.wallet.warning.lowTokenAmiount', {0: contractDetails && contractDetails.name}) }}
                 </template>
                 <v-icon
                   v-else
-                  color="green"
-                  title="OK">
+                  :title="$t('exoplatform.wallet.button.ok')"
+                  color="green">
                   fa-check-circle
                 </v-icon>
               </template>
@@ -136,8 +136,8 @@
                 size="20" />
               <span
                 v-else-if="loadingWallets && props.item.loadingTokenBalance !== false"
-                title="Loading balance...">
-                loading...
+                :title="$t('exoplatform.wallet.label.loadingBalance')">
+                {{ $t('exoplatform.wallet.label.loading') }}...
               </span>
               <template v-else-if="props.item.tokenBalance">
                 {{ walletUtils.toFixed(props.item.tokenBalance) }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
@@ -156,8 +156,8 @@
                 size="20" />
               <span
                 v-else-if="loadingWallets && props.item.loadingBalance !== false"
-                title="Loading balance...">
-                loading...
+                :title="$t('exoplatform.wallet.label.loadingBalance')">
+                {{ $t('exoplatform.wallet.label.loading') }}...
               </span>
               <template v-else>
                 {{ walletUtils.toFixed(props.item.balance) }} eth
@@ -170,32 +170,32 @@
               <template v-if="props.item.type === 'user' || props.item.type === 'space'">
                 <v-icon
                   v-if="props.item.initializationState === 'NEW'"
-                  color="primary"
-                  title="New wallet">
+                  :title="$t('exoplatform.wallet.label.newWallet')"
+                  color="primary">
                   fa-hands
                 </v-icon>
                 <v-icon
                   v-else-if="props.item.initializationState === 'MODIFIED'"
-                  color="orange"
-                  title="Modified wallet">
+                  :title="$t('exoplatform.wallet.label.modifiedWallet')"
+                  color="orange">
                   fa-hands
                 </v-icon>
                 <v-icon
                   v-else-if="props.item.initializationState === 'DENIED'"
-                  color="orange"
-                  title="Denied to access wallet">
+                  :title="$t('exoplatform.wallet.label.deniedWallet')"
+                  color="orange">
                   fa-times-circle
                 </v-icon>
                 <v-icon
                   v-else-if="props.item.initializationState === 'PENDING'"
-                  color="primary"
-                  title="Initialization in progress">
+                  :title="$t('exoplatform.wallet.label.initializationInProgressForWallet')"
+                  color="primary">
                   fa-dot-circle
                 </v-icon>
                 <v-icon
                   v-else-if="props.item.initializationState === 'INITIALIZED'"
-                  color="green"
-                  title="Initialized wallet">
+                  :title="$t('exoplatform.wallet.label.initializedWallet')"
+                  color="green">
                   fa-check-circle
                 </v-icon>
               </template>
@@ -203,7 +203,7 @@
             <td class="text-xs-center">
               <v-progress-circular
                 v-if="props.item.pendingTransaction"
-                title="A transaction is in progress"
+                :title="$t('exoplatform.wallet.message.transactionInProgress')"
                 color="primary"
                 class="mr-4"
                 indeterminate
@@ -217,32 +217,32 @@
                 </v-btn>
                 <v-list flat class="pt-0 pb-0">
                   <v-list-tile @click="refreshWallet(props.item)">
-                    <v-list-tile-title>Refresh</v-list-tile-title>
+                    <v-list-tile-title>{{ $t('exoplatform.wallet.button.refresh') }}</v-list-tile-title>
                   </v-list-tile>
                   <v-divider />
 
                   <template v-if="props.item.type === 'user' || props.item.type === 'space'">
                     <template v-if="useWalletAdmin && contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
                       <v-list-tile @click="openAcceptInitializationModal(props.item)">
-                        <v-list-tile-title>Initialize wallet</v-list-tile-title>
+                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-tile-title>
                       </v-list-tile>
                       <v-list-tile v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
-                        <v-list-tile-title>Reject wallet</v-list-tile-title>
+                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
                     </template>
                     <template v-else-if="useWalletAdmin && Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
                       <v-list-tile @click="openAcceptSendEtherModal(props.item)">
-                        <v-list-tile-title>Send ether</v-list-tile-title>
+                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
                     </template>
 
                     <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
-                      <v-list-tile-title>Disable wallet</v-list-tile-title>
+                      <v-list-tile-title>{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-tile-title>
                     </v-list-tile>
                     <v-list-tile v-else-if="!props.item.disabledUser && !props.item.deletedUser" @click="enableWallet(props.item, true)">
-                      <v-list-tile-title>Enable wallet</v-list-tile-title>
+                      <v-list-tile-title>{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-tile-title>
                     </v-list-tile>
                   </template>
                 </v-list>
@@ -258,7 +258,7 @@
         color="primary"
         flat
         @click="limit += pageSize">
-        Load More
+        {{ $t('exoplatform.wallet.button.loadMore') }}
       </v-btn>
     </v-flex>
 
@@ -378,29 +378,29 @@ export default {
           value: 'avatar',
         },
         {
-          text: 'Name',
+          text: this.$t('exoplatform.wallet.label.name'),
           align: 'left',
           sortable: true,
           value: 'name',
         },
         {
-          text: 'Wallet status',
+          text: this.$t('exoplatform.wallet.label.walletStatus'),
           align: 'center',
           sortable: true,
           value: 'walletStatus',
         },
         {
-          text: `${this.contractDetails && this.contractDetails.name} balance`,
+          text: this.$t('exoplatform.wallet.label.tokenBalance', {0: this.contractDetails && this.contractDetails.name}),
           align: 'center',
           value: 'tokenBalance',
         },
         {
-          text: 'Ether balance',
+          text: this.$t('exoplatform.wallet.label.etherBalance'),
           align: 'center',
           value: 'balance',
         },
         {
-          text: 'Initialization status',
+          text: this.$t('exoplatform.wallet.label.initializationstatus'),
           align: 'center',
           sortable: true,
           value: 'initializationState',
@@ -627,6 +627,9 @@ export default {
           if (initialized && wallet.initializationState !== 'INITIALIZED') {
             this.changeWalletInitializationStatus(wallet, 'INITIALIZED');
             this.$set(wallet, 'initializationState', 'INITIALIZED');
+          } else if (!initialized && wallet.initializationState === 'INITIALIZED') {
+            this.changeWalletInitializationStatus(wallet, 'MODIFIED');
+            this.$set(wallet, 'initializationState', 'MODIFIED');
           }
         });
     },
@@ -639,7 +642,7 @@ export default {
         .then((balanceDetails, error) => {
           if (error) {
             this.$set(wallet, 'icon', 'warning');
-            this.$set(wallet, 'error', `Error retrieving balance of wallet: ${error}`);
+            this.$set(wallet, 'error', this.$t('exoplatform.wallet.error.errorRetrievingBalanceOfWallet', {0: wallet.name, 1: String(error)}));
           } else {
             this.$set(wallet, 'balance', balanceDetails && balanceDetails.balance ? balanceDetails.balance : 0);
             this.$set(wallet, 'balanceFiat', balanceDetails && balanceDetails.balanceFiat ? balanceDetails.balanceFiat : 0);
@@ -654,7 +657,7 @@ export default {
               .call()
               .then((balance, error) => {
                 if (error) {
-                  throw new Error('Invalid contract address');
+                  throw new Error(this.$t('exoplatform.wallet.error.invalidContractAddress'));
                 }
                 balance = String(balance);
                 balance = this.walletUtils.convertTokenAmountReceived(balance, this.contractDetails.decimals);
@@ -669,7 +672,7 @@ export default {
         })
         .catch((error) => {
           this.$set(wallet, 'icon', 'warning');
-          this.$set(wallet, 'error', `Error retrieving balance of wallet: ${error}`);
+          this.$set(wallet, 'error', this.$t('exoplatform.wallet.error.errorRetrievingBalanceOfWallet', {0: wallet.name, 1: String(error)}));
           this.error = String(error);
         })
         .finally(() => {
@@ -725,7 +728,7 @@ export default {
           if(result) {
             return this.addressRegistry.refreshWallet(wallet);
           } else {
-            this.error = `An error occurred while ${enable ? 'enabling' : 'disabling'} wallet of ${wallet.name}`;
+            this.error = (enable && this.$t('exoplatform.wallet.error.errorEnablingWallet', {0: wallet.name})) || this.$t('exoplatform.wallet.error.errorDisablingWallet', {0: wallet.name});
           }
         })
         .catch(e => this.error = String(e));
@@ -747,24 +750,16 @@ export default {
     },
     openDenyInitializationModal(wallet) {
       this.walletToProcess = wallet;
-      this.informationTitle = 'Deny wallet confirmation';
-      this.informationMessage = `Would you like to <strong>deny permission</strong> to wallet of ${wallet.type} <strong>${wallet.name}</strong>?`;
+      this.informationTitle = this.$t('exoplatform.wallet.title.rejectWalletInitializationConfirmationModal');
+      this.informationMessage = this.$t('exoplatform.wallet.message.rejectWalletInitializationConfirmation', {0: wallet.type, 1: `<strong>${wallet.name}</strong>`});
       this.hideConfirmActions = false;
       this.confirmAction = 'deny';
       this.$refs.informationModal.open();
     },
-    openRemoveWalletModal(wallet) {
-      this.walletToProcess = wallet;
-      this.informationTitle = 'Delete wallet confirmation';
-      this.informationMessage = `Would you like to <strong>delete</strong> wallet of ${wallet.type} <strong>${wallet.name}</strong>?`;
-      this.hideConfirmActions = false;
-      this.confirmAction = 'remove';
-      this.$refs.informationModal.open();
-    },
     openDisableWalletModal(wallet) {
       this.walletToProcess = wallet;
-      this.informationTitle = 'Disable wallet confirmation';
-      this.informationMessage = `Would you like to <strong>disable</strong> wallet of ${wallet.type} <strong>${wallet.name}</strong>?`;
+      this.informationTitle = this.$t('exoplatform.wallet.title.disableWalletConfirmationModal');
+      this.informationMessage = this.$t('exoplatform.wallet.message.disableWalletConfirmation', {0: wallet.type, 1: `<strong>${wallet.name}</strong>`});
       this.hideConfirmActions = false;
       this.confirmAction = 'disable';
       this.$refs.informationModal.open();

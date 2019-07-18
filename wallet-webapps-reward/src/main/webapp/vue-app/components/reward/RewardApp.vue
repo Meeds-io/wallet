@@ -8,7 +8,7 @@
         <v-flex>
           <v-card class="applicationToolbar mb-3" flat>
             <v-card-text class="pt-2 pb-2">
-              <strong>Reward administration</strong>
+              <strong>{{ $t('exoplatform.wallet.title.rewardAdministration') }}</strong>
             </v-card-text>
           </v-card>
         </v-flex>
@@ -21,7 +21,7 @@
           <v-flex v-if="settingWarnings && settingWarnings.length && !loading" class=" text-xs-center">
             <div class="alert alert-warning text-xs-left">
               <i class="uiIconWarning"></i>
-              <span>Please check <a href="javascript:void(0);" @click="selectedTab = 2">rewards configuration</a></span>
+              <span><a href="javascript:void(0);" @click="selectedTab = 2">{{ $t('exoplatform.wallet.label.pleaseCheckRewardConfiguration') }}</a></span>
               <ul>
                 <li
                   v-for="warning in settingWarnings"
@@ -48,7 +48,7 @@
             width="300">
             <v-card color="primary" dark>
               <v-card-text>
-                Loading ...
+                {{ $t('exoplatform.wallet.label.loading') }} ...
                 <v-progress-linear
                   indeterminate
                   color="white"
@@ -60,13 +60,13 @@
           <v-tabs v-model="selectedTab" grow>
             <v-tabs-slider color="primary" />
             <v-tab key="SendRewards">
-              Send Rewards
+              {{ $t('exoplatform.wallet.title.sendRewardsTab') }}
             </v-tab>
             <v-tab key="RewardPools">
-              Reward pools
+              {{ $t('exoplatform.wallet.title.rewardPoolsTab') }}
             </v-tab>
             <v-tab key="Configuration">
-              Configuration
+              {{ $t('exoplatform.wallet.title.rewardConfigurationTab') }}
             </v-tab>
           </v-tabs>
       
@@ -191,16 +191,16 @@ export default {
       return this.walletUtils.initSettings()
         .then(() => {
           if (!window.walletSettings) {
-            throw new Error('Wallet settings are empty for current user');
+            throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug('Error connecting to network', error);
-            this.error = 'Error connecting to network';
+            this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
-            this.error = 'Please configure your wallet';
+            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
             throw error;
           }
         })
@@ -212,7 +212,7 @@ export default {
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
           console.debug('init method - error', e);
-          this.error = e ? String(e) : 'Error encountered';
+          this.error = e ? String(e) : this.$t('exoplatform.wallet.error.unknownError');
         })
         .finally(() => {
           this.loading = false;
@@ -295,8 +295,8 @@ export default {
             if(!noTeamMembers) {
               noTeamMembers = {
                 id: 0,
-                name: 'No pool users',
-                description: 'Users with no associated pool',
+                name: this.$t('exoplatform.wallet.label.noPoolUsers'),
+                description: this.$t('exoplatform.wallet.label.noPoolUsersDescription'),
                 rewardType: 'COMPUTED',
                 computedBudget: 0,
                 noTeam: true,
@@ -335,25 +335,26 @@ export default {
       this.settingWarnings = [];
 
       if(!this.rewardSettings) {
-        this.settingWarnings.push('Empty settings');
+        this.settingWarnings.push(this.$t('exoplatform.wallet.error.emptySettings'));
       } else {
         if(!this.rewardSettings.pluginSettings || !this.rewardSettings.pluginSettings.length) {
-          this.settingWarnings.push('Can\'t compute rewards, no reward plugins is configured');
+          this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noPluginConfiguration'));
         } else {
           this.rewardSettings.pluginSettings.forEach(pluginSetting => {
             if(pluginSetting && !pluginSetting.budgetType) {
-              this.settingWarnings.push(`Can't compute rewards, plugin '${pluginSetting.pluginId}' doesn't have a configured budget type`);
+              this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noRewardBudgetConfiguredForPlugin', {0: pluginSetting.pluginId}));
             }
           });
         }
       }
 
       if (!this.contractDetails) {
-        this.settingWarnings.push('No token is configured');
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
       }
 
       if (!this.periodType) {
-        this.settingWarnings.push('No reward periodicity is configured');
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.missingRewardPeriodicity'));
       }
 
       if(this.settingWarnings.length) {

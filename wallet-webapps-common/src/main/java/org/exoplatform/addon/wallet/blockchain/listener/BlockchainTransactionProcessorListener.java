@@ -66,6 +66,7 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
         return;
       }
 
+      TransactionDetail transactionDetail = null;
       String transactionHash = null;
       String blockHash = null;
       Long blockTimestamp = null;
@@ -78,6 +79,9 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
         Transaction transaction = (Transaction) source;
         transactionHash = transaction.getHash();
         blockHash = transaction.getBlockHash();
+      } else if (source instanceof TransactionDetail) {
+        transactionDetail = (TransactionDetail) source;
+        transactionHash = transactionDetail.getHash();
       } else {
         transactionHash = (String) source;
       }
@@ -87,7 +91,9 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
         return;
       }
 
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      if (transactionDetail == null) {
+        transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      }
       if (transactionDetail == null) {
         LOG.warn("Transaction detail with hash {} wasn't found in database", transactionHash);
         return;
@@ -121,6 +127,8 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
 
       if (hasKnownWalletInTransaction(transactionDetail)) {
         getTransactionService().saveTransactionDetail(transactionDetail, broadcastSavingTransaction);
+      } else {
+        LOG.debug("Transaction with hash {} doesn't have a known wallet, it will be ignored");
       }
     } finally {
       RequestLifeCycle.end();

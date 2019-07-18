@@ -6,7 +6,7 @@
       </div>
 
       <div v-if="loading" class="grey--text">
-        Loading recent transactions...
+        {{ $t('exoplatform.wallet.message.loadingRecentTransactions') }}...
       </div>
       <v-progress-linear
         v-if="loading"
@@ -60,7 +60,7 @@
               <v-list-tile-content class="transactionDetailContent">
                 <v-list-tile-title v-if="item.isContractCreation">
                   <span>
-                    Created contract
+                    {{ $t('exoplatform.wallet.label.createdContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -89,9 +89,10 @@
                     :avatar="item.fromAvatar" />
 
                   <span v-if="item.isReceiver">
-                    Received from
-                  </span> <span v-else>
-                    Sent to
+                    {{ $t('exoplatform.wallet.label.receivedFrom') }}
+                  </span>
+                  <span v-else>
+                    {{ $t('exoplatform.wallet.label.sentTo') }}
                   </span>
 
                   <profile-chip
@@ -117,7 +118,7 @@
 
                 <v-list-tile-title v-else-if="item.contractMethodName === 'transferFrom'">
                   <span>
-                    Sent to
+                    {{ $t('exoplatform.wallet.label.sentTo') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -128,7 +129,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    by
+                    {{ $t('exoplatform.wallet.label.by') }}
                   </span>
                   <profile-chip
                     :address="item.byAddress"
@@ -139,7 +140,7 @@
                     :display-name="item.byDisplayName"
                     :avatar="item.byAvatar" />
                   <span>
-                    on behalf of
+                    {{ $t('exoplatform.wallet.label.onBehalfOf') }}
                   </span>
                   <profile-chip
                     :address="item.fromAddress"
@@ -172,13 +173,16 @@
                     :avatar="item.fromAvatar" />
 
                   <span v-if="item.contractMethodName === 'transfer' && item.isReceiver">
-                    Received from
-                  </span> <span v-else-if="item.contractMethodName === 'transfer' && !item.isReceiver">
-                    Sent to
-                  </span> <span v-else-if="item.contractMethodName === 'approve' && item.isReceiver">
-                    Delegated from
-                  </span> <span v-else>
-                    Delegated to
+                    {{ $t('exoplatform.wallet.label.receivedFrom') }}
+                  </span>
+                  <span v-else-if="item.contractMethodName === 'transfer' && !item.isReceiver">
+                    {{ $t('exoplatform.wallet.label.sentTo') }}
+                  </span>
+                  <span v-else-if="item.contractMethodName === 'approve' && item.isReceiver">
+                    {{ $t('exoplatform.wallet.label.delegatedFrom') }}
+                  </span>
+                  <span v-else>
+                    {{ $t('exoplatform.wallet.label.delegatedTo') }}
                   </span>
 
                   <profile-chip
@@ -212,7 +216,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    added
+                    {{ $t('exoplatform.wallet.label.added') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -223,7 +227,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    as administrator on contract
+                    {{ $t('exoplatform.wallet.label.asAdministratorOnContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -242,7 +246,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    removed
+                    {{ $t('exoplatform.wallet.label.removed') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -253,7 +257,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    as administrator from contract
+                    {{ $t('exoplatform.wallet.label.asAdministratorFromContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -271,7 +275,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    transferred ownership to
+                    {{ $t('exoplatform.wallet.label.transferredOwnershipTo') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -282,7 +286,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    on contract
+                    {{ $t('exoplatform.wallet.label.onContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -301,7 +305,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    approved
+                    {{ $t('exoplatform.wallet.label.approved') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -312,7 +316,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    account on contract
+                    {{ $t('exoplatform.wallet.label.accountOnContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -331,7 +335,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    disapproved
+                    {{ $t('exoplatform.wallet.label.disapproved') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -342,7 +346,7 @@
                     :display-name="item.toDisplayName"
                     :avatar="item.toAvatar" />
                   <span>
-                    account on contract
+                    {{ $t('exoplatform.wallet.label.accountOnContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -361,7 +365,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    paused contract
+                    {{ $t('exoplatform.wallet.label.pausedContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -380,7 +384,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    un-paused contract
+                    {{ $t('exoplatform.wallet.label.unPausedContract') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -399,7 +403,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    modified sell price
+                    {{ $t('exoplatform.wallet.label.modifiedSellPrice') }}
                   </span>
                 </v-list-tile-title>
 
@@ -414,7 +418,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    upgraded data contract
+                    {{ $t('exoplatform.wallet.label.upgradedDataContract') }}
                   </span>
                 </v-list-tile-title>
 
@@ -429,7 +433,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    upgraded implementation contract
+                    {{ $t('exoplatform.wallet.label.upgradedImplementationContract') }}
                   </span>
                 </v-list-tile-title>
 
@@ -444,7 +448,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    vested tokens to
+                    {{ $t('exoplatform.wallet.label.vestedTokensTo') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -467,7 +471,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    initialized wallet of
+                    {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -490,7 +494,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    rewarded
+                    {{ $t('exoplatform.wallet.label.rewarded') }}
                   </span>
                   <profile-chip
                     :address="item.toAddress"
@@ -513,7 +517,7 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    Sent ether to contract
+                    {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
                   </span>
                 </v-list-tile-title>
 
@@ -528,13 +532,13 @@
                     :display-name="item.fromDisplayName"
                     :avatar="item.fromAvatar" />
                   <span>
-                    Sent ether to contract
+                    {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
                   </span>
                 </v-list-tile-title>
 
                 <v-list-tile-title v-else>
                   <span>
-                    Contract transaction
+                    {{ $t('exoplatform.wallet.label.contractTransaction') }}
                   </span>
                   <wallet-address
                     :value="item.contractAddress"
@@ -603,7 +607,7 @@
           <v-list class="pl-5 ml-2 pr-4" dense>
             <v-list-tile v-if="!item.pending">
               <v-list-tile-content>
-                Status
+                {{ $t('exoplatform.wallet.label.status') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <v-icon :color="item.status ? 'success' : 'error'" v-text="item.status ? 'fa-check-circle' : 'fa-exclamation-circle'" />
@@ -611,7 +615,7 @@
             </v-list-tile>
             <v-list-tile v-if="administration && item.issuer">
               <v-list-tile-content>
-                Issuer
+                {{ $t('exoplatform.wallet.label.issuer') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <profile-chip
@@ -627,14 +631,14 @@
 
             <v-list-tile v-if="item.label" class="dynamic-height">
               <v-list-tile-content>
-                Label
+                {{ $t('exoplatform.wallet.label.transactionLabel') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end paragraph" v-text="item.label" />
             </v-list-tile>
 
             <v-list-tile v-if="item.message" class="dynamic-height">
               <v-list-tile-content>
-                Message
+                {{ $t('exoplatform.wallet.label.transactionMessage') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end paragraph" v-text="item.message" />
             </v-list-tile>
@@ -650,7 +654,7 @@
             <template v-if="item.contractMethodName === 'reward'">
               <v-list-tile v-if="Number(item.value)">
                 <v-list-tile-content>
-                  Transferred amount
+                  {{ $t('exoplatform.wallet.label.transferredAmount') }}
                 </v-list-tile-content>
                 <v-list-tile-content class="align-end">
                   {{ toFixed(item.value) }} {{ item.contractSymbol }}
@@ -660,7 +664,7 @@
             <template v-else>
               <v-list-tile v-if="Number(item.amountFiat)">
                 <v-list-tile-content>
-                  Fiat amount
+                  {{ $t('exoplatform.wallet.label.fiatAmount') }}
                 </v-list-tile-content>
                 <v-list-tile-content class="align-end">
                   {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
@@ -668,7 +672,7 @@
               </v-list-tile>
               <v-list-tile v-if="Number(item.value)">
                 <v-list-tile-content>
-                  Ether amount
+                  {{ $t('exoplatform.wallet.label.etherAmount') }}
                 </v-list-tile-content>
                 <v-list-tile-content class="align-end">
                   {{ toFixed(item.value) }} ether
@@ -678,14 +682,14 @@
 
             <v-list-tile v-if="item.fromAddress">
               <v-list-tile-content>
-                From address
+                {{ $t('exoplatform.wallet.label.fromAddress') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <a
                   v-if="addressEtherscanLink"
                   :href="`${addressEtherscanLink}${item.fromAddress}`"
-                  target="_blank"
-                  title="Open on etherscan">
+                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                  target="_blank">
                   {{ item.fromAddress }}
                 </a>
               </v-list-tile-content>
@@ -693,14 +697,14 @@
 
             <v-list-tile v-if="item.toAddress">
               <v-list-tile-content>
-                To address
+                {{ $t('exoplatform.wallet.label.toAddress') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <a
                   v-if="addressEtherscanLink"
                   :href="`${addressEtherscanLink}${item.toAddress}`"
-                  target="_blank"
-                  title="Open on etherscan">
+                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                  target="_blank">
                   {{ item.toAddress }}
                 </a>
               </v-list-tile-content>
@@ -708,7 +712,7 @@
 
             <v-list-tile v-if="item.contractName">
               <v-list-tile-content>
-                Contract name
+                {{ $t('exoplatform.wallet.label.contractName') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 {{ item.contractName }}
@@ -717,14 +721,14 @@
 
             <v-list-tile v-if="item.contractAddress">
               <v-list-tile-content>
-                Contract address
+                {{ $t('exoplatform.wallet.label.contractAddress') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <a
                   v-if="tokenEtherscanLink"
                   :href="`${tokenEtherscanLink}${item.contractAddress}`"
-                  target="_blank"
-                  title="Open on etherscan">
+                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                  target="_blank">
                   {{ item.contractAddress }}
                 </a>
               </v-list-tile-content>
@@ -732,7 +736,7 @@
 
             <v-list-tile v-if="item.fee">
               <v-list-tile-content>
-                Transaction fee
+                {{ $t('exoplatform.wallet.label.transactionFee') }}
               </v-list-tile-content>
               <v-list-tile-content v-if="item.feeToken" class="align-end">
                 {{ toFixed(item.feeToken) }} {{ item.contractSymbol }}
@@ -752,14 +756,14 @@
 
             <v-list-tile>
               <v-list-tile-content>
-                Transaction hash
+                {{ $t('exoplatform.wallet.label.transactionHash') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
                 <a
                   v-if="transactionEtherscanLink"
                   :href="`${transactionEtherscanLink}${item.hash}`"
-                  target="_blank"
-                  title="Open on etherscan">
+                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                  target="_blank">
                   {{ item.hash }}
                 </a>
               </v-list-tile-content>
@@ -772,13 +776,13 @@
             color="primary"
             flat
             @click="transactionsLimit += transactionsPerPage">
-            Load More
+            {{ $t('exoplatform.wallet.button.loadMore') }}
           </v-btn>
         </div>
       </v-expansion-panel>
       <v-flex v-else-if="!loading" class="text-xs-center">
         <span>
-          No recent transactions
+          {{ $t('exoplatform.wallet.label.noRecentTransactions') }}
         </span>
       </v-flex>
     </v-card>
@@ -895,7 +899,7 @@ export default {
         this.init().catch((error) => {
           console.debug('account field change event - error', error);
           this.loading = false;
-          this.$emit('error', `Account loading error: ${error}`);
+          this.$emit('error', `${this.$t('exoplatform.wallet.error.accountLoadingError')}: ${error}`);
         });
       }
     },
@@ -909,7 +913,7 @@ export default {
       this.init().catch((error) => {
         console.debug('init method - error', error);
         this.loading = false;
-        this.$emit('error', `Account initialization error: ${error}`);
+        this.$emit('error', `${this.$t('exoplatform.wallet.error.accountInitializationError')}: ${error}`);
       });
     }
   },

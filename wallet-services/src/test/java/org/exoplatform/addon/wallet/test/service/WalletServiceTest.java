@@ -16,18 +16,24 @@
  */
 package org.exoplatform.addon.wallet.test.service;
 
+import static org.exoplatform.addon.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.picocontainer.Startable;
-
 import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.settings.*;
+import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
+import org.exoplatform.commons.api.notification.model.NotificationInfo;
+import org.exoplatform.commons.api.notification.model.PluginKey;
+import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
+import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.junit.Test;
+import org.picocontainer.Startable;
 
 public class WalletServiceTest extends BaseWalletTest {
 
@@ -144,19 +150,17 @@ public class WalletServiceTest extends BaseWalletTest {
   public void testSaveUserPreferences() {
     WalletService walletService = getService(WalletService.class);
     WalletSettings userPreferences = new WalletSettings();
-    String currentUser = "root0";
     Integer dataVersion = 2;
     String phrase = "save User";
 
     userPreferences.setPhrase(phrase);
     userPreferences.setDataVersion(dataVersion);
-    walletService.saveUserPreferences(currentUser, userPreferences);
+    walletService.saveUserPreferences(CURRENT_USER, userPreferences);
 
     IdentityManagerMock identityManagerMock = getService(IdentityManagerMock.class);
-    identityManagerMock.getOrCreateIdentity(OrganizationIdentityProvider.NAME, currentUser, false);
-    UserSettings userSettings = walletService.getUserSettings(null, currentUser);
+    identityManagerMock.getOrCreateIdentity(OrganizationIdentityProvider.NAME, CURRENT_USER, false);
+    UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER);
     assertEquals("Data version are not equals", dataVersion, userSettings.getUserPreferences().getDataVersion());
-
   }
 
   /**
@@ -168,7 +172,79 @@ public class WalletServiceTest extends BaseWalletTest {
 
     UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER);
     assertNotNull("User settings shouldn't be null", userSettings);
-    // TODO continue test on returned attributes values
+    assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
+    assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
+    assertNotNull("Initial funds shouldn't be null", userSettings.getInitialFunds());
+    assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
+  }
+
+  /**
+   * Test get Settings
+   */
+  @Test
+  public void testGetSettings() {
+    WalletService walletService = getService(WalletService.class);
+
+    GlobalSettings globalSettings = walletService.getSettings();
+    assertNotNull("Global settings shouldn't be null", globalSettings);
+    assertNotNull("Contract address shouldn't be null", globalSettings.getContractAddress());
+    assertNotNull("Contract bin shouldn't be null", globalSettings.getContractBin());
+    assertNotNull("Initial funds shouldn't be null", globalSettings.getInitialFunds());
+    assertNotNull("Access permission shouldn't be null", globalSettings.getAccessPermission());
+  }
+
+  /**
+   * Test request Funds
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testRequestFunds() throws IllegalAccessException {
+    WalletService walletService = getService(WalletService.class);
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    FundsRequest fundsRequest = new FundsRequest();
+    Double amount = (double) 500;
+    String contract = "Contract V1";
+    String receipientType = "root1";
+    String receipient = "root1";
+    String message = "Funds request";
+    fundsRequest.setAmount(amount);
+    fundsRequest.setReceipientType(receipientType);
+    fundsRequest.setAddress(ADDRESS);
+    fundsRequest.setContract(contract);
+    fundsRequest.setReceipient(receipient);
+    fundsRequest.setMessage(message);
+
+    ContractDetail contractDetail = new ContractDetail();
+    int decimals = 100;
+    String name = "Contract";
+    String owner = "UserTest";
+    String symbol = "C";
+    String sellPrice = "1000";
+    String contractType = "Contract V2";
+    contractDetail.setContractType(contractType);
+    contractDetail.setAddress(ADDRESS);
+    contractDetail.setDecimals(decimals);
+    contractDetail.setName(name);
+    contractDetail.setOwner(owner);
+    contractDetail.setSymbol(symbol);
+    contractDetail.setSellPrice(sellPrice);
+    walletService.setConfiguredContractDetail(contractDetail);
+
+    Wallet wallet = newWallet();
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER);
+    ConversationState state = new ConversationState(identity);
+    state.setCurrent(state);
+
+    walletService.requestFunds(fundsRequest, CURRENT_USER);
+
+    assertEquals("Amount are not equals", amount, fundsRequest.getAmount());
+    assertEquals("contract are not equals", contract, fundsRequest.getContract());
+    assertEquals("receipientType are not equals", receipientType, fundsRequest.getReceipientType());
+    assertEquals("receipient are not equals", receipient, fundsRequest.getReceipient());
+    assertEquals("message are not equals", message, fundsRequest.getMessage());
+    entitiesToClean.add(wallet);
   }
 
   private void checkInitialFunds(int tokenAmount,
@@ -203,6 +279,49 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Symbol are not equals", symbol, contract.getSymbol());
     assertEquals("SellPrice are not equals", sellPrice, contract.getSellPrice());
     assertEquals("ContractType are not equals", contractType, contract.getContractType());
+  }
+
+  /**
+   * Test mark fund request as sent
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testMarkFundRequestAsSent() throws IllegalAccessException {
+    WalletService walletService = getService(WalletService.class);
+    WebNotificationStorage webNotification = getService(WebNotificationStorage.class);
+
+    String title = "Notification";
+    NotificationInfo notification = new NotificationInfo().key(PluginKey.key(FUNDS_REQUEST_NOTIFICATION_ID));
+    notification.setFrom(CURRENT_USER);
+    notification.setTo(CURRENT_USER);
+    notification.setTitle(title);
+    webNotification.save(notification);
+    walletService.markFundRequestAsSent(notification.getId(), CURRENT_USER);
+    assertEquals(CURRENT_USER, notification.getFrom());
+    assertEquals("Notification title are not equals", title, notification.getTitle());
+    assertEquals(CURRENT_USER, notification.getTo());
+  }
+
+  /**
+   * Test is fund request sent
+   * 
+   * @throws IllegalAccessException
+   */
+  @Test
+  public void testIsFundRequestSent() throws IllegalAccessException {
+    WalletService walletService = getService(WalletService.class);
+    WebNotificationStorage webNotification = getService(WebNotificationStorage.class);
+
+    String title = "Notification";
+    NotificationInfo notification = new NotificationInfo().key(PluginKey.key(FUNDS_REQUEST_NOTIFICATION_ID));
+    notification.setFrom(CURRENT_USER);
+    notification.setTo(CURRENT_USER);
+    notification.setTitle(title);
+    webNotification.save(notification);
+    Boolean isFundsRequestSent = walletService.isFundRequestSent(notification.getId(), CURRENT_USER);
+    assertEquals("ContractType are not equals", isFundsRequestSent, false);
+
   }
 
 }

@@ -8,7 +8,7 @@
         <v-flex>
           <v-card class="applicationToolbar mb-3" flat>
             <v-flex class="pl-3 pr-3 pt-2 pb-2">
-              <strong>Wallets administration</strong>
+              <strong>{{ $t('exoplatform.wallet.title.walletAdministration') }}</strong>
             </v-flex>
           </v-card>
         </v-flex>
@@ -33,7 +33,7 @@
             width="300">
             <v-card color="primary" dark>
               <v-card-text>
-                Loading ...
+                {{ $t('exoplatform.wallet.label.loading') }} ...
                 <v-progress-linear
                   indeterminate
                   color="white"
@@ -47,18 +47,18 @@
             <v-tab
               key="wallets"
               href="#wallets">
-              Wallets administration
+              {{ $t('exoplatform.wallet.title.walletAdministrationTab') }}
             </v-tab>
             <v-tab
               key="funds"
               href="#funds">
-              Initial funds
+              {{ $t('exoplatform.wallet.title.initialFundsTab') }}
             </v-tab>
             <v-tab
               v-if="contractDetails"
               key="contract"
               href="#contract">
-              {{ contractDetails.adminLevel >= 4 ? 'Contract' : 'Transactions history' }}
+              {{ contractDetails.adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
             </v-tab>
           </v-tabs>
 
@@ -157,7 +157,7 @@ export default {
         .then(() => {
           if (!window.walletSettings) {
             this.forceUpdate();
-            throw new Error('Wallet settings are empty for current user');
+            throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
@@ -169,9 +169,9 @@ export default {
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug('Error connecting to network', error);
-            this.error = 'Error connecting to network';
+            this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
-            this.error = 'Please configure your wallet';
+            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
             throw error;
           }
         })
@@ -186,7 +186,7 @@ export default {
               this.error = String(error);
             }
           } else {
-            this.error = 'Please configure your wallet';
+            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
           }
         })
         .catch((e) => {

@@ -7,17 +7,17 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.*;
-
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.junit.*;
 
 public abstract class BaseWalletTest {
 
@@ -50,6 +50,7 @@ public abstract class BaseWalletTest {
 
   @Before
   public void beforeMethodTest() {
+    entitiesToClean = new ArrayList<>();
     RequestLifeCycle.begin(container);
   }
 
@@ -60,44 +61,45 @@ public abstract class BaseWalletTest {
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
-    RequestLifeCycle.end();
-    RequestLifeCycle.begin(container);
-
     if (!entitiesToClean.isEmpty()) {
       for (Serializable entity : entitiesToClean) {
-        if (entity instanceof WalletEntity) {
-          walletAccountDAO.delete((WalletEntity) entity);
-        } else if (entity instanceof WalletPrivateKeyEntity) {
-          walletPrivateKeyDAO.delete((WalletPrivateKeyEntity) entity);
-        } else if (entity instanceof TransactionEntity) {
-          walletTransactionDAO.delete((TransactionEntity) entity);
-        } else if (entity instanceof AddressLabelEntity) {
-          addressLabelDAO.delete((AddressLabelEntity) entity);
-        } else if (entity instanceof WalletAddressLabel) {
-          AddressLabelEntity labelEntity = addressLabelDAO.find(((WalletAddressLabel) entity).getId());
-          addressLabelDAO.delete(labelEntity);
-        } else if (entity instanceof TransactionDetail) {
-          TransactionEntity transactionEntity = walletTransactionDAO.find(((TransactionDetail) entity).getId());
-          walletTransactionDAO.delete(transactionEntity);
-        } else if (entity instanceof Wallet) {
-          long walletId = ((Wallet) entity).getTechnicalId();
-          WalletEntity walletEntity = walletAccountDAO.find(walletId);
-          walletAccountDAO.delete(walletEntity);
+        try {
+          if (entity instanceof WalletEntity) {
+            walletAccountDAO.delete((WalletEntity) entity);
+          } else if (entity instanceof WalletPrivateKeyEntity) {
+            walletPrivateKeyDAO.delete((WalletPrivateKeyEntity) entity);
+          } else if (entity instanceof TransactionEntity) {
+            walletTransactionDAO.delete((TransactionEntity) entity);
+          } else if (entity instanceof AddressLabelEntity) {
+            addressLabelDAO.delete((AddressLabelEntity) entity);
+          } else if (entity instanceof WalletAddressLabel) {
+            AddressLabelEntity labelEntity = addressLabelDAO.find(((WalletAddressLabel) entity).getId());
+            addressLabelDAO.delete(labelEntity);
+          } else if (entity instanceof TransactionDetail) {
+            TransactionEntity transactionEntity = walletTransactionDAO.find(((TransactionDetail) entity).getId());
+            walletTransactionDAO.delete(transactionEntity);
+          } else if (entity instanceof Wallet) {
+            long walletId = ((Wallet) entity).getTechnicalId();
+            WalletEntity walletEntity = walletAccountDAO.find(walletId);
+            walletAccountDAO.delete(walletEntity);
 
-          WalletPrivateKeyEntity walletPrivateKey = walletPrivateKeyDAO.find(walletId);
-          if (walletPrivateKey != null) {
-            walletPrivateKeyDAO.delete(walletPrivateKey);
+            WalletPrivateKeyEntity walletPrivateKey = walletPrivateKeyDAO.find(walletId);
+            if (walletPrivateKey != null) {
+              walletPrivateKeyDAO.delete(walletPrivateKey);
+            }
+          } else {
+            throw new IllegalStateException("Entity not managed" + entity);
           }
-        } else {
-          throw new IllegalStateException("Entity not managed" + entity);
+        } catch (Exception e) {
+          LOG.warn("Error cleaning entities after test '{}' execution", this.getClass().getName(), e);
         }
       }
     }
 
-    int walletCount = walletAccountDAO.findAll().size();
-    int walletPrivateKeyCount = walletPrivateKeyDAO.findAll().size();
-    int walletAddressLabelsCount = addressLabelDAO.findAll().size();
-    int walletTransactionsCount = walletTransactionDAO.findAll().size();
+    long walletCount = walletAccountDAO.count();
+    long walletPrivateKeyCount = walletPrivateKeyDAO.count();
+    long walletAddressLabelsCount = addressLabelDAO.findAll().size();
+    long walletTransactionsCount = walletTransactionDAO.count();
 
     LOG.info("objects count wallets = {}, private keys = {}, address labels = {}, transactions count = {}",
              walletCount,
@@ -116,6 +118,9 @@ public abstract class BaseWalletTest {
     assertEquals("The previous test didn't cleaned wallets transactions entities correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
                  walletTransactionsCount);
+
+    AddressLabelStorage addressLabelStorage = getService(AddressLabelStorage.class);
+    addressLabelStorage.clearCache();
 
     RequestLifeCycle.end();
   }

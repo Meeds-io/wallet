@@ -13,7 +13,7 @@
         v-if="displayWalletBackup"
         id="walletBackupWarning"
         class="alert alert-warning no-wrap">
-        <i class="uiIconWarning"></i> Your wallet is not backed up yet.
+        <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.notBackedUpWallet') }}.
         <wallet-backup-modal
           ref="walletBackupModal"
           class="mr-3"
@@ -24,7 +24,7 @@
         v-if="displayResetPassword"
         id="walletResetPasswordWarning"
         class="alert alert-warning no-wrap">
-        <i class="uiIconWarning"></i> Your wallet is not secured yet.
+        <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.notSecuredWallet') }}.
         <wallet-reset-modal
           ref="walletResetModal"
           class="ml-3"
@@ -35,23 +35,26 @@
 
     <div v-if="displayWalletCreationToolbar" class="alert alert-info">
       <i class="uiIconInfo"></i> <span v-if="isSpace">
-        No private key was found in current browser. <strong>
-          Space wallet
-        </strong> is displayed in readonly mode.
+        {{ $t('exoplatform.wallet.warning.notPrivateKey') }}.
+        <strong>
+          {{ $t('exoplatform.wallet.title.spaceWallet') }}
+        </strong> {{ $t('exoplatform.wallet.warning.isReadOnlyMode') }}.
       </span> <span v-else>
-        No private key was found in current browser. <strong>
-          Your wallet
-        </strong> is displayed in readonly mode.
-      </span> <a
+        {{ $t('exoplatform.wallet.warning.notPrivateKey') }}.
+        <strong>
+          {{ $t('exoplatform.wallet.title.yourWallet') }}
+        </strong> {{ $t('exoplatform.wallet.warning.isReadOnlyMode') }}.
+      </span>
+      <a
         v-if="!displayWalletSetup"
         href="javascript:void(0);"
         @click="displayWalletSetupActions()">
-        More options
+        {{ $t('exoplatform.wallet.label.moreOptions') }}
       </a>
     </div>
 
     <div v-if="displayWalletNotExistingYet" class="alert alert-info">
-      <i class="uiIconInfo"></i> Space administrator hasn't set a Wallet for this space yet
+      <i class="uiIconInfo"></i> {{ $t('exoplatform.wallet.info.spaceWalletNotCreatedYet') }}
     </div>
     <wallet-browser-setup
       v-if="displayWalletSetup"

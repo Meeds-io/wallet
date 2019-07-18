@@ -101,6 +101,7 @@ public class WalletRewardService implements RewardService {
       }
       RewardTransaction rewardTransaction = walletReward.getRewardTransaction();
       if (rewardTransaction != null && StringUtils.isNotBlank(rewardTransaction.getHash())) {
+        rewardTransaction.setStartDateInSeconds(periodDateInSeconds);
         String hash = rewardTransaction.getHash();
         String transactionStatus = rewardTransaction.getStatus();
         if (StringUtils.isBlank(transactionStatus)) {
@@ -140,6 +141,7 @@ public class WalletRewardService implements RewardService {
     }
     for (WalletReward walletReward : rewards) {
       TransactionDetail transactionDetail = new TransactionDetail();
+      transactionDetail.setFrom(adminWalletAddress);
       transactionDetail.setTo(walletReward.getWallet().getAddress());
       transactionDetail.setContractAmount(walletReward.getTokensToSend());
       transactionDetail.setValue(walletReward.getTokensToSend());
@@ -169,16 +171,7 @@ public class WalletRewardService implements RewardService {
     if (periodDateInSeconds == 0) {
       throw new IllegalArgumentException("periodDate is mandatory");
     }
-    Set<Wallet> wallets = walletAccountService.listWallets();
-    wallets = wallets.stream().filter(wallet -> WalletType.isUser(wallet.getType())).collect(Collectors.toSet());
 
-    Set<Long> identityIds = wallets.stream()
-                                   .map(Wallet::getTechnicalId)
-                                   .collect(Collectors.toSet());
-    if (identityIds == null || identityIds.isEmpty()) {
-      return Collections.emptySet();
-    }
-    Collection<RewardPlugin> rewardPlugins = rewardSettingsService.getRewardPlugins();
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
       throw new IllegalStateException("Error computing rewards using empty settings");
@@ -186,48 +179,64 @@ public class WalletRewardService implements RewardService {
     if (rewardSettings.getPeriodType() == null) {
       throw new IllegalStateException("Error computing rewards using empty period type");
     }
-    Set<RewardPluginSettings> pluginSettings = rewardSettings.getPluginSettings();
-    if (pluginSettings == null || pluginSettings.isEmpty()) {
-      throw new IllegalStateException("Error computing rewards using empty rewards types");
+
+    Set<Wallet> wallets = walletAccountService.listWallets();
+    wallets = wallets.stream().filter(wallet -> WalletType.isUser(wallet.getType())).collect(Collectors.toSet());
+    Set<Long> identityIds = wallets.stream()
+                                   .map(Wallet::getTechnicalId)
+                                   .collect(Collectors.toSet());
+    if (identityIds == null || identityIds.isEmpty()) {
+      return Collections.emptySet();
     }
+
+    Set<Long> enabledIdentityIds = getEnabledWallets(identityIds);
+
+    Set<WalletReward> walletRewards = buildWalletRewardObjects(wallets, enabledIdentityIds);
 
     RewardPeriodType periodType = rewardSettings.getPeriodType();
     RewardPeriod periodOfTime = periodType.getPeriodOfTime(timeFromSeconds(periodDateInSeconds));
 
-    Set<Long> enabledIdentityIds = getEnabledWallets(identityIds);
-    Set<Long> walletsWithEnabledTeam = getEnabledTeamMembers(enabledIdentityIds);
+    retrieveRewardPeriodTransactionStatus(walletRewards, periodType, periodOfTime);
+    computeRewardDetails(walletRewards, rewardSettings, periodOfTime, identityIds, enabledIdentityIds);
+    return walletRewards;
+  }
 
-    Set<WalletPluginReward> walletRewardsByPlugin = new HashSet<>();
-    for (RewardPlugin rewardPlugin : rewardPlugins) {
-      if (rewardPlugin == null || !rewardPlugin.isEnabled()) {
-        continue;
-      }
-      RewardPluginSettings rewardPluginSettings = getPluginSetting(pluginSettings, rewardPlugin.getPluginId());
-      if (rewardPluginSettings != null) {
-        Map<Long, Double> earnedPoints = rewardPlugin.getEarnedPoints(identityIds,
-                                                                     periodOfTime.getStartDateInSeconds(),
-                                                                     periodOfTime.getEndDateInSeconds());
-        Set<Long> validIdentityIdsToUse = rewardPluginSettings.isUsePools() ? walletsWithEnabledTeam : enabledIdentityIds;
-        computeReward(rewardPluginSettings, earnedPoints, validIdentityIdsToUse, walletRewardsByPlugin);
-      }
-    }
-
-    List<RewardTransaction> rewardTransactions = rewardTransactionService.getRewardTransactions(periodType.name(),
-                                                                                                periodOfTime.getStartDateInSeconds());
-
+  private Set<WalletReward> buildWalletRewardObjects(Set<Wallet> wallets, Set<Long> enabledIdentityIds) {
     Set<WalletReward> walletRewards = new HashSet<>();
     for (Wallet wallet : wallets) {
       WalletReward walletReward = new WalletReward();
       walletReward.setWallet(wallet);
       walletReward.setEnabled(enabledIdentityIds.contains(wallet.getTechnicalId()));
+      walletReward.setRewards(Collections.emptySet());
+      walletRewards.add(walletReward);
+    }
+    List<RewardTeam> teams = rewardTeamService.getTeams();
+    for (RewardTeam rewardTeam : teams) {
+      List<RewardTeamMember> members = rewardTeam.getMembers();
+      for (RewardTeamMember teamMember : members) {
+        WalletReward walletReward = walletRewards.stream()
+                                                 .filter(walletRewardTmp -> walletRewardTmp.getWallet()
+                                                                                           .getTechnicalId() == teamMember.getIdentityId())
+                                                 .findFirst()
+                                                 .orElse(null);
+        if (walletReward != null) {
+          walletReward.setPoolName(rewardTeam.getName());
+        }
+      }
+    }
+    return walletRewards;
+  }
 
-      Set<WalletPluginReward> rewardDetails = walletRewardsByPlugin.stream()
-                                                                   .filter(reward -> reward.getIdentityId() == wallet.getTechnicalId())
-                                                                   .collect(Collectors.toSet());
-      walletReward.setRewards(rewardDetails);
+  private void retrieveRewardPeriodTransactionStatus(Set<WalletReward> walletRewards,
+                                                     RewardPeriodType periodType,
+                                                     RewardPeriod periodOfTime) {
+    List<RewardTransaction> rewardTransactions = rewardTransactionService.getRewardTransactions(periodType.name(),
+                                                                                                periodOfTime.getStartDateInSeconds());
 
+    for (WalletReward walletReward : walletRewards) {
       RewardTransaction rewardTransaction = rewardTransactions.stream()
-                                                              .filter(transaction -> transaction.getReceiverIdentityId() == wallet.getTechnicalId())
+                                                              .filter(transaction -> transaction.getReceiverIdentityId() == walletReward.getWallet()
+                                                                                                                                        .getTechnicalId())
                                                               .findFirst()
                                                               .orElse(null);
       walletReward.setRewardTransaction(rewardTransaction);
@@ -242,26 +251,62 @@ public class WalletRewardService implements RewardService {
           } else {
             rewardTransaction.setStatus(TRANSACTION_STATUS_FAILED);
           }
+          Wallet receiver = transactionDetail.getToWallet();
+          rewardTransaction.setPeriodType(periodType.name());
+          rewardTransaction.setStartDateInSeconds(periodOfTime.getStartDateInSeconds());
+          if (receiver != null) {
+            rewardTransaction.setReceiverId(receiver.getId());
+            rewardTransaction.setReceiverType(receiver.getType());
+            rewardTransaction.setReceiverIdentityId(receiver.getTechnicalId());
+          }
         }
       }
-      walletRewards.add(walletReward);
+    }
+  }
+
+  private void computeRewardDetails(Set<WalletReward> walletRewards,
+                                    RewardSettings rewardSettings,
+                                    RewardPeriod periodOfTime,
+                                    Set<Long> identityIds,
+                                    Set<Long> enabledIdentityIds) {
+    // Get te list of enabled reward plugins
+    Set<RewardPluginSettings> pluginSettings = rewardSettings.getPluginSettings();
+    pluginSettings = pluginSettings.stream().filter(RewardPluginSettings::isEnabled).collect(Collectors.toSet());
+    if (pluginSettings == null || pluginSettings.isEmpty()) {
+      return;
     }
 
-    List<RewardTeam> teams = rewardTeamService.getTeams();
-    for (RewardTeam rewardTeam : teams) {
-      List<RewardTeamMember> members = rewardTeam.getMembers();
-      for (RewardTeamMember teamMember : members) {
-        WalletReward wallet = walletRewards.stream()
-                                           .filter(walletReward -> walletReward.getWallet()
-                                                                               .getTechnicalId() == teamMember.getIdentityId())
-                                           .findFirst()
-                                           .orElse(null);
-        if (wallet != null) {
-          wallet.setPoolName(rewardTeam.getName());
-        }
+    Collection<RewardPlugin> rewardPlugins = rewardSettingsService.getRewardPlugins();
+    rewardPlugins = rewardPlugins.stream().filter(RewardPlugin::isEnabled).collect(Collectors.toSet());
+
+    Set<Long> walletsWithEnabledTeam = getEnabledTeamMembers(enabledIdentityIds);
+
+    // Compute rewards per plugin
+    Set<WalletPluginReward> walletRewardsByPlugin = new HashSet<>();
+    for (RewardPlugin rewardPlugin : rewardPlugins) {
+      if (rewardPlugin == null || !rewardPlugin.isEnabled()) {
+        continue;
       }
+      RewardPluginSettings rewardPluginSettings = getPluginSetting(pluginSettings, rewardPlugin.getPluginId());
+      if (rewardPluginSettings == null) {
+        continue;
+      }
+      Map<Long, Double> earnedPoints = rewardPlugin.getEarnedPoints(identityIds,
+                                                                    periodOfTime.getStartDateInSeconds(),
+                                                                    periodOfTime.getEndDateInSeconds());
+      Set<Long> validIdentityIdsToUse = rewardPluginSettings.isUsePools() ? walletsWithEnabledTeam : enabledIdentityIds;
+      computeReward(rewardPluginSettings, earnedPoints, validIdentityIdsToUse, walletRewardsByPlugin);
     }
-    return walletRewards;
+
+    // Assign rewards objects for each wallet,a wallet can have multiple rewards
+    // one per plugin
+    for (WalletReward walletReward : walletRewards) {
+      Set<WalletPluginReward> rewardDetails = walletRewardsByPlugin.stream()
+                                                                   .filter(rewardByPlugin -> rewardByPlugin.getIdentityId() == walletReward.getWallet()
+                                                                                                                                           .getTechnicalId())
+                                                                   .collect(Collectors.toSet());
+      walletReward.setRewards(rewardDetails);
+    }
   }
 
   private Set<Long> getEnabledTeamMembers(Set<Long> identityIds) {

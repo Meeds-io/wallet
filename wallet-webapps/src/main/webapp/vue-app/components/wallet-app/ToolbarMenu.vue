@@ -2,9 +2,9 @@
   <div id="walletAppMenu">
     <v-btn
       id="walletAppMenuRefreshButton"
+      :title="$t('exoplatform.wallet.button.refreshWallet')"
       icon
       flat
-      title="Refresh wallet"
       class="mr-0"
       @click="$emit('refresh')">
       <v-icon size="20px">
@@ -14,10 +14,10 @@
     <v-btn
       v-if="!isSpace || isSpaceAdministrator"
       id="walletAppMenuSettingsButton"
+      :title="$t('exoplatform.wallet.button.security')"
       class="mr-0 ml-0"
       icon
       flat
-      title="Security"
       @click="$emit('modify-settings')">
       <v-icon size="17px">
         fa-lock

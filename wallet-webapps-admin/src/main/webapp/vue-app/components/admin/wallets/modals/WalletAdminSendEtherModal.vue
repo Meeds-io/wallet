@@ -16,10 +16,10 @@
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
           <template v-if="wallet && wallet.name">
-            Send ether to {{ wallet.name }}
+            {{ $t('exoplatform.wallet.title.sendEtherModalForWallet', {0: wallet.name}) }}
           </template>
           <template v-else>
-            Send ether
+            {{ $t('exoplatform.wallet.title.sendEtherModal') }}
           </template>
         </span>
       </div>
@@ -39,9 +39,9 @@
               v-if="dialog"
               v-model="etherAmountLabel"
               :autofocus="dialog"
+              :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
+              :placeholder="$t('exoplatform.wallet.label.etherAmount')"
               name="etherAmount"
-              label="Ether amount"
-              placeholder="Set ether amount to send"
               disabled
               class="mt-3" />
 
@@ -49,18 +49,18 @@
               v-if="dialog"
               v-model="transactionLabel"
               :disabled="loading"
-              class="mt-3"
-              type="text"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
-              label="Label (Optional)"
-              placeholder="Enter label for your transaction" />
+              type="text"
+              class="mt-3" />
 
             <v-textarea
               v-model="transactionMessage"
               :disabled="loading"
+              :label="$t('exoplatform.wallet.label.transactionMessage')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
-              label="Message (Optional)"
-              placeholder="Enter a custom message to send with your transaction"
               class="mt-4"
               rows="3"
               flat
@@ -74,14 +74,14 @@
             :loading="loading"
             class="btn btn-primary mr-1"
             @click="send">
-            Send
+            {{ $t('exoplatform.wallet.button.send') }}
           </button>
           <button
             :disabled="loading"
             class="btn"
             color="secondary"
             @click="dialog = false">
-            Close
+            {{ $t('exoplatform.wallet.button.close') }}
           </button>
           <v-spacer />
         </v-card-actions>

@@ -1,7 +1,7 @@
 <template>
   <v-card class="walletSummaryCurrentBalance">
     <v-card-title class="headline pb-1">
-      Current balance
+      {{ $t('exoplatform.wallet.label.currentBalance') }}
     </v-card-title>
     <v-card-title class="tokenBalance pt-0 display-1">
       {{ walletUtils.toFixed(contractDetails.balance) }} {{ contractDetails.symbol }}

@@ -1,7 +1,7 @@
 <template>
   <v-card class="walletSummaryBalance">
     <v-card-title class="title pb-1 ellipsis">
-      Total Rewarded Cauri
+      {{ $t('exoplatform.wallet.label.totalWalletRewards') }}
     </v-card-title>
     <v-card-title class="rewardBalance headline pt-0 pb-1">
       <template v-if="loadingBalance">

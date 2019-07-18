@@ -15,12 +15,7 @@
           aria-hidden="true"
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
-          <template v-if="wallet && wallet.name">
-            Initialize wallet to {{ wallet.name }}
-          </template>
-          <template v-else>
-            Initialize wallet
-          </template>
+          {{ $t('exoplatform.wallet.title.tokenInitializationModal', {0: wallet && wallet.name}) }}
         </span>
       </div>
 
@@ -40,17 +35,17 @@
               v-model="etherAmount"
               :autofocus="dialog"
               :disabled="loading"
+              :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
+              :placeholder="$t('exoplatform.wallet.label.etherAmount')"
               name="etherAmount"
-              label="Ether amount"
-              placeholder="Set ether amount to send"
               class="mt-3" />
 
             <v-text-field
               v-if="dialog"
               v-model="tokenAmount"
               :disabled="loading"
-              :label="`${contractDetails && contractDetails.name} amount`"
-              :placeholder="`Set ${contractDetails && contractDetails.name} amount to send`"
+              :label="$t('exoplatform.wallet.label.tokenAmount', {0: contractDetails && contractDetails.name})"
+              :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceholder', {0: contractDetails && contractDetails.name})"
               name="tokenAmount"
               class="mt-3" />
 
@@ -58,18 +53,18 @@
               v-if="dialog"
               v-model="transactionLabel"
               :disabled="loading"
-              class="mt-3"
-              type="text"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
-              label="Label (Optional)"
-              placeholder="Enter label for your transaction" />
+              type="text"
+              class="mt-3" />
 
             <v-textarea
               v-model="transactionMessage"
               :disabled="loading"
+              :label="$t('exoplatform.wallet.label.transactionMessage')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
-              label="Message (Optional)"
-              placeholder="Enter a custom message to send with your transaction"
               class="mt-4"
               rows="3"
               flat
@@ -83,14 +78,14 @@
             :loading="loading"
             class="btn btn-primary mr-1"
             @click="send">
-            Send
+            {{ $t('exoplatform.wallet.button.send') }}
           </button>
           <button
             :disabled="loading"
             class="btn"
             color="secondary"
             @click="dialog = false">
-            Close
+            {{ $t('exoplatform.wallet.button.close') }}
           </button>
           <v-spacer />
         </v-card-actions>
@@ -149,7 +144,7 @@ export default {
         if (resp && resp.ok) {
           return resp.text();
         } else {
-          throw new Error(`Error intiializing wallet ${this.wallet.address}`);
+          throw new Error(this.$t('exoplatform.wallet.error.errorSendingInitializationTransaction', {0: this.wallet.address}));
         }
       }).then((hash) => {
         this.$emit('sent', hash);
