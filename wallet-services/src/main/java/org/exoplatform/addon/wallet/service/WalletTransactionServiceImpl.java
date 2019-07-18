@@ -61,15 +61,14 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   @Override
   public List<TransactionDetail> getPendingTransactions() {
-    return transactionStorage.getPendingTransactions(getNetworkId());
+    List<TransactionDetail> pendingTransactions = transactionStorage.getPendingTransactions(getNetworkId());
+    pendingTransactions.forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail, null));
+    return pendingTransactions;
   }
 
   @Override
   public Set<String> getPendingTransactionHashes() {
-    List<TransactionDetail> pendingTransactions = getPendingTransactions();
-    if (pendingTransactions == null || pendingTransactions.isEmpty()) {
-      return Collections.emptySet();
-    }
+    List<TransactionDetail> pendingTransactions = transactionStorage.getPendingTransactions(getNetworkId());
     return pendingTransactions.stream().map(transactionDetail -> transactionDetail.getHash()).collect(Collectors.toSet());
   }
 
@@ -166,7 +165,9 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   @Override
   public TransactionDetail getTransactionByHash(String hash) {
-    return transactionStorage.getTransactionByHash(hash);
+    TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hash);
+    retrieveWalletsDetails(transactionDetail, null);
+    return transactionDetail;
   }
 
   @Override

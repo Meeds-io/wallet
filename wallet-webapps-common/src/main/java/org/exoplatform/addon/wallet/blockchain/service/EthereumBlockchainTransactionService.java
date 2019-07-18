@@ -569,10 +569,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       if (transaction == null && creationTimestamp > 0) {
         Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
         if (duration.toDays() >= pendingTransactionMaxDays) {
-          LOG.info("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
-                   hash,
-                   pendingTransactionMaxDays);
-          getListenerService().broadcast(NEW_TRANSACTION_EVENT, hash, null);
+          LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
+                    hash,
+                    pendingTransactionMaxDays);
+          getListenerService().broadcast(NEW_TRANSACTION_EVENT, pendingTransactionDetail, null);
         }
       }
     }
@@ -590,7 +590,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       }
 
       if (hasKnownWalletInTransaction(transactionDetail)) {
-        LOG.info("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
+        LOG.debug("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
         getTransactionService().saveTransactionDetail(transactionDetail, true);
       }
     } catch (Exception e) {
