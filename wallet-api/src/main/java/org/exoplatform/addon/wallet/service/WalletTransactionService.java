@@ -67,17 +67,6 @@ public interface WalletTransactionService {
   TransactionDetail getTransactionByHash(String hash);
 
   /**
-   * @param address wallet address
-   * @param currentUser user accessing last pending transaction of wallet
-   * @return last transaction marked as pending in internal database
-   *         corresponding to the wallet identified by an address
-   * @throws IllegalAccessException if the current user is not an admin and is
-   *           not the owner of the wallet
-   */
-  TransactionDetail getAddressLastPendingTransactionSent(String address,
-                                                         String currentUser) throws IllegalAccessException;
-
-  /**
    * Save transaction details in database
    * 
    * @param transactionDetail transaction detail to save

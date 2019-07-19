@@ -1,5 +1,5 @@
-import {convertTokenAmountReceived, computeBalance} from './WalletUtils.js';
-import {getLastNonce} from './TransactionUtils.js';
+import {convertTokenAmountReceived, computeBalance, getTransaction} from './WalletUtils.js';
+import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
 
 export function getContractDetails(account, isAdministration) {
   if (window.walletSettings.contractAddress) {
@@ -392,44 +392,42 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
 
 export function sendContractTransaction(txDetails, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
   // suppose you want to call a function named myFunction of myContract
-  const data = txDetails.method(...txDetails.parameters).encodeABI();
   const transactionToSend = {
     to: txDetails.contractAddress,
     from: txDetails.senderAddress,
-    data: data,
+    data: txDetails.method(...txDetails.parameters).encodeABI(),
     gas: txDetails.gas,
     gasPrice: txDetails.gasPrice,
   };
 
-  return getLastNonce(txDetails.senderAddress).then((nonce) => {
+  return getNewTransactionNonce(txDetails.senderAddress).then((nonce) => {
     // Increment manually nonce if we have the last transaction always pending
-    if (nonce && Number(nonce) > 0) {
-      transactionToSend.nonce = nonce + 1;
-    }
+    transactionToSend.nonce = nonce;
 
-    return window.localWeb3.eth
-      .sendTransaction(transactionToSend)
-      .on('transactionHash', (hash) => {
+    return sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback);
+  });
+}
+
+export function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes) {
+  if (!attemptTimes) {
+    if (errorCallback) {
+      return errorCallback('Transaction hash not found');
+    }
+    return;
+  }
+  return getTransaction(hash)
+    .then(transaction => {
+      if (transaction) {
+        console.debug('Found transaction on blockchain', transaction);
         if (hashCallback) {
           return hashCallback(hash);
         }
-      })
-      .on('receipt', (receipt) => {
-        if (receiptCallback) {
-          return receiptCallback(receipt);
-        }
-      })
-      .on('confirmation', (confirmationNumber, receipt) => {
-        if (confirmedCallback) {
-          return confirmedCallback(confirmationNumber, receipt);
-        }
-      })
-      .on('error', (error, receipt) => {
-        if (errorCallback) {
-          return errorCallback(error, receipt);
-        }
-      });
-  });
+        return;
+      } else {
+        console.debug('Transaction not found on blockchain', hash);
+        waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
+      }
+    })
 }
 
 export function refreshContractOnServer() {
@@ -445,6 +443,58 @@ function transformContracDetailsToFailed(contractDetails, e) {
   contractDetails.title = contractDetails.address;
   contractDetails.error = `Error retrieving contract at specified address ${e ? e : ''}`;
   return contractDetails;
+}
+
+function sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
+  return window.localWeb3.eth.sendTransaction(transactionToSend)
+    .on('transactionHash', (hash) => {
+      if (hashCallback) {
+        // Verify if the generated hash is a bug from Web3js
+        // And then delete nonce to reattempt sending transaction
+        return getSavedTransactionByHash(hash)
+          .then(transaction => {
+            // A transaction with same hash has been already sent
+            if (transaction) {
+              console.debug('Transaction was found on server eXo', transaction, ' verifying blockchain transactions status, else incrementing gas price ', transactionToSend.nonce);
+
+              return getTransaction(hash)
+                .then(transaction => {
+                  if (transaction) {
+                    console.debug('Found transaction on blockchain, incrementing nonce', transaction);
+                    transactionToSend.nonce++;
+                  } else {
+                    console.debug('Transaction not found on blockchain, incrementing gas price with 1% to replace old buggy transaction', hash);
+                    delete transactionToSend.nonce;
+                    transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
+                  }
+                  return sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback);
+                });
+            }
+            // Attempt 5 times to retrieve sent transaction
+            return waitTransactionOnBlockchain(hash, hashCallback, errorCallback, 5);
+          })
+          .catch(error =>  {
+            console.error('Error fetching transaction with hash', hash, error);
+            errorCallback(error);
+          });
+      }
+    })
+    .on('receipt', (receipt) => {
+      if (receiptCallback) {
+        return receiptCallback(receipt);
+      }
+    })
+    .on('confirmation', (confirmationNumber, receipt) => {
+      if (confirmedCallback) {
+        return confirmedCallback(confirmationNumber, receipt);
+      }
+    })
+    .on('error', (error, receipt) => {
+      if (errorCallback) {
+        return errorCallback(error, receipt);
+      }
+    });
+
 }
 
 function getContractFiles(tokenName) {

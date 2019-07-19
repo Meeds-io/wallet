@@ -166,21 +166,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public TransactionDetail getTransactionByHash(String hash) {
     TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hash);
-    retrieveWalletsDetails(transactionDetail, null);
+    if (transactionDetail != null) {
+      retrieveWalletsDetails(transactionDetail, null);
+    }
     return transactionDetail;
-  }
-
-  @Override
-  public TransactionDetail getAddressLastPendingTransactionSent(String address,
-                                                                String currentUser) throws IllegalAccessException {
-    Wallet wallet = accountService.getWalletByAddress(address);
-    if (wallet == null) {
-      return null;
-    }
-    if (!canAccessWallet(wallet, currentUser)) {
-      throw new IllegalAccessException("Can't access wallet with address " + address);
-    }
-    return transactionStorage.getAddressLastPendingTransactionSent(getNetworkId(), address);
   }
 
   @Override
@@ -271,6 +260,9 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   private void retrieveWalletsDetails(TransactionDetail transactionDetail, String currentUser) {
+    if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
+      return;
+    }
     Wallet senderWallet = accountService.getWalletByAddress(transactionDetail.getFrom());
     transactionDetail.setFromWallet(senderWallet);
     hideWalletOwnerPrivateInformation(senderWallet);
@@ -285,9 +277,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       transactionDetail.setByWallet(senderWalletBy);
       if (!displayTransactionsLabel(senderWalletBy, currentUser)) {
         transactionDetail.setLabel(null);
+        transactionDetail.setMessage(null);
       }
     } else if (!displayTransactionsLabel(senderWallet, currentUser)) {
       transactionDetail.setLabel(null);
+      transactionDetail.setMessage(null);
     }
     if (transactionDetail.getIssuerId() > 0 && isUserRewardingAdmin(currentUser)) {
       Wallet issuerWallet = accountService.getWalletByIdentityId(transactionDetail.getIssuerId());

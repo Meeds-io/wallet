@@ -128,18 +128,6 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
-  public TransactionEntity getAddressLastPendingTransactionSent(long networkId, String address) {
-    TypedQuery<TransactionEntity> query =
-                                        getEntityManager().createNamedQuery("WalletTransaction.getAddressLastPendingTransactionSent",
-                                                                            TransactionEntity.class);
-    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
-    query.setParameter(NETWORK_ID_PARAM, networkId);
-    query.setMaxResults(1);
-
-    List<TransactionEntity> resultList = query.getResultList();
-    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
-  }
-
   public double countReceivedContractAmount(String contractAddress,
                                             String address,
                                             ZonedDateTime startDate,

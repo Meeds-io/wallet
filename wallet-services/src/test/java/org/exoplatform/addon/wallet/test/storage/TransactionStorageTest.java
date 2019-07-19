@@ -241,22 +241,6 @@ public class TransactionStorageTest extends BaseWalletTest {
   }
 
   /**
-   * Test get wallet last pending hash send by a wallet
-   */
-  @Test
-  public void testGetAddressLastPendingTransactionSent() {
-    String walletAddress = "address";
-    List<TransactionEntity> transactions = generateTransactions(walletAddress, null, null);
-
-    TransactionStorage transactionStorage = getService(TransactionStorage.class);
-    TransactionDetail transactionDetail = transactionStorage.getAddressLastPendingTransactionSent(1, walletAddress);
-    assertNotNull("Can't find previously saved transaction with given hash", transactionDetail);
-
-    TransactionEntity lastTX = transactions.get(transactions.size() - 2);
-    assertEquals("Last pending transaction isn't coherent", transactionDetail.getHash(), lastTX.getHash());
-  }
-
-  /**
    * Test count received contract amounts
    */
   @Test

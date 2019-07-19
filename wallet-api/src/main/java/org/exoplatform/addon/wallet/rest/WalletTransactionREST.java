@@ -85,30 +85,25 @@ public class WalletTransactionREST implements ResourceContainer {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("getLastPendingTransactionSent")
+  @Path("getSavedTransactionByHash")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get last pending transaction sent from an address to blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns pending transaction detail")
+  @ApiOperation(value = "Get saved transaction in internal database by hash", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "Request fulfilled"),
       @ApiResponse(code = 400, message = "Invalid query input"),
       @ApiResponse(code = 403, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getLastPendingTransactionSent(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
+  public Response getSavedTransactionByHash(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash) {
+    if (StringUtils.isBlank(hash)) {
+      LOG.warn("Empty transaction hash", hash);
       return Response.status(400).build();
     }
 
-    String currentUserId = getCurrentUserId();
     try {
-      TransactionDetail transactionDetail = transactionService.getAddressLastPendingTransactionSent(address,
-                                                                                                    currentUserId);
+      TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
       return Response.ok(transactionDetail).build();
-    } catch (IllegalAccessException e) {
-      LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
-      return Response.status(403).build();
     } catch (Exception e) {
-      LOG.error("Error getting transactions of wallet " + address, e);
+      LOG.error("Error getting transaction with hash {}", hash, e);
       return Response.serverError().build();
     }
   }
