@@ -24,6 +24,7 @@
           v-model="selectedDate"
           :first-day-of-week="1"
           :type="!periodType || periodType === 'WEEK' ? 'date' : 'month'"
+          :locale="lang"
           @input="selectedDateMenu = false" />
       </v-menu>
     </v-card-text>
@@ -294,6 +295,7 @@ export default {
       loading: false,
       sendingRewards: false,
       selectedWallet: null,
+      lang: 'en',
     };
   },
   computed: {
@@ -365,7 +367,7 @@ export default {
     },
     periodDatesDisplay() {
       if (this.selectedStartDate && this.selectedEndDate) {
-        return `${this.selectedStartDate} to ${this.selectedEndDate}`;
+        return `${this.selectedStartDate} ${this.$t('exoplatform.wallet.label.to')} ${this.selectedEndDate}`;
       } else if (this.selectedStartDate) {
         return this.selectedStartDate;
       } else {
@@ -414,6 +416,7 @@ export default {
   methods: {
     refreshDates() {
       this.loading = true;
+      this.lang = eXo.env.portal.language;
       return getRewardDates(new Date(this.selectedDate), this.periodType)
         .then((period) => {
           this.selectedStartDate = this.formatDate(new Date(period.startDateInSeconds * 1000));
@@ -464,9 +467,7 @@ export default {
       if (!date) {
         return null;
       }
-      const dateString = date.toString();
-      // Example: 'Feb 01 2018'
-      return dateString.substring(dateString.indexOf(' ') + 1, dateString.indexOf(':') - 3);
+      return date.toLocaleDateString(eXo.env.portal.language);
     },
   },
 };

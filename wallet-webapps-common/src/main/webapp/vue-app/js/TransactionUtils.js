@@ -2,21 +2,8 @@ import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus, getTransactionReceipt, getTransaction, convertTokenAmountReceived} from './WalletUtils.js';
 import {getSavedContractDetails, retrieveContractDetails} from './TokenUtils.js';
 
-export function getLastNonce(walletAddress) {
-  return getLastPendingTransactionSent(walletAddress)
-    .then((lastPendingTransaction) => {
-      if (!lastPendingTransaction || !lastPendingTransaction.hash) {
-        return;
-      }
-      return getTransaction(lastPendingTransaction.hash);
-    })
-    .then((pendingTransaction) => {
-      // If not pending on blockchain, use auto-increment nonce
-      if (!pendingTransaction || !pendingTransaction.nonce || pendingTransaction.blockNumber) {
-        return;
-      }
-      return pendingTransaction.nonce;
-    })
+export function getNewTransactionNonce(walletAddress) {
+  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending')
     .catch((e) => {
       console.debug('Error getting last nonce of wallet address', walletAddress, e);
     });
@@ -113,6 +100,22 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
   .catch((error) => {
     throw new Error('Error retrieving transactions list', error);
   });
+}
+
+export function getSavedTransactionByHash(hash) {
+  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByHash?hash=${hash}`, {credentials: 'include'})
+    .then((resp) => {
+      if (resp && resp.ok) {
+        const contentType = resp.headers && resp.headers.get('content-type');
+        if (contentType && contentType.indexOf('application/json') !== -1) {
+          return resp.json();
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    });
 }
 
 function loadTransactionReceipt(transactionDetails) {
@@ -443,23 +446,4 @@ function retrieveWalletDetails(transactionDetails, prefix) {
       });
     }
   }
-}
-
-function getLastPendingTransactionSent(address) {
-  return fetch(`/portal/rest/wallet/api/transaction/getLastPendingTransactionSent?address=${address}`, {credentials: 'include'})
-    .then((resp) => {
-      if (resp && resp.ok) {
-        const contentType = resp.headers && resp.headers.get('content-type');
-        if (contentType && contentType.indexOf('application/json') !== -1) {
-          return resp.json();
-        } else {
-          return null;
-        }
-      } else {
-        return null;
-      }
-    })
-    .catch((error) => {
-      throw new Error('Error retrieving last pending transaction', error);
-    });
 }

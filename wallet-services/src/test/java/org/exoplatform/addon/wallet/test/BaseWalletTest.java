@@ -33,9 +33,13 @@ public abstract class BaseWalletTest {
 
   protected static final String    INITIALIZATION_STATE = WalletInitializationState.INITIALIZED.name();
 
+  protected static final String    TYPE                 = WalletType.SPACE.name();
+
   protected static final boolean   IS_ENABLED           = true;
 
   protected static final String    CURRENT_USER         = "root1";
+
+  protected static final String    CURRENT_SPACE        = "space1";
 
   protected List<Serializable>     entitiesToClean      = new ArrayList<>();
 
@@ -288,6 +292,19 @@ public abstract class BaseWalletTest {
     wallet.setEnabled(IS_ENABLED);
     wallet.setInitializationState(INITIALIZATION_STATE);
     return wallet;
+  }
+
+  protected Wallet newWalletSpace() {
+    Wallet walletSpace = new Wallet();
+    walletSpace.setTechnicalId(IDENTITY_ID);
+    walletSpace.setAddress(ADDRESS);
+    walletSpace.setPassPhrase(PHRASE);
+    walletSpace.setEnabled(IS_ENABLED);
+    walletSpace.setId(CURRENT_SPACE);
+    walletSpace.setInitializationState(INITIALIZATION_STATE);
+    walletSpace.setSpaceAdministrator(IS_ENABLED);
+    walletSpace.setType(TYPE);
+    return walletSpace;
   }
 
 }

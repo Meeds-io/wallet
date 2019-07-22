@@ -93,11 +93,6 @@ public class TransactionStorage {
     }
   }
 
-  public TransactionDetail getAddressLastPendingTransactionSent(long networkId, String address) {
-    TransactionEntity transactionEntity = walletTransactionDAO.getAddressLastPendingTransactionSent(networkId, address);
-    return fromEntity(transactionEntity);
-  }
-
   public TransactionDetail getTransactionByHash(String hash) {
     hash = formatTransactionHash(hash);
     TransactionEntity transactionEntity = walletTransactionDAO.getTransactionByHash(hash);
