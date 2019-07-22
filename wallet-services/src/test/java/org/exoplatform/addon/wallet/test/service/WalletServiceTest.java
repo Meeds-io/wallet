@@ -95,6 +95,13 @@ public class WalletServiceTest extends BaseWalletTest {
   @Test
   public void testSaveInitialFundsSettings() {
     WalletService walletService = getService(WalletService.class);
+    try {
+      walletService.saveInitialFundsSettings(null);
+      fail("initialFundsSettings parameter is mandatory");
+    } catch (Exception e) {
+      // Expected, initialFundsSettings parameter is mandatory
+    }
+
     InitialFundsSettings initialFundsSettings = new InitialFundsSettings();
     int tokenAmount = 5000;
     String fundsHolder = "root";
@@ -149,6 +156,13 @@ public class WalletServiceTest extends BaseWalletTest {
   @Test
   public void testSaveUserPreferences() {
     WalletService walletService = getService(WalletService.class);
+
+    try {
+      walletService.saveUserPreferences(CURRENT_USER, null);
+      fail("UserPreferences parameter is mandatory");
+    } catch (Exception e) {
+      // Expected, userPreferences parameter is mandatory
+    }
     WalletSettings userPreferences = new WalletSettings();
     Integer dataVersion = 2;
     String phrase = "save User";
@@ -202,20 +216,28 @@ public class WalletServiceTest extends BaseWalletTest {
   public void testRequestFunds() throws IllegalAccessException {
     WalletService walletService = getService(WalletService.class);
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    try {
+      FundsRequest fundsRequest = new FundsRequest();
+      fundsRequest.setAddress("test");
+      walletService.requestFunds(fundsRequest, CURRENT_USER);
+      fail("Bad request sent to server with unknown sender address");
+    } catch (Exception e) {
+      // Expected, Bad request sent to server with unknown sender address
+    }
+
     FundsRequest fundsRequest = new FundsRequest();
     Double amount = (double) 500;
     String contract = "Contract V1";
-    String receipientType = "root1";
-    String receipient = "root1";
     String message = "Funds request";
     fundsRequest.setAmount(amount);
-    fundsRequest.setReceipientType(receipientType);
+    fundsRequest.setReceipientType(CURRENT_USER);
     fundsRequest.setAddress(ADDRESS);
     fundsRequest.setContract(contract);
-    fundsRequest.setReceipient(receipient);
+    fundsRequest.setReceipient(CURRENT_USER);
     fundsRequest.setMessage(message);
 
     ContractDetail contractDetail = new ContractDetail();
+
     int decimals = 100;
     String name = "Contract";
     String owner = "UserTest";
@@ -229,20 +251,33 @@ public class WalletServiceTest extends BaseWalletTest {
     contractDetail.setOwner(owner);
     contractDetail.setSymbol(symbol);
     contractDetail.setSellPrice(sellPrice);
-    walletService.setConfiguredContractDetail(contractDetail);
 
     Wallet wallet = newWallet();
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
     org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER);
     ConversationState state = new ConversationState(identity);
-    state.setCurrent(state);
+    ConversationState.setCurrent(state);
 
+    try {
+      walletService.requestFunds(fundsRequest, "root3");
+      fail("Bad request sent to server with invalid sender type or id");
+    } catch (Exception e) {
+      // Expected, Bad request sent to server with invalid sender type or id
+    }
+
+    try {
+      walletService.requestFunds(fundsRequest, CURRENT_USER);
+      fail("Bad request sent to server with invalid contract address");
+    } catch (Exception e) {
+      // Expected, Bad request sent to server with invalid contract address
+    }
+    walletService.setConfiguredContractDetail(contractDetail);
     walletService.requestFunds(fundsRequest, CURRENT_USER);
 
     assertEquals("Amount are not equals", amount, fundsRequest.getAmount());
     assertEquals("contract are not equals", contract, fundsRequest.getContract());
-    assertEquals("receipientType are not equals", receipientType, fundsRequest.getReceipientType());
-    assertEquals("receipient are not equals", receipient, fundsRequest.getReceipient());
+    assertEquals("receipientType are not equals", CURRENT_USER, fundsRequest.getReceipientType());
+    assertEquals("receipient are not equals", CURRENT_USER, fundsRequest.getReceipient());
     assertEquals("message are not equals", message, fundsRequest.getMessage());
     entitiesToClean.add(wallet);
   }
@@ -297,6 +332,13 @@ public class WalletServiceTest extends BaseWalletTest {
     notification.setTo(CURRENT_USER);
     notification.setTitle(title);
     webNotification.save(notification);
+    try {
+      walletService.markFundRequestAsSent(notification.getId(), "User");
+      fail("Bad request sent to server with invalid contract address");
+    } catch (Exception e) {
+      // Expected, Bad request sent to server with invalid contract address
+    }
+
     walletService.markFundRequestAsSent(notification.getId(), CURRENT_USER);
     assertEquals(CURRENT_USER, notification.getFrom());
     assertEquals("Notification title are not equals", title, notification.getTitle());
@@ -314,11 +356,18 @@ public class WalletServiceTest extends BaseWalletTest {
     WebNotificationStorage webNotification = getService(WebNotificationStorage.class);
 
     String title = "Notification";
+
     NotificationInfo notification = new NotificationInfo().key(PluginKey.key(FUNDS_REQUEST_NOTIFICATION_ID));
     notification.setFrom(CURRENT_USER);
     notification.setTo(CURRENT_USER);
     notification.setTitle(title);
     webNotification.save(notification);
+    try {
+      walletService.isFundRequestSent(notification.getId(), "root0");
+      fail("Target user of notification is different from current user");
+    } catch (Exception e) {
+      // Expected, Target user of notification is different from current user
+    }
     Boolean isFundsRequestSent = walletService.isFundRequestSent(notification.getId(), CURRENT_USER);
     assertEquals("ContractType are not equals", isFundsRequestSent, false);
 

@@ -35,7 +35,11 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public Space getSpaceByPrettyName(String spacePrettyName) {
-    throw new UnsupportedOperationException();
+    Space space = new Space();
+    space.setPrettyName(spacePrettyName);
+    space.setId(String.valueOf(spacePrettyName.charAt(spacePrettyName.length() - 1)));
+    space.setGroupId("/spaces/" + spacePrettyName);
+    return space;
   }
 
   public Space getSpaceByGroupId(String groupId) {
@@ -116,7 +120,13 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public Space updateSpace(Space existingSpace) {
-    throw new UnsupportedOperationException();
+    String SpacePrettyName = existingSpace.getPrettyName();
+    String description = "updateSpace";
+    existingSpace.setPrettyName(existingSpace.getPrettyName());
+    existingSpace.setDescription(description);
+    existingSpace.setId(String.valueOf(SpacePrettyName.charAt(SpacePrettyName.length() - 1)));
+    existingSpace.setGroupId("/spaces/" + SpacePrettyName);
+    return existingSpace;
   }
 
   public Space updateSpaceAvatar(Space existingSpace) {

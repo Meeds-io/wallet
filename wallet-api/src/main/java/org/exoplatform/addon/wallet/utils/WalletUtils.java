@@ -349,9 +349,6 @@ public class WalletUtils {
   }
 
   public static final boolean isUserRewardingAdmin(String username) {
-    if (StringUtils.isBlank(username)) {
-      return false;
-    }
     return isUserMemberOfGroupOrUser(username, REWARDINGS_GROUP);
   }
 
