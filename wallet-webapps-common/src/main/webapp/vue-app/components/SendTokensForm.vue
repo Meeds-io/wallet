@@ -90,13 +90,14 @@
     <v-card-actions>
       <v-spacer />
       <button
-        :disabled="loading || !recipient || !amount || !canSendToken"
+        :disabled="disabled"
         :loading="loading"
         class="btn btn-primary mr-1"
         @click="sendTokens">
         {{ $t('exoplatform.wallet.button.send') }}
-      </button> <button
-        :disabled="loading || !recipient || !amount || !canSendToken"
+      </button>
+      <button
+        :disabled="disabled"
         class="btn"
         color="secondary"
         @click="showQRCodeModal = true">
@@ -172,6 +173,9 @@ export default {
     };
   },
   computed: {
+    disabled() {
+      return !this.account || this.loading || !this.recipient || !this.amount || !this.canSendToken || (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length));
+    },
     transactionFeeString() {
       if (this.transactionFeeToken) {
         if (this.contractDetails) {
