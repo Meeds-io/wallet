@@ -1,8 +1,7 @@
 import * as constants from './Constants';
 import {searchWalletByTypeAndId, saveNewAddress} from './AddressRegistry';
 
-const DECIMALS = 3;
-const DECIMALS_POW = Math.pow(10, DECIMALS);
+const DEFAULT_DECIMALS = 3;
 
 export function etherToFiat(amount) {
   if (window.walletSettings.fiatPrice && amount) {
@@ -616,35 +615,21 @@ export function estimateTransactionFeeFiat(gas, gasPrice) {
 
 export function toFixed(value, decimals) {
   if (!decimals) {
-    decimals = 3;
+    decimals = DEFAULT_DECIMALS;
   }
-  const number = value ? Number(String(value).trim()) : 0;
-  if (Number.isNaN(number) || !Number.isFinite(number) || !number) {
-    return 0;
-  }
-  value = String(number);
-  const toBN = LocalWeb3.utils.toBN;
-  const negative = value.substring(0, 1) === '-';
-  if (negative) {
-    value = value.substring(1);
-  }
-  const comps = value.split('.');
-  let integer = comps[0];
-  let fraction = comps.length > 0 ? comps[1] : '0';
-  if (fraction && fraction.length > decimals) {
-    fraction = String(Math.round(Number('0.' + fraction) * DECIMALS_POW) / DECIMALS_POW).substring(2); // eslint-disable-line prefer-template
-  }
-  if (!fraction || Number(fraction) === 0) {
-    fraction = null;
-  }
-  integer = toBN(integer);
-  if (negative) {
-    integer = integer.mul(-1);
-  }
-  if (fraction && fraction.length) {
-    return `${integer}.${fraction}`;
-  } else {
-    return integer.toString();
+  try {
+    let fixedDecimal = Number.parseFloat(value).toFixed(decimals);
+    if (fixedDecimal.indexOf('.0') >= 0) {
+      const comps = fixedDecimal.split('.');
+      const fraction = Number.parseFloat(`0.${comps[1]}`);
+      if (!fraction) {
+        fixedDecimal = comps[0];
+      }
+    }
+    return fixedDecimal;
+  } catch (e) {
+    console.error('Error parsing value ', value, ' same value will be retruned', e);
+    return value;
   }
 }
 
