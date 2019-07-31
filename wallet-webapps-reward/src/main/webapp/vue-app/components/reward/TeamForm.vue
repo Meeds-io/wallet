@@ -455,7 +455,7 @@ export default {
         return;
       }
 
-      if (this.teams && this.teams.length) {
+      if (this.teams && this.teams.length && (!this.id || this.name !== this.team.name)) {
         let nameAlreadyExists = false;
         this.teams.forEach((team) => {
           nameAlreadyExists = nameAlreadyExists || team.name.toLowerCase() === this.name.toLowerCase();
