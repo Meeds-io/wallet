@@ -41,8 +41,14 @@ public class RewardReminderJob implements Job {
   public void execute(JobExecutionContext context) throws JobExecutionException {
     ExoContainer currentContainer = ExoContainerContext.getCurrentContainer();
     ExoContainerContext.setCurrentContainer(container);
+
     RequestLifeCycle.begin(this.container);
     try {
+      // Service not yet instanciated from wallet-commons WAR servlet
+      if (getWalletTaskService() == null) {
+        return;
+      }
+
       RewardSettings rewardSettings = getRewardSettingsService().getSettings();
       RewardPeriodType periodType = rewardSettings == null ? null : rewardSettings.getPeriodType();
       if (rewardSettings == null || periodType == null) {
