@@ -82,6 +82,18 @@ public interface WalletTokenAdminService {
   TransactionDetail sendEther(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
   /**
+   * Send token (on blockchain) to a receiver wallet address using 'Admin'
+   * wallet. The transaction issuer, label and message will be stored in
+   * transaction details inside eXo server only.
+   * 
+   * @param transactionDetail
+   * @param issuerUsername
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
+   */
+  TransactionDetail sendToken(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
+
+  /**
    * Get token balance of a wallet address (on blockchain)
    * 
    * @param address

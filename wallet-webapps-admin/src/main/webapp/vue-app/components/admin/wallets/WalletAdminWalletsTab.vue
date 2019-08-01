@@ -222,18 +222,25 @@
                   <v-divider />
 
                   <template v-if="props.item.type === 'user' || props.item.type === 'space'">
-                    <template v-if="useWalletAdmin && contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
-                      <v-list-tile @click="openAcceptInitializationModal(props.item)">
-                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-tile-title>
-                      </v-list-tile>
-                      <v-list-tile v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
-                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-tile-title>
-                      </v-list-tile>
-                      <v-divider />
-                    </template>
-                    <template v-else-if="useWalletAdmin && Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
-                      <v-list-tile @click="openAcceptSendEtherModal(props.item)">
-                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
+                    <template v-if="useWalletAdmin">
+                      <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
+                        <v-list-tile @click="openAcceptInitializationModal(props.item)">
+                          <v-list-tile-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-tile-title>
+                        </v-list-tile>
+                        <v-list-tile v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
+                          <v-list-tile-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-tile-title>
+                        </v-list-tile>
+                        <v-divider />
+                      </template>
+                      <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                        <v-list-tile @click="openSendEtherModal(props.item)">
+                          <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
+                        </v-list-tile>
+                        <v-divider />
+                      </template>
+
+                      <v-list-tile @click="openSendTokenModal(props.item)">
+                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
                     </template>
@@ -266,6 +273,10 @@
       ref="initAccountModal"
       @sent="walletPendingTransaction" />
 
+    <send-token-modal
+      ref="sendTokenModal"
+      :contract-details="contractDetails"
+      @sent="walletPendingTransaction" />
     <send-ether-modal
       ref="sendEtherModal"
       @sent="walletPendingTransaction" />
@@ -298,11 +309,13 @@
 <script>
 import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
 import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
+import SendTokenModal from './modals/WalletAdminSendTokenModal.vue';
 
 export default {
   components: {
     InitializeAccountModal,
     SendEtherModal,
+    SendTokenModal,
   },
   props: {
     loading: {
@@ -744,7 +757,11 @@ export default {
       this.walletToProcess = wallet;
       this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
     },
-    openAcceptSendEtherModal(wallet) {
+    openSendTokenModal(wallet) {
+      this.walletToProcess = wallet;
+      this.$refs.sendTokenModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.tokenAmount);
+    },
+    openSendEtherModal(wallet) {
       this.walletToProcess = wallet;
       this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount);
     },

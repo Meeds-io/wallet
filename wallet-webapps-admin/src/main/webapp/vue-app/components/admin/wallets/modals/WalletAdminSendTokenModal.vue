@@ -16,10 +16,10 @@
           @click="dialog = false"></a>
         <span class="PopupTitle popupTitle">
           <template v-if="wallet && wallet.name">
-            {{ $t('exoplatform.wallet.title.sendEtherModalForWallet', {0: wallet.name}) }}
+            {{ $t('exoplatform.wallet.title.sendTokenModalForWallet', {0: contractDetails && contractDetails.name, 1: wallet.name}) }}
           </template>
           <template v-else>
-            {{ $t('exoplatform.wallet.title.sendEtherModal') }}
+            {{ $t('exoplatform.wallet.title.sendTokenModal', {0: contractDetails && contractDetails.name}) }}
           </template>
         </span>
       </div>
@@ -37,11 +37,11 @@
             ">
             <v-text-field
               v-if="dialog"
-              v-model="etherAmountLabel"
+              v-model="tokenAmountLabel"
               :autofocus="dialog"
-              :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
-              :placeholder="$t('exoplatform.wallet.label.etherAmount')"
-              name="etherAmount"
+              :label="$t('exoplatform.wallet.label.tokenAmount', {0: contractDetails && contractDetails.name})"
+              :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceholder', {0: contractDetails && contractDetails.name})"
+              name="tokenAmount"
               disabled
               class="mt-3" />
 
@@ -49,8 +49,8 @@
               v-if="dialog"
               v-model="transactionLabel"
               :disabled="loading"
-              :label="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
-              :placeholder="$t('exoplatform.wallet.label.transactionLabel')"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
               type="text"
               class="mt-3" />
@@ -93,43 +93,47 @@
 <script>
 
 export default {
+  props: {
+    contractDetails: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+  },
   data() {
     return {
       dialog: null,
       loading: false,
       wallet: null,
-      etherAmount: null,
+      tokenAmount: null,
       transactionLabel: null,
       transactionMessage: null,
       error: null,
     };
   },
   computed: {
-    etherAmountLabel() {
-      return this.etherAmountInFiat ? `${this.etherAmount} (${this.etherAmountInFiat} ${window.walletSettings.fiatSymbol})` : this.etherAmount;
-    },
-    etherAmountInFiat() {
-      return (this.etherAmount && this.walletUtils.etherToFiat(this.etherAmount)) || 0;
+    tokenAmountLabel() {
+      return `${this.tokenAmount} ${this.contractDetails && this.contractDetails.symbol}`;
     },
   },
   methods: {
-    open(wallet, initialFundsMessage, etherAmount) {
+    open(wallet, initialFundsMessage, tokenAmount) {
       if (!wallet) {
         return;
       }
       this.wallet = wallet;
-      this.etherAmount = etherAmount;
+      this.tokenAmount = tokenAmount;
       this.transactionLabel = `Initialize wallet of ${this.wallet.type} ${this.wallet.name}`;
       this.transactionMessage = initialFundsMessage;
 
       this.error = null;
       this.loading = false;
-
       this.dialog = true;
     },
     send() {
       this.loading = true;
-      fetch('/portal/rest/wallet/api/admin/transaction/sendEther', {
+      fetch('/portal/rest/wallet/api/admin/transaction/sendToken', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -144,7 +148,7 @@ export default {
         if (resp && resp.ok) {
           return resp.text();
         } else {
-          throw new Error(`Error sending ether to wallet ${this.wallet.address}`);
+          throw new Error(`Error sending token to wallet ${this.wallet.address}`);
         }
       }).then((hash) => {
         this.$emit('sent', hash);

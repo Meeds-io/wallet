@@ -388,6 +388,58 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   @ExoBlockchainTransaction
+  public final TransactionDetail sendToken(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
+    if (transactionDetail == null) {
+      throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
+    }
+    String receiverAddress = transactionDetail.getTo();
+    if (StringUtils.isBlank(receiverAddress)) {
+      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
+    }
+    if (transactionDetail.getContractAmount() <= 0) {
+      throw new IllegalArgumentException("token amount parameter has to be positive");
+    }
+
+    checkAdminWalletIsValid();
+
+    setIssuer(transactionDetail, issuerUsername);
+
+    if (!isApprovedAccount(receiverAddress)) {
+      String receiver = transactionDetail.getToWallet() == null
+          || StringUtils.isBlank(transactionDetail.getToWallet().getName()) ? receiverAddress
+                                                                            : transactionDetail.getToWallet().getName();
+      throw new IllegalStateException("Wallet receiver " + receiver + " is not approved yet, thus no transfer is allowed");
+    }
+
+    int decimals = getDecimals();
+    BigInteger tokenAmount = transactionDetail.getContractAmountDecimal(decimals);
+
+    String contractAddress = getContractAddress();
+    if (StringUtils.isBlank(contractAddress)) {
+      throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
+    }
+    String transactionHash = executeTokenTransaction(contractAddress,
+                                                     ERTTokenV2.FUNC_TRANSFER,
+                                                     receiverAddress,
+                                                     tokenAmount);
+
+    if (StringUtils.isBlank(transactionHash)) {
+      throw new IllegalStateException(TRANSACTION_HASH_IS_EMPTY + transactionDetail);
+    }
+    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(getAdminWalletAddress());
+    transactionDetail.setContractAddress(contractAddress);
+    transactionDetail.setContractMethodName(ERTTokenV2.FUNC_TRANSFER);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setAdminOperation(false);
+    transactionDetail.setPending(true);
+    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    return transactionDetail;
+  }
+
+  @Override
+  @ExoBlockchainTransaction
   public final TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
     if (transactionDetail == null) {
       throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
@@ -400,7 +452,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalArgumentException("reward amount parameter has to be a positive");
     }
     if (transactionDetail.getValue() <= 0) {
-      throw new IllegalArgumentException("tokenamount parameter has to be a positive");
+      throw new IllegalArgumentException("token amount parameter has to be a positive");
     }
 
     checkAdminWalletIsValid();
