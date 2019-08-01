@@ -108,13 +108,13 @@
                   <v-icon color="orange">
                     warning
                   </v-icon>
-                  {{ $t('exoplatform.wallet.warning.lowEtherAmiount') }}
+                  {{ $t('exoplatform.wallet.warning.lowEtherAmount') }}
                 </template>
                 <template v-else-if="Number(props.item.tokenBalance) === 0">
                   <v-icon color="orange">
                     warning
                   </v-icon>
-                  {{ $t('exoplatform.wallet.warning.lowTokenAmiount', {0: contractDetails && contractDetails.name}) }}
+                  {{ $t('exoplatform.wallet.warning.lowTokenAmount', {0: contractDetails && contractDetails.name}) }}
                 </template>
                 <v-icon
                   v-else

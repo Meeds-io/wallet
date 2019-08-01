@@ -367,7 +367,7 @@ public class WalletUtils {
       throw new IllegalArgumentException("Permission expression is mandatory");
     }
     if (StringUtils.isBlank(username)) {
-      throw new IllegalArgumentException("Username is mandatory");
+      return false;
     }
 
     org.exoplatform.services.security.Identity identity = CommonsUtils.getService(IdentityRegistry.class).getIdentity(username);

@@ -172,7 +172,6 @@ export default {
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
             this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
-            throw error;
           }
         })
         .then(() => this.reloadContract())

@@ -22,6 +22,7 @@
       v-show="selectedTeam"
       ref="teamModal"
       :team="selectedTeam"
+      :teams="teams"
       :wallet-rewards="walletRewards"
       @saved="refreshTeams(true)"
       @close="selectedTeam = null" />

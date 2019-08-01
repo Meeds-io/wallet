@@ -87,7 +87,8 @@
         class="btn btn-primary mr-1"
         @click="sendEther">
         {{ $t('exoplatform.wallet.button.send') }}
-      </button> <button
+      </button>
+      <button
         :disabled="disabled"
         class="btn"
         color="secondary"
@@ -164,7 +165,7 @@ export default {
   },
   computed: {
     disabled() {
-      return !this.account || this.loading || !this.recipient || !this.amount;
+      return !this.account || this.loading || !this.recipient || !this.amount || (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length));
     }
   },
   watch: {

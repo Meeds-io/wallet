@@ -28,7 +28,7 @@
       {{ displayName }} <span class="red--text">({{ $t('exoplatform.wallet.label.disabledPool') }})</span>
     </template>
     <template v-else-if="initializationState !== 'INITIALIZED'">
-      {{ displayName }} <span class="orange--text">({{ $t('exoplatform.wallet.label.exoplatform.wallet.label.notInitialized') }})</span>
+      {{ displayName }} <span class="orange--text">({{ $t('exoplatform.wallet.label.notInitialized') }})</span>
     </template>
     <template v-else>
       {{ displayName }}
@@ -39,7 +39,7 @@
       {{ displayName }}
     </template>
     <span v-else>
-      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.exoplatform.wallet.label.disabledWallet') }})
+      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disabledWallet') }})
     </span>
   </code>
   <wallet-address

@@ -555,14 +555,14 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws InterruptedException,
                                                                                                IOException {
-    if (contractTransactionManager instanceof FastRawTransactionManager) {
+    if (writeOperation && contractTransactionManager instanceof FastRawTransactionManager) {
       FastRawTransactionManager fastRawTransactionManager = (FastRawTransactionManager) contractTransactionManager;
       BigInteger transactionCount = getClientConnector().getWeb3j()
                                                         .ethGetTransactionCount(fastRawTransactionManager.getFromAddress(),
                                                                                 DefaultBlockParameterName.PENDING)
                                                         .send()
                                                         .getTransactionCount();
-      fastRawTransactionManager.setNonce(transactionCount.add(BigInteger.valueOf(1)));
+      fastRawTransactionManager.setNonce(transactionCount.subtract(BigInteger.valueOf(1)));
     }
     // Retrieve cached contract instance
     if (this.ertInstance != null) {
