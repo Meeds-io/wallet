@@ -49,7 +49,7 @@
                 :open="showSettingsModal"
                 :app-loading="loading"
                 :display-reset-option="displayWalletResetOption"
-                @copied="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
+                @backed-up="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
                 @close="showSettingsModal = false"
                 @settings-changed="init()" />
             </v-toolbar>
@@ -338,6 +338,7 @@ export default {
           } else {
             this.isWalletEnabled = true;
             this.isSpaceAdministrator = this.settings.wallet.spaceAdministrator;
+
             if (this.settings.wallet.address) {
               this.$forceUpdate();
             } else {
@@ -347,7 +348,9 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          return this.walletUtils.initWeb3(this.isSpace);
+          if (this.isReadOnly || !window.localWeb3) {
+            return this.walletUtils.initWeb3(this.isSpace);
+          }
         })
         .then((result, error) => {
           this.handleError(error);

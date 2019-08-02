@@ -114,6 +114,17 @@ public interface WalletAccountService {
   void saveWallet(Wallet wallet);
 
   /**
+   * Change wallet backup state
+   * 
+   * @param identityId user/space technical identty id
+   * @param backupState true if backedUp else false
+   * @param currentUser current username saving wallet backup state
+   * @return modified {@link Wallet}
+   * @throws IllegalAccessException when currentUser is not owner of wallet
+   */
+  Wallet saveWalletBackupState(String currentUser, long identityId, boolean backupState) throws IllegalAccessException;
+
+  /**
    * Save wallet address to currentUser or to a space managed by current user
    * 
    * @param wallet {@link Wallet} wallet details to save

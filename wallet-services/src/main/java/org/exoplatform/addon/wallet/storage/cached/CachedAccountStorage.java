@@ -52,6 +52,17 @@ public class CachedAccountStorage extends WalletStorage {
   }
 
   @Override
+  public Wallet saveWalletBackupState(long identityId, boolean backupState) {
+    Wallet wallet = super.saveWalletBackupState(identityId, backupState);
+
+    // Remove cached wallet
+    this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
+    this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
+
+    return wallet;
+  }
+
+  @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
     String oldAddress = null;
     if (!isNew) {

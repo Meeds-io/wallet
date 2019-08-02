@@ -79,6 +79,29 @@ public class WalletStorageTest extends BaseWalletTest {
   }
 
   /**
+   * Check wallet storage: save wallet backup state
+   */
+  @Test
+  public void testSaveWalletBackupState() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Wallet wallet = newWallet();
+    assertFalse(wallet.isBackedUp());
+
+    wallet = walletStorage.saveWallet(wallet, true);
+    this.entitiesToClean.add(wallet);
+
+    assertNotNull(wallet);
+    assertFalse(wallet.isBackedUp());
+
+    wallet = walletStorage.saveWalletBackupState(wallet.getTechnicalId(), true);
+    assertTrue(wallet.isBackedUp());
+
+    wallet = walletStorage.saveWalletBackupState(wallet.getTechnicalId(), false);
+    assertFalse(wallet.isBackedUp());
+  }
+
+  /**
    * Check wallet storage: remove
    */
   @Test
