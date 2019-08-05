@@ -150,6 +150,7 @@
             @item-selected="addMember($event)" />
           <v-data-table
             :items="membersObjects"
+            :pagination.sync="pagination"
             item-key="id"
             class="elevation-1 mt-2"
             sortable>
@@ -278,6 +279,9 @@ export default {
     managerObject: null,
     members: [],
     membersObjects: [],
+    pagination: {
+      rowsPerPage: 25,
+    },
     rewardTeamSpace: null,
     rewardTeamSpaceId: null,
     rewardTeamSpaceOptions: [],
