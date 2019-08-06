@@ -217,7 +217,6 @@ export default {
       }
     },
     selectedValue() {
-      // this.$refs.selectAutoComplete.isFocused = false;
       this.addressLoad = 'loading';
       if (this.selectedValue) {
         const isAddress = this.selectedValue.indexOf('_') < 0;
@@ -255,6 +254,7 @@ export default {
                   id: id,
                   type: type,
                   name: data.name,
+                  id_type: `${type}_${id}`,
                   address: address,
                 });
               } else {
@@ -263,6 +263,7 @@ export default {
                   id: id,
                   type: type,
                   name: data && data.name,
+                  id_type: `${type}_${id}`,
                   address: null,
                 });
               }
@@ -316,18 +317,20 @@ export default {
     },
     selectItem(id, type) {
       const isAddress = id && window.localWeb3.utils.isAddress(id);
+      const contractAddress = window.walletSettings && window.walletSettings.contractAddress;
       if (!id) {
         this.$refs.selectAutoComplete.selectItem(null);
-      } else if (isAddress && window.walletSettings && window.walletSettings.contractDetail && id.trim().toLowerCase() === window.walletSettings.contractAddress) {
+      } else if (isAddress && contractAddress && id.trim().toLowerCase() === contractAddress.trim().toLowerCase()) {
         const item = {
-            address: id,
-            name: window.walletSettings.contractDetail.name,
-            id: id,
-          };
-          this.items.push(item);
-          if (this.$refs.selectAutoComplete) {
-            this.$refs.selectAutoComplete.selectItem(item);
-          }
+          address: contractAddress,
+          id_type: contractAddress,
+          name: window.walletSettings.contractDetail.name,
+          id: contractAddress,
+        };
+        this.items.push(item);
+        if (this.$refs.selectAutoComplete) {
+          this.$refs.selectAutoComplete.selectItem(item);
+        }
       } else if (type) {
         return searchWalletByTypeAndId(id, type).then((item) => {
           item.id_type = item.type && item.id ? `${item.type}_${item.id}` : null;
