@@ -34,6 +34,7 @@ import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletService;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
@@ -641,6 +642,20 @@ public class WalletUtils {
 
   public static final boolean isWalletEmpty(Wallet wallet) {
     return wallet == null || StringUtils.isBlank(wallet.getAddress());
+  }
+
+  public static final boolean isAdminAccount(String address) {
+    try {
+      return getWalletTokenAdminService().isAdminAccount(address);
+    } catch (Exception e) {
+      // Can happen when wallet admin account is inaccessible or not set
+      LOG.debug("Error retrievng wallet admin address", e);
+      return false;
+    }
+  }
+
+  private static final WalletTokenAdminService getWalletTokenAdminService() {
+    return CommonsUtils.getService(WalletTokenAdminService.class);
   }
 
   private static final WalletService getWalletService() {

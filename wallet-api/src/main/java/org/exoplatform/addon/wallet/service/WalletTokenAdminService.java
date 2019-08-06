@@ -90,8 +90,9 @@ public interface WalletTokenAdminService {
    * @param issuerUsername
    * @return {@link TransactionDetail} with the hash of the transaction sent in
    *         blockchain
+   * @throws Exception
    */
-  TransactionDetail sendToken(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
+  TransactionDetail sendToken(TransactionDetail transactionDetail, String issuerUsername) throws Exception; // NOSONAR
 
   /**
    * Get token balance of a wallet address (on blockchain)
