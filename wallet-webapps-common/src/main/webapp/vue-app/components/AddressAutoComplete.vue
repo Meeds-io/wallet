@@ -223,7 +223,7 @@ export default {
         const isAddress = this.selectedValue.indexOf('_') < 0;
         const type = isAddress ? null : this.selectedValue.substring(0, this.selectedValue.indexOf('_'));
         const id = isAddress ? this.selectedValue : this.selectedValue.substring(this.selectedValue.indexOf('_') + 1);
-        if (this.noAddress || isAddress) {
+        if (!this.noAddress && isAddress) {
           return searchWalletByAddress(this.selectedValue)
             .then(details => {
               if(details && details.type) {
@@ -233,6 +233,7 @@ export default {
                   type: details.type,
                   address: details.address,
                   enabled: details.enabled,
+                  name: details.name,
                   id_type: `${details.type}_${details.id}`,
                 });
               } else {
@@ -253,6 +254,7 @@ export default {
                 this.$emit('item-selected', {
                   id: id,
                   type: type,
+                  name: data.name,
                   address: address,
                 });
               } else {
@@ -260,6 +262,7 @@ export default {
                 this.$emit('item-selected', {
                   id: id,
                   type: type,
+                  name: data && data.name,
                   address: null,
                 });
               }

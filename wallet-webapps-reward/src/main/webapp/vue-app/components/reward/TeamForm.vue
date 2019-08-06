@@ -443,13 +443,23 @@ export default {
       if (!memberObject || !memberObject.id) {
         return;
       }
-      if (this.members) {
-        if (this.members.indexOf(memberObject.id) < 0) {
-          this.members.push(memberObject.id);
-        }
+      this.error = '';
+
+      // Check if member already exists in other pool
+      let otherDuplicatedTeams = this.teams || [];
+      otherDuplicatedTeams = otherDuplicatedTeams.filter(team => team.id && team.id !== this.team.id && team.members && team.members.filter(member => member.id === memberObject.id).length);
+      if (otherDuplicatedTeams && otherDuplicatedTeams.length) {
+        this.error = this.$t('exoplatform.wallet.warning.memberDuplicatedInOtherPool', {0: memberObject.name, 1: otherDuplicatedTeams[0].name});
       } else {
-        this.members = [memberObject.id];
+        if (this.members) {
+          if (this.members.indexOf(memberObject.id) < 0) {
+            this.members.push(memberObject.id);
+          }
+        } else {
+          this.members = [memberObject.id];
+        }
       }
+
       this.$refs.memberAutocomplete.selectItem(null);
     },
     save() {
@@ -459,6 +469,7 @@ export default {
         return;
       }
 
+      // Check team name
       if (this.teams && this.teams.length && (!this.id || this.name !== this.team.name)) {
         let nameAlreadyExists = false;
         this.teams.forEach((team) => {

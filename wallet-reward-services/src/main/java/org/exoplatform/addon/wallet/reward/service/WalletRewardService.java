@@ -213,6 +213,9 @@ public class WalletRewardService implements RewardService {
     List<RewardTeam> teams = rewardTeamService.getTeams();
     for (RewardTeam rewardTeam : teams) {
       List<RewardTeamMember> members = rewardTeam.getMembers();
+      if (members == null) {
+        continue;
+      }
       for (RewardTeamMember teamMember : members) {
         WalletReward walletReward = walletRewards.stream()
                                                  .filter(walletRewardTmp -> walletRewardTmp.getWallet()
@@ -488,6 +491,9 @@ public class WalletRewardService implements RewardService {
     // Compute teams budget with fixed amount
     for (RewardTeam rewardTeam : teams) {
       RewardBudgetType teamBudgetType = rewardTeam.getRewardType();
+      if (rewardTeam.getMembers() == null || rewardTeam.getMembers().isEmpty()) {
+        continue;
+      }
       double totalTeamPoints = rewardTeam.getMembers()
                                          .stream()
                                          .collect(Collectors.summingDouble(member -> earnedPoints.get(member.getIdentityId())));
@@ -525,14 +531,16 @@ public class WalletRewardService implements RewardService {
       double remaingBudgetForComputedTeams = totalTeamsBudget - totalFixedTeamsBudget;
       double budgetPerTeamMember = remaingBudgetForComputedTeams / computedRecipientsCount;
       computedBudgetTeams.forEach(rewardTeam -> {
-        double totalTeamBudget = budgetPerTeamMember * rewardTeam.getMembers().size();
-        Double totalTeamPoints = totalPointsPerTeam.get(rewardTeam.getId());
-        addTeamRewardRepartition(rewardTeam,
-                                 totalTeamBudget,
-                                 totalTeamPoints,
-                                 pluginId,
-                                 earnedPoints,
-                                 rewardMemberDetails);
+        if (rewardTeam.getMembers() != null && !rewardTeam.getMembers().isEmpty()) {
+          double totalTeamBudget = budgetPerTeamMember * rewardTeam.getMembers().size();
+          Double totalTeamPoints = totalPointsPerTeam.get(rewardTeam.getId());
+          addTeamRewardRepartition(rewardTeam,
+                                   totalTeamBudget,
+                                   totalTeamPoints,
+                                   pluginId,
+                                   earnedPoints,
+                                   rewardMemberDetails);
+        }
       });
     }
   }
@@ -568,7 +576,9 @@ public class WalletRewardService implements RewardService {
     while (teamsIterator.hasNext()) {
       RewardTeam rewardTeam = teamsIterator.next();
       List<RewardTeamMember> members = rewardTeam.getMembers();
-      if (members != null && !members.isEmpty()) {
+      if (members == null || members.isEmpty()) {
+        teamsIterator.remove();
+      } else {
         Iterator<RewardTeamMember> membersIterator = members.iterator();
         while (membersIterator.hasNext()) {
           RewardTeamMember member = membersIterator.next();
@@ -582,9 +592,6 @@ public class WalletRewardService implements RewardService {
             membersIterator.remove();
           }
         }
-      }
-      if (members == null || members.isEmpty()) {
-        teamsIterator.remove();
       }
     }
     return identityIds;
@@ -635,7 +642,7 @@ public class WalletRewardService implements RewardService {
                                         String pluginId,
                                         Map<Long, Double> earnedPoints,
                                         Set<WalletPluginReward> rewardMemberDetails) {
-    if (rewardTeam.getMembers().isEmpty() || totalTeamBudget <= 0 || totalTeamPoints <= 0) {
+    if (rewardTeam.getMembers() == null || rewardTeam.getMembers().isEmpty() || totalTeamBudget <= 0 || totalTeamPoints <= 0) {
       return;
     }
 
