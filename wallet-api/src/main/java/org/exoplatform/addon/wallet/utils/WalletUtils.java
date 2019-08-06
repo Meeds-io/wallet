@@ -661,14 +661,7 @@ public class WalletUtils {
     }
   }
 
-  public static final String getResourceBundleKey(Wallet wallet, String key) {
-    Locale locale = null;
-    if (WalletType.isUser(wallet.getType())) {
-      locale = getUserLocale(wallet.getId());
-    } else {
-      locale = Locale.getDefault();
-    }
-
+  public static final String getResourceBundleKey(Locale locale, String key) {
     ResourceBundle resourceBundle = CommonsUtils.getService(ResourceBundleService.class)
                                                 .getResourceBundle(RESOURCE_BUNDLE_NAME, locale);
     String label = resourceBundle == null ? null : resourceBundle.getString(key);
@@ -678,6 +671,16 @@ public class WalletUtils {
       label = resourceBundle == null ? null : resourceBundle.getString(key);
     }
     return label;
+  }
+
+  public static Locale getLocale(Wallet wallet) {
+    Locale locale = null;
+    if (WalletType.isUser(wallet.getType())) {
+      locale = getUserLocale(wallet.getId());
+    } else {
+      locale = Locale.getDefault();
+    }
+    return locale;
   }
 
   public static final Locale getUserLocale(String username) {

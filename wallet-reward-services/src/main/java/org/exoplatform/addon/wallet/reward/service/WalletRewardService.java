@@ -593,12 +593,13 @@ public class WalletRewardService implements RewardService {
 
   private String getTransactionLabel(WalletReward walletReward, ContractDetail contractDetail, RewardPeriod periodOfTime) {
     Wallet wallet = walletReward.getWallet();
-    String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_LABEL_KEY);
+    Locale locale = getLocale(wallet);
+    String label = getResourceBundleKey(locale, REWARD_TRANSACTION_LABEL_KEY);
     if (StringUtils.isBlank(label)) {
       return "";
     }
     return label.replace("{0}", wallet.getName())
-                .replace("{1}", String.valueOf(walletReward.getTokensToSend()))
+                .replace("{1}", formatNumber(walletReward.getTokensToSend(), locale.getLanguage()))
                 .replace("{2}", contractDetail.getSymbol())
                 .replace("{3}", formatTime(periodOfTime.getStartDateInSeconds()))
                 .replace("{4}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
@@ -607,30 +608,32 @@ public class WalletRewardService implements RewardService {
   private String getTransactionMessage(WalletReward walletReward, ContractDetail contractDetail, RewardPeriod periodOfTime) {
     StringBuilder transactionMessage = new StringBuilder();
     Set<WalletPluginReward> walletRewardsByPlugin = walletReward.getRewards();
+    Locale locale = getLocale(walletReward.getWallet());
+
     for (WalletPluginReward walletPluginReward : walletRewardsByPlugin) {
       Wallet wallet = walletReward.getWallet();
       String transactionMessagePart = null;
       if (walletPluginReward.isPoolsUsed()) {
-        String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY);
+        String label = getResourceBundleKey(locale, REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY);
         if (StringUtils.isBlank(label)) {
           continue;
         }
-        transactionMessagePart = label.replace("{0}", String.valueOf(walletPluginReward.getAmount()))
+        transactionMessagePart = label.replace("{0}", formatNumber(walletPluginReward.getAmount(), locale.getLanguage()))
                                       .replace("{1}", contractDetail.getSymbol())
-                                      .replace("{2}", String.valueOf(walletPluginReward.getPoints()))
+                                      .replace("{2}", formatNumber(walletPluginReward.getPoints(), locale.getLanguage()))
                                       .replace("{3}", walletPluginReward.getPluginId())
                                       .replace("{4}", walletReward.getPoolName())
                                       .replace("{5}", formatTime(periodOfTime.getStartDateInSeconds()))
                                       .replace("{6}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
 
       } else {
-        String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY);
+        String label = getResourceBundleKey(locale, REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY);
         if (StringUtils.isBlank(label)) {
           continue;
         }
-        transactionMessagePart = label.replace("{0}", String.valueOf(walletPluginReward.getAmount()))
+        transactionMessagePart = label.replace("{0}", formatNumber(walletPluginReward.getAmount(), locale.getLanguage()))
                                       .replace("{1}", contractDetail.getSymbol())
-                                      .replace("{2}", String.valueOf(walletPluginReward.getPoints()))
+                                      .replace("{2}", formatNumber(walletPluginReward.getPoints(), locale.getLanguage()))
                                       .replace("{3}", walletPluginReward.getPluginId())
                                       .replace("{4}", formatTime(periodOfTime.getStartDateInSeconds()))
                                       .replace("{5}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
