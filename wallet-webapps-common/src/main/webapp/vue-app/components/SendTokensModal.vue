@@ -115,16 +115,29 @@ export default {
         return;
       }
 
-      if (receiver && receiverType && notificationId) {
+      if (receiver && notificationId) {
+        receiverType = receiverType || 'user';
         checkFundRequestStatus(notificationId).then((sent) => {
           this.dialog = !sent;
           return this.$nextTick(() => {
             if (receiver) {
               this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
-              this.$refs.sendTokensForm.amount = Number(amount);
+              this.$refs.sendTokensForm.disabledRecipient = true;
+              this.$refs.sendTokensForm.amount = amount && Number(amount) || '';
               this.$refs.sendTokensForm.notificationId = notificationId;
             }
           });
+        });
+      } else if (receiver) {
+        this.dialog = true;
+        return this.$nextTick(() => {
+          if (receiver) {
+            receiverType = receiverType || 'user';
+            this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
+            this.$refs.sendTokensForm.disabledRecipient = true;
+            this.$refs.sendTokensForm.amount = amount && Number(amount) || '';
+            this.$refs.sendTokensForm.notificationId = notificationId;
+          }
         });
       } else {
         this.dialog = true;
