@@ -91,11 +91,16 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       @ApiResponse(code = 403, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendEther(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                            @ApiParam(value = "ether amount to send", required = true) @FormParam("etherAmount") double etherAmount,
                             @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
                             @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
+      return Response.status(400).build();
+    }
+    if (etherAmount <= 0) {
+      LOG.warn("Wrong ether amount '{}' sent to server", etherAmount);
       return Response.status(400).build();
     }
 
@@ -108,7 +113,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
-      transactionDetail.setValue(settings.getInitialFunds().getEtherAmount());
+      transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendEther(transactionDetail, currentUserId);

@@ -137,6 +137,7 @@ export default {
         },
         body: $.param({
           receiver: this.wallet.address,
+          etherAmount: this.etherAmount,
           transactionLabel: this.transactionLabel,
           transactionMessage: this.transactionMessage,
         }),

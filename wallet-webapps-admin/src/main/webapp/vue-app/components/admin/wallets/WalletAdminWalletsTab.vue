@@ -770,7 +770,10 @@ export default {
     },
     openSendEtherModal(wallet) {
       this.walletToProcess = wallet;
-      this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount);
+      const etherAmount = Number(this.etherAmount) - Number(wallet && wallet.balance);
+      if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount) && !Number.isNaN(etherAmount)) {
+        this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, etherAmount);
+      }
     },
     openDenyInitializationModal(wallet) {
       this.walletToProcess = wallet;
