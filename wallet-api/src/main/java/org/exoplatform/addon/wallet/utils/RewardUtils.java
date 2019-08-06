@@ -12,24 +12,33 @@ import org.exoplatform.services.security.ConversationState;
 
 public class RewardUtils {
 
-  public static final DateTimeFormatter DATE_FORMATTER             = DateTimeFormatter.ofPattern("d MMM uuuu");
+  public static final DateTimeFormatter DATE_FORMATTER                           = DateTimeFormatter.ofPattern("d MMM uuuu");
 
-  public static final String            TRANSACTION_STATUS_PENDING = "pending";
+  public static final String            TRANSACTION_STATUS_PENDING               = "pending";
 
-  public static final String            TRANSACTION_STATUS_SUCCESS = "success";
+  public static final String            TRANSACTION_STATUS_SUCCESS               = "success";
 
-  public static final String            TRANSACTION_STATUS_FAILED  = "error";
+  public static final String            TRANSACTION_STATUS_FAILED                = "error";
 
-  public static final String            REWARD_SCOPE_NAME          = "ADDONS_REWARD";
+  public static final String            REWARD_SCOPE_NAME                        = "ADDONS_REWARD";
 
-  public static final String            REWARD_CONTEXT_NAME        = "ADDONS_REWARD";
+  public static final String            REWARD_CONTEXT_NAME                      = "ADDONS_REWARD";
 
-  public static final Context           REWARD_CONTEXT             = Context.GLOBAL.id(REWARD_CONTEXT_NAME);
+  public static final String            REWARD_TRANSACTION_LABEL_KEY             =
+                                                                     "exoplatform.wallet.label.rewardTransactionLabel";
 
-  public static final Scope             REWARD_SCOPE               =
+  public static final String            REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY =
+                                                                                 "exoplatform.wallet.label.rewardTransactionMessageWithPool";
+
+  public static final String            REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY   =
+                                                                               "exoplatform.wallet.label.rewardTransactionMessageNoPool";
+
+  public static final Context           REWARD_CONTEXT                           = Context.GLOBAL.id(REWARD_CONTEXT_NAME);
+
+  public static final Scope             REWARD_SCOPE                             =
                                                      Scope.APPLICATION.id(REWARD_SCOPE_NAME);
 
-  public static final String            REWARD_SETTINGS_KEY_NAME   = "REWARD_SETTINGS";
+  public static final String            REWARD_SETTINGS_KEY_NAME                 = "REWARD_SETTINGS";
 
   private RewardUtils() {
   }

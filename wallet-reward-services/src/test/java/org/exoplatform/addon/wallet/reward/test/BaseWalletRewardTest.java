@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.*;
+import org.mockito.Mockito;
 
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
@@ -19,10 +20,13 @@ import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.addon.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.addon.wallet.reward.test.service.WalletRewardSettingsServiceTest;
+import org.exoplatform.addon.wallet.utils.RewardUtils;
+import org.exoplatform.commons.utils.MapResourceBundle;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.resources.ResourceBundleService;
 
 public abstract class BaseWalletRewardTest {
 
@@ -94,6 +98,8 @@ public abstract class BaseWalletRewardTest {
     container = PortalContainer.getInstance();
     assertNotNull("Container shouldn't be null", container);
     assertTrue("Container should have been started", container.isStarted());
+
+    registerResourceBundleService();
 
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     defaultSettings = rewardSettingsService.getSettings();
@@ -247,5 +253,20 @@ public abstract class BaseWalletRewardTest {
     }
     newSettings.setPluginSettings(pluginSettings);
     return newSettings;
+  }
+
+  private static void registerResourceBundleService() {
+    ResourceBundleService resourceBundleService = Mockito.mock(ResourceBundleService.class);
+    MapResourceBundle resourceBundle = new MapResourceBundle(Locale.getDefault());
+    resourceBundle.add(RewardUtils.REWARD_TRANSACTION_LABEL_KEY, "{0} is rewarded {1} {2} for period: {3} to {4}");
+    resourceBundle.add(RewardUtils.REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY,
+                       "You have earned {0} {1} in reward for your {2} {3} earned in pool {4} for period: {5} to {6}");
+    resourceBundle.add(RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY,
+                       "You have earned {0} {1} in reward for your {2} {3} for period: {4} to {5}");
+    Mockito.when(resourceBundleService.getResourceBundle(Mockito.anyString(), Mockito.any())).thenReturn(resourceBundle);
+    if (container.getComponentInstanceOfType(ResourceBundleService.class) != null) {
+      container.unregisterComponent(ResourceBundleService.class);
+    }
+    container.registerComponentInstance(ResourceBundleService.class, resourceBundleService);
   }
 }

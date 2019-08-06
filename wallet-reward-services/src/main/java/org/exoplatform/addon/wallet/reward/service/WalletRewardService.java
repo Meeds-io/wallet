@@ -17,8 +17,7 @@
 package org.exoplatform.addon.wallet.reward.service;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
-import static org.exoplatform.addon.wallet.utils.WalletUtils.convertFromDecimals;
-import static org.exoplatform.addon.wallet.utils.WalletUtils.getSettings;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -41,13 +40,8 @@ import org.exoplatform.services.log.Log;
  * A storage service to save/load reward settings
  */
 public class WalletRewardService implements RewardService {
-  private static final Log         LOG                             = ExoLogger.getLogger(WalletRewardService.class);
 
-  private static final String      DEFAULT_REWARD_LABEL_TEMPLATE   =
-                                                                 "{name} is rewarded {amount} {symbol} for period: {startDate} to {endDate}";
-
-  private static final String      DEFAULT_REWARD_MESSAGE_TEMPLATE =
-                                                                   "You have earned {amount} {symbol} in reward for your {rewardCount} {pluginName} {earned in pool_label} for period: {startDate} to {endDate}";
+  private static final Log         LOG = ExoLogger.getLogger(WalletRewardService.class);
 
   private WalletAccountService     walletAccountService;
 
@@ -599,12 +593,15 @@ public class WalletRewardService implements RewardService {
 
   private String getTransactionLabel(WalletReward walletReward, ContractDetail contractDetail, RewardPeriod periodOfTime) {
     Wallet wallet = walletReward.getWallet();
-    return DEFAULT_REWARD_LABEL_TEMPLATE.replace("{name}", wallet.getName())
-                                        .replace("{amount}", String.valueOf(walletReward.getTokensToSend()))
-                                        .replace("{startDate}",
-                                                 formatTime(periodOfTime.getStartDateInSeconds()))
-                                        .replace("{endDate}", formatTime(periodOfTime.getEndDateInSeconds()))
-                                        .replace("{symbol}", contractDetail.getSymbol());
+    String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_LABEL_KEY);
+    if (StringUtils.isBlank(label)) {
+      return "";
+    }
+    return label.replace("{0}", wallet.getName())
+                .replace("{1}", String.valueOf(walletReward.getTokensToSend()))
+                .replace("{2}", contractDetail.getSymbol())
+                .replace("{3}", formatTime(periodOfTime.getStartDateInSeconds()))
+                .replace("{4}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
   }
 
   private String getTransactionMessage(WalletReward walletReward, ContractDetail contractDetail, RewardPeriod periodOfTime) {
@@ -612,23 +609,32 @@ public class WalletRewardService implements RewardService {
     Set<WalletPluginReward> walletRewardsByPlugin = walletReward.getRewards();
     for (WalletPluginReward walletPluginReward : walletRewardsByPlugin) {
       Wallet wallet = walletReward.getWallet();
-      String transactionMessagePart = DEFAULT_REWARD_MESSAGE_TEMPLATE.replace("{name}", wallet.getName())
-                                                                     .replace("{amount}",
-                                                                              String.valueOf(walletPluginReward.getAmount()))
-                                                                     .replace("{rewardCount}",
-                                                                              String.valueOf(walletPluginReward.getPoints()))
-                                                                     .replace("{pluginName}",
-                                                                              walletPluginReward.getPluginId())
-                                                                     .replace("{earned in pool_label}",
-                                                                              walletPluginReward.isPoolsUsed()
-                                                                                  && StringUtils.isNotBlank(walletReward.getPoolName()) ? ("earned in '"
-                                                                                      + walletReward.getPoolName() + "' pool")
-                                                                                                                                        : "")
-                                                                     .replace("{startDate}",
-                                                                              formatTime(periodOfTime.getStartDateInSeconds()))
-                                                                     .replace("{endDate}",
-                                                                              formatTime(periodOfTime.getEndDateInSeconds()))
-                                                                     .replace("{symbol}", contractDetail.getSymbol());
+      String transactionMessagePart = null;
+      if (walletPluginReward.isPoolsUsed()) {
+        String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY);
+        if (StringUtils.isBlank(label)) {
+          continue;
+        }
+        transactionMessagePart = label.replace("{0}", String.valueOf(walletPluginReward.getAmount()))
+                                      .replace("{1}", contractDetail.getSymbol())
+                                      .replace("{2}", String.valueOf(walletPluginReward.getPoints()))
+                                      .replace("{3}", walletPluginReward.getPluginId())
+                                      .replace("{4}", walletReward.getPoolName())
+                                      .replace("{5}", formatTime(periodOfTime.getStartDateInSeconds()))
+                                      .replace("{6}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
+
+      } else {
+        String label = getResourceBundleKey(wallet, REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY);
+        if (StringUtils.isBlank(label)) {
+          continue;
+        }
+        transactionMessagePart = label.replace("{0}", String.valueOf(walletPluginReward.getAmount()))
+                                      .replace("{1}", contractDetail.getSymbol())
+                                      .replace("{2}", String.valueOf(walletPluginReward.getPoints()))
+                                      .replace("{3}", walletPluginReward.getPluginId())
+                                      .replace("{4}", formatTime(periodOfTime.getStartDateInSeconds()))
+                                      .replace("{5}", formatTime(periodOfTime.getEndDateInSeconds() - 1));
+      }
 
       transactionMessage.append(transactionMessagePart);
       transactionMessage.append("\r\n");
@@ -674,4 +680,5 @@ public class WalletRewardService implements RewardService {
     }
     return walletTokenAdminService;
   }
+
 }
