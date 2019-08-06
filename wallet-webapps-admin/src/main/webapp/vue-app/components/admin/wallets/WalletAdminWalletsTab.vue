@@ -50,6 +50,9 @@
             <v-btn value="disapproved">
               {{ $t('exoplatform.wallet.label.disapproved') }}
             </v-btn>
+            <v-btn value="deletedIdentity">
+              {{ $t('exoplatform.wallet.label.deleted') }}
+            </v-btn>
           </v-btn-toggle>
         </v-flex>
         <v-flex
@@ -447,6 +450,9 @@ export default {
     displayDisabledWallets() {
       return this.walletStatuses && this.walletStatuses.includes('disabled');
     },
+    displayDeletedIdentities() {
+      return this.walletStatuses && this.walletStatuses.includes('deletedIdentity');
+    },
     etherAccountDetails() {
       return {
         title: 'ether',
@@ -574,6 +580,7 @@ export default {
         && (this.displaySpaces || wallet.type !== 'space')
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || wallet.enabled)
+        && (this.displayDeletedIdentities || !wallet.deletedUser)
         && (this.displayDisapprovedWallets || !wallet.disapproved)
         && (!this.search
             || wallet.initializationState.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
