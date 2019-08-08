@@ -48,6 +48,15 @@
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/lib</outputDirectory>
       <includes>
+        <include>org.exoplatform.wallet:ert-contract:jar</include>
+      </includes>
+      <scope>provided</scope>
+      <outputFileNameMapping>ert-contract.jar</outputFileNameMapping>
+    </dependencySet>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
         <include>${project.groupId}:wallet-api:jar</include>
       </includes>
       <scope>provided</scope>
@@ -70,78 +79,6 @@
       </includes>
       <scope>provided</scope>
       <outputFileNameMapping>wallet-reward-services.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.exoplatform.wallet:ert-contract:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>ert-contract.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:core:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>web3j-core.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:utils:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>web3j-utils.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:abi:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>web3j-abi.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:crypto:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>web3j-crypto.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:rlp:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>web3j-rlp.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.java-websocket:Java-WebSocket:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>Java-WebSocket.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>io.reactivex:rxjava:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>rxjava.jar</outputFileNameMapping>
     </dependencySet>
   </dependencySets>
 </assembly>

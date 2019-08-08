@@ -17,11 +17,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.wallet</groupId>
-      <artifactId>ert-contract</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.exoplatform.ws</groupId>
       <artifactId>exo.ws.rest.core</artifactId>
       <scope>provided</scope>
@@ -56,6 +51,11 @@
       <scope>provided</scope>
     </dependency>
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.exoplatform.wallet</groupId>
+      <artifactId>ert-contract</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.exoplatform.commons</groupId>
       <artifactId>commons-testing</artifactId>

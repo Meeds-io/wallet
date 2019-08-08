@@ -12,6 +12,8 @@ import javax.servlet.http.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.blockchain.listener.BlockchainTransactionProcessorListener;
 import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
 import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
@@ -34,7 +36,7 @@ import org.exoplatform.services.scheduler.JobSchedulerService;
  * loader by a new one that defines more algorithms and a newer implementation.
  * Workaround for PLF-8123
  */
-public class ServiceLoaderServlet extends HttpServlet {
+public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTransactionService {
 
   private static final long                     serialVersionUID = 4629318431709644350L;
 
@@ -44,64 +46,62 @@ public class ServiceLoaderServlet extends HttpServlet {
 
   @Override
   public void init() throws ServletException {
-    executor.scheduleAtFixedRate(() -> {
-      PortalContainer container = PortalContainer.getInstance();
-      if (container == null || !container.isStarted()) {
-        LOG.debug("Portal Container is not yet started");
-        return;
-      }
+    executor.scheduleAtFixedRate(this::instantiateBlockchainServices, 10, 10, TimeUnit.SECONDS);
+  }
 
-      Thread currentThread = Thread.currentThread();
-      ClassLoader currentClassLoader = currentThread.getContextClassLoader();
-      ClassLoader contextCL = getServletContext().getClassLoader();
-      currentThread.setContextClassLoader(contextCL);
-      ExoContainerContext.setCurrentContainer(container);
-      RequestLifeCycle.begin(container);
-      try {
-        // Replace old bouncy castle provider by the newer version
-        Class<?> class1 = contextCL.loadClass(BouncyCastleProvider.class.getName());
-        Provider provider = (Provider) class1.newInstance();
-        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
-        Security.addProvider(provider);
-        provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-        LOG.info("BouncyCastleProvider class registered with version {}",
-                 provider.getVersion());
+  @ExoBlockchainTransaction
+  private void instantiateBlockchainServices() {
+    PortalContainer container = PortalContainer.getInstance();
+    if (container == null || !container.isStarted()) {
+      LOG.debug("Portal Container is not yet started");
+      return;
+    }
+    ExoContainerContext.setCurrentContainer(container);
+    RequestLifeCycle.begin(container);
+    try {
+      // Replace old bouncy castle provider by the newer version
+      ClassLoader webappClassLoader = getWebappClassLoader();
+      Class<?> class1 = webappClassLoader.loadClass(BouncyCastleProvider.class.getName());
+      Provider provider = (Provider) class1.newInstance();
+      Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+      Security.addProvider(provider);
+      provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+      LOG.info("BouncyCastleProvider class registered with version {}",
+               provider.getVersion());
 
-        // start connection to blockchain
-        EthereumClientConnector web3jConnector = new EthereumClientConnector(contextCL);
-        container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
-        web3jConnector.start();
+      // start connection to blockchain
+      EthereumClientConnector web3jConnector = new EthereumClientConnector(webappClassLoader);
+      container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
+      web3jConnector.start();
 
-        // Blockchain transaction decoder
-        EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector,
-                                                                                                                  contextCL);
-        container.registerComponentInstance(BlockchainTransactionService.class,
-                                            transactionDecoderService);
+      // Blockchain transaction decoder
+      EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector,
+                                                                                                                webappClassLoader);
+      container.registerComponentInstance(BlockchainTransactionService.class,
+                                          transactionDecoderService);
 
-        // Instantiate service with current webapp classloader
-        EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector, contextCL);
-        container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
-        tokenAdminService.start();
+      // Instantiate service with current webapp classloader
+      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector, webappClassLoader);
+      container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
+      tokenAdminService.start();
 
-        LOG.debug("Blockchain Service instances created");
+      ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
+      listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));
 
-        ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
-        listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));
+      addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
+                                "Configuration for wallet transaction stored status verifier",
+                                "0/10 * * * * ?");
+      addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
+                                "Add a job to verify if mined contract transactions are added in database",
+                                "0 0 * ? * * *");
 
-        addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
-                                  "Configuration for wallet transaction stored status verifier",
-                                  "0/10 * * * * ?");
-        addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
-                                  "Add a job to verify if mined contract transactions are added in database",
-                                  "0 0 * ? * * *");
-      } catch (Exception e) {
-        LOG.warn("Error registering service into portal container", e);
-      } finally {
-        currentThread.setContextClassLoader(currentClassLoader);
-        RequestLifeCycle.end();
-      }
-      executor.shutdown();
-    }, 10, 10, TimeUnit.SECONDS);
+      LOG.debug("Blockchain Service instances created");
+    } catch (Throwable e) {
+      LOG.error("Error registering service into portal container", e);
+    } finally {
+      RequestLifeCycle.end();
+    }
+    executor.shutdown();
   }
 
   @Override
@@ -125,5 +125,10 @@ public class ServiceLoaderServlet extends HttpServlet {
     params.addParam(propertiesParam);
     CronJob cronJob = new CronJob(params);
     schedulerService.addCronJob(cronJob);
+  }
+
+  @Override
+  public ClassLoader getWebappClassLoader() {
+    return getServletContext().getClassLoader();
   }
 }

@@ -222,7 +222,11 @@ public class WalletUtils {
 
   public static final String                          MODIFY_WALLET_TASK_TYPE               = "modify-wallet";
 
-  private static final String                         RESOURCE_BUNDLE_NAME                  = "locale.addon.Wallet";
+  public static final String                          RESOURCE_BUNDLE_NAME                  = "locale.addon.Wallet";
+
+  public static final String                          TOKEN_FUNC_SETSELLPRICE               = "setSellPrice";
+
+  public static final String                          TOKEN_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {

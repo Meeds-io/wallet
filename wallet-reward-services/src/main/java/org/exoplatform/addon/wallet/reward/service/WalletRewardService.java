@@ -611,7 +611,6 @@ public class WalletRewardService implements RewardService {
     Locale locale = getLocale(walletReward.getWallet());
 
     for (WalletPluginReward walletPluginReward : walletRewardsByPlugin) {
-      Wallet wallet = walletReward.getWallet();
       String transactionMessagePart = null;
       if (walletPluginReward.isPoolsUsed()) {
         String label = getResourceBundleKey(locale, REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY);

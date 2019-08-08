@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.addon.wallet.entity.TransactionEntity;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
@@ -141,8 +140,8 @@ public class TransactionStorage {
     // FIXME workaround to update amount that was stored in WEI // NOSONAR
     if (entity.getValue() > 10000L && (StringUtils.isBlank(entity.getContractAddress())
         || StringUtils.isBlank(entity.getContractMethodName())
-        || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_INITIALIZEACCOUNT)
-        || StringUtils.equals(entity.getContractMethodName(), ERTTokenV2.FUNC_SETSELLPRICE))) {
+        || StringUtils.equals(entity.getContractMethodName(), TOKEN_FUNC_INITIALIZEACCOUNT)
+        || StringUtils.equals(entity.getContractMethodName(), TOKEN_FUNC_SETSELLPRICE))) {
       LOG.debug("[from DB] Transaction {} has a value in WEI, converting it to ether.", entity.getHash());
       entity.setValue(convertFromDecimals(new BigInteger(String.valueOf(entity.getValue())), ETHER_TO_WEI_DECIMALS));
       walletTransactionDAO.update(entity);

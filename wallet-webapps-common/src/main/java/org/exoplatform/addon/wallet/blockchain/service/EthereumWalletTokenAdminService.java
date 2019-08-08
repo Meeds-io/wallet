@@ -426,6 +426,11 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (StringUtils.isBlank(transactionHash)) {
       throw new IllegalStateException(TRANSACTION_HASH_IS_EMPTY + transactionDetail);
     }
+    TransactionDetail persistedTransaction = getTransactionService().getTransactionByHash(transactionHash);
+    if (persistedTransaction != null) {
+      LOG.info("Transaction with hash {} already exists in database, it will be replaced with new data", transactionHash);
+      transactionDetail.setId(persistedTransaction.getId());
+    }
     transactionDetail.setNetworkId(getNetworkId());
     transactionDetail.setHash(transactionHash);
     transactionDetail.setFrom(getAdminWalletAddress());
@@ -614,7 +619,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
                                                                                 DefaultBlockParameterName.PENDING)
                                                         .send()
                                                         .getTransactionCount();
-      fastRawTransactionManager.setNonce(transactionCount.subtract(BigInteger.valueOf(1)));
+      fastRawTransactionManager.setNonce(transactionCount);
     }
     // Retrieve cached contract instance
     if (this.ertInstance != null) {

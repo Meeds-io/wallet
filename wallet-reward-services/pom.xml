@@ -22,11 +22,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.wallet</groupId>
-      <artifactId>ert-contract</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>jsr250-api</artifactId>
     </dependency>
@@ -61,6 +56,11 @@
       <scope>provided</scope>
     </dependency>
     <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.exoplatform.wallet</groupId>
+      <artifactId>ert-contract</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.exoplatform.commons</groupId>
       <artifactId>commons-testing</artifactId>
