@@ -4,7 +4,6 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,13 +14,13 @@ import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.*;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
-import org.web3j.tx.response.EmptyTransactionReceipt;
-import org.web3j.tx.response.QueuingTransactionReceiptProcessor;
-import org.web3j.utils.Convert.Unit;
+import org.web3j.tx.response.NoOpProcessor;
+import org.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -43,10 +42,6 @@ import org.exoplatform.social.core.identity.model.Identity;
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable, ExoBlockchainTransactionService {
 
   private static final int         ADMIN_WALLET_MIN_LEVEL                  = 2;
-
-  private static final int         POOLING_ATTEMPTS                        = 100;
-
-  private static final int         POOLING_ATTEMPT_PER_TX                  = 12000;
 
   private static final long        DEFAULT_ADMIN_GAS                       = 300000l;
 
@@ -564,16 +559,29 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Admin credentials are empty");
     }
     Web3j web3j = getClientConnector().getWeb3j();
-    TransactionReceipt receipt = Transfer.sendFunds(web3j,
-                                                    adminCredentials,
-                                                    receiverAddress,
-                                                    BigDecimal.valueOf(amountInEther),
-                                                    Unit.ETHER)
-                                         .send();
-    if (receipt == null) {
-      throw new IllegalStateException("Transaction receipt is null");
+    String adminWalletAddress = getAdminWalletAddress();
+    BigInteger nonce = getNonce(adminWalletAddress);
+    GlobalSettings settings = getSettings();
+    BigInteger gasPrice = BigInteger.valueOf(settings.getNetwork().getMinGasPrice());
+    BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
+
+    RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce,
+                                                                          gasPrice,
+                                                                          gasLimit,
+                                                                          receiverAddress,
+                                                                          convertToDecimals(amountInEther, 18));
+    byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, adminCredentials);
+    String hexValue = Numeric.toHexString(signedMessage);
+    EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
+    if (ethSendTransaction == null) {
+      throw new IllegalStateException("Ether Transaction is null");
     }
-    return receipt.getTransactionHash();
+    String transactionHash = ethSendTransaction.getTransactionHash();
+    if (StringUtils.isBlank(transactionHash)) {
+      throw new IllegalStateException("Returned ether Transaction has empty hash");
+    }
+
+    return transactionHash;
   }
 
   private String executeTokenTransaction(final String contractAddress,
@@ -584,16 +592,11 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (methodToInvoke == null) {
       throw new IllegalStateException("Can't find method " + methodName + " in Token instance");
     }
-
     @SuppressWarnings("unchecked")
-    RemoteCall<TransactionReceipt> response =
-                                            (RemoteCall<TransactionReceipt>) methodToInvoke.invoke(contractInstance, arguments);
+    RemoteCall<TransactionReceipt> response = (RemoteCall<TransactionReceipt>) methodToInvoke.invoke(contractInstance, arguments);
     TransactionReceipt receipt = response.send();
     if (receipt == null) {
       throw new IllegalStateException("Transaction receipt is null");
-    }
-    if (!(receipt instanceof EmptyTransactionReceipt)) {
-      throw new IllegalStateException("Transaction receipt isn't of a known type");
     }
     return receipt.getTransactionHash();
   }
@@ -614,12 +617,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
                                                                                                IOException {
     if (writeOperation && contractTransactionManager instanceof FastRawTransactionManager) {
       FastRawTransactionManager fastRawTransactionManager = (FastRawTransactionManager) contractTransactionManager;
-      BigInteger transactionCount = getClientConnector().getWeb3j()
-                                                        .ethGetTransactionCount(fastRawTransactionManager.getFromAddress(),
-                                                                                DefaultBlockParameterName.PENDING)
-                                                        .send()
-                                                        .getTransactionCount();
-      fastRawTransactionManager.setNonce(transactionCount);
+      BigInteger transactionCount = getNonce(fastRawTransactionManager.getFromAddress());
+      // Minus 1 because FastRawTransactionManager will add 1 each time a
+      // transaction will be sent
+      fastRawTransactionManager.setNonce(transactionCount.subtract(BigInteger.valueOf(1)));
     }
     // Retrieve cached contract instance
     if (this.ertInstance != null) {
@@ -634,8 +635,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Admin account keys aren't set");
     }
     GlobalSettings settings = getSettings();
-    ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(settings.getNetwork().getMinGasPrice()),
-                                                            BigInteger.valueOf(DEFAULT_ADMIN_GAS));
+    BigInteger gasPrice = BigInteger.valueOf(settings.getNetwork().getMinGasPrice());
+    BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
+    ContractGasProvider gasProvider = new StaticGasProvider(gasPrice, gasLimit);
     contractTransactionManager = getTransactionManager(adminCredentials);
     this.ertInstance = ERTTokenV2.load(contractAddress,
                                        getClientConnector().getWeb3j(),
@@ -645,6 +647,13 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return this.ertInstance;
   }
 
+  private BigInteger getNonce(String fromAddress) throws IOException, InterruptedException {
+    return getClientConnector().getWeb3j()
+                               .ethGetTransactionCount(fromAddress, DefaultBlockParameterName.PENDING)
+                               .send()
+                               .getTransactionCount();
+  }
+
   private TransactionManager getTransactionManager(Credentials credentials) throws InterruptedException {
     getClientConnector().waitConnection();
 
@@ -652,11 +661,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (credentials == null) {
       return new ReadonlyTransactionManager(web3j, Address.DEFAULT.toString());
     } else {
-      QueuingTransactionReceiptProcessor transactionReceiptProcessor = new QueuingTransactionReceiptProcessor(web3j,
-                                                                                                              null,
-                                                                                                              POOLING_ATTEMPTS,
-                                                                                                              POOLING_ATTEMPT_PER_TX);
-      return new FastRawTransactionManager(web3j, credentials, transactionReceiptProcessor);
+      return new FastRawTransactionManager(web3j, credentials, new NoOpProcessor(web3j));
     }
   }
 
@@ -677,7 +682,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     WalletFile adminWallet = null;
     try {
       ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-      adminWallet = objectMapper.reader(WalletFile.class).readValue(adminPrivateKey);
+      adminWallet = objectMapper.readerFor(WalletFile.class).readValue(adminPrivateKey);
     } catch (Exception e) {
       throw new IllegalStateException("An error occurred while parsing admin wallet keys", e);
     }
