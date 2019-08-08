@@ -482,9 +482,10 @@ export default {
         credentials: 'include',
       })
         .then((resp) => {
-          if (!resp || resp.ok) {
+          if (!resp || !resp.ok) {
             throw new Error(this.$t('exoplatform.wallet.warning.errorCheckingPendingTransactionsOnBlockchain'));
           }
+          return this.refreshTransactions();
         })
         .catch((error) => {
           this.error = error;
@@ -494,7 +495,7 @@ export default {
     refreshTransactions() {
       if (this.$refs.transactionsList) {
         this.refreshingTransactions = true;
-        this.$refs.transactionsList.init(true).finally(() => this.refreshingTransactions = false);
+        return this.$refs.transactionsList.init(true).finally(() => this.refreshingTransactions = false);
       }
     },
     newTransactionPending(transaction) {
