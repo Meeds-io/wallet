@@ -46,8 +46,12 @@ public interface BlockchainTransactionService {
    * checks transactions marked as pending in DB and verify their status on
    * blockchain. If mined, the status gets updated on DB, else wait for next
    * trigger time.
+   * 
+   * @param pendingTransactionMaxDays mas days to keep transactions not sent on
+   *          blockchain as pending. If <= 0, no duration check
+   * @return number of transactions marked as mined
    */
-  void checkPendingTransactions();
+  int checkPendingTransactions(long pendingTransactionMaxDays);
 
   /**
    * Scans newly mined blocks in Blockchain to verify if there are transactions

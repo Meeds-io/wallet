@@ -208,17 +208,36 @@
     </v-tabs>
     <v-tabs-items v-model="selectedTab">
       <v-tab-item id="transactions" value="transactions">
-        <transactions-list
-          id="transactionsList"
-          ref="transactionsList"
-          :account="contractDetails.address"
-          :contract-details="contractDetails"
-          :fiat-symbol="fiatSymbol"
-          :error="error"
-          display-full-transaction
-          administration
-          @loaded="computeTransactionsCount"
-          @error="error = $event" />
+        <v-layout column>
+          <v-flex xs12>
+            <v-btn
+              v-if="adminLevel >= 4"
+              :disabled="checkingPendingTransactions"
+              :loading="checkingPendingTransactions"
+              @click="checkPendingTransactions">
+              {{ $t('exoplatform.wallet.button.checkPendingTransactionsOnBlockchain') }}
+            </v-btn>
+            <v-btn
+              :disabled="refreshingTransactions"
+              :loading="refreshingTransactions"
+              @click="refreshTransactions">
+              {{ $t('exoplatform.wallet.button.refresh') }}
+            </v-btn>
+          </v-flex>
+          <v-flex xs12>
+            <transactions-list
+              id="transactionsList"
+              ref="transactionsList"
+              :account="contractDetails.address"
+              :contract-details="contractDetails"
+              :fiat-symbol="fiatSymbol"
+              :error="error"
+              display-full-transaction
+              administration
+              @loaded="computeTransactionsCount"
+              @error="error = $event" />
+          </v-flex>
+        </v-layout>
       </v-tab-item>
       <v-tab-item
         v-if="contractDetails.contractType > 0 && adminLevel >= 4"
@@ -382,10 +401,12 @@ export default {
   },
   data() {
     return {
-      selectedTab: 'transactions',
+      selectedTab: -1,
       totalTransactionsCount: 0,
       approvedWallets: [],
       adminWallets: [],
+      checkingPendingTransactions: false,
+      refreshingTransactions: false,
       approvedWalletsLoadedFromContract: false,
       loadingApprovedWalletsFromContract: false,
       loadingAdminWalletsFromContract: false,
@@ -399,6 +420,9 @@ export default {
     totalSupply() {
       return this.contractDetails && this.contractDetails.totalSupply ? this.walletUtils.convertTokenAmountReceived(this.contractDetails.totalSupply, this.contractDetails.decimals) : 0;
     },
+  },
+  created() {
+    this.$nextTick(() => this.selectedTab = 'transactions');
   },
   methods: {
     successSendingEther() {
@@ -450,6 +474,28 @@ export default {
         );
       }
       return Promise.all(promises);
+    },
+    checkPendingTransactions() {
+      this.checkingPendingTransactions = true;
+      return fetch('/portal/rest/wallet/api/transaction/checkPendingTransactions', {
+        method: 'GET',
+        credentials: 'include',
+      })
+        .then((resp) => {
+          if (!resp || resp.ok) {
+            throw new Error(this.$t('exoplatform.wallet.warning.errorCheckingPendingTransactionsOnBlockchain'));
+          }
+        })
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => this.checkingPendingTransactions = false);
+    },
+    refreshTransactions() {
+      if (this.$refs.transactionsList) {
+        this.refreshingTransactions = true;
+        this.$refs.transactionsList.init(true).finally(() => this.refreshingTransactions = false);
+      }
     },
     newTransactionPending(transaction) {
       this.$emit('pending-transaction', transaction);
