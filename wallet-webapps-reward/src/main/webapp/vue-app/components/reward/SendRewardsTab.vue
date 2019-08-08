@@ -377,12 +377,6 @@ export default {
     selectedDateInSeconds() {
       return this.selectedDate ? new Date(this.selectedDate).getTime() / 1000 : 0;
     },
-    selectedStartDateInSeconds() {
-      return this.selectedStartDate ? new Date(this.selectedStartDate).getTime() / 1000 : 0;
-    },
-    selectedEndDateInSeconds() {
-      return this.selectedEndDate ? new Date(this.selectedEndDate).getTime() / 1000 : 0;
-    },
     symbol() {
       return this.contractDetails && this.contractDetails.symbol ? this.contractDetails.symbol : '';
     },
@@ -420,7 +414,7 @@ export default {
       return getRewardDates(new Date(this.selectedDate), this.periodType)
         .then((period) => {
           this.selectedStartDate = this.formatDate(new Date(period.startDateInSeconds * 1000));
-          this.selectedEndDate = this.formatDate(new Date(period.endDateInSeconds * 1000));
+          this.selectedEndDate = this.formatDate(new Date((period.endDateInSeconds -1) * 1000));
         })
         .finally(() => this.loading = false);
     },
