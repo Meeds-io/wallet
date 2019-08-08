@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.*;
 
@@ -34,14 +35,19 @@ import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletService;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.portal.Constants;
 import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.UserProfile;
+import org.exoplatform.services.resources.ResourceBundleService;
 import org.exoplatform.services.security.*;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;
@@ -215,6 +221,12 @@ public class WalletUtils {
   public static final String                          NEW_WALLET_TASK_TYPE                  = "new-wallet";
 
   public static final String                          MODIFY_WALLET_TASK_TYPE               = "modify-wallet";
+
+  public static final String                          RESOURCE_BUNDLE_NAME                  = "locale.addon.Wallet";
+
+  public static final String                          TOKEN_FUNC_SETSELLPRICE               = "setSellPrice";
+
+  public static final String                          TOKEN_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {
@@ -641,6 +653,61 @@ public class WalletUtils {
 
   public static final boolean isWalletEmpty(Wallet wallet) {
     return wallet == null || StringUtils.isBlank(wallet.getAddress());
+  }
+
+  public static final boolean isAdminAccount(String address) {
+    try {
+      return getWalletTokenAdminService().isAdminAccount(address);
+    } catch (Exception e) {
+      // Can happen when wallet admin account is inaccessible or not set
+      LOG.debug("Error retrievng wallet admin address", e);
+      return false;
+    }
+  }
+
+  public static final String getResourceBundleKey(Locale locale, String key) {
+    ResourceBundle resourceBundle = CommonsUtils.getService(ResourceBundleService.class)
+                                                .getResourceBundle(RESOURCE_BUNDLE_NAME, locale);
+    String label = resourceBundle == null ? null : resourceBundle.getString(key);
+    if (StringUtils.isBlank(label)) {
+      resourceBundle = CommonsUtils.getService(ResourceBundleService.class)
+                                   .getResourceBundle(RESOURCE_BUNDLE_NAME, Locale.getDefault());
+      label = resourceBundle == null ? null : resourceBundle.getString(key);
+    }
+    return label;
+  }
+
+  public static Locale getLocale(Wallet wallet) {
+    Locale locale = null;
+    if (WalletType.isUser(wallet.getType())) {
+      locale = getUserLocale(wallet.getId());
+    } else {
+      locale = Locale.getDefault();
+    }
+    return locale;
+  }
+
+  public static final Locale getUserLocale(String username) {
+    if (StringUtils.isNotBlank(username)) {
+      OrganizationService organizationService = CommonsUtils.getService(OrganizationService.class);
+      UserProfile profile = null;
+      try {
+        profile = organizationService.getUserProfileHandler().findUserProfileByName(username);
+      } catch (Exception e) {
+        LOG.warn("Error getting profile of user {}", username, e);
+      }
+      if (profile != null) {
+        String lang = profile.getAttribute(Constants.USER_LANGUAGE);
+        if (StringUtils.isNotBlank(lang)) {
+          return LocaleUtils.toLocale(lang);
+        }
+      }
+    }
+    return Locale.getDefault();
+  }
+
+  private static final WalletTokenAdminService getWalletTokenAdminService() {
+    return CommonsUtils.getService(WalletTokenAdminService.class);
   }
 
   private static final WalletService getWalletService() {

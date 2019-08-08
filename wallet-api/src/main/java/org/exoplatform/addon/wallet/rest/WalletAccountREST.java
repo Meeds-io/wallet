@@ -195,6 +195,43 @@ public class WalletAccountREST implements ResourceContainer {
   }
 
   @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("saveBackupState")
+  @RolesAllowed("users")
+  @ApiOperation(value = "Saves wallet backup state", httpMethod = "POST", consumes = "application/json", response = Response.class, notes = "returns the modified wallet")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response saveWalletBackupState(@ApiParam(value = "wallet technical id", required = true) @FormParam("walletId") long walletId,
+                                        @ApiParam(value = "whether wallet backedUp or not", required = true) @FormParam("backedUp") boolean backedUp) {
+    if (walletId <= 0) {
+      LOG.warn("Bad request sent to server with wrong wallet technical id");
+      return Response.status(400).build();
+    }
+
+    String currentUserId = getCurrentUserId();
+    LOG.debug("User '{}' is saving wallet with id {} backup state {}",
+              currentUserId,
+              walletId,
+              backedUp);
+    try {
+      Wallet wallet = accountService.saveWalletBackupState(currentUserId, walletId, backedUp);
+      return Response.ok(wallet).build();
+    } catch (IllegalAccessException e) {
+      LOG.debug("User '{}' is not allowed to change backup state of wallet with id {}", currentUserId, walletId, e);
+      return Response.status(403).build();
+    } catch (Exception e) {
+      LOG.error("Unknown error occurred while saving wallet backup state: User {} attempts to change backup state wallet with id {}",
+                currentUserId,
+                walletId,
+                e);
+      return Response.status(500).build();
+    }
+  }
+
+  @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveAddress")
   @RolesAllowed("users")

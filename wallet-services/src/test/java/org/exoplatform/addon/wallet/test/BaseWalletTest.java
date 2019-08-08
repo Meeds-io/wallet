@@ -67,6 +67,9 @@ public abstract class BaseWalletTest {
 
     if (!entitiesToClean.isEmpty()) {
       for (Serializable entity : entitiesToClean) {
+        if (entity == null) {
+          continue;
+        }
         try {
           if (entity instanceof WalletEntity) {
             walletAccountDAO.delete((WalletEntity) entity);
@@ -92,7 +95,7 @@ public abstract class BaseWalletTest {
               walletPrivateKeyDAO.delete(walletPrivateKey);
             }
           } else {
-            throw new IllegalStateException("Entity not managed" + entity);
+            throw new IllegalStateException("Entity not managed " + entity);
           }
         } catch (Exception e) {
           LOG.warn("Error cleaning entities after test '{}' execution", this.getClass().getName(), e);

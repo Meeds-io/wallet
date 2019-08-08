@@ -16,7 +16,7 @@
         ">
         <address-auto-complete
           ref="autocomplete"
-          :disabled="loading"
+          :disabled="loading || disabledRecipient"
           :input-label="$t('exoplatform.wallet.label.recipient')"
           :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
           autofocus
@@ -161,6 +161,7 @@ export default {
       recipient: null,
       notificationId: null,
       isApprovedRecipient: true,
+      disabledRecipient: false,
       canSendToken: true,
       amount: null,
       gasPrice: 0,
@@ -268,6 +269,7 @@ export default {
         }
       });
       this.loading = false;
+      this.disabledRecipient = false;
       this.showQRCodeModal = false;
       this.recipient = null;
       this.amount = null;

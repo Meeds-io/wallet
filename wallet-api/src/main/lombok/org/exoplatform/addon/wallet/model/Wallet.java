@@ -58,6 +58,10 @@ public class Wallet implements Serializable, Cloneable {
   @ToString.Exclude
   private boolean           hasPrivateKey        = false;
 
+  @Exclude
+  @ToString.Exclude
+  private boolean           backedUp             = false;
+
   @Override
   public Wallet clone() { // NOSONAR
     try {

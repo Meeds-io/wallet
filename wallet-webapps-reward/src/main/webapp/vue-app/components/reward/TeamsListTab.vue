@@ -1,15 +1,5 @@
 <template>
   <v-flex flat transparent>
-    <v-flex v-if="duplicatedWallets && duplicatedWallets.length" class="text-xs-center">
-      <div class="alert alert-warning">
-        <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.poolMemberDuplicated') }}:
-        <ul>
-          <li v-for="duplicatedWallet in duplicatedWallets" :key="duplicatedWallet.id">
-            <code>{{ duplicatedWallet.name }}</code>
-          </li>
-        </ul>
-      </div>
-    </v-flex>
     <confirm-dialog
       ref="deleteTeamConfirm"
       :loading="loading"
@@ -241,12 +231,6 @@ export default {
   },
   props: {
     walletRewards: {
-      type: Array,
-      default: function() {
-        return [];
-      },
-    },
-    duplicatedWallets: {
       type: Array,
       default: function() {
         return [];

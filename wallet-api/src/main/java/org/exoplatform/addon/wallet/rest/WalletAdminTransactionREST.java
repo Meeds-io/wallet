@@ -91,11 +91,16 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       @ApiResponse(code = 403, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendEther(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                            @ApiParam(value = "ether amount to send", required = true) @FormParam("etherAmount") double etherAmount,
                             @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
                             @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
+      return Response.status(400).build();
+    }
+    if (etherAmount <= 0) {
+      LOG.warn("Wrong ether amount '{}' sent to server", etherAmount);
       return Response.status(400).build();
     }
 
@@ -108,13 +113,51 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
-      transactionDetail.setValue(settings.getInitialFunds().getEtherAmount());
+      transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendEther(transactionDetail, currentUserId);
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
       LOG.error("Error sending ether to wallet {}", receiver, e);
+      return Response.serverError().build();
+    }
+  }
+
+  @POST
+  @Path("sendToken")
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Send tokens using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response sendToken(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                            @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
+                            @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
+    String currentUserId = getCurrentUserId();
+    if (StringUtils.isBlank(receiver)) {
+      LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
+      return Response.status(400).build();
+    }
+
+    try {
+      GlobalSettings settings = getSettings();
+      if (settings == null || settings.getInitialFunds() == null || settings.getInitialFunds().getTokenAmount() <= 0) {
+        throw new IllegalStateException("Can't send tokens to wallet " + receiver
+            + " because no default token amount is configured in settings: " + settings);
+      }
+
+      TransactionDetail transactionDetail = new TransactionDetail();
+      transactionDetail.setTo(receiver);
+      transactionDetail.setContractAmount(settings.getInitialFunds().getTokenAmount());
+      transactionDetail.setLabel(transactionLabel);
+      transactionDetail.setMessage(transactionMessage);
+      transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, currentUserId);
+      return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
+    } catch (Exception e) {
+      LOG.error("Error sending token to wallet {}", receiver, e);
       return Response.serverError().build();
     }
   }

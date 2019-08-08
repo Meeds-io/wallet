@@ -203,6 +203,25 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
+  public Wallet saveWalletBackupState(String currentUser, long identityId, boolean backupState) throws IllegalAccessException {
+    if (identityId == 0) {
+      throw new IllegalArgumentException("Wallet technical id is mandatory");
+    }
+
+    if (StringUtils.isBlank(currentUser)) {
+      throw new IllegalArgumentException("User name is mandatory");
+    }
+
+    Wallet wallet = accountStorage.getWalletByIdentityId(identityId);
+    if (wallet == null) {
+      throw new IllegalStateException("Can't find wallet with id " + identityId);
+    }
+    checkIsWalletOwner(wallet, currentUser, "save wallet");
+
+    return accountStorage.saveWalletBackupState(identityId, backupState);
+  }
+
+  @Override
   public void saveWalletAddress(Wallet wallet, String currentUser, boolean broadcast) throws IllegalAccessException {
     if (wallet == null) {
       throw new IllegalArgumentException("Wallet is mandatory");

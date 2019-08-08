@@ -35,6 +35,7 @@ import org.web3j.protocol.websocket.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -286,6 +287,7 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
     }
   }
 
+  @ExoBlockchainTransaction
   private boolean initWeb3Connection() throws Exception { // NOSONAR
     if (this.connectionInProgress) {
       LOG.info("Web3 connection initialization in progress, skip transaction processing until it's initialized");

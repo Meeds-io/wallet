@@ -100,7 +100,7 @@ public class WalletTransactionREST implements ResourceContainer {
     }
 
     try {
-      TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
+      TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash, getCurrentUserId());
       return Response.ok(transactionDetail).build();
     } catch (Exception e) {
       LOG.error("Error getting transaction with hash {}", hash, e);

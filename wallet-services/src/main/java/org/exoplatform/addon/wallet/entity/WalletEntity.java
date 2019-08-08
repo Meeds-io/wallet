@@ -36,6 +36,9 @@ public class WalletEntity implements Serializable {
   @Column(name = "ENABLED", nullable = false)
   private boolean                   isEnabled;
 
+  @Column(name = "BACKED_UP", nullable = false)
+  private boolean                   isBackedUp;
+
   @Column(name = "INITIALIZATION_STATE")
   private WalletInitializationState initializationState;
 
@@ -64,6 +67,14 @@ public class WalletEntity implements Serializable {
 
   public void setEnabled(boolean isEnabled) {
     this.isEnabled = isEnabled;
+  }
+
+  public boolean isBackedUp() {
+    return isBackedUp;
+  }
+
+  public void setBackedUp(boolean isBackedUp) {
+    this.isBackedUp = isBackedUp;
   }
 
   public WalletType getType() {

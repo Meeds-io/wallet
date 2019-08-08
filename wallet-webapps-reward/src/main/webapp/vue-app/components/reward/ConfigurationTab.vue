@@ -110,14 +110,20 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="configurationEditable"
-        :loading="loadingSettings"
-        class="btn btn-primary px-2"
-        dark
-        @click="save">
-        {{ $t('exoplatform.wallet.button.save') }}
-      </v-btn>
+      <template v-if="configurationEditable">
+        <v-btn
+          :loading="loadingSettings"
+          class="btn btn-primary px-2"
+          dark
+          @click="save">
+          {{ $t('exoplatform.wallet.button.save') }}
+        </v-btn>
+        <v-btn
+          class="btn mx-2 px-3"
+          @click="init">
+          {{ $t('exoplatform.wallet.button.cancel') }}
+        </v-btn>
+      </template>
       <v-btn
         v-else
         class="btn btn-primary ml-2"
@@ -176,7 +182,7 @@ export default {
       this.configurationEditable = false;
 
       if (window.walletRewardSettings) {
-        this.settingsToSave = Object.assign({}, window.walletRewardSettings);
+        this.settingsToSave = JSON.parse(JSON.stringify(window.walletRewardSettings));
         this.$nextTick().then(() =>{
           this.settingsToSave.periodType = this.selectedPeriodType;
         });

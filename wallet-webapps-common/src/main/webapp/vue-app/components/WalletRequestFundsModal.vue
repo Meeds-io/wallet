@@ -69,13 +69,13 @@
       <v-card-actions>
         <v-spacer />
         <button
-          :disabled="loading"
+          :disabled="disabled"
           class="btn btn-primary"
           @click="requestFunds">
           {{ $t('exoplatform.wallet.button.sendRequest') }}
         </button>
         <button
-          :disabled="loading"
+          :disabled="disabled"
           class="btn ml-2"
           @click="dialog = false">
           {{ $t('exoplatform.wallet.button.close') }}
@@ -119,6 +119,11 @@ export default {
       dialog: false,
       amoutRules: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField'), (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || this.$t('exoplatform.wallet.warning.invalidAmount')],
     };
+  },
+  computed: {
+    disabled() {
+      return !this.walletAddress || this.loading || !this.recipient || !this.amount;
+    },
   },
   watch: {
     dialog() {

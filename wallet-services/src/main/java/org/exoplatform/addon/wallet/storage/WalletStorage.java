@@ -103,6 +103,21 @@ public class WalletStorage {
   }
 
   /**
+   * Change wallet backup state
+   * 
+   * @param identityId user/space technical identty id
+   * @param backupState true if backedUp else false
+   * 
+   * @return modified {@link Wallet}
+   */
+  public Wallet saveWalletBackupState(long identityId, boolean backupState) {
+    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+    walletEntity.setBackedUp(backupState);
+    walletEntity = walletAccountDAO.update(walletEntity);
+    return fromEntity(walletEntity);
+  }
+
+  /**
    * Removes a wallet identitied by user/space identity technical id
    * 
    * @param identityId user/space technical identty id
@@ -147,8 +162,8 @@ public class WalletStorage {
   /**
    * Save wallet private key
    * 
-   * @param walletId
-   * @param content
+   * @param walletId wallet unique identifier that is equals to identity ID
+   * @param content private key content
    */
   public void saveWalletPrivateKey(long walletId, String content) {
     if (StringUtils.isBlank(content)) {
@@ -190,6 +205,7 @@ public class WalletStorage {
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
+    wallet.setBackedUp(walletEntity.isBackedUp());
     if (walletEntity.getPrivateKey() == null) {
       WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
       wallet.setHasPrivateKey(privateKey != null);
@@ -209,6 +225,7 @@ public class WalletStorage {
     walletEntity.setEnabled(wallet.isEnabled());
     walletEntity.setInitializationState(WalletInitializationState.valueOf(wallet.getInitializationState()));
     walletEntity.setPassPhrase(wallet.getPassPhrase());
+    walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
     return walletEntity;
   }

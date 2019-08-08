@@ -67,6 +67,14 @@ public interface WalletTransactionService {
   TransactionDetail getTransactionByHash(String hash);
 
   /**
+   * @param hash transaction hash
+   * @param currentUser current username that is getting transaction details
+   * @return the transaction detail corresponding to the hash parameter,
+   *         retrieved from internal database
+   */
+  TransactionDetail getTransactionByHash(String hash, String currentUser);
+
+  /**
    * Save transaction details in database
    * 
    * @param transactionDetail transaction detail to save

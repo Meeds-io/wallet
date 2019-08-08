@@ -217,13 +217,12 @@ export default {
       }
     },
     selectedValue() {
-      // this.$refs.selectAutoComplete.isFocused = false;
       this.addressLoad = 'loading';
       if (this.selectedValue) {
         const isAddress = this.selectedValue.indexOf('_') < 0;
         const type = isAddress ? null : this.selectedValue.substring(0, this.selectedValue.indexOf('_'));
         const id = isAddress ? this.selectedValue : this.selectedValue.substring(this.selectedValue.indexOf('_') + 1);
-        if (this.noAddress || isAddress) {
+        if (!this.noAddress && isAddress) {
           return searchWalletByAddress(this.selectedValue)
             .then(details => {
               if(details && details.type) {
@@ -233,6 +232,7 @@ export default {
                   type: details.type,
                   address: details.address,
                   enabled: details.enabled,
+                  name: details.name,
                   id_type: `${details.type}_${details.id}`,
                 });
               } else {
@@ -253,6 +253,8 @@ export default {
                 this.$emit('item-selected', {
                   id: id,
                   type: type,
+                  name: data.name,
+                  id_type: `${type}_${id}`,
                   address: address,
                 });
               } else {
@@ -260,6 +262,8 @@ export default {
                 this.$emit('item-selected', {
                   id: id,
                   type: type,
+                  name: data && data.name,
+                  id_type: `${type}_${id}`,
                   address: null,
                 });
               }
@@ -313,18 +317,20 @@ export default {
     },
     selectItem(id, type) {
       const isAddress = id && window.localWeb3.utils.isAddress(id);
+      const contractAddress = window.walletSettings && window.walletSettings.contractAddress;
       if (!id) {
         this.$refs.selectAutoComplete.selectItem(null);
-      } else if (isAddress && window.walletSettings && window.walletSettings.contractDetail && id.trim().toLowerCase() === window.walletSettings.contractAddress) {
+      } else if (isAddress && contractAddress && id.trim().toLowerCase() === contractAddress.trim().toLowerCase()) {
         const item = {
-            address: id,
-            name: window.walletSettings.contractDetail.name,
-            id: id,
-          };
-          this.items.push(item);
-          if (this.$refs.selectAutoComplete) {
-            this.$refs.selectAutoComplete.selectItem(item);
-          }
+          address: contractAddress,
+          id_type: contractAddress,
+          name: window.walletSettings.contractDetail.name,
+          id: contractAddress,
+        };
+        this.items.push(item);
+        if (this.$refs.selectAutoComplete) {
+          this.$refs.selectAutoComplete.selectItem(item);
+        }
       } else if (type) {
         return searchWalletByTypeAndId(id, type).then((item) => {
           item.id_type = item.type && item.id ? `${item.type}_${item.id}` : null;
