@@ -235,14 +235,14 @@
                         </v-list-tile>
                         <v-divider />
                       </template>
-                      <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                      <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
                         <v-list-tile @click="openSendEtherModal(props.item)">
                           <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
                         </v-list-tile>
                         <v-divider />
                       </template>
 
-                      <v-list-tile @click="openSendTokenModal(props.item)">
+                      <v-list-tile v-if="tokenAmount > 0 && props.item.tokenBalance < tokenAmount" @click="openSendTokenModal(props.item)">
                         <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
@@ -770,8 +770,8 @@ export default {
     },
     openSendEtherModal(wallet) {
       this.walletToProcess = wallet;
-      const etherAmount = Number(this.etherAmount) - Number(wallet && wallet.balance);
-      if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount) && !Number.isNaN(etherAmount)) {
+      const etherAmount = this.walletUtils.toFixed(this.etherAmount) - Number(wallet && wallet.balance);
+      if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount)) {
         this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, etherAmount);
       }
     },

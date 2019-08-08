@@ -48,7 +48,7 @@ public interface BlockchainTransactionService {
    * trigger time.
    * 
    * @param pendingTransactionMaxDays mas days to keep transactions not sent on
-   *          blockchain as pending. If <= 0, no duration check
+   *          blockchain as pending. If equals or less than 0, no duration check
    * @return number of transactions marked as mined
    */
   int checkPendingTransactions(long pendingTransactionMaxDays);
