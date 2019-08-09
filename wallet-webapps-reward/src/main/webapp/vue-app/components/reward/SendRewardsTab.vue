@@ -447,13 +447,11 @@ export default {
       this.error = null;
       this.sendingRewards = true;
       sendRewards(this.selectedDateInSeconds)
-        .then(() => {
-          this.$emit('refresh');
-        })
         .catch(e => {
           this.error = String(e);
         })
         .finally(() => {
+          this.$emit('refresh');
           this.sendingRewards = false;
         });
     },
