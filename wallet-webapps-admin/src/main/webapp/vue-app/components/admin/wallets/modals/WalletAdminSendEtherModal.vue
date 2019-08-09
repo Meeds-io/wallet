@@ -119,7 +119,7 @@ export default {
       }
       this.wallet = wallet;
       this.etherAmount = etherAmount;
-      this.transactionLabel = `Initialize wallet of ${this.wallet.type} ${this.wallet.name}`;
+      this.transactionLabel = `Send ether for wallet of ${this.wallet.type} ${this.wallet.name}`;
       this.transactionMessage = initialFundsMessage;
 
       this.error = null;

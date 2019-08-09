@@ -124,7 +124,7 @@ export default {
       }
       this.wallet = wallet;
       this.tokenAmount = tokenAmount;
-      this.transactionLabel = `Initialize wallet of ${this.wallet.type} ${this.wallet.name}`;
+      this.transactionLabel = `Send tokens for wallet of ${this.wallet.type} ${this.wallet.name}`;
       this.transactionMessage = initialFundsMessage;
 
       this.error = null;
