@@ -235,11 +235,11 @@ public class WalletUtils {
     return null;
   }
 
-  public static List<String> getNotificationReceiversUsers(Wallet toAccount, String excludedId) {
-    if (WalletType.isSpace(toAccount.getType())) {
-      Space space = getSpace(toAccount.getId());
+  public static List<String> getNotificationReceiversUsers(Wallet wallet, String excludedId) {
+    if (WalletType.isSpace(wallet.getType())) {
+      Space space = getSpace(wallet.getId());
       if (space == null) {
-        return Collections.singletonList(toAccount.getId());
+        return Collections.singletonList(wallet.getId());
       } else {
         String[] managers = space.getManagers();
         if (managers == null || managers.length == 0) {
@@ -250,8 +250,10 @@ public class WalletUtils {
           return Arrays.stream(managers).filter(member -> !excludedId.equals(member)).collect(Collectors.toList());
         }
       }
+    } else if (WalletType.isUser(wallet.getType())) {
+      return Collections.singletonList(wallet.getId());
     } else {
-      return Collections.singletonList(toAccount.getId());
+      return Collections.emptyList();
     }
   }
 
