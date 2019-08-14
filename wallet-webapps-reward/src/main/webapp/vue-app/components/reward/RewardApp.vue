@@ -218,7 +218,7 @@ export default {
         })
         .then(() => {
           this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          return this.tokenUtils.getContractDetails(this.walletAddress, true);
+          return this.tokenUtils.getContractDetails(this.walletAddress);
         })
         .then(contractDetails => this.contractDetails = contractDetails)
         .then(() => this.refreshRewardSettings())

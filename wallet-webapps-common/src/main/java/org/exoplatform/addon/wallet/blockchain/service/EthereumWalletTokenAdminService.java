@@ -517,6 +517,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       contractDetail.setOwner(owner);
       BigInteger sellPrice = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_GETSELLPRICE);
       contractDetail.setSellPrice(String.valueOf(convertFromDecimals(sellPrice, 18)));
+      BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_TOTALSUPPLY);
+      contractDetail.setTotalSupply(String.valueOf(convertFromDecimals(totalSupply, 18)));
       return contractDetail;
     } catch (Exception e) {
       throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress,

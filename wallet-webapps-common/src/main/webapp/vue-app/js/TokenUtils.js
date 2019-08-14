@@ -1,14 +1,14 @@
 import {convertTokenAmountReceived, computeBalance, getTransaction} from './WalletUtils.js';
 import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
 
-export function getContractDetails(account, isAdministration) {
+export function getContractDetails(account, refreshFromBlockchain, isAdministration) {
   if (window.walletSettings.contractAddress) {
     const contractDetails = window.walletSettings.contractDetail || {};
     contractDetails.address = window.walletSettings.contractAddress;
     contractDetails.icon = 'fa-file-contract';
     contractDetails.networkId = window.walletSettings.network.id;
     contractDetails.isContract = true;
-    return retrieveContractDetails(account, contractDetails, isAdministration);
+    return retrieveContractDetails(account, contractDetails, refreshFromBlockchain, isAdministration);
   }
   return Promise.resolve();
 }
@@ -22,11 +22,11 @@ export function refreshTokenBalance(walletAddress, contractDetails) {
       contractDetails.balance = convertTokenAmountReceived(balance, contractDetails.decimals);
     });
 }
-  
+
 /*
  * Retrieve an ERC20 contract instance at specified address
  */
-export function retrieveContractDetails(account, contractDetails, isAdministration) {
+export function retrieveContractDetails(account, contractDetails, refreshFromBlockchain, isAdministration) {
   contractDetails.networkId = window.walletSettings.network.id;
   contractDetails.retrievedAttributes = 0;
   let contractToSave = false;
@@ -55,20 +55,20 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
   if (contractDetails.sellPrice) {
     contractDetails.sellPrice = Number(contractDetails.sellPrice);
   }
-  return ((!isAdministration && contractDetails.contractType > 1) ? contractDetails.contract.methods.version().call() : Promise.resolve(null))
+  return ((!refreshFromBlockchain && contractDetails.contractType &&  Promise.resolve(contractDetails.contractType)) || contractDetails.contract.methods.version().call())
     .then((version) => {
-      if (version !== true && version) {
+      if (version) {
         version = Number(version);
         const originalContractType = contractDetails.contractType;
         contractDetails.contractType = version && !Number.isNaN(Number(version)) && Number.isInteger(version) ? Number(version) : 0;
         contractToSave = contractToSave || Number(contractDetails.contractType) !== originalContractType;
+        contractDetails.retrievedAttributes++;
       }
-      contractDetails.retrievedAttributes++;
     })
     .catch((e) => {
       contractDetails.contractType = 0;
     })
-    .then(() => (!isAdministration && contractDetails.decimals) || contractDetails.contract.methods.decimals().call())
+    .then(() => (!refreshFromBlockchain && contractDetails.decimals) || contractDetails.contract.methods.decimals().call())
     .then((decimals) => {
       if (decimals) {
         decimals = Number(decimals);
@@ -97,9 +97,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       balance = window.localWeb3.utils.fromWei(String(balance), 'ether');
       contractDetails.etherBalance = balance;
     })
-    .then(() => {
-      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.symbol) ? contractDetails.symbol : contractDetails.contract.methods.symbol().call();
-    })
+    .then(() => (!refreshFromBlockchain && contractDetails.symbol) || contractDetails.contract.methods.symbol().call())
     .then((symbol) => {
       if (symbol) {
         contractToSave = contractToSave || contractDetails.symbol !== symbol;
@@ -111,9 +109,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       contractDetails.contractType = -1;
       console.debug('retrieveContractDetails method - error retrieving symbol', contractDetails.address, new Error(e));
     })
-    .then(() => {
-      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.hasOwnProperty('name')) ? contractDetails.name : contractDetails.contract.methods.name().call();
-    })
+    .then(() => (!refreshFromBlockchain && contractDetails.name) || contractDetails.contract.methods.name().call())
     .then((name) => {
       if (name) {
         contractToSave = contractToSave || contractDetails.name !== name;
@@ -126,11 +122,9 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
       contractDetails.contractType = -1;
       console.debug('retrieveContractDetails method - error retrieving name', contractDetails.address, new Error(e));
     })
-    .then(() => {
-      return contractDetails.contractType < 0 ? null : (!isAdministration && contractDetails.hasOwnProperty('totalSupply')) ? contractDetails.totalSupply : contractDetails.contract.methods.totalSupply().call();
-    })
+    .then(() => (!isAdministration && "0") || (!refreshFromBlockchain && contractDetails.totalSupply) || contractDetails.contract.methods.totalSupply().call())
     .then((totalSupply) => {
-      if (totalSupply) {
+      if (totalSupply && Number(totalSupply)) {
         contractDetails.totalSupply = totalSupply;
         contractDetails.retrievedAttributes++;
       }
@@ -138,7 +132,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
     .catch((e) => {
       console.debug('retrieveContractDetails method - error retrieving totalSupply', contractDetails.address, new Error(e));
     })
-    .then(() => contractDetails.contractType > 0 && isAdministration && computeBalance(contractDetails.address))
+    .then(() => isAdministration && computeBalance(contractDetails.address))
     .then((contractBalance) => {
       if (contractBalance && contractBalance.balance) {
         contractDetails.contractBalance = contractBalance.balance;
@@ -153,7 +147,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
         return;
       }
       // Compute ERT Token attributes
-      return ((!isAdministration && contractDetails.sellPrice) ? Promise.resolve(Number(contractDetails.sellPrice) * 1000000000000000000) : contractDetails.contract.methods.getSellPrice().call())
+      return ((!refreshFromBlockchain && contractDetails.sellPrice) ? Promise.resolve(Number(contractDetails.sellPrice) * 1000000000000000000) : contractDetails.contract.methods.getSellPrice().call())
         .then((sellPrice) => {
           sellPrice = (sellPrice && Number(sellPrice) / Math.pow(10, 18)) || 0;
           contractToSave = contractToSave || contractDetails.sellPrice !== sellPrice;
@@ -163,45 +157,19 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
         .catch((e) => {
           console.debug('retrieveContractDetails method - error retrieving sellPrice', contractDetails.address, new Error(e));
         })
-        .then(() => {
-          return (!isAdministration && contractDetails.owner) ? contractDetails.owner : contractDetails.contract.methods.owner().call();
-        })
+        .then(() => (!refreshFromBlockchain && contractDetails.owner) || contractDetails.contract.methods.owner().call())
         .then((owner) => {
           if (owner) {
             contractDetails.owner = owner.toLowerCase();
             contractDetails.isOwner = contractDetails.owner === account && account.toLowerCase();
-          }
-          contractDetails.retrievedAttributes++;
-        })
-        .catch((e) => {
-          console.debug('retrieveContractDetails method - error retrieving sellPrice', contractDetails.address, new Error(e));
-        })
-        .then(() => {
-          return contractDetails.hasOwnProperty('isApproved') && !isAdministration ? contractDetails.isApproved : contractDetails.contract.methods.isApprovedAccount(account).call();
-        })
-        .then((approvedAccount) => {
-          contractDetails.isApproved = approvedAccount;
-        })
-        .catch((e) => {
-          console.debug('retrieveContractDetails method - error retrieving isApprovedAccount', contractDetails.address, new Error(e));
-        })
-        .then(() => {
-          return contractDetails.hasOwnProperty('adminLevel') ? contractDetails.adminLevel : contractDetails.contract.methods.getAdminLevel(account).call();
-        })
-        .then((habilitationLevel) => {
-          if (habilitationLevel) {
-            contractDetails.adminLevel = Number(habilitationLevel);
-            contractDetails.isAdmin = habilitationLevel > 0;
-            if (contractDetails.isAdmin) {
-              contractDetails.isApproved = true;
-            }
+            contractDetails.retrievedAttributes++;
           }
         })
         .catch((e) => {
           console.debug('retrieveContractDetails method - error retrieving getAdminLevel', contractDetails.address, new Error(e));
         })
         .then(() => {
-          return (!isAdministration && contractDetails.hasOwnProperty('isPaused')) ? contractDetails.isPaused : contractDetails.contract.methods.isPaused().call();
+          return (!refreshFromBlockchain && contractDetails.hasOwnProperty('isPaused')) ? contractDetails.isPaused : contractDetails.contract.methods.isPaused().call();
         })
         .then((isPaused) => {
           contractDetails.isPaused = isPaused ? true : false;
@@ -218,7 +186,7 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
     .then(() => {
       if (contractDetails.contractType < 0 || contractDetails.retrievedAttributes === 0) {
         transformContracDetailsToFailed(contractDetails);
-      } else if (contractToSave && window.walletSettings.admin) {
+      } else if (contractToSave && isAdministration && window.walletSettings.admin) {
         refreshContractOnServer();
       }
 
@@ -226,17 +194,8 @@ export function retrieveContractDetails(account, contractDetails, isAdministrati
         window.walletContractsDetails = {};
       }
 
-      if (contractDetails.contractType > 0) {
-        contractDetails.contractTypeLabel = `ERT Token V${contractDetails.contractType}`;
-        window.walletContractsDetails[contractDetails.address] = contractDetails;
-        window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
-      } else if (contractDetails.contractType === 0) {
-        contractDetails.contractTypeLabel = 'Standard ERC20 Token';
-        window.walletContractsDetails[contractDetails.address] = contractDetails;
-        window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
-      } else {
-        contractDetails.contractTypeLabel = 'Non ERC20 Contract';
-      }
+      window.walletContractsDetails[contractDetails.address] = contractDetails;
+      window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
       return contractDetails;
     });
 }
@@ -431,6 +390,8 @@ export function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, a
 }
 
 export function refreshContractOnServer() {
+  console.debug('Refreshing contract details on server');
+
   return fetch('/portal/rest/wallet/api/contract/refresh', {
     method: 'GET',
   }).then((resp) => {

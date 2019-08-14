@@ -386,6 +386,12 @@ export default {
         return null;
       },
     },
+    adminLevel: {
+      type: Number,
+      default: function() {
+        return null;
+      },
+    },
     fiatSymbol: {
       type: String,
       default: function() {
@@ -414,9 +420,6 @@ export default {
     };
   },
   computed: {
-    adminLevel() {
-      return (this.contractDetails && this.contractDetails.adminLevel) || 0;
-    },
     totalSupply() {
       return this.contractDetails && this.contractDetails.totalSupply ? this.walletUtils.convertTokenAmountReceived(this.contractDetails.totalSupply, this.contractDetails.decimals) : 0;
     },

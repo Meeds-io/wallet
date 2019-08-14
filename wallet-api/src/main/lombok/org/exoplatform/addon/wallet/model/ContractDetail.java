@@ -34,6 +34,9 @@ public class ContractDetail implements Serializable {
   private String            sellPrice;
 
   @Exclude
+  private String            totalSupply;
+
+  @Exclude
   private String            contractType;
 
   public ContractDetail clone() { // NOSONAR

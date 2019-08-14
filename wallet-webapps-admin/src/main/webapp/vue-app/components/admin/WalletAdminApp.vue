@@ -59,7 +59,7 @@
               v-if="contractDetails"
               key="contract"
               href="#contract">
-              {{ contractDetails.adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
+              {{ adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
             </v-tab>
           </v-tabs>
 
@@ -97,6 +97,7 @@
                 :wallet-address="walletAddress"
                 :user-wallet="userWallet"
                 :contract-details="contractDetails"
+                :admin-level="adminLevel"
                 :fiat-symbol="fiatSymbol"
                 :address-etherscan-link="addressEtherscanLink"
                 @back="back()"
@@ -128,6 +129,7 @@ export default {
       selectedTab: 'wallets',
       fiatSymbol: '$',
       walletAddress: null,
+      adminLevel: 0,
       refreshIndex: 1,
       contractDetails: null,
       isAdmin: null,
@@ -199,8 +201,14 @@ export default {
         });
     },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress, true)
-        .then(contractDetails => this.contractDetails = contractDetails);
+      return this.tokenUtils.getContractDetails(this.walletAddress)
+        .then(contractDetails => {
+          this.contractDetails = contractDetails;
+          if (this.contractDetails && this.contractDetails.contract && !this.adminLevel) {
+            return this.contractDetails.contract.methods.getAdminLevel(this.walletAddress).call()
+              .then(adminLevel => this.adminLevel = adminLevel);
+          }
+        });
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();

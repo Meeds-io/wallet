@@ -221,34 +221,6 @@ export function getTransaction(hash) {
   return window.localWeb3.eth.getTransaction(hash);
 }
 
-export function computeNetwork() {
-  return window.localWeb3.eth.net.getId()
-    .then((networkId, error) => {
-      if (error) {
-        console.debug('Error computing network id', error);
-        throw error;
-      }
-      if (networkId) {
-        console.debug(`Detected network id: ${networkId}`);
-        window.walletSettings.currentNetworkId = networkId;
-        return window.localWeb3.eth.net.getNetworkType();
-      } else {
-        console.debug('Network is disconnected');
-        throw new Error('Network is disconnected');
-      }
-    })
-    .then((netType, error) => {
-      if (error) {
-        console.debug('Error computing network type', error);
-        throw error;
-      }
-      if (netType) {
-        window.walletSettings.currentNetworkType = netType;
-        console.debug('Detected network type:', netType);
-      }
-    });
-}
-
 export function computeBalance(account) {
   if (!window.localWeb3) {
     return Promise.reject(new Error("You don't have a wallet yet"));
@@ -678,28 +650,16 @@ function checkNetworkStatus(waitTime, tentativesCount) {
   if (!waitTime) {
     waitTime = 300;
   }
-  if (!tentativesCount) {
-    tentativesCount = 1;
-  }
   // Test if network is connected: isListening operation can hang up forever
-  window.localWeb3.eth.net.isListening().then((listening) => (window.walletSettings.isListening = window.walletSettings.isListening || listening));
-  return new Promise((resolve) => setTimeout(resolve, waitTime))
-    .then(() => {
+  return window.localWeb3.eth.net.isListening()
+    .then((listening) => {
+      window.walletSettings.isListening = listening;
       if (!window.walletSettings.isListening) {
         console.debug('The network seems to be disconnected');
         throw new Error(constants.ERROR_WALLET_DISCONNECTED);
       }
     })
-    .then(() => computeNetwork())
-    .then(() => console.debug('Network status: OK'))
-    .then(() => constants.OK)
-    .catch((error) => {
-      if (tentativesCount > 10) {
-        throw error;
-      }
-      console.debug('Reattempt to connect with wait time:', waitTime, ' tentative : ', tentativesCount);
-      return checkNetworkStatus(waitTime, ++tentativesCount);
-    });
+    .then(() => constants.OK);
 }
 
 function initSpaceAccount(spaceGroup) {
