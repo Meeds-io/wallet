@@ -1,5 +1,5 @@
 <template>
-  <v-app id="WalletAPIApp" class="hidden" />
+  <v-app id="WalletAPIApp" class="hidden VuetifyApp" />
 </template>
 
 <script>

@@ -2,6 +2,7 @@
   <v-app
     :id="isSpace ? 'SpaceWalletApp' : 'WalletApp'"
     color="transaprent"
+    class="VuetifyApp"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
       <v-layout>

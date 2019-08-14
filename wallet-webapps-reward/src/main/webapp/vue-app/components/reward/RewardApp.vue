@@ -2,6 +2,7 @@
   <v-app
     id="RewardApp"
     color="transaprent"
+    class="VuetifyApp"
     flat>
     <main>
       <v-layout column>
