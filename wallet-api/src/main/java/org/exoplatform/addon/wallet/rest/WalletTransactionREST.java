@@ -110,6 +110,30 @@ public class WalletTransactionREST implements ResourceContainer {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @Path("checkPendingTransactions")
+  @RolesAllowed("users")
+  @ApiOperation(value = "Checks transactions marked as pending if it exists on blockchain, else mark it as failed", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns number of transactions marked as failed")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response checkPendingTransactions() {
+    String currentUser = getCurrentUserId();
+    try {
+      long numberOfTransactions = transactionService.checkPendingTransactions(currentUser);
+      return Response.ok(String.valueOf(numberOfTransactions)).build();
+    } catch (IllegalAccessException e) {
+      LOG.error("User {} is not allowed to check pending transactions if it exists on blockchain", currentUser, e);
+      return Response.status(403).build();
+    } catch (Exception e) {
+      LOG.error("Error checking transactions marked as pending if it exists on blockchain", e);
+      return Response.serverError().build();
+    }
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactionsAmounts")
   @RolesAllowed("users")
   @ApiOperation(value = "Get token amounts sent per each period of time by a wallet identified by its address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction statistics object")
@@ -182,4 +206,5 @@ public class WalletTransactionREST implements ResourceContainer {
       return Response.serverError().build();
     }
   }
+
 }

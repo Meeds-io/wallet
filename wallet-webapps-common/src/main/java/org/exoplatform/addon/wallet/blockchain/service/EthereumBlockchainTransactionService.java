@@ -136,20 +136,24 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   @ExoBlockchainTransaction
-  public void checkPendingTransactions() {
+  public int checkPendingTransactions(long pendingTransactionMaxDays) {
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+    int transactionsMarkedAsMined = 0;
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
-      long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
       for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
         try { // NOSONAR
-          verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
+          boolean transactionMined = verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
+          if (transactionMined) {
+            transactionsMarkedAsMined++;
+          }
         } catch (Exception e) {
           LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
         }
       }
     }
+    return transactionsMarkedAsMined;
   }
 
   @Override
@@ -555,8 +559,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     return new EventValues(indexedValues, nonIndexedValues);
   }
 
-  private void verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
-                                                   long pendingTransactionMaxDays) throws Exception {
+  private boolean verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
+                                                      long pendingTransactionMaxDays) throws Exception {
     String hash = pendingTransactionDetail.getHash();
     Transaction transaction = ethereumClientConnector.getTransaction(hash);
     String blockHash = transaction == null ? null : transaction.getBlockHash();
@@ -564,18 +568,25 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         && !StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
         && transaction.getBlockNumber() != null) {
       getListenerService().broadcast(NEW_TRANSACTION_EVENT, transaction, null);
-    } else if (pendingTransactionMaxDays > 0) {
-      long creationTimestamp = pendingTransactionDetail.getTimestamp();
-      if (transaction == null && creationTimestamp > 0) {
-        Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
-        if (duration.toDays() >= pendingTransactionMaxDays) {
-          LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
-                    hash,
-                    pendingTransactionMaxDays);
-          getListenerService().broadcast(NEW_TRANSACTION_EVENT, pendingTransactionDetail, null);
+      return true;
+    } else if (transaction == null) {
+      boolean emitFailedTransactionEvent = true;
+      if (pendingTransactionMaxDays > 0) {
+        long creationTimestamp = pendingTransactionDetail.getTimestamp();
+        if (creationTimestamp > 0) {
+          Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+          emitFailedTransactionEvent = duration.toDays() >= pendingTransactionMaxDays;
         }
       }
+      if (emitFailedTransactionEvent) {
+        LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
+                  hash,
+                  pendingTransactionMaxDays);
+        getListenerService().broadcast(NEW_TRANSACTION_EVENT, pendingTransactionDetail, null);
+        return true;
+      }
     }
+    return false;
   }
 
   private boolean processTransaction(String transactionHash, ContractDetail contractDetail) {

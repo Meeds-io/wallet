@@ -101,30 +101,32 @@
                 no-status />
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
-              <template v-if="!loadingWallets">
+              <template>
                 <template v-if="props.item.deletedUser">{{ $t('exoplatform.wallet.label.deletedIdentity') }}</template>
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
                 <template v-else-if="props.item.disapproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
-                <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
-                  <v-icon color="orange">
-                    warning
+                <template v-else-if="props.item.loadingBalance === false && props.item.loadingTokenBalance === false">
+                  <template v-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
+                    <v-icon color="orange">
+                      warning
+                    </v-icon>
+                    {{ $t('exoplatform.wallet.warning.lowEtherAmount') }}
+                  </template>
+                  <template v-else-if="Number(props.item.tokenBalance) === 0">
+                    <v-icon color="orange">
+                      warning
+                    </v-icon>
+                    {{ $t('exoplatform.wallet.warning.lowTokenAmount', {0: contractDetails && contractDetails.name}) }}
+                  </template>
+                  <v-icon
+                    v-else
+                    :title="$t('exoplatform.wallet.button.ok')"
+                    color="green">
+                    fa-check-circle
                   </v-icon>
-                  {{ $t('exoplatform.wallet.warning.lowEtherAmount') }}
                 </template>
-                <template v-else-if="Number(props.item.tokenBalance) === 0">
-                  <v-icon color="orange">
-                    warning
-                  </v-icon>
-                  {{ $t('exoplatform.wallet.warning.lowTokenAmount', {0: contractDetails && contractDetails.name}) }}
-                </template>
-                <v-icon
-                  v-else
-                  :title="$t('exoplatform.wallet.button.ok')"
-                  color="green">
-                  fa-check-circle
-                </v-icon>
               </template>
             </td>
             <td
@@ -226,7 +228,7 @@
 
                   <template v-if="props.item.type === 'user' || props.item.type === 'space'">
                     <template v-if="useWalletAdmin">
-                      <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED'">
+                      <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                         <v-list-tile @click="openAcceptInitializationModal(props.item)">
                           <v-list-tile-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-tile-title>
                         </v-list-tile>
@@ -235,14 +237,14 @@
                         </v-list-tile>
                         <v-divider />
                       </template>
-                      <template v-else-if="Number(props.item.balance) === 0 || (etherAmount && Number(props.item.balance) < Number(etherAmount))">
+                      <template v-else-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount)))">
                         <v-list-tile @click="openSendEtherModal(props.item)">
                           <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
                         </v-list-tile>
                         <v-divider />
                       </template>
 
-                      <v-list-tile @click="openSendTokenModal(props.item)">
+                      <v-list-tile v-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && !props.item.disapproved && tokenAmount > 0 && props.item.tokenBalance < tokenAmount" @click="openSendTokenModal(props.item)">
                         <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
@@ -579,7 +581,7 @@ export default {
         && (this.displayUsers || wallet.type !== 'user')
         && (this.displaySpaces || wallet.type !== 'space')
         && (this.displayAdmin || wallet.type !== 'admin')
-        && (this.displayDisabledWallets || wallet.enabled)
+        && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
         && (this.displayDeletedIdentities || !wallet.deletedUser)
         && (this.displayDisapprovedWallets || !wallet.disapproved)
         && (!this.search
@@ -766,13 +768,13 @@ export default {
     },
     openSendTokenModal(wallet) {
       this.walletToProcess = wallet;
-      this.$refs.sendTokenModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.tokenAmount);
+      this.$refs.sendTokenModal.open(wallet, null, this.tokenAmount);
     },
     openSendEtherModal(wallet) {
       this.walletToProcess = wallet;
-      const etherAmount = Number(this.etherAmount) - Number(wallet && wallet.balance);
-      if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount) && !Number.isNaN(etherAmount)) {
-        this.$refs.sendEtherModal.open(wallet, window.walletSettings.initialFunds.requestMessage, etherAmount);
+      const etherAmount = this.walletUtils.toFixed(this.etherAmount) - Number(wallet && wallet.balance);
+      if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount)) {
+        this.$refs.sendEtherModal.open(wallet, null, etherAmount);
       }
     },
     openDenyInitializationModal(wallet) {

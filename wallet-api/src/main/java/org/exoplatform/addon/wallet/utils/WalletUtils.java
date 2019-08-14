@@ -656,13 +656,7 @@ public class WalletUtils {
   }
 
   public static final boolean isAdminAccount(String address) {
-    try {
-      return getWalletTokenAdminService().isAdminAccount(address);
-    } catch (Exception e) {
-      // Can happen when wallet admin account is inaccessible or not set
-      LOG.debug("Error retrievng wallet admin address", e);
-      return false;
-    }
+    return StringUtils.equalsIgnoreCase(address, getWalletTokenAdminService().getAdminWalletAddress());
   }
 
   public static final String getResourceBundleKey(Locale locale, String key) {

@@ -98,6 +98,17 @@ public interface WalletTransactionService {
                              boolean broadcastMinedTransaction) throws IllegalAccessException;
 
   /**
+   * Checks transactions marked as pending if it exists on blockchain, else mark
+   * it as failed
+   * 
+   * @param currentUser current username that is saving transaction
+   * @return number of transactions marked as failed
+   * @throws IllegalAccessException when user is not allowed to execute
+   *           operation
+   */
+  long checkPendingTransactions(String currentUser) throws IllegalAccessException;
+
+  /**
    * @return watched transactions count treated since the server startup
    */
   long getWatchedTreatedTransactionsCount();

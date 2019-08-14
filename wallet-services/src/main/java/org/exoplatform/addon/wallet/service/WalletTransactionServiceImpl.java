@@ -25,25 +25,27 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class WalletTransactionServiceImpl implements WalletTransactionService {
 
-  private static final Log      LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
+  private static final Log             LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
 
-  private static final String   YEAR_PERIODICITY  = "year";
+  private static final String          YEAR_PERIODICITY  = "year";
 
-  private static final String   MONTH_PERIODICITY = "month";
+  private static final String          MONTH_PERIODICITY = "month";
 
-  private WalletAccountService  accountService;
+  private WalletAccountService         accountService;
 
-  private WalletContractService contractService;
+  private WalletContractService        contractService;
 
-  private TransactionStorage    transactionStorage;
+  private TransactionStorage           transactionStorage;
 
-  private SpaceService          spaceService;
+  private BlockchainTransactionService blockchainTransactionService;
 
-  private ListenerService       listenerService;
+  private SpaceService                 spaceService;
 
-  private long                  watchedTreatedTransactionsCount;
+  private ListenerService              listenerService;
 
-  private long                  pendingTransactionMaxDays;
+  private long                         watchedTreatedTransactionsCount;
+
+  private long                         pendingTransactionMaxDays;
 
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
@@ -64,6 +66,14 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     List<TransactionDetail> pendingTransactions = transactionStorage.getPendingTransactions(getNetworkId());
     pendingTransactions.forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail));
     return pendingTransactions;
+  }
+
+  @Override
+  public long checkPendingTransactions(String currentUser) throws IllegalAccessException {
+    if (!isUserRewardingAdmin(currentUser)) {
+      throw new IllegalAccessException("User " + currentUser + " is not allowed to check pending transaction statuses");
+    }
+    return getBlockchainTransactionService().checkPendingTransactions(0);
   }
 
   @Override
@@ -374,4 +384,15 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                                                     .atStartOfDay(ZoneOffset.systemDefault());
   }
 
+  /**
+   * Not injected via configuration, thus not added in constructor
+   * 
+   * @return instance of {@link BlockchainTransactionService}
+   */
+  private BlockchainTransactionService getBlockchainTransactionService() {
+    if (blockchainTransactionService == null) {
+      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
+    }
+    return blockchainTransactionService;
+  }
 }
