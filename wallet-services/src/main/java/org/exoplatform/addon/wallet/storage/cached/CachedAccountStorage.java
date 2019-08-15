@@ -2,8 +2,7 @@ package org.exoplatform.addon.wallet.storage.cached;
 
 import org.apache.commons.lang.StringUtils;
 
-import org.exoplatform.addon.wallet.dao.WalletAccountDAO;
-import org.exoplatform.addon.wallet.dao.WalletPrivateKeyDAO;
+import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.WalletCacheKey;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
@@ -20,8 +19,9 @@ public class CachedAccountStorage extends WalletStorage {
   public CachedAccountStorage(CacheService cacheService,
                               WalletAccountDAO walletAccountDAO,
                               WalletPrivateKeyDAO privateKeyDAO,
+                              WalletBlockchainStateDAO blockchainStateDAO,
                               CodecInitializer codecInitializer) {
-    super(walletAccountDAO, privateKeyDAO, codecInitializer);
+    super(walletAccountDAO, privateKeyDAO, blockchainStateDAO, codecInitializer);
 
     ExoCache<WalletCacheKey, Wallet> walletCache = cacheService.getCacheInstance("wallet.account");
 
@@ -80,6 +80,14 @@ public class CachedAccountStorage extends WalletStorage {
     }
 
     return newWallet;
+  }
+
+  @Override
+  public void saveWalletBlockchainState(Wallet wallet, String contractAddress) {
+    super.saveWalletBlockchainState(wallet, contractAddress);
+    long walletId = wallet.getTechnicalId();
+    this.walletFutureCache.remove(new WalletCacheKey(walletId));
+    this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
   }
 
   @Override

@@ -83,7 +83,9 @@ public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTr
       // Instantiate service with current webapp classloader
       EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector, webappClassLoader);
       container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
+
       tokenAdminService.start();
+      transactionDecoderService.start();
 
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
       listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));

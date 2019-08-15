@@ -1,5 +1,6 @@
 package org.exoplatform.addon.wallet.service;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.exoplatform.addon.wallet.model.*;
@@ -112,6 +113,14 @@ public interface WalletAccountService {
    * @param wallet wallet to save
    */
   void saveWallet(Wallet wallet);
+
+  /**
+   * Save wallet state on blockchain
+   * 
+   * @param wallet
+   * @param contractAddress
+   */
+  void saveWalletBlockchainState(Wallet wallet, String contractAddress);
 
   /**
    * Change wallet backup state
@@ -238,5 +247,29 @@ public interface WalletAccountService {
    * @return admin account password from configuration
    */
   String getAdminAccountPassword();
+
+  /**
+   * Refreshes wallets from blockchain
+   * 
+   * @param walletsModifications modified wallets on blockchain with the set of
+   *          invoked methods on contract
+   */
+  void refreshWalletsFromBlockchain(Map<String, Set<String>> walletsModifications);
+
+  /**
+   * Refreshes wallet state from blockchain
+   * 
+   * @param wallet
+   * @param contractDetail
+   * @param walletsModifications
+   */
+  void refreshWalletFromBlockchain(Wallet wallet, ContractDetail contractDetail, Map<String, Set<String>> walletsModifications);
+
+  /**
+   * Retrieve wallet state from internal database
+   * 
+   * @param wallet object to refresh
+   */
+  void retrieveWalletBlockchainState(Wallet wallet);
 
 }

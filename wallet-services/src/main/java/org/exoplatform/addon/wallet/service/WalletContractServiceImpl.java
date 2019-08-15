@@ -4,6 +4,7 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -131,10 +132,15 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
   }
 
   @Override
-  public void refreshContractDetail() {
+  public void refreshContractDetail(Set<String> contractModifications) {
     GlobalSettings settings = getSettings();
     String contractAddress = settings.getContractAddress();
-    ContractDetail contractDetail = getWalletTokenAdminService().getContractDetailFromBlockchain(contractAddress);
+    ContractDetail contractDetail = getContractDetail(contractAddress);
+    if (contractDetail == null) {
+      contractDetail = new ContractDetail();
+      contractDetail.setAddress(contractAddress);
+    }
+    getWalletTokenAdminService().refreshContractDetailFromBlockchain(contractDetail, contractModifications);
     saveContractDetail(contractDetail);
     getWalletService().setConfiguredContractDetail(contractDetail);
   }

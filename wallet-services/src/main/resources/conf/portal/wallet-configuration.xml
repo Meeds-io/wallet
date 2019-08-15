@@ -20,6 +20,10 @@
   </component>
 
   <component>
+    <type>org.exoplatform.addon.wallet.dao.WalletBlockchainStateDAO</type>
+  </component>
+
+  <component>
     <key>org.exoplatform.addon.wallet.storage.WalletStorage</key>
     <type>org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage</type>
   </component>

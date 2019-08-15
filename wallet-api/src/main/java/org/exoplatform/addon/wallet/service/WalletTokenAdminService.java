@@ -1,6 +1,7 @@
 package org.exoplatform.addon.wallet.service;
 
 import java.math.BigInteger;
+import java.util.Set;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -23,10 +24,11 @@ public interface WalletTokenAdminService {
    * 
    * @param privateKey admin account wallet private key
    * @param issuerUsername current user creating wallet
+   * @return created wallet
    * @throws IllegalAccessException if current user is not allowed to create
    *           admin wallet account
    */
-  void createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
+  Wallet createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
 
   /**
    * @return Admin wallet object
@@ -159,10 +161,26 @@ public interface WalletTokenAdminService {
    * Retrieves contract details from blockchain, like: - Sell price - Owner -
    * Symbol - Name ...
    * 
-   * @param contractAddress
-   * @return {@link TransactionDetail} with the hash of the transaction sent in
-   *         blockchain
+   * @param contractDetail existing contract detail retrieved from internal
+   *          database to refresh its attributes.
+   * @param contractModifications list of called method names to change contract
+   *          state on blockchain. This parameter will be used to know which
+   *          methods to call to refresh contract state in order to optimize the
+   *          number of calls to Blockchain
    */
-  ContractDetail getContractDetailFromBlockchain(String contractAddress);
+  void refreshContractDetailFromBlockchain(ContractDetail contractDetail, Set<String> contractModifications);
+
+  /**
+   * Retrieves wallet details from blockchain
+   * 
+   * @param wallet object to refresh
+   * @param contractDetail contract details attributes
+   * @param walletModifications list of called method names to change wallet
+   *          state on blockchain. This parameter will be used to know which
+   *          methods to call to refresh wallet state in order to optimize the
+   *          number of calls to Blockchain
+   * @throws Exception
+   */
+  void refreshWallet(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception; // NOSONAR
 
 }

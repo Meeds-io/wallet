@@ -228,6 +228,10 @@ public class WalletUtils {
 
   public static final String                          TOKEN_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
 
+  public static final String                          TOKEN_FUNC_DEPOSIT_FUNDS              = "depositFunds";
+
+  public static final String                          ETHER_FUNC_SEND_FUNDS                 = "sendEtherFunds";
+
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {
       return ConversationState.getCurrent().getIdentity().getUserId();

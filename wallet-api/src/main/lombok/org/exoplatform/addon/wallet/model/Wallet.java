@@ -62,6 +62,38 @@ public class Wallet implements Serializable, Cloneable {
   @ToString.Exclude
   private boolean           backedUp             = false;
 
+  /* Wallet state on Blockchain */
+
+  @Exclude
+  @ToString.Exclude
+  private Double            etherBalance         = null;
+
+  /* Wallet state on Contract on Blockchain */
+
+  @Exclude
+  @ToString.Exclude
+  private Double            tokenBalance         = null;
+
+  @Exclude
+  @ToString.Exclude
+  private Double            rewardBalance        = null;
+
+  @Exclude
+  @ToString.Exclude
+  private Double            vestingBalance       = null;
+
+  @Exclude
+  @ToString.Exclude
+  private Integer           adminLevel           = null;
+
+  @Exclude
+  @ToString.Exclude
+  private Boolean           isApproved           = null;
+
+  @Exclude
+  @ToString.Exclude
+  private Boolean           isInitialized        = null;
+
   @Override
   public Wallet clone() { // NOSONAR
     try {

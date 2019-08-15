@@ -231,6 +231,7 @@ public class WalletServiceImpl implements WalletService, Startable {
         } else {
           hideWalletOwnerPrivateInformation(wallet);
         }
+        accountService.retrieveWalletBlockchainState(wallet);
         userSettings.setWallet(wallet);
       }
       walletSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));

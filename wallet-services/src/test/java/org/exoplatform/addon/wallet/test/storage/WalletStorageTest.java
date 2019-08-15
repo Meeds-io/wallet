@@ -49,7 +49,7 @@ public class WalletStorageTest extends BaseWalletTest {
   @Test
   public void testNoExceptionThrownOnConstructor() {
     try {
-      new WalletStorage(null, null, null);
+      new WalletStorage(null, null, null, null);
     } catch (Exception e) {
       fail("Shouldn't throw an exception on constructor, even if all parameters are null");
     }

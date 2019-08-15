@@ -39,6 +39,12 @@ public class ContractDetail implements Serializable {
   @Exclude
   private String            contractType;
 
+  @Exclude
+  private Boolean           isPaused;
+
+  @Exclude
+  private Double            etherBalance;
+
   public ContractDetail clone() { // NOSONAR
     try {
       return (ContractDetail) super.clone();
