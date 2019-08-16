@@ -20,7 +20,7 @@
 
           <wallet-setup
             ref="walletSetup"
-            :wallet-address="walletAddress"
+            :wallet="wallet"
             :refresh-index="refreshIndex"
             :loading="loading"
             is-administration
@@ -140,13 +140,15 @@ export default {
   },
   computed: {
     walletAddress() {
-      return this.wallet && this.wallet.address;
+      return this.wallet && this.wallet.address && this.wallet.address.toLowerCase();
     },
     adminLevel() {
       return this.wallet && this.wallet.adminLevel;
     },
   },
   created() {
+    document.addEventListener('exo.addon.wallet.modified', this.walletUpdated);
+    document.addEventListener('exo.addon.contract.modified', this.reloadContract);
     this.init()
       .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
   },
@@ -157,7 +159,7 @@ export default {
       this.forceUpdate();
       this.error = null;
 
-      return this.walletUtils.initSettings()
+      return this.walletUtils.initSettings(false, true)
         .then(() => {
           if (!window.walletSettings) {
             this.forceUpdate();
@@ -166,10 +168,11 @@ export default {
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
           this.wallet = window.walletSettings.wallet;
+          this.contractDetails = this.settings.contractDetail;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
-          this.walletAddress = window.walletSettings.wallet.address;
+          this.walletAddress = this.wallet.address;
         })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
@@ -202,11 +205,13 @@ export default {
           this.forceUpdate();
         });
     },
+    walletUpdated(event) {
+      if(this.walletAddress && event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
+        this.refreshWallet(this.wallet);
+      }
+    },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress)
-        .then(contractDetails => {
-          this.contractDetails = contractDetails;
-        });
+      return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();
@@ -215,21 +220,24 @@ export default {
         if (transaction.contractAddress) {
           this.$set(wallet, 'loadingTokenBalance', true);
           this.walletUtils.watchTransactionStatus(transaction.hash, () => {
-            return this.addressRegistry.refreshWallet(wallet).then(() => {
-              wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+            return this.refreshWallet(wallet).then(() => {
               this.$set(wallet, 'loadingTokenBalance', false);
             });
           });
         } else {
           this.$set(wallet, 'loadingBalance', true);
           this.walletUtils.watchTransactionStatus(transaction.hash, () => {
-            return this.addressRegistry.refreshWallet(wallet).then(() => {
-              wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+            return this.refreshWallet(wallet).then(() => {
               this.$set(wallet, 'loadingBalance', false);
             });
           });
         }
       }
+    },
+    refreshWallet(wallet) {
+      return this.addressRegistry.refreshWallet(wallet).then(() => {
+        wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+      });
     },
     forceUpdate() {
       this.refreshIndex++;

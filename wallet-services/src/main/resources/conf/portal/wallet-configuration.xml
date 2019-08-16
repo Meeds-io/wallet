@@ -131,6 +131,10 @@
   </component>
 
   <component>
+    <type>org.exoplatform.addon.wallet.service.WalletWebSocketService</type>
+  </component>
+
+  <component>
     <type>org.exoplatform.addon.wallet.rest.WalletSettingsREST</type>
   </component>
 

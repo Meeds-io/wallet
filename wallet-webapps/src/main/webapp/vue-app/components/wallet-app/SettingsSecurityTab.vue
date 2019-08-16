@@ -15,6 +15,7 @@
         <h5>{{ $t('exoplatform.wallet.message.securityPasswordManagement') }}</h5>
         <reset-modal
           ref="walletResetModal"
+          :wallet="wallet"
           :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
           display-remember-me
           @reseted="$emit('settings-changed')" />
@@ -54,8 +55,8 @@
 <script>
 export default {
   props: {
-    walletAddress: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -76,6 +77,9 @@ export default {
     };
   },
   computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
     confirmMessage() {
       return this.hasKeyOnServerSide ? this.$t('exoplatform.wallet.message.storePrivateKeyOnServer') : this.$t('exoplatform.wallet.message.deletePrivateKeyFromServer');
     },

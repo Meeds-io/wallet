@@ -269,10 +269,9 @@
       <account-detail
         ref="accountDetail"
         :fiat-symbol="fiatSymbol"
-        :wallet-address="selectedWalletAddress"
+        :wallet="selectedWallet"
         :contract-details="selectedWalletDetails"
         :selected-transaction-hash="selectedTransactionHash"
-        :wallet="selectedWallet"
         is-read-only
         is-display-only
         is-administration
@@ -630,8 +629,6 @@ export default {
       }
     },
     watchWalletTransaction(wallet, hash) {
-      this.refreshWallet(wallet);
-
       this.walletUtils.watchTransactionStatus(hash, () => {
         this.$set(wallet, 'pendingTransaction', (wallet.pendingTransaction || 1) - 1);
         this.refreshWallet(wallet);

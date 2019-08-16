@@ -1,6 +1,6 @@
 package org.exoplatform.addon.wallet.blockchain.service;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.NEW_TRANSACTION_EVENT;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.security.Provider;
@@ -14,7 +14,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
-import org.exoplatform.addon.wallet.blockchain.listener.BlockchainTransactionProcessorListener;
+import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
 import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
@@ -89,6 +89,11 @@ public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTr
 
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
       listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));
+
+      // Start listening on blockchain modification for websocket trigger
+      listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new WebSocketTransactionListener());
+      listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
+      listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());
 
       addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
                                 "Configuration for wallet transaction stored status verifier",

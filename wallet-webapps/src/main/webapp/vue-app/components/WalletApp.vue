@@ -48,6 +48,7 @@
                 ref="walletSettingsModal"
                 :is-space="isSpace"
                 :open="showSettingsModal"
+                :wallet="wallet"
                 :app-loading="loading"
                 :display-reset-option="displayWalletResetOption"
                 @backed-up="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
@@ -63,7 +64,7 @@
               <wallet-setup
                 ref="walletSetup"
                 :is-space="isSpace"
-                :wallet-address="walletAddress"
+                :wallet="wallet"
                 :initialization-state="initializationState"
                 :loading="loading"
                 @loading="loading = true"
@@ -303,6 +304,9 @@ export default {
       }
     });
 
+    document.addEventListener('exo.addon.wallet.modified', this.walletUpdated);
+    document.addEventListener('exo.addon.contract.modified', this.reloadContract);
+
     this.$nextTick(() => {
       // Init application
       this.init()
@@ -330,7 +334,7 @@ export default {
       this.selectedAccount = null;
       this.wallet = null;
 
-      return this.walletUtils.initSettings(this.isSpace)
+      return this.walletUtils.initSettings(this.isSpace, true)
         .then((result, error) => {
           this.handleError(error);
           this.settings = window.walletSettings || {wallet: {}, network: {}};
@@ -359,6 +363,7 @@ export default {
           this.handleError(error);
 
           this.wallet = this.settings.wallet;
+          this.contractDetails = this.settings.contractDetail;
           this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
@@ -401,14 +406,18 @@ export default {
           this.$forceUpdate();
         });
     },
+    walletUpdated(event) {
+      if(this.walletAddress && event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
+        this.addressRegistry.refreshWallet(this.wallet);
+      }
+    },
     refreshTokenBalance() {
       return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress)
+      return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress)
         .then((contractDetails, error) => {
           this.handleError(error);
-          this.contractDetails = Object.assign({}, contractDetails);
         });
     },
     openAccountDetail(methodName, hash) {

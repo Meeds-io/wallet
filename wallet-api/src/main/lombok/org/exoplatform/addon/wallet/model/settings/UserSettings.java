@@ -1,6 +1,7 @@
 package org.exoplatform.addon.wallet.model.settings;
 
 import org.exoplatform.addon.wallet.model.Wallet;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 
 import lombok.*;
 import lombok.EqualsAndHashCode.Exclude;
@@ -22,6 +23,15 @@ public class UserSettings extends GlobalSettings {
 
   @Exclude
   private boolean           walletEnabled    = true;
+
+  @Exclude
+  private String            cometdChannel    = WalletUtils.COMETD_CHANNEL;
+
+  @Exclude
+  private String            cometdToken;
+
+  @Exclude
+  private String            cometdContext;
 
   public UserSettings(GlobalSettings globalSettings) {
     super(globalSettings);

@@ -79,6 +79,12 @@ export default {
         return false;
       },
     },
+    wallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
     refreshIndex: {
       type: Number,
       default: function() {
@@ -88,7 +94,6 @@ export default {
   },
   data() {
     return {
-      walletAddress: null,
       walletPassword: null,
       walletPasswordShow: null,
       loadingWalletBrowser: false,
@@ -96,6 +101,11 @@ export default {
         min: (v) => (v && v.length >= 8) || this.$t('exoplatform.wallet.warning.atLeast8Chars'),
       },
     };
+  },
+  computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    }
   },
   watch: {
     refreshIndex(newValue, oldValue) {
@@ -113,9 +123,6 @@ export default {
       this.loadingWalletBrowser = false;
       if (!window.localWeb3) {
         initEmptyWeb3Instance();
-      }
-      if (window.walletSettings && window.walletSettings.userPreferences) {
-        this.walletAddress = window.walletSettings.wallet.address;
       }
     },
     createWallet() {

@@ -109,8 +109,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         contractDetail = new ContractDetail();
         contractDetail.setAddress(contractAddress);
       }
-      refreshContractDetailFromBlockchain(contractDetail, new HashSet<>());
-      getContractService().saveContractDetail(contractDetail);
+      getContractService().refreshContractDetail(new HashSet<>());
     } catch (Exception e) {
       LOG.warn("Error retrieving contract with address {}", contractAddress, e);
     }

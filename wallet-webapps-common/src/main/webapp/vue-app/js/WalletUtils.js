@@ -1,5 +1,6 @@
 import * as constants from './Constants';
 import {searchWalletByTypeAndId, saveNewAddress} from './AddressRegistry';
+import {getSavedTransactionByHash} from './TransactionUtils';
 
 const DEFAULT_DECIMALS = 3;
 
@@ -134,8 +135,8 @@ export function initWeb3(isSpace, isAdmin) {
   return checkNetworkStatus();
 }
 
-export function initSettings(isSpace, spaceGroup) {
-  const spaceId = (isSpace && (spaceGroup || window.walletSpaceGroup)) || '';
+export function initSettings(isSpace, useCometd) {
+  const spaceId = (isSpace && window.walletSpaceGroup) || '';
 
   clearCache();
 
@@ -162,6 +163,9 @@ export function initSettings(isSpace, spaceGroup) {
 
       window.walletSettings = $.extend(window.walletSettings, settings);
       window.walletSettings = $.extend(window.walletSettings, settings);
+      if (useCometd) {
+        initCometd(window.walletSettings);
+      }
     })
     .then(() => {
       if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.wallet.address) {
@@ -211,6 +215,11 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
 
   if (!window.watchingTransactions) {
     window.watchingTransactions = {};
+    document.addEventListener('exo.addon.wallet.transaction.mined', triggerTransactionMinedEvent);
+  }
+  
+  if (!window.watchingTransactions) {
+    window.watchingTransactions = {};
   }
 
   if (!window.watchingTransactions[hash]) {
@@ -218,15 +227,8 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
   } else {
     window.watchingTransactions[hash].push(transactionMinedcallback);
   }
-
-  // TODO add websocket async call
-  /*
-  window.watchingTransactions[hash].forEach((callback) => {
-    callback(...);
-  });
-  window.watchingTransactions[hash] = null;
-   */
 }
+
 
 export function saveBrowserWalletInstance(wallet, password, isSpace, autoGenerateWallet, backedUp) {
   const account = window.localWeb3.eth.accounts.wallet.add(wallet);
@@ -388,10 +390,6 @@ export function unlockBrowserWallet(password, phrase, address) {
   }
 
   return isWalletUnlocked(address);
-}
-
-function isWalletUnlocked(address) {
-  return window.localWeb3.eth.accounts.wallet.length > 0 && window.localWeb3.eth.accounts.wallet[address] && window.localWeb3.eth.accounts.wallet[address].privateKey;
 }
 
 export function setWalletBackedUp() {
@@ -600,6 +598,28 @@ export function saveWalletInitializationStatus(address, status) {
     });
 }
 
+function triggerTransactionMinedEvent(event) {
+  return triggerTransactionMined(event && event.detail && event.detail.string);
+}
+
+function triggerTransactionMined(hash) {
+  if (!window.watchingTransactions[hash]) {
+    return;
+  }
+
+  return getSavedTransactionByHash(hash)
+    .then(transactionDetails => {
+      window.watchingTransactions[hash].forEach((callback) => {
+        callback(transactionDetails);
+      });
+      window.watchingTransactions[hash] = null;
+    })
+}
+
+function isWalletUnlocked(address) {
+  return window.localWeb3.eth.accounts.wallet.length > 0 && window.localWeb3.eth.accounts.wallet[address] && window.localWeb3.eth.accounts.wallet[address].privateKey;
+}
+
 function createLocalWeb3Instance(isSpace) {
   if (window.walletSettings.wallet.address) {
     window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL));
@@ -689,4 +709,19 @@ function retrieveFiatExchangeRateOnline(currency) {
     .catch((error) => {
       console.debug('error retrieving currency exchange, trying to get exchange from local store', error);
     });
+}
+
+function initCometd(settings) {
+  const loc = window.location;
+  cCometd.configure({
+    url: `${loc.protocol}//${loc.hostname}${(loc.port && ':') || ''}${loc.port || ''}/${settings.cometdContext}/cometd`,
+    exoId: eXo.env.portal.userName,
+    exoToken: settings.cometdToken,
+  });
+
+  cCometd.subscribe(settings.cometdChannel, null, (event) => {
+    const data = event.data && JSON.parse(event.data);
+    // console.debug("WS msg received", data.eventId, data);
+    document.dispatchEvent(new CustomEvent(data.eventId, {detail: data && data.message}));
+  });
 }

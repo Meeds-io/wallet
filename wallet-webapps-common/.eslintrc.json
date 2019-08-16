@@ -19,6 +19,7 @@
         "$": true,
         "global": true,
         "eXo": true,
+        "cCometd": true,
         "LocalWeb3": true,
         "localWeb3": true,
         "Vue": true,

@@ -131,6 +131,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
                                            contractDetail,
                                            walletsModifications == null ? null : walletsModifications.get(wallet.getAddress()));
       saveWalletBlockchainState(wallet, contractDetail.getAddress());
+      getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
     } catch (Exception e) {
       LOG.error("Error refreshing wallet state on blockchain");
     }

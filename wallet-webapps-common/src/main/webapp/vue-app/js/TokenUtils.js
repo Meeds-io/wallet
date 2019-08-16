@@ -1,6 +1,18 @@
 import {etherToFiat} from './WalletUtils.js';
 import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
 
+export function reloadContractDetails(contractDetails, walletAddress) {
+  if (!contractDetails || !contractDetails.address) {
+    return;
+  }
+
+  return getSavedContractDetails(contractDetails.address)
+    .then(savedDetails => {
+      Object.assign(contractDetails, savedDetails);
+      return getContractDetails(walletAddress);
+    });
+}
+
 export function getContractDetails(walletAddress) {
   const contractDetails = window.walletSettings.contractDetail;
   if (contractDetails && !contractDetails.icon) {

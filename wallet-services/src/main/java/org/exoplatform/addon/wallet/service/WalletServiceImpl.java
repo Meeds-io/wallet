@@ -58,16 +58,20 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   private WebNotificationStorage webNotificationStorage;
 
+  private WalletWebSocketService webSocketService;
+
   private GlobalSettings         configuredGlobalSettings = new GlobalSettings();
 
   public WalletServiceImpl(WalletContractService contractService,
                            WalletAccountService accountService,
+                           WalletWebSocketService webSocketService,
                            WebNotificationStorage webNotificationStorage,
                            PortalContainer container,
                            InitParams params) {
     this.container = container;
     this.accountService = accountService;
     this.contractService = contractService;
+    this.webSocketService = webSocketService;
     this.webNotificationStorage = webNotificationStorage;
 
     if (params.containsKey(NETWORK_ID)) {
@@ -212,6 +216,8 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
 
     if (userSettings.isWalletEnabled() || userSettings.isAdmin()) {
+      userSettings.setCometdToken(webSocketService.getUserToken(currentUser));
+      userSettings.setCometdContext(webSocketService.getCometdContextName());
       // Append user preferences
       SettingValue<?> userSettingsValue = getSettingService().get(Context.USER.id(currentUser), WALLET_SCOPE, SETTINGS_KEY_NAME);
       WalletSettings walletSettings = null;

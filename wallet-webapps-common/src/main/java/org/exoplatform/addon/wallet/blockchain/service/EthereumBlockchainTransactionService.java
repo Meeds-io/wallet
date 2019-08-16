@@ -360,6 +360,7 @@ public class EthereumBlockchainTransactionService
       LOG.info("Can't find transaction with hash {}, it may be pending", hash);
       return transactionDetail;
     }
+    transactionDetail.setGasPrice(transaction.getGasPrice().intValue());
 
     Block block = ethereumClientConnector.getBlock(transaction.getBlockHash());
     transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
