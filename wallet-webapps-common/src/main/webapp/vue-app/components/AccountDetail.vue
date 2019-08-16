@@ -30,7 +30,7 @@
             {{ fiatBalance }}
           </h3>
           <h4 v-if="!contractDetails.isContract" class="grey--text font-weight-light">
-            {{ balance }}
+            {{ tokenBalance }}
           </h4>
           <h3 v-else class="font-weight-light">
             <template v-if="selectedContractMethodName === 'reward'">
@@ -55,7 +55,7 @@
     <transactions-list
       id="transactionsList"
       ref="transactionsList"
-      :account="walletAddress"
+      :account="wallet && wallet.address"
       :contract-details="contractDetails"
       :fiat-symbol="fiatSymbol"
       :administration="isAdministration"
@@ -71,7 +71,6 @@
 import TransactionsList from './TransactionsList.vue';
 import ProfileChip from './ProfileChip.vue';
 
-import {retrieveContractDetails} from '../js/TokenUtils.js';
 import {etherToFiat, toFixed} from '../js/WalletUtils.js';
 
 export default {
@@ -80,24 +79,6 @@ export default {
     ProfileChip,
   },
   props: {
-    isReadOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    isDisplayOnly: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    walletAddress: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     wallet: {
       type: Object,
       default: function() {
@@ -137,56 +118,26 @@ export default {
   },
   data() {
     return {
-      // Avoid refreshing list and balance twice
-      refreshing: false,
       error: null,
     };
   },
   computed: {
     fiatBalance() {
-      return this.contractDetails && this.contractDetails.balanceFiat ? `${toFixed(this.contractDetails.balanceFiat)} ${this.fiatSymbol}` : `0 ${this.fiatSymbol}`;
+      return this.wallet && `${toFixed(etherToFiat(this.wallet.etherBalance))} ${this.fiatSymbol}`;
     },
     rewardBalance() {
-      return this.contractDetails && this.contractDetails.rewardBalance ? `${toFixed(this.contractDetails.rewardBalance)} ${this.contractDetails && this.contractDetails.symbol}` : '';
+      return this.wallet && `${toFixed(this.wallet.rewardBalance)} ${this.tokenSymbol}`;
     },
-    balance() {
-      return this.contractDetails && this.contractDetails.balance ? `${toFixed(this.contractDetails.balance)} ${this.contractDetails && this.contractDetails.symbol}` : '';
+    tokenBalance() {
+      return this.wallet && `${toFixed(this.wallet.tokenBalance)} ${this.tokenSymbol}`;
+    },
+    tokenSymbol() {
+      return this.contractDetails && this.contractDetails.symbol;
     },
   },
   watch: {
     contractDetails() {
       this.error = null;
-    },
-  },
-  methods: {
-    refreshBalance() {
-      if (!this.contractDetails) {
-        return Promise.resolve(null);
-      }
-      return window.localWeb3.eth.getBalance(this.walletAddress).then((balance) => {
-        if (!this.contractDetails) {
-          return Promise.resolve(null);
-        }
-        balance = window.localWeb3.utils.fromWei(String(balance), 'ether');
-        if (this.contractDetails.isContract) {
-          this.contractDetails.etherBalance = balance;
-          return retrieveContractDetails(this.walletAddress, this.contractDetails, this.isAdministration).then(() => this.$forceUpdate());
-        } else {
-          this.$set(this.contractDetails, 'balance', balance);
-          this.$set(this.contractDetails, 'balanceFiat', etherToFiat(balance));
-          if (this.contractDetails.details) {
-            this.$set(this.contractDetails.details, 'balance', this.contractDetails.balance);
-            this.$set(this.contractDetails.details, 'balanceFiat', this.contractDetails.balanceFiat);
-          }
-          this.$forceUpdate();
-        }
-      });
-    },
-    newTransactionPending(transaction) {
-      if (this.$refs.transactionsList) {
-        this.$refs.transactionsList.init(true);
-      }
-      this.$emit('transaction-sent', transaction);
     },
   },
 };

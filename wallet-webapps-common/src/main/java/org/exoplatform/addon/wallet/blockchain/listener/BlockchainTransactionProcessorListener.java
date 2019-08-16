@@ -106,6 +106,9 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
       boolean broadcastSavingTransaction = transactionDetail.isPending();
       transactionDetail.setPending(false);
       transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+      if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
+        transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
+      }
 
       // Ensure that stored transaction has a timestamp
       if (transactionDetail.getTimestamp() == 0) {

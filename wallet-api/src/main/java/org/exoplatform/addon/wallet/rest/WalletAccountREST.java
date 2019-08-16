@@ -102,10 +102,11 @@ public class WalletAccountREST implements ResourceContainer {
         LOG.warn(EMPTY_ADDRESS_MESSAGE);
         return Response.status(400).build();
       }
-      Wallet wallet = accountService.getWalletByAddress(address);
+      String currentUser = getCurrentUserId();
+      Wallet wallet = accountService.getWalletByAddress(address, currentUser);
       if (wallet != null) {
         if (WalletType.isSpace(wallet.getType())) {
-          wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), getCurrentUserId()));
+          wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), currentUser));
         }
         hideWalletOwnerPrivateInformation(wallet);
         return Response.ok(wallet).build();

@@ -188,4 +188,18 @@
     </createIndex>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-18">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="GAS_USED" type="INT" defaultValueNumeric="0" />
+      <column name="GAS_PRICE" type="DOUBLE" defaultValueNumeric="0" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-19">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="TOKEN_FEE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="NO_CONTRACT_FUNDS" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

@@ -1,203 +1,32 @@
-import {convertTokenAmountReceived, computeBalance, getTransaction} from './WalletUtils.js';
+import {etherToFiat} from './WalletUtils.js';
 import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
 
-export function getContractDetails(account, refreshFromBlockchain, isAdministration) {
-  if (window.walletSettings.contractAddress) {
-    const contractDetails = window.walletSettings.contractDetail || {};
-    contractDetails.address = window.walletSettings.contractAddress;
+export function getContractDetails(walletAddress) {
+  const contractDetails = window.walletSettings.contractDetail;
+  if (contractDetails && !contractDetails.icon) {
     contractDetails.icon = 'fa-file-contract';
-    contractDetails.networkId = window.walletSettings.network.id;
+    contractDetails.title = contractDetails.name;
     contractDetails.isContract = true;
-    return retrieveContractDetails(account, contractDetails, refreshFromBlockchain, isAdministration);
-  }
-  return Promise.resolve();
-}
-
-/*
- * Refresh token balance of wallet address
- */
-export function refreshTokenBalance(walletAddress, contractDetails) {
-  return contractDetails.contract.methods.balanceOf(walletAddress).call()
-    .then((balance) => {
-      contractDetails.balance = convertTokenAmountReceived(balance, contractDetails.decimals);
-    });
-}
-
-/*
- * Retrieve an ERC20 contract instance at specified address
- */
-export function retrieveContractDetails(account, contractDetails, refreshFromBlockchain, isAdministration) {
-  contractDetails.networkId = window.walletSettings.network.id;
-  contractDetails.retrievedAttributes = 0;
-  let contractToSave = false;
-  try {
-    const contractInstance = getContractInstance(account, contractDetails.address);
-    contractDetails.contract = contractInstance;
-  } catch (e) {
-    transformContracDetailsToFailed(contractDetails);
-    console.debug('retrieveContractDetails method - error retrieving instance', contractDetails.address, new Error(e));
-    return Promise.resolve(contractDetails);
-  }
-
-  if (!contractDetails.hasOwnProperty('contractType')) {
-    contractToSave = true;
-  }
-
-  // FIXME: Workaround for a unidentified bug
-  if (contractDetails.symbol && contractDetails.symbol.trim() === '?') {
-    contractDetails.symbol = null;
-  }
-
-  // Convert to numbers
-  if (contractDetails.contractType) {
-    contractDetails.contractType = Number(contractDetails.contractType);
-  }
-  if (contractDetails.sellPrice) {
-    contractDetails.sellPrice = Number(contractDetails.sellPrice);
-  }
-  return ((!refreshFromBlockchain && contractDetails.contractType &&  Promise.resolve(contractDetails.contractType)) || contractDetails.contract.methods.version().call())
-    .then((version) => {
-      if (version) {
-        version = Number(version);
-        const originalContractType = contractDetails.contractType;
-        contractDetails.contractType = version && !Number.isNaN(Number(version)) && Number.isInteger(version) ? Number(version) : 0;
-        contractToSave = contractToSave || Number(contractDetails.contractType) !== originalContractType;
-        contractDetails.retrievedAttributes++;
-      }
-    })
-    .catch((e) => {
-      contractDetails.contractType = 0;
-    })
-    .then(() => (!refreshFromBlockchain && contractDetails.decimals) || contractDetails.contract.methods.decimals().call())
-    .then((decimals) => {
-      if (decimals) {
-        decimals = Number(decimals);
-        contractToSave = contractToSave || Number(contractDetails.decimals) !== decimals;
-        contractDetails.decimals = decimals;
-        contractDetails.retrievedAttributes++;
-      } else {
-        contractDetails.decimals = 0;
-      }
-    })
-    .catch((e) => {
-      contractDetails.decimals = 0;
-    })
-    .then(() => account && contractDetails.contract.methods.balanceOf(account).call())
-    .then((balance) => {
-      if (balance) {
-        contractDetails.balance = convertTokenAmountReceived(balance, contractDetails.decimals);
-      }
-    })
-    .catch((e) => {
-      contractDetails.contractType = -1;
-      console.debug('retrieveContractDetails method - error computing balance', e);
-    })
-    .then(() => window.localWeb3.eth.getBalance(account))
-    .then((balance) => {
-      balance = window.localWeb3.utils.fromWei(String(balance), 'ether');
-      contractDetails.etherBalance = balance;
-    })
-    .then(() => (!refreshFromBlockchain && contractDetails.symbol) || contractDetails.contract.methods.symbol().call())
-    .then((symbol) => {
-      if (symbol) {
-        contractToSave = contractToSave || contractDetails.symbol !== symbol;
-        contractDetails.symbol = symbol;
-        contractDetails.retrievedAttributes++;
-      }
-    })
-    .catch((e) => {
-      contractDetails.contractType = -1;
-      console.debug('retrieveContractDetails method - error retrieving symbol', contractDetails.address, new Error(e));
-    })
-    .then(() => (!refreshFromBlockchain && contractDetails.name) || contractDetails.contract.methods.name().call())
-    .then((name) => {
-      if (name) {
-        contractToSave = contractToSave || contractDetails.name !== name;
-        contractDetails.name = name;
-        contractDetails.title = name;
-        contractDetails.retrievedAttributes++;
-      }
-    })
-    .catch((e) => {
-      contractDetails.contractType = -1;
-      console.debug('retrieveContractDetails method - error retrieving name', contractDetails.address, new Error(e));
-    })
-    .then(() => (!isAdministration && "0") || (!refreshFromBlockchain && contractDetails.totalSupply) || contractDetails.contract.methods.totalSupply().call())
-    .then((totalSupply) => {
-      if (totalSupply && Number(totalSupply)) {
-        contractDetails.totalSupply = totalSupply;
-        contractDetails.retrievedAttributes++;
-      }
-    })
-    .catch((e) => {
-      console.debug('retrieveContractDetails method - error retrieving totalSupply', contractDetails.address, new Error(e));
-    })
-    .then(() => isAdministration && computeBalance(contractDetails.address))
-    .then((contractBalance) => {
-      if (contractBalance && contractBalance.balance) {
-        contractDetails.contractBalance = contractBalance.balance;
-        contractDetails.contractBalanceFiat = contractBalance.balanceFiat;
-      }
-    })
-    .catch((e) => {
-      console.debug('retrieveContractDetails method - error retrieving balance of contract', contractDetails.address, new Error(e));
-    })
-    .then(() => {
-      if (!contractDetails.contractType || contractDetails.contractType <= 0) {
-        return;
-      }
-      // Compute ERT Token attributes
-      return ((!refreshFromBlockchain && contractDetails.sellPrice) ? Promise.resolve(Number(contractDetails.sellPrice) * 1000000000000000000) : contractDetails.contract.methods.getSellPrice().call())
-        .then((sellPrice) => {
-          sellPrice = (sellPrice && Number(sellPrice) / Math.pow(10, 18)) || 0;
-          contractToSave = contractToSave || contractDetails.sellPrice !== sellPrice;
-          contractDetails.sellPrice = sellPrice;
-          contractDetails.retrievedAttributes++;
-        })
-        .catch((e) => {
-          console.debug('retrieveContractDetails method - error retrieving sellPrice', contractDetails.address, new Error(e));
-        })
-        .then(() => (!refreshFromBlockchain && contractDetails.owner) || contractDetails.contract.methods.owner().call())
-        .then((owner) => {
-          if (owner) {
-            contractDetails.owner = owner.toLowerCase();
-            contractDetails.isOwner = contractDetails.owner === account && account.toLowerCase();
-            contractDetails.retrievedAttributes++;
-          }
-        })
-        .catch((e) => {
-          console.debug('retrieveContractDetails method - error retrieving getAdminLevel', contractDetails.address, new Error(e));
-        })
-        .then(() => {
-          return (!refreshFromBlockchain && contractDetails.hasOwnProperty('isPaused')) ? contractDetails.isPaused : contractDetails.contract.methods.isPaused().call();
-        })
-        .then((isPaused) => {
-          contractDetails.isPaused = isPaused ? true : false;
-          contractDetails.retrievedAttributes++;
-        })
-        .catch((e) => {
-          console.debug('retrieveContractDetails method - error retrieving isPaused', contractDetails.address, new Error(e));
-        });
-    })
-    .catch((e) => {
-      console.debug('retrieveContractDetails method - error retrieving ERT Token', account, contractDetails, new Error(e), e);
-      return contractDetails;
-    })
-    .then(() => {
-      if (contractDetails.contractType < 0 || contractDetails.retrievedAttributes === 0) {
+    contractDetails.isOwner = contractDetails.owner === walletAddress && walletAddress.toLowerCase();
+    contractDetails.fiatBalance = contractDetails.fiatBalance || (contractDetails.etherBalance && etherToFiat(contractDetails.etherBalance));
+    if (!contractDetails.contract) {
+      try {
+        contractDetails.contract = getContractInstance(walletAddress, contractDetails.address);
+      } catch (e) {
         transformContracDetailsToFailed(contractDetails);
-      } else if (contractToSave && isAdministration && window.walletSettings.admin) {
-        refreshContractOnServer();
+        console.debug('getContractDetails method - error retrieving contract instance', contractDetails.address, new Error(e));
       }
+    }
 
-      if (!window.walletContractsDetails) {
-        window.walletContractsDetails = {};
-      }
+    // Cache contract details by contract address
+    if (!window.walletContractsDetails) {
+      window.walletContractsDetails = {};
+    }
 
-      window.walletContractsDetails[contractDetails.address] = contractDetails;
-      window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
-      return contractDetails;
-    });
+    window.walletContractsDetails[contractDetails.address] = contractDetails;
+    window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
+  }
+  return Promise.resolve(contractDetails);
 }
 
 /*
@@ -254,6 +83,9 @@ export function getSavedContractDetails(address) {
       }
     })
     .then((contractDetails) => {
+      if (contractDetails) {
+        contractDetails.fiatBalance = contractDetails.fiatBalance || (contractDetails.etherBalance && etherToFiat(contractDetails.etherBalance));
+      }
       return contractDetails && contractDetails.address ? contractDetails : null;
     })
     .catch((e) => {
@@ -367,14 +199,14 @@ export function sendContractTransaction(txDetails, hashCallback, receiptCallback
   });
 }
 
-export function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes) {
+function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes) {
   if (!attemptTimes) {
     if (errorCallback) {
       return errorCallback('Transaction hash not found');
     }
     return;
   }
-  return getTransaction(hash)
+  return window.localWeb3.eth.getTransaction(hash)
     .then(transaction => {
       if (transaction) {
         console.debug('Found transaction on blockchain', transaction);
@@ -387,16 +219,6 @@ export function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, a
         waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
       }
     })
-}
-
-export function refreshContractOnServer() {
-  console.debug('Refreshing contract details on server');
-
-  return fetch('/portal/rest/wallet/api/contract/refresh', {
-    method: 'GET',
-  }).then((resp) => {
-    return resp && resp.ok;
-  });
 }
 
 function transformContracDetailsToFailed(contractDetails, e) {
@@ -418,7 +240,7 @@ function sendTransaction(transactionToSend, hashCallback, receiptCallback, confi
             if (transaction) {
               console.debug('Transaction was found on server eXo', transaction, ' verifying blockchain transactions status, else incrementing gas price ', transactionToSend.nonce);
 
-              return getTransaction(hash)
+              return window.localWeb3.eth.getTransaction(hash)
                 .then(transaction => {
                   if (transaction) {
                     console.debug('Found transaction on blockchain, incrementing nonce', transaction);

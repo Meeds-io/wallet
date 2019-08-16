@@ -4,13 +4,7 @@
       {{ $t('exoplatform.wallet.label.totalWalletRewards') }}
     </v-card-title>
     <v-card-title class="rewardBalance headline pt-0 pb-1">
-      <template v-if="loadingBalance">
-        <v-progress-circular
-          color="primary"
-          class="mb-2"
-          indeterminate />
-      </template>
-      <v-container v-else fluid>
+      <v-container fluid>
         <v-layout row>
           <v-flex grow class="amount">
             {{ walletUtils.toFixed(rewardBalance) }} {{ contractDetails.symbol }}
@@ -32,8 +26,8 @@
 <script>
 export default {
   props: {
-    walletAddress: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -45,41 +39,14 @@ export default {
       },
     },
   },
-  data() {
-    return {
-      loadingBalance: false,
-      rewardBalance: 0,
-    }
-  },
-  watch: {
-    contractDetails() {
-      if (this.contractDetails && this.contractDetails.contract) {
-        this.refreshBalance();
-      }
-    }
-  },
-  created() {
-    if (this.contractDetails && this.contractDetails.contract) {
-      this.refreshBalance();
+  computed: {
+    rewardBalance() {
+      return (this.wallet && this.wallet.rewardBalance) || 0;
     }
   },
   methods: {
     displayTransactionList() {
       this.$emit('display-transactions');
-    },
-    refreshBalance() {
-      if (!this.contractDetails || !this.contractDetails.contract || !this.walletAddress) {
-        return;
-      }
-      this.loadingBalance = true;
-      this.contractDetails.contract.methods.rewardBalanceOf(this.walletAddress).call()
-        .then(rewardBalance => {
-          this.rewardBalance = this.contractDetails.rewardBalance = (rewardBalance && this.walletUtils.convertTokenAmountReceived(rewardBalance, this.contractDetails.decimals)) || 0;
-        })
-        .catch(e => {
-          this.$emit('error', e);
-        })
-        .finally(() => this.loadingBalance = false);
     }
   }
 }

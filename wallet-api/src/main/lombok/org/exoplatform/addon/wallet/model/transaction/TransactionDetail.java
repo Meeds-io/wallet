@@ -57,6 +57,14 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private double            contractAmount;
 
+  private int               gasUsed;
+
+  private double            gasPrice;
+
+  private double            tokenFee;
+
+  private boolean           noContractFunds;
+
   private long              timestamp;
 
   @Override

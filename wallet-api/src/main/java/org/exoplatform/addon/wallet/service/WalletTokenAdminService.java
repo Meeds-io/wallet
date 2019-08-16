@@ -127,17 +127,6 @@ public interface WalletTokenAdminService {
   boolean isInitializedAccount(String address) throws Exception;// NOSONAR
 
   /**
-   * Checks whether a wallet address is an admin on token with at least level 1
-   * (on blockchain)
-   * 
-   * @param address
-   * @return {@link TransactionDetail} with the hash of the transaction sent in
-   *         blockchain
-   * @throws Exception
-   */
-  boolean isAdminAccount(String address) throws Exception;// NOSONAR
-
-  /**
    * Get admin level of a wallet address from token (on blockchain)
    * 
    * @param address

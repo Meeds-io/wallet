@@ -15,7 +15,7 @@
       class="walletSummaryAction mt-2">
       <send-tokens-modal
         ref="sendTokensModal"
-        :account="walletAddress"
+        :wallet="wallet"
         :is-read-only="isReadOnly"
         :contract-details="contractDetails"
         @sent="$emit('transaction-sent', $event)"
@@ -42,8 +42,8 @@
 <script>
 export default {
   props: {
-    walletAddress: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -60,6 +60,11 @@ export default {
         return false;
       },
     },
+  },
+  computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    }
   },
   methods: {
     init(isReadOnly) {

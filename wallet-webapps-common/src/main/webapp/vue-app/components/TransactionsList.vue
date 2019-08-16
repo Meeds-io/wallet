@@ -548,7 +548,7 @@
 
                 <v-list-tile-sub-title>
                   <v-icon
-                    v-if="!item.pending && !item.status"
+                    v-if="!item.pending && !item.succeeded"
                     color="orange"
                     title="Transaction failed">
                     warning
@@ -610,7 +610,7 @@
                 {{ $t('exoplatform.wallet.label.status') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
-                <v-icon :color="item.status ? 'success' : 'error'" v-text="item.status ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+                <v-icon :color="item.succeeded ? 'success' : 'error'" v-text="item.succeeded ? 'fa-check-circle' : 'fa-exclamation-circle'" />
               </v-list-tile-content>
             </v-list-tile>
             <v-list-tile v-if="administration && item.issuer">
@@ -738,8 +738,8 @@
               <v-list-tile-content>
                 {{ $t('exoplatform.wallet.label.transactionFee') }}
               </v-list-tile-content>
-              <v-list-tile-content v-if="item.feeToken" class="align-end">
-                {{ toFixed(item.feeToken) }} {{ item.contractSymbol }}
+              <v-list-tile-content v-if="item.tokenFee" class="align-end">
+                {{ toFixed(item.tokenFee) }} {{ item.contractSymbol }}
               </v-list-tile-content>
               <v-list-tile-content v-else class="align-end">
                 <div class="no-wrap">

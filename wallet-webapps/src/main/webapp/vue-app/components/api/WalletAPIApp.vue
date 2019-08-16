@@ -96,10 +96,6 @@ export default {
               this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
             }
             this.principalContractDetails = this.settings.contractDetail;
-            return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.principalContractDetails);
-          })
-          .then((result, error) => {
-            this.handleError(error);
 
             if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
               console.debug('Principal token seems inconsistent', this.principalContractDetails);

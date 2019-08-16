@@ -231,19 +231,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   @ExoBlockchainTransaction
-  public final boolean isAdminAccount(String address) throws Exception {
-    if (StringUtils.isBlank(address)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    String contractAddress = checkContractAddress();
-    return (Boolean) executeReadOperation(contractAddress,
-                                          ERTTokenV2.FUNC_ISADMIN,
-                                          address,
-                                          BigInteger.valueOf(1));
-  }
-
-  @Override
-  @ExoBlockchainTransaction
   public final boolean isInitializedAccount(String address) throws Exception {
     if (StringUtils.isBlank(address)) {
       throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);

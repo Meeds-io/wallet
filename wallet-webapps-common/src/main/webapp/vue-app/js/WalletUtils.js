@@ -198,7 +198,15 @@ export function initSettings(isSpace, spaceGroup) {
     });
 }
 
-export function watchTransactionStatus(hash, transactionFinishedcallback) {
+export function watchTransactionStatus(hash, transactionMinedcallback) {
+  if (!transactionMinedcallback) {
+    console.warn('no callback added to method');
+    return;
+  }
+  if (!hash) {
+    console.warn('empty hash added to method');
+    return;
+  }
   hash = hash.toLowerCase();
 
   if (!window.watchingTransactions) {
@@ -206,51 +214,18 @@ export function watchTransactionStatus(hash, transactionFinishedcallback) {
   }
 
   if (!window.watchingTransactions[hash]) {
-    window.watchingTransactions[hash] = [transactionFinishedcallback];
-    waitAsyncForTransactionStatus(hash, null);
+    window.watchingTransactions[hash] = [transactionMinedcallback];
   } else {
-    window.watchingTransactions[hash].push(transactionFinishedcallback);
+    window.watchingTransactions[hash].push(transactionMinedcallback);
   }
-}
 
-export function getTransactionReceipt(hash) {
-  return window.localWeb3.eth.getTransactionReceipt(hash);
-}
-
-export function getTransaction(hash) {
-  return window.localWeb3.eth.getTransaction(hash);
-}
-
-export function computeBalance(account) {
-  if (!window.localWeb3) {
-    return Promise.reject(new Error("You don't have a wallet yet"));
-  }
-  return window.localWeb3.eth
-    .getBalance(account)
-    .then((retrievedBalance, error) => {
-      if (error && !retrievedBalance) {
-        console.debug(`error retrieving balance of ${account}`, new Error(error));
-        throw error;
-      }
-      if (retrievedBalance) {
-        return window.localWeb3.utils.fromWei(String(retrievedBalance), 'ether');
-      } else {
-        return 0;
-      }
-    })
-    .then((retrievedBalance, error) => {
-      if (error) {
-        throw error;
-      }
-      return {
-        balance: retrievedBalance,
-        balanceFiat: etherToFiat(retrievedBalance),
-      };
-    })
-    .catch((e) => {
-      console.debug('Error retrieving balance of account', account, e);
-      return null;
-    });
+  // TODO add websocket async call
+  /*
+  window.watchingTransactions[hash].forEach((callback) => {
+    callback(...);
+  });
+  window.watchingTransactions[hash] = null;
+   */
 }
 
 export function saveBrowserWalletInstance(wallet, password, isSpace, autoGenerateWallet, backedUp) {
@@ -674,43 +649,6 @@ function initSpaceAccount(spaceGroup) {
       return (window.walletSettings.wallet.spaceAdministrator = false);
     }
   });
-}
-
-function waitAsyncForTransactionStatus(hash, transaction) {
-  if (!transaction || !transaction.blockHash || !transaction.blockNumber) {
-    getTransaction(hash).then((transaction) => {
-      setTimeout(() => {
-        waitAsyncForTransactionStatus(hash, transaction);
-      }, 2000);
-    });
-  } else {
-    window.localWeb3.eth
-      .getBlock(transaction.blockHash, false)
-      .then((block) => {
-        // Sometimes the block is not available on time
-        if (!block) {
-          setTimeout(() => {
-            waitAsyncForTransactionStatus(hash, transaction);
-          }, 2000);
-          return;
-        }
-        return getTransactionReceipt(hash).then((receipt) => {
-          if (window.watchingTransactions[hash] && window.watchingTransactions[hash].length) {
-            window.watchingTransactions[hash].forEach((callback) => {
-              callback(receipt, block);
-            });
-            window.watchingTransactions[hash] = null;
-          }
-        });
-      })
-      .catch((error) => {
-        if (window.watchingTransactions[hash] && window.watchingTransactions[hash].length) {
-          window.watchingTransactions[hash].forEach((callback) => {
-            callback(null, null);
-          });
-        }
-      });
-  }
 }
 
 function getRemoteId(isSpace) {

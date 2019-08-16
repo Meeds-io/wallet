@@ -493,6 +493,9 @@ public class WalletUtils {
    * @return true if has access, else false
    */
   public static boolean canAccessWallet(Wallet wallet, String currentUser) {
+    if (StringUtils.isBlank(currentUser)) {
+      return false;
+    }
     String remoteId = wallet.getId();
     WalletType type = WalletType.getType(wallet.getType());
     boolean isUserAdmin = isUserRewardingAdmin(currentUser);

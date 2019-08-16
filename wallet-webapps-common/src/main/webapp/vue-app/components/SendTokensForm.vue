@@ -74,7 +74,7 @@
       <qr-code-modal
         ref="qrCodeModal"
         :to="recipient"
-        :from="account"
+        :from="walletAddress"
         :amount="0"
         :is-contract="true"
         :args-names="['_to', '_value']"
@@ -115,7 +115,7 @@ import GasPriceChoice from './GasPriceChoice.vue';
 
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
-import {retrieveContractDetails, sendContractTransaction} from '../js/TokenUtils.js';
+import {sendContractTransaction} from '../js/TokenUtils.js';
 
 export default {
   components: {
@@ -124,8 +124,8 @@ export default {
     AddressAutoComplete,
   },
   props: {
-    account: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -133,7 +133,7 @@ export default {
     contractDetails: {
       type: Object,
       default: function() {
-        return {};
+        return null;
       },
     },
     defaultLabel: {
@@ -174,8 +174,11 @@ export default {
     };
   },
   computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
     disabled() {
-      return !this.account || this.loading || !this.recipient || !this.amount || !this.canSendToken || (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length));
+      return !this.walletAddress || this.loading || !this.recipient || !this.amount || !this.canSendToken || (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length));
     },
     transactionFeeString() {
       if (this.transactionFeeToken) {
@@ -230,8 +233,6 @@ export default {
           return;
         }
 
-        // Admin will implicitly approve account, so not necessary
-        // to check if the receiver is approved or not
         if (this.contractDetails.contractType > 0) {
           this.warning = null;
           this.information = null;
@@ -290,17 +291,13 @@ export default {
         if (this.contractDetails && this.contractDetails.isPaused) {
           this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
         } else {
-          if (this.contractDetails && this.contractDetails.address && !this.contractDetails.hasOwnProperty('isApproved')) {
-            // Load contract details in async mode for adminLevel test
-            retrieveContractDetails(this.account, this.contractDetails, true);
-          }
           this.estimateTransactionFee();
           this.warning = null;
         }
       });
     },
     estimateTransactionFee() {
-      if (this.contractDetails && !this.contractDetails.isPaused && this.contractDetails.balance && this.contractDetails.sellPrice && this.contractDetails.owner && this.contractDetails.contractType) {
+      if (this.contractDetails && !this.contractDetails.isPaused && this.wallet.tokenBalance && this.wallet.etherBalance && this.contractDetails.sellPrice && this.contractDetails.owner && this.contractDetails.contractType) {
         const recipient = this.contractDetails.isOwner ? this.recipient : this.contractDetails.owner;
 
         if (recipient) {
@@ -355,7 +352,7 @@ export default {
         return;
       }
 
-      if (this.contractDetails.balance < this.amount) {
+      if (this.wallet.tokenBalance < this.amount) {
         this.error = this.$t('exoplatform.wallet.warning.unsufficientFunds');
         return;
       }
@@ -416,7 +413,7 @@ export default {
                   timestamp: Date.now(),
                   fee: this.transactionFeeEther,
                   feeFiat: this.transactionFeeFiat,
-                  feeToken: this.transactionFeeToken,
+                  tokenFee: this.transactionFeeToken,
                 };
 
                 // *async* save transaction message for contract, sender and receiver
@@ -464,7 +461,7 @@ export default {
         return;
       }
 
-      if (this.recipient === this.account && this.contractDetails.contractType > 0) {
+      if (this.recipient === this.walletAddress && this.contractDetails.contractType > 0) {
         this.error = `You can't send '${this.contractDetails.name}' to yourself`;
         this.canSendToken = false;
         return;
@@ -474,7 +471,7 @@ export default {
         this.error = 'Invalid amount';
         return;
       } else if (this.amount && $.isNumeric(this.amount)) {
-        this.error = (!this.contractDetails || this.contractDetails.balance >= this.amount) ? null : 'Unsufficient funds';
+        this.error = (!this.wallet || this.wallet.tokenBalance >= this.amount) ? null : 'Unsufficient funds';
         return;
       }
     },

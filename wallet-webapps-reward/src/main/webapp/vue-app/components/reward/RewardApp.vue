@@ -45,14 +45,6 @@
             </div>
           </v-flex>
 
-          <wallet-setup
-            ref="walletSetup"
-            :wallet-address="walletAddress"
-            :loading="loading"
-            is-administration
-            @refresh="init()"
-            @error="error = $event" />
-
           <v-dialog
             v-model="loading"
             attach="#walletDialogsParent"
@@ -87,7 +79,6 @@
               <send-rewards-tab
                 ref="sendRewards"
                 :wallet-rewards="walletRewards"
-                :wallet-address="walletAddress"
                 :contract-details="contractDetails"
                 :period-type="rewardSettings.periodType"
                 :transaction-etherscan-link="transactionEtherscanLink"
@@ -141,6 +132,7 @@ export default {
   data() {
     return {
       loading: false,
+      wallet: null,
       error: null,
       settingWarnings: [],
       selectedTab: null,
@@ -149,7 +141,6 @@ export default {
       contractDetails: null,
       periodDatesDisplay: null,
       periodType: null,
-      walletAddress: null,
       duplicatedWallets: [],
       rewardSettings: {},
       totalRewards: [],
@@ -205,20 +196,10 @@ export default {
           if (!window.walletSettings) {
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
-        })
-        .then(() => this.walletUtils.initWeb3(false, true))
-        .catch((error) => {
-          if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
-            console.debug('Error connecting to network', error);
-            this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
-          } else {
-            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
-            throw error;
-          }
+          this.wallet = window.walletSettings.wallet;
         })
         .then(() => {
-          this.walletAddress = window.localWeb3 && window.localWeb3.eth.defaultAccount && window.localWeb3.eth.defaultAccount.toLowerCase();
-          return this.tokenUtils.getContractDetails(this.walletAddress);
+          return this.tokenUtils.getContractDetails(this.wallet.address);
         })
         .then(contractDetails => this.contractDetails = contractDetails)
         .then(() => this.refreshRewardSettings())
@@ -265,8 +246,8 @@ export default {
 
           this.walletRewards.forEach(walletReward => {
             if (walletReward && walletReward.rewardTransaction && walletReward.rewardTransaction.hash && walletReward.rewardTransaction.status === 'pending') {
-              this.walletUtils.watchTransactionStatus(walletReward.rewardTransaction.hash, (receipt) => {
-                walletReward.rewardTransaction.status = receipt && receipt.status ? 'success' : 'error';
+              this.walletUtils.watchTransactionStatus(walletReward.rewardTransaction.hash, (transactionDetail) => {
+                walletReward.rewardTransaction.status = transactionDetail.succeeded ? 'success' : 'error';
               });
             }
           });

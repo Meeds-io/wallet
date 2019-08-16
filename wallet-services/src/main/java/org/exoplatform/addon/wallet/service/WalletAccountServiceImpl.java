@@ -179,6 +179,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       } else if (!StringUtils.equals(wallet.getId(), currentUser)) {
         hideWalletOwnerPrivateInformation(wallet);
       }
+      if (canAccessWallet(wallet, currentUser)) {
+        retrieveWalletBlockchainState(wallet);
+      }
     }
     return wallet;
   }
@@ -250,7 +253,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public Wallet getWalletByAddress(String address) {
+  public Wallet getWalletByAddress(String address, String currentUser) {
     if (address == null) {
       throw new IllegalArgumentException("address is mandatory");
     }
@@ -258,8 +261,16 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     if (wallet != null) {
       Identity identity = getIdentityById(wallet.getTechnicalId());
       computeWalletFromIdentity(wallet, identity);
+      if (canAccessWallet(wallet, currentUser)) {
+        retrieveWalletBlockchainState(wallet);
+      }
     }
     return wallet;
+  }
+
+  @Override
+  public Wallet getWalletByAddress(String address) {
+    return getWalletByAddress(address, null);
   }
 
   @Override

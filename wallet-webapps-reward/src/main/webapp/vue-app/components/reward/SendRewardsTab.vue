@@ -235,12 +235,6 @@ export default {
         return [];
       },
     },
-    walletAddress: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     periodType: {
       type: String,
       default: function() {

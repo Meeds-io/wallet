@@ -100,6 +100,16 @@ public interface WalletAccountService {
   void removePrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
 
   /**
+   * Retrieve wallet by address with blockchain state if current user can access
+   * wallet data
+   * 
+   * @param address address of wallet to retrieve
+   * @param currentUser current username accessing wallet information
+   * @return {@link Wallet} wallet details identified by type and remote Id
+   */
+  Wallet getWalletByAddress(String address, String currentUser);
+
+  /**
    * Retrieve wallet by address
    * 
    * @param address address of wallet to retrieve

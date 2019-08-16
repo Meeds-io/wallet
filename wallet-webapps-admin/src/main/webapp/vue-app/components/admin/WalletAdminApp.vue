@@ -95,7 +95,8 @@
               <contract-tab
                 ref="contractDetail"
                 :wallet-address="walletAddress"
-                :user-wallet="userWallet"
+                :user-wallet="wallet"
+                :wallets="wallets"
                 :contract-details="contractDetails"
                 :admin-level="adminLevel"
                 :fiat-symbol="fiatSymbol"
@@ -128,22 +129,22 @@ export default {
       loading: false,
       selectedTab: 'wallets',
       fiatSymbol: '$',
-      walletAddress: null,
-      adminLevel: 0,
+      wallet: null,
       refreshIndex: 1,
       contractDetails: null,
       isAdmin: null,
       addressEtherscanLink: null,
-      contracts: [],
       wallets: [],
       anchor: document.URL.indexOf('#') >= 0 ? document.URL.split('#')[1] : null,
     };
   },
   computed: {
-    userWallet() {
-      const address = this.walletAddress && this.walletAddress.toLowerCase();
-      return this.wallets && this.wallets.find((wallet) => wallet && wallet.address && wallet.address.toLowerCase() === address);
-    }
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
+    adminLevel() {
+      return this.wallet && this.wallet.adminLevel;
+    },
   },
   created() {
     this.init()
@@ -164,6 +165,7 @@ export default {
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
+          this.wallet = window.walletSettings.wallet;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
@@ -204,10 +206,6 @@ export default {
       return this.tokenUtils.getContractDetails(this.walletAddress)
         .then(contractDetails => {
           this.contractDetails = contractDetails;
-          if (this.contractDetails && this.contractDetails.contract && !this.adminLevel) {
-            return this.contractDetails.contract.methods.getAdminLevel(this.walletAddress).call()
-              .then(adminLevel => this.adminLevel = adminLevel);
-          }
         });
     },
     pendingTransaction(transaction) {
@@ -215,57 +213,23 @@ export default {
       const wallet = this.wallets.find((wallet) => wallet && wallet.address && wallet.address === recipient);
       if (wallet) {
         if (transaction.contractAddress) {
-          if(!transaction.contractMethodName || transaction.contractMethodName === 'transfer'  || transaction.contractMethodName === 'transferFrom' || transaction.contractMethodName === 'approve') {
-            this.$set(wallet, 'loadingTokenBalance', true);
-          }
-          this.watchPendingTransaction(transaction, this.contractDetails);
+          this.$set(wallet, 'loadingTokenBalance', true);
+          this.walletUtils.watchTransactionStatus(transaction.hash, () => {
+            return this.addressRegistry.refreshWallet(wallet).then(() => {
+              wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+              this.$set(wallet, 'loadingTokenBalance', false);
+            });
+          });
         } else {
           this.$set(wallet, 'loadingBalance', true);
-          this.watchPendingTransaction(transaction);
-        }
-      } else {
-        const contract = this.contracts.find((contract) => contract && contract.address && contract.address.toLowerCase() === recipient.toLowerCase());
-        if (contract) {
-          this.$set(contract, 'loadingBalance', true);
-          if (this.$refs.contractDetail) {
-            this.$refs.contractDetail.newTransactionPending(transaction, contract);
-          }
+          this.walletUtils.watchTransactionStatus(transaction.hash, () => {
+            return this.addressRegistry.refreshWallet(wallet).then(() => {
+              wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+              this.$set(wallet, 'loadingBalance', false);
+            });
+          });
         }
       }
-    },
-    watchPendingTransaction(transaction, contractDetails) {
-      const thiss = this;
-      this.walletUtils.watchTransactionStatus(transaction.hash, (receipt) => {
-        if (receipt && receipt.status) {
-          const wallet = thiss.wallets && thiss.wallets.find((wallet) => wallet && wallet.address && transaction.to && wallet.address.toLowerCase() === transaction.to.toLowerCase());
-          if (transaction.contractMethodName === 'transferOwnership') {
-            if (contractDetails && contractDetails.isContract && contractDetails.address && transaction.contractAddress && contractDetails.address.toLowerCase() === transaction.contractAddress.toLowerCase()) {
-              this.$set(contractDetails, 'owner', transaction.to);
-              return this.tokenUtils.refreshContractOnServer().then(() => this.init());
-            }
-          } else if (transaction.contractMethodName === 'addAdmin' || transaction.contractMethodName === 'removeAdmin') {
-            if (wallet) {
-              contractDetails.contract.methods
-                .getAdminLevel(wallet.address)
-                .call()
-                .then((level) => {
-                  if (!wallet.accountAdminLevel) {
-                    wallet.accountAdminLevel = {};
-                  }
-                  level = Number(level);
-                  thiss.$set(wallet.accountAdminLevel, contractDetails.address, level ? level : 'not admin');
-                  thiss.$nextTick(() => thiss.forceUpdate());
-                });
-            }
-          } else if (transaction.contractMethodName === 'unPause' || transaction.contractMethodName === 'pause') {
-            thiss.$set(contractDetails, 'isPaused', transaction.contractMethodName === 'pause' ? true : false);
-            thiss.$nextTick(thiss.forceUpdate);
-          }
-          if(wallet && thiss.$refs.walletsTab) {
-            thiss.$refs.walletsTab.refreshWallet(wallet);
-          }
-        }
-      });
     },
     forceUpdate() {
       this.refreshIndex++;
