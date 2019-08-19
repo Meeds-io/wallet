@@ -133,7 +133,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       saveWalletBlockchainState(wallet, contractDetail.getAddress());
       getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
     } catch (Exception e) {
-      LOG.error("Error refreshing wallet state on blockchain");
+      LOG.error("Error refreshing wallet state on blockchain", e);
     }
   }
 
