@@ -3,7 +3,8 @@ package org.exoplatform.addon.wallet.blockchain.listener;
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.service.WalletWebSocketService;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.services.listener.*;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
 
 public class WebSocketContractListener extends Listener<Object, ContractDetail> {
 

@@ -321,6 +321,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
+    transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
     getTransactionService().saveTransactionDetail(transactionDetail, true);
     return transactionDetail;
@@ -365,6 +366,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
+    transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
     getTransactionService().saveTransactionDetail(transactionDetail, true);
     return transactionDetail;
@@ -423,6 +425,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
+    transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
+
     getTransactionService().saveTransactionDetail(transactionDetail, true);
     return transactionDetail;
   }
@@ -480,6 +484,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
+    transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
+
     getTransactionService().saveTransactionDetail(transactionDetail, true);
     return transactionDetail;
   }
@@ -489,6 +495,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   public void refreshWallet(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception {
     if (wallet == null) {
       throw new IllegalArgumentException("wallet is mandatory");
+    }
+    if (StringUtils.isBlank(wallet.getAddress())) {
+      LOG.debug("No wallet address: {}", wallet);
+      return;
     }
     if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress()) || contractDetail.getDecimals() == null) {
       throw new IllegalArgumentException("contractDetail is mandatory");
@@ -555,9 +565,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     if (wallet.getIsInitialized() == null
         || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFEROWNERSHIP)
-        || walletModifications.contains(ERTTokenV2.FUNC_APPROVEACCOUNT)
-        || walletModifications.contains(ERTTokenV2.FUNC_DISAPPROVEACCOUNT)) {
+        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)) {
       Boolean initialized = (Boolean) executeReadOperation(contractAddress,
                                                            ERTTokenV2.FUNC_ISINITIALIZEDACCOUNT,
                                                            walletAddress);
@@ -688,7 +696,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     String adminWalletAddress = getAdminWalletAddress();
     BigInteger nonce = getNonce(adminWalletAddress);
     GlobalSettings settings = getSettings();
-    BigInteger gasPrice = BigInteger.valueOf(settings.getNetwork().getMinGasPrice());
+    BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice(settings));
     BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
 
     RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce,
@@ -709,6 +717,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
 
     return transactionHash;
+  }
+
+  private Long getAdminGasPrice(GlobalSettings settings) {
+    return settings.getNetwork().getMinGasPrice();
   }
 
   private String executeTokenTransaction(final String contractAddress,
@@ -762,7 +774,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Admin account keys aren't set");
     }
     GlobalSettings settings = getSettings();
-    BigInteger gasPrice = BigInteger.valueOf(settings.getNetwork().getMinGasPrice());
+    BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice(settings));
     BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
     ContractGasProvider gasProvider = new StaticGasProvider(gasPrice, gasLimit);
     contractTransactionManager = getTransactionManager(adminCredentials);

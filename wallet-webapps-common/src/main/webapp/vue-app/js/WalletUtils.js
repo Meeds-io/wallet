@@ -726,6 +726,7 @@ function initCometd(settings) {
 
   cCometd.subscribe(settings.cometdChannel, null, (event) => {
     const data = event.data && JSON.parse(event.data);
+
     document.dispatchEvent(new CustomEvent(data.eventId, {detail: data && data.message}));
   });
 }

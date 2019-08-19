@@ -406,7 +406,7 @@ export default {
         });
     },
     walletUpdated(event) {
-      if(this.walletAddress && event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
+      if(event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
         this.addressRegistry.refreshWallet(this.wallet);
       }
     },

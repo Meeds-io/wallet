@@ -205,8 +205,15 @@ export default {
         });
     },
     walletUpdated(event) {
-      if(this.walletAddress && event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
-        this.refreshWallet(this.wallet);
+      if(event && event.detail && event.detail.string) {
+        const updatedWalletAddress = event.detail.string.toLowerCase();
+        if(this.walletAddress === updatedWalletAddress) {
+          this.refreshWallet(this.wallet);
+        }
+        const updatedWallet = this.wallets.find(wallet => wallet && wallet.address && wallet.address.toLowerCase() === updatedWalletAddress);
+        if (updatedWallet) {
+          this.refreshWallet(updatedWallet);
+        }
       }
     },
     reloadContract() {

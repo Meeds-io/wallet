@@ -113,6 +113,14 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   public void refreshWalletFromBlockchain(Wallet wallet,
                                           ContractDetail contractDetail,
                                           Map<String, Set<String>> walletsModifications) {
+    if (wallet == null) {
+      return;
+    }
+    if (StringUtils.isBlank(wallet.getAddress())) {
+      LOG.debug("No wallet address: {}", wallet);
+      return;
+    }
+
     if (contractDetail == null) {
       String contractAddress = getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
@@ -158,8 +166,15 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   @Override
   public void retrieveWalletBlockchainState(Wallet wallet) {
     String contractAddress = getContractAddress();
+    if (wallet == null) {
+      return;
+    }
     if (StringUtils.isBlank(contractAddress)) {
       LOG.warn("Contract address is empty, thus wallets can't be refreshed");
+      return;
+    }
+    if (StringUtils.isBlank(wallet.getAddress())) {
+      LOG.debug("No wallet address: {}", wallet);
       return;
     }
     accountStorage.retrieveWalletBlockchainState(wallet, contractAddress);
