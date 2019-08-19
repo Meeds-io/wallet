@@ -124,7 +124,7 @@
 
           <!-- pause/unpause contract -->
           <contract-admin-modal
-            v-if="!contractDetails.isPaused && adminLevel >= 5"
+            v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -134,7 +134,7 @@
             @success="successTransaction"
             @error="transactionError" />
           <contract-admin-modal
-            v-if="contractDetails.isPaused && adminLevel >= 5"
+            v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -160,7 +160,7 @@
             @error="transactionError" />
 
           <contract-admin-modal
-            v-if="contractDetails.isOwner"
+            v-if="contractDetails && contractDetails.isOwner"
             ref="transferOwnership"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -173,7 +173,7 @@
             @error="transactionError" />
 
           <upgrade-token-modal
-            v-if="contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
+            v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -228,7 +228,7 @@
             <transactions-list
               id="transactionsList"
               ref="transactionsList"
-              :account="contractDetails.address"
+              :account="contractDetails && contractDetails.address"
               :contract-details="contractDetails"
               :fiat-symbol="fiatSymbol"
               :error="error"
@@ -240,7 +240,7 @@
         </v-layout>
       </v-tab-item>
       <v-tab-item
-        v-if="contractDetails.contractType > 0 && adminLevel >= 4"
+        v-if="contractDetails && contractDetails.contractType > 0 && adminLevel >= 4"
         id="approvedAccounts"
         value="approvedAccounts">
         <v-flex v-if="!loading" justify-center>

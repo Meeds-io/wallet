@@ -168,7 +168,7 @@ export default {
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
           this.wallet = window.walletSettings.wallet;
-          this.contractDetails = this.settings.contractDetail;
+          this.contractDetails = window.walletSettings.contractDetail;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
