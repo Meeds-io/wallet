@@ -138,6 +138,17 @@
         })();
       </adapter>
     </script>
+    <depends>
+      <module>babelpolyfill</module>
+    </depends>
+  </module>
+
+  <module>
+    <name>babelpolyfill</name>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/polyfill.min.js</path>
+    </script>
   </module>
 
 </gatein-resources>
