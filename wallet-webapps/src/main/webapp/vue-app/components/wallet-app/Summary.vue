@@ -87,6 +87,7 @@
             <summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
+              :pending-transactions-count="pendingTransactionsCount"
               @display-transactions="$emit('display-transactions')"
               @error="$emit('error', $event)" />
           </v-flex>

@@ -745,7 +745,7 @@
                 <div class="no-wrap">
                   {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
                   <v-icon
-                    v-if="item.feeNoSufficientFunds"
+                    v-if="item.noContractFunds"
                     color="orange"
                     title="You financed transaction fee with ether instead of Token.">
                     warning
@@ -943,7 +943,7 @@ export default {
           this.forceUpdateList();
         })
         .catch((e) => {
-          console.debug('loadTransactions - method error', e);
+          console.debug('loadRecentTransaction - method error', e);
 
           this.loading = false;
           this.$emit('error', `${e}`);
@@ -958,9 +958,14 @@ export default {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
-        thiss.$emit('refresh-balance');
-        thiss.forceUpdateList();
+      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, (transactionDetails) => {
+        if (transactionDetails && thiss.transactions) {
+          const TransactionToUpdate = Object.values(thiss.transactions).find(transaction => transaction && transaction.hash === transactionDetails.hash);
+          if (TransactionToUpdate) {
+            Object.assign(TransactionToUpdate, transactionDetails);
+            thiss.forceUpdateList();
+          }
+        }
       })
         .then(() => {
           const totalTransactionsCount = Object.keys(this.transactions).length;

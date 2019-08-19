@@ -35,7 +35,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
-import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.exoplatform.addon.wallet.model.WalletInitializationState;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.*;
@@ -165,37 +166,16 @@ public class EthereumBlockchainTransactionService
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
-      Set<String> contractMethodsInvoked = new HashSet<>();
-      Map<String, Set<String>> walletsModifications = new HashMap<>();
 
       for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
         try { // NOSONAR
           boolean transactionMined = verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
           if (transactionMined) {
-            String contractMethodName = pendingTransactionDetail.getContractMethodName();
-            if (StringUtils.isNotBlank(contractMethodName)) {
-              contractMethodsInvoked.add(contractMethodName);
-            }
-
-            if (pendingTransactionDetail.isSucceeded()) {
-              addWalletsModification(pendingTransactionDetail, walletsModifications);
-            }
-
             transactionsMarkedAsMined++;
           }
         } catch (Exception e) {
           LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
         }
-      }
-
-      // Refresh saved contract detail in internal database from blockchain
-      if (!contractMethodsInvoked.isEmpty()) {
-        getContractService().refreshContractDetail(contractMethodsInvoked);
-      }
-
-      // Refresh modified wallets in blockchain
-      if (!walletsModifications.isEmpty()) {
-        getAccountService().refreshWalletsFromBlockchain(walletsModifications);
       }
     }
     return transactionsMarkedAsMined;
@@ -248,8 +228,6 @@ public class EthereumBlockchainTransactionService
 
     int addedTransactionsCount = 0;
     int modifiedTransactionsCount = 0;
-    Set<String> contractMethodsInvoked = new HashSet<>();
-    Map<String, Set<String>> walletsModifications = new HashMap<>();
 
     for (String transactionHash : transactionHashes) {
       TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
@@ -261,30 +239,22 @@ public class EthereumBlockchainTransactionService
         }
       } else {
         LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
-        boolean changed = false;
-
-        // Verify that the transaction has been decoded
-        if (StringUtils.isBlank(transactionDetail.getContractAddress())
-            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
-          transactionDetail.setContractAddress(contractAddress);
-          computeTransactionDetail(transactionDetail, contractDetail);
-          changed = true;
-        }
 
         // Broadcast event and send notifications when the transaction was
         // marked as pending
         boolean braodcastSavingTransaction = transactionDetail.isPending();
         transactionDetail.setPending(false);
-        changed = changed || braodcastSavingTransaction;
+        boolean changed = braodcastSavingTransaction;
 
-        // If the transaction wasn't marked as succeeded, try to verify the
-        // status from Blockchain again
-        if (!transactionDetail.isSucceeded()) {
-          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-          transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
-          if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
-            transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
-          }
+        // Verify that the transaction has been correctly decoded
+        if (StringUtils.isBlank(transactionDetail.getContractAddress())
+            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
+          transactionDetail.setContractAddress(contractAddress);
+          computeTransactionDetail(transactionDetail, contractDetail);
+          changed = true;
+        } else if (!transactionDetail.isSucceeded()) {
+          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionDetail.getHash());
+          computeContractTransactionDetail(transactionDetail, transactionReceipt);
           changed = true;
         }
 
@@ -293,13 +263,6 @@ public class EthereumBlockchainTransactionService
           getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
           modifiedTransactionsCount++;
         }
-      }
-
-      if (transactionDetail != null) {
-        if (StringUtils.isNotBlank(transactionDetail.getContractMethodName())) {
-          contractMethodsInvoked.add(transactionDetail.getContractMethodName());
-        }
-        addWalletsModification(transactionDetail, walletsModifications);
       }
     }
 
@@ -313,16 +276,6 @@ public class EthereumBlockchainTransactionService
     if (processed) {
       // Save last verified block for contracts transactions
       saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
-
-      // Refresh saved contract detail in internal database from blockchain
-      if (!contractMethodsInvoked.isEmpty()) {
-        getContractService().refreshContractDetail(contractMethodsInvoked);
-      }
-
-      // Refresh modified wallets in blockchain
-      if (!walletsModifications.isEmpty()) {
-        getAccountService().refreshWalletsFromBlockchain(walletsModifications);
-      }
     }
   }
 
@@ -394,8 +347,7 @@ public class EthereumBlockchainTransactionService
 
   @Override
   @ExoBlockchainTransaction
-  public void computeContractTransactionDetail(TransactionDetail transactionDetail,
-                                               Object transactionReceipt) {
+  public void computeContractTransactionDetail(TransactionDetail transactionDetail, Object transactionReceipt) {
     computeContractTransactionDetail(null, transactionDetail, (TransactionReceipt) transactionReceipt);
   }
 
@@ -698,52 +650,6 @@ public class EthereumBlockchainTransactionService
                             WALLET_SCOPE,
                             LAST_BLOCK_NUMBER_KEY_NAME + networkId,
                             SettingValue.create(lastWatchedBlockNumber));
-  }
-
-  private void addWalletsModification(TransactionDetail transactionDetail, Map<String, Set<String>> walletsModifications) {
-    if (transactionDetail == null) {
-      return;
-    }
-
-    addWalletModificationState(transactionDetail.getFromWallet(), ETHER_FUNC_SEND_FUNDS, walletsModifications);
-
-    String contractMethodName = transactionDetail.getContractMethodName();
-    if (StringUtils.isBlank(contractMethodName)) {
-      addWalletModificationState(transactionDetail.getToWallet(), ETHER_FUNC_SEND_FUNDS, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFER)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFERFROM)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-      addWalletModificationState(transactionDetail.getByWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_APPROVE)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFEROWNERSHIP)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_INITIALIZEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_REWARD)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), ERTTokenV2.FUNC_TRANSFER, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_ADDADMIN)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_REMOVEADMIN)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_APPROVEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_DISAPPROVEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFORMTOVESTED)) {
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-    }
-  }
-
-  private void addWalletModificationState(Wallet wallet,
-                                          String contractMethodName,
-                                          Map<String, Set<String>> walletsModifications) {
-    if (wallet == null) {
-      return;
-    }
-    String address = wallet.getAddress();
-    if (!walletsModifications.containsKey(address)) {
-      walletsModifications.put(address, new HashSet<>());
-    }
-    walletsModifications.get(address).add(contractMethodName);
   }
 
   private SettingService getSettingService() {

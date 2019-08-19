@@ -51,7 +51,6 @@
                 :wallet="wallet"
                 :app-loading="loading"
                 :display-reset-option="displayWalletResetOption"
-                @backed-up="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
                 @close="showSettingsModal = false"
                 @settings-changed="init()" />
             </v-toolbar>
@@ -376,7 +375,7 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          return this.reloadContract();
+          return this.tokenUtils.getContractDetails(this.walletAddress);
         })
         .then((result, error) => {
           this.handleError(error);
@@ -414,7 +413,7 @@ export default {
     refreshTokenBalance() {
       return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
-    reloadContract() {
+    reloadContract(event) {
       return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress)
         .then((contractDetails, error) => {
           this.handleError(error);

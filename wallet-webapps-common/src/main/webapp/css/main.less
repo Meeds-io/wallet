@@ -110,6 +110,12 @@
     .accountDetailSummary {
       height: auto;
       display: block;
+
+      .rightIcon {
+        position: absolute;
+        right: 0;
+        top: 9px;
+      }
     }
     .transactionDetailItem, .transactionDetailContent {
       height: auto;
@@ -125,42 +131,6 @@
       height: auto;
       min-height: 29px;
       white-space: normal;
-    }
-    .rightIcon {
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-
-    .accountDetailIcon {
-      margin-bottom: 2px;
-    }
-
-    #accountDetailTitle {
-      margin: auto 0;
-      padding-top: 20px;
-      height: 100px;
-      display: flex;
-      flex-direction: column;
-
-      > * {
-        margin: auto;
-      }
-
-      .title {
-        position: absolute;
-        left: 0;
-        top: 0;
-        margin: 8px;
-      }
-    }
-
-    #accountDetailActions > div {
-      margin: 0 auto;
-    }
-
-    .v-bottom-nav .v-btn .v-btn__content span {
-      padding: 0 10px;
     }
   }
   .v-autocomplete label {

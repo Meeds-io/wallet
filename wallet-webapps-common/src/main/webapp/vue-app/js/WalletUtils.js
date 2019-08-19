@@ -163,7 +163,10 @@ export function initSettings(isSpace, useCometd) {
 
       window.walletSettings = $.extend(window.walletSettings, settings);
       window.walletSettings = $.extend(window.walletSettings, settings);
-      if (useCometd) {
+      if (useCometd && !window.walletComedDInitialized) {
+        window.walletComedDInitialized = true;
+
+        document.addEventListener('exo.addon.wallet.transaction.modified', triggerTransactionMinedEvent);
         initCometd(window.walletSettings);
       }
     })
@@ -215,7 +218,6 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
 
   if (!window.watchingTransactions) {
     window.watchingTransactions = {};
-    document.addEventListener('exo.addon.wallet.transaction.mined', triggerTransactionMinedEvent);
   }
   
   if (!window.watchingTransactions) {
@@ -721,7 +723,6 @@ function initCometd(settings) {
 
   cCometd.subscribe(settings.cometdChannel, null, (event) => {
     const data = event.data && JSON.parse(event.data);
-    // console.debug("WS msg received", data.eventId, data);
     document.dispatchEvent(new CustomEvent(data.eventId, {detail: data && data.message}));
   });
 }

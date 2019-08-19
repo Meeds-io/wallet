@@ -126,7 +126,7 @@ function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accoun
 
   transactionDetails.type = transactionDetails.contractAddress ? 'contract' : 'ether';
 
-  if (watchLoadSuccess) {
+  if (watchLoadSuccess && transactionDetails.pending) {
     watchTransactionStatus(transactionDetails.hash, watchLoadSuccess);
   }
 

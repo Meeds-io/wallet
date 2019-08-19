@@ -5,7 +5,6 @@ import org.exoplatform.addon.wallet.service.WalletWebSocketService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.*;
 
-@Asynchronous
 public class WebSocketContractListener extends Listener<Object, ContractDetail> {
 
   private WalletWebSocketService webSocketService;

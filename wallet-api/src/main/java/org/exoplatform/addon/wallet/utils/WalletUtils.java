@@ -137,6 +137,9 @@ public class WalletUtils {
   public static final String                          CONTRACT_MODIFIED_EVENT               =
                                                                               "exo.addon.wallet.contract.modified";
 
+  public static final String                          TRANSACTION_MODIFIED_EVENT            =
+                                                                                 "exo.addon.wallet.transaction.modified";
+
   public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT          =
                                                                                    "exo.addon.wallet.addressAssociation.new";
 

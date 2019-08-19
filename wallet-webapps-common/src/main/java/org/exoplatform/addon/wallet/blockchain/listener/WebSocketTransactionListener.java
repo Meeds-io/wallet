@@ -1,20 +1,19 @@
 package org.exoplatform.addon.wallet.blockchain.listener;
 
-import org.json.JSONObject;
-
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletWebSocketService;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.services.listener.*;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
 
-@Asynchronous
-public class WebSocketTransactionListener extends Listener<Object, JSONObject> {
+public class WebSocketTransactionListener extends Listener<Object, TransactionDetail> {
 
   private WalletWebSocketService webSocketService;
 
   @Override
-  public void onEvent(Event<Object, JSONObject> event) throws Exception {
-    JSONObject transactionDetail = event.getData();
-    getWebSocketService().sendMessage(event.getEventName(), null, true, transactionDetail.get("hash"));
+  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
+    TransactionDetail transactionDetail = event.getData();
+    getWebSocketService().sendMessage(event.getEventName(), null, true, transactionDetail.getHash());
   }
 
   private WalletWebSocketService getWebSocketService() {

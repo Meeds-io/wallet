@@ -4,13 +4,10 @@
     id="accountDetail"
     class="text-xs-center white layout column">
     <v-card-title class="align-start accountDetailSummary">
-      <v-layout column>
-        <v-flex id="accountDetailTitle">
-          <div class="headline title align-start">
-            <v-icon class="primary--text accountDetailIcon">
-              {{ contractDetails.icon }}
-            </v-icon>
-            <span v-if="wallet">
+      <v-layout row>
+        <v-flex class="xs10 offset-xs1 headline title">
+          <span v-if="wallet">
+            <template v-if="isAdministration">
               {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
               <profile-chip
                 ref="profileChip"
@@ -21,34 +18,28 @@
                 :avatar="wallet.avatar"
                 :display-name="wallet.name"
                 :address="wallet.address" />
-            </span>
-            <span v-else>
-              {{ contractDetails.title }}
-            </span>
-          </div>
-          <h3 v-if="!contractDetails.isContract" class="font-weight-light">
-            {{ fiatBalance }}
-          </h3>
-          <h4 v-if="!contractDetails.isContract" class="grey--text font-weight-light">
-            {{ tokenBalance }}
-          </h4>
-          <h3 v-else class="font-weight-light">
-            <template v-if="selectedContractMethodName === 'reward'">
-              {{ $t('exoplatform.wallet.label.rewardBalance') }}: {{ rewardBalance }}
+            </template>
+            <template v-else-if="selectedContractMethodName === 'reward'">
+              {{ $t('exoplatform.wallet.label.rewardTransactionsList') }}
             </template>
             <template v-else>
-              {{ $t('exoplatform.wallet.label.balance') }}: {{ balance }}
+              {{ $t('exoplatform.wallet.label.transactionsList') }}
             </template>
-          </h3>
+          </span>
+          <span v-else>
+            {{ contractDetails.title }}
+          </span>
         </v-flex>
-        <v-btn
-          icon
-          class="rightIcon"
-          @click="$emit('back')">
-          <v-icon>
-            close
-          </v-icon>
-        </v-btn>
+        <v-flex class="xs1">
+          <v-btn
+            icon
+            class="rightIcon"
+            @click="$emit('back')">
+            <v-icon>
+              close
+            </v-icon>
+          </v-btn>
+        </v-flex>
       </v-layout>
     </v-card-title>
 
@@ -70,8 +61,6 @@
 <script>
 import TransactionsList from './TransactionsList.vue';
 import ProfileChip from './ProfileChip.vue';
-
-import {etherToFiat, toFixed} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -120,20 +109,6 @@ export default {
     return {
       error: null,
     };
-  },
-  computed: {
-    fiatBalance() {
-      return this.wallet && `${toFixed(etherToFiat(this.wallet.etherBalance))} ${this.fiatSymbol}`;
-    },
-    rewardBalance() {
-      return this.wallet && `${toFixed(this.wallet.rewardBalance)} ${this.tokenSymbol}`;
-    },
-    tokenBalance() {
-      return this.wallet && `${toFixed(this.wallet.tokenBalance)} ${this.tokenSymbol}`;
-    },
-    tokenSymbol() {
-      return this.contractDetails && this.contractDetails.symbol;
-    },
   },
   watch: {
     contractDetails() {
