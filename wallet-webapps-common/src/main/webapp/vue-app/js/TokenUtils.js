@@ -221,16 +221,14 @@ function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptT
   return window.localWeb3.eth.getTransaction(hash)
     .then(transaction => {
       if (transaction) {
-        console.debug('Found transaction on blockchain', transaction);
         if (hashCallback) {
           return hashCallback(hash);
         }
-        return;
       } else {
         console.debug('Transaction not found on blockchain', hash);
         waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
       }
-    })
+    });
 }
 
 function transformContracDetailsToFailed(contractDetails, e) {
@@ -282,7 +280,7 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
     })
     .on('error', (error, receipt) => {
       // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt")) {
+      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
         return;
       } else {
         return errorCallback(error, receipt);
@@ -290,7 +288,7 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
     })
     .catch((error) => {
       // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt")) {
+      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
         return;
       } else {
         console.error('Error fetching transaction with hash', transactionToSend && transactionToSend.hash, error);
