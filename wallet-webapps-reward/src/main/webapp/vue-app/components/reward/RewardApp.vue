@@ -197,11 +197,8 @@ export default {
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
           this.wallet = window.walletSettings.wallet;
+          this.contractDetails = window.walletSettings.contractDetail;
         })
-        .then(() => {
-          return this.tokenUtils.getContractDetails(this.wallet.address);
-        })
-        .then(contractDetails => this.contractDetails = contractDetails)
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
           console.debug('init method - error', e);

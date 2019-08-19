@@ -168,7 +168,6 @@ export default {
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
           this.wallet = window.walletSettings.wallet;
-          this.contractDetails = window.walletSettings.contractDetail;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
@@ -211,7 +210,10 @@ export default {
       }
     },
     reloadContract() {
-      return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress);
+      if (!this.contractDetails) {
+        this.contractDetails = window.walletSettings.contractDetail;
+      }
+      return this.tokenUtils.getContractDetails(this.walletAddress);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();
