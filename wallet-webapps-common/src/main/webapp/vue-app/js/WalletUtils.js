@@ -220,10 +220,6 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
   if (!window.watchingTransactions) {
     window.watchingTransactions = {};
   }
-  
-  if (!window.watchingTransactions) {
-    window.watchingTransactions = {};
-  }
 
   if (!window.watchingTransactions[hash]) {
     window.watchingTransactions[hash] = [transactionMinedcallback];
@@ -606,7 +602,7 @@ function triggerTransactionMinedEvent(event) {
 }
 
 function triggerTransactionMined(hash) {
-  if (!window.watchingTransactions[hash]) {
+  if (!window.watchingTransactions || !window.watchingTransactions[hash]) {
     return;
   }
 

@@ -257,7 +257,7 @@ export default {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
     displayEtherBalanceTooLow() {
-      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
+      return this.browserWalletExists && !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance || 0;
