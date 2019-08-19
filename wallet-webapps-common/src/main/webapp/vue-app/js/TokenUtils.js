@@ -193,7 +193,7 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
   }
 }
 
-export function sendContractTransaction(txDetails, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
+export function sendContractTransaction(txDetails, hashCallback, errorCallback) {
   // suppose you want to call a function named myFunction of myContract
   const transactionToSend = {
     to: txDetails.contractAddress,
@@ -207,7 +207,7 @@ export function sendContractTransaction(txDetails, hashCallback, receiptCallback
     // Increment manually nonce if we have the last transaction always pending
     transactionToSend.nonce = nonce;
 
-    return sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback);
+    return sendTransaction(transactionToSend, hashCallback, errorCallback);
   });
 }
 
@@ -240,7 +240,7 @@ function transformContracDetailsToFailed(contractDetails, e) {
   return contractDetails;
 }
 
-function sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback) {
+function sendTransaction(transactionToSend, hashCallback, errorCallback) {
   return window.localWeb3.eth.sendTransaction(transactionToSend)
     .on('transactionHash', (hash) => {
       if (hashCallback) {
@@ -262,31 +262,39 @@ function sendTransaction(transactionToSend, hashCallback, receiptCallback, confi
                     delete transactionToSend.nonce;
                     transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
                   }
-                  return sendTransaction(transactionToSend, hashCallback, receiptCallback, confirmedCallback, errorCallback);
+                  return sendTransaction(transactionToSend, hashCallback, errorCallback);
                 });
             }
             // Attempt 5 times to retrieve sent transaction
             return waitTransactionOnBlockchain(hash, hashCallback, errorCallback, 5);
           })
-          .catch(error =>  {
-            console.error('Error fetching transaction with hash', hash, error);
-            errorCallback(error);
+          .then(() => {
+            // Workaround to stop polling from blockchain waiting for receipt
+            const currentProvider = window.localWeb3.currentProvider;
+            if (currentProvider) {
+              window.localWeb3.currentProvider = null;
+              window.setTimeout(() => {
+                window.localWeb3.currentProvider = currentProvider;
+              }, 3000);
+            }
           });
       }
     })
-    .on('receipt', (receipt) => {
-      if (receiptCallback) {
-        return receiptCallback(receipt);
-      }
-    })
-    .on('confirmation', (confirmationNumber, receipt) => {
-      if (confirmedCallback) {
-        return confirmedCallback(confirmationNumber, receipt);
-      }
-    })
     .on('error', (error, receipt) => {
-      if (errorCallback) {
+      // Workaround to stop polling from blockchain waiting for receipt
+      if (String(error).indexOf("Failed to check for transaction receipt")) {
+        return;
+      } else {
         return errorCallback(error, receipt);
+      }
+    })
+    .catch((error) => {
+      // Workaround to stop polling from blockchain waiting for receipt
+      if (String(error).indexOf("Failed to check for transaction receipt")) {
+        return;
+      } else {
+        console.error('Error fetching transaction with hash', transactionToSend && transactionToSend.hash, error);
+        errorCallback(error);
       }
     });
 

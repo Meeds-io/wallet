@@ -620,8 +620,9 @@ function isWalletUnlocked(address) {
 }
 
 function createLocalWeb3Instance(isSpace) {
-  if (window.walletSettings.wallet.address) {
-    window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL));
+  if (window.walletSettings && window.walletSettings.network && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.network.providerURL) {
+    const provider = new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL);
+    window.localWeb3 = new LocalWeb3(provider);
     window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
 
     if (isSpace && !window.walletSettings.wallet.spaceAdministrator) {
@@ -633,11 +634,6 @@ function createLocalWeb3Instance(isSpace) {
     // Wallet not configured
     throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
   }
-}
-
-function isBrowserWallet(id, type, address) {
-  address = address.toLowerCase();
-  return localStorage.getItem(`exo-wallet-${type}-${id}`) === address;
 }
 
 function checkNetworkStatus(waitTime, tentativesCount) {

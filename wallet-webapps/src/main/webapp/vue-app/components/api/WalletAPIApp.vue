@@ -357,8 +357,6 @@ export default {
                       detail : pendingTransaction
                     }));
                   },
-                  null,
-                  null,
                   (error, receipt) => {
                     console.debug('contract transfer method - error', error, receipt);
                     document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {

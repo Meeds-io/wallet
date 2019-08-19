@@ -432,8 +432,6 @@ export default {
                   markFundRequestAsSent(this.notificationId);
                 }
               },
-              null,
-              null,
               (error, receipt) => {
                 console.debug('Web3 contract.transfer method - error', error);
                 // The transaction has failed
