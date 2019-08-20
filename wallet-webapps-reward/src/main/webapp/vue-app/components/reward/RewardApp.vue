@@ -191,7 +191,7 @@ export default {
       this.loading = true;
 
       this.error = null;
-      return this.walletUtils.initSettings()
+      return this.walletUtils.initSettings(false, true)
         .then(() => {
           if (!window.walletSettings) {
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
