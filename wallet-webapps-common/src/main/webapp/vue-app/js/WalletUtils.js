@@ -132,8 +132,7 @@ export function initWeb3(isSpace, isAdmin) {
     throw new Error(constants.ERROR_WALLET_SETTINGS_NOT_LOADED);
   }
 
-  createLocalWeb3Instance(isSpace);
-  return checkNetworkStatus();
+  return createLocalWeb3Instance(isSpace);
 }
 
 export function initSettings(isSpace, useCometd) {
@@ -634,22 +633,6 @@ function createLocalWeb3Instance(isSpace) {
     // Wallet not configured
     throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
   }
-}
-
-function checkNetworkStatus(waitTime, tentativesCount) {
-  if (!waitTime) {
-    waitTime = 300;
-  }
-  // Test if network is connected: isListening operation can hang up forever
-  return window.localWeb3.eth.net.isListening()
-    .then((listening) => {
-      window.walletSettings.isListening = listening;
-      if (!window.walletSettings.isListening) {
-        console.debug('The network seems to be disconnected');
-        throw new Error(constants.ERROR_WALLET_DISCONNECTED);
-      }
-    })
-    .then(() => constants.OK);
 }
 
 function initSpaceAccount(spaceGroup) {
