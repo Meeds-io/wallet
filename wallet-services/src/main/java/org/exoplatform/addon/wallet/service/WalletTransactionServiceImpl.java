@@ -212,6 +212,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         accountService.checkCanSaveWallet(senderWallet, senderWallet, currentUser);
       }
     }
+
+    if (StringUtils.isNotBlank(currentUser)) {
+      Wallet issuerWallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser);
+      transactionDetail.setIssuer(issuerWallet);
+    }
+
     transactionStorage.saveTransactionDetail(transactionDetail);
     if (broadcastMinedTransaction) {
       broadcastTransactionMinedEvent(transactionDetail);

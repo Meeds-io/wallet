@@ -376,9 +376,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       wallet = wallet.clone();
       try {
-        getListenerService().broadcast(eventName,
-                                       oldWallet == null ? null : oldWallet.clone(),
-                                       wallet);
+        getListenerService().broadcast(eventName, wallet, currentUser);
       } catch (Exception e) {
         LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
       }
@@ -437,6 +435,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
+
+    boolean walletEnablement = wallet.isEnabled();
     // Only 'rewarding' group members can change wallets
     if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
@@ -445,6 +445,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     wallet.setEnabled(enable);
     accountStorage.saveWallet(wallet, false);
+    if (walletEnablement != wallet.isEnabled()) {
+      try {
+        getListenerService().broadcast(enable ? WALLET_ENABLED_EVENT : WALLET_DISABLED_EVENT, wallet, currentUser);
+      } catch (Exception e) {
+        LOG.error("Error while braodcasting wallet {} enablement modification to {}", wallet, enable);
+      }
+    }
   }
 
   @Override
@@ -483,6 +490,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     wallet.setInitializationState(initializationState.name());
     accountStorage.saveWallet(wallet, false);
+
+    try {
+      getListenerService().broadcast(WALLET_INITIALIZATION_MODIFICATION_EVENT, wallet, currentUser);
+    } catch (Exception e) {
+      LOG.error("Error while braodcasting wallet {} state modification", wallet, currentUser);
+    }
   }
 
   @Override

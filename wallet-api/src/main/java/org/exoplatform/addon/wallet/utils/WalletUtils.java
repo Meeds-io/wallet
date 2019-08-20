@@ -68,179 +68,201 @@ public class WalletUtils {
   }
 
   @SuppressWarnings("all")
-  public static final char[]                          SIMPLE_CHARS                          = new char[] { 'A', 'B', 'C', 'D',
+  public static final char[]                          SIMPLE_CHARS                             = new char[] { 'A', 'B', 'C', 'D',
       'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
       'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1',
       '2', '3', '4', '5', '6', '7', '8', '9' };
 
-  public static final String                          COMETD_CHANNEL                        = "/eXo/Application/Addons/Wallet";
+  public static final String                          COMETD_CHANNEL                           = "/eXo/Application/Addons/Wallet";
 
-  public static final int                             ETHER_TO_WEI_DECIMALS                 = 18;
+  public static final int                             ETHER_TO_WEI_DECIMALS                    = 18;
 
-  public static final JsonParser                      JSON_PARSER                           = new JsonParserImpl();
+  public static final JsonParser                      JSON_PARSER                              = new JsonParserImpl();
 
-  public static final JsonGenerator                   JSON_GENERATOR                        = new JsonGeneratorImpl();
+  public static final JsonGenerator                   JSON_GENERATOR                           = new JsonGeneratorImpl();
 
-  public static final String                          EMPTY_HASH                            =
+  public static final String                          EMPTY_HASH                               =
                                                                  "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-  public static final String                          NETWORK_ID                            = "networkId";
+  public static final String                          NETWORK_ID                               = "networkId";
 
-  public static final String                          NETWORK_URL                           = "networkURL";
+  public static final String                          NETWORK_URL                              = "networkURL";
 
-  public static final String                          NETWORK_WS_URL                        = "networkWSURL";
+  public static final String                          NETWORK_WS_URL                           = "networkWSURL";
 
-  public static final String                          ACCESS_PERMISSION                     = "accessPermission";
+  public static final String                          ACCESS_PERMISSION                        = "accessPermission";
 
-  public static final String                          TOKEN_ADDRESS                         = "tokenAddress";
+  public static final String                          TOKEN_ADDRESS                            = "tokenAddress";
 
-  public static final String                          GAS_LIMIT                             = "gasLimit";
+  public static final String                          GAS_LIMIT                                = "gasLimit";
 
-  public static final String                          MIN_GAS_PRICE                         = "cheapGasPrice";
+  public static final String                          MIN_GAS_PRICE                            = "cheapGasPrice";
 
-  public static final String                          NORMAL_GAS_PRICE                      = "normalGasPrice";
+  public static final String                          NORMAL_GAS_PRICE                         = "normalGasPrice";
 
-  public static final String                          MAX_GAS_PRICE                         = "fastGasPrice";
+  public static final String                          MAX_GAS_PRICE                            = "fastGasPrice";
 
-  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME            = "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
+  public static final String                          LAST_BLOCK_NUMBER_KEY_NAME               =
+                                                                                 "ADDONS_ETHEREUM_LAST_BLOCK_NUMBER";
 
-  public static final String                          SCOPE_NAME                            = "ADDONS_ETHEREUM_WALLET";
+  public static final String                          SCOPE_NAME                               = "ADDONS_ETHEREUM_WALLET";
 
-  public static final String                          INITIAL_FUNDS_KEY_NAME                = "INITIAL_FUNDS";
+  public static final String                          INITIAL_FUNDS_KEY_NAME                   = "INITIAL_FUNDS";
 
-  public static final String                          SETTINGS_KEY_NAME                     = "ADDONS_ETHEREUM_WALLET_SETTINGS";
+  public static final String                          SETTINGS_KEY_NAME                        =
+                                                                        "ADDONS_ETHEREUM_WALLET_SETTINGS";
 
-  public static final Context                         WALLET_CONTEXT                        = Context.GLOBAL;
+  public static final Context                         WALLET_CONTEXT                           = Context.GLOBAL;
 
-  public static final Scope                           WALLET_SCOPE                          = Scope.APPLICATION.id(SCOPE_NAME);
+  public static final Scope                           WALLET_SCOPE                             = Scope.APPLICATION.id(SCOPE_NAME);
 
-  public static final String                          WALLET_USER_TRANSACTION_NAME          = "WALLET_USER_TRANSACTION";
+  public static final String                          WALLET_USER_TRANSACTION_NAME             = "WALLET_USER_TRANSACTION";
 
-  public static final String                          WALLET_BROWSER_PHRASE_NAME            = "WALLET_BROWSER_PHRASE";
+  public static final String                          WALLET_BROWSER_PHRASE_NAME               = "WALLET_BROWSER_PHRASE";
 
-  public static final String                          ADMIN_KEY_PARAMETER                   = "admin.wallet.key";
+  public static final String                          ADMIN_KEY_PARAMETER                      = "admin.wallet.key";
 
-  public static final String                          ABI_PATH_PARAMETER                    = "contract.abi.path";
+  public static final String                          ABI_PATH_PARAMETER                       = "contract.abi.path";
 
-  public static final String                          BIN_PATH_PARAMETER                    = "contract.bin.path";
+  public static final String                          BIN_PATH_PARAMETER                       = "contract.bin.path";
 
-  public static final String                          ADMINISTRATORS_GROUP                  = "/platform/administrators";
+  public static final String                          ADMINISTRATORS_GROUP                     = "/platform/administrators";
 
-  public static final String                          REWARDINGS_GROUP                      = "/platform/rewarding";
+  public static final String                          REWARDINGS_GROUP                         = "/platform/rewarding";
 
-  public static final String                          WALLET_ADMIN_REMOTE_ID                = "admin";
+  public static final String                          WALLET_ADMIN_REMOTE_ID                   = "admin";
 
-  public static final String                          PRINCIPAL_CONTRACT_ADMIN_NAME         = "Admin";
+  public static final String                          PRINCIPAL_CONTRACT_ADMIN_NAME            = "Admin";
 
-  public static final String                          WALLET_MODIFIED_EVENT                 = "exo.addon.wallet.modified";
+  public static final String                          WALLET_MODIFIED_EVENT                    = "exo.addon.wallet.modified";
 
-  public static final String                          CONTRACT_MODIFIED_EVENT               =
+  public static final String                          CONTRACT_MODIFIED_EVENT                  =
                                                                               "exo.addon.wallet.contract.modified";
 
-  public static final String                          TRANSACTION_MODIFIED_EVENT            =
+  public static final String                          TRANSACTION_MODIFIED_EVENT               =
                                                                                  "exo.addon.wallet.transaction.modified";
 
-  public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT          =
+  public static final String                          WALLET_ENABLED_EVENT                     = "exo.addon.wallet.enabled";
+
+  public static final String                          WALLET_DISABLED_EVENT                    = "exo.addon.wallet.disabled";
+
+  public static final String                          WALLET_INITIALIZATION_MODIFICATION_EVENT =
+                                                                                               "exo.addon.wallet.initialization.state";
+
+  public static final String                          CONTRACT_FUNC_TRANSFER                   = "transfer";
+
+  public static final String                          CONTRACT_FUNC_TRANSFERFROM               = "transferFrom";
+
+  public static final String                          CONTRACT_FUNC_APPROVE                    = "approve";
+
+  public static final String                          CONTRACT_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
+
+  public static final String                          CONTRACT_FUNC_REWARD                     = "reward";
+
+  public static final String                          CONTRACT_FUNC_ADDADMIN                   = "addAdmin";
+
+  public static final String                          NEW_ADDRESS_ASSOCIATED_EVENT             =
                                                                                    "exo.addon.wallet.addressAssociation.new";
 
-  public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT       =
+  public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.addon.wallet.addressAssociation.modification";
 
-  public static final String                          KNOWN_TRANSACTION_MINED_EVENT         =
+  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
                                                                                     "exo.addon.wallet.transaction.mined";
 
-  public static final String                          NEW_TRANSACTION_EVENT                 =
+  public static final String                          NEW_TRANSACTION_EVENT                    =
                                                                             "exo.addon.wallet.transaction.loaded";
 
-  public static final String                          TRANSACTION_PENDING_MAX_DAYS          = "transaction.pending.maxDays";
+  public static final String                          TRANSACTION_PENDING_MAX_DAYS             = "transaction.pending.maxDays";
 
-  public static final String                          WALLET_SENDER_NOTIFICATION_ID         = "EtherSenderNotificationPlugin";
+  public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
-  public static final String                          WALLET_RECEIVER_NOTIFICATION_ID       = "EtherReceiverNotificationPlugin";
+  public static final String                          WALLET_RECEIVER_NOTIFICATION_ID          =
+                                                                                      "EtherReceiverNotificationPlugin";
 
-  public static final String                          FUNDS_REQUEST_NOTIFICATION_ID         = "FundsRequestNotificationPlugin";
+  public static final String                          FUNDS_REQUEST_NOTIFICATION_ID            = "FundsRequestNotificationPlugin";
 
-  public static final String                          FUNDS_REQUEST_SENT                    = "sent";
+  public static final String                          FUNDS_REQUEST_SENT                       = "sent";
 
-  public static final String                          CONTRACT_ADDRESS                      = "contractAddress";
+  public static final String                          CONTRACT_ADDRESS                         = "contractAddress";
 
-  public static final String                          AMOUNT                                = "amount";
+  public static final String                          AMOUNT                                   = "amount";
 
-  public static final String                          SYMBOL                                = "symbol";
+  public static final String                          SYMBOL                                   = "symbol";
 
-  public static final String                          MESSAGE                               = "message";
+  public static final String                          MESSAGE                                  = "message";
 
-  public static final String                          HASH                                  = "hash";
+  public static final String                          HASH                                     = "hash";
 
-  public static final String                          ACCOUNT_TYPE                          = "account_type";
+  public static final String                          ACCOUNT_TYPE                             = "account_type";
 
-  public static final String                          RECEIVER_TYPE                         = "receiver_type";
+  public static final String                          RECEIVER_TYPE                            = "receiver_type";
 
-  public static final String                          AVATAR                                = "avatar";
+  public static final String                          AVATAR                                   = "avatar";
 
-  public static final String                          SENDER                                = "sender";
+  public static final String                          SENDER                                   = "sender";
 
-  public static final String                          USER                                  = "userFullname";
+  public static final String                          USER                                     = "userFullname";
 
-  public static final String                          USER_URL                              = "userUrl";
+  public static final String                          USER_URL                                 = "userUrl";
 
-  public static final String                          SENDER_URL                            = "senderUrl";
+  public static final String                          SENDER_URL                               = "senderUrl";
 
-  public static final String                          RECEIVER                              = "receiver";
+  public static final String                          RECEIVER                                 = "receiver";
 
-  public static final String                          RECEIVER_URL                          = "receiverUrl";
+  public static final String                          RECEIVER_URL                             = "receiverUrl";
 
-  public static final String                          FUNDS_ACCEPT_URL                      = "fundsAcceptUrl";
+  public static final String                          FUNDS_ACCEPT_URL                         = "fundsAcceptUrl";
 
-  public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER =
+  public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,
                                                                                                                   "senderFullName");
 
-  public static final ArgumentLiteral<Wallet>         SENDER_ACCOUNT_DETAIL_PARAMETER       =
+  public static final ArgumentLiteral<Wallet>         SENDER_ACCOUNT_DETAIL_PARAMETER          =
                                                                                       new ArgumentLiteral<>(Wallet.class,
                                                                                                             "senderAccountDetail");
 
-  public static final ArgumentLiteral<Wallet>         RECEIVER_ACCOUNT_DETAIL_PARAMETER     =
+  public static final ArgumentLiteral<Wallet>         RECEIVER_ACCOUNT_DETAIL_PARAMETER        =
                                                                                         new ArgumentLiteral<>(Wallet.class,
                                                                                                               "receiverAccountDetail");
 
-  public static final ArgumentLiteral<FundsRequest>   FUNDS_REQUEST_PARAMETER               =
+  public static final ArgumentLiteral<FundsRequest>   FUNDS_REQUEST_PARAMETER                  =
                                                                               new ArgumentLiteral<>(FundsRequest.class,
                                                                                                     "fundsRequest");
 
-  public static final ArgumentLiteral<ContractDetail> CONTRACT_DETAILS_PARAMETER            =
+  public static final ArgumentLiteral<ContractDetail> CONTRACT_DETAILS_PARAMETER               =
                                                                                  new ArgumentLiteral<>(ContractDetail.class,
                                                                                                        "contractDetails");
 
-  public static final ArgumentLiteral<Double>         AMOUNT_PARAMETER                      =
+  public static final ArgumentLiteral<Double>         AMOUNT_PARAMETER                         =
                                                                        new ArgumentLiteral<>(Double.class, AMOUNT);
 
-  public static final ArgumentLiteral<String>         MESSAGE_PARAMETER                     =
+  public static final ArgumentLiteral<String>         MESSAGE_PARAMETER                        =
                                                                         new ArgumentLiteral<>(String.class, MESSAGE);
 
-  public static final ArgumentLiteral<String>         HASH_PARAMETER                        =
+  public static final ArgumentLiteral<String>         HASH_PARAMETER                           =
                                                                      new ArgumentLiteral<>(String.class, HASH);
 
-  public static final ArgumentLiteral<String>         SYMBOL_PARAMETER                      =
+  public static final ArgumentLiteral<String>         SYMBOL_PARAMETER                         =
                                                                        new ArgumentLiteral<>(String.class, SYMBOL);
 
-  public static final ArgumentLiteral<String>         CONTRACT_ADDRESS_PARAMETER            =
+  public static final ArgumentLiteral<String>         CONTRACT_ADDRESS_PARAMETER               =
                                                                                  new ArgumentLiteral<>(String.class,
                                                                                                        CONTRACT_ADDRESS);
 
-  public static final String                          NEW_WALLET_TASK_TYPE                  = "new-wallet";
+  public static final String                          NEW_WALLET_TASK_TYPE                     = "new-wallet";
 
-  public static final String                          MODIFY_WALLET_TASK_TYPE               = "modify-wallet";
+  public static final String                          MODIFY_WALLET_TASK_TYPE                  = "modify-wallet";
 
-  public static final String                          RESOURCE_BUNDLE_NAME                  = "locale.addon.Wallet";
+  public static final String                          RESOURCE_BUNDLE_NAME                     = "locale.addon.Wallet";
 
-  public static final String                          TOKEN_FUNC_SETSELLPRICE               = "setSellPrice";
+  public static final String                          TOKEN_FUNC_SETSELLPRICE                  = "setSellPrice";
 
-  public static final String                          TOKEN_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
+  public static final String                          TOKEN_FUNC_INITIALIZEACCOUNT             = "initializeAccount";
 
-  public static final String                          TOKEN_FUNC_DEPOSIT_FUNDS              = "depositFunds";
+  public static final String                          TOKEN_FUNC_DEPOSIT_FUNDS                 = "depositFunds";
 
-  public static final String                          ETHER_FUNC_SEND_FUNDS                 = "sendEtherFunds";
+  public static final String                          ETHER_FUNC_SEND_FUNDS                    = "sendEtherFunds";
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {
