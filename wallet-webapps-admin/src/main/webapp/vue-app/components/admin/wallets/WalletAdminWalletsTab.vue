@@ -373,8 +373,8 @@ export default {
         {
           text: this.$t('exoplatform.wallet.label.walletStatus'),
           align: 'center',
-          sortable: true,
-          value: 'walletStatus',
+          sortable: false,
+          value: 'isApproved',
         },
         {
           text: this.$t('exoplatform.wallet.label.tokenBalance', {0: this.contractDetails && this.contractDetails.name}),
@@ -384,7 +384,7 @@ export default {
         {
           text: this.$t('exoplatform.wallet.label.etherBalance'),
           align: 'center',
-          value: 'balance',
+          value: 'etherBalance',
         },
         {
           text: this.$t('exoplatform.wallet.label.initializationstatus'),

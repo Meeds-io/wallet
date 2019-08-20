@@ -318,13 +318,13 @@ export default {
           text: this.$t('exoplatform.wallet.label.transaction'),
           align: 'center',
           sortable: true,
-          value: 'hash',
+          value: 'rewardTransaction.hash',
         },
         {
           text: this.$t('exoplatform.wallet.label.status'),
           align: 'center',
           sortable: true,
-          value: 'status',
+          value: 'rewardTransaction.status',
         },
         {
           text: (this.contractDetails && this.contractDetails.name),
