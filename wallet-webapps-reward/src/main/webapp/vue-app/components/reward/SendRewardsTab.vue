@@ -93,7 +93,7 @@
               :display-name="props.item.wallet.name"
               :enabled="props.item.wallet.enabled"
               :disabled-in-reward-pool="props.item.disabledPool"
-              :disapproved="props.item.wallet.disapproved"
+              :disapproved="!props.item.wallet.isApproved"
               :deleted-user="props.item.wallet.deletedUser"
               :disabled-user="props.item.wallet.disabledUser"
               :avatar="props.item.wallet.avatar"

@@ -244,16 +244,19 @@ public class WalletStorage {
     if (isNew) {
       blockchainStateEntity = new WalletBlockchainStateEntity();
       WalletEntity walletEntity = walletAccountDAO.find(walletId);
+      if (walletEntity == null) {
+        throw new IllegalStateException("Can't find wallet with id: " + walletId);
+      }
       blockchainStateEntity.setWallet(walletEntity);
     }
     blockchainStateEntity.setContractAddress(contractAddress);
-    blockchainStateEntity.setEtherBalance(wallet.getEtherBalance());
-    blockchainStateEntity.setTokenBalance(wallet.getTokenBalance());
-    blockchainStateEntity.setRewardBalance(wallet.getRewardBalance());
-    blockchainStateEntity.setVestingBalance(wallet.getVestingBalance());
-    blockchainStateEntity.setAdminLevel(wallet.getAdminLevel());
-    blockchainStateEntity.setApproved(wallet.getIsApproved());
-    blockchainStateEntity.setInitialized(wallet.getIsInitialized());
+    blockchainStateEntity.setEtherBalance(wallet.getEtherBalance() == null ? 0 : wallet.getEtherBalance());
+    blockchainStateEntity.setTokenBalance(wallet.getTokenBalance() == null ? 0 : wallet.getTokenBalance());
+    blockchainStateEntity.setRewardBalance(wallet.getRewardBalance() == null ? 0 : wallet.getRewardBalance());
+    blockchainStateEntity.setVestingBalance(wallet.getVestingBalance() == null ? 0 : wallet.getVestingBalance());
+    blockchainStateEntity.setAdminLevel(wallet.getAdminLevel() == null ? 0 : wallet.getAdminLevel());
+    blockchainStateEntity.setApproved(wallet.getIsApproved() != null && wallet.getIsApproved());
+    blockchainStateEntity.setInitialized(wallet.getIsInitialized() != null && wallet.getIsInitialized());
     if (isNew) {
       blockchainStateDAO.create(blockchainStateEntity);
     } else {

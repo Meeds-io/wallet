@@ -197,7 +197,7 @@
                     :profile-type="props.item.type"
                     :display-name="props.item.name"
                     :enabled="props.item.enabled"
-                    :disapproved="props.item.disapproved"
+                    :disapproved="!props.item.isApproved"
                     :deleted-user="props.item.deletedUser"
                     :disabled-user="props.item.disabledUser"
                     :avatar="props.item.avatar"
