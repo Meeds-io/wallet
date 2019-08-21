@@ -291,7 +291,7 @@ export default {
             .then((approved) => {
               approvedReceiver = approved;
               if(!approved) {
-                throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
+                throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
               }
             })
             .then(() => transfer(receiverAddress, amountWithDecimals).estimateGas({
