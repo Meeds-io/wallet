@@ -214,7 +214,7 @@
                         <v-divider />
                       </template>
 
-                      <v-list-tile v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0 && props.item.tokenBalance < tokenAmount" @click="openSendTokenModal(props.item)">
+                      <v-list-tile v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
                         <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />

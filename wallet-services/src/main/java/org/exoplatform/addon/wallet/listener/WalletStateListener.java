@@ -16,7 +16,7 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
-import static org.exoplatform.addon.wallet.utils.StatisticUtils.*;
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.util.HashMap;
@@ -24,13 +24,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.model.Wallet;
-import org.exoplatform.addon.wallet.model.WalletInitializationState;
-import org.exoplatform.addon.wallet.utils.StatisticUtils;
+import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.social.core.identity.model.Identity;
 
 /**
  * This listener will be triggered when a wallet state is modified. This is made
@@ -67,7 +67,14 @@ public class WalletStateListener extends Listener<Wallet, String> {
     parameters.put(STATUS, "ok");
     parameters.put(STATUS_CODE, "200");
     parameters.put(DURATION, "");
-    parameters.put("issuer", issuer);
+    if (StringUtils.isNotBlank(issuer)) {
+      Identity identity = getIdentityByTypeAndId(WalletType.USER, issuer);
+      if (identity == null) {
+        LOG.warn("Can't find identity with remote id: {}" + issuer);
+      } else {
+        parameters.put("user_social_id", identity);
+      }
+    }
 
     StatisticUtils.addStatisticEntry(parameters);
   }

@@ -19,12 +19,10 @@ package org.exoplatform.addon.wallet.blockchain.listener;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.hasKnownWalletInTransaction;
 
 import org.apache.commons.lang3.StringUtils;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import org.exoplatform.addon.wallet.blockchain.service.EthereumClientConnector;
-import org.exoplatform.addon.wallet.model.transaction.MinedTransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
@@ -68,17 +66,9 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
 
       TransactionDetail transactionDetail = null;
       String transactionHash = null;
-      String blockHash = null;
-      Long blockTimestamp = null;
-      if (source instanceof MinedTransactionDetail) {
-        MinedTransactionDetail transaction = (MinedTransactionDetail) source;
-        transactionHash = transaction.getHash();
-        blockHash = transaction.getBlockHash();
-        blockTimestamp = transaction.getBlockTimestamp();
-      } else if (source instanceof Transaction) {
+      if (source instanceof Transaction) {
         Transaction transaction = (Transaction) source;
         transactionHash = transaction.getHash();
-        blockHash = transaction.getBlockHash();
       } else if (source instanceof TransactionDetail) {
         transactionDetail = (TransactionDetail) source;
         transactionHash = transactionDetail.getHash();
@@ -112,12 +102,7 @@ public class BlockchainTransactionProcessorListener extends Listener<Object, Tra
 
       // Ensure that stored transaction has a timestamp
       if (transactionDetail.getTimestamp() == 0) {
-        if (blockTimestamp != null) {
-          transactionDetail.setTimestamp(blockTimestamp * 1000);
-        } else if (StringUtils.isNotBlank(blockHash)) {
-          Block block = getEthereumClientConnector().getBlock(blockHash);
-          transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
-        }
+        transactionDetail.setTimestamp(System.currentTimeMillis());
       }
 
       if (getTransactionDecoderService() == null) {

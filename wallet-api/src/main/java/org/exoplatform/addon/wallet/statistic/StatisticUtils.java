@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.utils;
+package org.exoplatform.addon.wallet.statistic;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -12,8 +12,6 @@ import org.exoplatform.services.log.Log;
 public class StatisticUtils {
 
   private static final Log STATISTIC_LOG = ExoLogger.getLogger("WalletStatistics");
-
-  private static final Log LOG           = ExoLogger.getLogger(StatisticUtils.class);
 
   private StatisticUtils() {
   }
@@ -46,7 +44,7 @@ public class StatisticUtils {
       logEntry.append(LOCAL_SERVICE).append("=").append(parameters.get(LOCAL_SERVICE)).append(" ");
       parameters.remove(LOCAL_SERVICE);
     } else if (parameters.containsKey(REMOTE_SERVICE)) {
-      logEntry.append(REMOTE_SERVICE).append("=").append(parameters.get(LOCAL_SERVICE)).append(" ");
+      logEntry.append(REMOTE_SERVICE).append("=").append(parameters.get(REMOTE_SERVICE)).append(" ");
       parameters.remove(REMOTE_SERVICE);
     } else {
       throw new IllegalStateException("neither 'local_service' nor 'remote_service' exists in parameters");
@@ -98,18 +96,16 @@ public class StatisticUtils {
         Wallet wallet = (Wallet) value;
         logEntry.append(prefix)
                 .append("identity_id:")
-                .append(wallet.getTechnicalId());
-        logEntry.append(prefix)
-                .append("wallet_type:")
-                .append(wallet.getType());
-        logEntry.append(prefix)
-                .append("remote_id:")
-                .append(wallet.getId());
-        logEntry.append(prefix)
+                .append(wallet.getTechnicalId())
+                .append(",")
+                .append(prefix)
+                .append("identity_type:")
+                .append(wallet.getType())
+                .append(",")
+                .append(prefix)
                 .append("wallet_address:")
                 .append(wallet.getAddress());
       } else {
-        LOG.debug("Object of type '{}' not managed in parameters", value.getClass().getName());
         logEntry.append(key).append(":").append(value);
       }
       parametersIterator.remove();

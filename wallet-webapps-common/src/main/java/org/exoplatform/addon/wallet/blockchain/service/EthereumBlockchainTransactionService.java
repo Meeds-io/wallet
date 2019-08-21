@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -137,9 +136,9 @@ public class EthereumBlockchainTransactionService
   public void start() {
     long networkId = getNetworkId();
     try {
-      long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
       long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
       if (lastWatchedBlockNumber <= 0) {
+        long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
         saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
         LOG.info("Start watching Blockchain transactions from block number {}", lastEthereumBlockNumber);
       }
@@ -314,9 +313,6 @@ public class EthereumBlockchainTransactionService
       return transactionDetail;
     }
     transactionDetail.setGasPrice(transaction.getGasPrice().intValue());
-
-    Block block = ethereumClientConnector.getBlock(transaction.getBlockHash());
-    transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
 
     String senderAddress = transaction.getFrom();
     transactionDetail.setFrom(senderAddress);

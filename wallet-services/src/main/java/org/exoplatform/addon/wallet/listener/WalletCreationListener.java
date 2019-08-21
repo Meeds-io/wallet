@@ -16,7 +16,7 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
-import static org.exoplatform.addon.wallet.utils.StatisticUtils.*;
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.getContractAddress;
 
 import java.util.HashMap;
@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.addon.wallet.model.Wallet;
-import org.exoplatform.addon.wallet.utils.StatisticUtils;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 

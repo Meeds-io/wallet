@@ -214,6 +214,26 @@ public class WalletUtils {
 
   public static final String                          FUNDS_ACCEPT_URL                         = "fundsAcceptUrl";
 
+  public static final String                          OPERATION_GET_TRANSACTION_COUNT          = "eth_getTransactionCount";
+
+  public static final String                          OPERATION_READ_FROM_TOKEN                = "eth_call";
+
+  public static final String                          OPERATION_GET_ETHER_BALANCE              = "eth_getBalance";
+
+  public static final String                          OPERATION_GET_LAST_BLOCK_NUMBER          = "eth_blockNumber";
+
+  public static final String                          OPERATION_GET_TRANSACTION                = "eth_getTransactionByHash";
+
+  public static final String                          OPERATION_GET_TRANSACTION_RECEIPT        = "eth_getTransactionReceipt";
+
+  public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
+
+  public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
+
+  public static final String                          OPERATION_SEND_ADMIN_TOKEN_TRANSACTION   = "SEND_TOKEN_ADMIN_TRANSACTION";
+
+  public static final String                          OPERATION_SEND_ADMIN_ETHER_TRANSACTION   = "SEND_ADMIN_ETHER_TRANSACTION";
+
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,
                                                                                                                   "senderFullName");
@@ -262,7 +282,7 @@ public class WalletUtils {
 
   public static final String                          TOKEN_FUNC_DEPOSIT_FUNDS                 = "depositFunds";
 
-  public static final String                          ETHER_FUNC_SEND_FUNDS                    = "sendEtherFunds";
+  public static final String                          ETHER_FUNC_SEND_FUNDS                    = "ether_transfer";
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {

@@ -16,7 +16,7 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
-import static org.exoplatform.addon.wallet.utils.StatisticUtils.*;
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.util.HashMap;
@@ -32,7 +32,7 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionNotificationType;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
-import org.exoplatform.addon.wallet.utils.StatisticUtils;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
@@ -176,6 +176,10 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put(LOCAL_SERVICE, "wallet");
     parameters.put(OPERATION, contractMethodName);
 
+    if (transactionDetail.getIssuer() != null) {
+      parameters.put("user_social_id", transactionDetail.getIssuer().getTechnicalId());
+    }
+
     parameters.put("sender", transactionDetail.getFromWallet());
     parameters.put("receiver", transactionDetail.getToWallet());
 
@@ -185,11 +189,11 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     case CONTRACT_FUNC_TRANSFERFROM:
     case CONTRACT_FUNC_APPROVE:
     case CONTRACT_FUNC_INITIALIZEACCOUNT:
-      parameters.put("ether_amount", transactionDetail.getValue());
-      parameters.put("token_amount", transactionDetail.getContractAmount());
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
     case CONTRACT_FUNC_REWARD:
-      parameters.put("token_amount", transactionDetail.getContractAmount());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
     case CONTRACT_FUNC_ADDADMIN:
       parameters.put("admin_level", transactionDetail.getValue());
@@ -201,9 +205,6 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
     parameters.put(DURATION, "");
-    if (transactionDetail.getIssuer() != null) {
-      parameters.put("issuer", transactionDetail.getIssuer().getId());
-    }
     StatisticUtils.addStatisticEntry(parameters);
   }
 

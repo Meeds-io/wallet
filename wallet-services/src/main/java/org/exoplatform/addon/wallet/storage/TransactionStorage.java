@@ -84,6 +84,9 @@ public class TransactionStorage {
 
   public void saveTransactionDetail(TransactionDetail transactionDetail) {
     TransactionEntity transactionEntity = toEntity(transactionDetail);
+    if (transactionDetail.getTimestamp() <= 0) {
+      transactionDetail.setTimestamp(System.currentTimeMillis());
+    }
     if (transactionEntity.getId() == 0) {
       transactionEntity = walletTransactionDAO.create(transactionEntity);
       transactionDetail.setId(transactionEntity.getId());
