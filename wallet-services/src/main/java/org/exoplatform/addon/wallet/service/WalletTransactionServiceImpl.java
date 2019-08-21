@@ -288,18 +288,24 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
       return;
     }
-    Wallet senderWallet = accountService.getWalletByAddress(transactionDetail.getFrom());
-    transactionDetail.setFromWallet(senderWallet);
-    hideWalletOwnerPrivateInformation(senderWallet);
-    if (StringUtils.isNotBlank(transactionDetail.getTo())) {
+    if (transactionDetail.getFromWallet() == null) {
+      Wallet senderWallet = accountService.getWalletByAddress(transactionDetail.getFrom());
+      transactionDetail.setFromWallet(senderWallet);
+      hideWalletOwnerPrivateInformation(senderWallet);
+    }
+    if (transactionDetail.getToWallet() == null && StringUtils.isNotBlank(transactionDetail.getTo())) {
       Wallet receiverWallet = accountService.getWalletByAddress(transactionDetail.getTo());
       hideWalletOwnerPrivateInformation(receiverWallet);
       transactionDetail.setToWallet(receiverWallet);
     }
-    if (StringUtils.isNotBlank(transactionDetail.getBy())) {
+    if (transactionDetail.getByWallet() == null && StringUtils.isNotBlank(transactionDetail.getBy())) {
       Wallet senderWalletBy = accountService.getWalletByAddress(transactionDetail.getBy());
       hideWalletOwnerPrivateInformation(senderWalletBy);
       transactionDetail.setByWallet(senderWalletBy);
+    }
+    if (transactionDetail.getIssuer() == null && transactionDetail.getIssuerId() > 0) {
+      Wallet issuerWallet = accountService.getWalletByIdentityId(transactionDetail.getIssuerId());
+      transactionDetail.setIssuer(issuerWallet);
     }
   }
 
@@ -307,27 +313,13 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
       return;
     }
-    Wallet senderWallet = accountService.getWalletByAddress(transactionDetail.getFrom());
-    transactionDetail.setFromWallet(senderWallet);
-    hideWalletOwnerPrivateInformation(senderWallet);
-    if (StringUtils.isNotBlank(transactionDetail.getTo())) {
-      Wallet receiverWallet = accountService.getWalletByAddress(transactionDetail.getTo());
-      hideWalletOwnerPrivateInformation(receiverWallet);
-      transactionDetail.setToWallet(receiverWallet);
-    }
+    retrieveWalletsDetails(transactionDetail);
     if (StringUtils.isNotBlank(transactionDetail.getBy())) {
-      Wallet senderWalletBy = accountService.getWalletByAddress(transactionDetail.getBy());
-      hideWalletOwnerPrivateInformation(senderWalletBy);
-      transactionDetail.setByWallet(senderWalletBy);
-      if (!displayTransactionsLabel(senderWalletBy, currentUser)) {
+      if (!displayTransactionsLabel(transactionDetail.getByWallet(), currentUser)) {
         transactionDetail.setLabel(null);
       }
-    } else if (!displayTransactionsLabel(senderWallet, currentUser)) {
+    } else if (!displayTransactionsLabel(transactionDetail.getFromWallet(), currentUser)) {
       transactionDetail.setLabel(null);
-    }
-    if (transactionDetail.getIssuerId() > 0 && isUserRewardingAdmin(currentUser)) {
-      Wallet issuerWallet = accountService.getWalletByIdentityId(transactionDetail.getIssuerId());
-      transactionDetail.setIssuer(issuerWallet);
     }
   }
 

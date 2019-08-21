@@ -31,6 +31,7 @@ public class IdentityManagerMock implements IdentityManager {
       identity.setEnable(true);
       identity.setProviderId(OrganizationIdentityProvider.NAME);
       identity.setRemoteId("root" + i);
+      identity.setId(String.valueOf(i));
       Profile profile = new Profile(identity);
       identity.setProfile(profile);
       identities.add(identity);
@@ -42,6 +43,7 @@ public class IdentityManagerMock implements IdentityManager {
       identity.setEnable(true);
       identity.setProviderId(SpaceIdentityProvider.NAME);
       identity.setRemoteId("space" + i);
+      identity.setId(String.valueOf(i + 10));
       Profile profile = new Profile(identity);
       identity.setProfile(profile);
       identities.add(identity);

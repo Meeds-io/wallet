@@ -717,7 +717,11 @@ public class WalletUtils {
   }
 
   public static final boolean isAdminAccount(String address) {
-    return StringUtils.equalsIgnoreCase(address, getWalletTokenAdminService().getAdminWalletAddress());
+    if (getWalletTokenAdminService() == null) {
+      return false;
+    }
+    String adminWalletAddress = getWalletTokenAdminService().getAdminWalletAddress();
+    return StringUtils.equalsIgnoreCase(address, adminWalletAddress);
   }
 
   public static final String getResourceBundleKey(Locale locale, String key) {

@@ -50,11 +50,13 @@ public class WalletWebSocketService {
 
   protected String getUserToken(String username) {
     try {
-      return getContinuationService().getUserToken(username);
+      if (getContinuationService() != null) {
+        return getContinuationService().getUserToken(username);
+      }
     } catch (Exception e) {
       LOG.warn("Could not retrieve continuation token for user " + username, e);
-      return "";
     }
+    return "";
   }
 
   private EXoContinuationBayeux getContinuationBayeux() {

@@ -7,43 +7,76 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.*;
+
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.junit.*;
 
 public abstract class BaseWalletTest {
 
   protected static PortalContainer container;
 
-  private static final Log         LOG                  = ExoLogger.getLogger(BaseWalletTest.class);
+  private static final Log         LOG                      = ExoLogger.getLogger(BaseWalletTest.class);
 
-  protected static final long      IDENTITY_ID          = 1L;
+  protected static final String    WALLET_ADDRESS_1         = "0x1111111111111111111111111111111111111111";
 
-  protected static final String    ADDRESS              = "walletAddress";
+  protected static final String    WALLET_ADDRESS_2         = "0x2222222222222222222222222222222222222222";
 
-  protected static final String    PHRASE               = "passphrase";
+  protected static final String    WALLET_ADDRESS_3         = "0x3333333333333333333333333333333333333333";
 
-  protected static final String    INITIALIZATION_STATE = WalletInitializationState.INITIALIZED.name();
+  protected static final String    TRANSACTION_LABEL        = "TRANSACTION_LABEL";
 
-  protected static final String    TYPE                 = WalletType.SPACE.name();
+  protected static final String    TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
 
-  protected static final boolean   IS_ENABLED           = true;
+  protected static final int       GAS_USED                 = 150000;
 
-  protected static final String    CURRENT_USER         = "root1";
+  protected static final double    GAS_PRICE                = 0.000000004d;
 
-  protected static final String    CURRENT_SPACE        = "space1";
+  protected static final double    TOKEN_FEE                = (GAS_PRICE * GAS_USED) / 0.001;
 
-  protected List<Serializable>     entitiesToClean      = new ArrayList<>();
+  protected static final double    ETHER_VALUE              = 0.001;
 
-  private Random                   random               = new Random(1);
+  protected static final String    PHRASE                   = "passphrase";
+
+  protected static final String    INITIALIZATION_STATE     = WalletInitializationState.INITIALIZED.name();
+
+  protected static final String    TYPE                     = WalletType.SPACE.name();
+
+  protected static final boolean   IS_ENABLED               = true;
+
+  protected static final String    CURRENT_USER             = "root1";
+
+  protected static final long      CURRENT_USER_IDENTITY_ID = 1L;
+
+  protected static final String    CURRENT_SPACE            = "space1";
+
+  protected static final String    CONTRACTNAME             = "contractName";
+
+  protected static final String    SELLPRICE                = "sellPrice";
+
+  protected static final String    CONTRACTTYPE             = "contractType";
+
+  protected static final long      NETWORK_ID               = 1;
+
+  protected static final int       CONTRACT_AMOUNT          = 500;
+
+  protected static final String    USER_TEST                = "root9";
+
+  protected static final long      USER_TEST_IDENTITY_ID    = 9;
+
+  protected List<Serializable>     entitiesToClean          = new ArrayList<>();
+
+  private Random                   random                   = new Random(1);
 
   @BeforeClass
   public static void beforeTest() {
@@ -72,27 +105,46 @@ public abstract class BaseWalletTest {
         }
         try {
           if (entity instanceof WalletEntity) {
-            walletAccountDAO.delete((WalletEntity) entity);
+            WalletEntity wallet = (WalletEntity) entity;
+            if (wallet.getId() > 0) {
+              walletAccountDAO.delete(walletAccountDAO.find(wallet.getId()));
+            }
           } else if (entity instanceof WalletPrivateKeyEntity) {
-            walletPrivateKeyDAO.delete((WalletPrivateKeyEntity) entity);
+            WalletPrivateKeyEntity privateKey = (WalletPrivateKeyEntity) entity;
+            if (privateKey.getId() > 0) {
+              walletPrivateKeyDAO.delete(walletPrivateKeyDAO.find(privateKey.getId()));
+            }
           } else if (entity instanceof TransactionEntity) {
-            walletTransactionDAO.delete((TransactionEntity) entity);
+            TransactionEntity transactionEntity = (TransactionEntity) entity;
+            if (transactionEntity.getId() > 0) {
+              walletTransactionDAO.delete(walletTransactionDAO.find(transactionEntity.getId()));
+            }
           } else if (entity instanceof AddressLabelEntity) {
-            addressLabelDAO.delete((AddressLabelEntity) entity);
+            AddressLabelEntity addressEntity = (AddressLabelEntity) entity;
+            if (addressEntity.getId() > 0) {
+              addressLabelDAO.delete(addressLabelDAO.find(addressEntity.getId()));
+            }
           } else if (entity instanceof WalletAddressLabel) {
             AddressLabelEntity labelEntity = addressLabelDAO.find(((WalletAddressLabel) entity).getId());
-            addressLabelDAO.delete(labelEntity);
+            if (labelEntity.getId() > 0) {
+              addressLabelDAO.delete(labelEntity);
+            }
           } else if (entity instanceof TransactionDetail) {
-            TransactionEntity transactionEntity = walletTransactionDAO.find(((TransactionDetail) entity).getId());
-            walletTransactionDAO.delete(transactionEntity);
+            long transactionId = ((TransactionDetail) entity).getId();
+            if (transactionId > 0) {
+              TransactionEntity transactionEntity = walletTransactionDAO.find(transactionId);
+              if (transactionEntity != null) {
+                walletTransactionDAO.delete(transactionEntity);
+              }
+            }
           } else if (entity instanceof Wallet) {
-            long walletId = ((Wallet) entity).getTechnicalId();
-            WalletEntity walletEntity = walletAccountDAO.find(walletId);
-            walletAccountDAO.delete(walletEntity);
-
-            WalletPrivateKeyEntity walletPrivateKey = walletPrivateKeyDAO.find(walletId);
-            if (walletPrivateKey != null) {
-              walletPrivateKeyDAO.delete(walletPrivateKey);
+            Wallet wallet = (Wallet) entity;
+            long walletId = wallet.getTechnicalId();
+            if (walletId > 0) {
+              WalletEntity walletEntity = walletAccountDAO.find(walletId);
+              if (walletEntity != null) {
+                walletAccountDAO.delete(walletEntity);
+              }
             }
           } else {
             throw new IllegalStateException("Entity not managed " + entity);
@@ -227,7 +279,6 @@ public abstract class BaseWalletTest {
   }
 
   protected TransactionDetail createTransactionDetail(String hash,
-                                                      String contractAddress,
                                                       String contractMethodName,
                                                       double contractAmount,
                                                       double value,
@@ -253,10 +304,11 @@ public abstract class BaseWalletTest {
     }
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
+
     TransactionDetail transactionDetail = new TransactionDetail();
-    transactionDetail.setNetworkId(1);
+    transactionDetail.setNetworkId(NETWORK_ID);
     transactionDetail.setHash(StringUtils.lowerCase(hash));
-    transactionDetail.setContractAddress(StringUtils.lowerCase(contractAddress));
+    transactionDetail.setContractAddress(WalletUtils.getContractAddress());
     transactionDetail.setContractMethodName(contractMethodName);
     transactionDetail.setContractAmount(contractAmount);
     transactionDetail.setValue(value);
@@ -270,6 +322,10 @@ public abstract class BaseWalletTest {
     transactionDetail.setPending(isPending);
     transactionDetail.setAdminOperation(isAdminOperation);
     transactionDetail.setTimestamp(createdDate);
+    transactionDetail.setGasPrice(GAS_PRICE);
+    transactionDetail.setGasUsed(GAS_USED);
+    transactionDetail.setTokenFee(TOKEN_FEE);
+    transactionDetail.setNoContractFunds(true);
     transactionStorage.saveTransactionDetail(transactionDetail);
     entitiesToClean.add(transactionDetail);
     return transactionDetail;
@@ -289,8 +345,8 @@ public abstract class BaseWalletTest {
 
   protected Wallet newWallet() {
     Wallet wallet = new Wallet();
-    wallet.setTechnicalId(IDENTITY_ID);
-    wallet.setAddress(ADDRESS);
+    wallet.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+    wallet.setAddress(WALLET_ADDRESS_1);
     wallet.setPassPhrase(PHRASE);
     wallet.setEnabled(IS_ENABLED);
     wallet.setInitializationState(INITIALIZATION_STATE);
@@ -299,8 +355,8 @@ public abstract class BaseWalletTest {
 
   protected Wallet newWalletSpace() {
     Wallet walletSpace = new Wallet();
-    walletSpace.setTechnicalId(IDENTITY_ID);
-    walletSpace.setAddress(ADDRESS);
+    walletSpace.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+    walletSpace.setAddress(WALLET_ADDRESS_1);
     walletSpace.setPassPhrase(PHRASE);
     walletSpace.setEnabled(IS_ENABLED);
     walletSpace.setId(CURRENT_SPACE);
@@ -308,6 +364,17 @@ public abstract class BaseWalletTest {
     walletSpace.setSpaceAdministrator(IS_ENABLED);
     walletSpace.setType(TYPE);
     return walletSpace;
+  }
+
+  protected void addCurrentUserWallet() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = newWallet();
+    try {
+      walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+    } catch (IllegalAccessException e) {
+      fail("User should be able to save his wallet");
+    }
+    entitiesToClean.add(wallet);
   }
 
 }
