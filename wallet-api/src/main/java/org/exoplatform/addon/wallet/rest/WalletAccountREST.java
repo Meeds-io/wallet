@@ -259,11 +259,11 @@ public class WalletAccountREST implements ResourceContainer {
     try {
       Wallet storedWallet = accountService.getWalletByTypeAndId(wallet.getType(), wallet.getId(), currentUserId);
       if (storedWallet == null || StringUtils.isBlank(storedWallet.getAddress())) {
-        accountService.saveWalletAddress(wallet, currentUserId, true);
+        accountService.saveWalletAddress(wallet, currentUserId);
         return Response.ok(wallet.getPassPhrase()).build();
       } else {
         storedWallet.setAddress(wallet.getAddress());
-        accountService.saveWalletAddress(storedWallet, currentUserId, true);
+        accountService.saveWalletAddress(storedWallet, currentUserId);
         return Response.ok(storedWallet.getPassPhrase()).build();
       }
     } catch (IllegalAccessException e) {

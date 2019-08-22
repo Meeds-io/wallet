@@ -170,6 +170,6 @@ public interface WalletTokenAdminService {
    *          number of calls to Blockchain
    * @throws Exception
    */
-  void refreshWallet(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception; // NOSONAR
+  void retrieveWalletInformationFromBlockchain(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception; // NOSONAR
 
 }
