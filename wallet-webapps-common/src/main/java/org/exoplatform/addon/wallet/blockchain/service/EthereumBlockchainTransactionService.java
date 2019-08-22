@@ -25,10 +25,9 @@ import java.time.Duration;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.web3j.abi.*;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
+import org.picocontainer.Startable;
+import org.web3j.abi.EventEncoder;
+import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -47,48 +46,51 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class EthereumBlockchainTransactionService implements BlockchainTransactionService, ExoBlockchainTransactionService {
+public class EthereumBlockchainTransactionService
+    implements BlockchainTransactionService, ExoBlockchainTransactionService, Startable {
 
-  private static final Log                 LOG                        =
+  private static final Log                 LOG                         =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
 
-  private static final String              FUNC_DEPOSIT_FUNDS         = "depositFunds";
+  private static final String              TRANSFER_SIG                = EventEncoder.encode(ERTTokenV2.TRANSFER_EVENT);
 
-  private static final String              TRANSFER_SIG               = EventEncoder.encode(ERTTokenV2.TRANSFER_EVENT);
+  private static final String              APPROVAL_SIG                = EventEncoder.encode(ERTTokenV2.APPROVAL_EVENT);
 
-  private static final String              APPROVAL_SIG               = EventEncoder.encode(ERTTokenV2.APPROVAL_EVENT);
+  private static final String              ADDED_ADMIN_METHOD_SIG      = EventEncoder.encode(ERTTokenV2.ADDEDADMIN_EVENT);
 
-  private static final String              ADDED_ADMIN_METHOD_SIG     = EventEncoder.encode(ERTTokenV2.ADDEDADMIN_EVENT);
+  private static final String              REMOVED_ADMIN_SIG           = EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
 
-  private static final String              REMOVED_ADMIN_SIG          = EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
+  private static final String              APPROVED_ACCOUNT_SIG        = EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
 
-  private static final String              APPROVED_ACCOUNT_SIG       = EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
+  private static final String              DISAPPROVED_ACCOUNT_SIG     = EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
 
-  private static final String              DISAPPROVED_ACCOUNT_SIG    = EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
+  private static final String              CONTRACT_PAUSED_SIG         = EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
 
-  private static final String              CONTRACT_PAUSED_SIG        = EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
+  private static final String              CONTRACT_UNPAUSED_SIG       = EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
 
-  private static final String              CONTRACT_UNPAUSED_SIG      = EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
+  private static final String              DEPOSIT_RECEIVED_SIG        = EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
 
-  private static final String              DEPOSIT_RECEIVED_SIG       = EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
+  private static final String              TOKEN_PRICE_CHANGED_SIG     = EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
 
-  private static final String              TOKEN_PRICE_CHANGED_SIG    = EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
+  private static final String              TRANSFER_OWNERSHIP_SIG      = EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
 
-  private static final String              TRANSFER_OWNERSHIP_SIG     = EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
+  private static final String              ACCOUNT_INITIALIZATION_SIG  = EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
 
-  private static final String              ACCOUNT_INITIALIZATION_SIG = EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
+  private static final String              ACCOUNT_REWARD_SIG          = EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
 
-  private static final String              ACCOUNT_REWARD_SIG         = EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
+  private static final String              ACCOUNT_VESTED_SIG          = EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
 
-  private static final String              ACCOUNT_VESTED_SIG         = EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
+  private static final String              TRANSFER_VESTING_SIG        = EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
 
-  private static final String              TRANSFER_VESTING_SIG       = EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
+  private static final String              UPGRADED_SIG                = EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
 
-  private static final String              UPGRADED_SIG               = EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
+  private static final String              DATA_UPGRADED_SIG           = EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
 
-  private static final String              DATA_UPGRADED_SIG          = EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
+  private static final String              NOSUFFICIENTFUND_EVENT_HASH = EventEncoder.encode(ERTTokenV2.NOSUFFICIENTFUND_EVENT);
 
-  private static final Map<String, String> CONTRACT_METHODS_BY_SIG    = new HashMap<>();
+  private static final String              TRANSACTIONFEE_EVENT_HASH   = EventEncoder.encode(ERTTokenV2.TRANSACTIONFEE_EVENT);
+
+  private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
 
   static {
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, FUNC_TRANSFER);
@@ -99,7 +101,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     CONTRACT_METHODS_BY_SIG.put(DISAPPROVED_ACCOUNT_SIG, FUNC_DISAPPROVEACCOUNT);
     CONTRACT_METHODS_BY_SIG.put(CONTRACT_PAUSED_SIG, FUNC_PAUSE);
     CONTRACT_METHODS_BY_SIG.put(CONTRACT_UNPAUSED_SIG, FUNC_UNPAUSE);
-    CONTRACT_METHODS_BY_SIG.put(DEPOSIT_RECEIVED_SIG, FUNC_DEPOSIT_FUNDS);
+    CONTRACT_METHODS_BY_SIG.put(DEPOSIT_RECEIVED_SIG, TOKEN_FUNC_DEPOSIT_FUNDS);
     CONTRACT_METHODS_BY_SIG.put(TOKEN_PRICE_CHANGED_SIG, FUNC_SETSELLPRICE);
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIG, FUNC_TRANSFEROWNERSHIP);
     CONTRACT_METHODS_BY_SIG.put(ACCOUNT_INITIALIZATION_SIG, FUNC_INITIALIZEACCOUNT);
@@ -130,6 +132,27 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
+  @ExoBlockchainTransaction
+  public void start() {
+    long networkId = getNetworkId();
+    try {
+      long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
+      if (lastWatchedBlockNumber <= 0) {
+        long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+        saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
+        LOG.info("Start watching Blockchain transactions from block number {}", lastEthereumBlockNumber);
+      }
+    } catch (Exception e) {
+      LOG.error("Error while getting latest block number from blockchain with network id: {}", networkId, e);
+    }
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
+  }
+
+  @Override
   public ClassLoader getWebappClassLoader() {
     return webappClassLoader;
   }
@@ -142,6 +165,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
+
       for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
         try { // NOSONAR
           boolean transactionMined = verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
@@ -203,36 +227,33 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     int addedTransactionsCount = 0;
     int modifiedTransactionsCount = 0;
+
     for (String transactionHash : transactionHashes) {
       TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
       if (transactionDetail == null) {
-        processed = processTransaction(transactionHash, contractDetail) && processed;
+        transactionDetail = processTransaction(transactionHash, contractDetail);
+        processed = transactionDetail != null && processed;
         if (processed) {
           addedTransactionsCount++;
         }
       } else {
         LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
-        boolean changed = false;
-
-        // Verify that the transaction has been decoded
-        if (StringUtils.isBlank(transactionDetail.getContractAddress())
-            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
-          transactionDetail.setContractAddress(contractAddress);
-          computeTransactionDetail(transactionDetail, contractDetail);
-          changed = true;
-        }
 
         // Broadcast event and send notifications when the transaction was
         // marked as pending
         boolean braodcastSavingTransaction = transactionDetail.isPending();
         transactionDetail.setPending(false);
-        changed = changed || braodcastSavingTransaction;
+        boolean changed = braodcastSavingTransaction;
 
-        // If the transaction wasn't marked as succeeded, try to verify the
-        // status from Blockchain again
-        if (!transactionDetail.isSucceeded()) {
-          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-          transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+        // Verify that the transaction has been correctly decoded
+        if (StringUtils.isBlank(transactionDetail.getContractAddress())
+            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
+          transactionDetail.setContractAddress(contractAddress);
+          computeTransactionDetail(transactionDetail, contractDetail);
+          changed = true;
+        } else if (!transactionDetail.isSucceeded()) {
+          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionDetail.getHash());
+          computeContractTransactionDetail(transactionDetail, transactionReceipt);
           changed = true;
         }
 
@@ -291,9 +312,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       LOG.info("Can't find transaction with hash {}, it may be pending", hash);
       return transactionDetail;
     }
-
-    Block block = ethereumClientConnector.getBlock(transaction.getBlockHash());
-    transactionDetail.setTimestamp(block.getTimestamp().longValue() * 1000);
+    transactionDetail.setGasPrice(transaction.getGasPrice().intValue());
 
     String senderAddress = transaction.getFrom();
     transactionDetail.setFrom(senderAddress);
@@ -303,6 +322,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(hash);
     transactionDetail.setPending(transactionReceipt == null);
     transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+    if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
+      transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
+    }
 
     String receiverAddress = transaction.getTo();
     transactionDetail.setTo(receiverAddress);
@@ -321,8 +343,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   @ExoBlockchainTransaction
-  public void computeContractTransactionDetail(TransactionDetail transactionDetail,
-                                               Object transactionReceipt) {
+  public void computeContractTransactionDetail(TransactionDetail transactionDetail, Object transactionReceipt) {
     computeContractTransactionDetail(null, transactionDetail, (TransactionReceipt) transactionReceipt);
   }
 
@@ -331,6 +352,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                                                 TransactionReceipt transactionReceipt) {
     List<org.web3j.protocol.core.methods.response.Log> logs = transactionReceipt == null ? null : transactionReceipt.getLogs();
     transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
+    if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
+      transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
+    }
     if (!transactionDetail.isSucceeded()) {
       if (StringUtils.equals(transactionDetail.getContractMethodName(), FUNC_INITIALIZEACCOUNT)) {
         getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
@@ -353,7 +377,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       LOG.debug("Retrieving information from blockchain for transaction {} with {} LOGS", hash, logsSize);
       int i = 0;
       boolean transactionLogTreated = false;
-      while (!transactionLogTreated && i < logsSize) {
+      while (i < logsSize) {
         org.web3j.protocol.core.methods.response.Log log = logs.get(i++);
 
         List<String> topics = log.getTopics();
@@ -362,169 +386,183 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           transactionDetail.setSucceeded(false);
           continue;
         }
+
         String topic = topics.get(0);
-        LOG.debug("Treating transaction {} with {} topics", hash, topics.size());
-        String methodName = CONTRACT_METHODS_BY_SIG.get(topic);
-        if (StringUtils.isBlank(methodName)) {
+        LOG.debug("Treating transaction log {} with {} topics", hash, topics.size());
+
+        if (NOSUFFICIENTFUND_EVENT_HASH.equals(topic)) {
+          transactionDetail.setNoContractFunds(true);
+          continue;
+        } else if (TRANSACTIONFEE_EVENT_HASH.equals(topic)) {
+          EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
+          BigInteger tokenFee = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+          transactionDetail.setTokenFee(convertFromDecimals(tokenFee, contractDecimals));
           continue;
         }
-        transactionDetail.setContractMethodName(methodName);
-        if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
-          EventValues parameters = extractEventParameters(TRANSFER_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-          transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-          BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-          transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-          if (!StringUtils.equals(transactionReceipt.getFrom(), transactionDetail.getFrom())) {
-            transactionDetail.setBy(transactionReceipt.getFrom());
-            transactionDetail.setContractMethodName(FUNC_TRANSFERFROM);
-          }
-          transactionDetail.setAdminOperation(false);
-        } else if (StringUtils.equals(methodName, FUNC_APPROVE)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(APPROVAL_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-          transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-          BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-          transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-          transactionDetail.setAdminOperation(false);
-        } else if (StringUtils.equals(methodName, FUNC_APPROVEACCOUNT)) {
-          if (logsSize > 1) {
-            // Implicit acccount approval
-            continue;
-          }
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(APPROVEDACCOUNT_EVENT, log);
-          transactionDetail.setFrom(transactionReceipt.getFrom());
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_DISAPPROVEACCOUNT)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(DISAPPROVEDACCOUNT_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(transactionReceipt.getFrom());
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_ADDADMIN)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(ADDEDADMIN_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(transactionReceipt.getFrom());
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-          transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(1).getValue()).longValue());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_REMOVEADMIN)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(REMOVEDADMIN_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(transactionReceipt.getFrom());
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_UPGRADEDATA)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(UPGRADEDDATA_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_UPGRADEIMPLEMENTATION)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(UPGRADED_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_DEPOSIT_FUNDS)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(DEPOSITRECEIVED_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(parameters.getNonIndexedValues().get(0).getValue().toString());
-          BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-          transactionDetail.setValueDecimal(weiAmount, 18);
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_SETSELLPRICE)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(TOKENPRICECHANGED_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_TRANSFORMTOVESTED)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(VESTING_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setTo(parameters.getIndexedValues().get(0).getValue().toString());
-          BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-          transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_TRANSFEROWNERSHIP)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(TRANSFEROWNERSHIP_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-          transactionDetail.setAdminOperation(true);
-        } else if (StringUtils.equals(methodName, FUNC_INITIALIZEACCOUNT)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(INITIALIZATION_EVENT, log);
-          if (parameters == null) {
-            continue;
-          }
-          transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-          transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-          BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-          transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-          BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-          transactionDetail.setValueDecimal(weiAmount, 18);
-          transactionDetail.setAdminOperation(false);
 
-          if (transactionDetail.isSucceeded()) {
-            getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.INITIALIZED);
-          } else {
-            getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
-          }
-        } else if (StringUtils.equals(methodName, FUNC_REWARD)) {
-          transactionLogTreated = true;
-          EventValues parameters = extractEventParameters(REWARD_EVENT, log);
-          if (parameters == null) {
+        if (!transactionLogTreated) {
+          String methodName = CONTRACT_METHODS_BY_SIG.get(topic);
+          if (StringUtils.isBlank(methodName)) {
             continue;
           }
-          transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-          transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-          // Transfered tokens amount
-          BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-          transactionDetail.setValueDecimal(amount, contractDecimals);
-          // Reward amount
-          amount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-          transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-          transactionDetail.setAdminOperation(false);
-        } else if (!transactionLogTreated && (i + 1) == logsSize) {
-          LOG.warn("Can't find contract method name of transaction {}", transactionDetail);
+          transactionDetail.setContractMethodName(methodName);
+          if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSFER_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
+            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
+            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
+            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
+            if (!StringUtils.equals(transactionReceipt.getFrom(), transactionDetail.getFrom())) {
+              transactionDetail.setBy(transactionReceipt.getFrom());
+              transactionDetail.setContractMethodName(FUNC_TRANSFERFROM);
+            }
+            transactionDetail.setAdminOperation(false);
+          } else if (StringUtils.equals(methodName, FUNC_APPROVE)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(APPROVAL_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
+            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
+            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
+            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
+            transactionDetail.setAdminOperation(false);
+          } else if (StringUtils.equals(methodName, FUNC_APPROVEACCOUNT)) {
+            if (logsSize > 1) {
+              // Implicit acccount approval
+              continue;
+            }
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(APPROVEDACCOUNT_EVENT, log);
+            transactionDetail.setFrom(transactionReceipt.getFrom());
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_DISAPPROVEACCOUNT)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(DISAPPROVEDACCOUNT_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(transactionReceipt.getFrom());
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_ADDADMIN)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(ADDEDADMIN_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(transactionReceipt.getFrom());
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
+            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(1).getValue()).longValue());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_REMOVEADMIN)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(REMOVEDADMIN_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(transactionReceipt.getFrom());
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_UPGRADEDATA)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(UPGRADEDDATA_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_UPGRADEIMPLEMENTATION)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(UPGRADED_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, TOKEN_FUNC_DEPOSIT_FUNDS)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(DEPOSITRECEIVED_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(parameters.getNonIndexedValues().get(0).getValue().toString());
+            BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+            transactionDetail.setValueDecimal(weiAmount, 18);
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_SETSELLPRICE)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TOKENPRICECHANGED_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_TRANSFORMTOVESTED)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(VESTING_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setTo(parameters.getIndexedValues().get(0).getValue().toString());
+            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
+            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_TRANSFEROWNERSHIP)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSFEROWNERSHIP_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
+            transactionDetail.setAdminOperation(true);
+          } else if (StringUtils.equals(methodName, FUNC_INITIALIZEACCOUNT)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(INITIALIZATION_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
+            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
+            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
+            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
+            BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+            transactionDetail.setValueDecimal(weiAmount, 18);
+            transactionDetail.setAdminOperation(false);
+
+            if (transactionDetail.isSucceeded()) {
+              getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.INITIALIZED);
+            } else {
+              getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
+            }
+          } else if (StringUtils.equals(methodName, FUNC_REWARD)) {
+            transactionLogTreated = true;
+            EventValues parameters = ERTTokenV2.staticExtractEventParameters(REWARD_EVENT, log);
+            if (parameters == null) {
+              continue;
+            }
+            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
+            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
+            // Transfered tokens amount
+            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
+            transactionDetail.setValueDecimal(amount, contractDecimals);
+            // Reward amount
+            amount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
+            transactionDetail.setAdminOperation(false);
+          } else if (!transactionLogTreated && (i + 1) == logsSize) {
+            LOG.warn("Can't find contract method name of transaction {}", transactionDetail);
+          }
         }
       }
     }
@@ -538,25 +576,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
       transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
     }
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static EventValues extractEventParameters(Event event, org.web3j.protocol.core.methods.response.Log log) {
-    List<String> topics = log.getTopics();
-    String encodedEventSignature = EventEncoder.encode(event);
-    if (!topics.get(0).equals(encodedEventSignature)) {
-      return null;
-    }
-
-    List<Type> indexedValues = new ArrayList<>();
-    List<Type> nonIndexedValues = FunctionReturnDecoder.decode(log.getData(), event.getNonIndexedParameters());
-
-    List<TypeReference<Type>> indexedParameters = event.getIndexedParameters();
-    for (int i = 0; i < indexedParameters.size(); i++) {
-      Type value = FunctionReturnDecoder.decodeIndexedValue(topics.get(i + 1), indexedParameters.get(i));
-      indexedValues.add(value);
-    }
-    return new EventValues(indexedValues, nonIndexedValues);
   }
 
   private boolean verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
@@ -589,13 +608,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     return false;
   }
 
-  private boolean processTransaction(String transactionHash, ContractDetail contractDetail) {
-    boolean processed = true;
+  private TransactionDetail processTransaction(String transactionHash, ContractDetail contractDetail) {
+    TransactionDetail transactionDetail = null;
     try {
       LOG.debug(" - treating transaction {} that doesn't exist on database.", transactionHash);
 
-      TransactionDetail transactionDetail = computeTransactionDetail(transactionHash,
-                                                                     contractDetail);
+      transactionDetail = computeTransactionDetail(transactionHash, contractDetail);
       if (transactionDetail == null) {
         throw new IllegalStateException("Empty transaction detail is returned");
       }
@@ -605,10 +623,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         getTransactionService().saveTransactionDetail(transactionDetail, true);
       }
     } catch (Exception e) {
-      processed = false;
       LOG.warn("Error processing transaction {}. It will be retried next time.", transactionHash, e);
+      return null;
     }
-    return processed;
+    return transactionDetail;
   }
 
   private long getLastWatchedBlockNumber(long networkId) {

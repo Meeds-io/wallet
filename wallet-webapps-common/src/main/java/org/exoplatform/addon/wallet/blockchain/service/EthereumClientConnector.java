@@ -16,9 +16,10 @@
  */
 package org.exoplatform.addon.wallet.blockchain.service;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.getWebsocketURL;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.*;
@@ -29,7 +30,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthLog.LogResult;
 import org.web3j.protocol.websocket.*;
 
@@ -37,13 +37,15 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
 import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
+import org.exoplatform.addon.wallet.blockchain.statistic.ExoWalletStatistic;
+import org.exoplatform.addon.wallet.blockchain.statistic.ExoWalletStatisticService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 /**
  * A Web3j connector class to interact with Ethereum Blockchain
  */
-public class EthereumClientConnector implements ExoBlockchainTransactionService, Startable {
+public class EthereumClientConnector implements ExoBlockchainTransactionService, ExoWalletStatisticService, Startable {
 
   private static final Log         LOG                        = ExoLogger.getLogger(EthereumClientConnector.class);
 
@@ -117,6 +119,7 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
    * @return Web3j Transaction object
    * @throws InterruptedException when Blockchain request is interrupted
    */
+  @ExoWalletStatistic(statisticType = OPERATION_GET_TRANSACTION)
   public Transaction getTransaction(String transactionHash) throws InterruptedException {
     waitConnection();
     EthTransaction ethTransaction;
@@ -135,36 +138,13 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
   }
 
   /**
-   * Get block by hash
-   * 
-   * @param blockHash block hash to retrieve
-   * @return Web3j Block object
-   * @throws InterruptedException when Blockchain request is interrupted
-   */
-  public Block getBlock(String blockHash) throws InterruptedException {
-    waitConnection();
-    EthBlock ethBlock;
-    try {
-      ethBlock = web3j.ethGetBlockByHash(blockHash, false).send();
-    } catch (IOException e) {
-      LOG.info("Connection interrupted while getting Block '{}' information. Reattempt until getting it. Reason: {}",
-               blockHash,
-               e.getMessage());
-      return getBlock(blockHash);
-    }
-    if (ethBlock != null && ethBlock.getResult() != null) {
-      return ethBlock.getResult();
-    }
-    return null;
-  }
-
-  /**
    * Get transaction receipt by hash
    * 
    * @param transactionHash transaction hash to retrieve
    * @return Web3j Transaction receipt object
    * @throws InterruptedException when Blockchain request is interrupted
    */
+  @ExoWalletStatistic(statisticType = OPERATION_GET_TRANSACTION_RECEIPT)
   public TransactionReceipt getTransactionReceipt(String transactionHash) throws InterruptedException {
     waitConnection();
     EthGetTransactionReceipt ethGetTransactionReceipt;
@@ -194,10 +174,11 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
    * @throws InterruptedException when waiting for blockchain is interrupted
    * @throws IOException when error sending transaction on blockchain
    */
+  @ExoWalletStatistic(statisticType = OPERATION_GET_LAST_BLOCK_NUMBER)
   public long getLastestBlockNumber() throws InterruptedException, IOException {
     waitConnection();
-    Block block = web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send().getBlock();
-    return block.getNumber().longValue();
+    BigInteger blockNumber = web3j.ethBlockNumber().send().getBlockNumber();
+    return blockNumber.longValue();
   }
 
   /**
@@ -213,6 +194,7 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
    * @throws InterruptedException if an interruption is made while getting
    *           information from blockchain
    */
+  @ExoWalletStatistic(statisticType = OPERATION_FILTER_CONTRACT_TRANSACTIONS)
   public Set<String> getContractTransactions(String contractsAddress,
                                              long fromBlock,
                                              long toBlock) throws IOException, InterruptedException {
@@ -285,6 +267,48 @@ public class EthereumClientConnector implements ExoBlockchainTransactionService,
       web3jService = null;
       webSocketClient = null;
     }
+  }
+
+  @Override
+  public Map<String, Object> getParameters(String statisticType, Object result, Object... methodArgs) {
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put("remote_service", "blockchain");
+    parameters.put("operation", statisticType);
+    switch (statisticType) {
+    case OPERATION_GET_TRANSACTION:
+      parameters.put("transaction_hash", methodArgs[0]);
+      break;
+    case OPERATION_GET_TRANSACTION_RECEIPT:
+      parameters.put("transaction_hash", methodArgs[0]);
+      break;
+    case OPERATION_GET_TRANSACTION_COUNT:
+      parameters.put("wallet_address", methodArgs[0]);
+      break;
+    case OPERATION_GET_LAST_BLOCK_NUMBER:
+      parameters.put("last_block_number", result);
+      break;
+    case OPERATION_FILTER_CONTRACT_TRANSACTIONS:
+      parameters.put("from_block_number", methodArgs[1]);
+      parameters.put("to_block_number", methodArgs[2]);
+      if (result instanceof Set) {
+        parameters.put("transactions_count_received", ((Set<?>) result).size());
+      } else {
+        LOG.warn("Statistict type {} has an unexpected result class type", statisticType);
+      }
+      break;
+    default:
+      LOG.warn("Statistic type {} not managed", statisticType);
+      break;
+    }
+    return parameters;
+  }
+
+  @ExoWalletStatistic(statisticType = OPERATION_GET_TRANSACTION_COUNT)
+  public BigInteger getNonce(String walletAddress) throws IOException, InterruptedException {
+    waitConnection();
+    return getWeb3j().ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+                     .send()
+                     .getTransactionCount();
   }
 
   @ExoBlockchainTransaction

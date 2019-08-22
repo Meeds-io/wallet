@@ -79,6 +79,18 @@ public class TransactionEntity implements Serializable {
   @Column(name = "CREATED_DATE")
   private long              createdDate;
 
+  @Column(name = "GAS_USED")
+  private int               gasUsed;
+
+  @Column(name = "GAS_PRICE")
+  private double            gasPrice;
+
+  @Column(name = "TOKEN_FEE")
+  private double            tokenFee;
+
+  @Column(name = "NO_CONTRACT_FUNDS")
+  private boolean           noContractFunds;
+
   public long getId() {
     return id;
   }
@@ -213,6 +225,38 @@ public class TransactionEntity implements Serializable {
 
   public void setIssuerIdentityId(long issuerIdentityId) {
     this.issuerIdentityId = issuerIdentityId;
+  }
+
+  public int getGasUsed() {
+    return gasUsed;
+  }
+
+  public void setGasUsed(int gasUsed) {
+    this.gasUsed = gasUsed;
+  }
+
+  public double getGasPrice() {
+    return gasPrice;
+  }
+
+  public void setGasPrice(double gasPrice) {
+    this.gasPrice = gasPrice;
+  }
+
+  public double getTokenFee() {
+    return tokenFee;
+  }
+
+  public void setTokenFee(double tokenFee) {
+    this.tokenFee = tokenFee;
+  }
+
+  public boolean isNoContractFunds() {
+    return noContractFunds;
+  }
+
+  public void setNoContractFunds(boolean noContractFunds) {
+    this.noContractFunds = noContractFunds;
   }
 
 }

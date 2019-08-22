@@ -2,6 +2,7 @@
   <v-app
     id="WalletAdminApp"
     color="transaprent"
+    class="VuetifyApp"
     flat>
     <main>
       <v-layout column>
@@ -19,7 +20,7 @@
 
           <wallet-setup
             ref="walletSetup"
-            :wallet-address="walletAddress"
+            :wallet="wallet"
             :refresh-index="refreshIndex"
             :loading="loading"
             is-administration
@@ -58,7 +59,7 @@
               v-if="contractDetails"
               key="contract"
               href="#contract">
-              {{ contractDetails.adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
+              {{ adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
             </v-tab>
           </v-tabs>
 
@@ -94,8 +95,10 @@
               <contract-tab
                 ref="contractDetail"
                 :wallet-address="walletAddress"
-                :user-wallet="userWallet"
+                :user-wallet="wallet"
+                :wallets="wallets"
                 :contract-details="contractDetails"
+                :admin-level="adminLevel"
                 :fiat-symbol="fiatSymbol"
                 :address-etherscan-link="addressEtherscanLink"
                 @back="back()"
@@ -126,23 +129,26 @@ export default {
       loading: false,
       selectedTab: 'wallets',
       fiatSymbol: '$',
-      walletAddress: null,
+      wallet: null,
       refreshIndex: 1,
       contractDetails: null,
       isAdmin: null,
       addressEtherscanLink: null,
-      contracts: [],
       wallets: [],
       anchor: document.URL.indexOf('#') >= 0 ? document.URL.split('#')[1] : null,
     };
   },
   computed: {
-    userWallet() {
-      const address = this.walletAddress && this.walletAddress.toLowerCase();
-      return this.wallets && this.wallets.find((wallet) => wallet && wallet.address && wallet.address.toLowerCase() === address);
-    }
+    walletAddress() {
+      return this.wallet && this.wallet.address && this.wallet.address.toLowerCase();
+    },
+    adminLevel() {
+      return this.wallet && this.wallet.adminLevel;
+    },
   },
   created() {
+    document.addEventListener('exo.addon.wallet.modified', this.walletUpdated);
+    document.addEventListener('exo.addon.contract.modified', this.reloadContract);
     this.init()
       .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
   },
@@ -153,7 +159,7 @@ export default {
       this.forceUpdate();
       this.error = null;
 
-      return this.walletUtils.initSettings()
+      return this.walletUtils.initSettings(false, true)
         .then(() => {
           if (!window.walletSettings) {
             this.forceUpdate();
@@ -161,10 +167,11 @@ export default {
           }
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
+          this.wallet = window.walletSettings.wallet;
         })
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
-          this.walletAddress = window.walletSettings.wallet.address;
+          this.walletAddress = this.wallet.address;
         })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
@@ -197,65 +204,48 @@ export default {
           this.forceUpdate();
         });
     },
+    walletUpdated(event) {
+      if(event && event.detail && event.detail.string) {
+        const updatedWalletAddress = event.detail.string.toLowerCase();
+        if(this.walletAddress === updatedWalletAddress) {
+          this.refreshWallet(this.wallet);
+        }
+        const updatedWallet = this.wallets.find(wallet => wallet && wallet.address && wallet.address.toLowerCase() === updatedWalletAddress);
+        if (updatedWallet) {
+          this.refreshWallet(updatedWallet);
+        }
+      }
+    },
     reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress, true)
-        .then(contractDetails => this.contractDetails = contractDetails);
+      if (!this.contractDetails) {
+        this.contractDetails = window.walletSettings.contractDetail;
+      }
+      return this.tokenUtils.getContractDetails(this.walletAddress);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();
       const wallet = this.wallets.find((wallet) => wallet && wallet.address && wallet.address === recipient);
       if (wallet) {
         if (transaction.contractAddress) {
-          if(!transaction.contractMethodName || transaction.contractMethodName === 'transfer'  || transaction.contractMethodName === 'transferFrom' || transaction.contractMethodName === 'approve') {
-            this.$set(wallet, 'loadingTokenBalance', true);
-          }
-          this.watchPendingTransaction(transaction, this.contractDetails);
+          this.$set(wallet, 'loadingTokenBalance', true);
+          this.walletUtils.watchTransactionStatus(transaction.hash, () => {
+            return this.refreshWallet(wallet).then(() => {
+              this.$set(wallet, 'loadingTokenBalance', false);
+            });
+          });
         } else {
           this.$set(wallet, 'loadingBalance', true);
-          this.watchPendingTransaction(transaction);
-        }
-      } else {
-        const contract = this.contracts.find((contract) => contract && contract.address && contract.address.toLowerCase() === recipient.toLowerCase());
-        if (contract) {
-          this.$set(contract, 'loadingBalance', true);
-          if (this.$refs.contractDetail) {
-            this.$refs.contractDetail.newTransactionPending(transaction, contract);
-          }
+          this.walletUtils.watchTransactionStatus(transaction.hash, () => {
+            return this.refreshWallet(wallet).then(() => {
+              this.$set(wallet, 'loadingBalance', false);
+            });
+          });
         }
       }
     },
-    watchPendingTransaction(transaction, contractDetails) {
-      const thiss = this;
-      this.walletUtils.watchTransactionStatus(transaction.hash, (receipt) => {
-        if (receipt && receipt.status) {
-          const wallet = thiss.wallets && thiss.wallets.find((wallet) => wallet && wallet.address && transaction.to && wallet.address.toLowerCase() === transaction.to.toLowerCase());
-          if (transaction.contractMethodName === 'transferOwnership') {
-            if (contractDetails && contractDetails.isContract && contractDetails.address && transaction.contractAddress && contractDetails.address.toLowerCase() === transaction.contractAddress.toLowerCase()) {
-              this.$set(contractDetails, 'owner', transaction.to);
-              return this.tokenUtils.refreshContractOnServer().then(() => this.init());
-            }
-          } else if (transaction.contractMethodName === 'addAdmin' || transaction.contractMethodName === 'removeAdmin') {
-            if (wallet) {
-              contractDetails.contract.methods
-                .getAdminLevel(wallet.address)
-                .call()
-                .then((level) => {
-                  if (!wallet.accountAdminLevel) {
-                    wallet.accountAdminLevel = {};
-                  }
-                  level = Number(level);
-                  thiss.$set(wallet.accountAdminLevel, contractDetails.address, level ? level : 'not admin');
-                  thiss.$nextTick(() => thiss.forceUpdate());
-                });
-            }
-          } else if (transaction.contractMethodName === 'unPause' || transaction.contractMethodName === 'pause') {
-            thiss.$set(contractDetails, 'isPaused', transaction.contractMethodName === 'pause' ? true : false);
-            thiss.$nextTick(thiss.forceUpdate);
-          }
-          if(wallet && thiss.$refs.walletsTab) {
-            thiss.$refs.walletsTab.refreshWallet(wallet);
-          }
-        }
+    refreshWallet(wallet) {
+      return this.addressRegistry.refreshWallet(wallet).then(() => {
+        wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
       });
     },
     forceUpdate() {

@@ -93,7 +93,7 @@
               :display-name="props.item.wallet.name"
               :enabled="props.item.wallet.enabled"
               :disabled-in-reward-pool="props.item.disabledPool"
-              :disapproved="props.item.wallet.disapproved"
+              :disapproved="!props.item.wallet.isApproved"
               :deleted-user="props.item.wallet.deletedUser"
               :disabled-user="props.item.wallet.disabledUser"
               :avatar="props.item.wallet.avatar"
@@ -235,12 +235,6 @@ export default {
         return [];
       },
     },
-    walletAddress: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     periodType: {
       type: String,
       default: function() {
@@ -324,13 +318,13 @@ export default {
           text: this.$t('exoplatform.wallet.label.transaction'),
           align: 'center',
           sortable: true,
-          value: 'hash',
+          value: 'rewardTransaction.hash',
         },
         {
           text: this.$t('exoplatform.wallet.label.status'),
           align: 'center',
           sortable: true,
-          value: 'status',
+          value: 'rewardTransaction.status',
         },
         {
           text: (this.contractDetails && this.contractDetails.name),
@@ -447,13 +441,11 @@ export default {
       this.error = null;
       this.sendingRewards = true;
       sendRewards(this.selectedDateInSeconds)
-        .then(() => {
-          this.$emit('refresh');
-        })
         .catch(e => {
           this.error = String(e);
         })
         .finally(() => {
+          this.$emit('refresh');
           this.sendingRewards = false;
         });
     },

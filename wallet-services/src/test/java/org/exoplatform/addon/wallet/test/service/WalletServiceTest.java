@@ -231,7 +231,7 @@ public class WalletServiceTest extends BaseWalletTest {
     String message = "Funds request";
     fundsRequest.setAmount(amount);
     fundsRequest.setReceipientType(CURRENT_USER);
-    fundsRequest.setAddress(ADDRESS);
+    fundsRequest.setAddress(WALLET_ADDRESS_1);
     fundsRequest.setContract(contract);
     fundsRequest.setReceipient(CURRENT_USER);
     fundsRequest.setMessage(message);
@@ -245,7 +245,7 @@ public class WalletServiceTest extends BaseWalletTest {
     String sellPrice = "1000";
     String contractType = "Contract V2";
     contractDetail.setContractType(contractType);
-    contractDetail.setAddress(ADDRESS);
+    contractDetail.setAddress(WALLET_ADDRESS_1);
     contractDetail.setDecimals(decimals);
     contractDetail.setName(name);
     contractDetail.setOwner(owner);

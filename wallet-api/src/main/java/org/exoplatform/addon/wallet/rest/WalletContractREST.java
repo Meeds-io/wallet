@@ -126,25 +126,4 @@ public class WalletContractREST implements ResourceContainer {
       return Response.serverError().build();
     }
   }
-
-  @GET
-  @Path("refresh")
-  @RolesAllowed("rewarding")
-  @ApiOperation(value = "Refreshes contract detail from blockchain and store it in internal datasource", httpMethod = "GET", response = Response.class, notes = "returns empty response")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response refreshContract() {
-    try {
-      contractService.refreshContractDetail();
-      LOG.info("User {} is refreshing Token from blockchain", getCurrentUserId());
-      return Response.ok().build();
-    } catch (Exception e) {
-      LOG.error("Error refreshing Token from blockchain", e);
-      return Response.serverError().build();
-    }
-  }
-
 }

@@ -153,4 +153,53 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-15">
+    <createTable tableName="ADDONS_WALLET_BLOCKCHAIN_STATE">
+      <column name="BLOCKCHAIN_STATE_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_BLOCKCHAIN_STATE_ID"/>
+      </column>
+      <column name="WALLET_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_ACCOUNT_02" references="ADDONS_WALLET_ACCOUNT(IDENTITY_ID)" nullable="false" />
+      </column>
+      <column name="CONTRACT_ADDRESS" type="VARCHAR(100)">
+        <constraints nullable="false" />
+      </column>
+      <column name="ETHER_BALANCE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="TOKEN_BALANCE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="REWARD_BALANCE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="VESTING_BALANCE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="ADMIN_LEVEL" type="INT" defaultValueNumeric="0" />
+      <column name="IS_APPROVED" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="IS_INITIALIZED" type="BOOLEAN" defaultValueBoolean="false" />
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-16" dbms="oracle,postgresql">
+    <createSequence sequenceName="SEQ_WALLET_STATE" startValue="1"/>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-17">
+    <createIndex tableName="ADDONS_WALLET_BLOCKCHAIN_STATE" indexName="IDX_ADDONS_WALLET_05">
+      <column name="WALLET_ID" type="BIGINT" />
+      <column name="CONTRACT_ADDRESS" type="VARCHAR(100)" />
+    </createIndex>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-18">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="GAS_USED" type="INT" defaultValueNumeric="0" />
+      <column name="GAS_PRICE" type="DOUBLE" defaultValueNumeric="0" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-19">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="TOKEN_FEE" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="NO_CONTRACT_FUNDS" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

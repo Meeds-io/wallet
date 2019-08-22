@@ -412,7 +412,7 @@ export default {
                 });
                 this.dialog = false;
               })
-              .on('error', (error, receipt) => {
+              .on('error', (error) => {
                 console.debug('Error while sending admin transaction', error);
                 // The transaction has failed
                 this.error = this.walletUtils.truncateError(error);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2019 eXo Platform SAS.
+   * Copyright (C) 2003-2019 eXo Platform SAS.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,11 @@
  */
 package org.exoplatform.addon.wallet.listener;
 
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
@@ -28,6 +32,7 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionNotificationType;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
@@ -68,9 +73,15 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
         return;
       }
       TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
-      if (transactionDetail == null || !transactionDetail.isSucceeded() || transactionDetail.isAdminOperation()) {
-        // No notification for admin operation or not watched transaction or not
-        // succeeded transaction
+      if (transactionDetail == null || !transactionDetail.isSucceeded()) {
+        // No notification for not succeeded transactions
+        return;
+      }
+
+      logStatistics(transactionDetail);
+
+      if (transactionDetail.isAdminOperation()) {
+        // No notification for admin operation transactions
         return;
       }
 
@@ -152,6 +163,49 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     // Notification type is determined automatically by
     // transactionStatus.getNotificationId()
     ctx.getNotificationExecutor().with(ctx.makeCommand(PluginKey.key(transactionStatus.getNotificationId()))).execute(ctx);
+  }
+
+  private void logStatistics(TransactionDetail transactionDetail) {
+    String contractMethodName = transactionDetail.getContractMethodName();
+
+    if (StringUtils.isBlank(contractMethodName)) {
+      contractMethodName = ETHER_FUNC_SEND_FUNDS;
+    }
+
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put(LOCAL_SERVICE, "wallet");
+    parameters.put(OPERATION, contractMethodName);
+
+    if (transactionDetail.getIssuer() != null) {
+      parameters.put("user_social_id", transactionDetail.getIssuer().getTechnicalId());
+    }
+
+    parameters.put("sender", transactionDetail.getFromWallet());
+    parameters.put("receiver", transactionDetail.getToWallet());
+
+    switch (contractMethodName) {
+    case ETHER_FUNC_SEND_FUNDS:
+    case CONTRACT_FUNC_TRANSFER:
+    case CONTRACT_FUNC_TRANSFERFROM:
+    case CONTRACT_FUNC_APPROVE:
+    case CONTRACT_FUNC_INITIALIZEACCOUNT:
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case CONTRACT_FUNC_REWARD:
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case CONTRACT_FUNC_ADDADMIN:
+      parameters.put("admin_level", transactionDetail.getValue());
+      break;
+    default:
+      break;
+    }
+    parameters.put("transaction", transactionDetail.getHash());
+    parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
+    parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
+    parameters.put(DURATION, "");
+    StatisticUtils.addStatisticEntry(parameters);
   }
 
   private WalletTransactionService getTransactionService() {

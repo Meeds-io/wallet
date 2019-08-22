@@ -4,6 +4,7 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.commons.utils.IOUtil;
 import org.exoplatform.container.configuration.ConfigurationManager;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -39,6 +41,8 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
   private String                  contractBinary;
 
   private SettingService          settingService;
+
+  private ListenerService         listenerService;
 
   private WalletService           walletService;
 
@@ -131,12 +135,22 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
   }
 
   @Override
-  public void refreshContractDetail() {
+  public void refreshContractDetail(Set<String> contractModifications) {
     GlobalSettings settings = getSettings();
     String contractAddress = settings.getContractAddress();
-    ContractDetail contractDetail = getWalletTokenAdminService().getContractDetailFromBlockchain(contractAddress);
+    ContractDetail contractDetail = getContractDetail(contractAddress);
+    if (contractDetail == null) {
+      contractDetail = new ContractDetail();
+      contractDetail.setAddress(contractAddress);
+    }
+    getWalletTokenAdminService().refreshContractDetailFromBlockchain(contractDetail, contractModifications);
     saveContractDetail(contractDetail);
     getWalletService().setConfiguredContractDetail(contractDetail);
+    try {
+      getListenerService().broadcast(CONTRACT_MODIFIED_EVENT, null, contractDetail);
+    } catch (Exception e) {
+      LOG.error("Error while broadcasting contract modification event", e);
+    }
   }
 
   @Override
@@ -171,6 +185,13 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
       walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
     return walletTokenAdminService;
+  }
+
+  private ListenerService getListenerService() {
+    if (listenerService == null) {
+      listenerService = CommonsUtils.getService(ListenerService.class);
+    }
+    return listenerService;
   }
 
 }

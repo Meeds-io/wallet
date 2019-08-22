@@ -76,7 +76,7 @@ public class TemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("RECEIVER", receiver);
       templateContext.put("SENDER_URL", senderUrl);
       templateContext.put("RECEIVER_URL", receiverUrl);
-      templateContext.put("AVATAR", avatar != null ? avatar : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
+      templateContext.put("AVATAR", avatar == null ? LinkProvider.PROFILE_DEFAULT_AVATAR_URL : avatar);
       templateContext.put("SYMBOL", symbol);
       templateContext.put("CONTRACT_ADDRESS", contractAddress == null ? "" : contractAddress);
       templateContext.put("NOTIFICATION_ID", notification.getId());

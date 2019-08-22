@@ -51,7 +51,7 @@
               value="security">
               <settings-security-tab
                 ref="securityTab"
-                :wallet-address="walletAddress"
+                :wallet="wallet"
                 :is-space="isSpace"
                 @settings-changed="$emit('settings-changed')"
                 @manage-keys="selectedTab = 'keys'" />
@@ -119,6 +119,12 @@ export default {
   props: {
     title: {
       type: String,
+      default: function() {
+        return null;
+      },
+    },
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },

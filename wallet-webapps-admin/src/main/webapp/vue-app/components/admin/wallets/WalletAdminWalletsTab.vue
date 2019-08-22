@@ -93,7 +93,7 @@
                 :profile-type="props.item.type"
                 :display-name="props.item.name"
                 :enabled="props.item.enabled"
-                :disapproved="props.item.disapproved"
+                :disapproved="!props.item.isApproved"
                 :deleted-user="props.item.deletedUser"
                 :disabled-user="props.item.disabledUser"
                 :avatar="props.item.avatar"
@@ -106,9 +106,9 @@
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
-                <template v-else-if="props.item.disapproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
-                <template v-else-if="props.item.loadingBalance === false && props.item.loadingTokenBalance === false">
-                  <template v-if="Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount))">
+                <template v-else-if="!props.item.isApproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
+                <template v-else>
+                  <template v-if="Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount))">
                     <v-icon color="orange">
                       warning
                     </v-icon>
@@ -133,18 +133,7 @@
               v-if="contractDetails"
               class="clickable text-xs-center"
               @click="openAccountDetail(props.item)">
-              <v-progress-circular
-                v-if="props.item.loadingTokenBalance"
-                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
-                color="primary"
-                indeterminate
-                size="20" />
-              <span
-                v-else-if="loadingWallets && props.item.loadingTokenBalance !== false"
-                :title="$t('exoplatform.wallet.label.loadingBalance')">
-                {{ $t('exoplatform.wallet.label.loading') }}...
-              </span>
-              <template v-else-if="props.item.tokenBalance">
+              <template v-if="props.item.tokenBalance">
                 {{ walletUtils.toFixed(props.item.tokenBalance) }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
               </template>
               <template v-else>
@@ -152,21 +141,7 @@
               </template>
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
-              <v-progress-circular
-                v-if="props.item.loadingBalance"
-                :title="loadingWallets ? 'Loading balance' : 'A transaction is in progress'"
-                color="primary"
-                class="mr-4"
-                indeterminate
-                size="20" />
-              <span
-                v-else-if="loadingWallets && props.item.loadingBalance !== false"
-                :title="$t('exoplatform.wallet.label.loadingBalance')">
-                {{ $t('exoplatform.wallet.label.loading') }}...
-              </span>
-              <template v-else>
-                {{ walletUtils.toFixed(props.item.balance) }} eth
-              </template>
+              {{ walletUtils.toFixed(props.item.etherBalance) }} eth
             </td>
             <td
               v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1"
@@ -213,7 +188,7 @@
                 class="mr-4"
                 indeterminate
                 size="20" />
-              <v-menu v-else-if="isAdmin" offset-y>
+              <v-menu v-else-if="isAdmin && (props.item.type === 'user' || props.item.type === 'space')" offset-y>
                 <v-btn
                   slot="activator"
                   icon
@@ -221,12 +196,7 @@
                   <v-icon size="20px">fa-ellipsis-v</v-icon>
                 </v-btn>
                 <v-list flat class="pt-0 pb-0">
-                  <v-list-tile @click="refreshWallet(props.item)">
-                    <v-list-tile-title>{{ $t('exoplatform.wallet.button.refresh') }}</v-list-tile-title>
-                  </v-list-tile>
-                  <v-divider />
-
-                  <template v-if="props.item.type === 'user' || props.item.type === 'space'">
+                  <template>
                     <template v-if="useWalletAdmin">
                       <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                         <v-list-tile @click="openAcceptInitializationModal(props.item)">
@@ -237,14 +207,14 @@
                         </v-list-tile>
                         <v-divider />
                       </template>
-                      <template v-else-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.balance) === 0 || (etherAmount && walletUtils.toFixed(props.item.balance) < Number(etherAmount)))">
+                      <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
                         <v-list-tile @click="openSendEtherModal(props.item)">
                           <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
                         </v-list-tile>
                         <v-divider />
                       </template>
 
-                      <v-list-tile v-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && !props.item.disapproved && tokenAmount > 0 && props.item.tokenBalance < tokenAmount" @click="openSendTokenModal(props.item)">
+                      <v-list-tile v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
                         <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                       </v-list-tile>
                       <v-divider />
@@ -299,10 +269,9 @@
       <account-detail
         ref="accountDetail"
         :fiat-symbol="fiatSymbol"
-        :wallet-address="selectedWalletAddress"
+        :wallet="selectedWallet"
         :contract-details="selectedWalletDetails"
         :selected-transaction-hash="selectedTransactionHash"
-        :wallet="selectedWallet"
         is-read-only
         is-display-only
         is-administration
@@ -404,8 +373,8 @@ export default {
         {
           text: this.$t('exoplatform.wallet.label.walletStatus'),
           align: 'center',
-          sortable: true,
-          value: 'walletStatus',
+          sortable: false,
+          value: 'isApproved',
         },
         {
           text: this.$t('exoplatform.wallet.label.tokenBalance', {0: this.contractDetails && this.contractDetails.name}),
@@ -415,7 +384,7 @@ export default {
         {
           text: this.$t('exoplatform.wallet.label.etherBalance'),
           align: 'center',
-          value: 'balance',
+          value: 'etherBalance',
         },
         {
           text: this.$t('exoplatform.wallet.label.initializationstatus'),
@@ -435,7 +404,7 @@ export default {
       return this.wallets && this.wallets.find(wallet => wallet && wallet.type === 'admin');
     },
     useWalletAdmin() {
-      return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.balance && Number(this.walletAdmin.balance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
+      return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
     },
     displayUsers() {
       return this.walletTypes && this.walletTypes.includes('user');
@@ -500,11 +469,6 @@ export default {
     }
   },
   watch: {
-    filteredWallets(value, oldValue) {
-      if(value.length > 0 && (value.length !== oldValue.length || value[value.length -1].id !== oldValue[oldValue.length -1].id)) {
-        return this.retrieveWalletsBalances(this.wallets);
-      }
-    },
     loadingWallets(value) {
       this.$emit('loading-wallets-changed', value);
     },
@@ -540,13 +504,10 @@ export default {
         .then((wallets) => {
           this.wallets = wallets.sort(this.sortByName);
           // *async* approval retrieval
-          this.retrieveWalletsApproval(this.wallets);
+          this.wallets.forEach((wallet) => {
+            wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance));
+          });
           return this.$nextTick();
-        })
-        .then(() => {
-          if (this.walletAdmin) {
-            return this.refreshWallet(this.walletAdmin);
-          }
         })
         .then(() => {
           this.$emit('wallets-loaded', this.wallets);
@@ -561,21 +522,6 @@ export default {
       const sortB = b.name && b.name.toLocaleLowerCase();
       return (sortA > sortB && 1) || (sortA < sortB && (-1)) || 0; // NOSONAR
     },
-    retrieveWalletsApproval(wallets, i) {
-      if(!wallets || !wallets.length) {
-        return;
-      }
-      if(!i) {
-        i = 0;
-      }
-      if(i >= wallets.length) {
-        return;
-      }
-      return this.loadWalletApproval(wallets[i])
-        .then(() => this.retrieveWalletsApproval(wallets, ++i))
-        // Stop loading wallets only when the first call is finished
-        .finally(() => this.loadingWallets = !i && true);
-    },
     isDisplayWallet(wallet) {
       return wallet && wallet.address
         && (this.displayUsers || wallet.type !== 'user')
@@ -583,134 +529,28 @@ export default {
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
         && (this.displayDeletedIdentities || !wallet.deletedUser)
-        && (this.displayDisapprovedWallets || !wallet.disapproved)
+        && (this.displayDisapprovedWallets || wallet.isApproved)
         && (!this.search
             || wallet.initializationState.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
     },
-    retrieveWalletsBalances(wallets, i) {
-      if(!wallets || !wallets.length) {
-        return;
-      }
-      if(!i) {
-        i = 0;
-      }
-      if(i >= wallets.length) {
-        return;
-      }
-      if(i === 0 && this.loadingWallets) {
-        return;
-      }
-      this.loadingWallets = true;
-      const wallet = wallets[i];
-      let promise = null;
-      if (wallet.loadingBalance !== true && wallet.loadingBalance !== false) {
-        // Compute only not already computed balances
-        promise = this.computeBalance(wallet);
-      } else {
-        promise = Promise.resolve(null);
-      }
-      return promise.then(() => this.retrieveWalletsBalances(wallets, ++i))
-        // Stop loading wallets only when the first call is finished
-        .finally(() => this.loadingWallets = !i && true);
-    },
     refreshWallet(wallet) {
-      return this.addressRegistry.refreshWallet(wallet)
-        .then(() => this.loadWalletApproval(wallet))
-        .then(() => this.loadWalletInitialization(wallet))
-        .then(() => this.computeBalance(wallet));
-    },
-    loadWalletApproval(wallet) {
-      if(!this.contractDetails || !this.contractDetails.contract || !this.contractDetails.contract || !wallet || !wallet.address) {
-        return Promise.resolve(null);
-      }
-      return this.contractDetails.contract.methods.isApprovedAccount(wallet.address).call()
-        .then((approved) => {
-          this.$set(wallet, 'disapproved', !approved);
-          this.$forceUpdate();
-
-          if(approved) {
-            return this.contractDetails.contract.methods.getAdminLevel(wallet.address).call();
-          }
-        })
-        .then((adminLevel) => this.$set(wallet, 'adminLevel', Number(adminLevel) || 0));
-    },
-    loadWalletInitialization(wallet) {
-      if(!this.contractDetails || !this.contractDetails.contract || !this.contractDetails.contract || !wallet || !wallet.address) {
-        return Promise.resolve(null);
-      }
-
-      return this.contractDetails.contract.methods.isInitializedAccount(wallet.address).call()
-        .then((initialized) => {
-          // Consider wallet as initialized if it's approved or initialized
-          initialized = initialized || !wallet.disapproved;
-
-          if (initialized && wallet.initializationState !== 'INITIALIZED') {
-            this.changeWalletInitializationStatus(wallet, 'INITIALIZED');
-            this.$set(wallet, 'initializationState', 'INITIALIZED');
-          } else if (!initialized && wallet.initializationState === 'INITIALIZED') {
-            this.changeWalletInitializationStatus(wallet, 'MODIFIED');
-            this.$set(wallet, 'initializationState', 'MODIFIED');
-          }
-        });
-    },
-    computeBalance(wallet, ignoreUpdateLoadingBalanceParam) {
-      if(!wallet.address || !wallet.displayedWallet) {
-        return Promise.resolve(null);
-      }
-      this.$set(wallet, 'loadingBalance', true);
-      return this.walletUtils.computeBalance(wallet.address)
-        .then((balanceDetails, error) => {
-          if (error) {
-            this.$set(wallet, 'icon', 'warning');
-            this.$set(wallet, 'error', this.$t('exoplatform.wallet.error.errorRetrievingBalanceOfWallet', {0: wallet.name, 1: String(error)}));
-          } else {
-            this.$set(wallet, 'balance', balanceDetails && balanceDetails.balance ? balanceDetails.balance : 0);
-            this.$set(wallet, 'balanceFiat', balanceDetails && balanceDetails.balanceFiat ? balanceDetails.balanceFiat : 0);
-          }
-        })
-        .then(() => {
-          // check if we should reload contract balance too
-          if (this.contractDetails && this.contractDetails.contract) {
-            this.$set(wallet, 'loadingTokenBalance', true);
-            return this.contractDetails.contract.methods
-              .balanceOf(wallet.address)
-              .call()
-              .then((balance, error) => {
-                if (error) {
-                  throw new Error(this.$t('exoplatform.wallet.error.invalidContractAddress'));
-                }
-                balance = String(balance);
-                balance = this.walletUtils.convertTokenAmountReceived(balance, this.contractDetails.decimals);
-                this.$set(wallet, 'tokenBalance', balance);
-              })
-              .finally(() => {
-                if (!ignoreUpdateLoadingBalanceParam) {
-                  this.$set(wallet, 'loadingTokenBalance', false);
-                }
-              });
-          }
-        })
-        .catch((error) => {
-          this.$set(wallet, 'icon', 'warning');
-          this.$set(wallet, 'error', this.$t('exoplatform.wallet.error.errorRetrievingBalanceOfWallet', {0: wallet.name, 1: String(error)}));
-          this.error = String(error);
-        })
-        .finally(() => {
-          if (!ignoreUpdateLoadingBalanceParam) {
-            this.$set(wallet, 'loadingBalance', false);
-            if (wallet.loadingTokenBalance && this.contractDetails && this.contractDetails.contract && this.contractDetails.contract) {
-              this.$set(wallet, 'loadingTokenBalance', false);
-            }
-          }
-        });
+      return this.addressRegistry.refreshWallet(wallet).then(() => wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance)));
     },
     openAccountDetail(wallet, hash) {
       this.selectedTransactionHash = hash;
       this.selectedWalletAddress = wallet.address;
       this.selectedWallet = wallet;
-      this.computeWalletDetails(wallet);
+      this.selectedWalletDetails = {
+        title: 'ether',
+        icon: 'fab fa-ethereum',
+        symbol: 'ether',
+        address: this.selectedWalletAddress,
+        balance: wallet.etherBalance,
+        balanceFiat: wallet.fiatBalance,
+        details: wallet,
+      };
       this.seeAccountDetails = true;
 
       this.$nextTick(() => {
@@ -721,21 +561,6 @@ export default {
             thiss.back();
           });
       });
-    },
-    computeWalletDetails(wallet) {
-      if (!this.selectedWalletAddress) {
-        this.selectedWalletDetails = null;
-        return;
-      }
-      this.selectedWalletDetails = {
-        title: 'ether',
-        icon: 'fab fa-ethereum',
-        symbol: 'ether',
-        address: this.selectedWalletAddress,
-        balance: wallet.balance,
-        balanceFiat: wallet.balanceFiat,
-        details: wallet,
-      };
     },
     back() {
       this.seeAccountDetails = false;
@@ -772,7 +597,7 @@ export default {
     },
     openSendEtherModal(wallet) {
       this.walletToProcess = wallet;
-      const etherAmount = this.walletUtils.toFixed(this.etherAmount) - Number(wallet && wallet.balance);
+      const etherAmount = this.walletUtils.toFixed(this.etherAmount) - Number(wallet && wallet.etherBalance);
       if (etherAmount && etherAmount > 0 && Number.isFinite(etherAmount)) {
         this.$refs.sendEtherModal.open(wallet, null, etherAmount);
       }
@@ -804,9 +629,7 @@ export default {
       }
     },
     watchWalletTransaction(wallet, hash) {
-      this.refreshWallet(wallet);
-
-      this.walletUtils.watchTransactionStatus(hash, (receipt) => {
+      this.walletUtils.watchTransactionStatus(hash, () => {
         this.$set(wallet, 'pendingTransaction', (wallet.pendingTransaction || 1) - 1);
         this.refreshWallet(wallet);
       });

@@ -8,8 +8,8 @@
         <v-flex
           id="accountDetailTitle"
           class="mt-3">
-          <h3 v-if="adminLevel >= 5 && contractDetails.contractBalanceFiat" class="font-weight-light">
-            {{ contractDetails.name }} - {{ $t('exoplatform.wallet.label.version') }}: {{ contractDetails.contractType }} - {{ $t('exoplatform.wallet.label.balance') }}: {{ walletUtils.toFixed(contractDetails.contractBalanceFiat) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.contractBalance) }} ether
+          <h3 v-if="adminLevel >= 5 && contractDetails.fiatBalance" class="font-weight-light">
+            {{ contractDetails.name }} - {{ $t('exoplatform.wallet.label.version') }}: {{ contractDetails.contractType }} - {{ $t('exoplatform.wallet.label.balance') }}: {{ walletUtils.toFixed(contractDetails.fiatBalance) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.etherBalance) }} ether
           </h3>
           <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
             <b>{{ contractDetails && contractDetails.name }}</b> {{ $t('exoplatform.wallet.label.sellPrice') }}: {{ contractDetails && contractDetails.sellPrice }} ether
@@ -124,7 +124,7 @@
 
           <!-- pause/unpause contract -->
           <contract-admin-modal
-            v-if="!contractDetails.isPaused && adminLevel >= 5"
+            v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -134,7 +134,7 @@
             @success="successTransaction"
             @error="transactionError" />
           <contract-admin-modal
-            v-if="contractDetails.isPaused && adminLevel >= 5"
+            v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -160,7 +160,7 @@
             @error="transactionError" />
 
           <contract-admin-modal
-            v-if="contractDetails.isOwner"
+            v-if="contractDetails && contractDetails.isOwner"
             ref="transferOwnership"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -173,7 +173,7 @@
             @error="transactionError" />
 
           <upgrade-token-modal
-            v-if="contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
+            v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"
             :wallet-address="walletAddress"
@@ -228,7 +228,7 @@
             <transactions-list
               id="transactionsList"
               ref="transactionsList"
-              :account="contractDetails.address"
+              :account="contractDetails && contractDetails.address"
               :contract-details="contractDetails"
               :fiat-symbol="fiatSymbol"
               :error="error"
@@ -240,7 +240,7 @@
         </v-layout>
       </v-tab-item>
       <v-tab-item
-        v-if="contractDetails.contractType > 0 && adminLevel >= 4"
+        v-if="contractDetails && contractDetails.contractType > 0 && adminLevel >= 4"
         id="approvedAccounts"
         value="approvedAccounts">
         <v-flex v-if="!loading" justify-center>
@@ -260,7 +260,7 @@
           hide-actions
           hide-headers>
           <template slot="items" slot-scope="props">
-            <tr v-if="(props.item.approved && props.item.approved[contractDetails.address] === 'approved') || (props.item.accountAdminLevel && props.item.accountAdminLevel[contractDetails.address] != 'not admin' && props.item.accountAdminLevel[contractDetails.address] >= 1)">
+            <tr v-if="props.item.approved || props.item.adminLevel >= 1">
               <td>
                 <v-avatar size="36px">
                   <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
@@ -280,8 +280,8 @@
                   :avatar="props.item.avatar" />
               </td>
               <td v-if="$refs.disapproveAccountModal">
-                <span v-if="props.item.accountAdminLevel && props.item.accountAdminLevel[contractDetails.address] != 'not admin' && props.item.accountAdminLevel[contractDetails.address] >= 1">
-                  {{ $t('exoplatform.wallet.label.adminLevel') }}: {{ props.item.accountAdminLevel[contractDetails.address] }}
+                <span v-if="props.item.adminLevel >= 1">
+                  {{ $t('exoplatform.wallet.label.adminLevel') }}: {{ props.item.adminLevel }}
                 </span>
                 <v-btn
                   v-else
@@ -318,7 +318,7 @@
           hide-actions
           hide-headers>
           <template slot="items" slot-scope="props">
-            <tr v-if="props.item.accountAdminLevel && props.item.accountAdminLevel[contractDetails.address] != 'not admin' && props.item.accountAdminLevel[contractDetails.address] >= 1">
+            <tr v-if="props.item.adminLevel >= 1">
               <td>
                 <v-avatar size="36px">
                   <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
@@ -338,7 +338,7 @@
                   :avatar="props.item.avatar" />
               </td>
               <td>
-                {{ $t('exoplatform.wallet.label.level') }} {{ props.item.accountAdminLevel[contractDetails.address] }}
+                {{ $t('exoplatform.wallet.label.level') }} {{ props.item.adminLevel }}
               </td>
               <td v-if="$refs.removeAdminModal">
                 <v-btn
@@ -386,8 +386,20 @@ export default {
         return null;
       },
     },
+    adminLevel: {
+      type: Number,
+      default: function() {
+        return null;
+      },
+    },
     fiatSymbol: {
       type: String,
+      default: function() {
+        return null;
+      },
+    },
+    wallets: {
+      type: Array,
       default: function() {
         return null;
       },
@@ -414,9 +426,6 @@ export default {
     };
   },
   computed: {
-    adminLevel() {
-      return (this.contractDetails && this.contractDetails.adminLevel) || 0;
-    },
     totalSupply() {
       return this.contractDetails && this.contractDetails.totalSupply ? this.walletUtils.convertTokenAmountReceived(this.contractDetails.totalSupply, this.contractDetails.decimals) : 0;
     },
@@ -433,43 +442,33 @@ export default {
         });
     },
     retrieveAccountDetails(wallet, ignoreApproved, ignoreAdmin) {
-      if (!wallet.approved) {
-        wallet.approved = {};
-      }
-      if (!wallet.accountAdminLevel) {
-        wallet.accountAdminLevel = {};
-      }
-
       const promises = [];
-      if (!ignoreApproved && !wallet.approved.hasOwnProperty(this.contractDetails.address)) {
-        wallet.approved[this.contractDetails.address] = false;
+      if (!ignoreApproved && !wallet.hasOwnProperty('approved')) {
         promises.push(
           this.contractDetails.contract.methods
             .isApprovedAccount(wallet.address)
             .call()
             .then((approved) => {
-              this.$set(wallet.approved, this.contractDetails.address, approved ? 'approved' : 'disapproved');
-              return this.addressRegistry.refreshWallet(wallet);
+              this.$set(wallet, 'approved', approved);
             })
             .catch((e) => {
               console.debug('Error getting approval of account', wallet.address, e);
-              this.$set(wallet.approved, this.contractDetails.address, 'disapproved');
+              delete wallet['approved'];
             })
         );
       }
-      if (!ignoreAdmin && !wallet.accountAdminLevel.hasOwnProperty(this.contractDetails.address)) {
-        wallet.accountAdminLevel[this.contractDetails.address] = 0;
+      if (!ignoreAdmin && !wallet.hasOwnProperty('adminLevel')) {
         promises.push(
           this.contractDetails.contract.methods
             .getAdminLevel(wallet.address)
             .call()
             .then((level) => {
               level = Number(level);
-              this.$set(wallet.accountAdminLevel, this.contractDetails.address, level ? level : 'not admin');
+              this.$set(wallet, 'adminLevel', level);
             })
             .catch((e) => {
               console.debug('Error getting admin level of account', wallet.address, e);
-              this.$set(wallet.accountAdminLevel, this.contractDetails.address, 'not admin');
+              delete wallet['adminLevel'];
             })
         );
       }
@@ -516,11 +515,8 @@ export default {
       this.totalTransactionsCount = count;
     },
     refreshBalance() {
-      return this.walletUtils.computeBalance(this.contractDetails.address).then((contractBalance) => {
-        if (contractBalance) {
-          this.$set(this.contractDetails, 'contractBalance', contractBalance.balance);
-          this.$set(this.contractDetails, 'contractBalanceFiat', contractBalance.balanceFiat);
-        }
+      return this.tokenUtils.getSavedContractDetails(this.contractDetails.address).then((contractDetails) => {
+        Object.assign(this.contractDetails, contractDetails);
       })
       .finally(() => {
         this.$set(this.contractDetails, 'loadingBalance', false);
@@ -553,10 +549,13 @@ export default {
               const promises = [];
               events.forEach((event) => {
                 if (event.returnValues && event.returnValues[paramName]) {
-                  const address = event.returnValues[paramName];
-                  const wallet = {
-                    address: address,
-                  };
+                  const address = event.returnValues[paramName].toLowerCase();
+                  let wallet = this.wallets.find(walletTmp => walletTmp.address && walletTmp.address.toLowerCase() === address);
+                  if (!wallet) {
+                    wallet = {
+                        address: address,
+                    };
+                  }
                   if(this.contractDetails.owner && address.toLowerCase() === this.contractDetails.owner.toLowerCase()) {
                     wallet.owner = true;
                     wallet.name = "Admin";
@@ -591,7 +590,6 @@ export default {
           this.approvedWallets.splice(index, 1);
         }
       }
-      return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.contractDetails, true);
     },
   },
 };

@@ -84,6 +84,9 @@ public class TransactionStorage {
 
   public void saveTransactionDetail(TransactionDetail transactionDetail) {
     TransactionEntity transactionEntity = toEntity(transactionDetail);
+    if (transactionDetail.getTimestamp() <= 0) {
+      transactionDetail.setTimestamp(System.currentTimeMillis());
+    }
     if (transactionEntity.getId() == 0) {
       transactionEntity = walletTransactionDAO.create(transactionEntity);
       transactionDetail.setId(transactionEntity.getId());
@@ -158,6 +161,10 @@ public class TransactionStorage {
     detail.setNetworkId(entity.getNetworkId());
     detail.setPending(entity.isPending());
     detail.setSucceeded(entity.isSuccess());
+    detail.setGasPrice(entity.getGasPrice());
+    detail.setGasUsed(entity.getGasUsed());
+    detail.setTokenFee(entity.getTokenFee());
+    detail.setNoContractFunds(entity.isNoContractFunds());
     return detail;
   }
 
@@ -180,6 +187,10 @@ public class TransactionStorage {
     entity.setPending(detail.isPending());
     entity.setSuccess(detail.isSucceeded());
     entity.setValue(detail.getValue());
+    entity.setGasPrice(detail.getGasPrice());
+    entity.setTokenFee(detail.getTokenFee());
+    entity.setGasUsed(detail.getGasUsed());
+    entity.setNoContractFunds(detail.isNoContractFunds());
     if (detail.getTimestamp() == 0) {
       entity.setCreatedDate(System.currentTimeMillis());
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {

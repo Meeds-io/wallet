@@ -239,7 +239,6 @@ export default {
           } else {
             this.removeUpgradeState();
             this.$emit('success', result && result.hash, 'upgrade');
-            return this.tokenUtils.refreshContractOnServer();
           }
           return true;
         })

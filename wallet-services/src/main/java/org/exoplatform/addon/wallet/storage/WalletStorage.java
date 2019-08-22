@@ -8,10 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.addon.wallet.dao.WalletAccountDAO;
-import org.exoplatform.addon.wallet.dao.WalletPrivateKeyDAO;
-import org.exoplatform.addon.wallet.entity.WalletEntity;
-import org.exoplatform.addon.wallet.entity.WalletPrivateKeyEntity;
+import org.exoplatform.addon.wallet.dao.*;
+import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -20,17 +18,23 @@ import org.exoplatform.web.security.codec.AbstractCodec;
 import org.exoplatform.web.security.codec.CodecInitializer;
 
 public class WalletStorage {
-  private static final Log    LOG = ExoLogger.getLogger(WalletStorage.class);
+  private static final Log         LOG = ExoLogger.getLogger(WalletStorage.class);
 
-  private WalletAccountDAO    walletAccountDAO;
+  private WalletAccountDAO         walletAccountDAO;
 
-  private WalletPrivateKeyDAO privateKeyDAO;
+  private WalletPrivateKeyDAO      privateKeyDAO;
 
-  private AbstractCodec       codec;
+  private WalletBlockchainStateDAO blockchainStateDAO;
 
-  public WalletStorage(WalletAccountDAO walletAccountDAO, WalletPrivateKeyDAO privateKeyDAO, CodecInitializer codecInitializer) {
+  private AbstractCodec            codec;
+
+  public WalletStorage(WalletAccountDAO walletAccountDAO,
+                       WalletPrivateKeyDAO privateKeyDAO,
+                       WalletBlockchainStateDAO blockchainStateDAO,
+                       CodecInitializer codecInitializer) {
     this.walletAccountDAO = walletAccountDAO;
     this.privateKeyDAO = privateKeyDAO;
+    this.blockchainStateDAO = blockchainStateDAO;
 
     try {
       this.codec = codecInitializer.getCodec();
@@ -88,6 +92,34 @@ public class WalletStorage {
   }
 
   /**
+   * Get wallet blockchain state from internal database
+   * 
+   * @param wallet object to refresh
+   * @param contractAddress contract address to use for wallet blockchain state
+   */
+  public void retrieveWalletBlockchainState(Wallet wallet, String contractAddress) {
+    if (wallet == null) {
+      throw new IllegalArgumentException("wallet is mandatory");
+    }
+
+    if (StringUtils.isBlank(contractAddress)) {
+      throw new IllegalArgumentException("contractAddress is mandatory");
+    }
+
+    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(wallet.getTechnicalId(),
+                                                                                                     contractAddress);
+    if (blockchainStateEntity != null) {
+      wallet.setEtherBalance(blockchainStateEntity.getEtherBalance());
+      wallet.setTokenBalance(blockchainStateEntity.getTokenBalance());
+      wallet.setRewardBalance(blockchainStateEntity.getRewardBalance());
+      wallet.setVestingBalance(blockchainStateEntity.getVestingBalance());
+      wallet.setAdminLevel(blockchainStateEntity.getAdminLevel());
+      wallet.setIsApproved(blockchainStateEntity.isApproved());
+      wallet.setIsInitialized(blockchainStateEntity.isInitialized());
+    }
+  }
+
+  /**
    * @param wallet wallet details to save
    * @param isNew whether this is a new wallet association or not
    * @return saved wallet entity
@@ -107,7 +139,6 @@ public class WalletStorage {
    * 
    * @param identityId user/space technical identty id
    * @param backupState true if backedUp else false
-   * 
    * @return modified {@link Wallet}
    */
   public Wallet saveWalletBackupState(long identityId, boolean backupState) {
@@ -187,6 +218,49 @@ public class WalletStorage {
       privateKeyDAO.create(privateKey);
     } else {
       privateKeyDAO.update(privateKey);
+    }
+  }
+
+  /**
+   * Save wallet state in blockchain
+   * 
+   * @param wallet wallet to save its state
+   * @param contractAddress address of the contract on which the state is
+   *          associated
+   */
+  public void saveWalletBlockchainState(Wallet wallet, String contractAddress) {
+    if (StringUtils.isBlank(contractAddress)) {
+      throw new IllegalArgumentException("contractAddress is mandatory");
+    }
+    if (wallet == null) {
+      throw new IllegalArgumentException("wallet is mandatory");
+    }
+    long walletId = wallet.getTechnicalId();
+    if (walletId <= 0) {
+      throw new IllegalArgumentException("wallet ID is mandatory");
+    }
+    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(walletId, contractAddress);
+    boolean isNew = blockchainStateEntity == null;
+    if (isNew) {
+      blockchainStateEntity = new WalletBlockchainStateEntity();
+      WalletEntity walletEntity = walletAccountDAO.find(walletId);
+      if (walletEntity == null) {
+        throw new IllegalStateException("Can't find wallet with id: " + walletId);
+      }
+      blockchainStateEntity.setWallet(walletEntity);
+    }
+    blockchainStateEntity.setContractAddress(contractAddress);
+    blockchainStateEntity.setEtherBalance(wallet.getEtherBalance() == null ? 0 : wallet.getEtherBalance());
+    blockchainStateEntity.setTokenBalance(wallet.getTokenBalance() == null ? 0 : wallet.getTokenBalance());
+    blockchainStateEntity.setRewardBalance(wallet.getRewardBalance() == null ? 0 : wallet.getRewardBalance());
+    blockchainStateEntity.setVestingBalance(wallet.getVestingBalance() == null ? 0 : wallet.getVestingBalance());
+    blockchainStateEntity.setAdminLevel(wallet.getAdminLevel() == null ? 0 : wallet.getAdminLevel());
+    blockchainStateEntity.setApproved(wallet.getIsApproved() != null && wallet.getIsApproved());
+    blockchainStateEntity.setInitialized(wallet.getIsInitialized() != null && wallet.getIsInitialized());
+    if (isNew) {
+      blockchainStateDAO.create(blockchainStateEntity);
+    } else {
+      blockchainStateDAO.update(blockchainStateEntity);
     }
   }
 

@@ -30,7 +30,7 @@
       </div>
       <send-tokens-form
         ref="sendTokensForm"
-        :account="account"
+        :wallet="wallet"
         :contract-details="contractDetails"
         class="pt-4"
         @sent="$emit('sent', $event, contractDetails)"
@@ -50,8 +50,8 @@ export default {
     SendTokensForm,
   },
   props: {
-    account: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -81,14 +81,14 @@ export default {
     };
   },
   computed: {
-    balance() {
-      return this.contractDetails && this.contractDetails.balance;
+    tokenBalance() {
+      return this.contractDetails && this.wallet.tokenBalance;
     },
     etherBalance() {
-      return this.contractDetails && this.contractDetails.etherBalance;
+      return this.contractDetails && this.wallet.etherBalance;
     },
     disabled() {
-      return this.isReadOnly || !this.balance || this.balance === 0 || (typeof this.balance === 'string' && (!this.balance.length || this.balance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
+      return this.isReadOnly || !this.tokenBalance || this.tokenBalance === 0 || (typeof this.tokenBalance === 'string' && (!this.tokenBalance.length || this.tokenBalance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
   watch: {

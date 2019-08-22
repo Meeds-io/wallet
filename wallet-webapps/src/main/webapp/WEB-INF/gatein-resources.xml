@@ -1,38 +1,4 @@
 <gatein-resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/gatein_resources_1_4 http://www.exoplatform.org/xml/ns/gatein_resources_1_4" xmlns="http://www.exoplatform.org/xml/ns/gatein_resources_1_4">
-<!-- 
-  We can't use this due to:
-  https://jira.exoplatform.org/browse/PLF-8100
-
-  <portlet-skin>
-    <application-name>wallet</application-name>
-    <portlet-name>Wallet</portlet-name>
-    <skin-name>Enterprise</skin-name>
-    <css-path>/css/wallet.css</css-path>
-  </portlet-skin>
-
-  <portlet-skin>
-    <application-name>wallet</application-name>
-    <portlet-name>Wallet</portlet-name>
-    <skin-name>Default</skin-name>
-    <css-path>/css/wallet.css</css-path>
-  </portlet-skin>
-
-  <portlet-skin>
-    <application-name>wallet</application-name>
-    <portlet-name>SpaceWallet</portlet-name>
-    <skin-name>Enterprise</skin-name>
-    <css-path>/css/wallet.css</css-path>
-  </portlet-skin>
-
-  <portlet-skin>
-    <application-name>wallet</application-name>
-    <portlet-name>SpaceWallet</portlet-name>
-    <skin-name>Default</skin-name>
-    <css-path>/css/wallet.css</css-path>
-  </portlet-skin>
-
--->
-
   <portlet>
     <name>WalletLink</name>
     <module>
@@ -160,6 +126,10 @@
       <depends>
         <module>spacePopupPlugin</module>
       </depends>
+      <depends>
+        <module>commons-cometd3</module>
+        <as>cCometd</as>
+      </depends>
     </module>
   </portlet>
 
@@ -219,6 +189,10 @@
       </depends>
       <depends>
         <module>spacePopupPlugin</module>
+      </depends>
+      <depends>
+        <module>commons-cometd3</module>
+        <as>cCometd</as>
       </depends>
     </module>
   </portlet>

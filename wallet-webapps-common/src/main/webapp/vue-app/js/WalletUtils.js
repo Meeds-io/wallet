@@ -1,5 +1,6 @@
 import * as constants from './Constants';
 import {searchWalletByTypeAndId, saveNewAddress} from './AddressRegistry';
+import {getSavedTransactionByHash} from './TransactionUtils';
 
 const DEFAULT_DECIMALS = 3;
 
@@ -93,12 +94,21 @@ export function retrieveFiatExchangeRate() {
   window.walletSettings.fiatSymbol = window.walletSettings.userPreferences.currency && constants.FIAT_CURRENCIES[window.walletSettings.userPreferences.currency] ? constants.FIAT_CURRENCIES[window.walletSettings.userPreferences.currency].symbol : '$';
 
   const currency = window.walletSettings && window.walletSettings.userPreferences.currency ? window.walletSettings.userPreferences.currency : 'usd';
+
+  const etherToFiatExchangeObject = localStorage.getItem(`exo-wallet-exchange-${currency}`);
+  const etherToFiatExchangeLastCheckTime = localStorage.getItem(`exo-wallet-exchange-${currency}-time`);
+
+  let promise = null;
+  if (!etherToFiatExchangeObject || !etherToFiatExchangeLastCheckTime || (Number(etherToFiatExchangeLastCheckTime) - Date.now() > 86400000)) {
+    promise = retrieveFiatExchangeRateOnline(currency);
+  } else {
+    promise = Promise.resolve(etherToFiatExchangeObject);
+  }
+
   // Retrieve Fiat <=> Ether exchange rate
-  return retrieveFiatExchangeRateOnline(currency)
+  return promise
     .then((content) => {
-      if (content && content.length && content[0][`price_${currency}`]) {
-        localStorage.setItem(`exo-wallet-exchange-${currency}`, JSON.stringify(content));
-      } else {
+      if (etherToFiatExchangeObject && (!content || !content.length || !content[0][`price_${currency}`])) {
         // Try to get old information from local storage
         content = localStorage.getItem(`exo-wallet-exchange-${currency}`);
         if (content) {
@@ -110,14 +120,6 @@ export function retrieveFiatExchangeRate() {
       window.walletSettings.fiatPrice = content ? parseFloat(content[0][`price_${currency}`]) : 0;
       window.walletSettings.priceLastUpdated = content ? new Date(parseInt(content[0].last_updated) * 1000) : null;
     })
-    .then(() => {
-      if (window.retrieveFiatExchangeRateInterval) {
-        clearInterval(window.retrieveFiatExchangeRateInterval);
-      }
-      window.retrieveFiatExchangeRateInterval = setTimeout(() => {
-        retrieveFiatExchangeRate();
-      }, 300000);
-    });
 }
 
 export function initEmptyWeb3Instance() {
@@ -130,12 +132,11 @@ export function initWeb3(isSpace, isAdmin) {
     throw new Error(constants.ERROR_WALLET_SETTINGS_NOT_LOADED);
   }
 
-  createLocalWeb3Instance(isSpace);
-  return checkNetworkStatus();
+  return createLocalWeb3Instance(isSpace);
 }
 
-export function initSettings(isSpace, spaceGroup) {
-  const spaceId = (isSpace && (spaceGroup || window.walletSpaceGroup)) || '';
+export function initSettings(isSpace, useCometd) {
+  const spaceId = (isSpace && window.walletSpaceGroup) || '';
 
   clearCache();
 
@@ -162,6 +163,12 @@ export function initSettings(isSpace, spaceGroup) {
 
       window.walletSettings = $.extend(window.walletSettings, settings);
       window.walletSettings = $.extend(window.walletSettings, settings);
+      if (useCometd && !window.walletComedDInitialized) {
+        window.walletComedDInitialized = true;
+
+        document.addEventListener('exo.addon.wallet.transaction.modified', triggerTransactionMinedEvent);
+        initCometd(window.walletSettings);
+      }
     })
     .then(() => {
       if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.wallet.address) {
@@ -198,7 +205,15 @@ export function initSettings(isSpace, spaceGroup) {
     });
 }
 
-export function watchTransactionStatus(hash, transactionFinishedcallback) {
+export function watchTransactionStatus(hash, transactionMinedcallback) {
+  if (!transactionMinedcallback) {
+    console.warn('no callback added to method');
+    return;
+  }
+  if (!hash) {
+    console.warn('empty hash added to method');
+    return;
+  }
   hash = hash.toLowerCase();
 
   if (!window.watchingTransactions) {
@@ -206,80 +221,12 @@ export function watchTransactionStatus(hash, transactionFinishedcallback) {
   }
 
   if (!window.watchingTransactions[hash]) {
-    window.watchingTransactions[hash] = [transactionFinishedcallback];
-    waitAsyncForTransactionStatus(hash, null);
+    window.watchingTransactions[hash] = [transactionMinedcallback];
   } else {
-    window.watchingTransactions[hash].push(transactionFinishedcallback);
+    window.watchingTransactions[hash].push(transactionMinedcallback);
   }
 }
 
-export function getTransactionReceipt(hash) {
-  return window.localWeb3.eth.getTransactionReceipt(hash);
-}
-
-export function getTransaction(hash) {
-  return window.localWeb3.eth.getTransaction(hash);
-}
-
-export function computeNetwork() {
-  return window.localWeb3.eth.net.getId()
-    .then((networkId, error) => {
-      if (error) {
-        console.debug('Error computing network id', error);
-        throw error;
-      }
-      if (networkId) {
-        console.debug(`Detected network id: ${networkId}`);
-        window.walletSettings.currentNetworkId = networkId;
-        return window.localWeb3.eth.net.getNetworkType();
-      } else {
-        console.debug('Network is disconnected');
-        throw new Error('Network is disconnected');
-      }
-    })
-    .then((netType, error) => {
-      if (error) {
-        console.debug('Error computing network type', error);
-        throw error;
-      }
-      if (netType) {
-        window.walletSettings.currentNetworkType = netType;
-        console.debug('Detected network type:', netType);
-      }
-    });
-}
-
-export function computeBalance(account) {
-  if (!window.localWeb3) {
-    return Promise.reject(new Error("You don't have a wallet yet"));
-  }
-  return window.localWeb3.eth
-    .getBalance(account)
-    .then((retrievedBalance, error) => {
-      if (error && !retrievedBalance) {
-        console.debug(`error retrieving balance of ${account}`, new Error(error));
-        throw error;
-      }
-      if (retrievedBalance) {
-        return window.localWeb3.utils.fromWei(String(retrievedBalance), 'ether');
-      } else {
-        return 0;
-      }
-    })
-    .then((retrievedBalance, error) => {
-      if (error) {
-        throw error;
-      }
-      return {
-        balance: retrievedBalance,
-        balanceFiat: etherToFiat(retrievedBalance),
-      };
-    })
-    .catch((e) => {
-      console.debug('Error retrieving balance of account', account, e);
-      return null;
-    });
-}
 
 export function saveBrowserWalletInstance(wallet, password, isSpace, autoGenerateWallet, backedUp) {
   const account = window.localWeb3.eth.accounts.wallet.add(wallet);
@@ -441,10 +388,6 @@ export function unlockBrowserWallet(password, phrase, address) {
   }
 
   return isWalletUnlocked(address);
-}
-
-function isWalletUnlocked(address) {
-  return window.localWeb3.eth.accounts.wallet.length > 0 && window.localWeb3.eth.accounts.wallet[address] && window.localWeb3.eth.accounts.wallet[address].privateKey;
 }
 
 export function setWalletBackedUp() {
@@ -653,9 +596,32 @@ export function saveWalletInitializationStatus(address, status) {
     });
 }
 
+function triggerTransactionMinedEvent(event) {
+  return triggerTransactionMined(event && event.detail && event.detail.string);
+}
+
+function triggerTransactionMined(hash) {
+  if (!window.watchingTransactions || !window.watchingTransactions[hash]) {
+    return;
+  }
+
+  return getSavedTransactionByHash(hash)
+    .then(transactionDetails => {
+      window.watchingTransactions[hash].forEach((callback) => {
+        callback(transactionDetails);
+      });
+      window.watchingTransactions[hash] = null;
+    })
+}
+
+function isWalletUnlocked(address) {
+  return window.localWeb3.eth.accounts.wallet.length > 0 && window.localWeb3.eth.accounts.wallet[address] && window.localWeb3.eth.accounts.wallet[address].privateKey;
+}
+
 function createLocalWeb3Instance(isSpace) {
-  if (window.walletSettings.wallet.address) {
-    window.localWeb3 = new LocalWeb3(new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL));
+  if (window.walletSettings && window.walletSettings.network && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.network.providerURL) {
+    const provider = new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL);
+    window.localWeb3 = new LocalWeb3(provider);
     window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
 
     if (isSpace && !window.walletSettings.wallet.spaceAdministrator) {
@@ -667,39 +633,6 @@ function createLocalWeb3Instance(isSpace) {
     // Wallet not configured
     throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
   }
-}
-
-function isBrowserWallet(id, type, address) {
-  address = address.toLowerCase();
-  return localStorage.getItem(`exo-wallet-${type}-${id}`) === address;
-}
-
-function checkNetworkStatus(waitTime, tentativesCount) {
-  if (!waitTime) {
-    waitTime = 300;
-  }
-  if (!tentativesCount) {
-    tentativesCount = 1;
-  }
-  // Test if network is connected: isListening operation can hang up forever
-  window.localWeb3.eth.net.isListening().then((listening) => (window.walletSettings.isListening = window.walletSettings.isListening || listening));
-  return new Promise((resolve) => setTimeout(resolve, waitTime))
-    .then(() => {
-      if (!window.walletSettings.isListening) {
-        console.debug('The network seems to be disconnected');
-        throw new Error(constants.ERROR_WALLET_DISCONNECTED);
-      }
-    })
-    .then(() => computeNetwork())
-    .then(() => console.debug('Network status: OK'))
-    .then(() => constants.OK)
-    .catch((error) => {
-      if (tentativesCount > 10) {
-        throw error;
-      }
-      console.debug('Reattempt to connect with wait time:', waitTime, ' tentative : ', tentativesCount);
-      return checkNetworkStatus(waitTime, ++tentativesCount);
-    });
 }
 
 function initSpaceAccount(spaceGroup) {
@@ -714,43 +647,6 @@ function initSpaceAccount(spaceGroup) {
       return (window.walletSettings.wallet.spaceAdministrator = false);
     }
   });
-}
-
-function waitAsyncForTransactionStatus(hash, transaction) {
-  if (!transaction || !transaction.blockHash || !transaction.blockNumber) {
-    getTransaction(hash).then((transaction) => {
-      setTimeout(() => {
-        waitAsyncForTransactionStatus(hash, transaction);
-      }, 2000);
-    });
-  } else {
-    window.localWeb3.eth
-      .getBlock(transaction.blockHash, false)
-      .then((block) => {
-        // Sometimes the block is not available on time
-        if (!block) {
-          setTimeout(() => {
-            waitAsyncForTransactionStatus(hash, transaction);
-          }, 2000);
-          return;
-        }
-        return getTransactionReceipt(hash).then((receipt) => {
-          if (window.watchingTransactions[hash] && window.watchingTransactions[hash].length) {
-            window.watchingTransactions[hash].forEach((callback) => {
-              callback(receipt, block);
-            });
-            window.watchingTransactions[hash] = null;
-          }
-        });
-      })
-      .catch((error) => {
-        if (window.watchingTransactions[hash] && window.watchingTransactions[hash].length) {
-          window.watchingTransactions[hash].forEach((callback) => {
-            callback(null, null);
-          });
-        }
-      });
-  }
 }
 
 function getRemoteId(isSpace) {
@@ -788,7 +684,28 @@ function retrieveFiatExchangeRateOnline(currency) {
         return resp.json();
       }
     })
+    .then((content) => {
+      if (content && content.length && content[0][`price_${currency}`]) {
+        localStorage.setItem(`exo-wallet-exchange-${currency}`, JSON.stringify(content));
+        localStorage.setItem(`exo-wallet-exchange-${currency}-time`, Date.now());
+      }
+    })
     .catch((error) => {
       console.debug('error retrieving currency exchange, trying to get exchange from local store', error);
     });
+}
+
+function initCometd(settings) {
+  const loc = window.location;
+  cCometd.configure({
+    url: `${loc.protocol}//${loc.hostname}${(loc.port && ':') || ''}${loc.port || ''}/${settings.cometdContext}/cometd`,
+    exoId: eXo.env.portal.userName,
+    exoToken: settings.cometdToken,
+  });
+
+  cCometd.subscribe(settings.cometdChannel, null, (event) => {
+    const data = event.data && JSON.parse(event.data);
+
+    document.dispatchEvent(new CustomEvent(data.eventId, {detail: data && data.message}));
+  });
 }

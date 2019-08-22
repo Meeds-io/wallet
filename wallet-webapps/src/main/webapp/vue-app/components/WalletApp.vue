@@ -2,6 +2,7 @@
   <v-app
     :id="isSpace ? 'SpaceWalletApp' : 'WalletApp'"
     color="transaprent"
+    class="VuetifyApp"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
       <v-layout>
@@ -47,9 +48,9 @@
                 ref="walletSettingsModal"
                 :is-space="isSpace"
                 :open="showSettingsModal"
+                :wallet="wallet"
                 :app-loading="loading"
                 :display-reset-option="displayWalletResetOption"
-                @backed-up="$refs.walletSetup && $refs.walletSetup.hideBackupMessage()"
                 @close="showSettingsModal = false"
                 @settings-changed="init()" />
             </v-toolbar>
@@ -62,7 +63,7 @@
               <wallet-setup
                 ref="walletSetup"
                 :is-space="isSpace"
-                :wallet-address="walletAddress"
+                :wallet="wallet"
                 :initialization-state="initializationState"
                 :loading="loading"
                 @loading="loading = true"
@@ -94,9 +95,9 @@
                     class="ml-0 mr-0">
                     <v-flex xs12>
                       <wallet-summary
-                        v-if="walletAddress && contractDetails"
+                        v-if="wallet && contractDetails"
                         ref="walletSummary"
-                        :wallet-address="walletAddress"
+                        :wallet="wallet"
                         :is-space="isSpace"
                         :is-space-administrator="isSpaceAdministrator"
                         :initialization-state="initializationState"
@@ -139,7 +140,7 @@
                     :is-space="isSpace"
                     :is-space-administrator="isSpaceAdministrator"
                     :contract-details="contractDetails"
-                    :wallet-address="walletAddress"
+                    :wallet="wallet"
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
                     @refresh-token-balance="refreshTokenBalance"
@@ -162,8 +163,7 @@
               <account-detail
                 ref="accountDetail"
                 :fiat-symbol="fiatSymbol"
-                :is-read-only="isReadOnly"
-                :wallet-address="walletAddress"
+                :wallet="wallet"
                 :contract-details="selectedAccount"
                 :selected-transaction-hash="selectedTransactionHash"
                 :selected-contract-method-name="selectedContractMethodName"
@@ -231,7 +231,7 @@ export default {
       showSettingsModal: false,
       gasPriceInEther: null,
       browserWalletExists: false,
-      walletAddress: null,
+      wallet: null,
       selectedTransactionHash: null,
       selectedContractMethodName: null,
       contractDetails: null,
@@ -247,6 +247,9 @@ export default {
     walletReadonly() {
       return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
     },
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
     displayAccountsList() {
       return this.walletAddress;
     },
@@ -254,10 +257,10 @@ export default {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
     displayEtherBalanceTooLow() {
-      return !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && this.walletAddress && !this.isReadOnly && this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther);
+      return this.browserWalletExists && !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
     },
     etherBalance() {
-      return this.contractDetails && this.contractDetails.etherBalance || 0;
+      return this.wallet && this.wallet.etherBalance || 0;
     },
   },
   watch: {
@@ -300,6 +303,9 @@ export default {
       }
     });
 
+    document.addEventListener('exo.addon.wallet.modified', this.walletUpdated);
+    document.addEventListener('exo.addon.contract.modified', this.reloadContract);
+
     this.$nextTick(() => {
       // Init application
       this.init()
@@ -325,9 +331,9 @@ export default {
       this.error = null;
       this.seeAccountDetails = false;
       this.selectedAccount = null;
-      this.walletAddress = null;
+      this.wallet = null;
 
-      return this.walletUtils.initSettings(this.isSpace)
+      return this.walletUtils.initSettings(this.isSpace, true)
         .then((result, error) => {
           this.handleError(error);
           this.settings = window.walletSettings || {wallet: {}, network: {}};
@@ -354,9 +360,10 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          this.walletAddress = window.localWeb3.eth.defaultAccount.toLowerCase();
 
-          this.isReadOnly = this.settings.isReadOnly;
+          this.wallet = this.settings.wallet;
+          this.contractDetails = this.settings.contractDetail;
+          this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
           this.fiatSymbol = this.settings.fiatSymbol || '$';
@@ -368,7 +375,7 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
-          return this.reloadContract();
+          return this.tokenUtils.getContractDetails(this.walletAddress);
         })
         .then((result, error) => {
           this.handleError(error);
@@ -382,7 +389,7 @@ export default {
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
             this.browserWalletExists = this.settings.browserWalletExists = false;
-            this.walletAddress = null;
+            this.wallet = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.walletInitializationFailure');
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
@@ -398,14 +405,18 @@ export default {
           this.$forceUpdate();
         });
     },
+    walletUpdated(event) {
+      if(event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
+        this.addressRegistry.refreshWallet(this.wallet);
+      }
+    },
     refreshTokenBalance() {
       return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
-    reloadContract() {
-      return this.tokenUtils.getContractDetails(this.walletAddress)
+    reloadContract(event) {
+      return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress)
         .then((contractDetails, error) => {
           this.handleError(error);
-          this.contractDetails = Object.assign({}, contractDetails);
         });
     },
     openAccountDetail(methodName, hash) {
@@ -436,11 +447,8 @@ export default {
       if (this.$refs && this.$refs.walletSummary) {
         this.$refs.walletSummary.loadPendingTransactions();
       }
-      this.walletUtils.watchTransactionStatus(transaction.hash, (receipt) => {
-        if (receipt && receipt.status) {
-          this.reloadContract()
-            .then(this.$refs.transactionHistoryChart.initializeChart);
-        }
+      this.walletUtils.watchTransactionStatus(transaction.hash, () => {
+        this.reloadContract().then(this.$refs.transactionHistoryChart.initializeChart);
       });
     },
     checkOpenTransaction() {

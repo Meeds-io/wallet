@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import org.exoplatform.addon.wallet.dao.AddressLabelDAO;
 import org.exoplatform.addon.wallet.entity.AddressLabelEntity;
 import org.exoplatform.addon.wallet.model.*;
@@ -15,8 +18,6 @@ import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
 
@@ -44,7 +45,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
     walletAccountService.saveWallet(wallet);
-    Wallet walletTest = walletAccountService.getWalletByAddress(ADDRESS);
+    Wallet walletTest = walletAccountService.getWalletByAddress(WALLET_ADDRESS_1);
     assertEquals("Wallet initialization state shouldn't be null", INITIALIZATION_STATE, walletTest.getInitializationState());
     assertEquals("Wallet passPhrase shouldn't be null",
                  PHRASE,
@@ -62,7 +63,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     try {
       Wallet walletTest = new Wallet();
-      walletTest.setTechnicalId(IDENTITY_ID);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
       walletTest.setAddress("");
       walletTest.setPassPhrase(PHRASE);
       walletTest.setEnabled(IS_ENABLED);
@@ -83,7 +84,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     try {
       Wallet walletTest = new Wallet();
-      walletTest.setTechnicalId(IDENTITY_ID);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
       walletTest.setAddress("walletUser");
       walletTest.setPassPhrase(PHRASE);
       walletTest.setEnabled(IS_ENABLED);
@@ -97,8 +98,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     wallet.setPassPhrase("");
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
-    String addressTest = walletAccountService.getWalletByAddress(ADDRESS).getAddress();
-    assertEquals("Unexpected wallet address", StringUtils.lowerCase(ADDRESS), StringUtils.lowerCase(addressTest));
+    String addressTest = walletAccountService.getWalletByAddress(WALLET_ADDRESS_1).getAddress();
+    assertEquals("Unexpected wallet address", StringUtils.lowerCase(WALLET_ADDRESS_1), StringUtils.lowerCase(addressTest));
     entitiesToClean.add(wallet);
   }
 
@@ -133,7 +134,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
       // Expected, wallet address shouldn't be null
     }
 
-    Wallet walletTest = walletAccountService.getWalletByAddress(ADDRESS);
+    Wallet walletTest = walletAccountService.getWalletByAddress(WALLET_ADDRESS_1);
     assertNotNull("Shouldn't find wallet with not recognized address", walletTest);
     entitiesToClean.add(wallet);
     entitiesToClean.add(walletTest);
@@ -298,8 +299,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertNotNull(wallet);
     try {
       Wallet walletTest = new Wallet();
-      walletTest.setTechnicalId(IDENTITY_ID);
-      walletTest.setAddress(ADDRESS);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+      walletTest.setAddress(WALLET_ADDRESS_1);
       walletTest.setPassPhrase(PHRASE);
       walletTest.setEnabled(false);
       walletTest.setInitializationState(INITIALIZATION_STATE);
@@ -312,8 +313,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     try {
       Wallet walletTest = new Wallet();
-      walletTest.setTechnicalId(IDENTITY_ID);
-      walletTest.setAddress(ADDRESS);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+      walletTest.setAddress(WALLET_ADDRESS_1);
       walletTest.setPassPhrase(PHRASE);
       walletTest.setId("root2");
       walletTest.setEnabled(false);
@@ -328,8 +329,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     try {
       Wallet walletTest = new Wallet();
       String id = "root2";
-      walletTest.setTechnicalId(IDENTITY_ID);
-      walletTest.setAddress(ADDRESS);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+      walletTest.setAddress(WALLET_ADDRESS_1);
       walletTest.setPassPhrase(PHRASE);
       walletTest.setId(id);
       walletTest.setEnabled(IS_ENABLED);
@@ -344,8 +345,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     try {
       Wallet walletTest = new Wallet();
       String id = "root2";
-      walletTest.setTechnicalId(IDENTITY_ID);
-      walletTest.setAddress(ADDRESS);
+      walletTest.setTechnicalId(CURRENT_USER_IDENTITY_ID);
+      walletTest.setAddress(WALLET_ADDRESS_1);
       walletTest.setPassPhrase(PHRASE);
       walletTest.setId(id);
       walletTest.setType(WalletType.ADMIN.name());
@@ -409,7 +410,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
       String label = "Save address label";
       int identityId = 1;
       walletAddressLabel.setId(2);
-      walletAddressLabel.setAddress(ADDRESS);
+      walletAddressLabel.setAddress(WALLET_ADDRESS_1);
       walletAddressLabel.setIdentityId(identityId);
       walletAddressLabel.setLabel(label);
       walletAccountService.saveOrDeleteAddressLabel(walletAddressLabel, "user");
@@ -420,7 +421,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
     int identityId = 2;
-    walletAddressLabel.setAddress(ADDRESS);
+    walletAddressLabel.setAddress(WALLET_ADDRESS_1);
     walletAddressLabel.setId(1);
     walletAddressLabel.setIdentityId(identityId);
     WalletAddressLabel labelTest = walletAccountService.saveOrDeleteAddressLabel(walletAddressLabel, CURRENT_USER);
@@ -438,7 +439,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAddressLabel walletAddressLabel = new WalletAddressLabel();
     String label = "Save address label";
     int identityId = 1;
-    walletAddressLabel.setAddress(ADDRESS);
+    walletAddressLabel.setAddress(WALLET_ADDRESS_1);
     walletAddressLabel.setIdentityId(identityId);
     walletAddressLabel.setLabel(label);
 
@@ -533,7 +534,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     String group = "/platform/rewarding";
     MembershipEntry entry = new MembershipEntry(group, MembershipEntry.ANY_TYPE);
-    Set<MembershipEntry> entryTest = new HashSet();
+    Set<MembershipEntry> entryTest = new HashSet<>();
     entryTest.add(entry);
     org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
     identityRegistry.register(identity);
@@ -561,13 +562,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.removeWalletByAddress(ADDRESS, "root2");
+      walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected, user is not user rewarding admin
     }
     try {
-      walletAccountService.removeWalletByAddress(ADDRESS, CURRENT_USER);
+      walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, CURRENT_USER);
     } catch (IllegalAccessException e) {
       fail("Can't remove wallet by address");
     }
@@ -584,7 +585,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
 
     MembershipEntry entry = new MembershipEntry("/platform/rewarding", MembershipEntry.ANY_TYPE);
-    Set<MembershipEntry> entryTest = new HashSet();
+    Set<MembershipEntry> entryTest = new HashSet<>();
     entryTest.add(entry);
     org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
     identityRegistry.register(identity);
@@ -652,7 +653,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
 
     MembershipEntry entry = new MembershipEntry("/platform/rewarding", MembershipEntry.ANY_TYPE);
-    Set<MembershipEntry> entryTest = new HashSet();
+    Set<MembershipEntry> entryTest = new HashSet<>();
     entryTest.add(entry);
     org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
     identityRegistry.register(identity);
@@ -681,13 +682,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.enableWalletByAddress(ADDRESS, true, "root2");
+      walletAccountService.enableWalletByAddress(WALLET_ADDRESS_1, true, "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected, user is not user rewarding admin
     }
     try {
-      walletAccountService.enableWalletByAddress(ADDRESS, true, CURRENT_USER);
+      walletAccountService.enableWalletByAddress(WALLET_ADDRESS_1, true, CURRENT_USER);
     } catch (IllegalAccessException e) {
       fail("Can't enable wallet by this address");
     }
@@ -717,14 +718,14 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, "");
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, "");
       fail("Username is mandatory");
     } catch (Exception e) {
       // Expected, username is mandatory
     }
 
     try {
-      walletAccountService.setInitializationStatus(ADDRESS, null, CURRENT_USER);
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, null, CURRENT_USER);
       fail("InitializationState is mandatory");
     } catch (Exception e) {
       // Expected, initializationState is mandatory
@@ -738,13 +739,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, "root2");
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected, user is not user rewarding admin
     }
 
-    walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW, CURRENT_USER);
+    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, CURRENT_USER);
     assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
     entitiesToClean.add(wallet);
   }
@@ -771,7 +772,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.setInitializationStatus(ADDRESS, null);
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, null);
       fail("InitializationState is mandatory");
     } catch (Exception e) {
       // Expected, initializationState is mandatory
@@ -783,7 +784,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
       fail("Can't find wallet associated to address");
     }
 
-    walletAccountService.setInitializationStatus(ADDRESS, WalletInitializationState.NEW);
+    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW);
     assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
     entitiesToClean.add(wallet);
   }

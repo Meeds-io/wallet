@@ -1,6 +1,7 @@
 package org.exoplatform.addon.wallet.service;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -59,6 +60,9 @@ public interface WalletContractService {
 
   /**
    * Refresh contract details from blockchain
+   * 
+   * @param contractModifications list of called method names to change contract
+   *          state on blockchain
    */
-  void refreshContractDetail();
+  void refreshContractDetail(Set<String> contractModifications);
 }

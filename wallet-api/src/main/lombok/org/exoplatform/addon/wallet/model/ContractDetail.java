@@ -34,7 +34,16 @@ public class ContractDetail implements Serializable {
   private String            sellPrice;
 
   @Exclude
+  private String            totalSupply;
+
+  @Exclude
   private String            contractType;
+
+  @Exclude
+  private Boolean           isPaused;
+
+  @Exclude
+  private Double            etherBalance;
 
   public ContractDetail clone() { // NOSONAR
     try {

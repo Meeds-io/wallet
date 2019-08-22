@@ -18,6 +18,8 @@ package org.exoplatform.addon.wallet.rest;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.util.Set;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -100,10 +102,11 @@ public class WalletAccountREST implements ResourceContainer {
         LOG.warn(EMPTY_ADDRESS_MESSAGE);
         return Response.status(400).build();
       }
-      Wallet wallet = accountService.getWalletByAddress(address);
+      String currentUser = getCurrentUserId();
+      Wallet wallet = accountService.getWalletByAddress(address, currentUser);
       if (wallet != null) {
         if (WalletType.isSpace(wallet.getType())) {
-          wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), getCurrentUserId()));
+          wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), currentUser));
         }
         hideWalletOwnerPrivateInformation(wallet);
         return Response.ok(wallet).build();
@@ -542,7 +545,11 @@ public class WalletAccountREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getWallets() {
     try {
-      return Response.ok(accountService.listWallets()).build();
+      Set<Wallet> wallets = accountService.listWallets();
+      for (Wallet wallet : wallets) {
+        accountService.retrieveWalletBlockchainState(wallet);
+      }
+      return Response.ok(wallets).build();
     } catch (Exception e) {
       LOG.warn("Error retrieving list of wallets", e);
       return Response.serverError().build();

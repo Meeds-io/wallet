@@ -22,6 +22,7 @@ import org.exoplatform.addon.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.addon.wallet.utils.RewardUtils;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.container.component.RequestLifeCycle;
 
 public class WalletRewardServiceTest extends BaseWalletRewardTest {
@@ -41,7 +42,6 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 03)
                                                                  .atEndOfMonth()
                                                                  .atStartOfDay());
-
     Set<WalletReward> computedRewards = walletRewardService.computeReward(startDateInSeconds);
     assertNotNull(computedRewards);
     assertEquals(0, computedRewards.size());
@@ -51,8 +51,11 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     for (int i = 0; i < enabledWalletsCount; i++) {
       Wallet wallet = newWallet(i + 1l);
       wallet = walletStorage.saveWallet(wallet, true);
+      updateWalletBlockchainState(wallet);
+      walletStorage.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
       entitiesToClean.add(wallet);
     }
+
     computedRewards = walletRewardService.computeReward(startDateInSeconds);
     assertNotNull(computedRewards);
     // Even if settings are null, the returned rewards shouldn't be empty
@@ -225,6 +228,8 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
+      WalletService walletService = getService(WalletService.class);
+      walletService.setConfiguredContractDetail(null);
     }
   }
 
@@ -241,23 +246,13 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
                                                                       rewardSettingsService,
                                                                       rewardTransactionService,
                                                                       rewardTeamService);
-    int contractDecimals = 12;
-
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
     container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
 
-    WalletService walletService = getService(WalletService.class);
-    ContractDetail contractDetail = new ContractDetail();
-    contractDetail.setName("name");
-    contractDetail.setSymbol("symbol");
-    contractDetail.setDecimals(contractDecimals);
-    contractDetail.setAddress("address");
-    contractDetail.setContractType("3");
-    contractDetail.setNetworkId(1l);
-    contractDetail.setSellPrice("0.002");
-    walletService.setConfiguredContractDetail(contractDetail);
+    int contractDecimals = 12;
 
+    setContractDetails(contractDecimals);
     long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 04)
                                                                  .atEndOfMonth()
                                                                  .atStartOfDay());
@@ -287,6 +282,8 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       for (int i = 0; i < enabledWalletsCount; i++) {
         Wallet wallet = newWallet(i + 1l);
         wallet = walletStorage.saveWallet(wallet, true);
+        updateWalletBlockchainState(wallet);
+        walletStorage.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
         entitiesToClean.add(wallet);
       }
 
@@ -335,8 +332,22 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
+      WalletService walletService = getService(WalletService.class);
       walletService.setConfiguredContractDetail(null);
     }
+  }
+
+  private void setContractDetails(int contractDecimals) {
+    WalletService walletService = getService(WalletService.class);
+    ContractDetail contractDetail = new ContractDetail();
+    contractDetail.setName("name");
+    contractDetail.setSymbol("symbol");
+    contractDetail.setDecimals(contractDecimals);
+    contractDetail.setAddress(WalletUtils.getContractAddress());
+    contractDetail.setContractType("3");
+    contractDetail.setNetworkId(1l);
+    contractDetail.setSellPrice("0.002");
+    walletService.setConfiguredContractDetail(contractDetail);
   }
 
   private void resetTokenAdminService(WalletTransactionService walletTransactionService,

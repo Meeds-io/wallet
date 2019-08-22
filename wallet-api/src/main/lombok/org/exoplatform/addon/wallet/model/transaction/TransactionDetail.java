@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import org.exoplatform.addon.wallet.model.Wallet;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode.Exclude;
 import lombok.ToString;
 
 @Data
@@ -19,6 +20,7 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private long              id;
 
+  @Exclude
   private Wallet            issuer;
 
   private long              issuerId;
@@ -39,14 +41,17 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private String            from;
 
+  @Exclude
   private Wallet            fromWallet;
 
   private String            to;
 
+  @Exclude
   private Wallet            toWallet;
 
   private String            by;
 
+  @Exclude
   private Wallet            byWallet;
 
   private String            label;
@@ -56,6 +61,14 @@ public class TransactionDetail implements Serializable, Cloneable {
   private double            value;
 
   private double            contractAmount;
+
+  private int               gasUsed;
+
+  private double            gasPrice;
+
+  private double            tokenFee;
+
+  private boolean           noContractFunds;
 
   private long              timestamp;
 

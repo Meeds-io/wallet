@@ -4,8 +4,7 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.security.Provider;
 import java.security.Security;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +36,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
 
   private WalletTokenAdminService tokenAdminService;
 
+  private WalletContractService   contractService;
+
   private WalletStorage           accountStorage;
 
   private AddressLabelStorage     labelStorage;
@@ -45,9 +46,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
 
   private String                  adminAccountPassword;
 
-  public WalletAccountServiceImpl(WalletStorage walletAccountStorage,
+  public WalletAccountServiceImpl(WalletContractService contractService,
+                                  WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
                                   InitParams params) {
+    this.contractService = contractService;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)
@@ -80,6 +83,69 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
+  public void refreshWalletsFromBlockchain(Map<String, Set<String>> walletsModifications) {
+    if (walletsModifications == null) {
+      walletsModifications = new HashMap<>();
+    }
+
+    String contractAddress = getContractAddress();
+    if (StringUtils.isBlank(contractAddress)) {
+      LOG.warn("Contract address is empty, thus wallets can't be refreshed");
+      return;
+    }
+    ContractDetail contractDetail = contractService.getContractDetail(contractAddress);
+    if (contractDetail == null) {
+      LOG.info("Contract detail with address {} is not found in database, thus wallets can't be refreshed", contractAddress);
+      return;
+    }
+
+    Set<String> walletAddresses = walletsModifications.keySet();
+    for (String walletAddress : walletAddresses) {
+      Wallet wallet = getWalletByAddress(walletAddress);
+      if (wallet == null) {
+        continue;
+      }
+      refreshWalletFromBlockchain(wallet, contractDetail, walletsModifications);
+    }
+  }
+
+  @Override
+  public void refreshWalletFromBlockchain(Wallet wallet,
+                                          ContractDetail contractDetail,
+                                          Map<String, Set<String>> walletsModifications) {
+    if (wallet == null) {
+      return;
+    }
+    if (StringUtils.isBlank(wallet.getAddress())) {
+      LOG.debug("No wallet address: {}", wallet);
+      return;
+    }
+
+    if (contractDetail == null) {
+      String contractAddress = getContractAddress();
+      if (StringUtils.isBlank(contractAddress)) {
+        LOG.warn("Contract address is empty, thus wallets can't be refreshed");
+        return;
+      }
+      contractDetail = contractService.getContractDetail(contractAddress);
+      if (contractDetail == null) {
+        LOG.info("Contract detail with address {} is not found in database, thus wallets can't be refreshed", contractAddress);
+        return;
+      }
+    }
+
+    try {
+      getTokenAdminService().refreshWallet(wallet,
+                                           contractDetail,
+                                           walletsModifications == null ? null : walletsModifications.get(wallet.getAddress()));
+      saveWalletBlockchainState(wallet, contractDetail.getAddress());
+      getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+    } catch (Exception e) {
+      LOG.error("Error refreshing wallet state on blockchain", e);
+    }
+  }
+
+  @Override
   public long getWalletsCount() {
     return accountStorage.getWalletsCount();
   }
@@ -98,6 +164,26 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
+  public void retrieveWalletBlockchainState(Wallet wallet) {
+    String contractAddress = getContractAddress();
+    if (wallet == null) {
+      return;
+    }
+    if (StringUtils.isBlank(contractAddress)) {
+      LOG.warn("Contract address is empty, thus wallets can't be refreshed");
+      return;
+    }
+    if (StringUtils.isBlank(wallet.getAddress())) {
+      LOG.debug("No wallet address: {}", wallet);
+      return;
+    }
+    accountStorage.retrieveWalletBlockchainState(wallet, contractAddress);
+    if (wallet.getEtherBalance() == null) {
+      refreshWalletFromBlockchain(wallet, null, null);
+    }
+  }
+
+  @Override
   public Wallet getWalletByTypeAndId(String type, String remoteId, String currentUser) {
     Wallet wallet = getWalletByTypeAndId(type, remoteId);
     if (wallet != null) {
@@ -108,6 +194,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
         }
       } else if (!StringUtils.equals(wallet.getId(), currentUser)) {
         hideWalletOwnerPrivateInformation(wallet);
+      }
+      if (canAccessWallet(wallet, currentUser)) {
+        retrieveWalletBlockchainState(wallet);
       }
     }
     return wallet;
@@ -180,7 +269,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public Wallet getWalletByAddress(String address) {
+  public Wallet getWalletByAddress(String address, String currentUser) {
     if (address == null) {
       throw new IllegalArgumentException("address is mandatory");
     }
@@ -188,8 +277,16 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     if (wallet != null) {
       Identity identity = getIdentityById(wallet.getTechnicalId());
       computeWalletFromIdentity(wallet, identity);
+      if (canAccessWallet(wallet, currentUser)) {
+        retrieveWalletBlockchainState(wallet);
+      }
     }
     return wallet;
+  }
+
+  @Override
+  public Wallet getWalletByAddress(String address) {
+    return getWalletByAddress(address, null);
   }
 
   @Override
@@ -200,6 +297,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   @Override
   public void saveWallet(Wallet wallet) {
     accountStorage.saveWallet(wallet, false);
+  }
+
+  @Override
+  public void saveWalletBlockchainState(Wallet wallet, String contractAddress) {
+    accountStorage.saveWalletBlockchainState(wallet, contractAddress);
   }
 
   @Override
@@ -255,13 +357,26 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       accountStorage.removeWalletPrivateKey(wallet.getTechnicalId());
     }
 
+    String contractAddress = getContractAddress();
+    if (StringUtils.isNotBlank(contractAddress)) {
+      ContractDetail contractDetail = contractService.getContractDetail(contractAddress);
+      if (contractDetail == null) {
+        LOG.warn("Contract detail with address {} wasn't found, thus can't compute blockchain attributes of wallet {} {}",
+                 contractAddress,
+                 wallet.getType(),
+                 wallet.getId());
+      } else {
+        refreshWalletFromBlockchain(wallet, contractDetail, null);
+      }
+    } else {
+      LOG.warn("Contract address is empty, thus admin wallet can't be refreshed");
+    }
+
     if (broadcast) {
       String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       wallet = wallet.clone();
       try {
-        getListenerService().broadcast(eventName,
-                                       oldWallet == null ? null : oldWallet.clone(),
-                                       wallet);
+        getListenerService().broadcast(eventName, wallet, currentUser);
       } catch (Exception e) {
         LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
       }
@@ -320,6 +435,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
+
+    boolean walletEnablement = wallet.isEnabled();
     // Only 'rewarding' group members can change wallets
     if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
@@ -328,6 +445,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     wallet.setEnabled(enable);
     accountStorage.saveWallet(wallet, false);
+    if (walletEnablement != wallet.isEnabled()) {
+      try {
+        getListenerService().broadcast(enable ? WALLET_ENABLED_EVENT : WALLET_DISABLED_EVENT, wallet, currentUser);
+      } catch (Exception e) {
+        LOG.error("Error while braodcasting wallet {} enablement modification to {}", wallet, enable);
+      }
+    }
   }
 
   @Override
@@ -366,6 +490,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
     wallet.setInitializationState(initializationState.name());
     accountStorage.saveWallet(wallet, false);
+
+    try {
+      getListenerService().broadcast(WALLET_INITIALIZATION_MODIFICATION_EVENT, wallet, currentUser);
+    } catch (Exception e) {
+      LOG.error("Error while braodcasting wallet {} state modification", wallet, currentUser);
+    }
   }
 
   @Override

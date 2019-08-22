@@ -20,6 +20,8 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.transaction.TransactionNotificationType;
 import org.exoplatform.commons.api.notification.NotificationContext;
@@ -27,6 +29,7 @@ import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.social.core.service.LinkProvider;
 
 public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
 
@@ -59,7 +62,11 @@ public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
       return null;
     }
 
-    String avatar = CommonsUtils.getCurrentDomain() + receiverAccountDetail.getAvatar();
+    String receiverAvatar = receiverAccountDetail.getAvatar();
+    if (StringUtils.isBlank(receiverAvatar)) {
+      receiverAvatar = LinkProvider.PROFILE_DEFAULT_AVATAR_URL;
+    }
+    receiverAvatar = CommonsUtils.getCurrentDomain() + receiverAvatar;
 
     return NotificationInfo.instance()
                            .to(toList)
@@ -70,7 +77,7 @@ public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
                            .with(SYMBOL, symbol)
                            .with(MESSAGE, message)
                            .with(HASH, hash)
-                           .with(AVATAR, avatar)
+                           .with(AVATAR, receiverAvatar)
                            .with(SENDER_URL, getPermanentLink(senderAccountDetail))
                            .with(RECEIVER_URL, getPermanentLink(receiverAccountDetail))
                            .with(SENDER, senderAccountDetail.getName())

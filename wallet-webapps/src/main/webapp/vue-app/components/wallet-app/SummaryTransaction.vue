@@ -47,6 +47,12 @@ export default {
         return {};
       },
     },
+    pendingTransactionsCount: {
+      type: Number,
+      default: function() {
+        return 0;
+      },
+    },
   },
   data() {
     return {
@@ -61,8 +67,24 @@ export default {
     }
   },
   watch: {
+    pendingTransactionsCount(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.refreshLastTransaction();
+      }
+    },
     contractDetails() {
       this.refreshLastTransaction();
+    },
+    lastTransaction() {
+      if (this.lastTransaction && this.lastTransaction.pending) {
+        const thiss = this;
+        this.walletUtils.watchTransactionStatus(this.lastTransaction.hash, (transactionDetails) => {
+          if (transactionDetails && thiss.lastTransaction && thiss.lastTransaction.hash === transactionDetails.hash) {
+            Object.assign(thiss.lastTransaction, transactionDetails);
+            thiss.$forceUpdate();
+          }
+        });
+      }
     }
   },
   created() {

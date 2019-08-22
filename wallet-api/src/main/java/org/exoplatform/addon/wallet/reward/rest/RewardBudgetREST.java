@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.reward.WalletReward;
 import org.exoplatform.addon.wallet.reward.service.RewardService;
+import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -23,12 +24,15 @@ import io.swagger.annotations.*;
 @RolesAllowed("rewarding")
 @Api(value = "/wallet/api/reward", description = "Manage wallet rewards") // NOSONAR
 public class RewardBudgetREST implements ResourceContainer {
-  private static final Log LOG = ExoLogger.getLogger(RewardBudgetREST.class);
+  private static final Log     LOG = ExoLogger.getLogger(RewardBudgetREST.class);
 
-  private RewardService    rewardService;
+  private RewardService        rewardService;
 
-  public RewardBudgetREST(RewardService rewardService) {
+  private WalletAccountService walletAccountService;
+
+  public RewardBudgetREST(RewardService rewardService, WalletAccountService walletAccountService) {
     this.rewardService = rewardService;
+    this.walletAccountService = walletAccountService;
   }
 
   @GET
@@ -43,6 +47,9 @@ public class RewardBudgetREST implements ResourceContainer {
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       Set<WalletReward> rewards = rewardService.computeReward(periodDateInSeconds);
+      for (WalletReward walletReward : rewards) {
+        walletAccountService.retrieveWalletBlockchainState(walletReward.getWallet());
+      }
       return Response.ok(rewards).build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);

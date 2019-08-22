@@ -175,7 +175,12 @@ public class WalletRewardService implements RewardService {
     }
 
     Set<Wallet> wallets = walletAccountService.listWallets();
-    wallets = wallets.stream().filter(wallet -> WalletType.isUser(wallet.getType())).collect(Collectors.toSet());
+    for (Wallet wallet : wallets) {
+      walletAccountService.retrieveWalletBlockchainState(wallet);
+    }
+    wallets = wallets.stream()
+                     .filter(wallet -> WalletType.isUser(wallet.getType()))
+                     .collect(Collectors.toSet());
     Set<Long> identityIds = wallets.stream()
                                    .map(Wallet::getTechnicalId)
                                    .collect(Collectors.toSet());
@@ -183,8 +188,7 @@ public class WalletRewardService implements RewardService {
       return Collections.emptySet();
     }
 
-    Set<Long> enabledIdentityIds = getEnabledWallets(identityIds);
-
+    Set<Long> enabledIdentityIds = getEnabledWallets(wallets);
     Set<WalletReward> walletRewards = buildWalletRewardObjects(wallets, enabledIdentityIds);
 
     RewardPeriodType periodType = rewardSettings.getPeriodType();
@@ -318,25 +322,25 @@ public class WalletRewardService implements RewardService {
     return walletsWithEnabledTeam;
   }
 
-  private Set<Long> getEnabledWallets(Set<Long> identityIds) {
-    Set<Long> enabledIdentityIds = new HashSet<>(identityIds);
-    Iterator<Long> identityIdsIterator = enabledIdentityIds.iterator();
-    while (identityIdsIterator.hasNext()) {
-      Long identityId = identityIdsIterator.next();
-      if (identityId == null || identityId == 0) {
-        identityIdsIterator.remove();
-      }
-      Wallet wallet = walletAccountService.getWalletByIdentityId(identityId);
+  private Set<Long> getEnabledWallets(Set<Wallet> wallets) {
+    Set<Wallet> enabledWallets = new HashSet<>(wallets);
+    Iterator<Wallet> enabledWalletsIterator = enabledWallets.iterator();
+    while (enabledWalletsIterator.hasNext()) {
+      Wallet wallet = enabledWalletsIterator.next();
       if (wallet == null) {
-        identityIdsIterator.remove();
+        enabledWalletsIterator.remove();
         continue;
       }
-      if (!wallet.isEnabled() || wallet.isDeletedUser() || wallet.isDisabledUser()
-          || !StringUtils.equals(wallet.getInitializationState(), WalletInitializationState.INITIALIZED.name())) {
-        identityIdsIterator.remove();
+      walletAccountService.retrieveWalletBlockchainState(wallet);
+      if (!wallet.isEnabled()
+          || wallet.isDeletedUser()
+          || wallet.isDisabledUser()
+          || wallet.getIsApproved() == null
+          || !wallet.getIsApproved()) {
+        enabledWalletsIterator.remove();
       }
     }
-    return enabledIdentityIds;
+    return enabledWallets.stream().map(Wallet::getTechnicalId).collect(Collectors.toSet());
   }
 
   private RewardPluginSettings getPluginSetting(Set<RewardPluginSettings> pluginSettings, String pluginId) {

@@ -7,8 +7,6 @@ import WarningBubble from './components/WarningBubble.vue';
 import ProfileChip from './components/ProfileChip.vue';
 import QRCode from './components/QRCode.vue';
 import QRCodeModal from './components/QRCodeModal.vue';
-import SendEtherForm from './components/SendEtherForm.vue';
-import SendEtherModal from './components/SendEtherModal.vue';
 import SendTokensForm from './components/SendTokensForm.vue';
 import SendTokensModal from './components/SendTokensModal.vue';
 import TransactionsList from './components/TransactionsList.vue';
@@ -46,8 +44,6 @@ const WalletCommon = {
     Vue.component('profile-chip', ProfileChip);
     Vue.component('qr-code', QRCode);
     Vue.component('qr-code-modal', QRCodeModal);
-    Vue.component('send-ether-form', SendEtherForm);
-    Vue.component('send-ether-modal', SendEtherModal);
     Vue.component('send-tokens-form', SendTokensForm);
     Vue.component('send-tokens-modal', SendTokensModal);
     Vue.component('transactions-list', TransactionsList);

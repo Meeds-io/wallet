@@ -548,7 +548,7 @@
 
                 <v-list-tile-sub-title>
                   <v-icon
-                    v-if="!item.pending && !item.status"
+                    v-if="!item.pending && !item.succeeded"
                     color="orange"
                     title="Transaction failed">
                     warning
@@ -610,7 +610,7 @@
                 {{ $t('exoplatform.wallet.label.status') }}
               </v-list-tile-content>
               <v-list-tile-content class="align-end">
-                <v-icon :color="item.status ? 'success' : 'error'" v-text="item.status ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+                <v-icon :color="item.succeeded ? 'success' : 'error'" v-text="item.succeeded ? 'fa-check-circle' : 'fa-exclamation-circle'" />
               </v-list-tile-content>
             </v-list-tile>
             <v-list-tile v-if="administration && item.issuer">
@@ -738,14 +738,14 @@
               <v-list-tile-content>
                 {{ $t('exoplatform.wallet.label.transactionFee') }}
               </v-list-tile-content>
-              <v-list-tile-content v-if="item.feeToken" class="align-end">
-                {{ toFixed(item.feeToken) }} {{ item.contractSymbol }}
+              <v-list-tile-content v-if="item.tokenFee" class="align-end">
+                {{ toFixed(item.tokenFee) }} {{ item.contractSymbol }}
               </v-list-tile-content>
               <v-list-tile-content v-else class="align-end">
                 <div class="no-wrap">
                   {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
                   <v-icon
-                    v-if="item.feeNoSufficientFunds"
+                    v-if="item.noContractFunds"
                     color="orange"
                     title="You financed transaction fee with ether instead of Token.">
                     warning
@@ -943,7 +943,7 @@ export default {
           this.forceUpdateList();
         })
         .catch((e) => {
-          console.debug('loadTransactions - method error', e);
+          console.debug('loadRecentTransaction - method error', e);
 
           this.loading = false;
           this.$emit('error', `${e}`);
@@ -958,9 +958,14 @@ export default {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, () => {
-        thiss.$emit('refresh-balance');
-        thiss.forceUpdateList();
+      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, (transactionDetails) => {
+        if (transactionDetails && thiss.transactions) {
+          const TransactionToUpdate = Object.values(thiss.transactions).find(transaction => transaction && transaction.hash === transactionDetails.hash);
+          if (TransactionToUpdate) {
+            Object.assign(TransactionToUpdate, transactionDetails);
+            thiss.forceUpdateList();
+          }
+        }
       })
         .then(() => {
           const totalTransactionsCount = Object.keys(this.transactions).length;

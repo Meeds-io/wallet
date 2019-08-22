@@ -60,7 +60,7 @@
             md4
             xs12
             text-xs-center>
-            <summary-balance :contract-details="contractDetails" />
+            <summary-balance :wallet="wallet" :contract-details="contractDetails" />
           </v-flex>
           <v-flex
             offset-md1
@@ -71,8 +71,8 @@
             pl-0
             text-xs-center>
             <summary-reward
+              :wallet="wallet"
               :contract-details="contractDetails"
-              :wallet-address="walletAddress"
               @display-transactions="$emit('display-transactions', 'reward')"
               @error="$emit('error', $event)" />
           </v-flex>
@@ -87,6 +87,7 @@
             <summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
+              :pending-transactions-count="pendingTransactionsCount"
               @display-transactions="$emit('display-transactions')"
               @error="$emit('error', $event)" />
           </v-flex>
@@ -108,8 +109,8 @@ export default {
     SummaryTransaction,
   },
   props: {
-    walletAddress: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -147,6 +148,9 @@ export default {
     };
   },
   computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
     pendingTransactionsCount() {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },

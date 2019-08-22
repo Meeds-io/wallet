@@ -211,7 +211,6 @@ public class TransactionStorageTest extends BaseWalletTest {
     long createdDateInSeconds = System.currentTimeMillis() / 1000;
     createTransactionDetail(hashOfTX,
                             null,
-                            null,
                             0, // token amount
                             0, // ether amount
                             "from",
@@ -246,7 +245,6 @@ public class TransactionStorageTest extends BaseWalletTest {
   @Test
   public void testSaveTransactionDetail() {
     TransactionDetail transactionDetail = createTransactionDetail(null,
-                                                                  null,
                                                                   null,
                                                                   0, // token
                                                                      // amount

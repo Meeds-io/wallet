@@ -1,5 +1,5 @@
 <template>
-  <v-app id="WalletAPIApp" class="hidden" />
+  <v-app id="WalletAPIApp" class="hidden VuetifyApp" />
 </template>
 
 <script>
@@ -11,6 +11,7 @@ export default {
       loading: true,
       needPassword: false,
       isReadOnly: true,
+      wallet: null,
       walletAddress: null,
       principalContractDetails: null,
       error: null,
@@ -44,6 +45,7 @@ export default {
         this.needPassword = false;
         this.principalContractDetails = null;
         this.walletAddress = null;
+        this.wallet = null;
 
         console.debug("Wallet API application start loading");
 
@@ -53,6 +55,8 @@ export default {
           if(settings.sender.type === 'space') {
             isSpace = true;
             window.walletSpaceGroup = settings.sender.id;
+          } else {
+            throw new Error(this.$t('exoplatform.wallet.warning.walletInitializationFailure'));
           }
         }
 
@@ -81,6 +85,7 @@ export default {
           .then((result, error) => {
             this.handleError(error);
             this.walletAddress = this.settings.wallet.address;
+            this.wallet = this.settings.wallet;
 
             if(!this.walletAddress) {
               this.isReadOnly = true;
@@ -95,11 +100,11 @@ export default {
             if (this.settings.network.maxGasPrice) {
               this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
             }
-            this.principalContractDetails = this.settings.contractDetail;
-            return this.tokenUtils.retrieveContractDetails(this.walletAddress, this.principalContractDetails);
+            return this.tokenUtils.getContractDetails(this.walletAddress);
           })
           .then((result, error) => {
             this.handleError(error);
+            this.principalContractDetails = result;
 
             if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
               console.debug('Principal token seems inconsistent', this.principalContractDetails);
@@ -227,7 +232,7 @@ export default {
           return;
         }
   
-        if (!this.principalContractDetails.balance || this.principalContractDetails.balance < amount) {
+        if (!this.wallet.tokenBalance || this.wallet.tokenBalance < amount) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
             detail : this.$t('exoplatform.wallet.warning.unsufficientFunds')
           }));
@@ -286,7 +291,7 @@ export default {
             .then((approved) => {
               approvedReceiver = approved;
               if(!approved) {
-                throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
+                throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
               }
             })
             .then(() => transfer(receiverAddress, amountWithDecimals).estimateGas({
@@ -301,7 +306,7 @@ export default {
                   to: receiverAddress,
                   gas: defaultGas,
                   gasPrice: gasPrice,
-                  balance: this.principalContractDetails.balance,
+                  balance: this.wallet.tokenBalance,
                   amount: amount,
                 }, e);
 
@@ -361,8 +366,6 @@ export default {
                       detail : pendingTransaction
                     }));
                   },
-                  null,
-                  null,
                   (error, receipt) => {
                     console.debug('contract transfer method - error', error, receipt);
                     document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
