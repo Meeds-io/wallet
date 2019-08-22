@@ -16,7 +16,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.exoplatform.addon.wallet.blockchain.statistic;
+package org.exoplatform.addon.wallet.statistic;
 
 import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 
@@ -47,13 +47,15 @@ public class ExoWalletStatisticAspect {
    * @return result of processing point after its execution
    * @throws Throwable if processing point throws an exception
    */
-  @Around("execution(* *(..)) && @annotation(org.exoplatform.addon.wallet.blockchain.statistic.ExoWalletStatistic)")
+  @Around("execution(* *(..)) && @annotation(org.exoplatform.addon.wallet.statistic.ExoWalletStatistic)")
   public Object around(ProceedingJoinPoint point) throws Throwable {
     ExoWalletStatisticService statisticService = (ExoWalletStatisticService) point.getThis();
     MethodSignature methodSignature = (MethodSignature) point.getSignature();
     Method method = methodSignature.getMethod();
     ExoWalletStatistic annotation = method.getAnnotation(ExoWalletStatistic.class);
-    String statisticType = annotation.statisticType();
+    boolean local = annotation.local();
+    String service = annotation.service();
+    String operation = annotation.operation();
 
     String errorMessage = null;
     long startTime = System.currentTimeMillis();
@@ -67,13 +69,16 @@ public class ExoWalletStatisticAspect {
     } finally {
       long duration = System.currentTimeMillis() - startTime;
       try {
-        Map<String, Object> parameters = statisticService.getParameters(statisticType, result, point.getArgs());
-        if (parameters == null || parameters.isEmpty()) {
-          LOG.error("Empty statistic parameters was returned in method {} for statistic type {}",
-                    method.getName(),
-                    statisticType);
-        } else {
-          parameters.put(REMOTE_SERVICE, "blockchain");
+        Map<String, Object> parameters = statisticService.getStatisticParameters(operation, result, point.getArgs());
+        if (parameters != null) {
+          if (local) {
+            parameters.put(LOCAL_SERVICE, service);
+          } else {
+            parameters.put(REMOTE_SERVICE, service);
+          }
+          if (!parameters.containsKey(OPERATION)) {
+            parameters.put(OPERATION, operation);
+          }
           if (!parameters.containsKey(DURATION)) {
             parameters.put(DURATION, duration);
           }
@@ -93,8 +98,8 @@ public class ExoWalletStatisticAspect {
           }
           addStatisticEntry(parameters);
         }
-      } catch (Exception e) {
-        LOG.error("Error adding statistic log entry in method {} for statistic type {}", method.getName(), statisticType, e);
+      } catch (Throwable e) {
+        LOG.error("Error adding statistic log entry in method {} for statistic type {}", method.getName(), operation, e);
       }
     }
   }

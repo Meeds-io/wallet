@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.blockchain.statistic;
+package org.exoplatform.addon.wallet.statistic;
 
 import java.util.Map;
 
@@ -10,10 +10,10 @@ public interface ExoWalletStatisticService {
   /**
    * Retrieve statistic log parameters
    * 
-   * @param statisticType
-   * @param result 
+   * @param operation
+   * @param result
    * @param methodArgs
    * @return a {@link Map} of parameters to include in statistic log
    */
-  Map<String, Object> getParameters(String statisticType, Object result, Object... methodArgs);
+  Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs);
 }

@@ -196,21 +196,6 @@
       <type>org.exoplatform.addon.wallet.listener.TransactionNotificationListener</type>
       <description>Send transaction mined notification to sender and receiver</description>
     </component-plugin>
-    <component-plugin>
-      <name>exo.addon.wallet.enabled</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.WalletStateListener</type>
-    </component-plugin>
-    <component-plugin>
-      <name>exo.addon.wallet.disabled</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.WalletStateListener</type>
-    </component-plugin>
-    <component-plugin>
-      <name>exo.addon.wallet.initialization.state</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.listener.WalletStateListener</type>
-    </component-plugin>
   </external-component-plugins>
 
   <external-component-plugins>
