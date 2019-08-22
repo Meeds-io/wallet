@@ -204,19 +204,21 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   public void saveTransactionDetail(TransactionDetail transactionDetail,
                                     String currentUser,
                                     boolean broadcastMinedTransaction) throws IllegalAccessException {
+    if (StringUtils.isBlank(currentUser)) {
+      throw new IllegalArgumentException("username is mandatory");
+    }
     if (!broadcastMinedTransaction) {
       String senderAddress = StringUtils.isBlank(transactionDetail.getBy()) ? transactionDetail.getFrom()
                                                                             : transactionDetail.getBy();
       Wallet senderWallet = accountService.getWalletByAddress(senderAddress);
-      if (senderWallet != null) {
-        accountService.checkCanSaveWallet(senderWallet, senderWallet, currentUser);
+      if (senderWallet == null || !accountService.isWalletOwner(senderWallet, currentUser)) {
+        throw new IllegalAccessException("User '" + currentUser
+            + "' is attempting to save a new transaction for another wallet");
       }
     }
 
-    if (StringUtils.isNotBlank(currentUser)) {
-      Wallet issuerWallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser);
-      transactionDetail.setIssuer(issuerWallet);
-    }
+    Wallet issuerWallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser);
+    transactionDetail.setIssuer(issuerWallet);
 
     transactionStorage.saveTransactionDetail(transactionDetail);
     if (broadcastMinedTransaction) {

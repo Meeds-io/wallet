@@ -1,5 +1,6 @@
 package org.exoplatform.addon.wallet.service;
 
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.OPERATION;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.security.Provider;
@@ -12,6 +13,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
+import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
+import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -21,7 +24,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 
-public class WalletAccountServiceImpl implements WalletAccountService, Startable {
+public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService, Startable {
 
   private static final Log        LOG                                     =
                                       ExoLogger.getLogger(WalletAccountServiceImpl.class);
@@ -34,9 +37,15 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
 
   private static final String     ADDRESS_PARAMTER_IS_MANDATORY           = "address paramter is mandatory";
 
-  private WalletTokenAdminService tokenAdminService;
+  private static final String     STATISTIC_OPERATION_INITIALIZATION      = "initialization";
 
-  private WalletContractService   contractService;
+  private static final String     STATISTIC_OPERATION_CREATE              = "create_wallet";
+
+  private static final String     STATISTIC_OPERATION_ENABLE              = "enable";
+
+  private static final String     STATISTIC_OPERATION_DISABLE             = "disable";
+
+  private WalletTokenAdminService tokenAdminService;
 
   private WalletStorage           accountStorage;
 
@@ -46,11 +55,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
 
   private String                  adminAccountPassword;
 
-  public WalletAccountServiceImpl(WalletContractService contractService,
-                                  WalletStorage walletAccountStorage,
+  public WalletAccountServiceImpl(WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
                                   InitParams params) {
-    this.contractService = contractService;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)
@@ -88,17 +95,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       walletsModifications = new HashMap<>();
     }
 
-    String contractAddress = getContractAddress();
-    if (StringUtils.isBlank(contractAddress)) {
-      LOG.warn("Contract address is empty, thus wallets can't be refreshed");
-      return;
-    }
-    ContractDetail contractDetail = contractService.getContractDetail(contractAddress);
-    if (contractDetail == null) {
-      LOG.info("Contract detail with address {} is not found in database, thus wallets can't be refreshed", contractAddress);
-      return;
-    }
-
+    ContractDetail contractDetail = getContractDetail();
     Set<String> walletAddresses = walletsModifications.keySet();
     for (String walletAddress : walletAddresses) {
       Wallet wallet = getWalletByAddress(walletAddress);
@@ -122,26 +119,23 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
 
     if (contractDetail == null) {
-      String contractAddress = getContractAddress();
-      if (StringUtils.isBlank(contractAddress)) {
-        LOG.warn("Contract address is empty, thus wallets can't be refreshed");
-        return;
-      }
-      contractDetail = contractService.getContractDetail(contractAddress);
-      if (contractDetail == null) {
-        LOG.info("Contract detail with address {} is not found in database, thus wallets can't be refreshed", contractAddress);
-        return;
-      }
+      contractDetail = getSettings().getContractDetail();
     }
 
-    try {
-      getTokenAdminService().refreshWallet(wallet,
-                                           contractDetail,
-                                           walletsModifications == null ? null : walletsModifications.get(wallet.getAddress()));
-      saveWalletBlockchainState(wallet, contractDetail.getAddress());
-      getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
-    } catch (Exception e) {
-      LOG.error("Error refreshing wallet state on blockchain", e);
+    if (getTokenAdminService() == null) {
+      LOG.warn("Can't refresh wallet from blockchain because TokenAdminService isn't initialized yet");
+    } else {
+      try {
+        Set<String> walletModifications = walletsModifications == null ? null
+                                                                       : walletsModifications.get(wallet.getAddress());
+        getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
+                                                                       contractDetail,
+                                                                       walletModifications);
+        saveWalletBlockchainState(wallet, contractDetail.getAddress());
+        getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+      } catch (Exception e) {
+        LOG.error("Error refreshing wallet state on blockchain", e);
+      }
     }
   }
 
@@ -295,11 +289,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public void saveWallet(Wallet wallet) {
-    accountStorage.saveWallet(wallet, false);
-  }
-
-  @Override
   public void saveWalletBlockchainState(Wallet wallet, String contractAddress) {
     accountStorage.saveWalletBlockchainState(wallet, contractAddress);
   }
@@ -324,7 +313,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public void saveWalletAddress(Wallet wallet, String currentUser, boolean broadcast) throws IllegalAccessException {
+  @ExoWalletStatistic(local = true, service = "wallet", operation = STATISTIC_OPERATION_CREATE)
+  public void saveWalletAddress(Wallet wallet, String currentUser) throws IllegalAccessException {
     if (wallet == null) {
       throw new IllegalArgumentException("Wallet is mandatory");
     }
@@ -343,43 +333,29 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
       // New wallet created for user/space
       wallet.setInitializationState(WalletInitializationState.NEW.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
-      // User changing associated address to him or to a space he manages
       wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
     } else {
-      // No initialization state change
-      wallet.setInitializationState(oldWallet.getInitializationState());
+      throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
-
     accountStorage.saveWallet(wallet, isNew);
+
     if (!isNew) {
+      // Automatically Remove old private key when modifying address associated
+      // to wallet
       accountStorage.removeWalletPrivateKey(wallet.getTechnicalId());
     }
 
-    String contractAddress = getContractAddress();
-    if (StringUtils.isNotBlank(contractAddress)) {
-      ContractDetail contractDetail = contractService.getContractDetail(contractAddress);
-      if (contractDetail == null) {
-        LOG.warn("Contract detail with address {} wasn't found, thus can't compute blockchain attributes of wallet {} {}",
-                 contractAddress,
-                 wallet.getType(),
-                 wallet.getId());
-      } else {
-        refreshWalletFromBlockchain(wallet, contractDetail, null);
-      }
-    } else {
-      LOG.warn("Contract address is empty, thus admin wallet can't be refreshed");
-    }
+    // This is about address modification or creation, thus, the blockchain must
+    // be retrieved again
+    refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-    if (broadcast) {
-      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
-      wallet = wallet.clone();
-      try {
-        getListenerService().broadcast(eventName, wallet, currentUser);
-      } catch (Exception e) {
-        LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
-      }
+    String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+    try {
+      getListenerService().broadcast(eventName, wallet.clone(), currentUser);
+    } catch (Exception e) {
+      LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
     }
   }
 
@@ -427,7 +403,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public void enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException {
+  @ExoWalletStatistic(service = "wallet", operation = STATISTIC_OPERATION_ENABLE, local = true)
+  public boolean enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException {
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
     }
@@ -437,24 +414,29 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     }
 
     boolean walletEnablement = wallet.isEnabled();
-    // Only 'rewarding' group members can change wallets
-    if (!isUserRewardingAdmin(currentUser)) {
-      throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
-          + " of "
-          + wallet.getType() + " " + wallet.getId());
-    }
-    wallet.setEnabled(enable);
-    accountStorage.saveWallet(wallet, false);
-    if (walletEnablement != wallet.isEnabled()) {
-      try {
-        getListenerService().broadcast(enable ? WALLET_ENABLED_EVENT : WALLET_DISABLED_EVENT, wallet, currentUser);
-      } catch (Exception e) {
-        LOG.error("Error while braodcasting wallet {} enablement modification to {}", wallet, enable);
+    if (walletEnablement != enable) {
+      // Only 'rewarding' group members can change wallets
+      if (!isUserRewardingAdmin(currentUser)) {
+        throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
+            + " of "
+            + wallet.getType() + " " + wallet.getId());
       }
+      wallet.setEnabled(enable);
+      accountStorage.saveWallet(wallet, false);
+      if (walletEnablement != wallet.isEnabled()) {
+        try {
+          getListenerService().broadcast(enable ? WALLET_ENABLED_EVENT : WALLET_DISABLED_EVENT, wallet, currentUser);
+        } catch (Exception e) {
+          LOG.error("Error while braodcasting wallet {} enablement modification to {}", wallet, enable);
+        }
+      }
+      return true;
     }
+    return false;
   }
 
   @Override
+  @ExoWalletStatistic(local = true, service = "wallet", operation = STATISTIC_OPERATION_INITIALIZATION)
   public void setInitializationStatus(String address,
                                       WalletInitializationState initializationState,
                                       String currentUser) throws IllegalAccessException {
@@ -516,29 +498,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   }
 
   @Override
-  public void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
-    // 'rewarding' group members can change all wallets
-    if (isUserRewardingAdmin(currentUser)) {
-      return;
-    }
-
-    checkIsWalletOwner(wallet, currentUser, "save wallet");
-
-    // Check if wallet is enabled
-    if (storedWallet != null && !storedWallet.isEnabled()) {
-      LOG.error("User '{}' attempts to modify his wallet while it's disabled", currentUser);
-      throw new IllegalAccessException();
-    }
-
-    Wallet walletByAddress =
-                           accountStorage.getWalletByAddress(wallet.getAddress());
-    if (walletByAddress != null && walletByAddress.getId() != null && !walletByAddress.getId().equals(wallet.getId())) {
-      throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to assign address of wallet of "
-          + walletByAddress);
-    }
-  }
-
-  @Override
   public boolean isWalletOwner(Wallet wallet, String currentUser) {
     if (wallet == null) {
       return false;
@@ -546,13 +505,14 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
     String remoteId = wallet.getId();
     WalletType type = WalletType.getType(wallet.getType());
     if (type.isSpace()) {
-      try {
-        return checkUserIsSpaceManager(remoteId, currentUser, false);
-      } catch (IllegalAccessException e) {
-        return false;
-      }
-    } else {
+      return isUserSpaceManager(remoteId, currentUser);
+    } else if (type.isAdmin()) {
+      return isUserRewardingAdmin(currentUser);
+    } else if (type.isUser()) {
       return StringUtils.equals(currentUser, remoteId);
+    } else {
+      LOG.warn("Unrecognized wallet type '{}'", type);
+      return false;
     }
   }
 
@@ -600,6 +560,79 @@ public class WalletAccountServiceImpl implements WalletAccountService, Startable
   @Override
   public String getAdminAccountPassword() {
     return adminAccountPassword;
+  }
+
+  @Override
+  public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) {
+    Map<String, Object> parameters = new HashMap<>();
+    if (StringUtils.equals(STATISTIC_OPERATION_INITIALIZATION, operation)) {
+      String address = (String) methodArgs[0];
+      Wallet wallet = getWalletByAddress(address);
+      if (wallet == null) {
+        return null;
+      } else {
+        parameters.put("", wallet);
+      }
+      WalletInitializationState initializationState = (WalletInitializationState) methodArgs[1];
+      if (initializationState == WalletInitializationState.DENIED) {
+        parameters.put(OPERATION, "reject");
+      } else {
+        // No stats about other initialization state modifications
+        return null;
+      }
+    } else if (StringUtils.equals(STATISTIC_OPERATION_ENABLE, operation)) {
+      if (result == null || !((boolean) result)) {
+        return null;
+      }
+      String address = (String) methodArgs[0];
+      Wallet wallet = getWalletByAddress(address);
+      if (wallet == null) {
+        return null;
+      } else {
+        parameters.put("", wallet);
+      }
+      boolean enable = (boolean) methodArgs[1];
+      parameters.put(OPERATION, enable ? STATISTIC_OPERATION_ENABLE : STATISTIC_OPERATION_DISABLE);
+    } else if (StringUtils.equals(STATISTIC_OPERATION_CREATE, operation)) {
+      Wallet wallet = (Wallet) methodArgs[0];
+      parameters.put("", wallet);
+    } else {
+      LOG.warn("Statistic operation type '{}' not handled", operation);
+      return null;
+    }
+
+    String issuer = (String) methodArgs[methodArgs.length - 1];
+    if (StringUtils.isNotBlank(issuer)) {
+      Identity identity = getIdentityByTypeAndId(WalletType.USER, issuer);
+      if (identity == null) {
+        LOG.warn("Can't find identity with remote id: {}" + issuer);
+      } else {
+        parameters.put("user_social_id", identity);
+      }
+    }
+    return parameters;
+  }
+
+  private void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
+    // 'rewarding' group members can change all wallets
+    if (isUserRewardingAdmin(currentUser)) {
+      return;
+    }
+
+    checkIsWalletOwner(wallet, currentUser, "save wallet");
+
+    // Check if wallet is enabled
+    if (storedWallet != null && !storedWallet.isEnabled()) {
+      LOG.error("User '{}' attempts to modify his wallet while it's disabled", currentUser);
+      throw new IllegalAccessException();
+    }
+
+    Wallet walletByAddress =
+                           accountStorage.getWalletByAddress(wallet.getAddress());
+    if (walletByAddress != null && walletByAddress.getId() != null && !walletByAddress.getId().equals(wallet.getId())) {
+      throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to assign address of wallet of "
+          + walletByAddress);
+    }
   }
 
   private void checkIsWalletOwner(Wallet wallet, String currentUser, String operationMessage) throws IllegalAccessException {

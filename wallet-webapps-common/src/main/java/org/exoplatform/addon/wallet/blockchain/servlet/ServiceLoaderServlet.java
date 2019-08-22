@@ -1,4 +1,4 @@
-package org.exoplatform.addon.wallet.blockchain.service;
+package org.exoplatform.addon.wallet.blockchain.servlet;
 
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
@@ -12,9 +12,8 @@ import javax.servlet.http.*;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.blockchain.listener.*;
+import org.exoplatform.addon.wallet.blockchain.service.*;
 import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
 import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
@@ -36,7 +35,7 @@ import org.exoplatform.services.scheduler.JobSchedulerService;
  * loader by a new one that defines more algorithms and a newer implementation.
  * Workaround for PLF-8123
  */
-public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTransactionService {
+public class ServiceLoaderServlet extends HttpServlet {
 
   private static final long                     serialVersionUID = 4629318431709644350L;
 
@@ -49,7 +48,6 @@ public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTr
     executor.scheduleAtFixedRate(this::instantiateBlockchainServices, 10, 10, TimeUnit.SECONDS);
   }
 
-  @ExoBlockchainTransaction
   private void instantiateBlockchainServices() {
     PortalContainer container = PortalContainer.getInstance();
     if (container == null || !container.isStarted()) {
@@ -70,18 +68,17 @@ public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTr
                provider.getVersion());
 
       // start connection to blockchain
-      EthereumClientConnector web3jConnector = new EthereumClientConnector(webappClassLoader);
+      EthereumClientConnector web3jConnector = new EthereumClientConnector();
       container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
       web3jConnector.start();
 
       // Blockchain transaction decoder
-      EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector,
-                                                                                                                webappClassLoader);
+      EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector);
       container.registerComponentInstance(BlockchainTransactionService.class,
                                           transactionDecoderService);
 
       // Instantiate service with current webapp classloader
-      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector, webappClassLoader);
+      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector);
       container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
 
       tokenAdminService.start();
@@ -135,8 +132,7 @@ public class ServiceLoaderServlet extends HttpServlet implements ExoBlockchainTr
     schedulerService.addCronJob(cronJob);
   }
 
-  @Override
-  public ClassLoader getWebappClassLoader() {
+  private ClassLoader getWebappClassLoader() {
     return getServletContext().getClassLoader();
   }
 }

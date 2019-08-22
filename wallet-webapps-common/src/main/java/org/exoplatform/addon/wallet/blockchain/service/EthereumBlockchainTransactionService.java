@@ -31,8 +31,6 @@ import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
@@ -46,8 +44,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class EthereumBlockchainTransactionService
-    implements BlockchainTransactionService, ExoBlockchainTransactionService, Startable {
+public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
   private static final Log                 LOG                         =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
@@ -124,15 +121,11 @@ public class EthereumBlockchainTransactionService
 
   private ListenerService          listenerService;
 
-  private ClassLoader              webappClassLoader;
-
-  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector, ClassLoader webappClassLoader) {
+  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector) {
     this.ethereumClientConnector = ethereumClientConnector;
-    this.webappClassLoader = webappClassLoader;
   }
 
   @Override
-  @ExoBlockchainTransaction
   public void start() {
     long networkId = getNetworkId();
     try {
@@ -153,12 +146,6 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  public ClassLoader getWebappClassLoader() {
-    return webappClassLoader;
-  }
-
-  @Override
-  @ExoBlockchainTransaction
   public int checkPendingTransactions(long pendingTransactionMaxDays) {
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
     int transactionsMarkedAsMined = 0;
@@ -181,7 +168,6 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  @ExoBlockchainTransaction
   public void scanNewerBlocks() throws InterruptedException, IOException {
     GlobalSettings settings = getSettings();
     if (settings == null) {
@@ -279,7 +265,6 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  @ExoBlockchainTransaction
   public TransactionDetail computeTransactionDetail(String hash,
                                                     ContractDetail contractDetail) throws InterruptedException {
     if (StringUtils.isBlank(hash)) {
@@ -293,7 +278,6 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  @ExoBlockchainTransaction
   public TransactionDetail computeTransactionDetail(TransactionDetail transactionDetail,
                                                     ContractDetail contractDetail) throws InterruptedException {
     if (transactionDetail == null) {
@@ -342,7 +326,6 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  @ExoBlockchainTransaction
   public void computeContractTransactionDetail(TransactionDetail transactionDetail, Object transactionReceipt) {
     computeContractTransactionDetail(null, transactionDetail, (TransactionReceipt) transactionReceipt);
   }
