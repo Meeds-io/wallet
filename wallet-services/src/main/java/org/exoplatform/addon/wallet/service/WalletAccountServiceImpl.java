@@ -240,7 +240,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return null;
     }
     checkIsWalletOwner(wallet, currentUser, "get private key of wallet");
-    return accountStorage.getWalletPrivateKey(wallet.getTechnicalId());
+    try {
+      return accountStorage.getWalletPrivateKey(wallet.getTechnicalId());
+    } catch (Exception e) {
+      LOG.warn("Unable to decode private key of {} '{}': {}", type, remoteId, e.getMessage());
+      return null;
+    }
   }
 
   @Override
@@ -249,7 +254,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (wallet == null || wallet.getTechnicalId() < 1) {
       return null;
     }
-    return accountStorage.getWalletPrivateKey(wallet.getTechnicalId());
+    try {
+      return accountStorage.getWalletPrivateKey(wallet.getTechnicalId());
+    } catch (Exception e) {
+      LOG.warn("Unable to decode private key of {} '{}': {}", type, remoteId, e.getMessage());
+      return null;
+    }
   }
 
   @Override
