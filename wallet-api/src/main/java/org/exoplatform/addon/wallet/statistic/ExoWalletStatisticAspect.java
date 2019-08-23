@@ -99,7 +99,7 @@ public class ExoWalletStatisticAspect {
           addStatisticEntry(parameters);
         }
       } catch (Throwable e) {
-        LOG.error("Error adding statistic log entry in method {} for statistic type {}", method.getName(), operation, e);
+        LOG.warn("Error adding statistic log entry in method {} for statistic type {}", method.getName(), operation, e);
       }
     }
   }

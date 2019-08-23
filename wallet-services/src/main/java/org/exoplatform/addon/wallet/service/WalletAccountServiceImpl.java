@@ -567,8 +567,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     Map<String, Object> parameters = new HashMap<>();
     if (StringUtils.equals(STATISTIC_OPERATION_INITIALIZATION, operation)) {
       String address = (String) methodArgs[0];
+      if (StringUtils.isBlank(address)) {
+        LOG.debug("Address parameter is missing. No statistic log will be added");
+        return null;
+      }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
+        LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
         return null;
       } else {
         parameters.put("", wallet);
@@ -577,7 +582,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       if (initializationState == WalletInitializationState.DENIED) {
         parameters.put(OPERATION, "reject");
       } else {
-        // No stats about other initialization state modifications
+        LOG.debug("No statistic log is handeled for initialization state modification to {}", initializationState);
         return null;
       }
     } else if (StringUtils.equals(STATISTIC_OPERATION_ENABLE, operation)) {
@@ -585,8 +590,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         return null;
       }
       String address = (String) methodArgs[0];
+      if (StringUtils.isBlank(address)) {
+        LOG.debug("Address parameter is missing. No statistic log will be added");
+        return null;
+      }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
+        LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
         return null;
       } else {
         parameters.put("", wallet);
@@ -595,7 +605,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       parameters.put(OPERATION, enable ? STATISTIC_OPERATION_ENABLE : STATISTIC_OPERATION_DISABLE);
     } else if (StringUtils.equals(STATISTIC_OPERATION_CREATE, operation)) {
       Wallet wallet = (Wallet) methodArgs[0];
-      parameters.put("", wallet);
+      if (wallet == null) {
+        LOG.debug("Wallet not found in parameters. No statistic log will be added");
+        return null;
+      } else {
+        parameters.put("", wallet);
+      }
     } else {
       LOG.warn("Statistic operation type '{}' not handled", operation);
       return null;
@@ -605,7 +620,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (StringUtils.isNotBlank(issuer)) {
       Identity identity = getIdentityByTypeAndId(WalletType.USER, issuer);
       if (identity == null) {
-        LOG.warn("Can't find identity with remote id: {}" + issuer);
+        LOG.debug("Can't find identity with remote id: {}" + issuer);
       } else {
         parameters.put("user_social_id", identity);
       }
