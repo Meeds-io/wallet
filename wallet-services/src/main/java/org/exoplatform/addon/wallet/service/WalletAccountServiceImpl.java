@@ -632,7 +632,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       if (identity == null) {
         LOG.debug("Can't find identity with remote id: {}" + issuer);
       } else {
-        parameters.put("user_social_id", identity);
+        parameters.put("user_social_id", identity.getId());
       }
     }
     return parameters;
