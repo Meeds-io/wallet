@@ -128,6 +128,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       try {
         Set<String> walletModifications = walletsModifications == null ? null
                                                                        : walletsModifications.get(wallet.getAddress());
+        retrieveWalletBlockchainState(wallet);
         getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
                                                                        contractDetail,
                                                                        walletModifications);
