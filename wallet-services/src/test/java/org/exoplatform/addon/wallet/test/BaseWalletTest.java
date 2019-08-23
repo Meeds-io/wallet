@@ -236,7 +236,7 @@ public abstract class BaseWalletTest {
                                                "message",
                                                true, // isSuccess
                                                i % 2 == 0, // isPending
-                                               i % 2 == 1, // isAdminOperation
+                                               i % 2 != 0, // isAdminOperation
                                                System.currentTimeMillis() + offsetTime);
       transactionEntities.add(tx);
     }

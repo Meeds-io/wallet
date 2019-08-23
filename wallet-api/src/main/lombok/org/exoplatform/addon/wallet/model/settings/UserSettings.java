@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode.Exclude;
 
 @Data
 @ToString
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class UserSettings extends GlobalSettings {
 
   private static final long serialVersionUID = -1053053050527461491L;

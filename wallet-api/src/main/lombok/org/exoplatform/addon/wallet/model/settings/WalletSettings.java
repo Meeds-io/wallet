@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode.Exclude;
 @Data
 @NoArgsConstructor
 @ToString
-public class WalletSettings implements Serializable {
+public class WalletSettings implements Serializable, Cloneable {
 
   private static final long       serialVersionUID = -5725443183560646198L;
 
