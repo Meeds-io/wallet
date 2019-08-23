@@ -144,7 +144,6 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
       contractDetail.setAddress(contractAddress);
     }
     getWalletTokenAdminService().refreshContractDetailFromBlockchain(contractDetail, contractModifications);
-    saveContractDetail(contractDetail);
     getWalletService().setConfiguredContractDetail(contractDetail);
     try {
       getListenerService().broadcast(CONTRACT_MODIFIED_EVENT, null, contractDetail);

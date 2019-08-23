@@ -60,6 +60,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private UserACL                  userACL;
 
+  private WalletService            walletService;
+
   private WalletContractService    walletContractService;
 
   private EthereumClientConnector  clientConnector;
@@ -86,19 +88,25 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public void start() {
+    try {
+      configuredContractAddress = getSettings().getContractAddress();
+      ContractDetail contractDetail = getContractService().getContractDetail(configuredContractAddress);
+      if (contractDetail == null) {
+        contractDetail = new ContractDetail();
+        contractDetail.setAddress(configuredContractAddress);
+        refreshContractDetailFromBlockchain(contractDetail, null);
+        getWalletService().setConfiguredContractDetail(contractDetail);
+      }
+      configuredContractDecimals = getPrincipalContractDetail().getDecimals();
+    } catch (Exception e) {
+      LOG.warn("Error refreshing contract detail from blockchain with address {}", configuredContractAddress, e);
+    }
+
     // Create admin wallet if not exists
     Wallet wallet = getAdminWallet();
     if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
       createAdminAccount();
       LOG.info("Admin wallet created");
-    }
-
-    try {
-      configuredContractAddress = getSettings().getContractAddress();
-      getContractService().refreshContractDetail(new HashSet<>());
-      configuredContractDecimals = getPrincipalContractDetail().getDecimals();
-    } catch (Exception e) {
-      LOG.warn("Error refreshing contract detail from blockchain with address {}", configuredContractAddress, e);
     }
   }
 
@@ -462,7 +470,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public void retrieveWalletInformationFromBlockchain(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception {
+  public void retrieveWalletInformationFromBlockchain(Wallet wallet,
+                                                      ContractDetail contractDetail,
+                                                      Set<String> walletModifications) throws Exception {
     if (wallet == null) {
       throw new IllegalArgumentException("wallet is mandatory");
     }
@@ -473,8 +483,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress()) || contractDetail.getDecimals() == null) {
       throw new IllegalArgumentException("contractDetail is mandatory");
     }
-    // Force refresh wallet state from database stored data
-    getAccountService().retrieveWalletBlockchainState(wallet);
 
     String walletAddress = wallet.getAddress();
 
@@ -622,6 +630,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         BigInteger contractEtherBalance = getEtherBalanceOf(contractAddress);
         contractDetail.setEtherBalance(convertFromDecimals(contractEtherBalance, ETHER_TO_WEI_DECIMALS));
       }
+      getContractService().saveContractDetail(contractDetail);
     } catch (Exception e) {
       throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress,
                                       e);
@@ -910,6 +919,13 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       walletContractService = CommonsUtils.getService(WalletContractService.class);
     }
     return walletContractService;
+  }
+
+  private WalletService getWalletService() {
+    if (walletService == null) {
+      walletService = CommonsUtils.getService(WalletService.class);
+    }
+    return walletService;
   }
 
   private EthereumClientConnector getClientConnector() {
