@@ -386,7 +386,7 @@ export default {
             const contractDetails = this.contractDetails;
             const transfer =  contractDetails.contract.methods.transfer;
 
-            return sendContractTransaction({
+            sendContractTransaction({
               contractAddress: contractDetails.address,
               senderAddress: sender,
               gas: window.walletSettings.network.gasLimit,
@@ -416,7 +416,6 @@ export default {
                   tokenFee: this.transactionFeeToken,
                 };
 
-                // *async* save transaction message for contract, sender and receiver
                 saveTransactionDetails(pendingTransaction)
                   .then(() => {
                     // The transaction has been hashed and will be sent
@@ -425,26 +424,28 @@ export default {
                       pendingTransaction,
                       this.contractDetails
                     );
-                    this.$emit('close');
-                  });
 
-                if (this.notificationId) {
-                  markFundRequestAsSent(this.notificationId);
-                }
+                    this.loading = false;
+                    lockBrowserWallet();
+                    this.$emit('close');
+
+                    if (this.notificationId) {
+                      return markFundRequestAsSent(this.notificationId);
+                    }
+                  });
               },
               (error, receipt) => {
                 console.debug('Web3 contract.transfer method - error', error);
                 // The transaction has failed
                 this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(error)}`;
+
+                this.loading = false;
+                lockBrowserWallet();
               });
           })
           .catch((e) => {
             console.debug('Web3 contract.transfer method - error', e);
             this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
-          })
-          .finally(() => {
-            this.loading = false;
-            lockBrowserWallet();
           });
       } catch (e) {
         console.debug('Web3 contract.transfer method - error', e);

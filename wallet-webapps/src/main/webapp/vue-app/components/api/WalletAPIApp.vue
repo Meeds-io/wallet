@@ -333,7 +333,7 @@ export default {
               }
 
               //finally pass this data parameter to send Transaction
-              return this.tokenUtils.sendContractTransaction({
+              this.tokenUtils.sendContractTransaction({
                    contractAddress: contractAddress,
                    senderAddress: senderAddress,
                    gas: defaultGas,
@@ -358,27 +358,27 @@ export default {
                       timestamp: Date.now()
                     };
 
-                    // *async* save transaction message for contract, sender and receiver
-                    this.transactionUtils.saveTransactionDetails(pendingTransaction);
-
-                    // The transaction has been hashed and will be sent
-                    document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
-                      detail : pendingTransaction
-                    }));
+                    this.transactionUtils.saveTransactionDetails(pendingTransaction).then(() => {
+                      // The transaction has been hashed and is marked as pending in internal database
+                      document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
+                        detail : pendingTransaction
+                      }));
+                    });
+                    this.walletUtils.lockBrowserWallet();
                   },
-                  (error, receipt) => {
-                    console.debug('contract transfer method - error', error, receipt);
+                  (error) => {
+                    console.debug('contract transfer method - error', error);
                     document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
                       detail : this.$t('exoplatform.wallet.warning.transactionGenericError', {0: error})
                     }));
+                    this.walletUtils.lockBrowserWallet();
                   });
             })
             .catch((e) => {
               console.debug('contract transfer method - error', e);
               this.loading = false;
               throw new Error(this.$t('exoplatform.wallet.warning.transactionGenericError', {0: this.walletUtils.truncateError(e)}));
-            })
-            .finally(() => this.walletUtils.lockBrowserWallet());
+            });
           })
           .catch((error) => {
             console.debug('sendTokens method - error', error);
