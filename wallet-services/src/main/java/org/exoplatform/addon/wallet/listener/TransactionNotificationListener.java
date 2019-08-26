@@ -184,11 +184,15 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put("receiver", transactionDetail.getToWallet());
 
     switch (contractMethodName) {
+    case CONTRACT_FUNC_INITIALIZEACCOUNT:
+      parameters.put(OPERATION, "initialize_account");
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
     case ETHER_FUNC_SEND_FUNDS:
     case CONTRACT_FUNC_TRANSFER:
     case CONTRACT_FUNC_TRANSFERFROM:
     case CONTRACT_FUNC_APPROVE:
-    case CONTRACT_FUNC_INITIALIZEACCOUNT:
       parameters.put("amount_ether", transactionDetail.getValue());
       parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
