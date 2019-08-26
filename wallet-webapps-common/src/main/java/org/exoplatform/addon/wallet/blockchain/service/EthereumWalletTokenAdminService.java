@@ -493,7 +493,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (wallet.getTokenBalance() == null
         || walletModifications == null
         || walletModifications.contains(ERTTokenV2.FUNC_REWARD)
-        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZE)
+        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)
+        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFORMTOVESTED)
         || walletModifications.contains(ERTTokenV2.FUNC_TRANSFER)
         || walletModifications.contains(ERTTokenV2.FUNC_TRANSFERFROM)
         || walletModifications.contains(ERTTokenV2.FUNC_APPROVE)) {
@@ -513,7 +514,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     if (wallet.getVestingBalance() == null
         || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_REWARD)) {
+        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFORMTOVESTED)) {
       BigInteger walletVestingBalance = (BigInteger) executeReadOperation(configuredContractAddress,
                                                                           ERTTokenV2.FUNC_VESTINGBALANCEOF,
                                                                           walletAddress);
@@ -531,7 +532,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     if (wallet.getIsApproved() == null
         || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZE)
+        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)
         || walletModifications.contains(ERTTokenV2.FUNC_ADDADMIN)
         || walletModifications.contains(ERTTokenV2.FUNC_REMOVEADMIN)
         || walletModifications.contains(ERTTokenV2.FUNC_APPROVEACCOUNT)
