@@ -150,7 +150,10 @@ export default {
     document.addEventListener('exo.addon.wallet.modified', this.walletUpdated);
     document.addEventListener('exo.addon.contract.modified', this.reloadContract);
     this.init()
-      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
+      .then(() => {
+        this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()
+        this.walletUtils.setDraggable('WalletAdminApp');
+      });
   },
   methods: {
     init() {

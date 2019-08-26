@@ -1,6 +1,6 @@
 <template>
   <v-app
-    :id="isSpace ? 'SpaceWalletApp' : 'WalletApp'"
+    :id="appId"
     color="transaprent"
     class="VuetifyApp"
     flat>
@@ -244,6 +244,9 @@ export default {
     };
   },
   computed: {
+    appId() {
+      return this.isSpace ? 'SpaceWalletApp' : 'WalletApp';
+    },
     walletReadonly() {
       return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
     },
@@ -318,6 +321,7 @@ export default {
           }
           this.checkOpenTransaction();
           this.$forceUpdate();
+          this.walletUtils.setDraggable(this.appId);
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);
