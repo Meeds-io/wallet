@@ -208,7 +208,6 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put("transaction", transactionDetail.getHash());
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
-    parameters.put(DURATION, "");
     StatisticUtils.addStatisticEntry(parameters);
   }
 
