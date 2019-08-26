@@ -665,9 +665,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         Object[] contractMethodParams = (Object[]) methodArgs[2];
         String toAddress = (String) contractMethodParams[0];
         Wallet toWallet = getAccountService().getWalletByAddress(toAddress);
-        BigInteger tokenAmountDecimals = (BigInteger) contractMethodParams[0];
+        BigInteger tokenAmountDecimals = (BigInteger) contractMethodParams[1];
         double tokenAmount = convertFromDecimals(tokenAmountDecimals, configuredContractDecimals);
-        BigInteger etherAmountDecimals = (BigInteger) contractMethodParams[0];
+        BigInteger etherAmountDecimals = (BigInteger) contractMethodParams[2];
         double etherAmount = convertFromDecimals(etherAmountDecimals, ETHER_TO_WEI_DECIMALS);
 
         parameters.put("receiver", toWallet);
