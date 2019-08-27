@@ -11,12 +11,7 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 public interface WalletTransactionService {
 
   /**
-   * @return {@link List} of pending {@link TransactionDetail}
-   */
-  List<TransactionDetail> getPendingTransactions();
-
-  /**
-   * @return transactions hashes that are marked as pensing in internal database
+   * @return {@link Set} of pending transaction hashes
    */
   Set<String> getPendingTransactionHashes();
 
@@ -96,22 +91,6 @@ public interface WalletTransactionService {
   void saveTransactionDetail(TransactionDetail transactionDetail,
                              String currentUser,
                              boolean broadcastMinedTransaction) throws IllegalAccessException;
-
-  /**
-   * Checks transactions marked as pending if it exists on blockchain, else mark
-   * it as failed
-   * 
-   * @param currentUser current username that is saving transaction
-   * @return number of transactions marked as failed
-   * @throws IllegalAccessException when user is not allowed to execute
-   *           operation
-   */
-  long checkPendingTransactions(String currentUser) throws IllegalAccessException;
-
-  /**
-   * @return watched transactions count treated since the server startup
-   */
-  long getWatchedTreatedTransactionsCount();
 
   /**
    * @return max days to wait until marking a non existing transaction on

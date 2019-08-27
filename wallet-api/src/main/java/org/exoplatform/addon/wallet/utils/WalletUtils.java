@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.*;
 
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
@@ -169,9 +168,6 @@ public class WalletUtils {
 
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
                                                                                     "exo.addon.wallet.transaction.mined";
-
-  public static final String                          NEW_TRANSACTION_EVENT                    =
-                                                                            "exo.addon.wallet.transaction.loaded";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS             = "transaction.pending.maxDays";
 
@@ -499,18 +495,6 @@ public class WalletUtils {
                                           .append(StringEscapeUtils.escapeHtml(space.getDisplayName()))
                                           .append("</a>")
                                           .toString();
-  }
-
-  public static Set<String> jsonArrayToList(JSONObject jsonObject, String key) throws JSONException {
-    Set<String> set = null;
-    if (jsonObject.has(key)) {
-      set = new HashSet<>();
-      JSONArray arrayValue = jsonObject.getJSONArray(key);
-      for (int i = 0; i < arrayValue.length(); i++) {
-        set.add(arrayValue.getString(i));
-      }
-    }
-    return set;
   }
 
   public static String encodeString(String content) {

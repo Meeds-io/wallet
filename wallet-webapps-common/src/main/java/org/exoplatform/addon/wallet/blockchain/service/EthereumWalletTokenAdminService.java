@@ -795,8 +795,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return response.send();
   }
 
-  public ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws InterruptedException,
-                                                                                              IOException {
+  public ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws IOException {
     if (writeOperation && contractTransactionManager instanceof FastRawTransactionManager) {
       FastRawTransactionManager fastRawTransactionManager = (FastRawTransactionManager) contractTransactionManager;
       BigInteger transactionCount = getClientConnector().getNonce(fastRawTransactionManager.getFromAddress());
@@ -829,7 +828,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return this.ertInstance;
   }
 
-  private TransactionManager getTransactionManager(Credentials credentials) throws InterruptedException {
+  private TransactionManager getTransactionManager(Credentials credentials) {
     getClientConnector().waitConnection();
 
     Web3j web3j = getClientConnector().getWeb3j();

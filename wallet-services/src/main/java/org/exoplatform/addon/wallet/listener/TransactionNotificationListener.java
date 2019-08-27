@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -50,7 +49,7 @@ import org.exoplatform.social.core.service.LinkProvider;
  * database and send notifications.
  */
 @Asynchronous
-public class TransactionNotificationListener extends Listener<Object, JSONObject> {
+public class TransactionNotificationListener extends Listener<Object, Map<String, Object>> {
   private static final Log         LOG = ExoLogger.getLogger(TransactionNotificationListener.class);
 
   private ExoContainer             container;
@@ -64,11 +63,11 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
   }
 
   @Override
-  public void onEvent(Event<Object, JSONObject> event) throws Exception {
+  public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String transactionHash = event.getData().getString("hash");
+      String transactionHash = (String) event.getData().get("hash");
       if (StringUtils.isBlank(transactionHash)) {
         return;
       }

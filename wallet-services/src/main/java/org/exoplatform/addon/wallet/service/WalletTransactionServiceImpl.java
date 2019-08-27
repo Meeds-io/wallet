@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
@@ -25,27 +24,23 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class WalletTransactionServiceImpl implements WalletTransactionService {
 
-  private static final Log             LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
+  private static final Log      LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
 
-  private static final String          YEAR_PERIODICITY  = "year";
+  private static final String   YEAR_PERIODICITY  = "year";
 
-  private static final String          MONTH_PERIODICITY = "month";
+  private static final String   MONTH_PERIODICITY = "month";
 
-  private WalletAccountService         accountService;
+  private WalletAccountService  accountService;
 
-  private WalletContractService        contractService;
+  private WalletContractService contractService;
 
-  private TransactionStorage           transactionStorage;
+  private TransactionStorage    transactionStorage;
 
-  private BlockchainTransactionService blockchainTransactionService;
+  private SpaceService          spaceService;
 
-  private SpaceService                 spaceService;
+  private ListenerService       listenerService;
 
-  private ListenerService              listenerService;
-
-  private long                         watchedTreatedTransactionsCount;
-
-  private long                         pendingTransactionMaxDays;
+  private long                  pendingTransactionMaxDays;
 
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
@@ -62,24 +57,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public List<TransactionDetail> getPendingTransactions() {
-    List<TransactionDetail> pendingTransactions = transactionStorage.getPendingTransactions(getNetworkId());
-    pendingTransactions.forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail));
-    return pendingTransactions;
-  }
-
-  @Override
-  public long checkPendingTransactions(String currentUser) throws IllegalAccessException {
-    if (!isUserRewardingAdmin(currentUser)) {
-      throw new IllegalAccessException("User " + currentUser + " is not allowed to check pending transaction statuses");
-    }
-    return getBlockchainTransactionService().checkPendingTransactions(0);
-  }
-
-  @Override
   public Set<String> getPendingTransactionHashes() {
-    List<TransactionDetail> pendingTransactions = transactionStorage.getPendingTransactions(getNetworkId());
-    return pendingTransactions.stream().map(transactionDetail -> transactionDetail.getHash()).collect(Collectors.toSet());
+    return transactionStorage.getPendingTransactionHashes(getNetworkId());
   }
 
   @Override
@@ -221,14 +200,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     transactionDetail.setIssuer(issuerWallet);
 
     transactionStorage.saveTransactionDetail(transactionDetail);
+    retrieveWalletsDetails(transactionDetail);
     if (broadcastMinedTransaction) {
       broadcastTransactionMinedEvent(transactionDetail);
     }
-  }
-
-  @Override
-  public long getWatchedTreatedTransactionsCount() {
-    return watchedTreatedTransactionsCount;
   }
 
   @Override
@@ -348,15 +323,20 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
     try {
-      JSONObject transaction = new JSONObject();
+      Map<String, Object> transaction = new HashMap<>();
       transaction.put("hash", transactionDetail.getHash());
-      transaction.put("address", transactionDetail.getFrom());
+      transaction.put("from", transactionDetail.getFromWallet() == null ? 0 : transactionDetail.getFromWallet().getTechnicalId());
+      transaction.put("to", transactionDetail.getToWallet() == null ? 0 : transactionDetail.getToWallet().getTechnicalId());
+      transaction.put("contractAddress", transactionDetail.getContractAddress());
+      transaction.put("contractAmount", transactionDetail.getContractAmount());
+      transaction.put("contractMethodName", transactionDetail.getContractMethodName());
+      transaction.put("etherAmount", transactionDetail.getValue());
       transaction.put("status", transactionDetail.isSucceeded());
+      transaction.put("issuerId", transactionDetail.getIssuerId());
       getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
     }
-    this.watchedTreatedTransactionsCount++;
   }
 
   private SpaceService getSpaceService() {
@@ -382,17 +362,5 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                                                   .atStartOfDay(ZoneOffset.systemDefault())
                                                                        : selectedDay.plusDays(1)
                                                                                     .atStartOfDay(ZoneOffset.systemDefault());
-  }
-
-  /**
-   * Not injected via configuration, thus not added in constructor
-   * 
-   * @return instance of {@link BlockchainTransactionService}
-   */
-  private BlockchainTransactionService getBlockchainTransactionService() {
-    if (blockchainTransactionService == null) {
-      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
-    }
-    return blockchainTransactionService;
   }
 }

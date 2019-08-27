@@ -10,12 +10,14 @@ import java.util.concurrent.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.blockchain.service.*;
 import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
 import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -57,6 +59,25 @@ public class ServiceLoaderServlet extends HttpServlet {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
+
+      GlobalSettings settings = getSettings();
+      if (settings == null) {
+        LOG.warn("No wallet addon settings are found");
+        return;
+      }
+
+      if (settings.getNetwork() == null || settings.getNetwork().getId() <= 0
+          || StringUtils.isBlank(settings.getNetwork().getProviderURL())
+          || StringUtils.isBlank(settings.getNetwork().getWebsocketProviderURL())) {
+        LOG.warn("No valid blockchain network settings are found: {}", settings.getNetwork());
+        return;
+      }
+
+      if (StringUtils.isBlank(settings.getContractAddress())) {
+        LOG.warn("No contract address is configured");
+        return;
+      }
+
       // Replace old bouncy castle provider by the newer version
       ClassLoader webappClassLoader = getWebappClassLoader();
       Class<?> class1 = webappClassLoader.loadClass(BouncyCastleProvider.class.getName());
@@ -86,7 +107,6 @@ public class ServiceLoaderServlet extends HttpServlet {
       transactionDecoderService.start();
 
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
-      listernerService.addListener(NEW_TRANSACTION_EVENT, new BlockchainTransactionProcessorListener(container));
 
       // Start listening on blockchain modification for websocket trigger
       listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionMinedListener());
