@@ -185,9 +185,9 @@ export default {
           }
         })
         .then(() => this.reloadContract())
-        .then(() => this.$refs.walletSetup && this.$refs.walletSetup.init())
-        .then(() => this.$refs && this.$refs.walletsTab && this.$refs.walletsTab.init(true))
-        .then(() => this.$refs.fundsTab && this.$refs.fundsTab.init())
+        .then(() => this.$refs.walletSetup.init())
+        .then(() => this.$refs.walletsTab.init())
+        .then(() => this.$refs.fundsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug(error);

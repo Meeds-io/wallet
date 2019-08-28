@@ -353,7 +353,6 @@ export default {
     return {
       search: null,
       loadingWallets: false,
-      appInitialized: false,
       selectedTransactionHash: null,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
@@ -506,12 +505,7 @@ export default {
     },
   },
   methods: {
-    init(appInitialized) {
-      if(!appInitialized || this.appInitialized) {
-        return;
-      }
-
-      this.appInitialized = this.appInitialized || appInitialized;
+    init() {
       if(this.loadingWallets) {
         return;
       }
