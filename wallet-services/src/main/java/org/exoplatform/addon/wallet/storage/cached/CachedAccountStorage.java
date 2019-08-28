@@ -125,4 +125,8 @@ public class CachedAccountStorage extends WalletStorage {
     }
   }
 
+  public void clearCache() {
+    walletFutureCache.clear();
+  }
+
 }

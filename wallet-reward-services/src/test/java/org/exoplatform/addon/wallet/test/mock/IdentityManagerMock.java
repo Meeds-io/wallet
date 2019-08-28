@@ -302,7 +302,7 @@ public class IdentityManagerMock implements IdentityManager {
   }
 
   @Override
-  public List<String> sortIdentities(List<String> identityRemoteIds, String sortField) {
+  public List<String> sortIdentities(List<String> identityRemoteIds, String sortField) { // NOSONAR
     throw new UnsupportedOperationException();
   }
 

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -50,7 +49,7 @@ import org.exoplatform.social.core.service.LinkProvider;
  * database and send notifications.
  */
 @Asynchronous
-public class TransactionNotificationListener extends Listener<Object, JSONObject> {
+public class TransactionNotificationListener extends Listener<Object, Map<String, Object>> {
   private static final Log         LOG = ExoLogger.getLogger(TransactionNotificationListener.class);
 
   private ExoContainer             container;
@@ -64,11 +63,11 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
   }
 
   @Override
-  public void onEvent(Event<Object, JSONObject> event) throws Exception {
+  public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String transactionHash = event.getData().getString("hash");
+      String transactionHash = (String) event.getData().get("hash");
       if (StringUtils.isBlank(transactionHash)) {
         return;
       }
@@ -184,11 +183,15 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put("receiver", transactionDetail.getToWallet());
 
     switch (contractMethodName) {
+    case CONTRACT_FUNC_INITIALIZEACCOUNT:
+      parameters.put(OPERATION, "initialize_account");
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
     case ETHER_FUNC_SEND_FUNDS:
     case CONTRACT_FUNC_TRANSFER:
     case CONTRACT_FUNC_TRANSFERFROM:
     case CONTRACT_FUNC_APPROVE:
-    case CONTRACT_FUNC_INITIALIZEACCOUNT:
       parameters.put("amount_ether", transactionDetail.getValue());
       parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
@@ -204,7 +207,6 @@ public class TransactionNotificationListener extends Listener<Object, JSONObject
     parameters.put("transaction", transactionDetail.getHash());
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
-    parameters.put(DURATION, "");
     StatisticUtils.addStatisticEntry(parameters);
   }
 

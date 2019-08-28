@@ -280,8 +280,8 @@ public class WalletServiceImpl implements WalletService, Startable {
     GlobalSettings settings = getSettings();
     if (!StringUtils.isBlank(fundsRequest.getContract())) {
       ContractDetail contractDetail = settings.getContractDetail();
-      if (contractDetail == null) {
-        throw new IllegalStateException("Bad request sent to server with invalid contract address (O ly default addresses are permitted)");
+      if (contractDetail == null || !StringUtils.equalsIgnoreCase(contractDetail.getAddress(), fundsRequest.getContract())) {
+        throw new IllegalStateException("Bad request sent to server with invalid contract address (Only default addresses are permitted)");
       }
       ctx.append(CONTRACT_DETAILS_PARAMETER, contractDetail);
     }
@@ -297,7 +297,7 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
 
     ctx.append(FUNDS_REQUEST_SENDER_DETAIL_PARAMETER,
-               accountService.getWalletByTypeAndId(WalletType.USER.getId(), getCurrentUserId()));
+               accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser));
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, requestSender);
     ctx.append(RECEIVER_ACCOUNT_DETAIL_PARAMETER, requestReceipient);
     ctx.append(FUNDS_REQUEST_PARAMETER, fundsRequest);

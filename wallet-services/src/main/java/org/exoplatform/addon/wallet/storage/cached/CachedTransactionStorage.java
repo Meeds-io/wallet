@@ -38,4 +38,9 @@ public class CachedTransactionStorage extends TransactionStorage {
     super.saveTransactionDetail(transactionDetail);
     this.transactionFutureCache.remove(transactionDetail.getHash().toLowerCase());
   }
+
+  public void clearCache() {
+    transactionFutureCache.clear();
+  }
+
 }

@@ -3,7 +3,6 @@ package org.exoplatform.addon.wallet.job;
 import org.quartz.*;
 
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
-import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -17,8 +16,6 @@ public class PendingTransactionVerifierJob implements Job {
 
   private ExoContainer                 container;
 
-  private WalletTransactionService     walletTransactionService;
-
   private BlockchainTransactionService blockchainTransactionService;
 
   public PendingTransactionVerifierJob() {
@@ -31,7 +28,7 @@ public class PendingTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      getBlockchainTransactionService().checkPendingTransactions(getWalletTransactionService().getPendingTransactionMaxDays());
+      getBlockchainTransactionService().checkPendingTransactions();
     } catch (Exception e) {
       LOG.error("Error while checking pending transactions", e);
     } finally {
@@ -45,12 +42,5 @@ public class PendingTransactionVerifierJob implements Job {
       blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
     }
     return blockchainTransactionService;
-  }
-
-  private WalletTransactionService getWalletTransactionService() {
-    if (walletTransactionService == null) {
-      walletTransactionService = CommonsUtils.getService(WalletTransactionService.class);
-    }
-    return walletTransactionService;
   }
 }

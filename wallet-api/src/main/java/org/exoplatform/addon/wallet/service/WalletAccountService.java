@@ -118,13 +118,6 @@ public interface WalletAccountService {
   Wallet getWalletByAddress(String address);
 
   /**
-   * Save wallet to storage
-   * 
-   * @param wallet wallet to save
-   */
-  void saveWallet(Wallet wallet);
-
-  /**
    * Save wallet state on blockchain
    * 
    * @param wallet
@@ -148,11 +141,10 @@ public interface WalletAccountService {
    * 
    * @param wallet {@link Wallet} wallet details to save
    * @param currentUser current username saving wallet details
-   * @param broadcast broadcast saving event or not
    * @throws IllegalAccessException when the current user is not able to save a
    *           new address to the wallet
    */
-  void saveWalletAddress(Wallet wallet, String currentUser, boolean broadcast) throws IllegalAccessException;
+  void saveWalletAddress(Wallet wallet, String currentUser) throws IllegalAccessException;
 
   /**
    * Remove User or Space wallet address association
@@ -179,20 +171,10 @@ public interface WalletAccountService {
    * @param address address of wallet to enable/disable
    * @param enable whether enable or disable wallet
    * @param currentUser username of current user making the operation
+   * @return true if modified else false
    * @throws IllegalAccessException if current user is not an administrator
    */
-  void enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException;
-
-  /**
-   * Throws an exception if the user is not allowed to modify wallet information
-   * 
-   * @param wallet wallet details to save
-   * @param storedWallet stored wallet in database
-   * @param currentUser current username that is making the modification
-   * @throws IllegalAccessException if current user is not allowed to modify
-   *           wallet
-   */
-  void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException;
+  boolean enableWalletByAddress(String address, boolean enable, String currentUser) throws IllegalAccessException;
 
   /**
    * @param wallet

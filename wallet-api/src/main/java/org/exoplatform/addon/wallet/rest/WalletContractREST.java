@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.service.WalletContractService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -51,14 +52,14 @@ public class WalletContractREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Retrieves stored contract details in internal datasource", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract detail object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getContract(@ApiParam(value = "contract address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn("Empty contract address");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     try {
       ContractDetail contractDetail = contractService.getContractDetail(address);
@@ -77,18 +78,18 @@ public class WalletContractREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Retrieves contract binary", httpMethod = "GET", response = Response.class, notes = "returns contract bin content")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getBin(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     if (name.contains("..") || name.contains("/") || name.contains("\\")) {
       LOG.error(getCurrentUserId() + " has used a forbidden path character is used: '..' or '/' or '\\'");
-      return Response.status(403).build();
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     }
     try {
       String contractBin = contractService.getContractFileContent(name, "bin");
@@ -105,18 +106,18 @@ public class WalletContractREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Retrieves contract ABI", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract ABI object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getAbi(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     if (name.contains("..") || name.contains("/") || name.contains("\\")) {
       LOG.error(getCurrentUserId() + " has used a forbidden path character is used: '..' or '/' or '\\'");
-      return Response.status(403).build();
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     }
     try {
       String contractAbi = contractService.getContractFileContent(name, "json");

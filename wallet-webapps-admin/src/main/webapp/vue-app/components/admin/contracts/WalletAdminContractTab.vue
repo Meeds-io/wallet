@@ -211,13 +211,6 @@
         <v-layout column>
           <v-flex xs12>
             <v-btn
-              v-if="adminLevel >= 4"
-              :disabled="checkingPendingTransactions"
-              :loading="checkingPendingTransactions"
-              @click="checkPendingTransactions">
-              {{ $t('exoplatform.wallet.button.checkPendingTransactionsOnBlockchain') }}
-            </v-btn>
-            <v-btn
               :disabled="refreshingTransactions"
               :loading="refreshingTransactions"
               @click="refreshTransactions">
@@ -473,23 +466,6 @@ export default {
         );
       }
       return Promise.all(promises);
-    },
-    checkPendingTransactions() {
-      this.checkingPendingTransactions = true;
-      return fetch('/portal/rest/wallet/api/transaction/checkPendingTransactions', {
-        method: 'GET',
-        credentials: 'include',
-      })
-        .then((resp) => {
-          if (!resp || !resp.ok) {
-            throw new Error(this.$t('exoplatform.wallet.warning.errorCheckingPendingTransactionsOnBlockchain'));
-          }
-          return this.refreshTransactions();
-        })
-        .catch((error) => {
-          this.error = error;
-        })
-        .finally(() => this.checkingPendingTransactions = false);
     },
     refreshTransactions() {
       if (this.$refs.transactionsList) {

@@ -6,7 +6,6 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.TRANSACTION_MODIFIE
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.Wallet;
@@ -16,7 +15,7 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.*;
 
 @Asynchronous
-public class TransactionMinedListener extends Listener<Object, JSONObject> {
+public class TransactionMinedListener extends Listener<Object, Map<String, Object>> {
 
   private WalletAccountService     accountService;
 
@@ -27,9 +26,9 @@ public class TransactionMinedListener extends Listener<Object, JSONObject> {
   private ListenerService          listenerService;
 
   @Override
-  public void onEvent(Event<Object, JSONObject> event) throws Exception {
-    JSONObject transactionDetailObject = event.getData();
-    String hash = transactionDetailObject.getString("hash");
+  public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
+    Map<String, Object> transactionDetailObject = event.getData();
+    String hash = (String) transactionDetailObject.get("hash");
     TransactionDetail transactionDetails = getTransactionService().getTransactionByHash(hash);
     if (transactionDetails == null) {
       return;

@@ -14,8 +14,10 @@ import org.exoplatform.addon.wallet.entity.*;
 import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
-import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
-import org.exoplatform.addon.wallet.storage.TransactionStorage;
+import org.exoplatform.addon.wallet.service.WalletService;
+import org.exoplatform.addon.wallet.storage.*;
+import org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage;
+import org.exoplatform.addon.wallet.storage.cached.CachedTransactionStorage;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -83,6 +85,8 @@ public abstract class BaseWalletTest {
     container = PortalContainer.getInstance();
     assertNotNull("Container shouldn't be null", container);
     assertTrue("Container should have been started", container.isStarted());
+
+    setContractDetails();
   }
 
   @Before
@@ -147,7 +151,7 @@ public abstract class BaseWalletTest {
               }
             }
           } else {
-            throw new IllegalStateException("Entity not managed " + entity);
+            LOG.warn("Entity not managed {}", entity);
           }
         } catch (Exception e) {
           LOG.warn("Error cleaning entities after test '{}' execution", this.getClass().getName(), e);
@@ -180,6 +184,16 @@ public abstract class BaseWalletTest {
 
     AddressLabelStorage addressLabelStorage = getService(AddressLabelStorage.class);
     addressLabelStorage.clearCache();
+
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    if (walletStorage instanceof CachedAccountStorage) {
+      ((CachedAccountStorage) walletStorage).clearCache();
+    }
+
+    TransactionStorage transactionStorage = getService(TransactionStorage.class);
+    if (transactionStorage instanceof CachedTransactionStorage) {
+      ((CachedTransactionStorage) transactionStorage).clearCache();
+    }
 
     RequestLifeCycle.end();
   }
@@ -222,7 +236,7 @@ public abstract class BaseWalletTest {
                                                "message",
                                                true, // isSuccess
                                                i % 2 == 0, // isPending
-                                               i % 2 == 1, // isAdminOperation
+                                               i % 2 != 0, // isAdminOperation
                                                System.currentTimeMillis() + offsetTime);
       transactionEntities.add(tx);
     }
@@ -370,11 +384,23 @@ public abstract class BaseWalletTest {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet wallet = newWallet();
     try {
-      walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
+      walletAccountService.saveWalletAddress(wallet, CURRENT_USER);
     } catch (IllegalAccessException e) {
       fail("User should be able to save his wallet");
     }
     entitiesToClean.add(wallet);
   }
 
+  private static void setContractDetails() {
+    WalletService walletService = container.getComponentInstanceOfType(WalletService.class);
+    ContractDetail contractDetail = new ContractDetail();
+    contractDetail.setName("name");
+    contractDetail.setSymbol("symbol");
+    contractDetail.setDecimals(12);
+    contractDetail.setAddress(WalletUtils.getContractAddress());
+    contractDetail.setContractType("3");
+    contractDetail.setNetworkId(1l);
+    contractDetail.setSellPrice("0.002");
+    walletService.setConfiguredContractDetail(contractDetail);
+  }
 }

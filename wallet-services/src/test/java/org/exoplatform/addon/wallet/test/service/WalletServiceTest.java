@@ -20,20 +20,20 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIF
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.exoplatform.addon.wallet.model.ContractDetail;
+import org.junit.Test;
+import org.picocontainer.Startable;
+
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.settings.*;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
-import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.junit.Test;
-import org.picocontainer.Startable;
 
 public class WalletServiceTest extends BaseWalletTest {
 
@@ -125,32 +125,6 @@ public class WalletServiceTest extends BaseWalletTest {
   }
 
   /**
-   * Test set configured contract detail
-   */
-  @Test
-  public void testSetConfiguredContractDetail() {
-    WalletService walletService = getService(WalletService.class);
-    ContractDetail contractDetail = new ContractDetail();
-    String address = "0xc76987D43b77C45d51653b6eB110b9174aCCE8fb";
-    int decimals = 100;
-    String name = "Contract";
-    String owner = "Root";
-    String symbol = "C";
-    String sellPrice = "1000";
-    String contractType = "Contract V2";
-    contractDetail.setContractType(contractType);
-    contractDetail.setAddress(address);
-    contractDetail.setDecimals(decimals);
-    contractDetail.setName(name);
-    contractDetail.setOwner(owner);
-    contractDetail.setSymbol(symbol);
-    contractDetail.setSellPrice(sellPrice);
-    walletService.setConfiguredContractDetail(contractDetail);
-
-    checkContractDetails(address, decimals, name, owner, symbol, sellPrice, contractType);
-  }
-
-  /**
    * Test save user preferences
    */
   @Test
@@ -225,61 +199,36 @@ public class WalletServiceTest extends BaseWalletTest {
       // Expected, Bad request sent to server with unknown sender address
     }
 
+    Wallet wallet = newWallet();
+    walletAccountService.saveWalletAddress(wallet, CURRENT_USER);
+    entitiesToClean.add(wallet);
+
     FundsRequest fundsRequest = new FundsRequest();
     Double amount = (double) 500;
-    String contract = "Contract V1";
     String message = "Funds request";
     fundsRequest.setAmount(amount);
     fundsRequest.setReceipientType(CURRENT_USER);
     fundsRequest.setAddress(WALLET_ADDRESS_1);
-    fundsRequest.setContract(contract);
+    fundsRequest.setContract("No existing address");
     fundsRequest.setReceipient(CURRENT_USER);
     fundsRequest.setMessage(message);
 
-    ContractDetail contractDetail = new ContractDetail();
-
-    int decimals = 100;
-    String name = "Contract";
-    String owner = "UserTest";
-    String symbol = "C";
-    String sellPrice = "1000";
-    String contractType = "Contract V2";
-    contractDetail.setContractType(contractType);
-    contractDetail.setAddress(WALLET_ADDRESS_1);
-    contractDetail.setDecimals(decimals);
-    contractDetail.setName(name);
-    contractDetail.setOwner(owner);
-    contractDetail.setSymbol(symbol);
-    contractDetail.setSellPrice(sellPrice);
-
-    Wallet wallet = newWallet();
-    walletAccountService.saveWalletAddress(wallet, CURRENT_USER, true);
-    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER);
-    ConversationState state = new ConversationState(identity);
-    ConversationState.setCurrent(state);
-
     try {
-      walletService.requestFunds(fundsRequest, "root3");
-      fail("Bad request sent to server with invalid sender type or id");
+      walletService.requestFunds(fundsRequest, USER_TEST);
+      fail("Expected exception: bad request sent to server with invalid sender type or id");
     } catch (Exception e) {
       // Expected, Bad request sent to server with invalid sender type or id
     }
 
     try {
       walletService.requestFunds(fundsRequest, CURRENT_USER);
-      fail("Bad request sent to server with invalid contract address");
+      fail("Expected exception: bad request sent to server with invalid contract address");
     } catch (Exception e) {
       // Expected, Bad request sent to server with invalid contract address
     }
-    walletService.setConfiguredContractDetail(contractDetail);
-    walletService.requestFunds(fundsRequest, CURRENT_USER);
 
-    assertEquals("Amount are not equals", amount, fundsRequest.getAmount());
-    assertEquals("contract are not equals", contract, fundsRequest.getContract());
-    assertEquals("receipientType are not equals", CURRENT_USER, fundsRequest.getReceipientType());
-    assertEquals("receipient are not equals", CURRENT_USER, fundsRequest.getReceipient());
-    assertEquals("message are not equals", message, fundsRequest.getMessage());
-    entitiesToClean.add(wallet);
+    fundsRequest.setContract(WalletUtils.getContractAddress());
+    walletService.requestFunds(fundsRequest, CURRENT_USER);
   }
 
   private void checkInitialFunds(int tokenAmount,
@@ -293,27 +242,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertEquals("Funds Holder shouldn't be null", fundsHolder, initialFunds.getFundsHolder());
     assertEquals("Token Amount are not equals", tokenAmount, initialFunds.getTokenAmount(), 0);
     assertEquals("Funds Holder type shouldn't be null", fundsHolderType, initialFunds.getFundsHolderType());
-  }
-
-  private void checkContractDetails(String address,
-                                    int decimals,
-                                    String name,
-                                    String owner,
-                                    String symbol,
-                                    String sellPrice,
-                                    String contractType) {
-    WalletService walletService = getService(WalletService.class);
-    GlobalSettings settings = walletService.getSettings();
-    assertNotNull("Settings service shouldn't be null", settings);
-    ContractDetail contract = settings.getContractDetail();
-    assertNotNull("Contract shouldn't be null", contract);
-    assertEquals("Address are not equals", address, contract.getAddress());
-    assertEquals("decimals are not equals", decimals, contract.getDecimals(), 0);
-    assertEquals("Contract name are not equals", name, contract.getName());
-    assertEquals("Owner are not equals", owner, contract.getOwner());
-    assertEquals("Symbol are not equals", symbol, contract.getSymbol());
-    assertEquals("SellPrice are not equals", sellPrice, contract.getSellPrice());
-    assertEquals("ContractType are not equals", contractType, contract.getContractType());
   }
 
   /**

@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode.Exclude;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContractDetail implements Serializable {
+public class ContractDetail implements Serializable, Cloneable {
 
   private static final long serialVersionUID = 1459881604949041768L;
 

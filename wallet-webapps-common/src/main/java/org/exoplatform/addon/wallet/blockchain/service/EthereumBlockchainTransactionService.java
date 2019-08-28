@@ -31,8 +31,6 @@ import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransaction;
-import org.exoplatform.addon.wallet.blockchain.ExoBlockchainTransactionService;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
@@ -42,12 +40,10 @@ import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class EthereumBlockchainTransactionService
-    implements BlockchainTransactionService, ExoBlockchainTransactionService, Startable {
+public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
   private static final Log                 LOG                         =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
@@ -116,23 +112,15 @@ public class EthereumBlockchainTransactionService
 
   private WalletAccountService     accountService;
 
-  private WalletContractService    contractService;
-
   private WalletTransactionService transactionService;
 
   private SettingService           settingService;
 
-  private ListenerService          listenerService;
-
-  private ClassLoader              webappClassLoader;
-
-  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector, ClassLoader webappClassLoader) {
+  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector) {
     this.ethereumClientConnector = ethereumClientConnector;
-    this.webappClassLoader = webappClassLoader;
   }
 
   @Override
-  @ExoBlockchainTransaction
   public void start() {
     long networkId = getNetworkId();
     try {
@@ -153,56 +141,26 @@ public class EthereumBlockchainTransactionService
   }
 
   @Override
-  public ClassLoader getWebappClassLoader() {
-    return webappClassLoader;
-  }
-
-  @Override
-  @ExoBlockchainTransaction
-  public int checkPendingTransactions(long pendingTransactionMaxDays) {
-    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
-    int transactionsMarkedAsMined = 0;
+  public void checkPendingTransactions() {
+    Set<String> pendingTransactions = getTransactionService().getPendingTransactionHashes();
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
 
-      for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
+      for (String pendingTransactionHash : pendingTransactions) {
         try { // NOSONAR
-          boolean transactionMined = verifyTransactionStatusOnBlockchain(pendingTransactionDetail, pendingTransactionMaxDays);
-          if (transactionMined) {
-            transactionsMarkedAsMined++;
-          }
+          verifyTransactionStatusOnBlockchain(pendingTransactionHash, true);
         } catch (Exception e) {
-          LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
+          LOG.warn("Error treating pending transaction: {}", pendingTransactionHash, e);
         }
       }
     }
-    return transactionsMarkedAsMined;
   }
 
   @Override
-  @ExoBlockchainTransaction
-  public void scanNewerBlocks() throws InterruptedException, IOException {
+  public void scanNewerBlocks() throws IOException {
     GlobalSettings settings = getSettings();
-    if (settings == null) {
-      LOG.debug("Empty settings, skip contract transaction verification");
-      return;
-    }
     long networkId = settings.getNetwork().getId();
-    if (settings.getNetwork().getId() == 0) {
-      LOG.debug("Empty network id in settings, skip contract transaction verification");
-      return;
-    }
-    String wsURL = settings.getNetwork().getWebsocketProviderURL();
-    if (StringUtils.isBlank(wsURL)) {
-      LOG.debug("Empty Websocket URL in settings, skip contract transaction verification");
-      return;
-    }
-    ContractDetail contractDetail = settings.getContractDetail();
-    if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress())) {
-      LOG.debug("Empty token address in settings, skip contract transaction verification");
-      return;
-    }
 
     long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
     long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
@@ -213,8 +171,7 @@ public class EthereumBlockchainTransactionService
       return;
     }
 
-    boolean processed = true;
-    String contractAddress = contractDetail.getAddress();
+    String contractAddress = getContractAddress();
     Set<String> transactionHashes = ethereumClientConnector.getContractTransactions(contractAddress,
                                                                                     lastWatchedBlockNumber,
                                                                                     lastEthereumBlockNumber);
@@ -225,154 +182,168 @@ public class EthereumBlockchainTransactionService
               lastWatchedBlockNumber,
               lastEthereumBlockNumber);
 
-    int addedTransactionsCount = 0;
-    int modifiedTransactionsCount = 0;
-
+    boolean processed = true;
     for (String transactionHash : transactionHashes) {
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
-      if (transactionDetail == null) {
-        transactionDetail = processTransaction(transactionHash, contractDetail);
-        processed = transactionDetail != null && processed;
-        if (processed) {
-          addedTransactionsCount++;
-        }
-      } else {
-        LOG.debug(" - transaction {} already exists on database, ignore it.", transactionDetail);
-
-        // Broadcast event and send notifications when the transaction was
-        // marked as pending
-        boolean braodcastSavingTransaction = transactionDetail.isPending();
-        transactionDetail.setPending(false);
-        boolean changed = braodcastSavingTransaction;
-
-        // Verify that the transaction has been correctly decoded
-        if (StringUtils.isBlank(transactionDetail.getContractAddress())
-            || StringUtils.isBlank(transactionDetail.getContractMethodName())) {
-          transactionDetail.setContractAddress(contractAddress);
-          computeTransactionDetail(transactionDetail, contractDetail);
-          changed = true;
-        } else if (!transactionDetail.isSucceeded()) {
-          TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionDetail.getHash());
-          computeContractTransactionDetail(transactionDetail, transactionReceipt);
-          changed = true;
-        }
-
-        // Save decoded transaction details after chaging its attributes
-        if (changed && hasKnownWalletInTransaction(transactionDetail)) {
-          getTransactionService().saveTransactionDetail(transactionDetail, braodcastSavingTransaction);
-          modifiedTransactionsCount++;
-        }
+      try {
+        verifyTransactionStatusOnBlockchain(transactionHash, false);
+      } catch (Exception e) {
+        LOG.warn("Error processing transaction with hash: {}", transactionHash, e);
+        processed = false;
       }
     }
-
-    LOG.debug("{} added and {} modified transactions has been stored using contract {} between block {} and {}",
-              addedTransactionsCount,
-              modifiedTransactionsCount,
-              contractAddress,
-              lastWatchedBlockNumber,
-              lastEthereumBlockNumber);
-
     if (processed) {
       // Save last verified block for contracts transactions
       saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
     }
   }
 
-  @Override
-  @ExoBlockchainTransaction
-  public TransactionDetail computeTransactionDetail(String hash,
-                                                    ContractDetail contractDetail) throws InterruptedException {
-    if (StringUtils.isBlank(hash)) {
-      throw new IllegalArgumentException("Transaction hash is empty");
-    }
-
-    TransactionDetail transactionDetail = new TransactionDetail();
-    transactionDetail.setNetworkId(getNetworkId());
-    transactionDetail.setHash(hash);
-    return computeTransactionDetail(transactionDetail, contractDetail);
-  }
-
-  @Override
-  @ExoBlockchainTransaction
-  public TransactionDetail computeTransactionDetail(TransactionDetail transactionDetail,
-                                                    ContractDetail contractDetail) throws InterruptedException {
-    if (transactionDetail == null) {
-      throw new IllegalArgumentException("Empty transaction detail parameter");
-    }
-    String hash = transactionDetail.getHash();
-    if (StringUtils.isBlank(hash)) {
-      throw new IllegalStateException("Transaction hash is empty");
-    }
-    if (transactionDetail.getNetworkId() <= 0) {
-      throw new IllegalStateException("Unknown network id: " + transactionDetail.getNetworkId());
-    }
-
-    Transaction transaction = ethereumClientConnector.getTransaction(hash);
+  private void verifyTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
+    Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     if (transaction == null) {
-      LOG.info("Can't find transaction with hash {}, it may be pending", hash);
-      return transactionDetail;
+      if (!pendingTransactionFromDatabase) {
+        throw new IllegalStateException("Transaction with hash " + transactionHash
+            + " is not marked as pending but the transaction wasn't found on blockchain");
+      }
+      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      if (transactionDetail == null) {
+        throw new IllegalStateException("Transaction with hash " + transactionHash
+            + " wasn't found in internal database while it should have been retrieved from it.");
+      }
+
+      LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
+
+      long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
+      if (pendingTransactionMaxDays > 0) {
+        long creationTimestamp = transactionDetail.getTimestamp();
+        if (creationTimestamp > 0) {
+          Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+          if (duration.toDays() >= pendingTransactionMaxDays) {
+            transactionDetail.setExceededMaxWaitMiningTime(true);
+            transactionDetail.setPending(false);
+            transactionDetail.setSucceeded(false);
+            LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
+                      transactionHash,
+                      pendingTransactionMaxDays);
+            getTransactionService().saveTransactionDetail(transactionDetail, true);
+          }
+        }
+      }
+      return;
+    } else {
+      String blockHash = transaction.getBlockHash();
+      if (StringUtils.isBlank(blockHash) || StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
+          || transaction.getBlockNumber() == null) {
+        if (!pendingTransactionFromDatabase) {
+          throw new IllegalStateException("Transaction " + transactionHash
+              + " is marked as pending in blockchain while it's not marked as pending");
+        }
+        LOG.debug("Transaction {} is marked as pending in database and is always pending on blockchain", transactionHash);
+        return;
+      }
     }
-    transactionDetail.setGasPrice(transaction.getGasPrice().intValue());
 
-    String senderAddress = transaction.getFrom();
-    transactionDetail.setFrom(senderAddress);
-    BigInteger weiAmount = transaction.getValue();
-    transactionDetail.setValueDecimal(weiAmount, 18);
-
-    TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(hash);
-    transactionDetail.setPending(transactionReceipt == null);
-    transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
-    if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
-      transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
+    ContractDetail contractDetail = getContractDetail();
+    if (contractDetail == null) {
+      throw new IllegalStateException("Principal contract detail wasn't found in database");
     }
 
+    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+    if (transactionDetail == null) {
+      if (pendingTransactionFromDatabase) {
+        throw new IllegalStateException("Transaction with hash " + transactionHash
+            + " wasn't found in internal database while it should have been retrieved from it.");
+      }
+
+      String contractAddress = transaction.getTo();
+      if (!StringUtils.equalsIgnoreCase(contractDetail.getAddress(), contractAddress)) {
+        LOG.debug("Transaction '{}' is not a contract transaction, thus it will not be added into database", transactionHash);
+        return;
+      }
+
+      transactionDetail = new TransactionDetail();
+      transactionDetail.setNetworkId(getNetworkId());
+      transactionDetail.setHash(transactionHash);
+    }
+
+    TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
+    if (transactionReceipt == null) {
+      throw new IllegalStateException("Couldn't find transaction receipt with hash '" + transactionHash + "' on blockchain");
+    }
+
+    if (pendingTransactionFromDatabase && !transactionDetail.isPending()) {
+      LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
+      return;
+    }
+
+    computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);
+
+    if (pendingTransactionFromDatabase) {
+      getTransactionService().saveTransactionDetail(transactionDetail, true);
+    } else {
+      // Compute wallets
+      if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
+        transactionDetail.setFromWallet(getAccountService().getWalletByAddress(transactionDetail.getFrom()));
+      }
+      if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
+        transactionDetail.setToWallet(getAccountService().getWalletByAddress(transactionDetail.getTo()));
+      }
+      if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
+        transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
+      }
+
+      if (hasKnownWalletInTransaction(transactionDetail)) {
+        getTransactionService().saveTransactionDetail(transactionDetail, true);
+      }
+    }
+  }
+
+  public void computeTransactionDetail(TransactionDetail transactionDetail,
+                                       ContractDetail contractDetail,
+                                       Transaction transaction,
+                                       TransactionReceipt transactionReceipt) {
+    transactionDetail.setFrom(transaction.getFrom());
+    transactionDetail.setSucceeded(transactionReceipt.isStatusOK());
+    transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
+    transactionDetail.setGasPrice(transaction.getGasPrice().doubleValue());
+    transactionDetail.setPending(false);
+    if (transactionDetail.getTimestamp() <= 0) {
+      transactionDetail.setTimestamp(System.currentTimeMillis());
+    }
+
+    if (transaction.getValue().compareTo(BigInteger.valueOf(0)) >= 0) {
+      BigInteger weiAmount = transaction.getValue();
+      transactionDetail.setValueDecimal(weiAmount, 18);
+    }
+
+    String contractAddress = contractDetail.getAddress();
     String receiverAddress = transaction.getTo();
-    transactionDetail.setTo(receiverAddress);
+    boolean isContractTransaction = StringUtils.equalsIgnoreCase(contractAddress, receiverAddress);
 
-    if (contractDetail == null && receiverAddress != null) {
-      contractDetail = getContractService().getContractDetail(receiverAddress);
+    if (isContractTransaction) {
+      transactionDetail.setContractAddress(contractAddress);
+    } else {
+      transactionDetail.setTo(receiverAddress);
+      transactionDetail.setTokenFee(0);
+      transactionDetail.setContractAddress(null);
+      transactionDetail.setContractMethodName(null);
+      transactionDetail.setContractAmount(0);
+      transactionDetail.setNoContractFunds(false);
+      return;
     }
 
-    if (contractDetail != null && StringUtils.isNotBlank(contractDetail.getAddress())) {
-      transactionDetail.setContractAddress(contractDetail.getAddress());
-      computeContractTransactionDetail(contractDetail, transactionDetail, transactionReceipt);
-    }
-
-    return transactionDetail;
-  }
-
-  @Override
-  @ExoBlockchainTransaction
-  public void computeContractTransactionDetail(TransactionDetail transactionDetail, Object transactionReceipt) {
-    computeContractTransactionDetail(null, transactionDetail, (TransactionReceipt) transactionReceipt);
-  }
-
-  private void computeContractTransactionDetail(ContractDetail contractDetail,
-                                                TransactionDetail transactionDetail,
-                                                TransactionReceipt transactionReceipt) {
-    List<org.web3j.protocol.core.methods.response.Log> logs = transactionReceipt == null ? null : transactionReceipt.getLogs();
-    transactionDetail.setSucceeded(transactionReceipt != null && transactionReceipt.isStatusOK());
-    if (transactionReceipt != null && transactionReceipt.getGasUsed() != null) {
-      transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
-    }
-    if (!transactionDetail.isSucceeded()) {
+    if (!transactionReceipt.isStatusOK()) {
       if (StringUtils.equals(transactionDetail.getContractMethodName(), FUNC_INITIALIZEACCOUNT)) {
         getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
       }
       return;
     }
 
-    String toAddress = transactionReceipt == null ? null : transactionReceipt.getTo();
-    if (contractDetail == null) {
-      contractDetail = getContractService().getContractDetail(StringUtils.lowerCase(toAddress));
-    }
-    if (contractDetail == null || !StringUtils.equalsIgnoreCase(toAddress, contractDetail.getAddress())) {
-      return;
-    }
-    Integer contractDecimals = contractDetail.getDecimals();
-
     String hash = transactionDetail.getHash();
+
+    List<org.web3j.protocol.core.methods.response.Log> logs = transactionReceipt.getLogs();
     if (logs != null && !logs.isEmpty()) {
+      Integer contractDecimals = contractDetail.getDecimals();
+
       int logsSize = logs.size();
       LOG.debug("Retrieving information from blockchain for transaction {} with {} LOGS", hash, logsSize);
       int i = 0;
@@ -566,67 +537,6 @@ public class EthereumBlockchainTransactionService
         }
       }
     }
-    // Compute wallets
-    if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
-      transactionDetail.setFromWallet(getAccountService().getWalletByAddress(transactionDetail.getFrom()));
-    }
-    if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
-      transactionDetail.setToWallet(getAccountService().getWalletByAddress(transactionDetail.getTo()));
-    }
-    if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
-      transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
-    }
-  }
-
-  private boolean verifyTransactionStatusOnBlockchain(TransactionDetail pendingTransactionDetail,
-                                                      long pendingTransactionMaxDays) throws Exception {
-    String hash = pendingTransactionDetail.getHash();
-    Transaction transaction = ethereumClientConnector.getTransaction(hash);
-    String blockHash = transaction == null ? null : transaction.getBlockHash();
-    if (!StringUtils.isBlank(blockHash)
-        && !StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
-        && transaction.getBlockNumber() != null) {
-      getListenerService().broadcast(NEW_TRANSACTION_EVENT, transaction, null);
-      return true;
-    } else if (transaction == null) {
-      boolean emitFailedTransactionEvent = true;
-      if (pendingTransactionMaxDays > 0) {
-        long creationTimestamp = pendingTransactionDetail.getTimestamp();
-        if (creationTimestamp > 0) {
-          Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
-          emitFailedTransactionEvent = duration.toDays() >= pendingTransactionMaxDays;
-        }
-      }
-      if (emitFailedTransactionEvent) {
-        LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
-                  hash,
-                  pendingTransactionMaxDays);
-        getListenerService().broadcast(NEW_TRANSACTION_EVENT, pendingTransactionDetail, null);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private TransactionDetail processTransaction(String transactionHash, ContractDetail contractDetail) {
-    TransactionDetail transactionDetail = null;
-    try {
-      LOG.debug(" - treating transaction {} that doesn't exist on database.", transactionHash);
-
-      transactionDetail = computeTransactionDetail(transactionHash, contractDetail);
-      if (transactionDetail == null) {
-        throw new IllegalStateException("Empty transaction detail is returned");
-      }
-
-      if (hasKnownWalletInTransaction(transactionDetail)) {
-        LOG.debug("Saving new transaction that wasn't managed by UI: {}", transactionDetail);
-        getTransactionService().saveTransactionDetail(transactionDetail, true);
-      }
-    } catch (Exception e) {
-      LOG.warn("Error processing transaction {}. It will be retried next time.", transactionHash, e);
-      return null;
-    }
-    return transactionDetail;
   }
 
   private long getLastWatchedBlockNumber(long networkId) {
@@ -662,13 +572,6 @@ public class EthereumBlockchainTransactionService
     return transactionService;
   }
 
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
-  }
-
   private WalletAccountService getAccountService() {
     if (accountService == null) {
       accountService = CommonsUtils.getService(WalletAccountService.class);
@@ -676,10 +579,4 @@ public class EthereumBlockchainTransactionService
     return accountService;
   }
 
-  private WalletContractService getContractService() {
-    if (contractService == null) {
-      contractService = CommonsUtils.getService(WalletContractService.class);
-    }
-    return contractService;
-  }
 }

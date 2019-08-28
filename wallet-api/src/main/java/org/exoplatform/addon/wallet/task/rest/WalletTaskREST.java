@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.task.WalletAdminTask;
 import org.exoplatform.addon.wallet.task.service.WalletTaskService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -38,8 +39,8 @@ public class WalletTaskREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Get list of wallet administration tasks assigned to a user", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns list of wallet admin task objects")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response listTasks() {
     ConversationState currentState = ConversationState.getCurrent();
@@ -58,7 +59,7 @@ public class WalletTaskREST implements ResourceContainer {
       } catch (JSONException e1) {
         // Nothing to do
       }
-      return Response.status(500).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
     }
   }
 
@@ -67,8 +68,8 @@ public class WalletTaskREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Marks a task identified by its technical id as completed", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns empty object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response markCompleted(@ApiParam(value = "Task technical id", required = true) @QueryParam("taskId") long taskId) {
     try {
@@ -82,7 +83,7 @@ public class WalletTaskREST implements ResourceContainer {
       } catch (JSONException e1) {
         // Nothing to do
       }
-      return Response.status(500).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
     }
   }
 

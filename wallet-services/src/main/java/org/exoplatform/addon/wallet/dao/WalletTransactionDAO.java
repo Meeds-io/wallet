@@ -17,7 +17,7 @@
 package org.exoplatform.addon.wallet.dao;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.*;
 
 import javax.persistence.TypedQuery;
 
@@ -113,11 +113,12 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return query.getResultList();
   }
 
-  public List<TransactionEntity> getPendingTransactions(long networkId) {
-    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactions",
-                                                                              TransactionEntity.class);
+  public Set<String> getPendingTransactionHashes(long networkId) {
+    TypedQuery<String> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactions",
+                                                                   String.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
-    return query.getResultList();
+    List<String> results = query.getResultList();
+    return results == null ? Collections.emptySet() : new HashSet<>(results);
   }
 
   public TransactionEntity getTransactionByHash(String hash) {

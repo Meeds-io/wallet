@@ -4,8 +4,7 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.math.BigInteger;
 import java.time.*;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,10 +31,8 @@ public class TransactionStorage {
     this.walletTransactionDAO = walletTransactionDAO;
   }
 
-  public List<TransactionDetail> getPendingTransactions(long networkId) {
-    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(networkId);
-    return transactions == null ? Collections.emptyList()
-                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
+  public Set<String> getPendingTransactionHashes(long networkId) {
+    return walletTransactionDAO.getPendingTransactionHashes(networkId);
   }
 
   public List<TransactionDetail> getContractTransactions(String contractAddress,

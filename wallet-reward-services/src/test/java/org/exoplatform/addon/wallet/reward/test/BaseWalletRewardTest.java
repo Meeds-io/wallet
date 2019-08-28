@@ -20,7 +20,9 @@ import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.addon.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.addon.wallet.reward.test.service.WalletRewardSettingsServiceTest;
+import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.utils.RewardUtils;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.commons.utils.MapResourceBundle;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -103,6 +105,7 @@ public abstract class BaseWalletRewardTest {
 
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     defaultSettings = rewardSettingsService.getSettings();
+    setContractDetails();
   }
 
   @Before
@@ -286,5 +289,18 @@ public abstract class BaseWalletRewardTest {
       container.unregisterComponent(ResourceBundleService.class);
     }
     container.registerComponentInstance(ResourceBundleService.class, resourceBundleService);
+  }
+
+  private static void setContractDetails() {
+    WalletService walletService = getService(WalletService.class);
+    ContractDetail contractDetail = new ContractDetail();
+    contractDetail.setName("name");
+    contractDetail.setSymbol("symbol");
+    contractDetail.setDecimals(12);
+    contractDetail.setAddress(WalletUtils.getContractAddress());
+    contractDetail.setContractType("3");
+    contractDetail.setNetworkId(1l);
+    contractDetail.setSellPrice("0.002");
+    walletService.setConfiguredContractDetail(contractDetail);
   }
 }

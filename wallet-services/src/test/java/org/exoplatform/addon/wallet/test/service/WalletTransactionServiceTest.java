@@ -2,7 +2,6 @@ package org.exoplatform.addon.wallet.test.service;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -21,8 +20,6 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   public void testContainerStart() {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
     assertNotNull(walletTransactionService);
-    assertNotNull(walletTransactionService.getPendingTransactionHashes());
-    assertEquals(0, walletTransactionService.getPendingTransactionHashes().size());
   }
 
   /**
@@ -94,44 +91,6 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     assertNotNull(storedTransactionDetail);
     assertEquals(transactionDetail, storedTransactionDetail);
     entitiesToClean.add(storedTransactionDetail);
-  }
-
-  /**
-   * Test {@link WalletTransactionService#getWatchedTreatedTransactionsCount()}
-   */
-  @Test
-  public void testGetWatchedTreatedTransactionsCount() {
-    addCurrentUserWallet();
-
-    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
-                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
-                                                                  CONTRACT_AMOUNT,
-                                                                  ETHER_VALUE,
-                                                                  WALLET_ADDRESS_1,
-                                                                  WALLET_ADDRESS_2,
-                                                                  WALLET_ADDRESS_3,
-                                                                  CURRENT_USER_IDENTITY_ID,
-                                                                  TRANSACTION_LABEL,
-                                                                  TRANSACTION_MESSAGE,
-                                                                  false,
-                                                                  true,
-                                                                  false,
-                                                                  System.currentTimeMillis());
-
-    long initialCount = walletTransactionService.getWatchedTreatedTransactionsCount();
-
-    try {
-      walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER, true);
-    } catch (IllegalAccessException e) {
-      fail("User should be able to save transaction");
-    }
-
-    TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
-    entitiesToClean.add(storedTransactionDetail);
-
-    long newCount = walletTransactionService.getWatchedTreatedTransactionsCount();
-    assertEquals(initialCount + 1, newCount);
   }
 
   /**
@@ -207,53 +166,6 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash(), CURRENT_USER);
     assertNotNull(storedTransactionDetail);
     assertNotNull("Current user should be able to access label of his transaction", storedTransactionDetail.getLabel());
-  }
-
-  /**
-   * Test {@link WalletTransactionService#getPendingTransactions()}
-   */
-  @Test
-  public void testGetPendingTransactions() {
-    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingTransactions();
-    assertNotNull(pendingTransactions);
-    assertEquals(0, pendingTransactions.size());
-
-    TransactionDetail pendingTransactionDetail = createTransactionDetail(generateTransactionHash(),
-                                                                         WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
-                                                                         CONTRACT_AMOUNT,
-                                                                         ETHER_VALUE,
-                                                                         WALLET_ADDRESS_1,
-                                                                         WALLET_ADDRESS_2,
-                                                                         WALLET_ADDRESS_3,
-                                                                         USER_TEST_IDENTITY_ID,
-                                                                         TRANSACTION_LABEL,
-                                                                         TRANSACTION_MESSAGE,
-                                                                         false,
-                                                                         true,
-                                                                         false,
-                                                                         System.currentTimeMillis());
-    entitiesToClean.add(pendingTransactionDetail);
-    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
-                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
-                                                                  CONTRACT_AMOUNT,
-                                                                  ETHER_VALUE,
-                                                                  WALLET_ADDRESS_1,
-                                                                  WALLET_ADDRESS_2,
-                                                                  WALLET_ADDRESS_3,
-                                                                  USER_TEST_IDENTITY_ID,
-                                                                  TRANSACTION_LABEL,
-                                                                  TRANSACTION_MESSAGE,
-                                                                  true,
-                                                                  false,
-                                                                  true,
-                                                                  System.currentTimeMillis());
-    entitiesToClean.add(transactionDetail);
-
-    pendingTransactions = walletTransactionService.getPendingTransactions();
-    assertNotNull(pendingTransactions);
-    assertEquals(1, pendingTransactions.size());
-    assertEquals(pendingTransactionDetail, pendingTransactions.iterator().next());
   }
 
   /**

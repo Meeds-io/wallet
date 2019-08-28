@@ -616,7 +616,7 @@ public class WalletRewardService implements RewardService {
 
     for (WalletPluginReward walletPluginReward : walletRewardsByPlugin) {
       String transactionMessagePart = null;
-      if (walletPluginReward.isPoolsUsed()) {
+      if (walletPluginReward.isPoolsUsed() && StringUtils.isNotBlank(walletReward.getPoolName())) {
         String label = getResourceBundleKey(locale, REWARD_TRANSACTION_WITH_POOL_MESSAGE_KEY);
         if (StringUtils.isBlank(label)) {
           continue;

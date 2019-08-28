@@ -183,8 +183,11 @@ export default {
   },
   created() {
     this.init()
-      .then(() => (this.transactionEtherscanLink = this.walletUtils.getTransactionEtherscanlink()))
-      .then(() => (this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()));
+      .then(() => {
+        this.transactionEtherscanLink = this.walletUtils.getTransactionEtherscanlink();
+        this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink();
+        this.walletUtils.setDraggable('RewardApp');
+      });
   },
   methods: {
     init() {
