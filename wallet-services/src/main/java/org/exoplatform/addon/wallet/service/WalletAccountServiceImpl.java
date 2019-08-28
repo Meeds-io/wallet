@@ -133,6 +133,16 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
                                                                        contractDetail,
                                                                        walletModifications);
         saveWalletBlockchainState(wallet, contractDetail.getAddress());
+
+        if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.INITIALIZED.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.PENDING.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.DENIED.name())
+            && wallet.getIsInitialized() != null && wallet.getIsInitialized() && wallet.getIsApproved() != null
+            && wallet.getIsApproved()) {
+          wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
+          setInitializationStatus(wallet.getAddress(), WalletInitializationState.INITIALIZED);
+        }
+
         getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
       } catch (Exception e) {
         LOG.error("Error refreshing wallet state on blockchain", e);

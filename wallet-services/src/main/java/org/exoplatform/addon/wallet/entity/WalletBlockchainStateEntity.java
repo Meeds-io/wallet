@@ -48,7 +48,7 @@ public class WalletBlockchainStateEntity implements Serializable {
   @Column(name = "IS_INITIALIZED", nullable = false)
   private boolean           isInitialized;
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE })
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE })
   @JoinColumn(name = "WALLET_ID")
   private WalletEntity      wallet;
 

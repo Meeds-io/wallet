@@ -555,4 +555,32 @@ public class WalletAccountREST implements ResourceContainer {
       return Response.serverError().build();
     }
   }
+
+  @GET
+  @Path("refreshWalletFromBlockchain")
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "force refresh wallet from blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns no response")
+  @ApiResponses(value = {
+      @ApiResponse(code = 204, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response refreshWalletFromBlockchain(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
+    if (StringUtils.isBlank(address)) {
+      LOG.warn("Bad request sent to server with empty wallet address in parameter");
+      return Response.status(400).build();
+    }
+    try {
+      Wallet wallet = accountService.getWalletByAddress(address);
+      if (wallet == null) {
+        LOG.warn("Bad request sent to server with unknown wallet address: {}", address);
+        return Response.status(400).build();
+      }
+      accountService.refreshWalletFromBlockchain(wallet, null, null);
+      return Response.status(204).build();
+    } catch (Exception e) {
+      LOG.warn("Error retrieving list of wallets", e);
+      return Response.serverError().build();
+    }
+  }
 }

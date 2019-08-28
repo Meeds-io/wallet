@@ -32,33 +32,13 @@
         </div>
 
         <div
-          v-if="displayCompleteMessage"
           id="walletBackupDetailedWarning"
           class="alert alert-warning v-content">
           <p>
             <i class="uiIconWarning"></i>
-            {{ $t('exoplatform.wallet.info.backupWalletPart1') }}. <br>
-            {{ $t('exoplatform.wallet.info.backupWalletPart2') }}: <br>
-            - {{ $t('exoplatform.wallet.info.backupWalletPart3') }} <br>
-            - {{ $t('exoplatform.wallet.info.backupWalletPart4') }}
-          </p>
-          <p>
-            {{ $t('exoplatform.wallet.info.backupWalletPart5') }}. <br>
-            {{ $t('exoplatform.wallet.info.backupWalletPart6') }}, <strong>
-              {{ $t('exoplatform.wallet.info.backupWalletPart7') }}
-            </strong>.
-          </p>
-        </div>
-        <div 
-          v-else 
-          id="walletBackupSimpleWarning"
-          class="alert alert-warning v-content">
-          <p>
-            <i class="uiIconWarning"></i>
-            {{ $t('exoplatform.wallet.info.backupWalletPart8') }}. <br>
-            {{ $t('exoplatform.wallet.info.backupWalletPart9') }}, <strong>
-              {{ $t('exoplatform.wallet.info.backupWalletPart10') }}
-            </strong>.
+            {{ $t('exoplatform.wallet.warning.backupWalletPart1') }} <br>
+            {{ $t('exoplatform.wallet.warning.backupWalletPart2') }} <br>
+            {{ $t('exoplatform.wallet.warning.backupWalletPart3') }} <br>
           </p>
         </div>
 
@@ -119,12 +99,6 @@ import {setDraggable, unlockBrowserWallet, lockBrowserWallet, getCurrentBrowserW
 
 export default {
   props: {
-    displayCompleteMessage: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
     noButton: {
       type: Boolean,
       default: function() {

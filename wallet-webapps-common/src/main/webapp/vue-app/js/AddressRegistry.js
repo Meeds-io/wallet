@@ -50,16 +50,28 @@ export function saveNewAddress(id, type, address, isBrowserWallet) {
   });
 }
 
-export function refreshWallet(wallet) {
+export function refreshWallet(wallet, refreshOnBlockchain) {
   if (!wallet && !wallet.address && !(wallet.id && wallet.type)) {
     console.debug("can't refresh wallet with empty identifiers", wallet);
     return Promise.resolve(null);
   }
-  if (wallet.address) {
-    return searchWalletByAddress(wallet.address, true).then((freshWallet) => freshWallet && Object.assign(wallet, freshWallet));
+  let promise = null;
+  if (refreshOnBlockchain) {
+    promise = fetch(`/portal/rest/wallet/api/account/refreshWalletFromBlockchain?address=${wallet.address}`, {
+      credentials: 'include'
+    }).then((resp) => {
+      return resp && resp.ok;
+    });
   } else {
-    return searchWalletByTypeAndId(wallet.id, wallet.type).then((freshWallet) => freshWallet && Object.assign(wallet, freshWallet));
+    promise = Promise.resolve(null);
   }
+  return promise.then(() => {
+    if (wallet.address) {
+      return searchWalletByAddress(wallet.address, true).then((freshWallet) => freshWallet && Object.assign(wallet, freshWallet));
+    } else {
+      return searchWalletByTypeAndId(wallet.id, wallet.type).then((freshWallet) => freshWallet && Object.assign(wallet, freshWallet));
+    }
+  });
 }
 
 /*

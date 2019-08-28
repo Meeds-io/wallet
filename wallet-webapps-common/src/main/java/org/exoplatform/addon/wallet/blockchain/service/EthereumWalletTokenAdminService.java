@@ -551,11 +551,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
                                                            walletAddress);
       wallet.setIsInitialized(initialized);
     }
-
-    if (wallet.getIsInitialized() != null && wallet.getIsInitialized() && wallet.getIsApproved() != null
-        && wallet.getIsApproved()) {
-      wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
-    }
   }
 
   @Override
