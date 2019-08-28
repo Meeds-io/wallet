@@ -180,7 +180,7 @@ export default {
       if (!value) {
         return;
       }
-      const isAddress = window.localWeb3.utils.isAddress(value);
+      const isAddress = window.localWeb3 && window.localWeb3.utils.isAddress(value);
       if (isAddress && !this.noAddress) {
         this.items.push({
           address: value,
@@ -316,7 +316,7 @@ export default {
       return true;
     },
     selectItem(id, type) {
-      const isAddress = id && window.localWeb3.utils.isAddress(id);
+      const isAddress = id && window.localWeb3 && window.localWeb3.utils.isAddress(id);
       const contractAddress = window.walletSettings && window.walletSettings.contractAddress;
       if (!id) {
         this.$refs.selectAutoComplete.selectItem(null);
