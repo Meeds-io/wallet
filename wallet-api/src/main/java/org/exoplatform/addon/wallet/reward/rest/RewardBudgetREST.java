@@ -14,6 +14,7 @@ import org.exoplatform.addon.wallet.model.reward.WalletReward;
 import org.exoplatform.addon.wallet.reward.service.RewardService;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -41,8 +42,8 @@ public class RewardBudgetREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Compute rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns a set of wallet reward object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
@@ -59,7 +60,7 @@ public class RewardBudgetREST implements ResourceContainer {
       } catch (JSONException e1) {
         // Nothing to do
       }
-      return Response.status(500).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
     }
   }
 
@@ -68,8 +69,8 @@ public class RewardBudgetREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Send rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, notes = "return empty response")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
@@ -83,7 +84,7 @@ public class RewardBudgetREST implements ResourceContainer {
       } catch (JSONException e1) {
         // Nothing to do
       }
-      return Response.status(500).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
     }
   }
 

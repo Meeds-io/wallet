@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -51,9 +52,9 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response intializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
                                   @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
@@ -63,7 +64,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
@@ -86,9 +87,9 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Send ether using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendEther(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
                             @ApiParam(value = "ether amount to send", required = true) @FormParam("etherAmount") double etherAmount,
@@ -97,11 +98,11 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     if (etherAmount <= 0) {
       LOG.warn("Wrong ether amount '{}' sent to server", etherAmount);
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
@@ -129,9 +130,9 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Send tokens using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendToken(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
                             @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
@@ -139,7 +140,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {

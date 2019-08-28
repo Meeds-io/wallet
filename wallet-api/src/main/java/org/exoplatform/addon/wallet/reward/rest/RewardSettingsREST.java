@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.service.RewardSettingsService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -35,8 +36,8 @@ public class RewardSettingsREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Get reward settings", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward settings object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getSettings() {
     try {
@@ -54,14 +55,14 @@ public class RewardSettingsREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Get reward settings", httpMethod = "POST", response = Response.class, produces = "application/json", notes = "returns reward settings object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response saveSettings(@ApiParam(value = "Reward settings object", required = true) RewardSettings rewardSettings) {
     if (rewardSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     try {
       rewardSettingsService.saveSettings(rewardSettings);
@@ -78,19 +79,19 @@ public class RewardSettingsREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Get dates corresponding to chosen period type and start date", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward period dates object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getRewardDates(@ApiParam(value = "Reward period type", required = true) @QueryParam("periodType") String periodType,
                                  @ApiParam(value = "A chosen date to calculate its period", required = true) @QueryParam("dateInSeconds") long dateInSeconds) {
     if (dateInSeconds == 0) {
       LOG.warn("Bad request sent to server with empty 'dateInSeconds' parameter");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     if (StringUtils.isBlank(periodType)) {
       LOG.warn("Bad request sent to server with empty 'periodType' parameter");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     RewardPeriodType rewardPeriodType = RewardPeriodType.valueOf(periodType);
     RewardPeriod rewardPeriod = rewardPeriodType.getPeriodOfTime(timeFromSeconds(dateInSeconds));

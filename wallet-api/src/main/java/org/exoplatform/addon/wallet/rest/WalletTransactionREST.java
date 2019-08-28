@@ -31,6 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -58,16 +59,16 @@ public class WalletTransactionREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response saveTransactionDetails(@ApiParam(value = "transaction detail object", required = true) TransactionDetail transactionDetail) {
     if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getHash())
         || StringUtils.isBlank(transactionDetail.getFrom())) {
       LOG.warn("Bad request sent to server with empty transaction details: {}",
                transactionDetail == null ? "" : transactionDetail.toString());
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     String currentUserId = getCurrentUserId();
@@ -76,7 +77,7 @@ public class WalletTransactionREST implements ResourceContainer {
       return Response.ok().build();
     } catch (IllegalAccessException e) {
       LOG.warn("User {} is attempting to save transaction {}", currentUserId, transactionDetail, e);
-      return Response.status(403).build();
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Error saving transaction message", e);
       return Response.serverError().build();
@@ -89,14 +90,14 @@ public class WalletTransactionREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Get saved transaction in internal database by hash", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getSavedTransactionByHash(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash) {
     if (StringUtils.isBlank(hash)) {
       LOG.warn("Empty transaction hash", hash);
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
@@ -114,20 +115,20 @@ public class WalletTransactionREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Get token amounts sent per each period of time by a wallet identified by its address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction statistics object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getTransactionsAmounts(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
                                          @ApiParam(value = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
                                          @ApiParam(value = "user locale language", required = false) @QueryParam("lang") String lang) {
     if (StringUtils.isBlank(periodicity)) {
       LOG.warn("Bad request sent to server with empty periodicity parameter");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
@@ -147,9 +148,9 @@ public class WalletTransactionREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Get list of transactions of an address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns list of transaction detail object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getTransactions(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
                                   @ApiParam(value = "token contract address to filter with", required = false) @QueryParam("contractAddress") String contractAddress,
@@ -160,7 +161,7 @@ public class WalletTransactionREST implements ResourceContainer {
                                   @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_ERROR, address);
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     String currentUserId = getCurrentUserId();
@@ -176,7 +177,7 @@ public class WalletTransactionREST implements ResourceContainer {
       return Response.ok(transactionDetails).build();
     } catch (IllegalAccessException e) {
       LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
-      return Response.status(403).build();
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Error getting transactions of wallet " + address, e);
       return Response.serverError().build();

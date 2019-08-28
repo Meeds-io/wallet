@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import org.exoplatform.addon.wallet.model.settings.InitialFundsSettings;
 import org.exoplatform.addon.wallet.model.settings.UserSettings;
 import org.exoplatform.addon.wallet.service.WalletService;
+import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -49,8 +50,8 @@ public class WalletSettingsREST implements ResourceContainer {
   @RolesAllowed("users")
   @ApiOperation(value = "Retrieves user settings by including space settings when added in parameters", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns user settings object")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getSettings(@ApiParam(value = "Space pretty name", required = false) @QueryParam("spaceId") String spaceId) {
     String currentUser = getCurrentUserId();
@@ -59,7 +60,7 @@ public class WalletSettingsREST implements ResourceContainer {
       return Response.ok(userSettings).build();
     } catch (Exception e) {
       LOG.error("Error getting settings for user {} and spaceId {}", currentUser, spaceId, e);
-      return Response.status(403).build();
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     }
   }
 
@@ -69,14 +70,14 @@ public class WalletSettingsREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Saves initial funds settings", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "Request fulfilled"),
-      @ApiResponse(code = 400, message = "Invalid query input"),
-      @ApiResponse(code = 403, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response saveInitialFundsSettings(@ApiParam(value = "Intial funds settings", required = true) InitialFundsSettings initialFundsSettings) {
     if (initialFundsSettings == null) {
       LOG.warn("Bad request sent to server with empty settings");
-      return Response.status(400).build();
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
