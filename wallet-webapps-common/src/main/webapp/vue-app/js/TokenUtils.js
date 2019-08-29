@@ -6,11 +6,10 @@ export function reloadContractDetails(contractDetails, walletAddress) {
     return;
   }
 
-  return getSavedContractDetails(contractDetails.address)
-    .then(savedDetails => {
-      Object.assign(contractDetails, savedDetails);
-      return getContractDetails(walletAddress);
-    });
+  return getSavedContractDetails(contractDetails.address).then((savedDetails) => {
+    Object.assign(contractDetails, savedDetails);
+    return getContractDetails(walletAddress);
+  });
 }
 
 export function getContractDetails(walletAddress) {
@@ -109,31 +108,31 @@ export function getSavedContractDetails(address) {
 /*
  * Creates a Web3 conract instance
  */
- export function createNewContractInstanceByName(tokenName, ...args) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+export function createNewContractInstanceByName(tokenName, ...args) {
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 /*
  * Creates a Web3 conract instance
  */
 export function createNewContractInstanceByNameAndAddress(tokenName, tokenAddress) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 export function estimateContractDeploymentGas(instance) {
@@ -218,17 +217,16 @@ function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptT
     }
     return;
   }
-  return window.localWeb3.eth.getTransaction(hash)
-    .then(transaction => {
-      if (transaction) {
-        if (hashCallback) {
-          return hashCallback(hash);
-        }
-      } else {
-        console.debug('Transaction not found on blockchain', hash);
-        waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
+  return window.localWeb3.eth.getTransaction(hash).then((transaction) => {
+    if (transaction) {
+      if (hashCallback) {
+        return hashCallback(hash);
       }
-    });
+    } else {
+      console.debug('Transaction not found on blockchain', hash);
+      waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
+    }
+  });
 }
 
 function transformContracDetailsToFailed(contractDetails, e) {
@@ -239,29 +237,29 @@ function transformContracDetailsToFailed(contractDetails, e) {
 }
 
 function sendTransaction(transactionToSend, hashCallback, errorCallback) {
-  return window.localWeb3.eth.sendTransaction(transactionToSend)
+  return window.localWeb3.eth
+    .sendTransaction(transactionToSend)
     .on('transactionHash', (hash) => {
       if (hashCallback) {
         // Verify if the generated hash is a bug from Web3js
         // And then delete nonce to reattempt sending transaction
         return getSavedTransactionByHash(hash)
-          .then(transaction => {
+          .then((transaction) => {
             // A transaction with same hash has been already sent
             if (transaction) {
               console.debug('Transaction was found on server eXo', transaction, ' verifying blockchain transactions status, else incrementing gas price ', transactionToSend.nonce);
 
-              return window.localWeb3.eth.getTransaction(hash)
-                .then(transaction => {
-                  if (transaction) {
-                    console.debug('Found transaction on blockchain, incrementing nonce', transaction);
-                    transactionToSend.nonce++;
-                  } else {
-                    console.debug('Transaction not found on blockchain, incrementing gas price with 1% to replace old buggy transaction', hash);
-                    delete transactionToSend.nonce;
-                    transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
-                  }
-                  return sendTransaction(transactionToSend, hashCallback, errorCallback);
-                });
+              return window.localWeb3.eth.getTransaction(hash).then((transaction) => {
+                if (transaction) {
+                  console.debug('Found transaction on blockchain, incrementing nonce', transaction);
+                  transactionToSend.nonce++;
+                } else {
+                  console.debug('Transaction not found on blockchain, incrementing gas price with 1% to replace old buggy transaction', hash);
+                  delete transactionToSend.nonce;
+                  transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
+                }
+                return sendTransaction(transactionToSend, hashCallback, errorCallback);
+              });
             }
             // Attempt 5 times to retrieve sent transaction
             return waitTransactionOnBlockchain(hash, hashCallback, errorCallback, 5);
@@ -280,14 +278,13 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
     })
     .catch((error) => {
       // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
+      if (String(error).indexOf('Failed to check for transaction receipt') >= 0) {
         return;
       } else {
         console.error('Error fetching transaction with hash', transactionToSend && transactionToSend.hash, error);
         errorCallback(error);
       }
     });
-
 }
 
 function getContractFiles(tokenName) {
@@ -320,7 +317,7 @@ function getContractFiles(tokenName) {
     .then((abi) => {
       return {
         abi: abi,
-        bin: contractBin
-      }
+        bin: contractBin,
+      };
     });
 }

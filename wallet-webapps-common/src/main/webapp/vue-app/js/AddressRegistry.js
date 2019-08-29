@@ -58,7 +58,7 @@ export function refreshWallet(wallet, refreshOnBlockchain) {
   let promise = null;
   if (refreshOnBlockchain) {
     promise = fetch(`/portal/rest/wallet/api/account/refreshWalletFromBlockchain?address=${wallet.address}`, {
-      credentials: 'include'
+      credentials: 'include',
     }).then((resp) => {
       return resp && resp.ok;
     });

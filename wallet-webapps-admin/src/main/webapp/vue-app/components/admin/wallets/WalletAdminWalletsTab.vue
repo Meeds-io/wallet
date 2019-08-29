@@ -15,9 +15,9 @@
       <i class="uiIconWarning"></i>
       {{ $t('exoplatform.wallet.warning.adminWalletNotInitialized') }}
     </div>
-    <v-container>
-      <v-layout>
-        <v-flex md3 xs12>
+    <v-container class="walletDisplay">
+      <v-layout class="hidden-sm-and-down">
+        <v-flex md4 xs12>
           <v-btn-toggle
             v-model="walletTypes"
             class="walletFilterButtons"
@@ -36,8 +36,7 @@
           </v-btn-toggle>
         </v-flex>
         <v-flex
-          md3
-          offset-md1
+          md4
           xs12>
           <v-btn-toggle
             v-model="walletStatuses"
@@ -57,8 +56,58 @@
         </v-flex>
         <v-flex
           md3
-          offset-md2
+          offset-md1
           xs12>
+          <v-text-field
+            v-model="search"
+            :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
+            append-icon="search"
+            class="pt-0" />
+        </v-flex>
+      </v-layout>
+      <v-layout class="hidden-md-and-up displayMobile">
+        <v-flex xs11 pb-3>
+          <v-btn-toggle
+            v-model="walletTypes"
+            class="walletFilterButtons"
+            mandatory
+            multiple
+            flat>
+            <v-btn value="user">
+              {{ $t('exoplatform.wallet.label.users') }}
+            </v-btn>
+            <v-btn value="space">
+              {{ $t('exoplatform.wallet.label.spaces') }}
+            </v-btn>
+            <v-btn value="admin">
+              {{ $t('exoplatform.wallet.label.admin') }}
+            </v-btn>
+          </v-btn-toggle>
+        </v-flex>
+        <v-flex
+          xs11
+          pb-3>
+          <v-btn-toggle
+            v-model="walletStatuses"
+            class="walletFilterButtons"
+            multiple
+            flat>
+            <v-btn value="disabled">
+              {{ $t('exoplatform.wallet.label.disabled') }}
+            </v-btn>
+            <v-btn value="disapproved">
+              {{ $t('exoplatform.wallet.label.disapproved') }}
+            </v-btn>
+            <v-btn value="deletedIdentity">
+              {{ $t('exoplatform.wallet.label.deleted') }}
+            </v-btn>
+          </v-btn-toggle>
+        </v-flex>
+        <v-flex
+          sm4
+          xs9
+          offset-xs1
+          offset-sm3>
           <v-text-field
             v-model="search"
             :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
@@ -229,13 +278,13 @@
                           </v-list-tile>
                           <v-divider />
                         </template>
-  
+
                         <v-list-tile v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
                           <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
                         </v-list-tile>
                         <v-divider />
                       </template>
-  
+
                       <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
                         <v-list-tile-title>{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-tile-title>
                       </v-list-tile>
