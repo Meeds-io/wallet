@@ -120,12 +120,9 @@
                     </v-icon>
                     {{ $t('exoplatform.wallet.warning.lowTokenAmount', {0: contractDetails && contractDetails.name}) }}
                   </template>
-                  <v-icon
-                    v-else
-                    :title="$t('exoplatform.wallet.button.ok')"
-                    color="green">
-                    fa-check-circle
-                  </v-icon>
+                  <template v-else>
+                    {{ $t('exoplatform.wallet.label.initializedWallet') }}
+                  </template>
                 </template>
               </template>
             </td>
