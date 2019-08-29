@@ -35,6 +35,7 @@ import org.web3j.protocol.websocket.*;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.services.log.ExoLogger;
@@ -260,6 +261,16 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   @Override
   public Map<String, Object> getStatisticParameters(String statisticType, Object result, Object... methodArgs) {
     Map<String, Object> parameters = new HashMap<>();
+
+    GlobalSettings settings = getSettings();
+    if (settings != null && settings.getNetwork() != null
+        && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
+      parameters.put("blockchain_network_id", settings.getNetwork().getId());
+      String websocketProviderURL = settings.getNetwork().getWebsocketProviderURL();
+      String[] urlParts = websocketProviderURL.split("/");
+      parameters.put("blockchain_network_url_suffix", urlParts[urlParts.length - 1]);
+    }
+
     switch (statisticType) {
     case OPERATION_GET_TRANSACTION:
       parameters.put("transaction_hash", methodArgs[0]);
