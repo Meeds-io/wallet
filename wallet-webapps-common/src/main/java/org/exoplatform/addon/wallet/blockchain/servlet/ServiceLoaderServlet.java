@@ -111,7 +111,7 @@ public class ServiceLoaderServlet extends HttpServlet {
 
       // Start listening on blockchain modification for websocket trigger
       listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionMinedListener());
-      listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionNotificationListener(container));
+      listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new TransactionNotificationListener(container));
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new WebSocketTransactionListener());
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());

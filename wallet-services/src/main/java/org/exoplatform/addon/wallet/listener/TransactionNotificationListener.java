@@ -49,7 +49,7 @@ import org.exoplatform.social.core.service.LinkProvider;
  * database and send notifications.
  */
 @Asynchronous
-public class TransactionNotificationListener extends Listener<Object, Map<String, Object>> {
+public class TransactionNotificationListener extends Listener<Object, TransactionDetail> {
   private static final Log         LOG = ExoLogger.getLogger(TransactionNotificationListener.class);
 
   private ExoContainer             container;
@@ -63,15 +63,16 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
   }
 
   @Override
-  public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
+  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String transactionHash = (String) event.getData().get("hash");
+      TransactionDetail transactionDetail = event.getData();
+      String transactionHash = transactionDetail.getHash();
       if (StringUtils.isBlank(transactionHash)) {
         return;
       }
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
       if (transactionDetail == null || !transactionDetail.isSucceeded()) {
         // No notification for not succeeded transactions
         return;

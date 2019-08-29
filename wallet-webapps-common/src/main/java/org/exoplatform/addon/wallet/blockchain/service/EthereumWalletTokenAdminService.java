@@ -309,7 +309,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -353,7 +353,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -409,7 +409,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -465,7 +465,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 

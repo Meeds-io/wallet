@@ -83,14 +83,10 @@ public interface WalletTransactionService {
    *
    * @param transactionDetail transaction detail to save
    * @param currentUser current username that is saving transaction
-   * @param broadcastMinedTransaction whether the transaction has been mined on
-   *          blockchain or not
    * @throws IllegalAccessException if current user is not allowed to save
    *           transaction to sender and receiver wallet
    */
-  void saveTransactionDetail(TransactionDetail transactionDetail,
-                             String currentUser,
-                             boolean broadcastMinedTransaction) throws IllegalAccessException;
+  void saveTransactionDetail(TransactionDetail transactionDetail, String currentUser) throws IllegalAccessException;
 
   /**
    * @return max days to wait until marking a non existing transaction on

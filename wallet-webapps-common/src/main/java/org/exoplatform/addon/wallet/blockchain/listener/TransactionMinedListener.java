@@ -29,20 +29,20 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
   public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
     Map<String, Object> transactionDetailObject = event.getData();
     String hash = (String) transactionDetailObject.get("hash");
-    TransactionDetail transactionDetails = getTransactionService().getTransactionByHash(hash);
-    if (transactionDetails == null) {
+    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(hash);
+    if (transactionDetail == null) {
       return;
     }
 
     Set<String> contractMethodsInvoked = new HashSet<>();
     Map<String, Set<String>> walletsModifications = new HashMap<>();
-    String contractMethodName = transactionDetails.getContractMethodName();
+    String contractMethodName = transactionDetail.getContractMethodName();
     if (StringUtils.isNotBlank(contractMethodName)) {
       contractMethodsInvoked.add(contractMethodName);
     }
 
-    if (transactionDetails.isSucceeded()) {
-      addWalletsModification(transactionDetails, walletsModifications);
+    if (transactionDetail.isSucceeded()) {
+      addWalletsModification(transactionDetail, walletsModifications);
     }
 
     // Refresh saved contract detail in internal database from blockchain
@@ -55,7 +55,7 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
       getAccountService().refreshWalletsFromBlockchain(walletsModifications);
     }
 
-    getListenerService().broadcast(TRANSACTION_MODIFIED_EVENT, null, transactionDetails);
+    getListenerService().broadcast(TRANSACTION_MODIFIED_EVENT, null, transactionDetail);
   }
 
   private void addWalletsModification(TransactionDetail transactionDetail, Map<String, Set<String>> walletsModifications) {

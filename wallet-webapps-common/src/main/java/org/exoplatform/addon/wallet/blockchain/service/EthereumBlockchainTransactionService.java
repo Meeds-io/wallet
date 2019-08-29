@@ -219,12 +219,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
           if (duration.toDays() >= pendingTransactionMaxDays) {
             transactionDetail.setExceededMaxWaitMiningTime(true);
+            boolean broadcastTransactionMining = transactionDetail.isPending();
             transactionDetail.setPending(false);
             transactionDetail.setSucceeded(false);
             LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
                       transactionHash,
                       pendingTransactionMaxDays);
-            getTransactionService().saveTransactionDetail(transactionDetail, true);
+            getTransactionService().saveTransactionDetail(transactionDetail, broadcastTransactionMining);
           }
         }
       }
@@ -263,7 +264,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionDetail = new TransactionDetail();
       transactionDetail.setNetworkId(getNetworkId());
       transactionDetail.setHash(transactionHash);
+      transactionDetail.setPending(true);
     }
+
+    boolean broadcastMinedTransaction = transactionDetail.isPending();
 
     TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
     if (transactionReceipt == null) {
@@ -278,7 +282,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);
 
     if (pendingTransactionFromDatabase) {
-      getTransactionService().saveTransactionDetail(transactionDetail, true);
+      getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
     } else {
       // Compute wallets
       if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
@@ -292,7 +296,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       }
 
       if (hasKnownWalletInTransaction(transactionDetail)) {
-        getTransactionService().saveTransactionDetail(transactionDetail, true);
+        getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
       }
     }
   }
