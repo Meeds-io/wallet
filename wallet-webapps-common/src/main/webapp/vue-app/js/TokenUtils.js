@@ -278,14 +278,6 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
           });
       }
     })
-    .on('error', (error, receipt) => {
-      // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
-        return;
-      } else {
-        return errorCallback(error, receipt);
-      }
-    })
     .catch((error) => {
       // Workaround to stop polling from blockchain waiting for receipt
       if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
