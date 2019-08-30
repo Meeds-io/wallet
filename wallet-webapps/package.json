@@ -19,7 +19,7 @@
     "lint": "eslint --fix ./src/main/webapp/vue-app/*.js ./src/main/webapp/vue-app/**/*.js ./src/main/webapp/vue-app/**/*.vue ./src/main/webapp/vue-app/**/**/*.vue",
     "eslint-check": "eslint --print-config . | eslint-config-prettier-check",
     "build": "webpack --config webpack.prod.js --mode production",
-    "ganache-cli": "ganache-cli --account=0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3,100000000000000000000 --networkId 4452364 -b 180 --debug --db ~/.ganache-data"
+    "ganache-cli": "ganache-cli --account=0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3,100000000000000000000 --networkId 4452364 -b 20 --debug --db ~/.ganache-data"
   },
   "author": "eXo",
   "license": "LGPL",

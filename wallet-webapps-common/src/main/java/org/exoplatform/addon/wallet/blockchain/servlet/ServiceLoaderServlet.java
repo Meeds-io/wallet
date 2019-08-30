@@ -92,8 +92,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       // start connection to blockchain
       EthereumClientConnector web3jConnector = new EthereumClientConnector();
       container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
-      web3jConnector.start();
-      web3jConnector.waitConnection();
+      web3jConnector.start(true);
 
       // Blockchain transaction decoder
       EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector);

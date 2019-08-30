@@ -9,7 +9,6 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.*;
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
@@ -17,10 +16,10 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.*;
+import org.web3j.tx.FastRawTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
-import org.web3j.tx.response.NoOpProcessor;
 import org.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -819,24 +818,13 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice(settings));
     BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
     ContractGasProvider gasProvider = new StaticGasProvider(gasPrice, gasLimit);
-    contractTransactionManager = getTransactionManager(adminCredentials);
+    contractTransactionManager = getClientConnector().getTransactionManager(adminCredentials);
     this.ertInstance = ERTTokenV2.load(contractAddress,
                                        getClientConnector().getWeb3j(),
                                        contractTransactionManager,
                                        gasProvider);
     this.isReadOnlyContract = adminCredentials == null;
     return this.ertInstance;
-  }
-
-  private TransactionManager getTransactionManager(Credentials credentials) {
-    getClientConnector().waitConnection();
-
-    Web3j web3j = getClientConnector().getWeb3j();
-    if (credentials == null) {
-      return new ReadonlyTransactionManager(web3j, Address.DEFAULT.toString());
-    } else {
-      return new FastRawTransactionManager(web3j, credentials, new NoOpProcessor(web3j));
-    }
   }
 
   private Credentials getAdminCredentials() {

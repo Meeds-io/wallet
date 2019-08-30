@@ -26,12 +26,16 @@ import java.util.concurrent.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.core.methods.response.EthLog.LogResult;
 import org.web3j.protocol.websocket.*;
+import org.web3j.tx.*;
+import org.web3j.tx.response.NoOpProcessor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -71,35 +75,54 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   @Override
   public void start() {
-    this.start(getWebsocketURL());
+    this.start(false);
   }
 
-  public void start(String websocketURL) {
-    this.websocketURL = websocketURL;
+  public void start(boolean blocking) {
+    this.websocketURL = getWebsocketURL();
     this.serviceStarted = true;
 
     // Blockchain connection verifier
-    connectionVerifierExecutor.scheduleWithFixedDelay(() -> {
+    connectionVerifierExecutor.scheduleAtFixedRate(() -> {
       try {
-        if (!initWeb3Connection()) {
+        if (isConnected()) {
           return;
+        } else {
+          connect();
         }
       } catch (Throwable e) {
         if (LOG.isDebugEnabled()) {
-          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e);
+          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint", e);
         } else {
           LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
         }
-        return;
       }
-    }, 5, 10, TimeUnit.SECONDS);
+    }, 0, 10, TimeUnit.SECONDS);
+
+    if (blocking) {
+      waitConnection();
+    }
   }
 
   @Override
   public void stop() {
     this.serviceStopping = true;
     connectionVerifierExecutor.shutdownNow();
-    resetConnection();
+    closeConnection();
+  }
+
+  /**
+   * Return {@link TransactionManager} to use when interacting with blockchain
+   * 
+   * @param credentials wallet credentials to use for this transaction manager
+   * @return {@link TransactionManager}
+   */
+  public TransactionManager getTransactionManager(Credentials credentials) {
+    if (credentials == null) {
+      return new ReadonlyTransactionManager(getWeb3j(), Address.DEFAULT.toString());
+    } else {
+      return new FastRawTransactionManager(getWeb3j(), credentials, new NoOpProcessor(getWeb3j()));
+    }
   }
 
   /**
@@ -110,10 +133,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    */
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION)
   public Transaction getTransaction(String transactionHash) {
-    waitConnection();
     EthTransaction ethTransaction;
     try {
-      ethTransaction = web3j.ethGetTransactionByHash(transactionHash).send();
+      ethTransaction = getWeb3j().ethGetTransactionByHash(transactionHash).send();
     } catch (IOException e) {
       LOG.info("Connection interrupted while getting Transaction '{}' information. Reattempt until getting it. Reason: {}",
                transactionHash,
@@ -134,10 +156,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    */
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION_RECEIPT)
   public TransactionReceipt getTransactionReceipt(String transactionHash) {
-    waitConnection();
     EthGetTransactionReceipt ethGetTransactionReceipt;
     try {
-      ethGetTransactionReceipt = web3j.ethGetTransactionReceipt(transactionHash).send();
+      ethGetTransactionReceipt = getWeb3j().ethGetTransactionReceipt(transactionHash).send();
     } catch (IOException e) {
       LOG.info("Connection interrupted while getting Transaction receipt '{}' information. Reattempt until getting it. Reason: {}",
                transactionHash,
@@ -151,20 +172,12 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   /**
-   * @return true if the connection to the blockchain is established
-   */
-  public boolean isConnected() {
-    return web3j != null && web3jService != null && webSocketClient != null && webSocketClient.isOpen();
-  }
-
-  /**
    * @return last mined block number from blockchain
    * @throws IOException when error sending transaction on blockchain
    */
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_LAST_BLOCK_NUMBER)
   public long getLastestBlockNumber() throws IOException {
-    waitConnection();
-    BigInteger blockNumber = web3j.ethBlockNumber().send().getBlockNumber();
+    BigInteger blockNumber = getWeb3j().ethBlockNumber().send().getBlockNumber();
     return blockNumber.longValue();
   }
 
@@ -183,12 +196,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public Set<String> getContractTransactions(String contractsAddress,
                                              long fromBlock,
                                              long toBlock) throws IOException {
-    waitConnection();
     org.web3j.protocol.core.methods.request.EthFilter filter =
                                                              new org.web3j.protocol.core.methods.request.EthFilter(new DefaultBlockParameterNumber(fromBlock),
                                                                                                                    new DefaultBlockParameterNumber(toBlock),
                                                                                                                    contractsAddress);
-    EthLog contractTransactions = web3j.ethGetLogs(filter).send();
+    EthLog contractTransactions = getWeb3j().ethGetLogs(filter).send();
 
     @SuppressWarnings("rawtypes")
     List<LogResult> logs = contractTransactions.getResult();
@@ -201,61 +213,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       }
     }
     return txHashes;
-  }
-
-  public Web3j getWeb3j() {
-    this.waitConnection();
-    return web3j;
-  }
-
-  public void waitConnection() {
-    if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
-      throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
-    }
-    if (this.serviceStopping) {
-      throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
-    }
-    try {
-      while (!isConnected()) {
-        if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
-          throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
-        }
-        if (this.serviceStopping) {
-          throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
-        }
-        LOG.info("Wait until Websocket connection to blockchain is established to retrieve information");
-        Thread.sleep(5000);
-      }
-    } catch (Exception e) {
-      throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
-    }
-  }
-
-  private void resetConnection() {
-    if (web3j != null) {
-      LOG.info("Resetting blockchain connection");
-      try {
-        web3j.shutdown();
-      } catch (Throwable e) {
-        LOG.warn("Error closing old web3j connection: {}", e.getMessage());
-        if (this.web3jService != null && webSocketClient != null && webSocketClient.isOpen()) {
-          try {
-            web3jService.close();
-          } catch (Throwable e1) {
-            LOG.warn("Error closing old websocket connection: {}", e1.getMessage());
-          }
-        } else if (webSocketClient != null && webSocketClient.isOpen()) {
-          try {
-            webSocketClient.close();
-          } catch (Throwable e1) {
-            LOG.warn("Error closing old websocket connection: {}", e1.getMessage());
-          }
-        }
-      }
-      web3j = null;
-      web3jService = null;
-      webSocketClient = null;
-    }
   }
 
   @Override
@@ -300,35 +257,68 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return parameters;
   }
 
+  /**
+   * Retruns current nonce to use for next transaction to use on blockchain for
+   * a selected wallet address
+   * 
+   * @param walletAddress wallet adres to determine its next nonce
+   * @return next transaction nonce
+   * @throws IOException if an I/O problem happens when connecting to blockchain
+   */
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION_COUNT)
   public BigInteger getNonce(String walletAddress) throws IOException {
-    waitConnection();
     return getWeb3j().ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
                      .send()
                      .getTransactionCount();
   }
 
-  private boolean initWeb3Connection() throws Exception { // NOSONAR
+  public Web3j getWeb3j() {
+    this.waitConnection();
+    return web3j;
+  }
+
+  private boolean isConnected() {
+    return web3j != null && web3jService != null && webSocketClient != null && webSocketClient.isOpen();
+  }
+
+  private void waitConnection() {
+    if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
+      throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
+    }
+    if (this.serviceStopping) {
+      throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
+    }
+    try {
+      while (!isConnected()) {
+        if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
+          throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
+        }
+        if (this.serviceStopping) {
+          throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
+        }
+        LOG.debug("Wait until Websocket connection to blockchain is established to retrieve information");
+        Thread.sleep(5000);
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
+    }
+  }
+
+  private boolean connect() throws Exception { // NOSONAR
     if (this.connectionInProgress) {
-      LOG.info("Web3 connection initialization in progress, skip transaction processing until it's initialized");
+      LOG.debug("Web3 connection is in progress");
       return false;
     }
     if (this.serviceStopping) {
       LOG.info("Stopping server, thus no new connection is attempted again");
       return false;
     }
-    String websocketProviderURL = websocketURL;
-    if (StringUtils.isBlank(websocketProviderURL)) {
+    if (StringUtils.isBlank(websocketURL)) {
       LOG.info("No configured URL for Ethereum Websocket connection");
-      resetConnection();
       return false;
     }
-    if (!websocketProviderURL.startsWith("ws:") && !websocketProviderURL.startsWith("wss:")) {
-      LOG.warn("Bad format for configured URL " + websocketProviderURL + " for Ethereum Websocket connection");
-      resetConnection();
-      return false;
-    }
-    if (isConnected()) {
+    if (!websocketURL.startsWith("ws:") && !websocketURL.startsWith("wss:")) {
+      LOG.warn("Bad format for configured URL " + websocketURL + " for Ethereum Websocket connection");
       return false;
     }
 
@@ -337,47 +327,70 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       if (this.web3j != null && this.web3jService != null && this.webSocketClient != null) {
         LOG.info("Reconnect to blockchain endpoint {}", websocketURL);
         boolean reconnected = this.webSocketClient.reconnectBlocking();
-        if (!reconnected) {
-          throw new IllegalStateException("Can't reconnect to ethereum blockchain: " + websocketURL);
+        if (reconnected) {
+          LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
         }
+        return reconnected;
       } else {
         LOG.info("Connecting to Ethereum network endpoint {}", websocketURL);
         this.webSocketClient = new WebSocketClient(new URI(websocketURL));
         this.webSocketClient.setConnectionLostTimeout(10);
         this.web3jService = new WebSocketService(webSocketClient, true);
-        this.webSocketClient.setListener(getWebsocketListener());
+        this.webSocketClient.setListener(new WebSocketListener() {
+          @Override
+          public void onMessage(String message) throws IOException {
+            LOG.debug("A new message is delivered from blockchain: {}", message);
+          }
+
+          @Override
+          public void onError(Exception e) {
+            LOG.warn("Error connecting to blockchain: {}", (e == null ? "" : e.getMessage()));
+          }
+
+          @Override
+          public void onClose() {
+            LOG.debug("Blockchain websocket connection closed");
+          }
+        });
         this.web3jService.connect();
-        Thread.sleep(10000);
         web3j = Web3j.build(web3jService);
         LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
+        return true;
       }
-      return true;
     } finally {
       this.connectionInProgress = false;
     }
   }
 
-  private WebSocketListener getWebsocketListener() {
-    return new WebSocketListener() {
-      @Override
-      public void onMessage(String message) throws IOException {
-        LOG.debug("A new message is received in testConnection method");
+  private void closeConnection() {
+    if (web3j != null) {
+      LOG.info("Closing blockchain connection");
+      try {
+        web3j.shutdown();
+        web3j = null;
+        web3jService = null;
+        webSocketClient = null;
+      } catch (Throwable e) {
+        LOG.warn("Error closing old web3j connection: {}", e.getMessage());
       }
-
-      @Override
-      public void onError(Exception e) {
-        LOG.warn(getConnectionFailedMessage());
+    }
+    if (web3jService != null && webSocketClient != null && webSocketClient.isOpen()) {
+      try {
+        web3jService.close();
+        web3jService = null;
+        webSocketClient = null;
+      } catch (Throwable e1) {
+        LOG.warn("Error closing old websocket connection: {}", e1.getMessage());
       }
-
-      @Override
-      public void onClose() {
-        LOG.debug("Websocket connection closed for testConnection method");
+    }
+    if (webSocketClient != null && webSocketClient.isOpen()) {
+      try {
+        webSocketClient.close();
+        webSocketClient = null;
+      } catch (Throwable e1) {
+        LOG.warn("Error closing old websocket connection: {}", e1.getMessage());
       }
-    };
-  }
-
-  private String getConnectionFailedMessage() {
-    return "Connection failed to " + websocketURL;
+    }
   }
 
 }
