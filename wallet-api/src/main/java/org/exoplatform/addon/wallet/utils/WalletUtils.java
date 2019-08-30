@@ -270,10 +270,6 @@ public class WalletUtils {
                                                                                  new ArgumentLiteral<>(String.class,
                                                                                                        CONTRACT_ADDRESS);
 
-  public static final String                          NEW_WALLET_TASK_TYPE                     = "new-wallet";
-
-  public static final String                          MODIFY_WALLET_TASK_TYPE                  = "modify-wallet";
-
   public static final String                          RESOURCE_BUNDLE_NAME                     = "locale.addon.Wallet";
 
   public static final String                          TOKEN_FUNC_SETSELLPRICE                  = "setSellPrice";

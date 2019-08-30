@@ -76,24 +76,4 @@
     </component-plugin>
   </external-component-plugins>
 
-  <external-component-plugins>
-    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Add a job to add an admin task reminder for reward</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for reward admin task reminder</description>
-          <property name="jobName" value="RewardReminderJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.addon.wallet.reward.scheduled.RewardReminderJob"/>
-          <property name="expression" value="${exo.addon.wallet.RewardReminderJob.expression:0 0 0 ? * * *}"/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-  </external-component-plugins>
-
 </configuration>

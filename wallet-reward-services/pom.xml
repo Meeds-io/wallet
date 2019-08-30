@@ -8,7 +8,7 @@
   <artifactId>wallet-reward-services</artifactId>
   <name>eXo Add-on:: Wallet - Reward Services</name>
   <properties>
-    <exo.test.coverage.ratio>0.72</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.78</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
