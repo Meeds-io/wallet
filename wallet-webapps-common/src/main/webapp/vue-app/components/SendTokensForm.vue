@@ -19,9 +19,9 @@
           :disabled="loading || disabledRecipient"
           :input-label="$t('exoplatform.wallet.label.recipient')"
           :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
+          :ignore-current-user="!isSpace"
           autofocus
           required
-          ignore-current-user
           @item-selected="
             recipient = $event.address;
             $emit('receiver-selected', $event);
@@ -164,6 +164,7 @@ export default {
       disabledRecipient: false,
       canSendToken: true,
       amount: null,
+      isSpace: false,
       gasPrice: 0,
       estimatedGas: 0,
       fiatSymbol: null,
@@ -280,6 +281,7 @@ export default {
       this.walletPassword = '';
       this.walletPasswordShow = false;
       this.error = null;
+      this.isSpace = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.type === 'space';
       this.transactionLabel = this.defaultLabel;
       this.transactionMessage = this.defaultMessage;
       if (!this.gasPrice) {

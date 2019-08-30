@@ -277,21 +277,19 @@ export default {
     },
   },
   created() {
-    if (!this.ignoreCurrentUser) {
-      searchWalletByTypeAndId(eXo.env.portal.userName, 'user').then((item) => {
-        if (item) {
-          item.id_type = `${item.type}_${item.id}`;
-          this.currentUserItem = item;
-        }
-      });
-    }
+    searchWalletByTypeAndId(eXo.env.portal.userName, 'user').then((item) => {
+      if (item) {
+        item.id_type = `${item.type}_${item.id}`;
+        this.currentUserItem = item;
+      }
+    });
   },
   methods: {
     focus() {
       this.$nextTick(() => this.$refs.selectAutoComplete.focus());
     },
     clear() {
-      if (this.currentUserItem) {
+      if (!this.ignoreCurrentUser && this.currentUserItem) {
         this.items = [this.currentUserItem];
       } else {
         this.items = [];
