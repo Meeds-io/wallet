@@ -68,21 +68,25 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
 
   @Override
   public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
+    TransactionDetail transactionDetail = event.getData();
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      TransactionDetail transactionDetail = event.getData();
       String transactionHash = transactionDetail.getHash();
-      if (StringUtils.isBlank(transactionHash)) {
+      if (StringUtils.isBlank(transactionHash) || StringUtils.isBlank(transactionDetail.getContractAddress())) {
         return;
       }
+      ContractDetail contractDetail = getContractDetail();
+      if (contractDetail == null
+          || !StringUtils.equalsIgnoreCase(contractDetail.getAddress(), transactionDetail.getContractAddress())) {
+        return;
+      }
+
       transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
       if (transactionDetail == null || !transactionDetail.isSucceeded()) {
         // No notification for not succeeded transactions
         return;
       }
-
-      logStatistics(transactionDetail);
 
       if (transactionDetail.isAdminOperation()) {
         // No notification for admin operation transactions
@@ -91,8 +95,6 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
 
       Wallet senderWallet = null;
       String senderAddress = transactionDetail.getFrom();
-      GlobalSettings settings = getSettings();
-      ContractDetail contractDetail = settings.getContractDetail();
       String contractAdminAddress = contractDetail == null ? null
                                                            : contractDetail.getOwner();
       if (StringUtils.isNotBlank(senderAddress)) {
@@ -129,15 +131,16 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
 
       if (senderWallet != null && senderWallet.getTechnicalId() > 0 && senderWallet.isEnabled() && !senderWallet.isDeletedUser()
           && !senderWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet, settings);
+        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet);
       }
       if (receiverWallet != null && receiverWallet.getTechnicalId() > 0 && receiverWallet.isEnabled()
           && !receiverWallet.isDeletedUser() && !receiverWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet, settings);
+        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet);
       }
     } catch (Exception e) {
       LOG.error("Error processing transaction notification {}", event.getData(), e);
     } finally {
+      logStatistics(transactionDetail);
       RequestLifeCycle.end();
     }
   }
@@ -145,24 +148,17 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
   private void sendNotification(TransactionDetail transactionDetail,
                                 TransactionNotificationType transactionStatus,
                                 Wallet senderWallet,
-                                Wallet receiverWallet,
-                                GlobalSettings settings) {
+                                Wallet receiverWallet) {
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
     ctx.append(HASH_PARAMETER, transactionDetail.getHash());
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, senderWallet);
     ctx.append(RECEIVER_ACCOUNT_DETAIL_PARAMETER, receiverWallet);
     ctx.append(MESSAGE_PARAMETER, transactionDetail.getMessage() == null ? "" : transactionDetail.getMessage());
 
-    if (StringUtils.isBlank(transactionDetail.getContractAddress())) {
-      ctx.append(SYMBOL_PARAMETER, "ether");
-      ctx.append(CONTRACT_ADDRESS_PARAMETER, "");
-      ctx.append(AMOUNT_PARAMETER, transactionDetail.getValue());
-    } else {
-      ContractDetail contractDetail = settings.getContractDetail();
-      ctx.append(SYMBOL_PARAMETER, contractDetail.getSymbol());
-      ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetail.getAddress());
-      ctx.append(AMOUNT_PARAMETER, transactionDetail.getContractAmount());
-    }
+    ContractDetail contractDetail = getContractDetail();
+    ctx.append(SYMBOL_PARAMETER, contractDetail.getSymbol());
+    ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetail.getAddress());
+    ctx.append(AMOUNT_PARAMETER, transactionDetail.getContractAmount());
 
     // Notification type is determined automatically by
     // transactionStatus.getNotificationId()
@@ -170,6 +166,9 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
   }
 
   private void logStatistics(TransactionDetail transactionDetail) {
+    if (transactionDetail == null) {
+      return;
+    }
     String contractMethodName = transactionDetail.getContractMethodName();
 
     if (StringUtils.isBlank(contractMethodName)) {
