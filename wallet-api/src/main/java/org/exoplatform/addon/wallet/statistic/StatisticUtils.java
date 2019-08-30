@@ -117,4 +117,9 @@ public class StatisticUtils {
 
     STATISTIC_LOG.info(logEntry.toString());
   }
+
+  public static final String transformCapitalWithUnderscore(String string) {
+    return string.replaceAll("([A-Z])", "_$1").toLowerCase();
+  }
+
 }

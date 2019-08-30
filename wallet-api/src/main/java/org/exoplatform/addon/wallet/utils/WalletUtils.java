@@ -152,6 +152,10 @@ public class WalletUtils {
 
   public static final String                          CONTRACT_FUNC_TRANSFERFROM               = "transferFrom";
 
+  public static final String                          CONTRACT_FUNC_TRANSFEROWNERSHIP          = "transferOwnership";
+
+  public static final String                          CONTRACT_FUNC_TRANSFORMTOVESTED          = "transformToVested";
+
   public static final String                          CONTRACT_FUNC_APPROVE                    = "approve";
 
   public static final String                          CONTRACT_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
