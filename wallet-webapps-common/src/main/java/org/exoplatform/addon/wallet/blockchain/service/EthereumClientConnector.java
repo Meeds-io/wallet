@@ -39,7 +39,6 @@ import org.web3j.tx.response.NoOpProcessor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.services.log.ExoLogger;
@@ -66,7 +65,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private boolean                  serviceStopping            = false;
 
+  private long                     networkId                  = 0;
+
   private String                   websocketURL               = null;
+
+  private String                   websocketURLSuffix         = null;
 
   public EthereumClientConnector() {
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
@@ -80,6 +83,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   public void start(boolean blocking) {
     this.websocketURL = getWebsocketURL();
+    this.networkId = getNetworkId();
     this.serviceStarted = true;
 
     // Blockchain connection verifier
@@ -219,13 +223,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public Map<String, Object> getStatisticParameters(String statisticType, Object result, Object... methodArgs) {
     Map<String, Object> parameters = new HashMap<>();
 
-    GlobalSettings settings = getSettings();
-    if (settings != null && settings.getNetwork() != null
-        && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
-      parameters.put("blockchain_network_id", settings.getNetwork().getId());
-      String websocketProviderURL = settings.getNetwork().getWebsocketProviderURL();
-      String[] urlParts = websocketProviderURL.split("/");
-      parameters.put("blockchain_network_url_suffix", urlParts[urlParts.length - 1]);
+    if (networkId > 0 && StringUtils.isNotBlank(websocketURL)) {
+      if (websocketURLSuffix == null) {
+        String[] urlParts = websocketURL.split("/");
+        websocketURLSuffix = urlParts[urlParts.length - 1];
+      }
+      parameters.put("blockchain_network_url_suffix", websocketURLSuffix);
+      parameters.put("blockchain_network_id", networkId);
     }
 
     switch (statisticType) {
