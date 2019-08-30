@@ -185,11 +185,8 @@
                 class="mr-4"
                 indeterminate
                 size="20" />
-              <template v-else-if="props.item.tokenBalance">
-                {{ walletUtils.toFixed(props.item.tokenBalance) }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
-              </template>
               <template v-else>
-                -
+                {{ walletUtils.toFixed(props.item.tokenBalance) || 0 }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
               </template>
             </td>
             <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
@@ -199,8 +196,8 @@
                 class="mr-4"
                 indeterminate
                 size="20" />
-              <template v-else-if="props.item.tokenBalance">
-                {{ walletUtils.toFixed(props.item.etherBalance) }} eth
+              <template v-else>
+                {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} eth
               </template>
             </td>
             <td
