@@ -155,6 +155,7 @@
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
+                <template v-else-if="props.item.initializationState === 'DENIED'">{{ $t('exoplatform.wallet.label.rejectedWallet') }}</template>
                 <template v-else-if="!props.item.isApproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
                 <template v-else>
                   <template v-if="Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount))">
