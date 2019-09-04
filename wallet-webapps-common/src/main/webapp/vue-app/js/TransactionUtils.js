@@ -1,12 +1,6 @@
 import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus} from './WalletUtils.js';
 
-export function getNewTransactionNonce(walletAddress) {
-  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending').catch((e) => {
-    console.debug('Error getting last nonce of wallet address', walletAddress, e);
-  });
-}
-
 export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
   if (!transactionsLimit) {
     transactionsLimit = 10;

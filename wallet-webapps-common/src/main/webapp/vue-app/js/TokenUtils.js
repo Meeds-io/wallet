@@ -1,5 +1,5 @@
 import {etherToFiat} from './WalletUtils.js';
-import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
+import {getSavedTransactionByHash} from './TransactionUtils.js';
 
 export function reloadContractDetails(contractDetails, walletAddress) {
   if (!contractDetails || !contractDetails.address) {
@@ -210,32 +210,6 @@ export function sendContractTransaction(txDetails, hashCallback, errorCallback) 
   });
 }
 
-function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes) {
-  if (!attemptTimes) {
-    if (errorCallback) {
-      return errorCallback('Transaction hash not found');
-    }
-    return;
-  }
-  return window.localWeb3.eth.getTransaction(hash).then((transaction) => {
-    if (transaction) {
-      if (hashCallback) {
-        return hashCallback(hash);
-      }
-    } else {
-      console.debug('Transaction not found on blockchain', hash);
-      waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
-    }
-  });
-}
-
-function transformContracDetailsToFailed(contractDetails, e) {
-  contractDetails.icon = 'warning';
-  contractDetails.title = contractDetails.address;
-  contractDetails.error = `Error retrieving contract at specified address ${e ? e : ''}`;
-  return contractDetails;
-}
-
 function sendTransaction(transactionToSend, hashCallback, errorCallback) {
   return window.localWeb3.eth
     .sendTransaction(transactionToSend)
@@ -247,22 +221,19 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
           .then((transaction) => {
             // A transaction with same hash has been already sent
             if (transaction) {
-              console.debug('Transaction was found on server eXo', transaction, ' verifying blockchain transactions status, else incrementing gas price ', transactionToSend.nonce);
-
-              return window.localWeb3.eth.getTransaction(hash).then((transaction) => {
-                if (transaction) {
-                  console.debug('Found transaction on blockchain, incrementing nonce', transaction);
-                  transactionToSend.nonce++;
-                } else {
-                  console.debug('Transaction not found on blockchain, incrementing gas price with 1% to replace old buggy transaction', hash);
-                  delete transactionToSend.nonce;
-                  transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
-                }
-                return sendTransaction(transactionToSend, hashCallback, errorCallback);
-              });
+              console.debug('Transaction was found on server eXo', transaction, '. reattempting to get a new nonce different from ', transactionToSend.nonce, ' incrementing gas price by 10% to be sure to replace old buggy transaction', transactionToSend.gasPrice);
+              return getNewTransactionNonce(transactionToSend.from)
+                .then(nonce => {
+                  transactionToSend.nonce = nonce;
+                  // Make sure to not exceed maximum allowed gasPrice
+                  if (transactionToSend.gasPrice < window.walletSettings.network.maxGasPrice) {
+                    transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
+                  }
+                  return sendTransaction(transactionToSend, hashCallback, errorCallback);
+                });
+            } else {
+              hashCallback(hash);
             }
-            // Attempt 5 times to retrieve sent transaction
-            return waitTransactionOnBlockchain(hash, hashCallback, errorCallback, 5);
           })
           .then(() => {
             // Workaround to stop polling from blockchain waiting for receipt
@@ -285,6 +256,19 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
         errorCallback(error);
       }
     });
+}
+
+function getNewTransactionNonce(walletAddress) {
+  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending').catch((e) => {
+    console.debug('Error getting last nonce of wallet address', walletAddress, e);
+  });
+}
+
+function transformContracDetailsToFailed(contractDetails, e) {
+  contractDetails.icon = 'warning';
+  contractDetails.title = contractDetails.address;
+  contractDetails.error = `Error retrieving contract at specified address ${e ? e : ''}`;
+  return contractDetails;
 }
 
 function getContractFiles(tokenName) {
