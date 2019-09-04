@@ -152,6 +152,10 @@ public class WalletUtils {
 
   public static final String                          CONTRACT_FUNC_TRANSFERFROM               = "transferFrom";
 
+  public static final String                          CONTRACT_FUNC_TRANSFEROWNERSHIP          = "transferOwnership";
+
+  public static final String                          CONTRACT_FUNC_TRANSFORMTOVESTED          = "transformToVested";
+
   public static final String                          CONTRACT_FUNC_APPROVE                    = "approve";
 
   public static final String                          CONTRACT_FUNC_INITIALIZEACCOUNT          = "initializeAccount";
@@ -265,10 +269,6 @@ public class WalletUtils {
   public static final ArgumentLiteral<String>         CONTRACT_ADDRESS_PARAMETER               =
                                                                                  new ArgumentLiteral<>(String.class,
                                                                                                        CONTRACT_ADDRESS);
-
-  public static final String                          NEW_WALLET_TASK_TYPE                     = "new-wallet";
-
-  public static final String                          MODIFY_WALLET_TASK_TYPE                  = "modify-wallet";
 
   public static final String                          RESOURCE_BUNDLE_NAME                     = "locale.addon.Wallet";
 

@@ -53,10 +53,13 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
 
   /**
    * Test
-   * {@link WalletTransactionService#saveTransactionDetail(TransactionDetail, String, boolean)}
+   * {@link WalletTransactionService#saveTransactionDetail(TransactionDetail, String)}
+   * 
+   * @throws IllegalAccessException when user is not allowed to save transaction
+   *           detail
    */
   @Test
-  public void testSaveTransactionDetailForCurrentUser() {
+  public void testSaveTransactionDetailForCurrentUser() throws IllegalAccessException {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
@@ -66,7 +69,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   ETHER_VALUE,
                                                                   WALLET_ADDRESS_1,
                                                                   WALLET_ADDRESS_2,
-                                                                  WALLET_ADDRESS_3,
+                                                                  null,
                                                                   CURRENT_USER_IDENTITY_ID,
                                                                   TRANSACTION_LABEL,
                                                                   TRANSACTION_MESSAGE,
@@ -76,16 +79,12 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   System.currentTimeMillis());
 
     try {
-      walletTransactionService.saveTransactionDetail(transactionDetail, USER_TEST, false);
+      walletTransactionService.saveTransactionDetail(transactionDetail, USER_TEST);
     } catch (IllegalAccessException e) {
       // Expected: "root9" shouldn't be able to save transaction of "root1"
     }
 
-    try {
-      walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER, true);
-    } catch (IllegalAccessException e) {
-      fail("User should be able to save transaction");
-    }
+    walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
 
     TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertNotNull(storedTransactionDetail);

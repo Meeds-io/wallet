@@ -1,13 +1,6 @@
 import {searchWalletByAddress} from './AddressRegistry.js';
 import {etherToFiat, watchTransactionStatus} from './WalletUtils.js';
 
-export function getNewTransactionNonce(walletAddress) {
-  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending')
-    .catch((e) => {
-      console.debug('Error getting last nonce of wallet address', walletAddress, e);
-    });
-}
-
 export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
@@ -71,51 +64,49 @@ export function saveTransactionDetails(transaction, contractDetails) {
 }
 
 export function getTransactionsAmounts(walletAddress, periodicity) {
-  const lang = window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language || 'en';
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'})
+  const lang = (window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language) || 'en';
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'}).then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      return null;
+    }
+  });
+}
+
+export function getStoredTransactions(account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
+  const transactionHashToSearch = filterObject && filterObject.hash;
+  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
+
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
       } else {
         return null;
       }
+    })
+    .then((transactions) => {
+      return transactions && transactions.length ? transactions : [];
+    })
+    .catch((error) => {
+      throw new Error('Error retrieving transactions list', error);
     });
-}
-
-export function getStoredTransactions(account, contractAddress, limit, filterObject, onlyPending, isAdministration) {
-  const transactionHashToSearch = filterObject && filterObject.hash;
-  const transactionContractMethodName = filterObject && filterObject.contractMethodName;
-  
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
-  .then((resp) => {
-    if (resp && resp.ok) {
-      return resp.json();
-    } else {
-      return null;
-    }
-  })
-  .then((transactions) => {
-    return transactions && transactions.length ? transactions : [];
-  })
-  .catch((error) => {
-    throw new Error('Error retrieving transactions list', error);
-  });
 }
 
 export function getSavedTransactionByHash(hash) {
-  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByHash?hash=${hash}`, {credentials: 'include'})
-    .then((resp) => {
-      if (resp && resp.ok) {
-        const contentType = resp.headers && resp.headers.get('content-type');
-        if (contentType && contentType.indexOf('application/json') !== -1) {
-          return resp.json();
-        } else {
-          return null;
-        }
+  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByHash?hash=${hash}`, {credentials: 'include'}).then((resp) => {
+    if (resp && resp.ok) {
+      const contentType = resp.headers && resp.headers.get('content-type');
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        return resp.json();
       } else {
         return null;
       }
-    });
+    } else {
+      return null;
+    }
+  });
 }
 
 function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
@@ -142,7 +133,7 @@ function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accoun
   } else {
     resultPromise = loadEtherTransactionProperties(walletAddress, transactionDetails);
   }
-  return resultPromise.then(() => transactions[transactionDetails.hash] = transactionDetails);
+  return resultPromise.then(() => (transactions[transactionDetails.hash] = transactionDetails));
 }
 
 function addContractDetailsInTransation(transactionDetails, contractDetails) {

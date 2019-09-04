@@ -49,8 +49,8 @@ import org.exoplatform.social.core.service.LinkProvider;
  * database and send notifications.
  */
 @Asynchronous
-public class TransactionNotificationListener extends Listener<Object, Map<String, Object>> {
-  private static final Log         LOG = ExoLogger.getLogger(TransactionNotificationListener.class);
+public class TransactionNotificationListener extends Listener<Object, TransactionDetail> {
+  private static final Log         LOG                 = ExoLogger.getLogger(TransactionNotificationListener.class);
 
   private ExoContainer             container;
 
@@ -58,26 +58,35 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
 
   private WalletAccountService     walletAccountService;
 
+  private long                     networkId           = 0;
+
+  private String                   blockchainURLSuffix = null;
+
   public TransactionNotificationListener(PortalContainer container) {
     this.container = container;
   }
 
   @Override
-  public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
+  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
+    TransactionDetail transactionDetail = event.getData();
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      String transactionHash = (String) event.getData().get("hash");
-      if (StringUtils.isBlank(transactionHash)) {
+      String transactionHash = transactionDetail.getHash();
+      if (StringUtils.isBlank(transactionHash) || StringUtils.isBlank(transactionDetail.getContractAddress())) {
         return;
       }
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+      ContractDetail contractDetail = getContractDetail();
+      if (contractDetail == null
+          || !StringUtils.equalsIgnoreCase(contractDetail.getAddress(), transactionDetail.getContractAddress())) {
+        return;
+      }
+
+      transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
       if (transactionDetail == null || !transactionDetail.isSucceeded()) {
         // No notification for not succeeded transactions
         return;
       }
-
-      logStatistics(transactionDetail);
 
       if (transactionDetail.isAdminOperation()) {
         // No notification for admin operation transactions
@@ -86,8 +95,6 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
 
       Wallet senderWallet = null;
       String senderAddress = transactionDetail.getFrom();
-      GlobalSettings settings = getSettings();
-      ContractDetail contractDetail = settings.getContractDetail();
       String contractAdminAddress = contractDetail == null ? null
                                                            : contractDetail.getOwner();
       if (StringUtils.isNotBlank(senderAddress)) {
@@ -124,15 +131,16 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
 
       if (senderWallet != null && senderWallet.getTechnicalId() > 0 && senderWallet.isEnabled() && !senderWallet.isDeletedUser()
           && !senderWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet, settings);
+        sendNotification(transactionDetail, TransactionNotificationType.SENDER, senderWallet, receiverWallet);
       }
       if (receiverWallet != null && receiverWallet.getTechnicalId() > 0 && receiverWallet.isEnabled()
           && !receiverWallet.isDeletedUser() && !receiverWallet.isDisabledUser()) {
-        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet, settings);
+        sendNotification(transactionDetail, TransactionNotificationType.RECEIVER, senderWallet, receiverWallet);
       }
     } catch (Exception e) {
       LOG.error("Error processing transaction notification {}", event.getData(), e);
     } finally {
+      logStatistics(transactionDetail);
       RequestLifeCycle.end();
     }
   }
@@ -140,24 +148,17 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
   private void sendNotification(TransactionDetail transactionDetail,
                                 TransactionNotificationType transactionStatus,
                                 Wallet senderWallet,
-                                Wallet receiverWallet,
-                                GlobalSettings settings) {
+                                Wallet receiverWallet) {
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
     ctx.append(HASH_PARAMETER, transactionDetail.getHash());
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, senderWallet);
     ctx.append(RECEIVER_ACCOUNT_DETAIL_PARAMETER, receiverWallet);
     ctx.append(MESSAGE_PARAMETER, transactionDetail.getMessage() == null ? "" : transactionDetail.getMessage());
 
-    if (StringUtils.isBlank(transactionDetail.getContractAddress())) {
-      ctx.append(SYMBOL_PARAMETER, "ether");
-      ctx.append(CONTRACT_ADDRESS_PARAMETER, "");
-      ctx.append(AMOUNT_PARAMETER, transactionDetail.getValue());
-    } else {
-      ContractDetail contractDetail = settings.getContractDetail();
-      ctx.append(SYMBOL_PARAMETER, contractDetail.getSymbol());
-      ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetail.getAddress());
-      ctx.append(AMOUNT_PARAMETER, transactionDetail.getContractAmount());
-    }
+    ContractDetail contractDetail = getContractDetail();
+    ctx.append(SYMBOL_PARAMETER, contractDetail.getSymbol());
+    ctx.append(CONTRACT_ADDRESS_PARAMETER, contractDetail.getAddress());
+    ctx.append(AMOUNT_PARAMETER, transactionDetail.getContractAmount());
 
     // Notification type is determined automatically by
     // transactionStatus.getNotificationId()
@@ -165,6 +166,9 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
   }
 
   private void logStatistics(TransactionDetail transactionDetail) {
+    if (transactionDetail == null) {
+      return;
+    }
     String contractMethodName = transactionDetail.getContractMethodName();
 
     if (StringUtils.isBlank(contractMethodName)) {
@@ -173,28 +177,32 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
 
     Map<String, Object> parameters = new HashMap<>();
     parameters.put(LOCAL_SERVICE, "wallet");
-    parameters.put(OPERATION, contractMethodName);
+    parameters.put(OPERATION, transformCapitalWithUnderscore(contractMethodName));
+    parameters.put("blockchain_network_id", getNetworkId());
+    parameters.put("blockchain_network_url_suffix", getBlockchainURLSuffix());
 
-    if (transactionDetail.getIssuer() != null) {
-      parameters.put("user_social_id", transactionDetail.getIssuer().getTechnicalId());
+    if (transactionDetail.getIssuerId() > 0 || transactionDetail.getIssuer() != null) {
+      parameters.put("user_social_id",
+                     transactionDetail.getIssuerId() > 0 ? transactionDetail.getIssuerId()
+                                                         : transactionDetail.getIssuer().getTechnicalId());
     }
 
     parameters.put("sender", transactionDetail.getFromWallet());
     parameters.put("receiver", transactionDetail.getToWallet());
+    parameters.put("by", transactionDetail.getByWallet());
 
     switch (contractMethodName) {
     case CONTRACT_FUNC_INITIALIZEACCOUNT:
-      parameters.put(OPERATION, "initialize_account");
       parameters.put("amount_ether", transactionDetail.getValue());
       parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
     case ETHER_FUNC_SEND_FUNDS:
-    case CONTRACT_FUNC_TRANSFER:
-    case CONTRACT_FUNC_TRANSFERFROM:
-    case CONTRACT_FUNC_APPROVE:
       parameters.put("amount_ether", transactionDetail.getValue());
-      parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
+    case CONTRACT_FUNC_TRANSFORMTOVESTED:
+    case CONTRACT_FUNC_TRANSFERFROM:
+    case CONTRACT_FUNC_TRANSFER:
+    case CONTRACT_FUNC_APPROVE:
     case CONTRACT_FUNC_REWARD:
       parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
@@ -208,6 +216,30 @@ public class TransactionNotificationListener extends Listener<Object, Map<String
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
     StatisticUtils.addStatisticEntry(parameters);
+  }
+
+  private long getNetworkId() {
+    if (networkId <= 0) {
+      GlobalSettings settings = getSettings();
+      if (settings != null && settings.getNetwork() != null
+          && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
+        networkId = settings.getNetwork().getId();
+      }
+    }
+    return networkId;
+  }
+
+  private String getBlockchainURLSuffix() {
+    if (blockchainURLSuffix == null) {
+      GlobalSettings settings = getSettings();
+      if (settings != null && settings.getNetwork() != null
+          && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
+        String websocketProviderURL = settings.getNetwork().getWebsocketProviderURL();
+        String[] urlParts = websocketProviderURL.split("/");
+        blockchainURLSuffix = urlParts[urlParts.length - 1];
+      }
+    }
+    return blockchainURLSuffix;
   }
 
   private WalletTransactionService getTransactionService() {

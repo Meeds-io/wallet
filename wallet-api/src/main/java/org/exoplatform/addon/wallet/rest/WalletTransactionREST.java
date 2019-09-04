@@ -73,7 +73,7 @@ public class WalletTransactionREST implements ResourceContainer {
 
     String currentUserId = getCurrentUserId();
     try {
-      transactionService.saveTransactionDetail(transactionDetail, currentUserId, false);
+      transactionService.saveTransactionDetail(transactionDetail, currentUserId);
       return Response.ok().build();
     } catch (IllegalAccessException e) {
       LOG.warn("User {} is attempting to save transaction {}", currentUserId, transactionDetail, e);

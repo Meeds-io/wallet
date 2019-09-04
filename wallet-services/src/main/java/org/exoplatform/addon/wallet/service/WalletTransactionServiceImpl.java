@@ -180,20 +180,16 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public void saveTransactionDetail(TransactionDetail transactionDetail,
-                                    String currentUser,
-                                    boolean broadcastMinedTransaction) throws IllegalAccessException {
+  public void saveTransactionDetail(TransactionDetail transactionDetail, String currentUser) throws IllegalAccessException {
     if (StringUtils.isBlank(currentUser)) {
       throw new IllegalArgumentException("username is mandatory");
     }
-    if (!broadcastMinedTransaction) {
-      String senderAddress = StringUtils.isBlank(transactionDetail.getBy()) ? transactionDetail.getFrom()
-                                                                            : transactionDetail.getBy();
-      Wallet senderWallet = accountService.getWalletByAddress(senderAddress);
-      if (senderWallet == null || !accountService.isWalletOwner(senderWallet, currentUser)) {
-        throw new IllegalAccessException("User '" + currentUser
-            + "' is attempting to save a new transaction for another wallet");
-      }
+    String senderAddress = StringUtils.isBlank(transactionDetail.getBy()) ? transactionDetail.getFrom()
+                                                                          : transactionDetail.getBy();
+    Wallet senderWallet = accountService.getWalletByAddress(senderAddress);
+    if (senderWallet == null || !accountService.isWalletOwner(senderWallet, currentUser)) {
+      throw new IllegalAccessException("User '" + currentUser
+          + "' is attempting to save a new transaction for wallet of user " + senderWallet);
     }
 
     Wallet issuerWallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser);
@@ -201,9 +197,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
     transactionStorage.saveTransactionDetail(transactionDetail);
     retrieveWalletsDetails(transactionDetail);
-    if (broadcastMinedTransaction) {
-      broadcastTransactionMinedEvent(transactionDetail);
-    }
   }
 
   @Override

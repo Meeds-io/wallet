@@ -17,6 +17,7 @@ import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.blockchain.service.*;
 import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
 import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
+import org.exoplatform.addon.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
@@ -91,8 +92,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       // start connection to blockchain
       EthereumClientConnector web3jConnector = new EthereumClientConnector();
       container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
-      web3jConnector.start();
-      web3jConnector.waitConnection();
+      web3jConnector.start(true);
 
       // Blockchain transaction decoder
       EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector);
@@ -110,6 +110,7 @@ public class ServiceLoaderServlet extends HttpServlet {
 
       // Start listening on blockchain modification for websocket trigger
       listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionMinedListener());
+      listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new TransactionNotificationListener(container));
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new WebSocketTransactionListener());
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());

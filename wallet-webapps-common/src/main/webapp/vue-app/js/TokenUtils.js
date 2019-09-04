@@ -1,16 +1,15 @@
 import {etherToFiat} from './WalletUtils.js';
-import {getNewTransactionNonce, getSavedTransactionByHash} from './TransactionUtils.js';
+import {getSavedTransactionByHash} from './TransactionUtils.js';
 
 export function reloadContractDetails(contractDetails, walletAddress) {
   if (!contractDetails || !contractDetails.address) {
     return;
   }
 
-  return getSavedContractDetails(contractDetails.address)
-    .then(savedDetails => {
-      Object.assign(contractDetails, savedDetails);
-      return getContractDetails(walletAddress);
-    });
+  return getSavedContractDetails(contractDetails.address).then((savedDetails) => {
+    Object.assign(contractDetails, savedDetails);
+    return getContractDetails(walletAddress);
+  });
 }
 
 export function getContractDetails(walletAddress) {
@@ -109,31 +108,31 @@ export function getSavedContractDetails(address) {
 /*
  * Creates a Web3 conract instance
  */
- export function createNewContractInstanceByName(tokenName, ...args) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+export function createNewContractInstanceByName(tokenName, ...args) {
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => newContractInstance(contractFiles.abi, contractFiles.bin, ...args))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 /*
  * Creates a Web3 conract instance
  */
 export function createNewContractInstanceByNameAndAddress(tokenName, tokenAddress) {
-   let contractFiles;
-   return getContractFiles(tokenName)
-     .then((filesContents) => contractFiles = filesContents)
-     .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
-     .then((contractInstance) => {
-       contractInstance.abi = contractFiles.abi;
-       contractInstance.bin = contractFiles.bin;
-       return contractInstance;
-     });
+  let contractFiles;
+  return getContractFiles(tokenName)
+    .then((filesContents) => (contractFiles = filesContents))
+    .then(() => getContractInstance(window.localWeb3.eth.defaultAccount, tokenAddress, false, contractFiles.abi, contractFiles.bin))
+    .then((contractInstance) => {
+      contractInstance.abi = contractFiles.abi;
+      contractInstance.bin = contractFiles.bin;
+      return contractInstance;
+    });
 }
 
 export function estimateContractDeploymentGas(instance) {
@@ -211,60 +210,30 @@ export function sendContractTransaction(txDetails, hashCallback, errorCallback) 
   });
 }
 
-function waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes) {
-  if (!attemptTimes) {
-    if (errorCallback) {
-      return errorCallback('Transaction hash not found');
-    }
-    return;
-  }
-  return window.localWeb3.eth.getTransaction(hash)
-    .then(transaction => {
-      if (transaction) {
-        if (hashCallback) {
-          return hashCallback(hash);
-        }
-      } else {
-        console.debug('Transaction not found on blockchain', hash);
-        waitTransactionOnBlockchain(hash, hashCallback, errorCallback, attemptTimes--);
-      }
-    });
-}
-
-function transformContracDetailsToFailed(contractDetails, e) {
-  contractDetails.icon = 'warning';
-  contractDetails.title = contractDetails.address;
-  contractDetails.error = `Error retrieving contract at specified address ${e ? e : ''}`;
-  return contractDetails;
-}
-
 function sendTransaction(transactionToSend, hashCallback, errorCallback) {
-  return window.localWeb3.eth.sendTransaction(transactionToSend)
+  return window.localWeb3.eth
+    .sendTransaction(transactionToSend)
     .on('transactionHash', (hash) => {
       if (hashCallback) {
         // Verify if the generated hash is a bug from Web3js
         // And then delete nonce to reattempt sending transaction
         return getSavedTransactionByHash(hash)
-          .then(transaction => {
+          .then((transaction) => {
             // A transaction with same hash has been already sent
             if (transaction) {
-              console.debug('Transaction was found on server eXo', transaction, ' verifying blockchain transactions status, else incrementing gas price ', transactionToSend.nonce);
-
-              return window.localWeb3.eth.getTransaction(hash)
-                .then(transaction => {
-                  if (transaction) {
-                    console.debug('Found transaction on blockchain, incrementing nonce', transaction);
-                    transactionToSend.nonce++;
-                  } else {
-                    console.debug('Transaction not found on blockchain, incrementing gas price with 1% to replace old buggy transaction', hash);
-                    delete transactionToSend.nonce;
+              console.debug('Transaction was found on server eXo', transaction, '. reattempting to get a new nonce different from ', transactionToSend.nonce, ' incrementing gas price by 10% to be sure to replace old buggy transaction', transactionToSend.gasPrice);
+              return getNewTransactionNonce(transactionToSend.from)
+                .then(nonce => {
+                  transactionToSend.nonce = nonce;
+                  // Make sure to not exceed maximum allowed gasPrice
+                  if (transactionToSend.gasPrice < window.walletSettings.network.maxGasPrice) {
                     transactionToSend.gasPrice = transactionToSend.gasPrice * 1.01;
                   }
                   return sendTransaction(transactionToSend, hashCallback, errorCallback);
                 });
+            } else {
+              hashCallback(hash);
             }
-            // Attempt 5 times to retrieve sent transaction
-            return waitTransactionOnBlockchain(hash, hashCallback, errorCallback, 5);
           })
           .then(() => {
             // Workaround to stop polling from blockchain waiting for receipt
@@ -278,24 +247,28 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
           });
       }
     })
-    .on('error', (error, receipt) => {
-      // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
-        return;
-      } else {
-        return errorCallback(error, receipt);
-      }
-    })
     .catch((error) => {
       // Workaround to stop polling from blockchain waiting for receipt
-      if (String(error).indexOf("Failed to check for transaction receipt") >= 0) {
+      if (String(error).indexOf('Failed to check for transaction receipt') >= 0) {
         return;
       } else {
         console.error('Error fetching transaction with hash', transactionToSend && transactionToSend.hash, error);
         errorCallback(error);
       }
     });
+}
 
+function getNewTransactionNonce(walletAddress) {
+  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending').catch((e) => {
+    console.debug('Error getting last nonce of wallet address', walletAddress, e);
+  });
+}
+
+function transformContracDetailsToFailed(contractDetails, e) {
+  contractDetails.icon = 'warning';
+  contractDetails.title = contractDetails.address;
+  contractDetails.error = `Error retrieving contract at specified address ${e ? e : ''}`;
+  return contractDetails;
 }
 
 function getContractFiles(tokenName) {
@@ -328,7 +301,7 @@ function getContractFiles(tokenName) {
     .then((abi) => {
       return {
         abi: abi,
-        bin: contractBin
-      }
+        bin: contractBin,
+      };
     });
 }

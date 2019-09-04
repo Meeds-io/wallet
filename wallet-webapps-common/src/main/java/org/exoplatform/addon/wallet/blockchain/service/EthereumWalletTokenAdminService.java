@@ -9,7 +9,6 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
-import org.web3j.abi.datatypes.Address;
 import org.web3j.crypto.*;
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3j;
@@ -17,10 +16,10 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.*;
+import org.web3j.tx.FastRawTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
-import org.web3j.tx.response.NoOpProcessor;
 import org.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,6 +77,12 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private boolean                  isReadOnlyContract;
 
+  private long                     networkId                               = 0;
+
+  private String                   websocketURL                            = null;
+
+  private String                   websocketURLSuffix                      = null;
+
   private String                   configuredContractAddress;
 
   private Integer                  configuredContractDecimals;
@@ -89,7 +94,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   @Override
   public void start() {
     try {
-      configuredContractAddress = getSettings().getContractAddress();
+      this.configuredContractAddress = getContractAddress();
+      this.websocketURL = getWebsocketURL();
+      this.networkId = getNetworkId();
+
       ContractDetail contractDetail = getContractService().getContractDetail(configuredContractAddress);
       if (contractDetail == null) {
         contractDetail = new ContractDetail();
@@ -299,7 +307,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     getAccountService().setInitializationStatus(receiver, WalletInitializationState.PENDING);
 
-    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setNetworkId(this.networkId);
     transactionDetail.setHash(transactionHash);
     transactionDetail.setFrom(adminWalletAddress);
     transactionDetail.setContractAddress(configuredContractAddress);
@@ -309,7 +317,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -345,7 +353,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException(TRANSACTION_HASH_IS_EMPTY + transactionDetail);
     }
 
-    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setNetworkId(this.networkId);
     transactionDetail.setHash(transactionHash);
     transactionDetail.setFrom(adminWalletAddress);
     transactionDetail.setTimestamp(System.currentTimeMillis());
@@ -353,7 +361,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -399,7 +407,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       LOG.info("Transaction with hash {} already exists in database, it will be replaced with new data", transactionHash);
       transactionDetail.setId(persistedTransaction.getId());
     }
-    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setNetworkId(this.networkId);
     transactionDetail.setHash(transactionHash);
     transactionDetail.setFrom(getAdminWalletAddress());
     transactionDetail.setContractAddress(configuredContractAddress);
@@ -409,7 +417,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -455,7 +463,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (StringUtils.isBlank(transactionHash)) {
       throw new IllegalStateException(TRANSACTION_HASH_IS_EMPTY + transactionDetail);
     }
-    transactionDetail.setNetworkId(getNetworkId());
+    transactionDetail.setNetworkId(this.networkId);
     transactionDetail.setHash(transactionHash);
     transactionDetail.setFrom(getAdminWalletAddress());
     transactionDetail.setContractAddress(configuredContractAddress);
@@ -465,7 +473,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setPending(true);
     transactionDetail.setGasPrice(getAdminGasPrice(getSettings()));
 
-    getTransactionService().saveTransactionDetail(transactionDetail, true);
+    getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
   }
 
@@ -561,7 +569,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     String contractAddress = contractDetail.getAddress();
     try {
       if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() <= 0) {
-        contractDetail.setNetworkId(getNetworkId());
+        contractDetail.setNetworkId(this.networkId);
       }
       if (StringUtils.isEmpty(contractDetail.getContractType())
           || StringUtils.equals(contractDetail.getContractType(), "0")
@@ -641,6 +649,16 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   @Override
   public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) {
     Map<String, Object> parameters = new HashMap<>();
+
+    if (networkId > 0 && StringUtils.isNotBlank(websocketURL)) {
+      if (websocketURLSuffix == null) {
+        String[] urlParts = websocketURL.split("/");
+        websocketURLSuffix = urlParts[urlParts.length - 1];
+      }
+      parameters.put("blockchain_network_url_suffix", websocketURLSuffix);
+      parameters.put("blockchain_network_id", networkId);
+    }
+
     switch (operation) {
     case OPERATION_GET_ETHER_BALANCE:
       parameters.put("address", methodArgs[0]);
@@ -699,34 +717,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return parameters;
   }
 
-  private String checkContractAddress() {
-    if (StringUtils.isBlank(configuredContractAddress)) {
-      throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
-    }
-    return configuredContractAddress;
-  }
-
-  private void setIssuer(TransactionDetail transactionDetail, String issuerUsername) {
-    if (StringUtils.isNotBlank(issuerUsername)) {
-      Wallet issuerWallet = getAccountService().getWalletByTypeAndId(WalletType.USER.name(), issuerUsername);
-      if (issuerWallet == null) {
-        throw new IllegalStateException("Can't find identity of user with id " + issuerUsername);
-      }
-      transactionDetail.setIssuer(issuerWallet);
-    }
-  }
-
-  private final void checkAdminWalletIsValid() throws Exception {
-    String adminAddress = getAdminWalletAddress();
-    if (adminAddress == null) {
-      throw new IllegalStateException("No admin wallet is set");
-    }
-    int adminLevel = getAdminLevel(adminAddress);
-    if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
-      throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
-    }
-  }
-
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_SEND_ADMIN_ETHER_TRANSACTION)
   public String executeSendEtherTransaction(String receiverAddress, double amountInEther) throws Exception { // NOSONAR
     Credentials adminCredentials = getAdminCredentials();
@@ -760,10 +750,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return transactionHash;
   }
 
-  private Long getAdminGasPrice(GlobalSettings settings) {
-    return settings.getNetwork().getMinGasPrice();
-  }
-
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_SEND_ADMIN_TOKEN_TRANSACTION)
   public String executeTokenTransaction(final String contractAddress,
                                         final String methodName,
@@ -795,7 +781,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return response.send();
   }
 
-  public ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws IOException {
+  private ERTTokenV2 getContractInstance(final String contractAddress, boolean writeOperation) throws IOException {
     if (writeOperation && contractTransactionManager instanceof FastRawTransactionManager) {
       FastRawTransactionManager fastRawTransactionManager = (FastRawTransactionManager) contractTransactionManager;
       BigInteger transactionCount = getClientConnector().getNonce(fastRawTransactionManager.getFromAddress());
@@ -819,7 +805,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice(settings));
     BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
     ContractGasProvider gasProvider = new StaticGasProvider(gasPrice, gasLimit);
-    contractTransactionManager = getTransactionManager(adminCredentials);
+    contractTransactionManager = getClientConnector().getTransactionManager(adminCredentials);
     this.ertInstance = ERTTokenV2.load(contractAddress,
                                        getClientConnector().getWeb3j(),
                                        contractTransactionManager,
@@ -828,15 +814,36 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return this.ertInstance;
   }
 
-  private TransactionManager getTransactionManager(Credentials credentials) {
-    getClientConnector().waitConnection();
-
-    Web3j web3j = getClientConnector().getWeb3j();
-    if (credentials == null) {
-      return new ReadonlyTransactionManager(web3j, Address.DEFAULT.toString());
-    } else {
-      return new FastRawTransactionManager(web3j, credentials, new NoOpProcessor(web3j));
+  private String checkContractAddress() {
+    if (StringUtils.isBlank(configuredContractAddress)) {
+      throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
     }
+    return configuredContractAddress;
+  }
+
+  private void setIssuer(TransactionDetail transactionDetail, String issuerUsername) {
+    if (StringUtils.isNotBlank(issuerUsername)) {
+      Wallet issuerWallet = getAccountService().getWalletByTypeAndId(WalletType.USER.name(), issuerUsername);
+      if (issuerWallet == null) {
+        throw new IllegalStateException("Can't find identity of user with id " + issuerUsername);
+      }
+      transactionDetail.setIssuer(issuerWallet);
+    }
+  }
+
+  private final void checkAdminWalletIsValid() throws Exception {
+    String adminAddress = getAdminWalletAddress();
+    if (adminAddress == null) {
+      throw new IllegalStateException("No admin wallet is set");
+    }
+    int adminLevel = getAdminLevel(adminAddress);
+    if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
+      throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
+    }
+  }
+
+  private Long getAdminGasPrice(GlobalSettings settings) {
+    return settings.getNetwork().getMinGasPrice();
   }
 
   private Credentials getAdminCredentials() {

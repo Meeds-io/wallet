@@ -99,27 +99,26 @@ export function retrieveFiatExchangeRate() {
   const etherToFiatExchangeLastCheckTime = localStorage.getItem(`exo-wallet-exchange-${currency}-time`);
 
   let promise = null;
-  if (!etherToFiatExchangeObject || !etherToFiatExchangeLastCheckTime || (Number(etherToFiatExchangeLastCheckTime) - Date.now() > 86400000)) {
+  if (!etherToFiatExchangeObject || !etherToFiatExchangeLastCheckTime || Number(etherToFiatExchangeLastCheckTime) - Date.now() > 86400000) {
     promise = retrieveFiatExchangeRateOnline(currency);
   } else {
     promise = Promise.resolve(etherToFiatExchangeObject);
   }
 
   // Retrieve Fiat <=> Ether exchange rate
-  return promise
-    .then((content) => {
-      if (etherToFiatExchangeObject && (!content || !content.length || !content[0][`price_${currency}`])) {
-        // Try to get old information from local storage
-        content = localStorage.getItem(`exo-wallet-exchange-${currency}`);
-        if (content) {
-          content = JSON.parse(content);
-        }
+  return promise.then((content) => {
+    if (etherToFiatExchangeObject && (!content || !content.length || !content[0][`price_${currency}`])) {
+      // Try to get old information from local storage
+      content = localStorage.getItem(`exo-wallet-exchange-${currency}`);
+      if (content) {
+        content = JSON.parse(content);
       }
+    }
 
-      window.walletSettings.usdPrice = content ? parseFloat(content[0].price_usd) : 0;
-      window.walletSettings.fiatPrice = content ? parseFloat(content[0][`price_${currency}`]) : 0;
-      window.walletSettings.priceLastUpdated = content ? new Date(parseInt(content[0].last_updated) * 1000) : null;
-    })
+    window.walletSettings.usdPrice = content ? parseFloat(content[0].price_usd) : 0;
+    window.walletSettings.fiatPrice = content ? parseFloat(content[0][`price_${currency}`]) : 0;
+    window.walletSettings.priceLastUpdated = content ? new Date(parseInt(content[0].last_updated) * 1000) : null;
+  });
 }
 
 export function initEmptyWeb3Instance() {
@@ -226,7 +225,6 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
     window.watchingTransactions[hash].push(transactionMinedcallback);
   }
 }
-
 
 export function saveBrowserWalletInstance(wallet, password, isSpace, autoGenerateWallet, backedUp) {
   const account = window.localWeb3.eth.accounts.wallet.add(wallet);
@@ -401,15 +399,17 @@ export function setWalletBackedUp() {
       walletId: window.walletSettings.wallet.technicalId,
       backedUp: true,
     }),
-  }).then((resp) => {
-    if (resp && resp.ok) {
-      return resp.json();
-    } else {
-      throw new Error();
-    }
-  }).then((wallet) => {
-    return window.walletSettings.wallet = wallet;
-  });
+  })
+    .then((resp) => {
+      if (resp && resp.ok) {
+        return resp.json();
+      } else {
+        throw new Error();
+      }
+    })
+    .then((wallet) => {
+      return (window.walletSettings.wallet = wallet);
+    });
 }
 
 export function hashCode(s) {
@@ -484,7 +484,7 @@ export function setDraggable(appId) {
   try {
     $(`#${appId} .v-dialog:not(.not-draggable)`).draggable();
   } catch (e) {
-    console.debug('Can\'t set modals draggable', e);
+    console.debug("Can't set modals draggable", e);
   }
 }
 
@@ -585,12 +585,12 @@ export function toFixed(value, decimals) {
 
 export function saveWalletInitializationStatus(address, status) {
   return fetch(`/portal/rest/wallet/api/account/setInitializationStatus?address=${address}&status=${status}`, {
-      credentials: 'include',
-    }).then((resp) => {
-      if(!resp || !resp.ok) {
-        throw new Error('Error while changing initialization status of wallet');
-      }
-    });
+    credentials: 'include',
+  }).then((resp) => {
+    if (!resp || !resp.ok) {
+      throw new Error('Error while changing initialization status of wallet');
+    }
+  });
 }
 
 function triggerTransactionMinedEvent(event) {
@@ -602,13 +602,12 @@ function triggerTransactionMined(hash) {
     return;
   }
 
-  return getSavedTransactionByHash(hash)
-    .then(transactionDetails => {
-      window.watchingTransactions[hash].forEach((callback) => {
-        callback(transactionDetails);
-      });
-      window.watchingTransactions[hash] = null;
-    })
+  return getSavedTransactionByHash(hash).then((transactionDetails) => {
+    window.watchingTransactions[hash].forEach((callback) => {
+      callback(transactionDetails);
+    });
+    window.watchingTransactions[hash] = null;
+  });
 }
 
 function isWalletUnlocked(address) {
