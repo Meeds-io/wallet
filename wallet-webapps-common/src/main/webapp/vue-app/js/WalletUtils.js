@@ -568,15 +568,7 @@ export function toFixed(value, decimals) {
     decimals = DEFAULT_DECIMALS;
   }
   try {
-    let fixedDecimal = Number.parseFloat(value).toFixed(decimals);
-    if (fixedDecimal.indexOf('.0') >= 0) {
-      const comps = fixedDecimal.split('.');
-      const fraction = Number.parseFloat(`0.${comps[1]}`);
-      if (!fraction) {
-        fixedDecimal = comps[0];
-      }
-    }
-    return fixedDecimal;
+    return Number.parseFloat(value).toFixed(decimals).replace(/(\..*[1-9])0+$/, '$1').replace(/\.0*$/, '');
   } catch (e) {
     console.error('Error parsing value ', value, ' same value will be retruned', e);
     return value;
