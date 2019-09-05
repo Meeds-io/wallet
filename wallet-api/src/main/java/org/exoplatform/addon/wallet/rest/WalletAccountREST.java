@@ -466,6 +466,8 @@ public class WalletAccountREST implements ResourceContainer {
     } catch (IllegalAccessException e) {
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (IllegalStateException e) {
+      LOG.error("Unknown error occurred while user '" + getCurrentUserId() + "' requesting funds for wallet  '"
+          + fundsRequest.getAddress() + "'", e);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while user '" + getCurrentUserId() + "' requesting funds for wallet  '"

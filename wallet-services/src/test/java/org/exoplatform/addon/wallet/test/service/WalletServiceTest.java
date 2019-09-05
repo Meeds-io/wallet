@@ -29,7 +29,6 @@ import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
 import org.exoplatform.addon.wallet.test.mock.IdentityManagerMock;
-import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
@@ -184,7 +183,8 @@ public class WalletServiceTest extends BaseWalletTest {
   /**
    * Test request Funds
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testRequestFunds() throws IllegalAccessException {
@@ -220,14 +220,6 @@ public class WalletServiceTest extends BaseWalletTest {
       // Expected, Bad request sent to server with invalid sender type or id
     }
 
-    try {
-      walletService.requestFunds(fundsRequest, CURRENT_USER);
-      fail("Expected exception: bad request sent to server with invalid contract address");
-    } catch (Exception e) {
-      // Expected, Bad request sent to server with invalid contract address
-    }
-
-    fundsRequest.setContract(WalletUtils.getContractAddress());
     walletService.requestFunds(fundsRequest, CURRENT_USER);
   }
 
@@ -247,7 +239,8 @@ public class WalletServiceTest extends BaseWalletTest {
   /**
    * Test mark fund request as sent
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testMarkFundRequestAsSent() throws IllegalAccessException {
@@ -276,7 +269,8 @@ public class WalletServiceTest extends BaseWalletTest {
   /**
    * Test is fund request sent
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testIsFundRequestSent() throws IllegalAccessException {

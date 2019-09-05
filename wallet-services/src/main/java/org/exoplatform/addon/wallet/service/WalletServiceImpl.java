@@ -271,19 +271,10 @@ public class WalletServiceImpl implements WalletService, Startable {
       if (WalletType.isUser(requestSenderType) && !StringUtils.equals(currentUser, requestSenderId)) {
         LOG.warn("Bad request sent to server with invalid sender type or id {} / {}", requestSenderType, requestSenderId);
         throw new IllegalAccessException("Bad request sent to server with invalid sender");
-      } else if (WalletType.isSpace(requestSenderType) && !isUserSpaceMember(requestSenderId, fundsRequest.getReceipient())) {
-        throw new IllegalAccessException("Request sender is not allowed to request funds from space");
+      } else if (WalletType.isSpace(requestSenderType) && !isUserSpaceMember(requestSenderId, currentUser)) {
+        throw new IllegalAccessException("User '" + currentUser + "' is not allowed to request funds on behalf of space "
+            + requestSenderId);
       }
-    }
-
-    NotificationContext ctx = NotificationContextImpl.cloneInstance();
-    GlobalSettings settings = getSettings();
-    if (!StringUtils.isBlank(fundsRequest.getContract())) {
-      ContractDetail contractDetail = settings.getContractDetail();
-      if (contractDetail == null || !StringUtils.equalsIgnoreCase(contractDetail.getAddress(), fundsRequest.getContract())) {
-        throw new IllegalStateException("Bad request sent to server with invalid contract address (Only default addresses are permitted)");
-      }
-      ctx.append(CONTRACT_DETAILS_PARAMETER, contractDetail);
     }
 
     String requestReceipientId = fundsRequest.getReceipient();
@@ -296,6 +287,7 @@ public class WalletServiceImpl implements WalletService, Startable {
       LOG.warn("Can't find fund request recipient with id {} and type {}", requestReceipientId, requestReceipientType);
     }
 
+    NotificationContext ctx = NotificationContextImpl.cloneInstance();
     ctx.append(FUNDS_REQUEST_SENDER_DETAIL_PARAMETER,
                accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser));
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, requestSender);
