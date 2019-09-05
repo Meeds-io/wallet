@@ -13,7 +13,7 @@
             </v-flex>
           </v-card>
         </v-flex>
-        <v-flex class="white text-xs-center" flat>
+        <v-flex class="white text-center" flat>
           <div v-if="error && !loading" class="alert alert-error v-content">
             <i class="uiIconError"></i>{{ error }}
           </div>
@@ -31,6 +31,7 @@
             v-model="loading"
             attach="#walletDialogsParent"
             persistent
+            hide-overlay
             width="300">
             <v-card color="primary" dark>
               <v-card-text>
@@ -66,7 +67,8 @@
           <v-tabs-items v-model="selectedTab">
             <v-tab-item
               id="wallets"
-              value="wallets">
+              value="wallets"
+              eager>
               <wallets-tab
                 ref="walletsTab"
                 :wallet-address="walletAddress"
@@ -81,17 +83,20 @@
             </v-tab-item>
             <v-tab-item
               id="funds"
-              value="funds">
+              value="funds"
+              eager>
               <initial-funds-tab
                 ref="fundsTab"
                 :loading="loading"
+                :settings="settings"
                 :contract-details="contractDetails"
                 @saved="refreshSettings" />
             </v-tab-item>
             <v-tab-item
               v-if="contractDetails"
               id="contract"
-              value="contract">
+              value="contract"
+              eager>
               <contract-tab
                 ref="contractDetail"
                 :wallet-address="walletAddress"
@@ -129,6 +134,7 @@ export default {
       loading: false,
       selectedTab: 'wallets',
       fiatSymbol: '$',
+      settings: null,
       wallet: null,
       refreshIndex: 1,
       contractDetails: null,
@@ -168,6 +174,7 @@ export default {
             this.forceUpdate();
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
+          this.settings = window.walletSettings;
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
           this.isAdmin = window.walletSettings.admin;
           this.wallet = window.walletSettings.wallet;
@@ -187,7 +194,6 @@ export default {
         .then(() => this.reloadContract())
         .then(() => this.$refs.walletSetup.init())
         .then(() => this.$refs.walletsTab.init())
-        .then(() => this.$refs.fundsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug(error);

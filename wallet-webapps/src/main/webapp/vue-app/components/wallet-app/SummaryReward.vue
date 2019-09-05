@@ -1,6 +1,6 @@
 <template>
-  <v-card class="walletSummaryBalance">
-    <v-card-title class="title pb-1 ellipsis">
+  <v-card class="walletSummaryBalance elevation-1">
+    <v-card-title class="title subtitle-1 pb-1 text-truncate">
       {{ $t('exoplatform.wallet.label.totalWalletRewards') }}
     </v-card-title>
     <v-card-title class="rewardBalance headline pt-0 pb-1">

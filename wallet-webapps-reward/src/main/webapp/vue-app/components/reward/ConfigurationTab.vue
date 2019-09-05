@@ -1,7 +1,7 @@
 <template>
   <v-card flat>
     <v-card-text>
-      <div class="text-xs-left rewardWalletConfiguration">
+      <div class="text-left rewardWalletConfiguration">
         <span>
           {{ $t('exoplatform.wallet.label.periodicity') }}:
         </span>
@@ -37,7 +37,7 @@
                   </h4>
                 </v-card-title>
                 <v-card-text class="pt-0 pb-0">
-                  <div class="text-xs-left rewardWalletConfiguration">
+                  <div class="text-left rewardWalletConfiguration">
                     <span>
                       {{ $t('exoplatform.wallet.label.rewardThreshold') }}:
                     </span>
@@ -47,13 +47,13 @@
                       name="threshold"
                       class="input-text-center" />
                   </div>
-                  <div v-if="pluginSetting.budgetType !== 'FIXED_PER_POINT'" class="text-xs-left rewardWalletConfiguration">
+                  <div v-if="pluginSetting.budgetType !== 'FIXED_PER_POINT'" class="text-left rewardWalletConfiguration">
                     <v-checkbox
                       v-model="pluginSetting.usePools"
                       :disabled="!configurationEditable"
                       :label="$t('exoplatform.wallet.label.usePools')" />
                   </div>
-                  <div class="text-xs-left mt-4">
+                  <div class="text-left mt-4">
                     <div>
                       {{ $t('exoplatform.wallet.label.rewardBudgetBy') }}:
                     </div>

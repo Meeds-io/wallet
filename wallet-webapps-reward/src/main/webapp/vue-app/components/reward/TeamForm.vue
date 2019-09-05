@@ -1,12 +1,18 @@
 <template>
-  <v-card class="elevation-12 pt-4">
-    <v-card-title v-if="error && String(error).trim() != '{}'" class="text-xs-center">
+  <v-card class="pt-4" flat>
+    <v-card-title v-if="error && String(error).trim() != '{}'" class="text-center">
       <div class="alert alert-error v-content">
         <i class="uiIconError"></i> {{ error }}
       </div>
     </v-card-title>
-    <v-container grid-list-md class="pt-2">
-      <v-layout wrap class="rewardPoolForm">
+    <v-container
+      grid-list-md
+      class="pt-2"
+      flat>
+      <v-layout
+        wrap
+        class="rewardPoolForm"
+        flat>
         <v-flex 
           v-if="!viewOnly"
           xs12
@@ -41,6 +47,7 @@
             ref="rewardTeamSpaceAutoComplete"
             v-model="rewardTeamSpace"
             :items="rewardTeamSpaceOptions"
+            :items-per-page="1000"
             :loading="isLoadingSpaceSuggestions"
             :search-input.sync="rewardTeamSpaceSearchTerm"
             :label="$t('exoplatform.wallet.label.poolSpace')"
@@ -58,17 +65,17 @@
             dense
             flat>
             <template slot="no-data">
-              <v-list-tile>
-                <v-list-tile-title>
+              <v-list-item>
+                <v-list-item-title>
                   {{ $t('exoplatform.wallet.label.poolSpaceSearchPlaceholder') }}
-                </v-list-tile-title>
-              </v-list-tile>
+                </v-list-item-title>
+              </v-list-item>
             </template>
 
             <template slot="selection" slot-scope="{item, selected}">
               <v-chip
                 v-if="item.error"
-                :selected="selected"
+                :input-value="selected"
                 class="autocompleteSelectedItem">
                 <del>
                   <span>
@@ -78,7 +85,7 @@
               </v-chip>
               <v-chip
                 v-else
-                :selected="selected"
+                :input-value="selected"
                 class="autocompleteSelectedItem">
                 <span>
                   {{ item.name }}
@@ -87,13 +94,12 @@
             </template>
 
             <template slot="item" slot-scope="{item}">
-              <v-list-tile-avatar
+              <v-list-item-avatar
                 v-if="item.avatar"
-                tile
                 size="20">
                 <img :src="item.avatar">
-              </v-list-tile-avatar>
-              <v-list-tile-title v-text="item.name" />
+              </v-list-item-avatar>
+              <v-list-item-title v-text="item.name" />
             </template>
           </v-autocomplete>
         </v-flex>
@@ -150,13 +156,14 @@
             @item-selected="addMember($event)" />
           <v-data-table
             :items="membersObjects"
-            :pagination.sync="pagination"
+            :items-per-page="1000"
             item-key="id"
             class="elevation-1 mt-2"
-            sortable>
+            sortable
+            hide-default-footer>
             <template slot="no-data">
               <tr>
-                <td colspan="3" class="text-xs-center">
+                <td colspan="3" class="text-center">
                   {{ $t('exoplatform.wallet.label.noMembersInPool') }}
                 </td>
               </tr>
@@ -165,10 +172,10 @@
             <!-- eslint-disable-next-line vue/no-unused-vars -->
             <template slot="headers" slot-scope="props">
               <tr>
-                <th colspan="2" class="text-xs-center">
+                <th colspan="2" class="text-center">
                   {{ $t('exoplatform.wallet.label.name') }}
                 </th>
-                <th class="text-xs-right">
+                <th class="text-right">
                   <v-btn
                     v-if="!viewOnly"
                     :title="$t('exoplatform.wallet.button.deleteAll')"
@@ -181,14 +188,14 @@
                 </th>
               </tr>
             </template>
-            <template slot="items" slot-scope="props">
+            <template slot="item" slot-scope="props">
               <tr>
-                <td class="text-xs-left">
+                <td class="text-left">
                   <v-avatar size="36px">
                     <img :src="props.item.avatar" onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
                   </v-avatar>
                 </td>
-                <td class="text-xs-center">
+                <td class="text-center">
                   <profile-chip
                     :address="props.item.address"
                     :profile-id="props.item.id"
@@ -203,7 +210,7 @@
                     :avatar="props.item.avatar"
                     display-no-address />
                 </td>
-                <td class="text-xs-right">
+                <td class="text-right">
                   <v-btn
                     v-if="!viewOnly"
                     :title="$t('exoplatform.wallet.button.delete')"
@@ -279,9 +286,6 @@ export default {
     managerObject: null,
     members: [],
     membersObjects: [],
-    pagination: {
-      rowsPerPage: 25,
-    },
     rewardTeamSpace: null,
     rewardTeamSpaceId: null,
     rewardTeamSpaceOptions: [],

@@ -5,23 +5,23 @@
     pr-1>
     <v-flex
       md6
-      text-xs-left
+      text-left
       pt-2
       class="periodicityLabel">
       {{ periodicityLabel }}
     </v-flex>
-    <v-flex md6 text-xs-right>
-      <v-btn-toggle v-model="periodicity" class="periodicityButtons">
+    <v-flex md6 text-right>
+      <v-btn-toggle v-model="periodicity" class="periodicityButtons elevation-1">
         <v-btn
           :disabled="periodicity === 'year'"
           value="year"
-          flat>
+          text>
           {{ $t('exoplatform.wallet.chart.year') }}
         </v-btn>
         <v-btn
           :disabled="periodicity === 'month'"
           value="month"
-          flat>
+          text>
           {{ $t('exoplatform.wallet.chart.month') }}
         </v-btn>
       </v-btn-toggle>

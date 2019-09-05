@@ -1,5 +1,5 @@
 <template>
-  <v-card class="walletSummaryCurrentBalance">
+  <v-card class="walletSummaryBalance elevation-1">
     <v-card-title class="headline pb-1">
       {{ $t('exoplatform.wallet.label.currentBalance') }}
     </v-card-title>

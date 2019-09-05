@@ -7,12 +7,12 @@
     max-width="100vw"
     @keydown.esc="close">
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="close"></a>
-        <span class="PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
           {{ title }}
         </span>
       </div>
@@ -23,13 +23,14 @@
         <button
           :disabled="loading"
           :loading="loading"
-          class="btn btn-primary mr-2"
+          class="ignore-vuetify-classes btn btn-primary mr-2"
           @click="ok">
           {{ okLabel }}
-        </button> <button
+        </button>
+        <button
           :disabled="loading"
           :loading="loading"
-          class="btn ml-2"
+          class="ignore-vuetify-classes btn ml-2"
           @click="close">
           {{ cancelLabel }}
         </button>

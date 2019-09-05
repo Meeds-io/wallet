@@ -1,5 +1,5 @@
 <template>
-  <v-chip outline class="walletAddressCmp">
+  <v-chip class="walletAddressCmp">
     <v-btn
       v-if="allowCopy"
       id="copy"
@@ -30,7 +30,7 @@
       :title="addressEtherscanLink && $t('exoplatform.wallet.label.openOnEtherscan') || ''"
       :class="!allowCopy && 'mr-4'"
       target="_blank"
-      class="walletAddressLabel ellipsis mr-2">
+      class="walletAddressLabel text-truncate mr-2">
       <template v-if="displayLabel && labelDetail && labelDetail.label">
         {{ labelDetail.label }}
       </template>

@@ -1,25 +1,27 @@
 <template>
   <v-card flat>
-    <v-card-text v-if="error && String(error).trim() != '{}'" class="text-xs-center">
+    <v-card-text v-if="error && String(error).trim() != '{}'" class="text-center">
       <div class="alert alert-error">
         <i class="uiIconError"></i> {{ error }}
       </div>
     </v-card-text>
     <v-card-text
-      class="text-xs-center"
+      class="text-center"
       data-app>
       <v-menu
         ref="selectedDateMenu"
         v-model="selectedDateMenu"
         transition="scale-transition"
-        lazy
         offset-y
         class="dateSelector">
-        <v-text-field
-          slot="activator"
-          v-model="periodDatesDisplay"
-          :label="$t('exoplatform.wallet.label.selectPeriodDate')"
-          prepend-icon="event" />
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            v-model="periodDatesDisplay"
+            :label="$t('exoplatform.wallet.label.selectPeriodDate')"
+            class="dateSelectorInput"
+            prepend-icon="event"
+            v-on="on" />
+        </template>
         <v-date-picker
           v-model="selectedDate"
           :first-day-of-week="1"
@@ -32,7 +34,7 @@
       <v-layout
         row
         wrap
-        class="text-xs-center">
+        class="text-center">
         <v-flex md4 xs12>
           <h4>{{ $t('exoplatform.wallet.label.eligibleUsers') }}: <strong>{{ eligibleUsersCount }}</strong></h4>
         </v-flex>
@@ -70,20 +72,20 @@
     <v-data-table
       :headers="identitiesHeaders"
       :items="filteredIdentitiesList"
+      :items-per-page="1000"
       :loading="loading"
       :sortable="true"
       item-key="address"
       class="elevation-1 mr-3 mb-2"
-      disable-initial-sort
-      hide-actions>
-      <template slot="items" slot-scope="props">
+      hide-default-footer>
+      <template slot="item" slot-scope="props">
         <tr :active="props.selected">
           <td>
             <v-avatar size="36px">
               <img :src="props.item.wallet.avatar" onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
             </v-avatar>
           </td>
-          <td class="text-xs-left">
+          <td class="text-left">
             <profile-chip
               :address="props.item.wallet.address"
               :profile-id="props.item.wallet.id"
@@ -100,7 +102,7 @@
               :initialization-state="props.item.wallet.initializationState"
               display-no-address />
           </td>
-          <td class="text-xs-left">
+          <td class="text-left">
             <ul v-if="props.item.rewardTeams && props.item.rewardTeams.length">
               <li v-for="team in props.item.rewardTeams" :key="team.id">
                 <template v-if="team.disabled">
@@ -115,7 +117,7 @@
               -
             </div>
           </td>
-          <td class="text-xs-center">
+          <td class="text-center">
             <a
               v-if="props.item.rewardTransaction && props.item.rewardTransaction.hash"
               :href="`${transactionEtherscanLink}${props.item.rewardTransaction.hash}`"
@@ -126,7 +128,7 @@
               -
             </span>
           </td>
-          <td class="text-xs-center">
+          <td class="text-center">
             <template v-if="!props.item.rewardTransaction || !props.item.rewardTransaction.status">
               <v-icon
                 v-if="!props.item.wallet.address"
@@ -155,7 +157,7 @@
               :title="props.item.rewardTransaction.status === 'success' ? 'Successfully proceeded' : props.item.rewardTransaction.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
               v-text="props.item.rewardTransaction.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
           </td>
-          <td class="text-xs-center">
+          <td class="text-center">
             <span
               v-if="props.item.tokensSent"
               :title="$t('exoplatform.wallet.label.amountSent')"
@@ -184,17 +186,19 @@
           </td>
         </tr>
       </template>
-      <template slot="footer">
-        <td :colspan="identitiesHeaders.length - 2">
-          <strong>
-            {{ $t('exoplatform.wallet.label.total') }}
-          </strong>
-        </td>
-        <td colspan="2">
-          <strong>
-            {{ totalTokens }} {{ symbol }}
-          </strong>
-        </td>
+      <template slot="body.append">
+        <tr>
+          <td :colspan="identitiesHeaders.length - 2">
+            <strong>
+              {{ $t('exoplatform.wallet.label.total') }}
+            </strong>
+          </td>
+          <td colspan="2">
+            <strong class="ml-7">
+              {{ totalTokens }} {{ symbol }}
+            </strong>
+          </td>
+        </tr>
       </template>
     </v-data-table>
 

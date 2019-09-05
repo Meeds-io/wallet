@@ -4,7 +4,7 @@
       id="walletAppMenuRefreshButton"
       :title="$t('exoplatform.wallet.button.refreshWallet')"
       icon
-      flat
+      text
       class="mr-0"
       @click="$emit('refresh')">
       <v-icon size="20px">
@@ -17,7 +17,7 @@
       :title="$t('exoplatform.wallet.button.security')"
       class="mr-0 ml-0"
       icon
-      flat
+      text
       @click="$emit('modify-settings')">
       <v-icon size="17px">
         fa-lock

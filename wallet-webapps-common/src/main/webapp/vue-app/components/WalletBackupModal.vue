@@ -10,19 +10,17 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <a
-      v-if="!noButton"
-      slot="activator"
-      href="javascript:void(0);"
-      @click="dialog = true">
-      {{ $t('exoplatform.wallet.title.backupWalletModal') }}
-    </a>
+    <template v-if="!noButton" v-slot:activator="{ on }">
+      <a href="javascript:void(0);" v-on="on">
+        {{ $t('exoplatform.wallet.title.backupWalletModal') }}
+      </a>
+    </template>
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix" draggable="true">
+      <div class="ignore-vuetify-classes popupHeader ClearFix" draggable="true">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
+          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
             {{ $t('exoplatform.wallet.button.backupWallet') }}
           </span>
       </div>
@@ -63,27 +61,28 @@
             @click:append="walletPasswordShow = !walletPasswordShow" />
         </v-form>
       </v-card-text>
-      <v-card-text v-if="walletPrivateKey" class="text-xs-center">
+      <v-card-text v-if="walletPrivateKey" class="text-center">
         <code v-text="walletPrivateKey"></code>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <button
           v-if="walletPrivateKey"
-          class="btn btn-primary mr-1"
+          class="ignore-vuetify-classes btn btn-primary mr-1"
           @click="walletBackedUp">
           {{ $t('exoplatform.wallet.button.backedUp') }}!
         </button>
         <button
           v-if="!walletPrivateKey"
           :disabled="loading"
-          class="btn btn-primary mr-1"
+          class="ignore-vuetify-classes btn btn-primary mr-1"
           @click="showPrivateKey">
           {{ $t('exoplatform.wallet.button.displayPrivateKey') }}!
-        </button> <button
+        </button>
+        <button
           v-if="!walletPrivateKey"
           :disabled="loading"
-          class="btn"
+          class="ignore-vuetify-classes btn"
           @click="dialog = false">
           {{ $t('exoplatform.wallet.button.close') }}!
         </button>

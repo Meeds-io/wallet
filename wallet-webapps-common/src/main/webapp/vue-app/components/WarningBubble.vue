@@ -1,20 +1,16 @@
 <template>
-  <v-tooltip bottom>
-    <information-bubble slot="activator">
-      <template slot="content">
-        <slot name="bubble-content"></slot>
-      </template>
-      <v-btn
-        icon
-        small
-        class="mt-0 mb-2">
-        <v-icon small color="orange">fa-exclamation-circle</v-icon>
-      </v-btn>
-    </information-bubble>
-    <span>
-      <slot name="content"></slot>
-    </span>
-  </v-tooltip>
+  <information-bubble>
+    <template slot="content">
+      <slot name="bubble-content"></slot>
+    </template>
+    <v-btn
+      :title="content"
+      icon
+      small
+      class="mt-0 mb-2">
+      <v-icon small color="orange">fa-exclamation-circle</v-icon>
+    </v-btn>
+  </information-bubble>
 </template>
 
 <script>

@@ -2,7 +2,7 @@
   <v-layout
     row
     wrap
-    class="walletSummaryActions mt-1 mb-1">
+    class="walletSummaryActions">
     <v-flex
       md12
       xs6
@@ -10,9 +10,8 @@
       order-xs2
       offset-xs0
       offset-md2
-      pl-2
-      pr-2
-      class="walletSummaryAction mt-2">
+      px-2
+      class="walletSummaryAction">
       <send-tokens-modal
         ref="sendTokensModal"
         :wallet="wallet"
@@ -28,9 +27,8 @@
       order-xs1
       offset-xs0
       offset-md2
-      pl-2
-      pr-2
-      class="walletSummaryAction mt-2">
+      px-2
+      class="walletSummaryAction">
       <request-funds-modal
         ref="walletRequestFundsModal"
         :wallet-address="walletAddress"

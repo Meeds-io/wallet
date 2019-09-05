@@ -136,19 +136,23 @@
   .v-autocomplete label {
     z-index: 1002;
   }
-  .v-autocomplete__content {
-    position: fixed;
-    z-index: 1100 !important;
-  }
   .v-btn {
     border: 0;
+    box-sizing: border-box;
 
     &.btn {
       padding: 0 10px;
+      padding: 3px 10px;
+      border-bottom-color: #e1e8ee;
+      text-shadow: none!important;
+      color: #4d5466;
+      background-color: #fff;
+      background-image: none;
     }
 
     &.btn-primary {
       color: rgb(255, 255, 255);
+      background-color: #578dc9;
       transition: initial;
 
       &:hover {
@@ -157,9 +161,6 @@
         background-position: 0px -45px;
       }
     }
-  }
-  .v-card__text {
-    box-sizing: border-box;
   }
   #accountDetailsDrawer, #contractDetailsDrawer {
     z-index: 1050;
@@ -198,10 +199,6 @@
     left: auto!important;
   }
 
-  .contactAutoComplete {
-    position: relative;
-  }
-
   .contactAutoCompleteContent {
     top: 55px !important;
     left: 0 !important;
@@ -212,9 +209,13 @@
     &.bigContactAutoComplete {
       top: 62px !important;
     }
+  }
+
+  .contactAutoComplete {
+    position: relative;
 
     .v-list {
-      padding: 0;
+      padding: 0 !important;
     }
 
     .v-list__tile {
@@ -241,8 +242,6 @@
   }
 
   .v-dialog {
-    overflow: visible;
-    border-radius: 4px;
     transform: translate(0);
     max-width: 100vw !important;
     max-height: 100vh;
@@ -550,7 +549,7 @@
 
   .periodicityButtons, .walletFilterButtons {
     button {
-      padding: 7px 13px;
+      padding: 0 13px;
 
       &.v-btn--active {
         opacity: 1;
@@ -561,42 +560,6 @@
 }
 
 #WalletApp, #SpaceWalletApp {
-  .walletSummaryCurrentBalance{
-      display: inline-block;
-      width: 100%;
-
-      .title, .headline {
-        color: #808080;
-      }
-
-      .tokenBalance {
-        color: #578DC9;
-      }
-
-      .rewardBalance, .lastTransactionBalance {
-        color: #000000;
-      }
-
-      .v-card__title {
-        white-space: nowrap;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        padding: 7px!important;
-
-        > * {
-          display: inline-block;
-        }
-      }
-
-      .container {
-        padding: 0;
-      }
-
-      .amount {
-        line-height: 40px;
-      }
-  }
-
   .periodicityLabel {
     text-transform: capitalize;
   }
@@ -636,6 +599,8 @@
     }
   }
   .walletSummaryActions {
+    margin-top: 22px;
+
     .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
       width: 98%;
       box-sizing: border-box;
@@ -670,6 +635,10 @@
 
   .dateSelector {
     width: 288px;
+  }
+  .dateSelectorInput {
+    width: 288px;
+    margin: auto;
 
     input {
       text-align: center;
@@ -685,11 +654,7 @@
     display: inline;
   }
   .walletDisplay {
-    max-width: 965px;
     padding: 20px;
-  }
-  .displayMobile {
-    display: block;
   }
 }
 
@@ -715,7 +680,6 @@
       display: inline-block;
     }
     &  > .v-input {
-      max-width: 150px;
       padding-left: 5px;
       padding-right: 5px;
     }
@@ -737,12 +701,13 @@
 
     .walletSummaryActions {
       position: fixed;
+      height: 45px;
       bottom: 0;
-      left: 0;
+      left: 12px;
       right: 0;
       background: white;
       box-sizing: border-box;
-      padding: 0 0 5px 0;
+      padding: 5px 0 5px 0;
       margin-bottom: 0px !important;
       box-shadow: 0 3px 3px -4px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,0.14),0 0px 2px 0 rgba(0,0,0,0.12)!important;
     }

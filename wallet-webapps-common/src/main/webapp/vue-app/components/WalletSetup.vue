@@ -1,5 +1,5 @@
 <template>
-  <v-flex id="walletSetup" class="text-xs-center">
+  <v-flex id="walletSetup" class="text-center">
     <wallet-backup-modal
       ref="walletBackupModal"
       class="mr-3"

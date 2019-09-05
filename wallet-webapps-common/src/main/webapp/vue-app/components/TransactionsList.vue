@@ -14,773 +14,802 @@
         color="primary"
         class="mb-0 mt-0" />
 
-      <v-expansion-panel v-if="Object.keys(sortedTransactions).length">
-        <v-expansion-panel-content
+      <v-divider />
+      <v-expansion-panels
+        v-if="Object.keys(sortedTransactions).length"
+        accordion
+        focusable>
+        <v-expansion-panel
           v-for="(item, index) in sortedTransactions"
           :id="`transaction-${item.hash}`"
           :key="index"
           :value="item.selected">
-          <v-list
-            slot="header"
-            :class="item.selected && 'blue lighten-5'"
-            two-line
-            ripple
-            class="pt-0 pb-0">
-            <v-list-tile
-              :key="item.hash"
-              class="transactionDetailItem autoHeight"
-              avatar
-              ripple>
-              <v-progress-circular
-                v-if="item.pending"
-                indeterminate
-                color="primary"
-                class="mr-4" />
-              <v-list-tile-avatar v-else-if="item.error" :title="item.error">
-                <v-icon color="red">
-                  warning
-                </v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-avatar v-else-if="item.adminIcon">
-                <v-icon color="grey">
-                  fa-cog
-                </v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-avatar v-else-if="item.isReceiver">
-                <v-icon color="green">
-                  fa-arrow-down
-                </v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-avatar v-else>
-                <v-icon color="red">
-                  fa-arrow-up
-                </v-icon>
-              </v-list-tile-avatar>
-
-              <v-list-tile-content class="transactionDetailContent">
-                <v-list-tile-title v-if="item.isContractCreation">
-                  <span>
-                    {{ $t('exoplatform.wallet.label.createdContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.type === 'ether'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <profile-chip
-                    v-else-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-
-                  <span v-if="item.isReceiver">
-                    {{ $t('exoplatform.wallet.label.receivedFrom') }}
-                  </span>
-                  <span v-else>
-                    {{ $t('exoplatform.wallet.label.sentTo') }}
-                  </span>
-
-                  <profile-chip
-                    v-if="item.isReceiver"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-
-                  <profile-chip
-                    v-else
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'transferFrom'">
-                  <span>
-                    {{ $t('exoplatform.wallet.label.sentTo') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.by') }}
-                  </span>
-                  <profile-chip
-                    :address="item.byAddress"
-                    :profile-id="item.byUsername"
-                    :profile-technical-id="item.byTechnicalId"
-                    :space-id="item.bySpaceId"
-                    :profile-type="item.byType"
-                    :display-name="item.byDisplayName"
-                    :avatar="item.byAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.onBehalfOf') }}
-                  </span>
-                  <profile-chip
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="(item.contractMethodName === 'transfer' || item.contractMethodName === 'approve')">
-                  <profile-chip
-                    v-if="displayFullTransaction && item.isReceiver"
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <profile-chip
-                    v-else-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-
-                  <span v-if="item.contractMethodName === 'transfer' && item.isReceiver">
-                    {{ $t('exoplatform.wallet.label.receivedFrom') }}
-                  </span>
-                  <span v-else-if="item.contractMethodName === 'transfer' && !item.isReceiver">
-                    {{ $t('exoplatform.wallet.label.sentTo') }}
-                  </span>
-                  <span v-else-if="item.contractMethodName === 'approve' && item.isReceiver">
-                    {{ $t('exoplatform.wallet.label.delegatedFrom') }}
-                  </span>
-                  <span v-else>
-                    {{ $t('exoplatform.wallet.label.delegatedTo') }}
-                  </span>
-
-                  <profile-chip
-                    v-if="item.isReceiver"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <profile-chip
-                    v-else
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'addAdmin'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.added') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.asAdministratorOnContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'removeAdmin'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.removed') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.asAdministratorFromContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-                <v-list-tile-title v-else-if="item.contractMethodName === 'transferOwnership'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.transferredOwnershipTo') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.onContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'approveAccount'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.approved') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.accountOnContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'disapproveAccount'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.disapproved') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.accountOnContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'pause'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.pausedContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'unPause'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.unPausedContract') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'setSellPrice'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.modifiedSellPrice') }}
-                  </span>
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'upgradeData'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.upgradedDataContract') }}
-                  </span>
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'upgradeImplementation'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.upgradedImplementationContract') }}
-                  </span>
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'transformToVested'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.vestedTokensTo') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'initializeAccount'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'reward'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.rewarded') }}
-                  </span>
-                  <profile-chip
-                    :address="item.toAddress"
-                    :profile-id="item.toUsername"
-                    :profile-technical-id="item.toTechnicalId"
-                    :space-id="item.toSpaceId"
-                    :profile-type="item.toType"
-                    :display-name="item.toDisplayName"
-                    :avatar="item.toAvatar" />
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.contractMethodName === 'depositFunds'">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
-                  </span>
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else-if="item.value && Number(item.value) && item.amountFiat">
-                  <profile-chip
-                    v-if="displayFullTransaction"
-                    :address="item.fromAddress"
-                    :profile-id="item.fromUsername"
-                    :profile-technical-id="item.fromTechnicalId"
-                    :space-id="item.fromSpaceId"
-                    :profile-type="item.fromType"
-                    :display-name="item.fromDisplayName"
-                    :avatar="item.fromAvatar" />
-                  <span>
-                    {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
-                  </span>
-                </v-list-tile-title>
-
-                <v-list-tile-title v-else>
-                  <span>
-                    {{ $t('exoplatform.wallet.label.contractTransaction') }}
-                  </span>
-                  <wallet-address
-                    :value="item.contractAddress"
-                    :name="item.contractName"
-                    display-label />
-                </v-list-tile-title>
-
-                <v-list-tile-sub-title>
-                  <v-icon
-                    v-if="!item.pending && !item.succeeded"
-                    color="orange"
-                    title="Transaction failed">
+          <v-expansion-panel-header
+            :expand-icon="false"
+            hide-actions
+            class="border-box-sizing px-2 py-0">
+            <v-list
+              :class="item.selected && 'blue lighten-5'"
+              two-line
+              ripple
+              class="pt-0 pb-0">
+              <v-list-item
+                :key="item.hash"
+                class="transactionDetailItem autoHeight"
+                ripple>
+                <v-progress-circular
+                  v-if="item.pending"
+                  indeterminate
+                  color="primary"
+                  class="mr-4" />
+                <v-list-item-avatar v-else-if="item.error" :title="item.error">
+                  <v-icon color="red">
                     warning
                   </v-icon>
-                  <v-list-tile-action-text v-if="item.dateFormatted">
-                    {{ item.dateFormatted }}
-                  </v-list-tile-action-text>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-
-              <v-list-tile-content v-if="item.type === 'ether' && item.value && Number(item.value)" class="transactionDetailActions">
-                <v-list-tile-title :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
-                  <span>
-                    {{ toFixed(item.value) }} ether
-                  </span>
-                </v-list-tile-title>
-                <v-list-tile-sub-title v-if="item.amountFiat">
-                  <v-list-tile-action-text>
-                    {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
-                  </v-list-tile-action-text>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-
-              <v-list-tile-content v-else class="transactionDetailActions">
-                <v-list-tile-title
-                  v-if="item.contractAmount"
-                  :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
-                  <span>
+                </v-list-item-avatar>
+                <v-list-item-avatar v-else-if="item.adminIcon">
+                  <v-icon color="grey">
+                    fa-cog
+                  </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-avatar v-else-if="item.isReceiver">
+                  <v-icon color="green">
+                    fa-arrow-down
+                  </v-icon>
+                </v-list-item-avatar>
+                <v-list-item-avatar v-else>
+                  <v-icon color="red">
+                    fa-arrow-up
+                  </v-icon>
+                </v-list-item-avatar>
+  
+                <v-list-item-content class="transactionDetailContent">
+                  <v-list-item-title v-if="item.isContractCreation">
+                    <span>
+                      {{ $t('exoplatform.wallet.label.createdContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.type === 'ether'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <profile-chip
+                      v-else-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+  
+                    <span v-if="item.isReceiver">
+                      {{ $t('exoplatform.wallet.label.receivedFrom') }}
+                    </span>
+                    <span v-else>
+                      {{ $t('exoplatform.wallet.label.sentTo') }}
+                    </span>
+  
+                    <profile-chip
+                      v-if="item.isReceiver"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+  
+                    <profile-chip
+                      v-else
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'transferFrom'">
+                    <span>
+                      {{ $t('exoplatform.wallet.label.sentTo') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.by') }}
+                    </span>
+                    <profile-chip
+                      :address="item.byAddress"
+                      :profile-id="item.byUsername"
+                      :profile-technical-id="item.byTechnicalId"
+                      :space-id="item.bySpaceId"
+                      :profile-type="item.byType"
+                      :display-name="item.byDisplayName"
+                      :avatar="item.byAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.onBehalfOf') }}
+                    </span>
+                    <profile-chip
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="(item.contractMethodName === 'transfer' || item.contractMethodName === 'approve')">
+                    <profile-chip
+                      v-if="displayFullTransaction && item.isReceiver"
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <profile-chip
+                      v-else-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+  
+                    <span v-if="item.contractMethodName === 'transfer' && item.isReceiver">
+                      {{ $t('exoplatform.wallet.label.receivedFrom') }}
+                    </span>
+                    <span v-else-if="item.contractMethodName === 'transfer' && !item.isReceiver">
+                      {{ $t('exoplatform.wallet.label.sentTo') }}
+                    </span>
+                    <span v-else-if="item.contractMethodName === 'approve' && item.isReceiver">
+                      {{ $t('exoplatform.wallet.label.delegatedFrom') }}
+                    </span>
+                    <span v-else>
+                      {{ $t('exoplatform.wallet.label.delegatedTo') }}
+                    </span>
+  
+                    <profile-chip
+                      v-if="item.isReceiver"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <profile-chip
+                      v-else
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'addAdmin'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.added') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.asAdministratorOnContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'removeAdmin'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.removed') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.asAdministratorFromContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+                  <v-list-item-title v-else-if="item.contractMethodName === 'transferOwnership'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.transferredOwnershipTo') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.onContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'approveAccount'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.approved') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.accountOnContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'disapproveAccount'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.disapproved') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.accountOnContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'pause'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.pausedContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'unPause'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.unPausedContract') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'setSellPrice'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.modifiedSellPrice') }}
+                    </span>
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'upgradeData'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.upgradedDataContract') }}
+                    </span>
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'upgradeImplementation'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.upgradedImplementationContract') }}
+                    </span>
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'transformToVested'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.vestedTokensTo') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'initializeAccount'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'reward'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.rewarded') }}
+                    </span>
+                    <profile-chip
+                      :address="item.toAddress"
+                      :profile-id="item.toUsername"
+                      :profile-technical-id="item.toTechnicalId"
+                      :space-id="item.toSpaceId"
+                      :profile-type="item.toType"
+                      :display-name="item.toDisplayName"
+                      :avatar="item.toAvatar" />
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.contractMethodName === 'depositFunds'">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
+                    </span>
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else-if="item.value && Number(item.value) && item.amountFiat">
+                    <profile-chip
+                      v-if="displayFullTransaction"
+                      :address="item.fromAddress"
+                      :profile-id="item.fromUsername"
+                      :profile-technical-id="item.fromTechnicalId"
+                      :space-id="item.fromSpaceId"
+                      :profile-type="item.fromType"
+                      :display-name="item.fromDisplayName"
+                      :avatar="item.fromAvatar" />
+                    <span>
+                      {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
+                    </span>
+                  </v-list-item-title>
+  
+                  <v-list-item-title v-else>
+                    <span>
+                      {{ $t('exoplatform.wallet.label.contractTransaction') }}
+                    </span>
+                    <wallet-address
+                      :value="item.contractAddress"
+                      :name="item.contractName"
+                      display-label />
+                  </v-list-item-title>
+  
+                  <v-list-item-subtitle>
+                    <v-icon
+                      v-if="!item.pending && !item.succeeded"
+                      color="orange"
+                      title="Transaction failed">
+                      warning
+                    </v-icon>
+                    <v-list-item-action-text v-if="item.dateFormatted">
+                      {{ item.dateFormatted }}
+                    </v-list-item-action-text>
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+  
+                <v-list-item-content v-if="item.type === 'ether' && item.value && Number(item.value)" class="transactionDetailActions">
+                  <v-list-item-title :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
+                    <span>
+                      {{ toFixed(item.value) }} ether
+                    </span>
+                  </v-list-item-title>
+                  <v-list-item-subtitle v-if="item.amountFiat">
+                    <v-list-item-action-text>
+                      {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
+                    </v-list-item-action-text>
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+  
+                <v-list-item-content v-else class="transactionDetailActions">
+                  <v-list-item-title
+                    v-if="item.contractAmount"
+                    :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
+                    <span>
+                      {{ toFixed(item.contractAmount) }} {{ item.contractSymbol }}
+                    </span>
+                  </v-list-item-title>
+                  <v-list-item-title
+                    v-else-if="item.value && Number(item.value)"
+                    :class="item.isReceiver ? 'green--text' : 'red--text'">
+                    <span>
+                      {{ toFixed(item.value) }} ether
+                    </span>
+                  </v-list-item-title>
+                  <v-list-item-subtitle
+                    v-if="item.contractMethodName === 'reward'">
+                    <v-list-item-action-text>
+                      {{ toFixed(item.value) }} {{ item.contractSymbol }}
+                    </v-list-item-action-text>
+                  </v-list-item-subtitle>
+                  <v-list-item-subtitle
+                    v-else-if="item.amountFiat">
+                    <v-list-item-action-text>
+                      {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
+                    </v-list-item-action-text>
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-list class="px-0 ml-2" dense>
+              <v-list-item v-if="!item.pending">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.status') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <div class="no-wrap">
+                    <v-icon :color="item.succeeded ? 'success' : 'error'" v-text="item.succeeded ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item v-if="administration && item.issuer">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.issuer') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <profile-chip
+                    :address="item.issuer.address"
+                    :profile-id="item.issuer.id"
+                    :profile-technical-id="item.issuer.technicalId"
+                    :space-id="item.issuer.spaceId"
+                    :profile-type="item.issuer.type"
+                    :display-name="item.issuer.name"
+                    :avatar="item.issuer.avatar" />
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.label" class="dynamic-height">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.transactionLabel') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right paragraph">
+                  <div class="no-wrap">
+                    {{ item.label }}
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.message" class="dynamic-height">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.transactionMessage') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right paragraph">
+                  <div class="no-wrap">
+                    {{ item.message }}
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="Number(item.contractAmount)">
+                <v-list-item-content>
+                  {{ item.contractAmountLabel }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <div class="no-wrap">
                     {{ toFixed(item.contractAmount) }} {{ item.contractSymbol }}
-                  </span>
-                </v-list-tile-title>
-                <v-list-tile-title
-                  v-else-if="item.value && Number(item.value)"
-                  :class="item.isReceiver ? 'green--text' : 'red--text'">
-                  <span>
-                    {{ toFixed(item.value) }} ether
-                  </span>
-                </v-list-tile-title>
-                <v-list-tile-sub-title
-                  v-if="item.contractMethodName === 'reward'">
-                  <v-list-tile-action-text>
-                    {{ toFixed(item.value) }} {{ item.contractSymbol }}
-                  </v-list-tile-action-text>
-                </v-list-tile-sub-title>
-                <v-list-tile-sub-title
-                  v-else-if="item.amountFiat">
-                  <v-list-tile-action-text>
-                    {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
-                  </v-list-tile-action-text>
-                </v-list-tile-sub-title>
-                <v-list-tile-sub-title v-else />
-              </v-list-tile-content>
-            </v-list-tile>
-          </v-list>
-
-          <v-list class="pl-5 ml-2 pr-4" dense>
-            <v-list-tile v-if="!item.pending">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.status') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <v-icon :color="item.succeeded ? 'success' : 'error'" v-text="item.succeeded ? 'fa-check-circle' : 'fa-exclamation-circle'" />
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile v-if="administration && item.issuer">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.issuer') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <profile-chip
-                  :address="item.issuer.address"
-                  :profile-id="item.issuer.id"
-                  :profile-technical-id="item.issuer.technicalId"
-                  :space-id="item.issuer.spaceId"
-                  :profile-type="item.issuer.type"
-                  :display-name="item.issuer.name"
-                  :avatar="item.issuer.avatar" />
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="item.label" class="dynamic-height">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.transactionLabel') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end paragraph" v-text="item.label" />
-            </v-list-tile>
-
-            <v-list-tile v-if="item.message" class="dynamic-height">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.transactionMessage') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end paragraph" v-text="item.message" />
-            </v-list-tile>
-
-            <v-list-tile v-if="Number(item.contractAmount)">
-              <v-list-tile-content>
-                {{ item.contractAmountLabel }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                {{ toFixed(item.contractAmount) }} {{ item.contractSymbol }}
-              </v-list-tile-content>
-            </v-list-tile>
-            <template v-if="item.contractMethodName === 'reward'">
-              <v-list-tile v-if="Number(item.value)">
-                <v-list-tile-content>
-                  {{ $t('exoplatform.wallet.label.transferredAmount') }}
-                </v-list-tile-content>
-                <v-list-tile-content class="align-end">
-                  {{ toFixed(item.value) }} {{ item.contractSymbol }}
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-            <template v-else>
-              <v-list-tile v-if="Number(item.amountFiat)">
-                <v-list-tile-content>
-                  {{ $t('exoplatform.wallet.label.fiatAmount') }}
-                </v-list-tile-content>
-                <v-list-tile-content class="align-end">
-                  {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
-                </v-list-tile-content>
-              </v-list-tile>
-              <v-list-tile v-if="Number(item.value)">
-                <v-list-tile-content>
-                  {{ $t('exoplatform.wallet.label.etherAmount') }}
-                </v-list-tile-content>
-                <v-list-tile-content class="align-end">
-                  {{ toFixed(item.value) }} ether
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-
-            <v-list-tile v-if="item.fromAddress">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.fromAddress') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <a
-                  v-if="addressEtherscanLink"
-                  :href="`${addressEtherscanLink}${item.fromAddress}`"
-                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
-                  target="_blank">
-                  {{ item.fromAddress }}
-                </a>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="item.toAddress">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.toAddress') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <a
-                  v-if="addressEtherscanLink"
-                  :href="`${addressEtherscanLink}${item.toAddress}`"
-                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
-                  target="_blank">
-                  {{ item.toAddress }}
-                </a>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="item.contractName">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.contractName') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                {{ item.contractName }}
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="item.contractAddress">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.contractAddress') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <a
-                  v-if="tokenEtherscanLink"
-                  :href="`${tokenEtherscanLink}${item.contractAddress}`"
-                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
-                  target="_blank">
-                  {{ item.contractAddress }}
-                </a>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="item.fee">
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.transactionFee') }}
-              </v-list-tile-content>
-              <v-list-tile-content v-if="item.tokenFee" class="align-end">
-                {{ toFixed(item.tokenFee) }} {{ item.contractSymbol }}
-              </v-list-tile-content>
-              <v-list-tile-content v-else class="align-end">
-                <div class="no-wrap">
-                  {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
-                  <v-icon
-                    v-if="item.noContractFunds"
-                    color="orange"
-                    title="You financed transaction fee with ether instead of Token.">
-                    warning
-                  </v-icon>
-                </div>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile>
-              <v-list-tile-content>
-                {{ $t('exoplatform.wallet.label.transactionHash') }}
-              </v-list-tile-content>
-              <v-list-tile-content class="align-end">
-                <a
-                  v-if="transactionEtherscanLink"
-                  :href="`${transactionEtherscanLink}${item.hash}`"
-                  :title="$t('exoplatform.wallet.label.openOnEtherscan')"
-                  target="_blank">
-                  {{ item.hash }}
-                </a>
-              </v-list-tile-content>
-            </v-list-tile>
-          </v-list>
-        </v-expansion-panel-content>
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+              <template v-if="item.contractMethodName === 'reward'">
+                <v-list-item v-if="Number(item.value)">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.transferredAmount') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <div class="no-wrap">
+                      {{ toFixed(item.value) }} {{ item.contractSymbol }}
+                    </div>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+              <template v-else>
+                <v-list-item v-if="Number(item.amountFiat)">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.fiatAmount') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <div class="no-wrap">
+                      {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
+                    </div>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item v-if="Number(item.value)">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.etherAmount') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <div class="no-wrap">
+                      {{ toFixed(item.value) }} ether
+                    </div>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+  
+              <v-list-item v-if="item.fromAddress">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.fromAddress') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <a
+                    v-if="addressEtherscanLink"
+                    :href="`${addressEtherscanLink}${item.fromAddress}`"
+                    :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                    target="_blank">
+                    {{ item.fromAddress }}
+                  </a>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.toAddress">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.toAddress') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <a
+                    v-if="addressEtherscanLink"
+                    :href="`${addressEtherscanLink}${item.toAddress}`"
+                    :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                    target="_blank">
+                    {{ item.toAddress }}
+                  </a>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.contractName">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.contractName') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <div class="no-wrap">
+                    {{ item.contractName }}
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.contractAddress">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.contractAddress') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <a
+                    v-if="tokenEtherscanLink"
+                    :href="`${tokenEtherscanLink}${item.contractAddress}`"
+                    :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                    target="_blank">
+                    {{ item.contractAddress }}
+                  </a>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item v-if="item.fee">
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.transactionFee') }}
+                </v-list-item-content>
+                <v-list-item-content v-if="item.tokenFee" class="align-end text-right">
+                  <div class="no-wrap">
+                    {{ toFixed(item.tokenFee) }} {{ item.contractSymbol }}
+                  </div>
+                </v-list-item-content>
+                <v-list-item-content v-else class="align-end text-right">
+                  <div class="no-wrap">
+                    {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
+                    <v-icon
+                      v-if="item.noContractFunds"
+                      color="orange"
+                      title="You financed transaction fee with ether instead of Token.">
+                      warning
+                    </v-icon>
+                  </div>
+                </v-list-item-content>
+              </v-list-item>
+  
+              <v-list-item>
+                <v-list-item-content>
+                  {{ $t('exoplatform.wallet.label.transactionHash') }}
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <a
+                    v-if="transactionEtherscanLink"
+                    :href="`${transactionEtherscanLink}${item.hash}`"
+                    :title="$t('exoplatform.wallet.label.openOnEtherscan')"
+                    target="_blank">
+                    {{ item.hash }}
+                  </a>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
         <div v-if="!limitReached">
           <v-btn
             :loading="loading"
             color="primary"
-            flat
+            text
             @click="transactionsLimit += transactionsPerPage">
             {{ $t('exoplatform.wallet.button.loadMore') }}
           </v-btn>
         </div>
-      </v-expansion-panel>
-      <v-flex v-else-if="!loading" class="text-xs-center">
+      </v-expansion-panels>
+      <v-flex v-else-if="!loading" class="text-center">
         <span>
           {{ $t('exoplatform.wallet.label.noRecentTransactions') }}
         </span>

@@ -20,19 +20,9 @@
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
               <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
-                <v-tooltip
-                  content-class="etherTooLowWarning"
-                  attach="#etherTooLowWarningParent"
-                  absolute
-                  top
-                  class="ml-2">
-                  <v-icon slot="activator" color="orange">
-                    warning
-                  </v-icon>
-                  <span>
-                    {{ $t('exoplatform.wallet.warning.noEnoughFunds') }}
-                  </span>
-                </v-tooltip>
+                <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                  warning
+                </v-icon>
               </div>
 
               <v-spacer />
@@ -92,7 +82,7 @@
                   <v-layout
                     row
                     wrap
-                    class="ml-0 mr-0">
+                    class="ml-0 mr-0 px-0">
                     <v-flex xs12>
                       <wallet-summary
                         v-if="wallet && contractDetails"

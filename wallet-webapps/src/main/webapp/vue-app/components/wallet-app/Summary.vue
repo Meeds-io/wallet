@@ -17,10 +17,10 @@
         primary-title
         class="pb-0">
         <v-spacer />
-        <div class="alert alert-info">
+        <div class="alert alert-info ignore-vuetify-classes">
           <i class="uiIconInfo"></i>
           {{ $t('exoplatform.wallet.info.initializationAccessDenied') }}
-          <button class="btn" @click="requestAccessAuthorization()">
+          <button class="ignore-vuetify-classes btn" @click="requestAccessAuthorization()">
             {{ $t('exoplatform.wallet.button.requestAuthorization') }}
           </button>
         </div>
@@ -55,11 +55,14 @@
         grid-list-md
         pl-3
         pr-0>
-        <v-layout col wrap>
+        <v-layout
+          col
+          wrap
+          class="px-0">
           <v-flex
             md4
             xs12
-            text-xs-center>
+            text-center>
             <summary-balance :wallet="wallet" :contract-details="contractDetails" />
           </v-flex>
           <v-flex
@@ -69,7 +72,7 @@
             xs6
             pr-0
             pl-0
-            text-xs-center>
+            text-center>
             <summary-reward
               :wallet="wallet"
               :contract-details="contractDetails"
@@ -83,7 +86,7 @@
             xs6
             pr-0
             pl-0
-            text-xs-center>
+            text-center>
             <summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"

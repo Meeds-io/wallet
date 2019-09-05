@@ -1,5 +1,5 @@
 <template>
-  <v-card id="sendTokenForm">
+  <v-card id="sendTokenForm" flat>
     <v-card-text class="pt-0">
       <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
@@ -34,7 +34,6 @@
           :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
           name="amount"
           required
-          class="mt-3"
           @input="$emit('amount-selected', amount)" />
 
         <v-text-field
@@ -50,7 +49,6 @@
           counter
           required
           autocomplete="current-passord"
-          class="mt-3"
           @click:append="walletPasswordShow = !walletPasswordShow" />
         <gas-price-choice :estimated-fee="transactionFeeString" @changed="gasPrice = $event" />
         <v-text-field
@@ -66,7 +64,6 @@
           :label="$t('exoplatform.wallet.label.transactionMessage')"
           :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
           name="tokenTransactionMessage"
-          class="mt-4"
           rows="3"
           flat
           no-resize />
@@ -92,13 +89,13 @@
       <button
         :disabled="disabled"
         :loading="loading"
-        class="btn btn-primary mr-1"
+        class="ignore-vuetify-classes btn btn-primary mr-1"
         @click="sendTokens">
         {{ $t('exoplatform.wallet.button.send') }}
       </button>
       <button
         :disabled="disabled"
-        class="btn"
+        class="ignore-vuetify-classes btn"
         color="secondary"
         @click="showQRCodeModal = true">
         {{ $t('exoplatform.wallet.button.qrCode') }}

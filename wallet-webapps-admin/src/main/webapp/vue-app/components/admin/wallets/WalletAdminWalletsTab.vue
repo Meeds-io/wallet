@@ -5,7 +5,7 @@
       :loading="loading"
       :title="informationTitle"
       :message="informationMessage"
-      :hide-actions="hideConfirmActions"
+      :hide-default-footer="hideConfirmActions"
       width="400px"
       @ok="proceessAction" />
     <div v-if="error" class="alert alert-error v-content">
@@ -15,113 +15,73 @@
       <i class="uiIconWarning"></i>
       {{ $t('exoplatform.wallet.warning.adminWalletNotInitialized') }}
     </div>
-    <v-container class="walletDisplay">
-      <v-layout class="hidden-sm-and-down">
-        <v-flex md4 xs12>
-          <v-btn-toggle
-            v-model="walletTypes"
-            class="walletFilterButtons"
-            mandatory
-            multiple
-            flat>
-            <v-btn value="user">
-              {{ $t('exoplatform.wallet.label.users') }}
-            </v-btn>
-            <v-btn value="space">
-              {{ $t('exoplatform.wallet.label.spaces') }}
-            </v-btn>
-            <v-btn value="admin">
-              {{ $t('exoplatform.wallet.label.admin') }}
-            </v-btn>
-          </v-btn-toggle>
-        </v-flex>
-        <v-flex
-          md4
-          xs12>
-          <v-btn-toggle
-            v-model="walletStatuses"
-            class="walletFilterButtons"
-            multiple
-            flat>
-            <v-btn value="disabled">
-              {{ $t('exoplatform.wallet.label.disabled') }}
-            </v-btn>
-            <v-btn value="disapproved">
-              {{ $t('exoplatform.wallet.label.disapproved') }}
-            </v-btn>
-            <v-btn value="deletedIdentity">
-              {{ $t('exoplatform.wallet.label.deleted') }}
-            </v-btn>
-          </v-btn-toggle>
-        </v-flex>
-        <v-flex
-          md3
-          offset-md1
-          xs12>
-          <v-text-field
-            v-model="search"
-            :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
-            append-icon="search"
-            class="pt-0" />
-        </v-flex>
-      </v-layout>
-      <v-layout class="hidden-md-and-up displayMobile">
-        <v-flex xs11 pb-3>
-          <v-btn-toggle
-            v-model="walletTypes"
-            class="walletFilterButtons"
-            mandatory
-            multiple
-            flat>
-            <v-btn value="user">
-              {{ $t('exoplatform.wallet.label.users') }}
-            </v-btn>
-            <v-btn value="space">
-              {{ $t('exoplatform.wallet.label.spaces') }}
-            </v-btn>
-            <v-btn value="admin">
-              {{ $t('exoplatform.wallet.label.admin') }}
-            </v-btn>
-          </v-btn-toggle>
-        </v-flex>
-        <v-flex
-          xs11
-          pb-3>
-          <v-btn-toggle
-            v-model="walletStatuses"
-            class="walletFilterButtons"
-            multiple
-            flat>
-            <v-btn value="disabled">
-              {{ $t('exoplatform.wallet.label.disabled') }}
-            </v-btn>
-            <v-btn value="disapproved">
-              {{ $t('exoplatform.wallet.label.disapproved') }}
-            </v-btn>
-            <v-btn value="deletedIdentity">
-              {{ $t('exoplatform.wallet.label.deleted') }}
-            </v-btn>
-          </v-btn-toggle>
-        </v-flex>
-        <v-flex
-          sm4
-          xs9
-          offset-xs1
-          offset-sm3>
-          <v-text-field
-            v-model="search"
-            :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
-            append-icon="search"
-            class="pt-0" />
-        </v-flex>
-      </v-layout>
-    </v-container>
+    <v-layout
+      row
+      wrap
+      class="border-box-sizing mx-0">
+      <v-flex
+        md4
+        xs12
+        class="mt-2 border-box-sizing">
+        <v-btn-toggle
+          v-model="walletTypes"
+          class="walletFilterButtons"
+          mandatory
+          multiple
+          text>
+          <v-btn value="user">
+            {{ $t('exoplatform.wallet.label.users') }}
+          </v-btn>
+          <v-btn value="space">
+            {{ $t('exoplatform.wallet.label.spaces') }}
+          </v-btn>
+          <v-btn value="admin">
+            {{ $t('exoplatform.wallet.label.admin') }}
+          </v-btn>
+        </v-btn-toggle>
+      </v-flex>
+      <v-flex
+        md3
+        offset-md1
+        offset-xs0
+        xs12
+        class="mt-2 border-box-sizing">
+        <v-btn-toggle
+          v-model="walletStatuses"
+          class="walletFilterButtons"
+          multiple
+          text>
+          <v-btn value="disabled">
+            {{ $t('exoplatform.wallet.label.disabled') }}
+          </v-btn>
+          <v-btn value="disapproved">
+            {{ $t('exoplatform.wallet.label.disapproved') }}
+          </v-btn>
+          <v-btn value="deletedIdentity">
+            {{ $t('exoplatform.wallet.label.deleted') }}
+          </v-btn>
+        </v-btn-toggle>
+      </v-flex>
+      <v-flex
+        md3
+        offset-md1
+        offset-xs0
+        xs12
+        class="mt-2 border-box-sizing">
+        <v-text-field
+          v-model="search"
+          :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
+          append-icon="search"
+          class="pt-0 mt-0" />
+      </v-flex>
+    </v-layout>
     <v-data-table
       :headers="walletTableHeaders"
       :items="filteredWallets"
+      :items-per-page="1000"
       :loading="loadingWallets"
-      hide-actions>
-      <template slot="items" slot-scope="props">
+      hide-default-footer>
+      <template slot="item" slot-scope="props">
         <transition name="fade">
           <tr v-show="props.item.displayedWallet">
             <td class="clickable" @click="openAccountDetail(props.item)">
@@ -133,7 +93,7 @@
                 <v-icon v-else size="36">fa-cog</v-icon>
               </v-avatar>
             </td>
-            <td class="clickable text-xs-left" @click="openAccountDetail(props.item)">
+            <td class="clickable text-left" @click="openAccountDetail(props.item)">
               <profile-chip
                 :address="props.item.address"
                 :profile-id="props.item.id"
@@ -149,7 +109,7 @@
                 display-no-address
                 no-status />
             </td>
-            <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
+            <td class="clickable text-center" @click="openAccountDetail(props.item)">
               <template>
                 <template v-if="props.item.deletedUser">{{ $t('exoplatform.wallet.label.deletedIdentity') }}</template>
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
@@ -178,7 +138,7 @@
             </td>
             <td
               v-if="contractDetails"
-              class="clickable text-xs-center"
+              class="clickable text-center"
               @click="openAccountDetail(props.item)">
               <v-progress-circular
                 v-if="props.item.loading"
@@ -190,7 +150,7 @@
                 {{ walletUtils.toFixed(props.item.tokenBalance) || 0 }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
               </template>
             </td>
-            <td class="clickable text-xs-center" @click="openAccountDetail(props.item)">
+            <td class="clickable text-center" @click="openAccountDetail(props.item)">
               <v-progress-circular
                 v-if="props.item.loading"
                 color="primary"
@@ -238,7 +198,7 @@
                 </v-icon>
               </template>
             </td>
-            <td class="text-xs-center">
+            <td class="text-center">
               <v-progress-circular
                 v-if="props.item.pendingTransaction || props.item.loading"
                 :title="$t('exoplatform.wallet.message.transactionInProgress')"
@@ -247,48 +207,49 @@
                 indeterminate
                 size="20" />
               <v-menu v-else-if="isAdmin" offset-y>
-                <v-btn
-                  slot="activator"
-                  icon
-                  small>
-                  <v-icon size="20px">fa-ellipsis-v</v-icon>
-                </v-btn>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    icon
+                    small
+                    v-on="on">
+                    <v-icon size="20px">fa-ellipsis-v</v-icon>
+                  </v-btn>
+                </template>
                 <v-list flat class="pt-0 pb-0">
                   <template>
-                    <v-list-tile @click="refreshWallet(props.item, true)">
-                      <v-list-tile-title>{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-tile-title>
-                    </v-list-tile>
+                    <v-list-item @click="refreshWallet(props.item, true)">
+                      <v-list-item-title>{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-item-title>
+                    </v-list-item>
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
                         <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
-                          <v-list-tile @click="openAcceptInitializationModal(props.item)">
-                            <v-list-tile-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-tile-title>
-                          </v-list-tile>
-                          <v-list-tile v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
-                            <v-list-tile-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-tile-title>
-                          </v-list-tile>
+                          <v-list-item @click="openAcceptInitializationModal(props.item)">
+                            <v-list-item-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
+                          </v-list-item>
+                          <v-list-item v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
+                            <v-list-item-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
+                          </v-list-item>
                           <v-divider />
                         </template>
                         <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
-                          <v-list-tile @click="openSendEtherModal(props.item)">
-                            <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-tile-title>
-                          </v-list-tile>
+                          <v-list-item @click="openSendEtherModal(props.item)">
+                            <v-list-item-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
+                          </v-list-item>
                           <v-divider />
                         </template>
-
-                        <v-list-tile v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
-                          <v-list-tile-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-tile-title>
-                        </v-list-tile>
+                        <v-list-item v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
+                          <v-list-item-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
+                        </v-list-item>
                         <v-divider />
                       </template>
 
-                      <v-list-tile v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
-                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-tile-title>
-                      </v-list-tile>
-                      <v-list-tile v-else-if="!props.item.disabledUser && !props.item.deletedUser" @click="enableWallet(props.item, true)">
-                        <v-list-tile-title>{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-tile-title>
-                      </v-list-tile>
+                      <v-list-item v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
+                        <v-list-item-title>{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-item-title>
+                      </v-list-item>
+                      <v-list-item v-else-if="!props.item.disabledUser && !props.item.deletedUser" @click="enableWallet(props.item, true)">
+                        <v-list-item-title>{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-item-title>
+                      </v-list-item>
                     </template>
                   </template>
                 </v-list>
@@ -302,7 +263,7 @@
       <v-btn
         :loading="loading"
         color="primary"
-        flat
+        text
         @click="limit += pageSize">
         {{ $t('exoplatform.wallet.button.loadMore') }}
       </v-btn>

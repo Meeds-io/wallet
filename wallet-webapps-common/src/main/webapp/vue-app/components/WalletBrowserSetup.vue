@@ -1,5 +1,5 @@
 <template>
-  <v-flex class="text-xs-center white">
+  <v-flex class="text-center white">
     <div
       v-show="!loading"
       id="walletBrowserSetup"
@@ -36,7 +36,7 @@
         </v-form>
         <button
           :disabled="loadingWalletBrowser"
-          class="btn btn-primary"
+          class="ignore-vuetify-classes btn btn-primary"
           @click="createWallet()">
           {{ $t('exoplatform.wallet.button.createNewWallet') }}
         </button>

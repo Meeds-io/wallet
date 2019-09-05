@@ -7,11 +7,11 @@
     max-width="100vw"
     @keydown.esc="dialog = false">
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
+          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
             {{ title }}
           </span>
       </div>

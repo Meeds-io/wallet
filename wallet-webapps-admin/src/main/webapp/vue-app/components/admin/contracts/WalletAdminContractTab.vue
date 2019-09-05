@@ -2,7 +2,7 @@
   <v-flex
     v-if="contractDetails && contractDetails.title"
     id="accountDetail"
-    class="text-xs-center white layout column">
+    class="text-center white layout column">
     <v-card-title v-if="adminLevel >= 4" class="align-start accountDetailSummary">
       <v-layout column>
         <v-flex
@@ -207,16 +207,11 @@
       </v-tab>
     </v-tabs>
     <v-tabs-items v-model="selectedTab">
-      <v-tab-item id="transactions" value="transactions">
+      <v-tab-item
+        id="transactions"
+        value="transactions"
+        eager>
         <v-layout column>
-          <v-flex xs12>
-            <v-btn
-              :disabled="refreshingTransactions"
-              :loading="refreshingTransactions"
-              @click="refreshTransactions">
-              {{ $t('exoplatform.wallet.button.refresh') }}
-            </v-btn>
-          </v-flex>
           <v-flex xs12>
             <transactions-list
               id="transactionsList"
@@ -235,12 +230,13 @@
       <v-tab-item
         v-if="contractDetails && contractDetails.contractType > 0 && adminLevel >= 4"
         id="approvedAccounts"
-        value="approvedAccounts">
+        value="approvedAccounts"
+        eager>
         <v-flex v-if="!loading" justify-center>
           <v-btn
             :loading="loadingApprovedWalletsFromContract"
             color="primary"
-            flat
+            text
             @click="loadApprovedWalletsFromContract">
             {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
           </v-btn>
@@ -248,11 +244,12 @@
         <v-data-table
           v-if="contractDetails"
           :items="approvedWallets"
+          :items-per-page="1000"
           :loading="loadingApprovedWalletsFromContract"
           no-data-text=""
-          hide-actions
-          hide-headers>
-          <template slot="items" slot-scope="props">
+          hide-default-footer
+          hide-default-header>
+          <template slot="item" slot-scope="props">
             <tr v-if="props.item.approved || props.item.adminLevel >= 1">
               <td>
                 <v-avatar size="36px">
@@ -293,12 +290,13 @@
       <v-tab-item
         v-if="contractDetails.contractType > 0 && adminLevel >= 5"
         id="adminAccounts"
-        value="adminAccounts">
+        value="adminAccounts"
+        eager>
         <v-flex v-if="!loading" justify-center>
           <v-btn
             :loading="loadingAdminWalletsFromContract"
             color="primary"
-            flat
+            text
             @click="loadAdminWalletsFromContract">
             {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
           </v-btn>
@@ -306,11 +304,12 @@
         <v-data-table
           v-if="contractDetails"
           :items="adminWallets"
+          :items-per-page="1000"
           :loading="loadingAdminWalletsFromContract"
           no-data-text=""
-          hide-actions
-          hide-headers>
-          <template slot="items" slot-scope="props">
+          hide-default-footer
+          hide-default-header>
+          <template slot="item" slot-scope="props">
             <tr v-if="props.item.adminLevel >= 1">
               <td>
                 <v-avatar size="36px">
@@ -411,7 +410,6 @@ export default {
       approvedWallets: [],
       adminWallets: [],
       checkingPendingTransactions: false,
-      refreshingTransactions: false,
       approvedWalletsLoadedFromContract: false,
       loadingApprovedWalletsFromContract: false,
       loadingAdminWalletsFromContract: false,
@@ -466,12 +464,6 @@ export default {
         );
       }
       return Promise.all(promises);
-    },
-    refreshTransactions() {
-      if (this.$refs.transactionsList) {
-        this.refreshingTransactions = true;
-        return this.$refs.transactionsList.init(true).finally(() => this.refreshingTransactions = false);
-      }
     },
     newTransactionPending(transaction) {
       this.$emit('pending-transaction', transaction);

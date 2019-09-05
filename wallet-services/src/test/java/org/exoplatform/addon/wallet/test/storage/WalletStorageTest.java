@@ -26,6 +26,7 @@ import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 
 public class WalletStorageTest extends BaseWalletTest {
   private static final String WALLET_PRIVATE_KEY_CONTENT = "Wallet-Private-Key-Encrypted-With-Password";
@@ -281,6 +282,76 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = walletStorage.getWalletByIdentityId(walletId);
     assertFalse(wallet.isHasPrivateKey());
+  }
+
+  /**
+   * Check wallet blockchain state storage
+   * {@link WalletStorage#saveWalletBlockchainState(Wallet, String)}
+   */
+  @Test
+  public void testSaveWalletBlockchainState() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    String contractAddress = WalletUtils.getContractAddress();
+
+    Wallet wallet = newWallet();
+
+    wallet = walletStorage.saveWallet(wallet, true);
+    walletStorage.retrieveWalletBlockchainState(wallet, contractAddress);
+    assertNotNull(wallet);
+    assertNull(wallet.getEtherBalance());
+    this.entitiesToClean.add(wallet);
+
+    try {
+      walletStorage.saveWalletBlockchainState(wallet, null);
+      fail("should throw exception when contract address is null");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+    try {
+      walletStorage.saveWalletBlockchainState(null, contractAddress);
+      fail("should throw exception when wallet is null");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+    try {
+      Wallet newWallet = newWallet();
+      newWallet.setTechnicalId(0);
+      walletStorage.saveWalletBlockchainState(newWallet, contractAddress);
+      fail("should throw exception when wallet id is 0");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+
+    // Test no blockchain state is added
+    walletStorage.saveWalletBlockchainState(wallet, contractAddress);
+
+    wallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId());
+    walletStorage.retrieveWalletBlockchainState(wallet, contractAddress);
+    assertNotNull(wallet);
+    assertNotNull(wallet.getEtherBalance());
+    assertEquals(0, wallet.getEtherBalance(), 0);
+
+    wallet.setTokenBalance(2d);
+    wallet.setVestingBalance(3d);
+    wallet.setEtherBalance(4d);
+    wallet.setRewardBalance(5d);
+    wallet.setAdminLevel(1);
+    wallet.setIsApproved(true);
+    wallet.setIsInitialized(true);
+    walletStorage.saveWalletBlockchainState(wallet, contractAddress);
+
+    Wallet storedWallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId());
+    walletStorage.retrieveWalletBlockchainState(storedWallet, contractAddress);
+    assertEquals(wallet.getEtherBalance(), storedWallet.getEtherBalance(), 0);
+    assertEquals(wallet.getTokenBalance(), storedWallet.getTokenBalance(), 0);
+    assertEquals(wallet.getVestingBalance(), storedWallet.getVestingBalance(), 0);
+    assertEquals(wallet.getRewardBalance(), storedWallet.getRewardBalance(), 0);
+    assertEquals(wallet.getAdminLevel(), storedWallet.getAdminLevel(), 0);
+    assertEquals(wallet.getIsApproved(), storedWallet.getIsApproved());
+    assertEquals(wallet.getIsInitialized(), storedWallet.getIsInitialized());
+
+    this.entitiesToClean.add(storedWallet);
   }
 
   protected void checkWalletContent(Wallet wallet,

@@ -9,12 +9,12 @@
     persistent
     @keydown.esc="dialog = false">
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a>
-        <span class="PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
           <template v-if="wallet && wallet.name">
             {{ $t('exoplatform.wallet.title.sendTokenModalForWallet', {0: contractDetails && contractDetails.name, 1: wallet.name}) }}
           </template>
@@ -42,8 +42,7 @@
               :label="$t('exoplatform.wallet.label.tokenAmount', {0: contractDetails && contractDetails.name})"
               :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceholder', {0: contractDetails && contractDetails.name})"
               name="tokenAmount"
-              disabled
-              class="mt-3" />
+              disabled />
 
             <v-text-field
               v-if="dialog"
@@ -52,8 +51,7 @@
               :label="$t('exoplatform.wallet.label.transactionLabel')"
               :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
               name="transactionLabel"
-              type="text"
-              class="mt-3" />
+              type="text" />
 
             <v-textarea
               v-model="transactionMessage"
@@ -61,7 +59,6 @@
               :label="$t('exoplatform.wallet.label.transactionMessage')"
               :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
-              class="mt-4"
               rows="3"
               flat
               no-resize />
@@ -72,13 +69,13 @@
           <button
             :disabled="loading"
             :loading="loading"
-            class="btn btn-primary mr-1"
+            class="ignore-vuetify-classes btn btn-primary mr-1"
             @click="send">
             {{ $t('exoplatform.wallet.button.send') }}
           </button>
           <button
             :disabled="loading"
-            class="btn"
+            class="ignore-vuetify-classes btn"
             color="secondary"
             @click="dialog = false">
             {{ $t('exoplatform.wallet.button.close') }}

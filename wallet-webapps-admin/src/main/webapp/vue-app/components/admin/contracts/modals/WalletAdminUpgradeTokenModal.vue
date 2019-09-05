@@ -8,28 +8,21 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <v-bottom-nav
-      v-if="!noButton"
-      slot="activator"
-      :value="true"
-      color="white"
-      class="elevation-0 buttomNavigation">
-      <v-btn flat value="send">
-        <span>
-          {{ $t('exoplatform.wallet.button.upgradeContract', {0: contractDetails && contractDetails.name}) }}
-        </span>
-        <v-icon>
-          send
-        </v-icon>
-      </v-btn>
-    </v-bottom-nav>
+    <template v-if="!noButton" v-slot:activator="{ on }">
+      <button
+        :value="true"
+        class="ignore-vuetify-classes btn"
+        v-on="on">
+        {{ $t('exoplatform.wallet.button.upgradeContract', {0: contractDetails && contractDetails.name}) }}
+      </button>
+    </template>
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a>
-        <span class="PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
           {{ $t('exoplatform.wallet.button.upgradeContract', {0: contractDetails && contractDetails.name}) }}
         </span>
       </div>
@@ -75,7 +68,6 @@
               autofocus
               counter
               required
-              class="mt-3"
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
             <gas-price-choice :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
@@ -86,13 +78,13 @@
           <button
             :disabled="disableSend"
             :loading="loading"
-            class="btn btn-primary mr-1"
+            class="ignore-vuetify-classes btn btn-primary mr-1"
             @click="send">
             {{ $t('exoplatform.wallet.button.upgrade') }}
           </button>
           <button
             :disabled="loading"
-            class="btn"
+            class="ignore-vuetify-classes btn"
             color="secondary"
             @click="dialog = false">
             {{ $t('exoplatform.wallet.button.close') }}

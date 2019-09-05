@@ -19,23 +19,24 @@
     <div
       v-show="!selectedTeam"
       id="addTeamButton"
-      class="text-xs-left ml-3">
+      class="text-left ml-3">
       <v-btn
         :title="$t('exoplatform.wallet.button.addNewPool')"
         color="primary"
         class="btn btn-primary"
         icon
         large
+        dark
         @click="selectedTeam = {}">
-        <v-icon>
+        <v-icon dark color="white">
           add
         </v-icon>
       </v-btn>
     </div>
-    <h4 v-show="!selectedTeam" class="text-xs-center">
+    <h4 v-show="!selectedTeam" class="text-center">
       <span>{{ $t('exoplatform.wallet.label.eligiblePoolsUsers') }}: <strong>{{ eligiblePoolsUsersCount }}</strong></span>
     </h4>
-    <h4 v-show="!selectedTeam" class="text-xs-center">
+    <h4 v-show="!selectedTeam" class="text-center">
       <span>{{ $t('exoplatform.wallet.label.totalPoolsBudget') }}: <strong>{{ walletUtils.toFixed(poolsBudget) }} {{ symbol }}</strong></span>
     </h4>
     <v-container
@@ -44,177 +45,178 @@
       grid-list-md>
       <v-data-iterator
         :items="teams"
-        content-tag="v-layout"
+        :items-per-page="1000"
         no-data-text=""
-        row
-        wrap
-        hide-actions>
-        <v-flex
-          slot="item"
-          slot-scope="props"
-          class="rewardTeamCard"
-          xs12
-          sm12
-          md6
-          lg4>
-          <v-card :style="props.item.spacePrettyName && `background: url(/portal/rest/v1/social/spaces/${props.item.spacePrettyName}/banner)  0 0/100% auto no-repeat`" class="elevation-3">
-            <v-card flat class="transparent">
-              <v-card-title class="pb-0">
-                <v-chip dark>
-                  <v-avatar v-if="props.item.spacePrettyName">
-                    <img :src="`/portal/rest/v1/social/spaces/${props.item.spacePrettyName}/avatar`">
-                  </v-avatar>
-                  <h3 v-if="props.item.disabled" class="headline">
-                    <del class="red--text">{{ props.item.name }}</del>
-                  </h3>
-                  <h3 v-else class="headline">
-                    {{ props.item.name }}
-                  </h3>
-                </v-chip>
-              </v-card-title>
-              <v-card-title class="pt-0">
-                <v-chip dark>
-                  <h4 v-if="props.item.description">
-                    {{ props.item.description }}
-                  </h4>
-                  <h4 v-else>
-                    <i>{{ $t('exoplatform.wallet.label.noDescription') }}</i>
-                  </h4>
-                </v-chip>
-              </v-card-title>
-              <v-divider />
-              <v-list dense class="pb-0">
-                <v-list-tile>
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.poolMembers') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content class="align-end">
-                    {{ props.item.members ? props.item.members.length : 0 }}
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile v-if="props.item.rewardType === 'FIXED'">
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content class="align-end">
-                    {{ props.item.budget }} {{ symbol }}
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile v-if="props.item.rewardType === 'FIXED_PER_MEMBER'">
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
-                    Fixed budget per member:
-                  </v-list-tile-content>
-                  <v-list-tile-content class="align-end">
-                    {{ Number(walletUtils.toFixed(props.item.budget)) }} {{ symbol }}
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile v-if="props.item.rewardType === 'COMPUTED'">
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.budget') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content class="align-end">
-                    {{ $t('exoplatform.wallet.label.computed') }}:
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-flex class="align-start pr-1">
-                    <v-divider />
-                  </v-flex>
-                  <v-flex
-                    class="align-center">
-                    <strong>
-                      {{ period }}
-                    </strong>
-                  </v-flex>
-                  <v-flex class="align-end pl-1">
-                    <v-divider />
-                  </v-flex>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.eligiblePoolMembers') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content class="align-end">
-                    {{ props.item.validMembersWallets ? props.item.validMembersWallets.length : 0 }} / {{ props.item.members ? props.item.members.length : 0 }}
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.budget') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content
-                    v-if="!Number(props.item.computedBudget) || !props.item.validMembersWallets || !props.item.validMembersWallets.length"
-                    class="align-end red--text">
-                    <strong>
-                      0 {{ symbol }}
-                    </strong>
-                  </v-list-tile-content>
-                  <v-list-tile-content v-else class="align-end">
-                    {{ Number(walletUtils.toFixed(props.item.computedBudget)) }} {{ symbol }}
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
-                    {{ $t('exoplatform.wallet.label.budgetPerMember') }}:
-                  </v-list-tile-content>
-                  <v-list-tile-content
-                    v-if="!Number(props.item.computedBudget) || !props.item.validMembersWallets || !props.item.validMembersWallets.length"
-                    class="align-end red--text">
-                    <strong>
-                      0 {{ symbol }}
-                    </strong>
-                  </v-list-tile-content>
-                  <v-list-tile-content v-else class="align-end">
-                    {{ walletUtils.toFixed(Number(props.item.computedBudget) / props.item.validMembersWallets.length) }} {{ symbol }}
-                  </v-list-tile-content>
-                </v-list-tile>
-              </v-list>
-            </v-card>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn
-                v-if="props.item.id"
-                flat
-                color="primary"
-                @click="selectedTeam = props.item">
-                {{ $t('exoplatform.wallet.button.edit') }}
-              </v-btn>
-              <v-btn
-                v-else
-                flat
-                color="primary"
-                @click="selectedTeam = props.item">
-                {{ $t('exoplatform.wallet.button.view') }}
-              </v-btn>
-              <v-btn
-                v-if="props.item.id && props.item.disabled"
-                flat
-                color="primary"
-                @click="disableTeam(props.item, false)">
-                {{ $t('exoplatform.wallet.button.enable') }}
-              </v-btn>
-              <v-btn
-                v-else-if="props.item.id"
-                flat
-                color="primary"
-                @click="disableTeam(props.item, true)">
-                {{ $t('exoplatform.wallet.button.disable') }}
-              </v-btn>
-              <v-btn
-                v-if="props.item.id"
-                flat
-                color="primary"
-                @click="
-                  teamToDelete = props.item;
-                  $refs.deleteTeamConfirm.open();
-                ">
-                {{ $t('exoplatform.wallet.button.delete') }}
-              </v-btn>
-              <v-spacer />
-            </v-card-actions>
-          </v-card>
-        </v-flex>
+        hide-default-footer>
+        <template v-slot:default="props">
+          <v-row>
+            <v-col
+              v-for="item in props.items"
+              :key="item.name"
+              cols="12"
+              sm="12"
+              md="6"
+              lg="4">
+              <v-card :style="item.spacePrettyName && `background: url(/portal/rest/v1/social/spaces/${item.spacePrettyName}/banner)  0 0/100% auto no-repeat`" class="elevation-3">
+                <v-card flat class="transparent">
+                  <v-card-title class="pb-0">
+                    <v-chip color="transparent">
+                      <v-avatar v-if="item.spacePrettyName">
+                        <img :src="`/portal/rest/v1/social/spaces/${item.spacePrettyName}/avatar`">
+                      </v-avatar>
+                      <h3 v-if="item.disabled" class="headline">
+                        <del class="red--text">{{ item.name }}</del>
+                      </h3>
+                      <h3 v-else class="headline">
+                        {{ item.name }}
+                      </h3>
+                    </v-chip>
+                  </v-card-title>
+                  <v-card-title class="pt-0">
+                    <v-chip color="transparent">
+                      <h4 v-if="item.description">
+                        {{ item.description }}
+                      </h4>
+                      <h4 v-else>
+                        <i>{{ $t('exoplatform.wallet.label.noDescription') }}</i>
+                      </h4>
+                    </v-chip>
+                  </v-card-title>
+                  <v-divider />
+                  <v-list dense class="pb-0">
+                    <v-list-item>
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.poolMembers') }}:
+                      </v-list-item-content>
+                      <v-list-item-content class="align-end">
+                        {{ item.members ? item.members.length : 0 }}
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-if="item.rewardType === 'FIXED'">
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
+                      </v-list-item-content>
+                      <v-list-item-content class="align-end">
+                        {{ item.budget }} {{ symbol }}
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-if="item.rewardType === 'FIXED_PER_MEMBER'">
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
+                        Fixed budget per member:
+                      </v-list-item-content>
+                      <v-list-item-content class="align-end">
+                        {{ Number(walletUtils.toFixed(item.budget)) }} {{ symbol }}
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item v-if="item.rewardType === 'COMPUTED'">
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.budget') }}:
+                      </v-list-item-content>
+                      <v-list-item-content class="align-end">
+                        {{ $t('exoplatform.wallet.label.computed') }}:
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-flex class="align-start pr-1">
+                        <v-divider />
+                      </v-flex>
+                      <v-flex
+                        class="align-center">
+                        <strong>
+                          {{ period }}
+                        </strong>
+                      </v-flex>
+                      <v-flex class="align-end pl-1">
+                        <v-divider />
+                      </v-flex>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.eligiblePoolMembers') }}:
+                      </v-list-item-content>
+                      <v-list-item-content class="align-end">
+                        {{ item.validMembersWallets ? item.validMembersWallets.length : 0 }} / {{ item.members ? item.members.length : 0 }}
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.budget') }}:
+                      </v-list-item-content>
+                      <v-list-item-content
+                        v-if="!Number(item.computedBudget) || !item.validMembersWallets || !item.validMembersWallets.length"
+                        class="align-end red--text">
+                        <strong>
+                          0 {{ symbol }}
+                        </strong>
+                      </v-list-item-content>
+                      <v-list-item-content v-else class="align-end">
+                        {{ Number(walletUtils.toFixed(item.computedBudget)) }} {{ symbol }}
+                      </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                      <v-list-item-content>
+                        {{ $t('exoplatform.wallet.label.budgetPerMember') }}:
+                      </v-list-item-content>
+                      <v-list-item-content
+                        v-if="!Number(item.computedBudget) || !item.validMembersWallets || !item.validMembersWallets.length"
+                        class="align-end red--text">
+                        <strong>
+                          0 {{ symbol }}
+                        </strong>
+                      </v-list-item-content>
+                      <v-list-item-content v-else class="align-end">
+                        {{ walletUtils.toFixed(Number(item.computedBudget) / item.validMembersWallets.length) }} {{ symbol }}
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list>
+                </v-card>
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn
+                    v-if="item.id"
+                    text
+                    color="primary"
+                    @click="selectedTeam = item">
+                    {{ $t('exoplatform.wallet.button.edit') }}
+                  </v-btn>
+                  <v-btn
+                    v-else
+                    text
+                    color="primary"
+                    @click="selectedTeam = item">
+                    {{ $t('exoplatform.wallet.button.view') }}
+                  </v-btn>
+                  <v-btn
+                    v-if="item.id && item.disabled"
+                    text
+                    color="primary"
+                    @click="disableTeam(item, false)">
+                    {{ $t('exoplatform.wallet.button.enable') }}
+                  </v-btn>
+                  <v-btn
+                    v-else-if="item.id"
+                    text
+                    color="primary"
+                    @click="disableTeam(item, true)">
+                    {{ $t('exoplatform.wallet.button.disable') }}
+                  </v-btn>
+                  <v-btn
+                    v-if="item.id"
+                    text
+                    color="primary"
+                    @click="
+                      teamToDelete = item;
+                      $refs.deleteTeamConfirm.open();
+                    ">
+                    {{ $t('exoplatform.wallet.button.delete') }}
+                  </v-btn>
+                  <v-spacer />
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+        </template>
       </v-data-iterator>
     </v-container>
   </v-flex>

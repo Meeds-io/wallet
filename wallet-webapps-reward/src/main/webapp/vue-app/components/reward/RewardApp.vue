@@ -14,13 +14,13 @@
           </v-card>
         </v-flex>
         <v-layout column class="white">
-          <v-flex v-if="error && !loading" class="text-xs-center">
-            <div class="alert alert-error text-xs-left">
+          <v-flex v-if="error && !loading" class="text-center">
+            <div class="alert alert-error text-left">
               <i class="uiIconError"></i>{{ error }}
             </div>
           </v-flex>
-          <v-flex v-if="settingWarnings && settingWarnings.length && !loading" class=" text-xs-center">
-            <div class="alert alert-warning text-xs-left">
+          <v-flex v-if="settingWarnings && settingWarnings.length && !loading" class=" text-center">
+            <div class="alert alert-warning text-left">
               <i class="uiIconWarning"></i>
               <span><a href="javascript:void(0);" @click="selectedTab = 2">{{ $t('exoplatform.wallet.label.pleaseCheckRewardConfiguration') }}</a></span>
               <ul>
@@ -34,7 +34,7 @@
             </div>
           </v-flex>
 
-          <v-flex v-if="duplicatedWallets && duplicatedWallets.length" class="text-xs-center">
+          <v-flex v-if="duplicatedWallets && duplicatedWallets.length" class="text-center">
             <div class="alert alert-warning">
               <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.poolMemberDuplicated') }}:
               <ul>
@@ -49,6 +49,7 @@
             v-model="loading"
             attach="#walletDialogsParent"
             persistent
+            hide-overlay
             width="300">
             <v-card color="primary" dark>
               <v-card-text>
@@ -63,19 +64,22 @@
 
           <v-tabs v-model="selectedTab" grow>
             <v-tabs-slider color="primary" />
-            <v-tab key="SendRewards">
+            <v-tab key="SendRewards" href="#SendRewards">
               {{ $t('exoplatform.wallet.title.sendRewardsTab') }}
             </v-tab>
-            <v-tab key="RewardPools">
+            <v-tab key="RewardPools" href="#RewardPools">
               {{ $t('exoplatform.wallet.title.rewardPoolsTab') }}
             </v-tab>
-            <v-tab key="Configuration">
+            <v-tab key="Configuration" href="#Configuration">
               {{ $t('exoplatform.wallet.title.rewardConfigurationTab') }}
             </v-tab>
           </v-tabs>
       
           <v-tabs-items v-model="selectedTab">
-            <v-tab-item id="SendRewards">
+            <v-tab-item
+              id="SendRewards"
+              value="SendRewards"
+              eager>
               <send-rewards-tab
                 ref="sendRewards"
                 :wallet-rewards="walletRewards"
@@ -90,7 +94,10 @@
                 @refresh="refreshRewards"
                 @error="error = $event" />
             </v-tab-item>
-            <v-tab-item id="RewardPools">
+            <v-tab-item
+              id="RewardPools"
+              value="RewardPools"
+              eager>
               <teams-list-tab
                 ref="rewardTeams"
                 :wallet-rewards="walletRewards"
@@ -101,7 +108,10 @@
                 @refresh="refreshRewardSettings"
                 @error="error = $event" />
             </v-tab-item>
-            <v-tab-item id="Configuration">
+            <v-tab-item
+              id="Configuration"
+              value="Configuration"
+              eager>
               <configuration-tab
                 ref="configurationTab"
                 @saved="refreshRewardSettings"
@@ -135,7 +145,7 @@ export default {
       wallet: null,
       error: null,
       settingWarnings: [],
-      selectedTab: null,
+      selectedTab: 'SendRewards',
       transactionEtherscanLink: null,
       addressEtherscanLink: null,
       contractDetails: null,

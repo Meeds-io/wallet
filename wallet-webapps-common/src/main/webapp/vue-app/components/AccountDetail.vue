@@ -2,7 +2,7 @@
   <v-flex
     v-if="contractDetails && contractDetails.icon"
     id="accountDetail"
-    class="text-xs-center white layout column">
+    class="text-center white layout column">
     <v-card-title class="align-start accountDetailSummary">
       <v-layout row>
         <v-flex class="xs10 offset-xs1 headline title">

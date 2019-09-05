@@ -6,15 +6,15 @@
     width="300px"
     max-width="100vw"
     @keydown.esc="dialog = false">
-    <template slot="activator">
+    <template v-slot:activator="{ on }">
       <slot></slot>
     </template>
     <v-card class="elevation-12">
-      <div v-if="title" class="popupHeader ClearFix">
+      <div v-if="title" class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
+          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
             {{ title }}
           </span>
       </div>

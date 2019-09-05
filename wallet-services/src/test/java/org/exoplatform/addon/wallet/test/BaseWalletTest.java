@@ -8,6 +8,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
+import org.junit.rules.TestName;
 
 import org.exoplatform.addon.wallet.dao.*;
 import org.exoplatform.addon.wallet.entity.*;
@@ -76,9 +77,12 @@ public abstract class BaseWalletTest {
 
   protected static final long      USER_TEST_IDENTITY_ID    = 9;
 
-  protected List<Serializable>     entitiesToClean          = new ArrayList<>();
+  protected Set<Serializable>      entitiesToClean          = null;
 
   private Random                   random                   = new Random(1);
+
+  @Rule
+  public TestName                  testName                 = new TestName();
 
   @BeforeClass
   public static void beforeTest() {
@@ -91,7 +95,7 @@ public abstract class BaseWalletTest {
 
   @Before
   public void beforeMethodTest() {
-    entitiesToClean = new ArrayList<>();
+    entitiesToClean = new HashSet<>();
     RequestLifeCycle.begin(container);
   }
 
@@ -100,11 +104,17 @@ public abstract class BaseWalletTest {
     WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
     AddressLabelDAO addressLabelDAO = getService(AddressLabelDAO.class);
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
+    WalletBlockchainStateDAO walletBlockchainStateDAO = getService(WalletBlockchainStateDAO.class);
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
+    LOG.info("Cleaning {} objects after test finished", entitiesToClean.size());
+
     if (!entitiesToClean.isEmpty()) {
-      for (Serializable entity : entitiesToClean) {
+      Iterator<Serializable> iterator = entitiesToClean.iterator();
+      while (iterator.hasNext()) {
+        Serializable entity = iterator.next();
         if (entity == null) {
+          iterator.remove();
           continue;
         }
         try {
@@ -112,26 +122,31 @@ public abstract class BaseWalletTest {
             WalletEntity wallet = (WalletEntity) entity;
             if (wallet.getId() > 0) {
               walletAccountDAO.delete(walletAccountDAO.find(wallet.getId()));
+              iterator.remove();
             }
           } else if (entity instanceof WalletPrivateKeyEntity) {
             WalletPrivateKeyEntity privateKey = (WalletPrivateKeyEntity) entity;
             if (privateKey.getId() > 0) {
               walletPrivateKeyDAO.delete(walletPrivateKeyDAO.find(privateKey.getId()));
+              iterator.remove();
             }
           } else if (entity instanceof TransactionEntity) {
             TransactionEntity transactionEntity = (TransactionEntity) entity;
             if (transactionEntity.getId() > 0) {
               walletTransactionDAO.delete(walletTransactionDAO.find(transactionEntity.getId()));
+              iterator.remove();
             }
           } else if (entity instanceof AddressLabelEntity) {
             AddressLabelEntity addressEntity = (AddressLabelEntity) entity;
             if (addressEntity.getId() > 0) {
               addressLabelDAO.delete(addressLabelDAO.find(addressEntity.getId()));
+              iterator.remove();
             }
           } else if (entity instanceof WalletAddressLabel) {
             AddressLabelEntity labelEntity = addressLabelDAO.find(((WalletAddressLabel) entity).getId());
             if (labelEntity.getId() > 0) {
               addressLabelDAO.delete(labelEntity);
+              iterator.remove();
             }
           } else if (entity instanceof TransactionDetail) {
             long transactionId = ((TransactionDetail) entity).getId();
@@ -140,6 +155,7 @@ public abstract class BaseWalletTest {
               if (transactionEntity != null) {
                 walletTransactionDAO.delete(transactionEntity);
               }
+              iterator.remove();
             }
           } else if (entity instanceof Wallet) {
             Wallet wallet = (Wallet) entity;
@@ -147,8 +163,15 @@ public abstract class BaseWalletTest {
             if (walletId > 0) {
               WalletEntity walletEntity = walletAccountDAO.find(walletId);
               if (walletEntity != null) {
+                WalletBlockchainStateEntity blockchainStateEntity =
+                                                                  walletBlockchainStateDAO.findByWalletIdAndContract(walletId,
+                                                                                                                     WalletUtils.getContractAddress());
+                if (blockchainStateEntity != null) {
+                  walletBlockchainStateDAO.delete(blockchainStateEntity);
+                }
                 walletAccountDAO.delete(walletEntity);
               }
+              iterator.remove();
             }
           } else {
             LOG.warn("Entity not managed {}", entity);
@@ -164,12 +187,16 @@ public abstract class BaseWalletTest {
     long walletAddressLabelsCount = addressLabelDAO.findAll().size();
     long walletTransactionsCount = walletTransactionDAO.count();
 
-    LOG.info("objects count wallets = {}, private keys = {}, address labels = {}, transactions count = {}",
+    LOG.info("objects count: remaining entities to clean: {}, wallets = {}, private keys = {}, address labels = {}, transactions count = {}. Test method '{}#{}'",
+             entitiesToClean,
              walletCount,
              walletPrivateKeyCount,
              walletAddressLabelsCount,
-             walletTransactionsCount);
-    assertEquals("The previous test didn't cleaned wallets entities correctly, should add entities to clean into 'entitiesToClean' list.",
+             walletTransactionsCount,
+             this.getClass().getSimpleName(),
+             testName.getMethodName());
+
+    assertEquals("The previous test didn't cleaned wallets entities correctly, should add entities to clean into 'entitiesToClean' list: ",
                  0,
                  walletCount);
     assertEquals("The previous test didn't cleaned wallet addresses labels correctly, should add entities to clean into 'entitiesToClean' list.",

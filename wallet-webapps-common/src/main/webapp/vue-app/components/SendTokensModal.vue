@@ -10,21 +10,22 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <v-btn
-      slot="activator"
-      :disabled="disabled"
-      class="btn btn-primary">
-      <v-icon color="white" class="mr-1">
-        send
-      </v-icon>
-      {{ $t('exoplatform.wallet.button.send') }}
-    </v-btn>
+    <template v-slot:activator="{ on }">
+      <v-btn
+        class="btn btn-primary"
+        v-on="on">
+        <v-icon color="white" class="mr-1">
+          send
+        </v-icon>
+        {{ $t('exoplatform.wallet.button.send') }}
+      </v-btn>
+    </template>
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
-          @click="dialog = false"></a> <span class="PopupTitle popupTitle">
+          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
             {{ $t('exoplatform.wallet.button.sendfunds') }}
           </span>
       </div>
@@ -32,7 +33,6 @@
         ref="sendTokensForm"
         :wallet="wallet"
         :contract-details="contractDetails"
-        class="pt-4"
         @sent="$emit('sent', $event, contractDetails)"
         @close="dialog = false"
         @error="$emit('error', $event)" />
@@ -102,7 +102,7 @@ export default {
     },
     dialog() {
       if (this.dialog) {
-        this.$refs.sendTokensForm.init();
+        this.$nextTick().then(() => this.$refs.sendTokensForm.init());
       } else {
         this.$emit('close');
       }

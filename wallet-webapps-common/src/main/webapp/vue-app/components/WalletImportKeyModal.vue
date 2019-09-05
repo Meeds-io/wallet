@@ -8,19 +8,18 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <a
-      slot="activator"
-      href="javascript:void(0);"
-      @click="dialog = true">
-      {{ walletAddress ? $t('exoplatform.wallet.title.restoreWalletModal') : $t('exoplatform.wallet.title.restoreExistingWalletModal') }}
-    </a>
+    <template v-slot:activator="{ on }">
+      <a href="javascript:void(0);" v-on="on">
+        {{ walletAddress ? $t('exoplatform.wallet.title.restoreWalletModal') : $t('exoplatform.wallet.title.restoreExistingWalletModal') }}
+      </a>
+    </template>
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a>
-        <span class="PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
           {{ $t('exoplatform.wallet.button.restoreWallet') }}
         </span>
       </div>
@@ -79,7 +78,6 @@
             name="walletPassword"
             counter
             autocomplete="current-passord"
-            autofocus
             @click:append="walletPasswordShow = !walletPasswordShow" />
         </v-form>
       </v-card-text>
@@ -87,13 +85,13 @@
         <v-spacer />
         <button
           :disabled="loading"
-          class="btn btn-primary mr-1"
+          class="ignore-vuetify-classes btn btn-primary mr-1"
           @click="importWallet">
           {{ $t('exoplatform.wallet.button.import') }}
         </button>
         <button
           :disabled="loading"
-          class="btn"
+          class="ignore-vuetify-classes btn"
           @click="dialog = false">
           {{ $t('exoplatform.wallet.button.close') }}
         </button>

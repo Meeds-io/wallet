@@ -1,16 +1,16 @@
 <template>
-  <v-card>
-    <v-card-title primary-title>
+  <v-card flat>
+    <v-card-title primary-title class="pt-0">
       <div>
         <h4 class="no-wrap">
           <v-icon small class="mb-1">fa-unlock</v-icon>
           <span>{{ $t('exoplatform.wallet.label.password') }}</span>
-          <v-tooltip v-if="!browserWalletExists" bottom>
-            <v-icon slot="activator" color="orange">warning</v-icon>
-            <span>
-              {{ $t('exoplatform.wallet.warning.noPrivateKey') }}
-            </span>
-          </v-tooltip>
+          <v-icon
+            v-if="!browserWalletExists"
+            :title="$t('exoplatform.wallet.warning.noPrivateKey')"
+            color="orange">
+            warning
+          </v-icon>
         </h4>
         <h5>{{ $t('exoplatform.wallet.message.securityPasswordManagement') }}</h5>
         <reset-modal
@@ -18,6 +18,7 @@
           :wallet="wallet"
           :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
           display-remember-me
+          class="d-flex"
           @reseted="$emit('settings-changed')" />
       </div>
     </v-card-title>
@@ -28,7 +29,7 @@
           {{ $t('exoplatform.wallet.label.encryptionKeys') }}
         </h4>
         <h5>{{ $t('exoplatform.wallet.message.encryptionKeysManagement') }}</h5>
-        <button class="btn" @click="$emit('manage-keys')">
+        <button class="ignore-vuetify-classes btn" @click="$emit('manage-keys')">
           <v-icon small>fa-qrcode</v-icon>
           {{ $t('exoplatform.wallet.button.manageKeys') }}
         </button>

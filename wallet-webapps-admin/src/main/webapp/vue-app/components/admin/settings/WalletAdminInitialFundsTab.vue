@@ -1,8 +1,8 @@
 <template>
   <v-card
-    class="text-xs-center pr-3 pl-3 pt-2"
+    class="text-center pr-3 pl-3 pt-2"
     flat>
-    <v-card-title>
+    <v-card-title class="subtitle-1">
       {{ $t('exoplatform.wallet.info.initialFundsIntroduction', {0: contractDetails && contractDetails.name}) }}
     </v-card-title>
     <v-card-text>
@@ -31,14 +31,14 @@
         :label="$t('exoplatform.wallet.label.initialFundsMessageInputPlaceholder')"
         :placeholder="$t('exoplatform.wallet.label.initialFundsMessageInputPlaceholder')"
         name="requestMessage"
-        class="mt-4 mb-0"
+        class="mb-0"
         rows="7"
         flat
         no-resize />
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <button class="btn btn-primary mb-3" @click="save">
+      <button class="ignore-vuetify-classes btn btn-primary mb-3" @click="save">
         {{ $t('exoplatform.wallet.button.save') }}
       </button>
       <v-spacer />
@@ -60,6 +60,12 @@ export default {
         return null;
       },
     },
+    settings: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
   },
   data() {
     return {
@@ -76,23 +82,23 @@ export default {
     etherAmountInFiat() {
       return (this.etherAmount && this.walletUtils.etherToFiat(this.etherAmount)) || 0;
     },
+    initialFunds() {
+      return this.settings && this.settings.initialFunds;
+    },
   },
   watch: {
-    contractDetails() {
+    initialFunds() {
+      this.reloadInitialFunds();
+    },
+    requestMessage() {
       this.reloadInitialFunds();
     },
   },
   methods: {
-    init() {
-      const initialFunds = window.walletSettings.initialFunds || {};
-      this.requestMessage = initialFunds.requestMessage;
-      this.reloadInitialFunds();
-    },
     reloadInitialFunds() {
-      const initialFunds = window.walletSettings.initialFunds || {};
-
-      this.etherAmount = initialFunds.etherAmount || 0;
-      this.tokenAmount = initialFunds.tokenAmount || 0;
+      this.etherAmount = this.initialFunds && this.initialFunds.etherAmount || 0;
+      this.tokenAmount = this.initialFunds && this.initialFunds.tokenAmount || 0;
+      this.requestMessage = this.initialFunds && this.initialFunds.requestMessage || '';
     },
     save() {
       const initialFunds = {

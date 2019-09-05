@@ -2,7 +2,8 @@
   <v-flex>
     <div v-if="information" class="alert alert-info">
       <i class="uiIconInfo"></i> {{ information }}
-    </div> <div :id="id" class="text-xs-center"></div>
+    </div>
+    <div :id="id" class="text-center"></div>
   </v-flex>
 </template>
 
@@ -79,10 +80,16 @@ export default {
   data() {
     return {
       qr: null,
-      id: `QRCode${parseInt(Math.random() * 10000)
-        .toString()
-        .toString()}`,
+      id: null,
     };
+  },
+  watch: {
+    id() {
+      this.computeCanvas();
+    },
+  },
+  created() {
+    this.id = `QRCode${parseInt(Math.random() * 10000).toString()}`;
   },
   methods: {
     computeCanvas() {

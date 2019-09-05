@@ -8,28 +8,21 @@
     max-width="100vw"
     persistent
     @keydown.esc="dialog = false">
-    <v-bottom-nav
-      v-if="!noButton"
-      slot="activator"
-      :value="true"
-      color="white"
-      class="elevation-0 buttomNavigation">
-      <v-btn flat value="send">
-        <span>
-          {{ title }}
-        </span>
-        <v-icon>
-          send
-        </v-icon>
-      </v-btn>
-    </v-bottom-nav>
+    <template v-if="!noButton" v-slot:activator="{ on }">
+      <button
+        :value="true"
+        class="ignore-vuetify-classes btn"
+        v-on="on">
+        {{ title }}
+      </button>
+    </template>
     <v-card class="elevation-12">
-      <div class="popupHeader ClearFix">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
         <a
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="dialog = false"></a>
-        <span class="PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
           {{ title }}
         </span>
       </div>
@@ -55,7 +48,6 @@
               :disabled="loading"
               :input-label="autocompleteLabel"
               :input-placeholder="autocompletePlaceholder"
-              class="mt-3"
               :autofocus="dialog && autocompleteLabel"
               @item-selected="autocompleteValue = $event.address" />
 
@@ -67,7 +59,6 @@
               :label="inputLabel"
               :placeholder="inputPlaceholder"
               :autofocus="inputLabel && !autocompleteLabel"
-              class="mt-3"
               name="inputValue" />
 
             <v-text-field
@@ -81,7 +72,6 @@
               :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
               counter
-              class="mt-3"
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
 
@@ -91,7 +81,6 @@
               v-if="dialog"
               v-model="transactionLabel"
               :disabled="loading"
-              :class="inputLabel || 'mt-3'"
               :autofocus="!inputLabel && !autocompleteLabel && storedPassword"
               :label="$t('exoplatform.wallet.label.transactionLabel')"
               :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
@@ -103,7 +92,6 @@
               :label="$t('exoplatform.wallet.label.transactionMessage')"
               :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
               name="transactionMessage"
-              class="mt-4"
               rows="3"
               flat
               no-resize />
@@ -116,12 +104,12 @@
           <button
             :disabled="disableSend"
             :loading="loading"
-            class="btn btn-primary mr-1"
+            class="ignore-vuetify-classes btn btn-primary mr-1"
             @click="send">
             {{ $t('exoplatform.wallet.button.send') }}
           </button> <button
             :disabled="loading"
-            class="btn"
+            class="ignore-vuetify-classes btn"
             color="secondary"
             @click="dialog = false">
             {{ $t('exoplatform.wallet.button.close') }}
