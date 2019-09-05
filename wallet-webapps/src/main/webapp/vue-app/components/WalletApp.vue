@@ -19,7 +19,10 @@
               <v-toolbar-title v-else>
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
-              <div v-if="displayWarnings" id="etherTooLowWarningParent" class="ml-2">
+              <div
+                v-if="displayWarnings"
+                id="etherTooLowWarningParent"
+                class="ml-2">
                 <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
                   warning
                 </v-icon>
