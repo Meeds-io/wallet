@@ -167,7 +167,7 @@ export default {
           }
           const wallet = window.localWeb3.eth.accounts.wallet.add(thiss.walletPrivateKey);
           if (!thiss.walletAddress || wallet.address.toLowerCase() === thiss.walletAddress.toLowerCase()) {
-            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, true)
+            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, false, true)
               .then(() => {
                 thiss.loading = false;
                 thiss.dialog = false;
