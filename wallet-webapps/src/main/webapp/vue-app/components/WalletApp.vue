@@ -331,6 +331,8 @@ export default {
         .then((result, error) => {
           this.handleError(error);
           this.settings = window.walletSettings || {wallet: {}, network: {}};
+          this.wallet = this.settings.wallet;
+
           if (!this.settings.walletEnabled) {
             this.isWalletEnabled = false;
             this.$forceUpdate();
@@ -355,7 +357,6 @@ export default {
         .then((result, error) => {
           this.handleError(error);
 
-          this.wallet = this.settings.wallet;
           this.contractDetails = this.settings.contractDetail;
           this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
           this.browserWalletExists = this.settings.browserWalletExists;
@@ -383,7 +384,6 @@ export default {
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
             this.browserWalletExists = this.settings.browserWalletExists = false;
-            this.wallet = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.walletInitializationFailure');
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
