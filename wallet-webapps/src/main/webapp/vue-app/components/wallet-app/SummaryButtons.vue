@@ -31,6 +31,7 @@
       class="walletSummaryAction">
       <request-funds-modal
         ref="walletRequestFundsModal"
+        :disabled-button="isDisapproved"
         :wallet-address="walletAddress"
         :contract-details="contractDetails" />
     </v-flex>
@@ -62,6 +63,9 @@ export default {
   computed: {
     walletAddress() {
       return this.wallet && this.wallet.address;
+    },
+    isDisapproved() {
+      return !this.wallet || !this.wallet.isApproved;
     }
   },
   methods: {

@@ -10,6 +10,7 @@
     @keydown.esc="dialog = false">
     <template v-slot:activator="{ on }">
       <v-btn
+        :disabled="disabledButton"
         class="btn white"
         v-on="on">
         <v-icon>
@@ -106,6 +107,12 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    disabledButton: {
+      type: Boolean,
+      default: function() {
+        return false;
       },
     },
   },

@@ -19,8 +19,15 @@
               <v-toolbar-title v-else>
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
-              <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
+              <div v-if="displayWarnings" id="etherTooLowWarningParent" class="ml-2">
                 <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                  warning
+                </v-icon>
+                <v-icon
+                  v-if="displayDisapprovedWallet"
+                  slot="activator"
+                  :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
+                  color="orange">
                   warning
                 </v-icon>
               </div>
@@ -249,8 +256,18 @@ export default {
     displayWalletResetOption() {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
+    displayWarnings() {
+      return this.displayDisapprovedWallet || this.displayEtherBalanceTooLow;
+    },
+    displayDisapprovedWallet() {
+      return this.wallet && this.wallet.isInitialized && !this.wallet.isApproved
+    },
     displayEtherBalanceTooLow() {
-      return this.browserWalletExists && !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
+      return this.browserWalletExists
+          && !this.loading
+          && !this.error
+          && (!this.isSpace || this.isSpaceAdministrator)
+          && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance || 0;
