@@ -121,6 +121,7 @@ public class WalletTransactionREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getTransactionsAmounts(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
                                          @ApiParam(value = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
+                                         @ApiParam(value = "Selected date", required = false) @QueryParam("date") String selectedDate,
                                          @ApiParam(value = "user locale language", required = false) @QueryParam("lang") String lang) {
     if (StringUtils.isBlank(periodicity)) {
       LOG.warn("Bad request sent to server with empty periodicity parameter");
@@ -134,6 +135,7 @@ public class WalletTransactionREST implements ResourceContainer {
     try {
       TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(address,
                                                                                                 periodicity,
+                                                                                                selectedDate,
                                                                                                 new Locale(lang));
       return Response.ok(transactionStatistics).build();
     } catch (Exception e) {

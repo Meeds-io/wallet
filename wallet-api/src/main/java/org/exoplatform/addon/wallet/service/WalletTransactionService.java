@@ -46,12 +46,14 @@ public interface WalletTransactionService {
    * 
    * @param address
    * @param periodicity
+   * @param selectedDate
    * @param locale
    * @return {@link TransactionStatistics} with sent and received amounts and
    *         labels
    */
   TransactionStatistics getTransactionStatistics(String address,
                                                  String periodicity,
+                                                 String selectedDate,
                                                  Locale locale);
 
   /**

@@ -113,17 +113,14 @@
                           v-if="!loading"
                           ref="chartPeriodicityButtons"
                           :periodicity-label="periodicityLabel"
-                          @periodicity-changed="periodicity = $event"
+                          @period-changed="periodChanged"
                           @error="error = $event" />
                       </v-flex>
                       <v-flex xs12>
                         <transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
-                          :periodicity="periodicity"
-                          :wallet-address="walletAddress"
-                          @periodicity-label="periodicityLabel = $event"
-                          @error="error = $event" />
+                          :transaction-statistics="transactionStatistics" />
                       </v-flex>
                     </template>
                   </v-layout>
@@ -227,7 +224,6 @@ export default {
       isSpaceAdministrator: false,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
-      periodicityLabel: null,
       showSettingsModal: false,
       gasPriceInEther: null,
       browserWalletExists: false,
@@ -240,7 +236,9 @@ export default {
       fiatSymbol: '$',
       settings: null,
       error: null,
+      transactionStatistics: null,
       periodicity: 'month',
+      selectedDate: new Date().toISOString().substr(0, 7),
     };
   },
   computed: {
@@ -274,6 +272,9 @@ export default {
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance || 0;
+    },
+    periodicityLabel() {
+      return this.transactionStatistics && this.transactionStatistics.periodicityLabel;
     },
   },
   watch: {
@@ -397,7 +398,7 @@ export default {
           this.$forceUpdate();
         })
         .then(() => this.$nextTick())
-        .then(() => this.$refs.transactionHistoryChart && this.$refs.transactionHistoryChart.initializeChart())
+        .then(() => this.periodChanged(this.periodicity))
         .catch((e) => {
           console.debug('init method - error', e);
           const error = `${e}`;
@@ -477,6 +478,18 @@ export default {
         if (this.walletAddress && this.contractDetails && parameters && parameters.hash) {
           this.openAccountDetail(null, parameters.hash);
         }
+      }
+    },
+    periodChanged(periodicity, selectedDate) {
+      this.periodicity = periodicity;
+      this.selectedDate = selectedDate;
+
+      if (this.$refs.transactionHistoryChart) {
+        this.transactionUtils.getTransactionsAmounts(this.walletAddress, this.periodicity, this.selectedDate)
+        .then((transactionsData) => {
+          this.transactionStatistics = transactionsData;
+        })
+        .catch(e => this.error = String(e));
       }
     },
   },

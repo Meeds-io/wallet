@@ -63,9 +63,9 @@ export function saveTransactionDetails(transaction, contractDetails) {
   }
 }
 
-export function getTransactionsAmounts(walletAddress, periodicity) {
+export function getTransactionsAmounts(walletAddress, periodicity, selectedDate) {
   const lang = (window && window.eXo && window.eXo.env && window.eXo.env.portal && window.eXo.env.portal.language) || 'en';
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?address=${walletAddress}&periodicity=${periodicity || ''}&lang=${lang}`, {credentials: 'include'}).then((resp) => {
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactionsAmounts?address=${walletAddress}&periodicity=${periodicity || ''}&date=${selectedDate || ''}&lang=${lang}`, {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {
       return resp.json();
     } else {
