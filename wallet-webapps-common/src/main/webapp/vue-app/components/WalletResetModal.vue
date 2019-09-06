@@ -8,6 +8,7 @@
     width="500px"
     max-width="100vw"
     persistent
+    hide-overlay
     @keydown.esc="close">
     <template v-if="displayRememberMe" v-slot:activator="{ on }">
       <div
