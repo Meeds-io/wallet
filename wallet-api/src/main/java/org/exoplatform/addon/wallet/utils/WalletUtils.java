@@ -190,6 +190,8 @@ public class WalletUtils {
 
   public static final String                          SYMBOL                                   = "symbol";
 
+  public static final String                          TOKEN_NAME                               = "tokenName";
+
   public static final String                          MESSAGE                                  = "message";
 
   public static final String                          HASH                                     = "hash";

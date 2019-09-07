@@ -1,0 +1,1 @@
+<%=_ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted)%>

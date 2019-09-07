@@ -1,0 +1,64 @@
+<table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height:20px;HelveticaNeue bold',arial,tahoma,serif;">
+    <tr>
+        <td align="center"  valign="middle" bgcolor="#ffffff" style="background-color: #ffffff;">
+            <table  cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="border:1px solid #d8d8d8;">
+                <tr>
+                    <td  height="45" valign="middle" style="margin:0;height:45px;font-weight:bold;vertical-align:middle;;background-color: #efefef;font-family:'HelveticaNeue bold',arial,tahoma,serif;color:#2f5e92;font-size:18px;text-align:center">
+                      <%=_ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted)%>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr><!--end header area-->
+    <tr>
+        <td bgcolor="#ffffff" style="background-color: #ffffff;">
+            <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="#ffffff" style="background-color: #ffffff; border:1px solid #d8d8d8;">
+                <tr>
+                    <td bgcolor="#ffffff" style="background-color: #ffffff;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="92%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; color:#333333;line-height:20px;">
+                            <tr>
+                                <td align="left" bgcolor="#ffffff" style="background-color: #ffffff;padding: 10px 0;" >
+                                    <table border="0" cellpadding="0" cellspacing="0" >
+                                        <tr>
+                                            <td  valign="top">
+                                                <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;white-space: pre-line;">
+                                                  <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
+                                                </p>
+                                                <div style="
+                                                      display: inline-block;
+                                                      text-decoration: none;
+                                                      font-size: 11px;
+                                                      font-family:HelveticaNeue,arial,tahoma,serif;
+                                                      color: #ffffff;
+                                                      text-shadow: 0 -1px 0 rgba(23, 33, 37, .25);
+                                                      background-color: #567ab6;
+                                                      background-image: -moz-linear-gradient(top, #638acd, #426393);
+                                                      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#638acd), to(#426393));
+                                                      background-image: -webkit-linear-gradient(top, #638acd, #426393);
+                                                      background-image: -o-linear-gradient(top, #638acd, #426393);
+                                                      background-image: linear-gradient(to bottom, #638acd, #426393);
+                                                      background-repeat: repeat-x;
+                                                      border-radius: 4px;
+                                                      -moz-border-radius: 4px;
+                                                      padding: 5px 8px;
+                                                      line-height: 100%;
+                                                      text-align: center;
+                                                      border: 1px solid #224886;
+                                                      font-weight: bold;
+                                                      -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                                                      -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                                                      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                                                      vertical-align: middle;">
+                                                </div>
+                                            </td>
+                                          </tr><!--end header area-->
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>            
+        </td>
+    </tr><!--end content area-->
+</table>

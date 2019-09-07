@@ -97,6 +97,7 @@ export default {
         }
         this.selectedDate = `${date}-01`;
 
+        // go back to year
         if (this.$refs.datePicker) {
           this.$refs.datePicker.activePicker = 'YEAR';
         }

@@ -119,8 +119,8 @@
           </td>
           <td class="text-center">
             <a
-              v-if="props.item.rewardTransaction && props.item.rewardTransaction.hash"
-              :href="`${transactionEtherscanLink}${props.item.rewardTransaction.hash}`"
+              v-if="props.item.transaction && props.item.transaction.hash"
+              :href="`${transactionEtherscanLink}${props.item.transaction.hash}`"
               :title="$t('exoplatform.wallet.label.openOnEtherscan')"
               target="_blank">
               {{ $t('exoplatform.wallet.label.openOnEtherscan') }}
@@ -129,7 +129,7 @@
             </span>
           </td>
           <td class="text-center">
-            <template v-if="!props.item.rewardTransaction || !props.item.rewardTransaction.status">
+            <template v-if="!props.item.transaction || !props.item.transaction.status">
               <v-icon
                 v-if="!props.item.wallet.address"
                 :title="$t('exoplatform.wallet.label.noAddress')"
@@ -147,15 +147,15 @@
               </div>
             </template>
             <v-progress-circular
-              v-else-if="props.item.rewardTransaction.status === 'pending'"
+              v-else-if="props.item.transaction.status === 'pending'"
               color="primary"
               indeterminate
               size="20" />
             <v-icon
               v-else
-              :color="props.item.rewardTransaction.status === 'success' ? 'success' : 'error'"
-              :title="props.item.rewardTransaction.status === 'success' ? 'Successfully proceeded' : props.item.rewardTransaction.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
-              v-text="props.item.rewardTransaction.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+              :color="props.item.transaction.status === 'success' ? 'success' : 'error'"
+              :title="props.item.transaction.status === 'success' ? 'Successfully proceeded' : props.item.transaction.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
+              v-text="props.item.transaction.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
           </td>
           <td class="text-center">
             <span
@@ -322,13 +322,13 @@ export default {
           text: this.$t('exoplatform.wallet.label.transaction'),
           align: 'center',
           sortable: true,
-          value: 'rewardTransaction.hash',
+          value: 'transaction.hash',
         },
         {
           text: this.$t('exoplatform.wallet.label.status'),
           align: 'center',
           sortable: true,
-          value: 'rewardTransaction.status',
+          value: 'transaction.status',
         },
         {
           text: (this.contractDetails && this.contractDetails.name),
@@ -353,11 +353,11 @@ export default {
       let disabledButton = true;
       for (const index in this.walletRewards) {
         const walletReward = this.walletRewards[index];
-        if (walletReward.enabled && walletReward.tokensToSend && (!walletReward.rewardTransaction || !walletReward.rewardTransaction.status || walletReward.rewardTransaction.status === 'error')) {
+        if (walletReward.enabled && walletReward.tokensToSend && (!walletReward.transaction || !walletReward.transaction.status || walletReward.transaction.status === 'error')) {
           disabledButton = false;
         }
         // If any transaction is still pending, then disable sending button
-        if (walletReward.rewardTransaction && walletReward.rewardTransaction.status === 'pending') {
+        if (walletReward.transaction && walletReward.transaction.status === 'pending') {
           return true;
         }
       }

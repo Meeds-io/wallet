@@ -4,11 +4,6 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 
   <component>
-    <key>org.exoplatform.services.organization.OrganizationService</key>
-    <type>org.exoplatform.services.organization.impl.mock.DummyOrganizationService</type>
-  </component>
-
-  <component>
     <key>org.exoplatform.social.core.space.spi.SpaceService</key>
     <type>org.exoplatform.addon.wallet.test.mock.SpaceServiceMock</type>
   </component>
@@ -45,6 +40,7 @@
 
   <import>jar:/conf/portal/wallet-configuration.xml</import>
   <import>jar:/conf/portal/wallet-reward-configuration.xml</import>
+  <import>jar:/conf/portal/test-organization-configuration.xml</import>
 
   <remove-configuration>org.exoplatform.commons.search.index.IndexingOperationProcessor</remove-configuration>
   <remove-configuration>org.exoplatform.commons.search.rest.IndexingManagementRestServiceV1</remove-configuration>

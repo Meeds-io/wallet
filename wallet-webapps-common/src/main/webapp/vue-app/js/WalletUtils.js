@@ -478,7 +478,7 @@ export function enableWallet(address, enable) {
 
 export function setDraggable(appId) {
   try {
-    $(`#${appId} .v-dialog:not(.not-draggable)`).draggable();
+    // $(`#${appId} .v-dialog:not(.not-draggable)`).draggable();
   } catch (e) {
     console.debug("Can't set modals draggable", e);
   }

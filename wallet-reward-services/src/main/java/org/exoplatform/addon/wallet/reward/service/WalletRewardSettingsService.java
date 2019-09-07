@@ -23,6 +23,7 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.toJsonString;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
@@ -126,6 +127,60 @@ public class WalletRewardSettingsService implements RewardSettingsService {
 
     // Purge cached settings
     this.rewardSettings = null;
+  }
+
+  @Override
+  public void addRewardPeriodInProgress(RewardPeriod rewardPeriod) {
+    Set<RewardPeriod> rewardPeriods = getRewardPeriodsInProgress();
+    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
+      rewardPeriods = new HashSet<>();
+    }
+    rewardPeriods.add(rewardPeriod);
+    saveRewardPeriodInProgress(rewardPeriods);
+  }
+
+  @Override
+  public void saveRewardPeriodInProgress(Set<RewardPeriod> rewardPeriods) {
+    String rewardPeriodString = toRewardPeriodString(rewardPeriods);
+    if (StringUtils.isBlank(rewardPeriodString)) {
+      settingService.remove(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS);
+    } else {
+      settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS, SettingValue.create(rewardPeriodString));
+    }
+  }
+
+  @Override
+  public Set<RewardPeriod> getRewardPeriodsInProgress() {
+    SettingValue<?> settingsValue = settingService.get(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS);
+    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
+                                                                                           : settingsValue.getValue().toString();
+
+    return settingsValueString == null ? Collections.emptySet() : toRewardPeriods(settingsValueString);
+  }
+
+  private String toRewardPeriodString(Set<RewardPeriod> rewardPeriods) {
+    JSONArray jsonArray = new JSONArray();
+    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
+      return null;
+    }
+    for (RewardPeriod rewardPeriod : rewardPeriods) {
+      jsonArray.put(toJsonString(rewardPeriod));
+    }
+    return jsonArray.toString();
+  }
+
+  private Set<RewardPeriod> toRewardPeriods(String settingsValueString) {
+    try {
+      JSONArray jsonArray = new JSONArray(settingsValueString);
+      Set<RewardPeriod> rewardPeriods = new HashSet<>();
+      for (int i = 0; i < jsonArray.length(); i++) {
+        String rewardPeriodString = jsonArray.getString(i);
+        rewardPeriods.add(fromJsonString(rewardPeriodString, RewardPeriod.class));
+      }
+      return rewardPeriods;
+    } catch (Exception e) {
+      throw new IllegalStateException("Error while parsing reward periods list", e);
+    }
   }
 
   @Override

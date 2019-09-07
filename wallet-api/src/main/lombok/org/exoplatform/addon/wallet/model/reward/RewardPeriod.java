@@ -5,22 +5,29 @@ import java.time.LocalDateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class RewardPeriod {
 
-  private long startDateInSeconds;
+  private RewardPeriodType rewardPeriodType;
 
-  private long endDateInSeconds;
+  private long             startDateInSeconds;
+
+  private long             endDateInSeconds;
+
+  public RewardPeriod(RewardPeriodType rewardPeriodType) {
+    this.rewardPeriodType = rewardPeriodType;
+  }
 
   public JSONObject toJSONObject() {
     JSONObject jsonObject = new JSONObject();
     try {
       jsonObject.put("startDateInSeconds", startDateInSeconds);
       jsonObject.put("endDateInSeconds", endDateInSeconds);
+      jsonObject.put("rewardPeriodType", rewardPeriodType.name());
     } catch (JSONException e) {
       throw new IllegalStateException("Error while converting Object to JSON", e);
     }

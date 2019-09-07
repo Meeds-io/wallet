@@ -76,4 +76,33 @@
     </component-plugin>
   </external-component-plugins>
 
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Add a job to verify if rewards sent having pending transactions are completely successfully sent</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for rewards transactions status verifier</description>
+          <property name="jobName" value="RewardStatusVerifierJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob"/>
+          <property name="expression" value="${exo.addon.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.reward.report.success</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.addon.wallet.reward.listener.RewardSucceedNotificationListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
 </configuration>

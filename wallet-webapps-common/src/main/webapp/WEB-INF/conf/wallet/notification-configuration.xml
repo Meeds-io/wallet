@@ -161,6 +161,43 @@
         </object-param>
       </init-params>
     </component-plugin>
+
+    <!-- Reward success notifications -->
+    <component-plugin>
+      <name>notification.plugins</name>
+      <set-method>addPlugin</set-method>
+      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessNotificationPlugin</type>
+      <init-params>
+        <object-param>
+          <name>template.RewardSuccessNotificationPlugin</name>
+          <description>The template of RewardSuccessNotificationPlugin</description>
+          <object type="org.exoplatform.commons.api.notification.plugin.config.PluginConfig">
+            <field name="pluginId">
+              <string>RewardSuccessNotificationPlugin</string>
+            </field>
+            <field name="resourceBundleKey">
+              <string>UINotification.label.RewardSuccessNotificationPlugin</string>
+            </field>
+            <field name="order">
+              <string>1</string>
+            </field>
+            <field name="defaultConfig">
+              <collection type="java.util.ArrayList">
+                <value>
+                  <string>Instantly</string>
+                </value>
+              </collection>
+            </field>
+            <field name="groupId">
+              <string>wallet</string>
+            </field>
+            <field name="bundlePath">
+              <string>locale.notification.WalletNotification</string>
+            </field>
+          </object>
+        </object-param>
+      </init-params>
+    </component-plugin>
   </external-component-plugins>
 
   <external-component-plugins>
@@ -191,6 +228,39 @@
       <name>push.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
       <type>org.exoplatform.addon.wallet.notification.provider.MobilePushTemplateProvider</type>
+      <init-params>
+        <value-param>
+          <name>channel-id</name>
+          <value>PUSH_CHANNEL</value>
+        </value-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>web.channel.wallet.reward.template</name>
+      <set-method>registerTemplateProvider</set-method>
+      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <init-params>
+        <value-param>
+          <name>channel-id</name>
+          <value>WEB_CHANNEL</value>
+        </value-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>mail.channel.wallet.reward.template</name>
+      <set-method>registerTemplateProvider</set-method>
+      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <init-params>
+        <value-param>
+          <name>channel-id</name>
+          <value>MAIL_CHANNEL</value>
+        </value-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>push.channel.wallet.reward.template</name>
+      <set-method>registerTemplateProvider</set-method>
+      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>

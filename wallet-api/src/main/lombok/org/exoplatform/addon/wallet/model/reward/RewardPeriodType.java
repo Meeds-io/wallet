@@ -14,7 +14,7 @@ public enum RewardPeriodType {
   public static final RewardPeriodType DEFAULT = MONTH;
 
   public RewardPeriod getPeriodOfTime(LocalDateTime localDateTime) {
-    RewardPeriod rewardPeriod = new RewardPeriod();
+    RewardPeriod rewardPeriod = new RewardPeriod(this);
     YearMonth yearMonth = YearMonth.from(localDateTime);
     switch (this) {
     case WEEK:
