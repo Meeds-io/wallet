@@ -600,7 +600,7 @@
                 <v-list-item-content>
                   <div class="alert alert-warning ignore-vuetify-classes">
                     <i class="uiIconWarning"></i>
-                    {{ item.adminIcon ? $t('exoplatform.wallet.label.transactionFailed') : item.isReceiver ? $t('exoplatform.wallet.label.transactionReceptionFailed', {0: contractDetails.name}) : $t('exoplatform.wallet.label.transactionSendingFailed', {0: contractDetails.name}) }}
+                    {{ item.adminIcon ? $t('exoplatform.wallet.label.transactionFailed') : item.isReceiver ? $t('exoplatform.wallet.label.transactionReceptionFailed', {0: contractName}) : $t('exoplatform.wallet.label.transactionSendingFailed', {0: contractName}) }}
                   </div>
                 </v-list-item-content>
               </v-list-item>
@@ -869,6 +869,7 @@ export default {
       // since the attribute this.transactions is modified outside the component
       refreshIndex: 1,
       loading: false,
+      settings: null,
       transactionsLimit: 10,
       transactionsPerPage: 10,
       limitReached: false,
@@ -876,6 +877,9 @@ export default {
     };
   },
   computed: {
+    contractName() {
+      return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
+    },
     sortedTransactions() {
       // A trick to force update computed list
       // since the attribute this.transactions is modified outside the component
@@ -933,6 +937,7 @@ export default {
     init(ignoreSelected) {
       this.loading = true;
       this.error = null;
+      this.settings = window.walletSettings;
 
       // Get transactions to latest block with maxBlocks to load
       return this.loadRecentTransaction(this.transactionsLimit)
