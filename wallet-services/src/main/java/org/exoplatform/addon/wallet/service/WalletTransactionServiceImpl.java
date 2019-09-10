@@ -129,7 +129,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
       int maxDayOfMonth = selectedMonth.lengthOfMonth();
       List<Integer> dayList = IntStream.rangeClosed(1, maxDayOfMonth).boxed().collect(Collectors.toList());
-      String monthLabel = StringUtils.capitalize(selectedMonth.getMonth().getDisplayName(TextStyle.FULL, userLocale));
+      String monthLabel = StringUtils.capitalize(selectedMonth.getMonth().getDisplayName(TextStyle.FULL, userLocale))
+          + " " + selectedMonth.getYear();
       transactionStatistics.setPeriodicityLabel(monthLabel);
       transactionStatistics.setLabels(dayList.stream()
                                              .map(day -> String.format("%02d", day))

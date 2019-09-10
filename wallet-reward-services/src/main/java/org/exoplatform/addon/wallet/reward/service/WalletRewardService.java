@@ -159,7 +159,7 @@ public class WalletRewardService implements RewardService {
       rewardTransaction.setReceiverIdentityId(walletReward.getWallet().getTechnicalId());
       rewardTransaction.setStartDateInSeconds(rewardPeriod.getStartDateInSeconds());
       rewardTransaction.setStatus(TRANSACTION_STATUS_PENDING);
-      rewardTransaction.setTokensSent(walletReward.getTokensToSend());
+      rewardTransaction.setTokensSent(transactionDetail.getContractAmount());
       rewardTransactionService.saveRewardTransaction(rewardTransaction);
     }
 
