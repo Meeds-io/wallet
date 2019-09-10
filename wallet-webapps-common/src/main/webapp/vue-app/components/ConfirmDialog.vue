@@ -5,6 +5,7 @@
     attach="#walletDialogsParent"
     content-class="uiPopup"
     max-width="100vw"
+    hide-overlay
     @keydown.esc="close">
     <v-card class="elevation-12">
       <div class="ignore-vuetify-classes popupHeader ClearFix">
