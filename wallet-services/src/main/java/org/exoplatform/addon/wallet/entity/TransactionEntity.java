@@ -19,6 +19,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx.hash FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
+    @NamedQuery(name = "WalletTransaction.getTransactionByAddressAndNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.fromAddress = :fromAddress AND tx.nonce = :nonce"),
     @NamedQuery(name = "WalletTransaction.getEtherTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.value > 0"),
 })
 public class TransactionEntity implements Serializable {
@@ -90,6 +91,9 @@ public class TransactionEntity implements Serializable {
 
   @Column(name = "NO_CONTRACT_FUNDS")
   private boolean           noContractFunds;
+
+  @Column(name = "NONCE")
+  private long              nonce;
 
   public long getId() {
     return id;
@@ -257,6 +261,14 @@ public class TransactionEntity implements Serializable {
 
   public void setNoContractFunds(boolean noContractFunds) {
     this.noContractFunds = noContractFunds;
+  }
+
+  public long getNonce() {
+    return nonce;
+  }
+
+  public void setNonce(long nonce) {
+    this.nonce = nonce;
   }
 
 }

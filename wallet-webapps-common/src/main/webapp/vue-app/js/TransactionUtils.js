@@ -32,17 +32,18 @@ export function loadTransactions(account, contractDetails, transactions, onlyPen
 export function saveTransactionDetails(transaction, contractDetails) {
   try {
     const transationDetails = {
-      networkId: transaction.networkId ? transaction.networkId : window.walletSettings.network.id,
-      hash: transaction.hash ? transaction.hash : '',
+      networkId: transaction.networkId || window.walletSettings.network.id,
+      hash: transaction.hash,
+      nonce: (transaction.nonce && Number(transaction.nonce)) || 0,
       contractAddress: transaction.contractAddress,
       contractMethodName: transaction.contractMethodName,
-      pending: transaction.pending ? Boolean(transaction.pending) : false,
+      pending: (transaction.pending && Boolean(transaction.pending)) || false,
       gasPrice: transaction.gasPrice || 0,
-      from: transaction.from ? transaction.from : '',
-      to: transaction.to ? transaction.to : '',
-      by: transaction.by ? transaction.by : '',
-      label: transaction.label ? transaction.label : '',
-      message: transaction.message ? transaction.message : '',
+      from: transaction.from || '',
+      to: transaction.to || '',
+      by: transaction.by || '',
+      label: transaction.label || '',
+      message: transaction.message || '',
       value: transaction.value ? Number(transaction.value) : 0,
       contractAmount: transaction.contractAmount ? Number(transaction.contractAmount) : 0,
       adminOperation: transaction.adminOperation ? Boolean(transaction.adminOperation) : false,
@@ -92,6 +93,21 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
     .catch((error) => {
       throw new Error('Error retrieving transactions list', error);
     });
+}
+
+export function getSavedTransactionByNonceOrHash(from, nonce, hash) {
+  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByNonceOrHash?hash=${hash}&from=${from}&nonce=${Number(nonce)}`, {credentials: 'include'}).then((resp) => {
+    if (resp && resp.ok) {
+      const contentType = resp.headers && resp.headers.get('content-type');
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        return resp.json();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  });
 }
 
 export function getSavedTransactionByHash(hash) {

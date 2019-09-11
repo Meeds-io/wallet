@@ -47,6 +47,8 @@ public abstract class BaseWalletTest {
 
   protected static final double    TOKEN_FEE                = (GAS_PRICE * GAS_USED) / 0.001;
 
+  protected static final long      NONCE                    = 10;
+
   protected static final double    ETHER_VALUE              = 0.001;
 
   protected static final String    PHRASE                   = "passphrase";
@@ -366,6 +368,7 @@ public abstract class BaseWalletTest {
     transactionDetail.setGasPrice(GAS_PRICE);
     transactionDetail.setGasUsed(GAS_USED);
     transactionDetail.setTokenFee(TOKEN_FEE);
+    transactionDetail.setNonce(NONCE);
     transactionDetail.setNoContractFunds(true);
     transactionStorage.saveTransactionDetail(transactionDetail);
     entitiesToClean.add(transactionDetail);

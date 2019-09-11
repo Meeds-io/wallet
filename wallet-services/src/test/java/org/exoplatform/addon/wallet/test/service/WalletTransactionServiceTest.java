@@ -168,6 +168,45 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   }
 
   /**
+   * Test
+   * {@link WalletTransactionService#getTransactionByNonceOrHash(String, String, long, String)}
+   */
+  @Test
+  public void testGetTransactionByNonceOrHashAndUser() {
+    addCurrentUserWallet();
+
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  null,
+                                                                  CURRENT_USER_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, true);
+    TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByNonceOrHash(transactionDetail.getHash(),
+                                                                                                     transactionDetail.getFrom(),
+                                                                                                     transactionDetail.getNonce()
+                                                                                                         + 1,
+                                                                                                     CURRENT_USER);
+    assertNotNull(storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetail);
+
+    storedTransactionDetail = walletTransactionService.getTransactionByNonceOrHash(generateTransactionHash(),
+                                                                                   transactionDetail.getFrom(),
+                                                                                   transactionDetail.getNonce(),
+                                                                                   CURRENT_USER);
+    assertNotNull(storedTransactionDetail);
+  }
+
+  /**
    * Test {@link WalletTransactionService#getPendingTransactionHashes}
    */
   @Test

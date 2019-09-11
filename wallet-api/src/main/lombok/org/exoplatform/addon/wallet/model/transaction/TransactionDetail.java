@@ -72,6 +72,8 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private long              timestamp;
 
+  private long              nonce;
+
   @Exclude
   private boolean           exceededMaxWaitMiningTime;
 

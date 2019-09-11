@@ -434,7 +434,7 @@ export function truncateError(error) {
     error = error.substring(0, error.indexOf(' at '));
   }
 
-  if (error.indexOf('replacement transaction underpriced') >= 0 || error.indexOf('known transaction') >= 0) {
+  if (String(error).indexOf('transaction underpriced') >= 0 || String(error).indexOf('nonce too low') >= 0|| String(error).indexOf('known transaction') >= 0) {
     error = 'Another transaction is in progress please wait until the first transaction is finished';
   }
   return error;

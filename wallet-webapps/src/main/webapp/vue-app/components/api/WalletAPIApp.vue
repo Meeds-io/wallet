@@ -341,7 +341,7 @@ export default {
                    method: transfer,
                    parameters: [receiverAddress, amountWithDecimals],
                   },
-                  (hash) => {
+                  (hash, nonce) => {
                     const pendingTransaction = {
                       hash: hash,
                       from: senderAddress.toLowerCase(),
@@ -355,6 +355,7 @@ export default {
                       contractAmount: amount,
                       label: label,
                       message: message,
+                      nonce: nonce,
                       timestamp: Date.now()
                     };
 
