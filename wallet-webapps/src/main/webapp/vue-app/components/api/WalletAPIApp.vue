@@ -189,7 +189,7 @@ export default {
           return;
         }
   
-        const amount = sendTokensRequest.amount;
+        const amount = Number(sendTokensRequest.amount);
         const password = sendTokensRequest.password;
         const receiver = sendTokensRequest.receiver;
         const sender = sendTokensRequest.sender;

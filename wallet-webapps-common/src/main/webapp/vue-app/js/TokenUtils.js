@@ -239,10 +239,12 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
             // Workaround to stop polling from blockchain waiting for receipt
             const currentProvider = window.localWeb3.currentProvider;
             if (currentProvider) {
-              window.localWeb3.currentProvider = null;
               window.setTimeout(() => {
-                window.localWeb3.currentProvider = currentProvider;
-              }, 3000);
+                window.localWeb3.currentProvider = null;
+                window.setTimeout(() => {
+                  window.localWeb3.currentProvider = currentProvider;
+                }, 2000);
+              }, 1000);
             }
           });
       }
