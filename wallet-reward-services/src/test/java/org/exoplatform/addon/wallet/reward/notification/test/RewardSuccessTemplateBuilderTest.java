@@ -32,7 +32,6 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
   public void testBuildMessage() {
     InitParams params = getParams();
     RewardSuccessNotificationPlugin plugin = new RewardSuccessNotificationPlugin(params);
-    ChannelKey channel = ChannelKey.key("WEB_CHANNEL");
 
     RewardSuccessTemplateProvider templateProvider = new RewardSuccessTemplateProvider(container, params);
     templateProvider.setWebTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
