@@ -39,7 +39,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test save wallet address
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testSaveWalletAddress() throws IllegalAccessException {
@@ -132,8 +133,6 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
   /**
    * Test get wallet by type and Id
-   *
-   * @throws IllegalAccessException
    */
   @Test
   public void testGetWalletByTypeAndId() {
@@ -172,7 +171,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test save private key by type, remoteId, content and user
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testSavePrivateKeyByTypeAndIdAndContent() throws IllegalAccessException {
@@ -202,7 +202,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test get wallet by identityId
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testGetWalletByIdentityId() throws IllegalAccessException {
@@ -229,7 +230,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test list of wallet
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testListWallets() throws IllegalAccessException {
@@ -246,7 +248,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test remove private key by Type and Id
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testRemovePrivateKeyByTypeAndId() throws IllegalAccessException {
@@ -337,7 +340,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test get private key by type, remoteId and user
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testGetPrivateKeyByTypeAndIdAndUser() throws IllegalAccessException {
@@ -375,7 +379,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test get private key by type and remoteId
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testGetPrivateKeyByTypeAndId() throws IllegalAccessException {
@@ -399,7 +404,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test remove wallet by address
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testRemoveWalletByAddress() throws IllegalAccessException {
@@ -448,7 +454,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test remove wallet by type and id
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testRemoveWalletByTypeAndId() throws IllegalAccessException {
@@ -502,7 +509,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test enable wallet by address
    * 
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testEnableWalletByAddress() throws IllegalAccessException {
@@ -555,7 +563,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test set initialization status
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testSetInitializationStatus() throws IllegalAccessException {
@@ -609,7 +618,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   /**
    * Test set initialization status wallet
    *
-   * @throws IllegalAccessException
+   * @throws IllegalAccessException when error happens while proceeding request
+   *           with CURRENT_USER
    */
   @Test
   public void testSetInitializationStatusWallet() throws IllegalAccessException {

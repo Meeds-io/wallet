@@ -20,11 +20,10 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
@@ -52,7 +51,6 @@ public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
     Wallet requestSenderDetail = ctx.value(FUNDS_REQUEST_SENDER_DETAIL_PARAMETER);
     Wallet requestSenderAccountDetail = ctx.value(SENDER_ACCOUNT_DETAIL_PARAMETER);
     Wallet requestReceiverAccountDetail = ctx.value(RECEIVER_ACCOUNT_DETAIL_PARAMETER);
-    ContractDetail contractDetail = ctx.value(CONTRACT_DETAILS_PARAMETER);
     FundsRequest fundsRequest = ctx.value(FUNDS_REQUEST_PARAMETER);
 
     List<String> toList = getNotificationReceiversUsers(requestReceiverAccountDetail, requestSenderDetail.getId());
@@ -60,19 +58,13 @@ public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
       return null;
     }
 
-    String requestAcceptURL = getWalletLink(null, null) + "?receiver=" + requestSenderAccountDetail.getId() + "&receiver_type="
+    String walletLink = getWalletLink(fundsRequest.getReceipientType(), fundsRequest.getReceipient());
+    String requestAcceptURL = walletLink + "?receiver="
+        + requestSenderAccountDetail.getId() + "&receiver_type="
         + requestSenderAccountDetail.getType() + "&amount=" + fundsRequest.getAmount();
 
-    String contractAddress = fundsRequest.getContract();
-    String symbol = null;
-    if (StringUtils.isNotBlank(contractAddress)) {
-      if (contractDetail == null) {
-        throw new IllegalStateException("Can't find contract with address " + contractAddress);
-      }
-      symbol = contractDetail.getSymbol();
-    } else {
-      symbol = "ether";
-    }
+    ContractDetail contractDetail = WalletUtils.getContractDetail();
+    String symbol = contractDetail == null ? null : contractDetail.getSymbol();
 
     return NotificationInfo.instance()
                            .to(toList)

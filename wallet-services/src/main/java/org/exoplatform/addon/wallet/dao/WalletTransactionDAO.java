@@ -30,6 +30,10 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
   private static final String HASH_PARAM                 = "hash";
 
+  private static final String FROM_ADDRESS_PARAM         = "fromAddress";
+
+  private static final String NONCE_PARAM                = "nonce";
+
   private static final String START_DATE                 = "startDate";
 
   private static final String END_DATE                   = "endDate";
@@ -125,6 +129,15 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getTransactionByHash",
                                                                               TransactionEntity.class);
     query.setParameter(HASH_PARAM, StringUtils.lowerCase(hash));
+    List<TransactionEntity> resultList = query.getResultList();
+    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+  }
+
+  public TransactionEntity getTransactionByAddressAndNonce(String fromAddress, long nonce) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getTransactionByAddressAndNonce",
+                                                                              TransactionEntity.class);
+    query.setParameter(FROM_ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    query.setParameter(NONCE_PARAM, nonce);
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }

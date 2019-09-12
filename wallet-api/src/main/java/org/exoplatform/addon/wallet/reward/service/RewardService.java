@@ -18,6 +18,7 @@ package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.Set;
 
+import org.exoplatform.addon.wallet.model.reward.RewardReport;
 import org.exoplatform.addon.wallet.model.reward.WalletReward;
 
 /**
@@ -34,7 +35,7 @@ public interface RewardService {
    * @return a {@link Set} of {@link WalletReward} with the details of sent
    *         tokens and tokens to send
    */
-  public Set<WalletReward> computeReward(long periodDateInSeconds);
+  public RewardReport getRewardReport(long periodDateInSeconds);
 
   /**
    * Send rewards transactions

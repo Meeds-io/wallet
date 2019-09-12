@@ -87,6 +87,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public TransactionStatistics getTransactionStatistics(String address,
                                                         String periodicity,
+                                                        String selectedDate,
                                                         Locale locale) {
     if (StringUtils.isBlank(address)) {
       throw new IllegalArgumentException("Wallet address is mandatory");
@@ -102,32 +103,41 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     if (StringUtils.equalsIgnoreCase(periodicity, YEAR_PERIODICITY)) {
       // Compute labels to display in chart
       List<YearMonth> monthsList = new ArrayList<>();
+
+      String[] selectedDateParts = StringUtils.isBlank(selectedDate) ? null : selectedDate.split("-");
+      Year selectedYear = selectedDateParts == null ? Year.now() : Year.of(Integer.parseInt(selectedDateParts[0]));
+
       // to optimise with stream()
-      for (long i = 11; i >= 1; i--) {
-        monthsList.add(YearMonth.now().minusMonths(i));
+      for (int i = 12; i >= 1; i--) {
+        monthsList.add(YearMonth.of(selectedYear.getValue(), i));
       }
-      monthsList.add(YearMonth.now());
-      transactionStatistics.setPeriodicityLabel(String.valueOf(Year.now().getValue()));
+
+      transactionStatistics.setPeriodicityLabel(String.valueOf(selectedYear.getValue()));
       transactionStatistics.setLabels(monthsList.stream()
                                                 .map(month -> StringUtils.capitalize(month.getMonth()
                                                                                           .getDisplayName(TextStyle.FULL,
                                                                                                           userLocale)))
                                                 .collect(Collectors.toList()));
 
-      // Compte list of 12 months to include in chart
+      // Compute list of 12 months to include in chart
       periodList = monthsList.stream().map(yearMonth -> yearMonth.atDay(1)).collect(Collectors.toList());
     } else if (StringUtils.equalsIgnoreCase(periodicity, MONTH_PERIODICITY)) {
-      Month currentMonth = MonthDay.now().getMonth();
-      int maxDayOfMonth = currentMonth.maxLength();
+      String[] selectedDateParts = StringUtils.isBlank(selectedDate) ? null : selectedDate.split("-");
+      YearMonth selectedMonth = selectedDateParts == null ? YearMonth.now()
+                                                          : YearMonth.of(Integer.parseInt(selectedDateParts[0]),
+                                                                         Integer.parseInt(selectedDateParts[1]));
+
+      int maxDayOfMonth = selectedMonth.lengthOfMonth();
       List<Integer> dayList = IntStream.rangeClosed(1, maxDayOfMonth).boxed().collect(Collectors.toList());
-      String monthLabel = StringUtils.capitalize(currentMonth.getDisplayName(TextStyle.FULL, userLocale));
+      String monthLabel = StringUtils.capitalize(selectedMonth.getMonth().getDisplayName(TextStyle.FULL, userLocale))
+          + " " + selectedMonth.getYear();
       transactionStatistics.setPeriodicityLabel(monthLabel);
       transactionStatistics.setLabels(dayList.stream()
                                              .map(day -> String.format("%02d", day))
                                              .collect(Collectors.toList()));
 
       // Compte list of days of current month to include in chart
-      periodList = dayList.stream().map(dayOfMonth -> YearMonth.now().atDay(dayOfMonth)).collect(Collectors.toList());
+      periodList = dayList.stream().map(dayOfMonth -> selectedMonth.atDay(dayOfMonth)).collect(Collectors.toList());
     } else {
       throw new IllegalArgumentException("Uknown periodicity parameter: " + periodicity);
     }
@@ -155,6 +165,15 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public TransactionDetail getTransactionByHash(String hash, String currentUser) {
     TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hash);
+    if (transactionDetail != null) {
+      retrieveWalletsDetails(transactionDetail, currentUser);
+    }
+    return transactionDetail;
+  }
+
+  @Override
+  public TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUser) {
+    TransactionDetail transactionDetail = transactionStorage.getTransactionByAddressAndNonce(fromAddress, nonce);
     if (transactionDetail != null) {
       retrieveWalletsDetails(transactionDetail, currentUser);
     }

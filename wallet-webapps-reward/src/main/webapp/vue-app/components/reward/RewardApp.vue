@@ -196,7 +196,6 @@ export default {
       .then(() => {
         this.transactionEtherscanLink = this.walletUtils.getTransactionEtherscanlink();
         this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink();
-        this.walletUtils.setDraggable('RewardApp');
       });
   },
   methods: {
@@ -246,18 +245,18 @@ export default {
       }
 
       return computeRewards(this.$refs.sendRewards.selectedDateInSeconds)
-        .then(walletRewards => {
-          if(walletRewards.error) {
-            this.error = (typeof walletRewards.error === 'object' ? walletRewards.error[0] : walletRewards.error);
+        .then(rewardReport => {
+          if(rewardReport.error) {
+            this.error = (typeof rewardReport.error === 'object' ? rewardReport.error[0] : rewardReport.error);
             return;
           }
-          this.walletRewards = walletRewards;
+          this.walletRewards = rewardReport.rewards;
           this.computeTotalRewardsByPlugin();
 
           this.walletRewards.forEach(walletReward => {
-            if (walletReward && walletReward.rewardTransaction && walletReward.rewardTransaction.hash && walletReward.rewardTransaction.status === 'pending') {
-              this.walletUtils.watchTransactionStatus(walletReward.rewardTransaction.hash, (transactionDetail) => {
-                walletReward.rewardTransaction.status = transactionDetail.succeeded ? 'success' : 'error';
+            if (walletReward && walletReward.transaction && walletReward.transaction.hash && walletReward.transaction.status === 'pending') {
+              this.walletUtils.watchTransactionStatus(walletReward.transaction.hash, (transactionDetail) => {
+                walletReward.transaction.status = transactionDetail.succeeded ? 'success' : 'error';
               });
             }
           });

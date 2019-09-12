@@ -46,12 +46,14 @@ public interface WalletTransactionService {
    * 
    * @param address
    * @param periodicity
+   * @param selectedDate
    * @param locale
    * @return {@link TransactionStatistics} with sent and received amounts and
    *         labels
    */
   TransactionStatistics getTransactionStatistics(String address,
                                                  String periodicity,
+                                                 String selectedDate,
                                                  Locale locale);
 
   /**
@@ -68,6 +70,14 @@ public interface WalletTransactionService {
    *         retrieved from internal database
    */
   TransactionDetail getTransactionByHash(String hash, String currentUser);
+
+  /**
+   * @param fromAddress
+   * @param nonce
+   * @param currentUserId
+   * @return the transaction identified by sender address and its nonce
+   */
+  TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUserId);
 
   /**
    * Save transaction details in database

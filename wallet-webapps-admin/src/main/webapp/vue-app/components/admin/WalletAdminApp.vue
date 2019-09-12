@@ -158,7 +158,6 @@ export default {
     this.init()
       .then(() => {
         this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()
-        this.walletUtils.setDraggable('WalletAdminApp');
       });
   },
   methods: {

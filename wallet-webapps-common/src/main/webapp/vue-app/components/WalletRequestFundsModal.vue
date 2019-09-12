@@ -10,6 +10,7 @@
     @keydown.esc="dialog = false">
     <template v-slot:activator="{ on }">
       <v-btn
+        :disabled="disabledButton"
         class="btn white"
         v-on="on">
         <v-icon>
@@ -89,8 +90,6 @@
 <script>
 import AddressAutoComplete from './AddressAutoComplete.vue';
 
-import {setDraggable} from '../js/WalletUtils.js';
-
 export default {
   components: {
     AddressAutoComplete,
@@ -106,6 +105,12 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    disabledButton: {
+      type: Boolean,
+      default: function() {
+        return false;
       },
     },
   },
@@ -134,9 +139,6 @@ export default {
         if (this.$refs && this.$refs.autocomplete) {
           this.$refs.autocomplete.clear();
         }
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
   },

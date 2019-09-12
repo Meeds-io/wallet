@@ -393,11 +393,12 @@ export default {
               method: transfer,
               parameters: [receiver, convertTokenAmountToSend(this.amount, contractDetails.decimals).toString()],
             },
-              (hash) => {
+              (hash, nonce) => {
                 const gas = window.walletSettings.network.gasLimit ? window.walletSettings.network.gasLimit : 35000;
 
                 const pendingTransaction = {
                   hash: hash,
+                  nonce: nonce,
                   from: sender.toLowerCase(),
                   to: receiver,
                   value: 0,

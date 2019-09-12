@@ -98,6 +98,11 @@ public class TransactionStorage {
     return fromEntity(transactionEntity);
   }
 
+  public TransactionDetail getTransactionByAddressAndNonce(String fromAddress, long nonce) {
+    TransactionEntity transactionEntity = walletTransactionDAO.getTransactionByAddressAndNonce(fromAddress, nonce);
+    return fromEntity(transactionEntity);
+  }
+
   /**
    * Return contract amount received during a period of time
    * 
@@ -162,6 +167,7 @@ public class TransactionStorage {
     detail.setGasUsed(entity.getGasUsed());
     detail.setTokenFee(entity.getTokenFee());
     detail.setNoContractFunds(entity.isNoContractFunds());
+    detail.setNonce(entity.getNonce());
     return detail;
   }
 
@@ -188,6 +194,7 @@ public class TransactionStorage {
     entity.setTokenFee(detail.getTokenFee());
     entity.setGasUsed(detail.getGasUsed());
     entity.setNoContractFunds(detail.isNoContractFunds());
+    entity.setNonce(detail.getNonce());
     if (detail.getTimestamp() == 0) {
       entity.setCreatedDate(System.currentTimeMillis());
     } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {

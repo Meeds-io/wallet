@@ -25,6 +25,10 @@
 
 #WalletApp, #SpaceWalletApp {
   margin: 20px 20px 0;
+
+  .v-date-picker-title__year {
+      display: none !important;
+  }
 }
 
 #WalletApp, #SpaceWalletApp, #RewardApp, #WalletAdminApp, #TodoListApp {
@@ -177,6 +181,7 @@
     width: auto;
     overflow: visible;
     height: 79px;
+    flex: none;
 
     div {
       width: auto;
@@ -273,6 +278,8 @@
     word-break: break-word;
     white-space: normal;
     z-index: auto;
+    box-sizing: border-box;
+    font-size: initial;
 
     /* To fix links baseline positions */
     .popupWithLink {

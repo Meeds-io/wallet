@@ -27,12 +27,12 @@
           <v-expansion-panel-header
             :expand-icon="false"
             hide-actions
-            class="border-box-sizing px-2 py-0">
+            class="border-box-sizing px-0 py-0">
             <v-list
               :class="item.selected && 'blue lighten-5'"
               two-line
               ripple
-              class="pt-0 pb-0">
+              class="px-2 py-0">
               <v-list-item
                 :key="item.hash"
                 class="transactionDetailItem autoHeight"
@@ -42,24 +42,9 @@
                   indeterminate
                   color="primary"
                   class="mr-4" />
-                <v-list-item-avatar v-else-if="item.error" :title="item.error">
-                  <v-icon color="red">
-                    warning
-                  </v-icon>
-                </v-list-item-avatar>
-                <v-list-item-avatar v-else-if="item.adminIcon">
-                  <v-icon color="grey">
-                    fa-cog
-                  </v-icon>
-                </v-list-item-avatar>
-                <v-list-item-avatar v-else-if="item.isReceiver">
-                  <v-icon color="green">
-                    fa-arrow-down
-                  </v-icon>
-                </v-list-item-avatar>
                 <v-list-item-avatar v-else>
-                  <v-icon color="red">
-                    fa-arrow-up
+                  <v-icon :color="item.succeeded ? 'primary' : 'red'">
+                    {{ item.adminIcon ? 'fa-cog' : item.isReceiver ? 'fa-arrow-down' : 'fa-arrow-up' }}
                   </v-icon>
                 </v-list-item-avatar>
   
@@ -95,10 +80,10 @@
                       :avatar="item.fromAvatar" />
   
                     <span v-if="item.isReceiver">
-                      {{ $t('exoplatform.wallet.label.receivedFrom') }}
+                      {{ (item.pending || item.succeeded) ? $t('exoplatform.wallet.label.receivedFrom') : $t('exoplatform.wallet.label.errorReceivedFrom') }}
                     </span>
                     <span v-else>
-                      {{ $t('exoplatform.wallet.label.sentTo') }}
+                      {{ (item.pending || item.succeeded) ? $t('exoplatform.wallet.label.sentTo') : $t('exoplatform.wallet.label.errorSentTo') }}
                     </span>
   
                     <profile-chip
@@ -555,8 +540,8 @@
                   <v-list-item-subtitle>
                     <v-icon
                       v-if="!item.pending && !item.succeeded"
-                      color="orange"
-                      title="Transaction failed">
+                      :title="$t('exoplatform.wallet.label.transactionFailed')"
+                      color="orange">
                       warning
                     </v-icon>
                     <v-list-item-action-text v-if="item.dateFormatted">
@@ -566,7 +551,7 @@
                 </v-list-item-content>
   
                 <v-list-item-content v-if="item.type === 'ether' && item.value && Number(item.value)" class="transactionDetailActions">
-                  <v-list-item-title :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
+                  <v-list-item-title :class="item.adminIcon ? '' : (item.pending || item.succeeded) ? 'primary--text' : 'red--text'">
                     <span>
                       {{ toFixed(item.value) }} ether
                     </span>
@@ -581,14 +566,14 @@
                 <v-list-item-content v-else class="transactionDetailActions">
                   <v-list-item-title
                     v-if="item.contractAmount"
-                    :class="item.adminIcon ? '' : item.isReceiver ? 'green--text' : 'red--text'">
+                    :class="(item.pending || item.succeeded) ? 'primary--text' : 'red--text'">
                     <span>
                       {{ toFixed(item.contractAmount) }} {{ item.contractSymbol }}
                     </span>
                   </v-list-item-title>
                   <v-list-item-title
                     v-else-if="item.value && Number(item.value)"
-                    :class="item.isReceiver ? 'green--text' : 'red--text'">
+                    :class="(item.pending || item.succeeded) ? 'primary--text' : 'red--text'">
                     <span>
                       {{ toFixed(item.value) }} ether
                     </span>
@@ -611,13 +596,11 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-list class="px-0 ml-2" dense>
-              <v-list-item v-if="!item.pending">
+              <v-list-item v-if="!item.pending && !item.succeeded">
                 <v-list-item-content>
-                  {{ $t('exoplatform.wallet.label.status') }}
-                </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
-                  <div class="no-wrap">
-                    <v-icon :color="item.succeeded ? 'success' : 'error'" v-text="item.succeeded ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+                  <div class="alert alert-warning ignore-vuetify-classes">
+                    <i class="uiIconWarning"></i>
+                    {{ item.adminIcon ? $t('exoplatform.wallet.label.transactionFailed') : item.isReceiver ? $t('exoplatform.wallet.label.transactionReceptionFailed', {0: contractName}) : $t('exoplatform.wallet.label.transactionSendingFailed', {0: contractName}) }}
                   </div>
                 </v-list-item-content>
               </v-list-item>
@@ -796,6 +779,14 @@
                   </a>
                 </v-list-item-content>
               </v-list-item>
+              <v-list-item>
+                <v-list-item-content>
+                  Nonce
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <strong>{{ item.nonce }}</strong>
+                </v-list-item-content>
+              </v-list-item>
             </v-list>
           </v-expansion-panel-content>
         </v-expansion-panel>
@@ -886,6 +877,7 @@ export default {
       // since the attribute this.transactions is modified outside the component
       refreshIndex: 1,
       loading: false,
+      settings: null,
       transactionsLimit: 10,
       transactionsPerPage: 10,
       limitReached: false,
@@ -893,6 +885,9 @@ export default {
     };
   },
   computed: {
+    contractName() {
+      return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
+    },
     sortedTransactions() {
       // A trick to force update computed list
       // since the attribute this.transactions is modified outside the component
@@ -950,6 +945,7 @@ export default {
     init(ignoreSelected) {
       this.loading = true;
       this.error = null;
+      this.settings = window.walletSettings;
 
       // Get transactions to latest block with maxBlocks to load
       return this.loadRecentTransaction(this.transactionsLimit)

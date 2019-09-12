@@ -111,6 +111,38 @@ public class WalletTransactionREST implements ResourceContainer {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @Path("getSavedTransactionByNonce")
+  @RolesAllowed("users")
+  @ApiOperation(value = "Get saved transaction in internal database by sender address with a specified nonce", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
+  @ApiResponses(value = {
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response getSavedTransactionByNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress,
+                                             @ApiParam(value = "Sender transaction nonce", required = true) @QueryParam("nonce") long nonce) {
+    if (nonce == 0) {
+      LOG.warn("Empty transaction nonce", nonce);
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+    if (StringUtils.isBlank(fromAddress)) {
+      LOG.warn("Empty transaction sender", fromAddress);
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+
+    try {
+      TransactionDetail transactionDetail = transactionService.getTransactionByNonce(fromAddress,
+                                                                                     nonce,
+                                                                                     getCurrentUserId());
+      return Response.ok(transactionDetail).build();
+    } catch (Exception e) {
+      LOG.error("Error getting transaction with address {} and nonce {}", fromAddress, nonce, e);
+      return Response.serverError().build();
+    }
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactionsAmounts")
   @RolesAllowed("users")
   @ApiOperation(value = "Get token amounts sent per each period of time by a wallet identified by its address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction statistics object")
@@ -121,6 +153,7 @@ public class WalletTransactionREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response getTransactionsAmounts(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
                                          @ApiParam(value = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
+                                         @ApiParam(value = "Selected date", required = false) @QueryParam("date") String selectedDate,
                                          @ApiParam(value = "user locale language", required = false) @QueryParam("lang") String lang) {
     if (StringUtils.isBlank(periodicity)) {
       LOG.warn("Bad request sent to server with empty periodicity parameter");
@@ -134,6 +167,7 @@ public class WalletTransactionREST implements ResourceContainer {
     try {
       TransactionStatistics transactionStatistics = transactionService.getTransactionStatistics(address,
                                                                                                 periodicity,
+                                                                                                selectedDate,
                                                                                                 new Locale(lang));
       return Response.ok(transactionStatistics).build();
     } catch (Exception e) {

@@ -189,7 +189,7 @@ export default {
           return;
         }
   
-        const amount = sendTokensRequest.amount;
+        const amount = Number(sendTokensRequest.amount);
         const password = sendTokensRequest.password;
         const receiver = sendTokensRequest.receiver;
         const sender = sendTokensRequest.sender;
@@ -341,7 +341,7 @@ export default {
                    method: transfer,
                    parameters: [receiverAddress, amountWithDecimals],
                   },
-                  (hash) => {
+                  (hash, nonce) => {
                     const pendingTransaction = {
                       hash: hash,
                       from: senderAddress.toLowerCase(),
@@ -355,6 +355,7 @@ export default {
                       contractAmount: amount,
                       label: label,
                       message: message,
+                      nonce: nonce,
                       timestamp: Date.now()
                     };
 

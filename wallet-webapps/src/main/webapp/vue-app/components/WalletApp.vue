@@ -19,8 +19,18 @@
               <v-toolbar-title v-else>
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
-              <div v-if="displayEtherBalanceTooLow" id="etherTooLowWarningParent">
+              <div
+                v-if="displayWarnings"
+                id="etherTooLowWarningParent"
+                class="ml-2">
                 <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                  warning
+                </v-icon>
+                <v-icon
+                  v-if="displayDisapprovedWallet"
+                  slot="activator"
+                  :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
+                  color="orange">
                   warning
                 </v-icon>
               </div>
@@ -103,17 +113,14 @@
                           v-if="!loading"
                           ref="chartPeriodicityButtons"
                           :periodicity-label="periodicityLabel"
-                          @periodicity-changed="periodicity = $event"
+                          @period-changed="periodChanged"
                           @error="error = $event" />
                       </v-flex>
                       <v-flex xs12>
                         <transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
-                          :periodicity="periodicity"
-                          :wallet-address="walletAddress"
-                          @periodicity-label="periodicityLabel = $event"
-                          @error="error = $event" />
+                          :transaction-statistics="transactionStatistics" />
                       </v-flex>
                     </template>
                   </v-layout>
@@ -217,7 +224,6 @@ export default {
       isSpaceAdministrator: false,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
-      periodicityLabel: null,
       showSettingsModal: false,
       gasPriceInEther: null,
       browserWalletExists: false,
@@ -230,7 +236,9 @@ export default {
       fiatSymbol: '$',
       settings: null,
       error: null,
+      transactionStatistics: null,
       periodicity: 'month',
+      selectedDate: new Date().toISOString().substr(0, 7),
     };
   },
   computed: {
@@ -249,11 +257,24 @@ export default {
     displayWalletResetOption() {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
+    displayWarnings() {
+      return this.displayDisapprovedWallet || this.displayEtherBalanceTooLow;
+    },
+    displayDisapprovedWallet() {
+      return this.wallet && this.wallet.isInitialized && !this.wallet.isApproved
+    },
     displayEtherBalanceTooLow() {
-      return this.browserWalletExists && !this.loading && !this.error && (!this.isSpace || this.isSpaceAdministrator) && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
+      return this.browserWalletExists
+          && !this.loading
+          && !this.error
+          && (!this.isSpace || this.isSpaceAdministrator)
+          && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance || 0;
+    },
+    periodicityLabel() {
+      return this.transactionStatistics && this.transactionStatistics.periodicityLabel;
     },
   },
   watch: {
@@ -311,7 +332,6 @@ export default {
           }
           this.checkOpenTransaction();
           this.$forceUpdate();
-          this.walletUtils.setDraggable(this.appId);
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);
@@ -331,6 +351,8 @@ export default {
         .then((result, error) => {
           this.handleError(error);
           this.settings = window.walletSettings || {wallet: {}, network: {}};
+          this.wallet = this.settings.wallet;
+
           if (!this.settings.walletEnabled) {
             this.isWalletEnabled = false;
             this.$forceUpdate();
@@ -355,7 +377,6 @@ export default {
         .then((result, error) => {
           this.handleError(error);
 
-          this.wallet = this.settings.wallet;
           this.contractDetails = this.settings.contractDetail;
           this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
           this.browserWalletExists = this.settings.browserWalletExists;
@@ -376,14 +397,13 @@ export default {
           this.$forceUpdate();
         })
         .then(() => this.$nextTick())
-        .then(() => this.$refs.transactionHistoryChart && this.$refs.transactionHistoryChart.initializeChart())
+        .then(() => this.periodChanged(this.periodicity))
         .catch((e) => {
           console.debug('init method - error', e);
           const error = `${e}`;
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
             this.browserWalletExists = this.settings.browserWalletExists = false;
-            this.wallet = null;
           } else if (error.indexOf(this.constants.ERROR_WALLET_SETTINGS_NOT_LOADED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.walletInitializationFailure');
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
@@ -457,6 +477,18 @@ export default {
         if (this.walletAddress && this.contractDetails && parameters && parameters.hash) {
           this.openAccountDetail(null, parameters.hash);
         }
+      }
+    },
+    periodChanged(periodicity, selectedDate) {
+      this.periodicity = periodicity;
+      this.selectedDate = selectedDate;
+
+      if (this.$refs.transactionHistoryChart) {
+        this.transactionUtils.getTransactionsAmounts(this.walletAddress, this.periodicity, this.selectedDate)
+        .then((transactionsData) => {
+          this.transactionStatistics = transactionsData;
+        })
+        .catch(e => this.error = String(e));
       }
     },
   },

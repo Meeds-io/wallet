@@ -17,7 +17,9 @@
 package org.exoplatform.addon.wallet.reward.service;
 
 import java.util.Collection;
+import java.util.Set;
 
+import org.exoplatform.addon.wallet.model.reward.RewardPeriod;
 import org.exoplatform.addon.wallet.model.reward.RewardSettings;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 
@@ -60,5 +62,25 @@ public interface RewardSettingsService {
    * @return days number before reward end date to create reminder
    */
   int getReminderDateInDays();
+
+  /**
+   * @return {@link Set} of {@link RewardPeriod} having rewards in progress
+   */
+  public Set<RewardPeriod> getRewardPeriodsInProgress();
+
+  /**
+   * Save {@link Set} of {@link RewardPeriod} having rewards in progress
+   * 
+   * @param rewardPeriods
+   */
+  void saveRewardPeriodInProgress(Set<RewardPeriod> rewardPeriods);
+
+  /**
+   * Add {@link RewardPeriod} to the already stored {@link Set} of
+   * {@link RewardPeriod}
+   * 
+   * @param rewardPeriod {@link RewardPeriod} to add
+   */
+  void addRewardPeriodInProgress(RewardPeriod rewardPeriod);
 
 }

@@ -22,7 +22,7 @@ public class WalletReward implements Serializable {
   private Set<WalletPluginReward> rewards;
 
   @Exclude
-  private RewardTransaction       rewardTransaction;
+  private RewardTransaction       transaction;
 
   @Exclude
   private String                  poolName;
@@ -30,10 +30,10 @@ public class WalletReward implements Serializable {
   private boolean                 enabled;
 
   public double getTokensSent() {
-    if (rewardTransaction == null || rewardTransaction.getTokensSent() == 0) {
+    if (transaction == null || transaction.getTokensSent() == 0) {
       return 0;
     } else {
-      return rewardTransaction.getTokensSent();
+      return transaction.getTokensSent();
     }
   }
 

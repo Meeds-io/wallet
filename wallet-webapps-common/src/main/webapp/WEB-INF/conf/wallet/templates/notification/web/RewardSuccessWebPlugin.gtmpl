@@ -1,0 +1,22 @@
+<li class="$READ clearfix" data-id="$NOTIFICATION_ID">
+  <div class="media">
+    <div class="media-body">
+      <div class="contentSmall">
+        <div class="content">
+        </div>
+        <div class="status">
+          <%=_ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted)%>
+        </div>
+        <div class="content">
+          <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
+        </div>
+        <div class="lastUpdatedTime">
+          $LAST_UPDATED_TIME
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="remove-item" data-rest="">
+    <i class="uiIconClose uiIconLightGray"></i>
+  </span>
+</li>

@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import {setDraggable, saveBrowserWalletInstance} from '../js/WalletUtils.js';
+import {saveBrowserWalletInstance} from '../js/WalletUtils.js';
 
 export default {
   props: {
@@ -138,9 +138,6 @@ export default {
     dialog() {
       if (this.dialog) {
         this.resetForm();
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
   },
@@ -167,7 +164,7 @@ export default {
           }
           const wallet = window.localWeb3.eth.accounts.wallet.add(thiss.walletPrivateKey);
           if (!thiss.walletAddress || wallet.address.toLowerCase() === thiss.walletAddress.toLowerCase()) {
-            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, true)
+            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, false, true)
               .then(() => {
                 thiss.loading = false;
                 thiss.dialog = false;

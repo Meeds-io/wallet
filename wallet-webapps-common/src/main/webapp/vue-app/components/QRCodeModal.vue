@@ -38,8 +38,6 @@
 <script>
 import QrCode from './QRCode.vue';
 
-import {setDraggable} from '../js/WalletUtils.js';
-
 export default {
   components: {
     QrCode,
@@ -129,9 +127,6 @@ export default {
       if (this.open) {
         this.dialog = true;
         this.computeCanvas();
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
     dialog() {

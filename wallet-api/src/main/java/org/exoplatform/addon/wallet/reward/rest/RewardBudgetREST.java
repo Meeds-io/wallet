@@ -1,7 +1,5 @@
 package org.exoplatform.addon.wallet.reward.rest;
 
-import java.util.Set;
-
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -10,6 +8,7 @@ import javax.ws.rs.core.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.exoplatform.addon.wallet.model.reward.RewardReport;
 import org.exoplatform.addon.wallet.model.reward.WalletReward;
 import org.exoplatform.addon.wallet.reward.service.RewardService;
 import org.exoplatform.addon.wallet.service.WalletAccountService;
@@ -47,11 +46,12 @@ public class RewardBudgetREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
-      Set<WalletReward> rewards = rewardService.computeReward(periodDateInSeconds);
-      for (WalletReward walletReward : rewards) {
+      RewardReport rewardReport = rewardService.getRewardReport(periodDateInSeconds);
+
+      for (WalletReward walletReward : rewardReport.getRewards()) {
         walletAccountService.retrieveWalletBlockchainState(walletReward.getWallet());
       }
-      return Response.ok(rewards).build();
+      return Response.ok(rewardReport).build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();

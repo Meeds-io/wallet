@@ -169,12 +169,20 @@ export default {
   computed: {
     walletAddress() {
       return this.wallet && this.wallet.address;
+    }
+  },
+  watch: {
+    walletAddress() {
+      if (this.walletAddress) {
+        this.$nextTick(() => {
+          this.refreshFromSettings();
+          this.$refs.qrCode.computeCanvas();
+        });
+      }
     },
     browserWalletExists() {
       return this.settings && this.settings.userPreferences && this.settings.browserWalletExists;
     },
-  },
-  watch: {
     appLoading() {
       if (!this.appLoading) {
         this.refreshFromSettings();
@@ -183,6 +191,7 @@ export default {
     open() {
       if (this.open) {
         this.error = null;
+        this.settings = window.walletSettings || {wallet: {}, userPreferences: {}};
 
         // Workaround to display slider on first popin open
         if (this.$refs.settingsTabs) {
@@ -192,7 +201,6 @@ export default {
         this.dialog = true;
         this.$nextTick(() => {
           this.refreshFromSettings();
-          this.walletUtils.setDraggable();
         });
       }
     },
@@ -208,21 +216,6 @@ export default {
       if (this.$refs.securityTab) {
         this.$refs.securityTab.init();
       }
-    },
-    removeServerSideBackup() {
-      return this.walletUtils.removeServerSideBackup(this.walletAddress)
-        .then((removed) => {
-          if (removed) {
-            this.$emit('settings-changed');
-          }
-          return this.$nextTick();
-        })
-        .then(() => {
-          this.refreshFromSettings();
-        })
-        .catch(e => {
-          this.error = String(e);
-        });
     },
   },
 };
