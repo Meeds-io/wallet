@@ -1,5 +1,5 @@
 import {etherToFiat} from './WalletUtils.js';
-import {getSavedTransactionByNonceOrHash} from './TransactionUtils.js';
+import {getSavedTransactionByNonce} from './TransactionUtils.js';
 
 const NONCE_TOO_LOW_ERROR = 'nonce too low';
 
@@ -217,18 +217,7 @@ function sendTransaction(transactionToSend, hashCallback, errorCallback) {
     .sendTransaction(transactionToSend, (error, hash) => {
       if (!error && hash) {
         if (hashCallback) {
-          // Verify if the generated hash is a duplication of an existing one
-          // And then delete nonce to reattempt sending transaction
-          return getSavedTransactionByNonceOrHash(transactionToSend.from, transactionToSend.nonce, hash)
-            .then((transaction) => {
-              // A transaction with same hash has been already sent
-              if (transaction) {
-                console.debug('Transaction was found on server eXo ', hash, '. Reattempting by incrementing nonce');
-                manageTransactionError(new Error(NONCE_TOO_LOW_ERROR), hash, transactionToSend, hashCallback, errorCallback);
-              } else {
-                hashCallback(hash, (transactionToSend.nonce && Number(transactionToSend.nonce)) || 0);
-              }
-            });
+          hashCallback(hash, (transactionToSend.nonce && Number(transactionToSend.nonce)) || 0);
         }
       }
     })
@@ -259,9 +248,27 @@ function manageTransactionError(error, hash, transactionToSend, hashCallback, er
 }
 
 function getNewTransactionNonce(walletAddress) {
-  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending').catch((e) => {
+  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending')
+  .then(nonce => {
+    return getTransactionNonceFromServer(walletAddress, nonce);
+  })
+  .catch((e) => {
     console.debug('Error getting last nonce of wallet address', walletAddress, e);
   });
+}
+
+function getTransactionNonceFromServer(walletAddress, nonce) {
+  // Verify if the generated nonce doesn't already exist for an address
+  return getSavedTransactionByNonce(walletAddress, nonce)
+    .then((transaction) => {
+      // A transaction with same nonce has been already sent
+      if (transaction) {
+        console.debug('Transaction was found on server eXo with the same nonce ', nonce, '. Reattempting by incrementing nonce');
+        return getTransactionNonceFromServer(walletAddress, ++nonce);
+      } else {
+        return nonce;
+      }
+    });
 }
 
 function transformContracDetailsToFailed(contractDetails, e) {

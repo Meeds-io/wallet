@@ -95,8 +95,8 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
     });
 }
 
-export function getSavedTransactionByNonceOrHash(from, nonce, hash) {
-  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByNonceOrHash?hash=${hash}&from=${from}&nonce=${Number(nonce)}`, {credentials: 'include'}).then((resp) => {
+export function getSavedTransactionByNonce(from, nonce) {
+  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByNonce?from=${from}&nonce=${Number(nonce)}`, {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {
       const contentType = resp.headers && resp.headers.get('content-type');
       if (contentType && contentType.indexOf('application/json') !== -1) {

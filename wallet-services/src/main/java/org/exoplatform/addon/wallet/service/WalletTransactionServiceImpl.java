@@ -172,11 +172,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public TransactionDetail getTransactionByNonceOrHash(String hash, String fromAddress, long nonce, String currentUser) {
-    TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hash);
-    if (transactionDetail == null) {
-      transactionDetail = transactionStorage.getTransactionByAddressAndNonce(fromAddress, nonce);
-    }
+  public TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUser) {
+    TransactionDetail transactionDetail = transactionStorage.getTransactionByAddressAndNonce(fromAddress, nonce);
     if (transactionDetail != null) {
       retrieveWalletsDetails(transactionDetail, currentUser);
     }

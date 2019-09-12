@@ -111,21 +111,16 @@ public class WalletTransactionREST implements ResourceContainer {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("getSavedTransactionByNonceOrHash")
+  @Path("getSavedTransactionByNonce")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get saved transaction in internal database by hash or by sender address with a specified nonce", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
+  @ApiOperation(value = "Get saved transaction in internal database by sender address with a specified nonce", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getSavedTransactionByNonceOrHash(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash,
-                                                   @ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress,
-                                                   @ApiParam(value = "Sender transaction nonce", required = true) @QueryParam("nonce") long nonce) {
-    if (StringUtils.isBlank(hash)) {
-      LOG.warn("Empty transaction hash", hash);
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
+  public Response getSavedTransactionByNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress,
+                                             @ApiParam(value = "Sender transaction nonce", required = true) @QueryParam("nonce") long nonce) {
     if (nonce == 0) {
       LOG.warn("Empty transaction nonce", nonce);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -136,13 +131,12 @@ public class WalletTransactionREST implements ResourceContainer {
     }
 
     try {
-      TransactionDetail transactionDetail = transactionService.getTransactionByNonceOrHash(hash,
-                                                                                           fromAddress,
-                                                                                           nonce,
-                                                                                           getCurrentUserId());
+      TransactionDetail transactionDetail = transactionService.getTransactionByNonce(fromAddress,
+                                                                                     nonce,
+                                                                                     getCurrentUserId());
       return Response.ok(transactionDetail).build();
     } catch (Exception e) {
-      LOG.error("Error getting transaction with hash {}", hash, e);
+      LOG.error("Error getting transaction with address {} and nonce {}", fromAddress, nonce, e);
       return Response.serverError().build();
     }
   }

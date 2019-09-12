@@ -72,14 +72,12 @@ public interface WalletTransactionService {
   TransactionDetail getTransactionByHash(String hash, String currentUser);
 
   /**
-   * @param hash
    * @param fromAddress
    * @param nonce
    * @param currentUserId
-   * @return the transaction identified by its hash or by sender address and its
-   *         nonce
+   * @return the transaction identified by sender address and its nonce
    */
-  TransactionDetail getTransactionByNonceOrHash(String hash, String fromAddress, long nonce, String currentUserId);
+  TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUserId);
 
   /**
    * Save transaction details in database
