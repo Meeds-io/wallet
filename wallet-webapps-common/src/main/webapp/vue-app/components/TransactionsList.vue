@@ -779,6 +779,14 @@
                   </a>
                 </v-list-item-content>
               </v-list-item>
+              <v-list-item>
+                <v-list-item-content>
+                  Nonce
+                </v-list-item-content>
+                <v-list-item-content class="align-end text-right">
+                  <strong>{{ item.nonce }}</strong>
+                </v-list-item-content>
+              </v-list-item>
             </v-list>
           </v-expansion-panel-content>
         </v-expansion-panel>

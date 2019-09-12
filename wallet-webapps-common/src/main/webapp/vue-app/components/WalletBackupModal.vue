@@ -94,7 +94,7 @@
 
 <script>
 
-import {setDraggable, unlockBrowserWallet, lockBrowserWallet, getCurrentBrowserWallet, hashCode, setWalletBackedUp} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, getCurrentBrowserWallet, hashCode, setWalletBackedUp} from '../js/WalletUtils.js';
 
 export default {
   props: {
@@ -125,9 +125,6 @@ export default {
           this.$refs.form.reset();
         }
         this.init();
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
   },

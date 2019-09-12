@@ -90,8 +90,6 @@
 <script>
 import AddressAutoComplete from './AddressAutoComplete.vue';
 
-import {setDraggable} from '../js/WalletUtils.js';
-
 export default {
   components: {
     AddressAutoComplete,
@@ -141,9 +139,6 @@ export default {
         if (this.$refs && this.$refs.autocomplete) {
           this.$refs.autocomplete.clear();
         }
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
   },

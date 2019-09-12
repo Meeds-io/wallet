@@ -254,9 +254,6 @@ export default {
     dialog() {
       if (this.dialog) {
         this.init();
-        this.$nextTick(() => {
-          this.walletUtils.setDraggable();
-        });
       } else {
         this.$emit('close');
       }

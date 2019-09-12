@@ -201,7 +201,6 @@ export default {
         this.dialog = true;
         this.$nextTick(() => {
           this.refreshFromSettings();
-          this.walletUtils.setDraggable();
         });
       }
     },

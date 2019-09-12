@@ -332,7 +332,6 @@ export default {
           }
           this.checkOpenTransaction();
           this.$forceUpdate();
-          this.walletUtils.setDraggable(this.appId);
         })
         .catch((error) => {
           console.debug('An error occurred while on initialization', error);

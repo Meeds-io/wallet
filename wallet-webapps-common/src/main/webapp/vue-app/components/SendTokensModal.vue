@@ -43,7 +43,7 @@
 <script>
 import SendTokensForm from './SendTokensForm.vue';
 
-import {setDraggable, checkFundRequestStatus} from '../js/WalletUtils.js';
+import {checkFundRequestStatus} from '../js/WalletUtils.js';
 
 export default {
   components: {
@@ -94,11 +94,6 @@ export default {
   watch: {
     open() {
       this.dialog = this.open;
-      if (this.open) {
-        this.$nextTick(() => {
-          setDraggable();
-        });
-      }
     },
     dialog() {
       if (this.dialog) {

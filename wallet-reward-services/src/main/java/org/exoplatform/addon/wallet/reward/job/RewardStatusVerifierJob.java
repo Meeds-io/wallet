@@ -35,7 +35,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 /**
- * This job is used to chck pending rewards sent for periods. When all
+ * This job is used to check pending rewards sent for periods. When all
  * transaction rewards are sent correctly without error, an event is triggered
  * through {@link ListenerService}
  */

@@ -476,14 +476,6 @@ export function enableWallet(address, enable) {
   return fetch(`/portal/rest/wallet/api/account/enable?address=${address}&enable=${enable}`, {credentials: 'include'}).then((resp) => resp && resp.ok);
 }
 
-export function setDraggable(appId) {
-  try {
-    // $(`#${appId} .v-dialog:not(.not-draggable)`).draggable();
-  } catch (e) {
-    console.debug("Can't set modals draggable", e);
-  }
-}
-
 /*
  * return amount * 10 ^ decimals
  */

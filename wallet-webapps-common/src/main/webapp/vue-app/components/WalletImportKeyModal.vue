@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import {setDraggable, saveBrowserWalletInstance} from '../js/WalletUtils.js';
+import {saveBrowserWalletInstance} from '../js/WalletUtils.js';
 
 export default {
   props: {
@@ -138,9 +138,6 @@ export default {
     dialog() {
       if (this.dialog) {
         this.resetForm();
-        this.$nextTick(() => {
-          setDraggable();
-        });
       }
     },
   },

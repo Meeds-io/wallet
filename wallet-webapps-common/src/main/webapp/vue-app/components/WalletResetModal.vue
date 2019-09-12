@@ -129,7 +129,7 @@
 <script>
 import {unlockBrowserWallet, saveBrowserWallet, hashCode, rememberPassword} from '../js/WalletUtils.js';
 
-import {setDraggable, sendPrivateKeyToServer} from '../js/WalletUtils.js';
+import {sendPrivateKeyToServer} from '../js/WalletUtils.js';
 
 export default {
   props: {
@@ -187,9 +187,6 @@ export default {
         if (!this.browserWalletExists) {
           this.error = this.$t('exoplatform.wallet.error.cantResetWallet');
         }
-        this.$nextTick(() => {
-          setDraggable();
-        });
       } else if (this.rememberPasswordToChange) {
         this.init();
       }
