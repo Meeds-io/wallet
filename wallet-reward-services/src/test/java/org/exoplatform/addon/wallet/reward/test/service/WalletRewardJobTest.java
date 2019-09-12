@@ -129,7 +129,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
 
       rewardPeriodsInProgress = rewardSettingsService.getRewardPeriodsInProgress();
       assertNotNull(rewardPeriodsInProgress);
-      assertEquals(initialRewardPeriodsInProgress.size(), rewardPeriodsInProgress.size());
+      assertEquals(0, rewardPeriodsInProgress.size());
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
