@@ -108,7 +108,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       Year selectedYear = selectedDateParts == null ? Year.now() : Year.of(Integer.parseInt(selectedDateParts[0]));
 
       // to optimise with stream()
-      for (int i = 12; i >= 1; i--) {
+      for (int i = 1; i <= 12; i++) {
         monthsList.add(YearMonth.of(selectedYear.getValue(), i));
       }
 
