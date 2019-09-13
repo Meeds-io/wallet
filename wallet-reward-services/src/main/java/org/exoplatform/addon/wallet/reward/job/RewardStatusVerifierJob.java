@@ -86,7 +86,7 @@ public class RewardStatusVerifierJob implements Job {
             changed = true;
             rewardPeriodsIterator.remove();
           } else {
-            LOG.debug("Reward always in progree for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
+            LOG.debug("Reward always in progress for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
                       rewardPeriod.getStartDateInSeconds(),
                       rewardReport.countValidRewards(),
                       rewardReport.countTransactions(),

@@ -682,17 +682,23 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     BigInteger nonceToUse = getAdminNonce();
     transactionDetail.setNonce(nonceToUse.longValue());
 
-    String transactionData = null;
+    RawTransaction rawTransaction = null;
     if (function != null) {
-      transactionData = FunctionEncoder.encode(function);
+      String transactionData = FunctionEncoder.encode(function);
+      rawTransaction = RawTransaction.createTransaction(nonceToUse,
+                                                        gasPrice,
+                                                        gasLimit,
+                                                        toAddress,
+                                                        etherValueInWei,
+                                                        transactionData);
+    } else {
+      rawTransaction = RawTransaction.createEtherTransaction(nonceToUse,
+                                                             gasPrice,
+                                                             gasLimit,
+                                                             toAddress,
+                                                             etherValueInWei);
     }
 
-    RawTransaction rawTransaction = RawTransaction.createTransaction(nonceToUse,
-                                                                     gasPrice,
-                                                                     gasLimit,
-                                                                     toAddress,
-                                                                     etherValueInWei,
-                                                                     transactionData);
     byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, adminCredentials);
     String rawTransactionString = Numeric.toHexString(signedMessage);
     transactionDetail.setRawTransaction(rawTransactionString);
