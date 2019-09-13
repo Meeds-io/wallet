@@ -110,33 +110,29 @@ public class WalletTransactionREST implements ResourceContainer {
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("getSavedTransactionByNonce")
+  @Path("getNonce")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get saved transaction in internal database by sender address with a specified nonce", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
+  @ApiOperation(value = "Get nonce to include in next transaction to send for a wallet", httpMethod = "GET", response = Response.class, notes = "returns transaction nonce")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getSavedTransactionByNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress,
-                                             @ApiParam(value = "Sender transaction nonce", required = true) @QueryParam("nonce") long nonce) {
-    if (nonce == 0) {
-      LOG.warn("Empty transaction nonce", nonce);
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
+  public Response getNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress) {
     if (StringUtils.isBlank(fromAddress)) {
       LOG.warn("Empty transaction sender", fromAddress);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
+    String currentUser = getCurrentUserId();
     try {
-      TransactionDetail transactionDetail = transactionService.getTransactionByNonce(fromAddress,
-                                                                                     nonce,
-                                                                                     getCurrentUserId());
-      return Response.ok(transactionDetail).build();
+      long nonce = transactionService.getNonce(fromAddress, currentUser);
+      return Response.ok(String.valueOf(nonce)).build();
+    } catch (IllegalAccessException e) {
+      LOG.warn("User {} attempts to display last nonce of address {}", currentUser, fromAddress, e);
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
-      LOG.error("Error getting transaction with address {} and nonce {}", fromAddress, nonce, e);
+      LOG.error("Error getting nonce for address {}", fromAddress, e);
       return Response.serverError().build();
     }
   }
@@ -210,7 +206,7 @@ public class WalletTransactionREST implements ResourceContainer {
                                                                                       currentUserId);
       return Response.ok(transactionDetails).build();
     } catch (IllegalAccessException e) {
-      LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
+      LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Error getting transactions of wallet " + address, e);

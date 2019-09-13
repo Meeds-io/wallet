@@ -334,53 +334,29 @@ export default {
                 return;
               }
 
-              //finally pass this data parameter to send Transaction
-              this.tokenUtils.sendContractTransaction({
-                   contractAddress: contractAddress,
-                   senderAddress: senderAddress,
-                   gas: defaultGas,
-                   gasPrice: gasPrice,
-                   method: transfer,
-                   parameters: [receiverAddress, amountWithDecimals],
-                  },
-                  (hash, nonce) => {
-                    const pendingTransaction = {
-                      hash: hash,
-                      from: senderAddress.toLowerCase(),
-                      to: receiverAddress.toLowerCase(),
-                      value: 0,
-                      gas: defaultGas,
-                      gasPrice: gasPrice,
-                      pending: true,
-                      contractAddress: contractAddress,
-                      contractMethodName: 'transfer',
-                      contractAmount: amount,
-                      label: label,
-                      message: message,
-                      nonce: nonce,
-                      timestamp: Date.now()
-                    };
+              const transactionDetail = {
+                from: senderAddress.toLowerCase(),
+                to: receiverAddress.toLowerCase(),
+                value: 0,
+                gas: defaultGas,
+                gasPrice: gasPrice,
+                pending: true,
+                contractAddress: contractAddress,
+                contractMethodName: 'transfer',
+                contractAmount: amount,
+                label: label,
+                message: message,
+                timestamp: Date.now()
+              };
 
-                    this.transactionUtils.saveTransactionDetails(pendingTransaction).then(() => {
-                      // The transaction has been hashed and is marked as pending in internal database
-                      document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
-                        detail : pendingTransaction
-                      }));
-                    });
-                    this.walletUtils.lockBrowserWallet();
-                  },
-                  (error) => {
-                    console.debug('contract transfer method - error', error);
-                    document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                      detail : this.$t('exoplatform.wallet.warning.transactionGenericError', {0: error})
-                    }));
-                    this.walletUtils.lockBrowserWallet();
-                  });
-            })
-            .catch((e) => {
-              console.debug('contract transfer method - error', e);
-              this.loading = false;
-              throw new Error(this.$t('exoplatform.wallet.warning.transactionGenericError', {0: this.walletUtils.truncateError(e)}));
+              return this.tokenUtils.sendContractTransaction(transactionDetail, transfer, [receiverAddress, amountWithDecimals])
+                .then((pendingTransaction) => {
+                  // The transaction has been hashed and is marked as pending in internal database
+                  document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
+                    detail : pendingTransaction
+                  }));
+                  this.walletUtils.lockBrowserWallet();
+                });
             });
           })
           .catch((error) => {

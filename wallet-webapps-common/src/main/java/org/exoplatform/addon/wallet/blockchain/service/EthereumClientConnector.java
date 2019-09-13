@@ -26,19 +26,17 @@ import java.util.concurrent.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.core.methods.response.EthLog.LogResult;
 import org.web3j.protocol.websocket.*;
-import org.web3j.tx.*;
-import org.web3j.tx.response.NoOpProcessor;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.exoplatform.addon.wallet.contract.ERTTokenV2;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.services.log.ExoLogger;
@@ -113,20 +111,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     this.serviceStopping = true;
     connectionVerifierExecutor.shutdownNow();
     closeConnection();
-  }
-
-  /**
-   * Return {@link TransactionManager} to use when interacting with blockchain
-   * 
-   * @param credentials wallet credentials to use for this transaction manager
-   * @return {@link TransactionManager}
-   */
-  public TransactionManager getTransactionManager(Credentials credentials) {
-    if (credentials == null) {
-      return new ReadonlyTransactionManager(getWeb3j(), Address.DEFAULT.toString());
-    } else {
-      return new FastRawTransactionManager(getWeb3j(), credentials, new NoOpProcessor(getWeb3j()));
-    }
   }
 
   /**
@@ -254,11 +238,58 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         LOG.warn("Statistict type {} has an unexpected result class type", statisticType);
       }
       break;
+    case OPERATION_SEND_TRANSACTION:
+      TransactionDetail transactionDetail = (TransactionDetail) methodArgs[0];
+      String methodName = transactionDetail.getContractMethodName();
+
+      if (StringUtils.isNotBlank(transactionDetail.getContractAddress())) {
+        parameters.put("contract_address", transactionDetail.getContractAddress());
+      }
+      if (StringUtils.isNotBlank(methodName)) {
+        parameters.put("contract_method", methodName);
+      }
+      parameters.put("sender", transactionDetail.getFromWallet());
+      parameters.put("receiver", transactionDetail.getToWallet());
+
+      double contractAmount = transactionDetail.getContractAmount();
+      if (contractAmount > 0 && (StringUtils.equals(ERTTokenV2.FUNC_INITIALIZEACCOUNT, methodName)
+          || StringUtils.equals(ERTTokenV2.FUNC_TRANSFER, methodName) || StringUtils.equals(ERTTokenV2.FUNC_REWARD, methodName)
+          || StringUtils.equals(ERTTokenV2.FUNC_APPROVE, methodName)
+          || StringUtils.equals(ERTTokenV2.FUNC_TRANSFERFROM, methodName))) {
+        parameters.put("amount_token", contractAmount);
+      }
+
+      double valueAmount = transactionDetail.getValue();
+      if (valueAmount > 0) {
+        if (StringUtils.equals(ERTTokenV2.FUNC_REWARD, methodName)) {
+          parameters.put("amount_reward_token", valueAmount);
+        } else {
+          parameters.put("amount_ether", valueAmount);
+        }
+      }
+      break;
     default:
       LOG.warn("Statistic type {} not managed", statisticType);
       return null;
     }
     return parameters;
+  }
+
+  /**
+   * Send raw transaction specified in Transaction detail
+   * 
+   * @param transactionDetail {@link TransactionDetail} having rawTransaction to
+   *          send to blockchain
+   * @return {@link CompletableFuture} for transaction sent asynchronously to
+   *         blockchain
+   * @throws IOException if an error occurs while sending transaction to
+   *           blockchain
+   */
+  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_SEND_TRANSACTION)
+  public CompletableFuture<EthSendTransaction> sendTransactionToBlockchain(final TransactionDetail transactionDetail) throws IOException {
+    waitConnection();
+    return getWeb3j().ethSendRawTransaction(transactionDetail.getRawTransaction())
+                     .sendAsync();
   }
 
   /**

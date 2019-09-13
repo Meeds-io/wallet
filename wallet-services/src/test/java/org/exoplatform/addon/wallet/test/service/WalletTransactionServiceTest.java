@@ -2,6 +2,7 @@ package org.exoplatform.addon.wallet.test.service;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -132,6 +133,56 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   }
 
   /**
+   * Test {@link WalletTransactionService#getNonce(String, String)}
+   */
+  @Test
+  public void testGetNonce() {
+    addCurrentUserWallet();
+
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+    entitiesToClean.add(transactionDetail);
+
+    try {
+      long nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+      assertEquals(NONCE + 1, nonce);
+    } catch (IllegalAccessException e) {
+      fail("Unexpected error while getting nonce of wallet");
+    }
+
+    try {
+      walletTransactionService.getNonce(WALLET_ADDRESS_1, USER_TEST);
+      fail("Expected to throw error while getting nonce of wallet of other user");
+    } catch (IllegalAccessException e) {
+      // Expected
+    }
+
+    transactionDetail.setPending(false);
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+
+    try {
+      long nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+      assertEquals(0, nonce);
+    } catch (IllegalAccessException e) {
+      fail("Unexpected error while getting nonce of wallet");
+    }
+  }
+
+  /**
    * Test {@link WalletTransactionService#getTransactionByHash(String, String)}
    */
   @Test
@@ -169,13 +220,15 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
 
   /**
    * Test
-   * {@link WalletTransactionService#getTransactionByNonce(String, long, String)}
+   * {@link WalletTransactionService#canSendTransactionToBlockchain(String)}
    */
   @Test
-  public void testGetTransactionByNonceOrHashAndUser() {
+  public void testCanSendTransactionToBlockchain() {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    assertTrue(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
+
     TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
                                                                   WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
                                                                   CONTRACT_AMOUNT,
@@ -190,20 +243,52 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   true,
                                                                   false,
                                                                   System.currentTimeMillis());
-    walletTransactionService.saveTransactionDetail(transactionDetail, true);
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+    entitiesToClean.add(transactionDetail);
 
-    TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByNonce(transactionDetail.getFrom(),
-                                                                                               transactionDetail.getNonce(),
-                                                                                               CURRENT_USER);
-    assertNotNull(storedTransactionDetail);
-    entitiesToClean.add(storedTransactionDetail);
+    assertFalse(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
+  }
 
-    storedTransactionDetail = walletTransactionService.getTransactionByNonce(transactionDetail.getFrom(),
-                                                                             transactionDetail.getNonce()
-                                                                                 + 1,
-                                                                             CURRENT_USER);
-    assertNull(storedTransactionDetail);
+  /**
+   * Test {@link WalletTransactionService#getTransactionsToSend()}
+   */
+  @Test
+  public void testGetTransactionsToSend() {
+    addCurrentUserWallet();
 
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+
+    List<TransactionDetail> listOfTransactionsToSend = walletTransactionService.getTransactionsToSend();
+    assertNotNull(listOfTransactionsToSend);
+    assertEquals(0, listOfTransactionsToSend.size());
+
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  null,
+                                                                  CURRENT_USER_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+    entitiesToClean.add(transactionDetail);
+
+    listOfTransactionsToSend = walletTransactionService.getTransactionsToSend();
+    assertNotNull(listOfTransactionsToSend);
+    assertEquals(1, listOfTransactionsToSend.size());
+
+    transactionDetail.setPending(false);
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+
+    listOfTransactionsToSend = walletTransactionService.getTransactionsToSend();
+    assertNotNull(listOfTransactionsToSend);
+    assertEquals(0, listOfTransactionsToSend.size());
   }
 
   /**

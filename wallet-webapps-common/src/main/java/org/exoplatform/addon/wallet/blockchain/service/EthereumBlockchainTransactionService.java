@@ -23,13 +23,14 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
-import org.web3j.protocol.core.methods.response.Transaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.core.methods.response.*;
 
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.ContractDetail;
@@ -56,35 +57,46 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private static final String              REMOVED_ADMIN_SIG           = EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
 
-  private static final String              APPROVED_ACCOUNT_SIG        = EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
+  private static final String              APPROVED_ACCOUNT_SIG        =
+                                                                EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
 
-  private static final String              DISAPPROVED_ACCOUNT_SIG     = EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
+  private static final String              DISAPPROVED_ACCOUNT_SIG     =
+                                                                   EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
 
-  private static final String              CONTRACT_PAUSED_SIG         = EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
+  private static final String              CONTRACT_PAUSED_SIG         =
+                                                               EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
 
-  private static final String              CONTRACT_UNPAUSED_SIG       = EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
+  private static final String              CONTRACT_UNPAUSED_SIG       =
+                                                                 EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
 
-  private static final String              DEPOSIT_RECEIVED_SIG        = EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
+  private static final String              DEPOSIT_RECEIVED_SIG        =
+                                                                EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
 
-  private static final String              TOKEN_PRICE_CHANGED_SIG     = EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
+  private static final String              TOKEN_PRICE_CHANGED_SIG     =
+                                                                   EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
 
-  private static final String              TRANSFER_OWNERSHIP_SIG      = EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
+  private static final String              TRANSFER_OWNERSHIP_SIG      =
+                                                                  EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
 
-  private static final String              ACCOUNT_INITIALIZATION_SIG  = EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
+  private static final String              ACCOUNT_INITIALIZATION_SIG  =
+                                                                      EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
 
   private static final String              ACCOUNT_REWARD_SIG          = EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
 
   private static final String              ACCOUNT_VESTED_SIG          = EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
 
-  private static final String              TRANSFER_VESTING_SIG        = EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
+  private static final String              TRANSFER_VESTING_SIG        =
+                                                                EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
 
   private static final String              UPGRADED_SIG                = EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
 
   private static final String              DATA_UPGRADED_SIG           = EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
 
-  private static final String              NOSUFFICIENTFUND_EVENT_HASH = EventEncoder.encode(ERTTokenV2.NOSUFFICIENTFUND_EVENT);
+  private static final String              NOSUFFICIENTFUND_EVENT_HASH =
+                                                                       EventEncoder.encode(ERTTokenV2.NOSUFFICIENTFUND_EVENT);
 
-  private static final String              TRANSACTIONFEE_EVENT_HASH   = EventEncoder.encode(ERTTokenV2.TRANSACTIONFEE_EVENT);
+  private static final String              TRANSACTIONFEE_EVENT_HASH   =
+                                                                     EventEncoder.encode(ERTTokenV2.TRANSACTIONFEE_EVENT);
 
   private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
 
@@ -195,6 +207,62 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       // Save last verified block for contracts transactions
       saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
     }
+  }
+
+  @Override
+  public void sendRawTransactions() {
+    List<TransactionDetail> transactions = getTransactionService().getTransactionsToSend();
+    transactions = transactions.stream()
+                               .sorted(Comparator.comparingLong(TransactionDetail::getTimestamp))
+                               .collect(Collectors.toList());
+    Set<String> walletAddressesWithTransactionsSent = new HashSet<>();
+    for (TransactionDetail transactionDetail : transactions) {
+      String from = transactionDetail.getFrom();
+      if (transactionDetail.getSendingAttemptCount() > getTransactionService().getMaxAttemptsToSend()) {
+        // Mark transaction as error and stop trying sending it to blockchain
+        transactionDetail.setPending(false);
+        transactionDetail.setSucceeded(false);
+        getTransactionService().saveTransactionDetail(transactionDetail, false);
+        continue;
+      }
+
+      if (!walletAddressesWithTransactionsSent.add(from)
+          || !getTransactionService().canSendTransactionToBlockchain(from)) {
+        continue;
+      }
+
+      try {
+        ethereumClientConnector.sendTransactionToBlockchain(transactionDetail)
+                               .whenComplete(handleTransactionSending(transactionDetail));
+        transactionDetail.setSentTimestamp(System.currentTimeMillis());
+      } catch (IOException e) {
+        LOG.error("Error while sending transaction {} to blockchain", transactionDetail, e);
+      }
+      transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
+      getTransactionService().saveTransactionDetail(transactionDetail, false);
+    }
+  }
+
+  private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {
+    return (transaction, exception) -> {
+      if (transaction != null && transaction.getTransactionHash() != null) {
+        LOG.debug("Transaction {} has been confirmed with hash {}", transactionDetail, transaction.getTransactionHash());
+        transactionDetail.setHash(transaction.getTransactionHash());
+      }
+      // Exception occurred while sending to blockchain
+      if (exception != null) {
+        LOG.warn("Error when sending transaction {}.", transactionDetail, exception);
+        Transaction transactionFromBlockchain = ethereumClientConnector.getTransaction(transaction.getTransactionHash());
+        // An exception occurred
+        if (transactionFromBlockchain == null) {
+          transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
+        } else {
+          transactionDetail.setPending(false);
+          transactionDetail.setSucceeded(false);
+        }
+      }
+      getTransactionService().saveTransactionDetail(transactionDetail, false);
+    };
   }
 
   private void verifyTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {

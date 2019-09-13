@@ -95,15 +95,10 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
     });
 }
 
-export function getSavedTransactionByNonce(from, nonce) {
-  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByNonce?from=${from}&nonce=${Number(nonce)}`, {credentials: 'include'}).then((resp) => {
+export function getNonce(from) {
+  return fetch(`/portal/rest/wallet/api/transaction/getNonce?from=${from}`, {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {
-      const contentType = resp.headers && resp.headers.get('content-type');
-      if (contentType && contentType.indexOf('application/json') !== -1) {
-        return resp.json();
-      } else {
-        return null;
-      }
+      return resp.text();
     } else {
       return null;
     }

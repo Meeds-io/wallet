@@ -45,6 +45,8 @@ public abstract class BaseWalletTest {
 
   protected static final double    GAS_PRICE                = 0.000000004d;
 
+  protected static final String    RAW_TRANSACTION          = "RAW_TRANSACTION";
+
   protected static final double    TOKEN_FEE                = (GAS_PRICE * GAS_USED) / 0.001;
 
   protected static final long      NONCE                    = 10;
@@ -370,6 +372,7 @@ public abstract class BaseWalletTest {
     transactionDetail.setTokenFee(TOKEN_FEE);
     transactionDetail.setNonce(NONCE);
     transactionDetail.setNoContractFunds(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
     transactionStorage.saveTransactionDetail(transactionDetail);
     entitiesToClean.add(transactionDetail);
     return transactionDetail;

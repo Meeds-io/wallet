@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-  function initWalletTipTip(tentative) {
+  function initWalletTipTip(attempt) {
     if(eXo && eXo.social && eXo.social.tiptip) {
       eXo.social.tiptip.extraActions = eXo.social.tiptip.extraActions ? eXo.social.tiptip.extraActions : [];
       eXo.social.tiptip.extraActions.push({
@@ -11,8 +11,8 @@ $( document ).ready(function() {
           }
         }
       });
-    } else if(tentative < 20) {
-      setTimeout(() => initWalletTipTip(++tentative), 300);
+    } else if(attempt < 20) {
+      setTimeout(() => initWalletTipTip(++attempt), 300);
     }
   }
 

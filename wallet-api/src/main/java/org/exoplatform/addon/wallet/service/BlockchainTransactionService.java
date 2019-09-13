@@ -19,4 +19,9 @@ public interface BlockchainTransactionService {
    */
   void scanNewerBlocks() throws IOException;
 
+  /**
+   * Sends raw transactions to blockchain
+   */
+  void sendRawTransactions();
+
 }

@@ -175,6 +175,11 @@ public class WalletUtils {
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS             = "transaction.pending.maxDays";
 
+  public static final String                          MAX_PENDING_TRANSACTIONS_TO_SEND         = "transaction.pending.maxToSend";
+
+  public static final String                          MAX_SENDING_TRANSACTIONS_ATTEMPTS        =
+                                                                                        "transaction.pending.maxSendingAttempts";
+
   public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
   public static final String                          WALLET_RECEIVER_NOTIFICATION_ID          =
@@ -231,10 +236,6 @@ public class WalletUtils {
   public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
 
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
-
-  public static final String                          OPERATION_SEND_ADMIN_TOKEN_TRANSACTION   = "SEND_TOKEN_ADMIN_TRANSACTION";
-
-  public static final String                          OPERATION_SEND_ADMIN_ETHER_TRANSACTION   = "SEND_ADMIN_ETHER_TRANSACTION";
 
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,

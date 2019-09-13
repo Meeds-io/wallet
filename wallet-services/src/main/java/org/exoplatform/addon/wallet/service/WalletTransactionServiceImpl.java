@@ -24,11 +24,16 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 
 public class WalletTransactionServiceImpl implements WalletTransactionService {
 
-  private static final Log      LOG               = ExoLogger.getLogger(WalletTransactionServiceImpl.class);
+  private static final Log      LOG                                       =
+                                    ExoLogger.getLogger(WalletTransactionServiceImpl.class);
 
-  private static final String   YEAR_PERIODICITY  = "year";
+  private static final String   YEAR_PERIODICITY                          = "year";
 
-  private static final String   MONTH_PERIODICITY = "month";
+  private static final String   MONTH_PERIODICITY                         = "month";
+
+  private static final long     DEFAULT_MAX_PARALLEL_PENDING_TRANSACTIONS = 1;
+
+  private static final long     DEFAULT_MAX_SENDING_TRANSACTIONS_ATTEMPTS = 3;
 
   private WalletAccountService  accountService;
 
@@ -42,6 +47,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private long                  pendingTransactionMaxDays;
 
+  private long                  maxParallelPendingTransactions;
+
+  private long                  maxAttemptsToSend;
+
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
                                       WalletContractService contractService,
@@ -50,9 +59,33 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     this.accountService = accountService;
     this.contractService = contractService;
 
-    if (params != null && params.containsKey(TRANSACTION_PENDING_MAX_DAYS)) {
-      String value = params.getValueParam(TRANSACTION_PENDING_MAX_DAYS).getValue();
-      this.pendingTransactionMaxDays = Long.parseLong(value);
+    if (params != null) {
+      if (params.containsKey(TRANSACTION_PENDING_MAX_DAYS)) {
+        String value = params.getValueParam(TRANSACTION_PENDING_MAX_DAYS).getValue();
+        this.pendingTransactionMaxDays = Long.parseLong(value);
+      }
+      if (params.containsKey(MAX_PENDING_TRANSACTIONS_TO_SEND)) {
+        String value = params.getValueParam(MAX_PENDING_TRANSACTIONS_TO_SEND).getValue();
+        this.maxParallelPendingTransactions = Long.parseLong(value);
+      }
+      if (params.containsKey(MAX_SENDING_TRANSACTIONS_ATTEMPTS)) {
+        String value = params.getValueParam(MAX_SENDING_TRANSACTIONS_ATTEMPTS).getValue();
+        this.maxAttemptsToSend = Long.parseLong(value);
+      }
+    }
+    if (this.maxParallelPendingTransactions <= 0) {
+      LOG.warn("Invalid value {} for parameter {}, using default value {}",
+               this.maxParallelPendingTransactions,
+               MAX_PENDING_TRANSACTIONS_TO_SEND,
+               DEFAULT_MAX_PARALLEL_PENDING_TRANSACTIONS);
+      this.maxParallelPendingTransactions = DEFAULT_MAX_PARALLEL_PENDING_TRANSACTIONS;
+    }
+    if (this.maxAttemptsToSend <= 0) {
+      LOG.warn("Invalid value {} for parameter {}, using default value {}",
+               this.maxAttemptsToSend,
+               MAX_SENDING_TRANSACTIONS_ATTEMPTS,
+               DEFAULT_MAX_SENDING_TRANSACTIONS_ATTEMPTS);
+      this.maxAttemptsToSend = DEFAULT_MAX_SENDING_TRANSACTIONS_ATTEMPTS;
     }
   }
 
@@ -172,12 +205,23 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUser) {
-    TransactionDetail transactionDetail = transactionStorage.getTransactionByAddressAndNonce(fromAddress, nonce);
-    if (transactionDetail != null) {
-      retrieveWalletsDetails(transactionDetail, currentUser);
+  public long getNonce(String fromAddress) {
+    if (transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) == 0) {
+      return 0;
+    } else {
+      long maxUsedNonce = transactionStorage.getMaxUsedNonce(getNetworkId(), fromAddress);
+      return maxUsedNonce == 0 ? 0 : maxUsedNonce + 1;
     }
-    return transactionDetail;
+  }
+
+  @Override
+  public long getNonce(String fromAddress, String currentUser) throws IllegalAccessException {
+    Wallet wallet = accountService.getWalletByAddress(fromAddress);
+    if (wallet == null || !accountService.isWalletOwner(wallet, currentUser)) {
+      throw new IllegalAccessException("User '" + currentUser
+          + "' is attempting to access last transaction nonce for wallet of user " + wallet);
+    }
+    return getNonce(fromAddress);
   }
 
   @Override
@@ -221,6 +265,21 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getPendingTransactionMaxDays() {
     return pendingTransactionMaxDays;
+  }
+
+  @Override
+  public List<TransactionDetail> getTransactionsToSend() {
+    return transactionStorage.getTransactionsToSend(getNetworkId());
+  }
+
+  @Override
+  public boolean canSendTransactionToBlockchain(String fromAddress) {
+    return transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) < this.maxParallelPendingTransactions;
+  }
+
+  @Override
+  public long getMaxAttemptsToSend() {
+    return maxAttemptsToSend;
   }
 
   private List<TransactionDetail> getContractTransactions(String contractAddress,

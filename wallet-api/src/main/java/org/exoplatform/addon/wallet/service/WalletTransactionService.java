@@ -73,11 +73,21 @@ public interface WalletTransactionService {
 
   /**
    * @param fromAddress
-   * @param nonce
    * @param currentUserId
-   * @return the transaction identified by sender address and its nonce
+   * @return the next nonce to include in transaction to send on blockchain. If
+   *         no pending transaction return 0 to let get nonce from blockchain
+   *         directly for more consistency.
+   * @throws IllegalAccessException when user is not owner of wallet address
    */
-  TransactionDetail getTransactionByNonce(String fromAddress, long nonce, String currentUserId);
+  long getNonce(String fromAddress, String currentUserId) throws IllegalAccessException;
+
+  /**
+   * @param fromAddress
+   * @return the next nonce to include in transaction to send on blockchain. If
+   *         no pending transaction return 0 to let get nonce from blockchain
+   *         directly for more consistency.
+   */
+  long getNonce(String fromAddress);
 
   /**
    * Save transaction details in database
@@ -103,5 +113,32 @@ public interface WalletTransactionService {
    *         blockchain as failed
    */
   long getPendingTransactionMaxDays();
+
+  /**
+   * @return {@link List} of {@link TransactionDetail} having
+   *         {@link TransactionDetail#getRawTransaction()} to send on blockchain
+   */
+  List<TransactionDetail> getTransactionsToSend();
+
+  /**
+   * Determines whether the user can send transaction to blockchain or not. In
+   * fact, this will avoid to send mutiple parallel transactions to the
+   * blockchain and to avoid transaction nonce collision. A transaction can be
+   * replaced by another one when it uses the same nonce and with a higher gas
+   * price. The problem here is that we can't determine for sure (using API that
+   * access to the blockchain) the next available nonce to use for transaction
+   * to send (inconsistent information can be retrieved from blockchain when
+   * tens of thousands of transactions are pending on blockchain when we use
+   * eth_getTransactionCount(address, 'pending')).
+   * 
+   * @param senderAddress wallet address of transaction sender
+   * @return true if address can send a transaction to blockchain.
+   */
+  boolean canSendTransactionToBlockchain(String senderAddress);
+
+  /**
+   * @return max attempts of sending a transaction
+   */
+  long getMaxAttemptsToSend();
 
 }

@@ -209,7 +209,7 @@ public class TransactionStorageTest extends BaseWalletTest {
   @Test
   public void testGetTransactionByHash() {
     String hashOfTX = "0x51a6e8ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceadb";
-    long createdDateInSeconds = System.currentTimeMillis() / 1000;
+    long createdDateInMilliSeconds = System.currentTimeMillis();
     createTransactionDetail(hashOfTX,
                             null,
                             0, // token amount
@@ -223,17 +223,11 @@ public class TransactionStorageTest extends BaseWalletTest {
                             true, // isSuccess
                             true, // isPending
                             true, // isAdminOperation
-                            createdDateInSeconds); // Simulate storing timestamp
-                                                   // in seconds
+                            createdDateInMilliSeconds);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hashOfTX);
     assertNotNull("Can't find previously saved transaction with given hash", transactionDetail);
-
-    long createdDateInMilliSeconds = createdDateInSeconds * 1000;
-    assertEquals("Created date should be returned in milliseconds even if it's saved using seconds",
-                 createdDateInMilliSeconds,
-                 transactionDetail.getTimestamp());
 
     transactionDetail =
                       transactionStorage.getTransactionByHash("0x111111ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceaaa");
