@@ -241,6 +241,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     case OPERATION_SEND_TRANSACTION:
       TransactionDetail transactionDetail = (TransactionDetail) methodArgs[0];
       String methodName = transactionDetail.getContractMethodName();
+      parameters.put("hash", transactionDetail.getHash());
 
       if (StringUtils.isNotBlank(transactionDetail.getContractAddress())) {
         parameters.put("contract_address", transactionDetail.getContractAddress());

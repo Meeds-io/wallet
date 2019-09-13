@@ -41,6 +41,12 @@ public interface WalletTokenAdminService {
   String getAdminWalletAddress();
 
   /**
+   * @param rawTransaction raw transaction to send to blockchain
+   * @return real generated transaction hash using Web3j
+   */
+  String generateHash(String rawTransaction);
+
+  /**
    * Send rewarded token amounts (on blockchain) to a receiver wallet address
    * using 'Admin' wallet. The amount sent could be different from rewarded
    * amount. A label and a message are associated to the transaction. Those
@@ -170,6 +176,8 @@ public interface WalletTokenAdminService {
    *          number of calls to Blockchain
    * @throws Exception
    */
-  void retrieveWalletInformationFromBlockchain(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception; // NOSONAR
+  void retrieveWalletInformationFromBlockchain(Wallet wallet,
+                                               ContractDetail contractDetail,
+                                               Set<String> walletModifications) throws Exception; // NOSONAR
 
 }

@@ -154,16 +154,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   public void checkPendingTransactions() {
-    Set<String> pendingTransactions = getTransactionService().getPendingTransactionHashes();
+    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactionsSent();
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
 
-      for (String pendingTransactionHash : pendingTransactions) {
+      for (TransactionDetail pendingTransaction : pendingTransactions) {
+        String hash = pendingTransaction.getHash();
         try { // NOSONAR
-          verifyTransactionStatusOnBlockchain(pendingTransactionHash, true);
+          verifyTransactionStatusOnBlockchain(hash, true);
         } catch (Exception e) {
-          LOG.warn("Error treating pending transaction: {}", pendingTransactionHash, e);
+          LOG.warn("Error treating pending transaction: {}", hash, e);
         }
       }
     }
@@ -196,6 +197,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     boolean processed = true;
     for (String transactionHash : transactionHashes) {
+      // Pending transactions in database are already managed by
+      // checkPendingTransactions() method
+      if (getTransactionService().getTransactionByHash(transactionHash) != null) {
+        continue;
+      }
+
       try {
         verifyTransactionStatusOnBlockchain(transactionHash, false);
       } catch (Exception e) {
@@ -222,14 +229,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         // Mark transaction as error and stop trying sending it to blockchain
         transactionDetail.setPending(false);
         transactionDetail.setSucceeded(false);
-        getTransactionService().saveTransactionDetail(transactionDetail, false);
+        getTransactionService().saveTransactionDetail(transactionDetail, true);
         continue;
       }
 
-      if (!walletAddressesWithTransactionsSent.add(from)
-          || !getTransactionService().canSendTransactionToBlockchain(from)) {
+      if (walletAddressesWithTransactionsSent.contains(from) || !getTransactionService().canSendTransactionToBlockchain(from)) {
         continue;
       }
+      walletAddressesWithTransactionsSent.add(from);
 
       try {
         ethereumClientConnector.sendTransactionToBlockchain(transactionDetail)
@@ -286,7 +293,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         if (creationTimestamp > 0) {
           Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
           if (duration.toDays() >= pendingTransactionMaxDays) {
-            transactionDetail.setExceededMaxWaitMiningTime(true);
             boolean broadcastTransactionMining = transactionDetail.isPending();
             transactionDetail.setPending(false);
             transactionDetail.setSucceeded(false);
@@ -350,6 +356,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);
 
     if (pendingTransactionFromDatabase) {
+      // Only save modifications if it's coming from database
       getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
     } else {
       // Compute wallets
@@ -363,6 +370,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
       }
 
+      // Check if it has a know wallet from internal database before saving
       if (hasKnownWalletInTransaction(transactionDetail)) {
         getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
       }
@@ -378,6 +386,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     transactionDetail.setGasUsed(transactionReceipt.getGasUsed().intValue());
     transactionDetail.setGasPrice(transaction.getGasPrice().doubleValue());
     transactionDetail.setPending(false);
+    transactionDetail.setNonce(transaction.getNonce().longValue());
     if (transactionDetail.getTimestamp() <= 0) {
       transactionDetail.setTimestamp(System.currentTimeMillis());
     }

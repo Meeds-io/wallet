@@ -11,9 +11,10 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 public interface WalletTransactionService {
 
   /**
-   * @return {@link Set} of pending transaction hashes
+   * @return {@link List} of pending {@link TransactionDetail} sent to
+   *         blockchain
    */
-  Set<String> getPendingTransactionHashes();
+  public List<TransactionDetail> getPendingTransactionsSent();
 
   /**
    * @param address wallet address

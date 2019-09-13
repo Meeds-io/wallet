@@ -3,7 +3,6 @@ package org.exoplatform.addon.wallet.test.service;
 import static org.junit.Assert.*;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -43,6 +42,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  null,
                                                                   System.currentTimeMillis());
 
     walletTransactionService.saveTransactionDetail(transactionDetail, true);
@@ -77,6 +77,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  null,
                                                                   System.currentTimeMillis());
 
     try {
@@ -125,6 +126,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  null,
                                                                   System.currentTimeMillis());
     walletTransactionService.saveTransactionDetail(transactionDetail, true);
     TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
@@ -153,6 +155,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  null,
                                                                   System.currentTimeMillis());
     walletTransactionService.saveTransactionDetail(transactionDetail, false);
     entitiesToClean.add(transactionDetail);
@@ -203,6 +206,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  null,
                                                                   System.currentTimeMillis());
     walletTransactionService.saveTransactionDetail(transactionDetail, true);
     TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash(),
@@ -227,24 +231,29 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    assertTrue(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
+    long maxAttemptsToSend = walletTransactionService.getMaxAttemptsToSend();
+    for (int i = 0; i < maxAttemptsToSend; i++) {
+      assertTrue(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
 
-    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
-                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
-                                                                  CONTRACT_AMOUNT,
-                                                                  ETHER_VALUE,
-                                                                  WALLET_ADDRESS_1,
-                                                                  WALLET_ADDRESS_2,
-                                                                  null,
-                                                                  CURRENT_USER_IDENTITY_ID,
-                                                                  TRANSACTION_LABEL,
-                                                                  TRANSACTION_MESSAGE,
-                                                                  false,
-                                                                  true,
-                                                                  false,
-                                                                  System.currentTimeMillis());
-    walletTransactionService.saveTransactionDetail(transactionDetail, false);
-    entitiesToClean.add(transactionDetail);
+      TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                    WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                    CONTRACT_AMOUNT,
+                                                                    ETHER_VALUE,
+                                                                    WALLET_ADDRESS_1,
+                                                                    WALLET_ADDRESS_2,
+                                                                    null,
+                                                                    CURRENT_USER_IDENTITY_ID,
+                                                                    TRANSACTION_LABEL,
+                                                                    TRANSACTION_MESSAGE,
+                                                                    false,
+                                                                    true,
+                                                                    false,
+                                                                    RAW_TRANSACTION,
+                                                                    System.currentTimeMillis());
+      transactionDetail.setSendingAttemptCount(1);
+      walletTransactionService.saveTransactionDetail(transactionDetail, false);
+      entitiesToClean.add(transactionDetail);
+    }
 
     assertFalse(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
   }
@@ -275,6 +284,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   true,
                                                                   false,
+                                                                  RAW_TRANSACTION,
                                                                   System.currentTimeMillis());
     walletTransactionService.saveTransactionDetail(transactionDetail, false);
     entitiesToClean.add(transactionDetail);
@@ -292,12 +302,12 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   }
 
   /**
-   * Test {@link WalletTransactionService#getPendingTransactionHashes}
+   * Test {@link WalletTransactionService#getPendingTransactionsSent()}
    */
   @Test
   public void testGetPendingTransactionHashes() {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    Set<String> pendingTransactions = walletTransactionService.getPendingTransactionHashes();
+    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingTransactionsSent();
     assertNotNull(pendingTransactions);
     assertEquals(0, pendingTransactions.size());
 
@@ -314,6 +324,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                          false,
                                                                          true,
                                                                          false,
+                                                                         null,
                                                                          System.currentTimeMillis());
     entitiesToClean.add(pendingTransactionDetail);
     TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
@@ -329,13 +340,14 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   true,
                                                                   false,
                                                                   true,
+                                                                  null,
                                                                   System.currentTimeMillis());
     entitiesToClean.add(transactionDetail);
 
-    pendingTransactions = walletTransactionService.getPendingTransactionHashes();
+    pendingTransactions = walletTransactionService.getPendingTransactionsSent();
     assertNotNull(pendingTransactions);
     assertEquals(1, pendingTransactions.size());
-    assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next());
+    assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next().getHash());
   }
 
 }

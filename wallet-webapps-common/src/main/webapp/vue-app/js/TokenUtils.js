@@ -193,15 +193,17 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
 }
 
 export function sendContractTransaction(transactionDetail, method, parameters) {
-  return getNewTransactionNonce(transactionDetail.senderAddress)
-    .then((nonce) => {
+  let nonce = 0;
+  return getNewTransactionNonce(transactionDetail.from)
+    .then((computedNonce) => {
+      nonce = computedNonce;
       const transactionToSend = {
-        from: transactionDetail.from,
+        nonce: nonce,
         to: transactionDetail.contractAddress,
         gasPrice: transactionDetail.gasPrice,
         gas: transactionDetail.gas,
+        value: 0,
         data: method(...parameters).encodeABI(),
-        nonce: nonce,
       };
       return window.localWeb3.eth.accounts.signTransaction(transactionToSend, window.localWeb3.eth.accounts.wallet[0].privateKey)
     })
@@ -209,7 +211,7 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
       if (!signedTransactionDetail.rawTransaction) {
         throw new Error(`Can't generate a transaction to send`);
       }
-      transactionDetail.hash = signedTransactionDetail.messageHash;
+      transactionDetail.nonce = nonce;
       transactionDetail.rawTransaction = signedTransactionDetail.rawTransaction;
       return saveTransactionDetails(transactionDetail);
     });

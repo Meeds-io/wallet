@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -193,13 +192,13 @@ public class TransactionStorageTest extends BaseWalletTest {
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
 
     // Search all pending transactions using the network id
-    Set<String> transactions = transactionStorage.getPendingTransactionHashes(1);
+    List<TransactionDetail> transactions = transactionStorage.getPendingTransactionsSent(1);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
 
     // Use non existing network ID
-    transactions = transactionStorage.getPendingTransactionHashes(2);
+    transactions = transactionStorage.getPendingTransactionsSent(2);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 
@@ -223,6 +222,7 @@ public class TransactionStorageTest extends BaseWalletTest {
                             true, // isSuccess
                             true, // isPending
                             true, // isAdminOperation
+                            null,
                             createdDateInMilliSeconds);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
@@ -254,6 +254,7 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                                   true, // isSuccess
                                                                   true, // isPending
                                                                   true, // isAdminOperation
+                                                                  null,
                                                                   0);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);

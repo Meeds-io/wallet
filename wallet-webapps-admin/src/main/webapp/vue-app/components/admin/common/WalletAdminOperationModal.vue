@@ -385,9 +385,9 @@ export default {
 
                 // *async* save transaction message for contract, sender and (avoid alarm receiver for admin operations)
                 this.transactionUtils.saveTransactionDetails(pendingTransaction)
-                  .then(() => {
+                  .then((savedTransaction) => {
                     // The transaction has been hashed and will be sent
-                    this.$emit('sent', pendingTransaction);
+                    this.$emit('sent', savedTransaction);
                   });
 
                 const thiss = this;

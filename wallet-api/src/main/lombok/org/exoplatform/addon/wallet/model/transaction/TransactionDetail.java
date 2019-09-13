@@ -80,9 +80,6 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private long              sendingAttemptCount;
 
-  @Exclude
-  private boolean           exceededMaxWaitMiningTime;
-
   @Override
   public TransactionDetail clone() { // NOSONAR
     try {

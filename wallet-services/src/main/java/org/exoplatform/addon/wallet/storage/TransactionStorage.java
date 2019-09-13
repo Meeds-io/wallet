@@ -3,7 +3,8 @@ package org.exoplatform.addon.wallet.storage;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.formatTransactionHash;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,11 +23,12 @@ public class TransactionStorage {
 
   /**
    * @param networkId blockchain network id
-   * @return {@link Set} of transaction hashes that are always marked as pending
-   *         in internal database
+   * @return {@link List} of {@link TransactionDetail} sent to blockchain and
+   *         marked as pending in internal database
    */
-  public Set<String> getPendingTransactionHashes(long networkId) {
-    return walletTransactionDAO.getPendingTransactionHashes(networkId);
+  public List<TransactionDetail> getPendingTransactionsSent(long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactionsSent(networkId);
+    return fromEntities(transactions);
   }
 
   /**
@@ -147,7 +149,16 @@ public class TransactionStorage {
    *         specified user
    */
   public long countPendingTransactionSent(long networkId, String fromAddress) {
-    return walletTransactionDAO.countPendingTransactions(networkId, fromAddress);
+    return walletTransactionDAO.countPendingTransactionSent(networkId, fromAddress);
+  }
+
+  /**
+   * @param networkId blockchain network id
+   * @param fromAddress transaction sender address
+   * @return count of pending transactions of a sender
+   */
+  public long countPendingTransactionAsSender(long networkId, String fromAddress) {
+    return walletTransactionDAO.countPendingTransactionAsSender(networkId, fromAddress);
   }
 
   /**

@@ -15,8 +15,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.blockchain.service.*;
-import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
-import org.exoplatform.addon.wallet.job.PendingTransactionVerifierJob;
+import org.exoplatform.addon.wallet.job.*;
 import org.exoplatform.addon.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
@@ -117,10 +116,13 @@ public class ServiceLoaderServlet extends HttpServlet {
 
       addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
                                 "Configuration for wallet transaction stored status verifier",
-                                "0/10 * * * * ?");
+                                "0/30 * * * * ?");
       addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
                                 "Add a job to verify if mined contract transactions are added in database",
                                 "0 0 * ? * * *");
+      addBlockchainScheduledJob(TransactionSenderJob.class,
+                                "Configuration for transaction sending to blockchain",
+                                "0/30 * * * * ?");
 
       LOG.debug("Blockchain Service instances created");
     } catch (Throwable e) {

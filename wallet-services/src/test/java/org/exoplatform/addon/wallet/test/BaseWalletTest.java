@@ -336,6 +336,7 @@ public abstract class BaseWalletTest {
                                                       boolean isSuccess,
                                                       boolean isPending,
                                                       boolean isAdminOperation,
+                                                      String rawTransaction,
                                                       long createdDate) {
 
     if (StringUtils.isBlank(hash)) {
@@ -372,7 +373,7 @@ public abstract class BaseWalletTest {
     transactionDetail.setTokenFee(TOKEN_FEE);
     transactionDetail.setNonce(NONCE);
     transactionDetail.setNoContractFunds(true);
-    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setRawTransaction(rawTransaction);
     transactionStorage.saveTransactionDetail(transactionDetail);
     entitiesToClean.add(transactionDetail);
     return transactionDetail;

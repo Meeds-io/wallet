@@ -61,7 +61,7 @@
       <value-param>
         <name>transaction.pending.maxToSend</name>
         <description>Maximum parallel pending transactions to send for a given wallet</description>
-        <value>${exo.wallet.transaction.pending.maxToSend:1}</value>
+        <value>${exo.wallet.transaction.pending.maxToSend:3}</value>
       </value-param>
       <value-param>
         <name>transaction.pending.maxSendingAttempts</name>

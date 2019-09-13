@@ -17,7 +17,7 @@
 package org.exoplatform.addon.wallet.dao;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
 
 import javax.persistence.TypedQuery;
 
@@ -113,12 +113,11 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return query.getResultList();
   }
 
-  public Set<String> getPendingTransactionHashes(long networkId) {
-    TypedQuery<String> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactions",
-                                                                   String.class);
+  public List<TransactionEntity> getPendingTransactionsSent(long networkId) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactionsSent",
+                                                                              TransactionEntity.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
-    List<String> results = query.getResultList();
-    return results == null ? Collections.emptySet() : new HashSet<>(results);
+    return query.getResultList();
   }
 
   public TransactionEntity getTransactionByHash(String hash) {
@@ -173,8 +172,17 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return query.getResultList();
   }
 
-  public long countPendingTransactions(long networkId, String fromAddress) {
-    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactionsForSender",
+  public long countPendingTransactionSent(long networkId, String fromAddress) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactionSent",
+                                                                 Long.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    Long result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
+
+  public long countPendingTransactionAsSender(long networkId, String fromAddress) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactionAsSender",
                                                                  Long.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));

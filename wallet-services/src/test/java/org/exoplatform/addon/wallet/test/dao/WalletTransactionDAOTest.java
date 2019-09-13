@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -173,13 +172,13 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
     // Search all pending transactions using the network id
-    Set<String> transactions = walletTransactionDAO.getPendingTransactionHashes(1);
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactionsSent(1);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
 
     // Use non existing network ID
-    transactions = walletTransactionDAO.getPendingTransactionHashes(2);
+    transactions = walletTransactionDAO.getPendingTransactionsSent(2);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 

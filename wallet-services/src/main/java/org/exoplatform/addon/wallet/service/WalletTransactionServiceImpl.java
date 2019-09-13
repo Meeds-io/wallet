@@ -90,8 +90,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public Set<String> getPendingTransactionHashes() {
-    return transactionStorage.getPendingTransactionHashes(getNetworkId());
+  public List<TransactionDetail> getPendingTransactionsSent() {
+    return transactionStorage.getPendingTransactionsSent(getNetworkId());
   }
 
   @Override
@@ -206,7 +206,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   @Override
   public long getNonce(String fromAddress) {
-    if (transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) == 0) {
+    if (transactionStorage.countPendingTransactionAsSender(getNetworkId(), fromAddress) == 0) {
+      // Let nonce be determined from blockchain on client side
       return 0;
     } else {
       long maxUsedNonce = transactionStorage.getMaxUsedNonce(getNetworkId(), fromAddress);
@@ -257,9 +258,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
     Wallet issuerWallet = accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser);
     transactionDetail.setIssuer(issuerWallet);
-
+    transactionDetail.setNetworkId(getNetworkId());
     transactionStorage.saveTransactionDetail(transactionDetail);
-    retrieveWalletsDetails(transactionDetail);
   }
 
   @Override
@@ -269,7 +269,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   @Override
   public List<TransactionDetail> getTransactionsToSend() {
-    return transactionStorage.getTransactionsToSend(getNetworkId());
+    List<TransactionDetail> transactionsToSend = transactionStorage.getTransactionsToSend(getNetworkId());
+
+    transactionsToSend.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail));
+    return transactionsToSend;
   }
 
   @Override

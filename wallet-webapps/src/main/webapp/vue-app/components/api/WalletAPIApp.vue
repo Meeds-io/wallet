@@ -350,10 +350,10 @@ export default {
               };
 
               return this.tokenUtils.sendContractTransaction(transactionDetail, transfer, [receiverAddress, amountWithDecimals])
-                .then((pendingTransaction) => {
+                .then((savedTransaction) => {
                   // The transaction has been hashed and is marked as pending in internal database
                   document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
-                    detail : pendingTransaction
+                    detail : savedTransaction
                   }));
                   this.walletUtils.lockBrowserWallet();
                 });

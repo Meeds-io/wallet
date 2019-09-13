@@ -30,8 +30,10 @@ import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.common.http.HTTPStatus;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -49,37 +51,49 @@ public class WalletTransactionREST implements ResourceContainer {
 
   private WalletTransactionService transactionService;
 
+  private WalletTokenAdminService  walletTokenAdminService;
+
   public WalletTransactionREST(WalletTransactionService transactionService) {
     this.transactionService = transactionService;
   }
 
   @POST
   @Path("saveTransactionDetails")
+  @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
+  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", produces = "application/json", notes = "returns saved transaction detail")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response saveTransactionDetails(@ApiParam(value = "transaction detail object", required = true) TransactionDetail transactionDetail) {
-    if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getHash())
-        || StringUtils.isBlank(transactionDetail.getFrom())) {
+    if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
       LOG.warn("Bad request sent to server with empty transaction details: {}",
                transactionDetail == null ? "" : transactionDetail.toString());
       return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     String currentUserId = getCurrentUserId();
+    // Fix generated transaction hash from Web3js to use generated hash from
+    // Web3j
+    if (transactionDetail.getId() == 0 && StringUtils.isNotBlank(transactionDetail.getRawTransaction())) {
+      String transactionHash = getWalletTokenAdminService().generateHash(transactionDetail.getRawTransaction());
+      transactionDetail.setHash(transactionHash);
+    } else if (StringUtils.isBlank(transactionDetail.getHash())) {
+      LOG.warn("Bad request sent to server with empty transaction hash");
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+
     try {
       transactionService.saveTransactionDetail(transactionDetail, currentUserId);
-      return Response.ok().build();
+      return Response.ok(transactionDetail).build();
     } catch (IllegalAccessException e) {
       LOG.warn("User {} is attempting to save transaction {}", currentUserId, transactionDetail, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
-      LOG.error("Error saving transaction message", e);
+      LOG.error("Error saving transaction message {}", transactionDetail, e);
       return Response.serverError().build();
     }
   }
@@ -212,6 +226,20 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.error("Error getting transactions of wallet " + address, e);
       return Response.serverError().build();
     }
+  }
+
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getWalletTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return walletTokenAdminService;
   }
 
 }

@@ -29,39 +29,22 @@ export function loadTransactions(account, contractDetails, transactions, onlyPen
   });
 }
 
-export function saveTransactionDetails(transaction, contractDetails) {
-  try {
-    const transationDetails = {
-      networkId: transaction.networkId || window.walletSettings.network.id,
-      hash: transaction.hash,
-      nonce: (transaction.nonce && Number(transaction.nonce)) || 0,
-      contractAddress: transaction.contractAddress,
-      contractMethodName: transaction.contractMethodName,
-      pending: (transaction.pending && Boolean(transaction.pending)) || false,
-      gasPrice: transaction.gasPrice || 0,
-      from: transaction.from || '',
-      to: transaction.to || '',
-      by: transaction.by || '',
-      label: transaction.label || '',
-      message: transaction.message || '',
-      value: transaction.value ? Number(transaction.value) : 0,
-      contractAmount: transaction.contractAmount ? Number(transaction.contractAmount) : 0,
-      adminOperation: transaction.adminOperation ? Boolean(transaction.adminOperation) : false,
-      timestamp: transaction.timestamp ? Number(transaction.timestamp) : 0,
-    };
-    return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(transationDetails),
-    });
-  } catch (e) {
-    console.debug('Error saving pending transaction', e);
-    throw e;
-  }
+export function saveTransactionDetails(transationDetails, contractDetails) {
+  return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(transationDetails),
+  }).then(resp => {
+    if(resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error while sending transaction');
+    }
+  });
 }
 
 export function getTransactionsAmounts(walletAddress, periodicity, selectedDate) {
