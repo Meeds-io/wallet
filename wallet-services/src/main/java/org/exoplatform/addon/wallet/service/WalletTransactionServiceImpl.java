@@ -90,8 +90,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public List<TransactionDetail> getPendingTransactionsSent() {
-    return transactionStorage.getPendingTransactionsSent(getNetworkId());
+  public List<String> getPendingTransactionHashes() {
+    return transactionStorage.getPendingTransactionHashes(getNetworkId());
   }
 
   @Override

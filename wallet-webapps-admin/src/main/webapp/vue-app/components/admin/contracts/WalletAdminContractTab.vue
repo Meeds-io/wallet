@@ -424,6 +424,11 @@ export default {
     this.$nextTick(() => this.selectedTab = 'transactions');
   },
   methods: {
+    refreshTransactionList() {
+      if (this.$refs.transactionsList) {
+        this.$refs.transactionsList.init();
+      }
+    },
     successSendingEther() {
       this.refreshBalance()
         .then(() => {

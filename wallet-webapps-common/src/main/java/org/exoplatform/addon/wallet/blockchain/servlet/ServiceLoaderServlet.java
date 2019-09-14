@@ -15,11 +15,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.blockchain.service.*;
-import org.exoplatform.addon.wallet.job.*;
+import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
+import org.exoplatform.addon.wallet.job.TransactionSenderJob;
 import org.exoplatform.addon.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
-import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
-import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
@@ -102,21 +102,23 @@ public class ServiceLoaderServlet extends HttpServlet {
       EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector);
       container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
 
-      tokenAdminService.start();
-      transactionDecoderService.start();
-
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
 
       // Start listening on blockchain modification for websocket trigger
+      listernerService.addListener(NEW_BLOCK_MINED_EVENT,
+                                   new BlockMinedListener(container,
+                                                          CommonsUtils.getService(WalletTransactionService.class),
+                                                          transactionDecoderService));
       listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionMinedListener());
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new TransactionNotificationListener(container));
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new WebSocketTransactionListener());
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());
 
-      addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
-                                "Configuration for wallet transaction stored status verifier",
-                                "0/30 * * * * ?");
+      // Start services after adding listeners
+      tokenAdminService.start();
+      transactionDecoderService.start();
+
       addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
                                 "Add a job to verify if mined contract transactions are added in database",
                                 "0 0 * ? * * *");

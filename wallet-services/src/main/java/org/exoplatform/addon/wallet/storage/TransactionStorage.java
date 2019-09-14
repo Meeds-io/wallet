@@ -23,12 +23,11 @@ public class TransactionStorage {
 
   /**
    * @param networkId blockchain network id
-   * @return {@link List} of {@link TransactionDetail} sent to blockchain and
-   *         marked as pending in internal database
+   * @return {@link List} of {@link TransactionDetail#getHash()} marked as
+   *         pending in internal database
    */
-  public List<TransactionDetail> getPendingTransactionsSent(long networkId) {
-    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactionsSent(networkId);
-    return fromEntities(transactions);
+  public List<String> getPendingTransactionHashes(long networkId) {
+    return walletTransactionDAO.getPendingTransactionsHashes(networkId);
   }
 
   /**

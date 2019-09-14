@@ -216,4 +216,11 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-22">
+    <createIndex tableName="ADDONS_WALLET_TRANSACTION" indexName="IDX_ADDONS_WALLET_06">
+      <column name="PENDING" type="BOOLEAN"/>
+      <column name="NETWORK_ID" type="BIGINT" />
+    </createIndex>
+  </changeSet>
+
 </databaseChangeLog>

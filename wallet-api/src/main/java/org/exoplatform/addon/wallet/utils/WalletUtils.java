@@ -170,6 +170,9 @@ public class WalletUtils {
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.addon.wallet.addressAssociation.modification";
 
+  public static final String                          NEW_BLOCK_MINED_EVENT                    =
+                                                                            "exo.addon.wallet.block.mined";
+
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
                                                                                     "exo.addon.wallet.transaction.mined";
 

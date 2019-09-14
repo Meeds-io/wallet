@@ -493,9 +493,6 @@ export default {
     }
   },
   watch: {
-    loadingWallets(value) {
-      this.$emit('loading-wallets-changed', value);
-    },
     seeAccountDetails() {
       if (this.seeAccountDetails) {
         $('body').addClass('hide-scroll');
@@ -612,6 +609,7 @@ export default {
         .catch(e => this.error = String(e));
     },
     walletPendingTransaction(hash) {
+      this.$emit('pending', hash);
       this.error = null;
       if (hash) {
         this.$set(this.walletToProcess, 'pendingTransaction', (this.walletToProcess.pendingTransaction || 0) + 1);

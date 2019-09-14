@@ -78,7 +78,7 @@
                 :address-etherscan-link="addressEtherscanLink"
                 :contract-details="contractDetails"
                 :is-admin="isAdmin"
-                @pending="pendingTransaction"
+                @pending="$refs && $refs.contractDetail && $refs.contractDetail.refreshTransactionList()"
                 @wallets-loaded="wallets = $event" />
             </v-tab-item>
             <v-tab-item

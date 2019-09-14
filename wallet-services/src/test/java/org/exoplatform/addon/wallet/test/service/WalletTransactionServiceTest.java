@@ -302,12 +302,12 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   }
 
   /**
-   * Test {@link WalletTransactionService#getPendingTransactionsSent()}
+   * Test {@link WalletTransactionService#getPendingTransactionHashes()}
    */
   @Test
   public void testGetPendingTransactionHashes() {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingTransactionsSent();
+    List<String> pendingTransactions = walletTransactionService.getPendingTransactionHashes();
     assertNotNull(pendingTransactions);
     assertEquals(0, pendingTransactions.size());
 
@@ -344,10 +344,10 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   System.currentTimeMillis());
     entitiesToClean.add(transactionDetail);
 
-    pendingTransactions = walletTransactionService.getPendingTransactionsSent();
+    pendingTransactions = walletTransactionService.getPendingTransactionHashes();
     assertNotNull(pendingTransactions);
     assertEquals(1, pendingTransactions.size());
-    assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next().getHash());
+    assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next());
   }
 
 }

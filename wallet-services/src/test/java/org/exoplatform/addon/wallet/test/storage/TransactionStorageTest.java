@@ -219,13 +219,13 @@ public class TransactionStorageTest extends BaseWalletTest {
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
 
     // Search all pending transactions using the network id
-    List<TransactionDetail> transactions = transactionStorage.getPendingTransactionsSent(1);
+    List<String> transactions = transactionStorage.getPendingTransactionHashes(1);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
 
     // Use non existing network ID
-    transactions = transactionStorage.getPendingTransactionsSent(2);
+    transactions = transactionStorage.getPendingTransactionHashes(2);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 

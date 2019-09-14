@@ -35,7 +35,6 @@ import org.web3j.protocol.core.methods.response.*;
 import org.exoplatform.addon.wallet.contract.ERTTokenV2;
 import org.exoplatform.addon.wallet.model.ContractDetail;
 import org.exoplatform.addon.wallet.model.WalletInitializationState;
-import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.commons.api.settings.SettingService;
@@ -134,16 +133,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   public void start() {
-    long networkId = getNetworkId();
     try {
-      long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
+      long lastWatchedBlockNumber = getLastWatchedBlockNumber();
       if (lastWatchedBlockNumber <= 0) {
-        long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
-        saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
-        LOG.info("Start watching Blockchain transactions from block number {}", lastEthereumBlockNumber);
+        lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+        saveLastWatchedBlockNumber(lastWatchedBlockNumber);
       }
+      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber);
     } catch (Exception e) {
-      LOG.error("Error while getting latest block number from blockchain with network id: {}", networkId, e);
+      LOG.error("Error while getting latest block number from blockchain with network id: {}", getNetworkId(), e);
     }
   }
 
@@ -153,30 +151,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void checkPendingTransactions() {
-    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactionsSent();
-    if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
-      LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
-                pendingTransactions.size());
-
-      for (TransactionDetail pendingTransaction : pendingTransactions) {
-        String hash = pendingTransaction.getHash();
-        try { // NOSONAR
-          verifyTransactionStatusOnBlockchain(hash, true);
-        } catch (Exception e) {
-          LOG.warn("Error treating pending transaction: {}", hash, e);
-        }
-      }
-    }
-  }
-
-  @Override
   public void scanNewerBlocks() throws IOException {
-    GlobalSettings settings = getSettings();
-    long networkId = settings.getNetwork().getId();
-
     long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
-    long lastWatchedBlockNumber = getLastWatchedBlockNumber(networkId);
+    long lastWatchedBlockNumber = getLastWatchedBlockNumber();
     if (lastEthereumBlockNumber <= lastWatchedBlockNumber) {
       LOG.debug("No new blocks to verify. last watched = {}. last blockchain block = {}",
                 lastWatchedBlockNumber,
@@ -204,7 +181,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       }
 
       try {
-        verifyTransactionStatusOnBlockchain(transactionHash, false);
+        checkTransactionStatusOnBlockchain(transactionHash, false);
       } catch (Exception e) {
         LOG.warn("Error processing transaction with hash: {}", transactionHash, e);
         processed = false;
@@ -212,7 +189,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
     if (processed) {
       // Save last verified block for contracts transactions
-      saveLastWatchedBlockNumber(networkId, lastEthereumBlockNumber);
+      saveLastWatchedBlockNumber(lastEthereumBlockNumber);
     }
   }
 
@@ -250,29 +227,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
   }
 
-  private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {
-    return (transaction, exception) -> {
-      if (transaction != null && transaction.getTransactionHash() != null) {
-        LOG.debug("Transaction {} has been confirmed with hash {}", transactionDetail, transaction.getTransactionHash());
-        transactionDetail.setHash(transaction.getTransactionHash());
-      }
-      // Exception occurred while sending to blockchain
-      if (exception != null) {
-        LOG.warn("Error when sending transaction {}.", transactionDetail, exception);
-        Transaction transactionFromBlockchain = ethereumClientConnector.getTransaction(transaction.getTransactionHash());
-        // An exception occurred
-        if (transactionFromBlockchain == null) {
-          transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
-        } else {
-          transactionDetail.setPending(false);
-          transactionDetail.setSucceeded(false);
-        }
-      }
-      getTransactionService().saveTransactionDetail(transactionDetail, false);
-    };
-  }
-
-  private void verifyTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
+  @Override
+  public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     if (transaction == null) {
       if (!pendingTransactionFromDatabase) {
@@ -375,6 +331,30 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
       }
     }
+  }
+
+  private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {
+    return (transaction, exception) -> {
+      if (transaction != null && transaction.getTransactionHash() != null) {
+        LOG.debug("Transaction {} has been confirmed with hash {}",
+                  transactionDetail.getHash(),
+                  transaction.getTransactionHash());
+        transactionDetail.setHash(transaction.getTransactionHash());
+      }
+      // Exception occurred while sending to blockchain
+      if (exception != null) {
+        LOG.warn("Error when sending transaction {}.", transactionDetail, exception);
+        Transaction transactionFromBlockchain = ethereumClientConnector.getTransaction(transaction.getTransactionHash());
+        // An exception occurred
+        if (transactionFromBlockchain == null) {
+          transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
+        } else {
+          transactionDetail.setPending(false);
+          transactionDetail.setSucceeded(false);
+        }
+      }
+      getTransactionService().saveTransactionDetail(transactionDetail, false);
+    };
   }
 
   public void computeTransactionDetail(TransactionDetail transactionDetail,
@@ -620,18 +600,20 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
   }
 
-  private long getLastWatchedBlockNumber(long networkId) {
-    SettingValue<?> lastBlockNumberValue =
-                                         getSettingService().get(WALLET_CONTEXT,
-                                                                 WALLET_SCOPE,
-                                                                 LAST_BLOCK_NUMBER_KEY_NAME + networkId);
+  private long getLastWatchedBlockNumber() {
+    long networkId = getNetworkId();
+    SettingValue<?> lastBlockNumberValue = getSettingService().get(WALLET_CONTEXT,
+                                                                   WALLET_SCOPE,
+                                                                   LAST_BLOCK_NUMBER_KEY_NAME + networkId);
     if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
       return Long.valueOf(lastBlockNumberValue.getValue().toString());
     }
     return 0;
   }
 
-  private void saveLastWatchedBlockNumber(long networkId, long lastWatchedBlockNumber) {
+  private void saveLastWatchedBlockNumber(long lastWatchedBlockNumber) {
+    long networkId = getNetworkId();
+
     LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
     getSettingService().set(WALLET_CONTEXT,
                             WALLET_SCOPE,
