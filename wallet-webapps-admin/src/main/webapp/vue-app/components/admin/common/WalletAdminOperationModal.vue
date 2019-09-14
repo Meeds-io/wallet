@@ -190,7 +190,6 @@ export default {
     return {
       dialog: null,
       loading: false,
-      transactionHash: null,
       storedPassword: false,
       walletPassword: '',
       walletPasswordShow: false,
@@ -274,7 +273,6 @@ export default {
       this.gasEstimation = null;
       this.transactionLabel = '';
       this.transactionMessage = '';
-      this.transactionHash = null;
       this.settings = window.walletSettings || {network: {}}
       if (!this.gasPrice) {
         this.gasPrice = this.settings.network.minGasPrice;
@@ -337,95 +335,53 @@ export default {
       }
 
       this.loading = true;
-      try {
-        this.method(...this.argumentsForEstimation)
-          .estimateGas({
+      this.method(...this.argumentsForEstimation)
+        .estimateGas({
+          from: this.contractDetails.contract.options.from,
+          gas: this.settings.network.gasLimit,
+          gasPrice: this.gasPrice,
+        })
+        .then((estimatedGas) => {
+          if (estimatedGas > this.settings.network.gasLimit) {
+            this.warning = `You have set a low gas ${this.settings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
+            return;
+          }
+
+          const transactionDetail = {
             from: this.contractDetails.contract.options.from,
+            to: this.autocompleteValue ? this.autocompleteValue : this.contractDetails.address,
+            value: 0,
             gas: this.settings.network.gasLimit,
             gasPrice: this.gasPrice,
-          })
-          .then((estimatedGas) => {
-            if (estimatedGas > this.settings.network.gasLimit) {
-              this.warning = `You have set a low gas ${this.settings.network.gasLimit} while the estimation of necessary gas is ${estimatedGas}. Please change it in your preferences.`;
-              return;
-            }
-            return this.method(...this.arguments)
-              .send({
-                from: this.contractDetails.contract.options.from,
-                gas: this.settings.network.gasLimit,
-                gasPrice: this.gasPrice,
-              })
-              .on('transactionHash', (hash) => {
-                this.transactionHash = hash;
-                const sender = this.contractDetails.contract.options.from;
-                const receiver = this.autocompleteValue ? this.autocompleteValue : this.contractDetails.address;
+            pending: true,
+            adminOperation: true,
+            contractAddress: this.contractDetails.address,
+            contractMethodName: this.methodName,
+            contractAmount: this.inputValue,
+            label: this.transactionLabel,
+            message: this.transactionMessage,
+            timestamp: Date.now()
+          };
 
-                const gas = this.settings.network.gasLimit || 35000;
+          return this.tokenUtils.sendContractTransaction(transactionDetail, this.method, this.arguments);
+        })
+        .then((savedTransaction) => {
+          this.$emit('sent', savedTransaction);
+          this.dialog = false;
 
-                const pendingTransaction = {
-                  hash: hash,
-                  from: sender,
-                  to: receiver,
-                  type: 'contract',
-                  value: 0,
-                  gas: gas,
-                  gasPrice: this.gasPrice,
-                  pending: true,
-                  adminOperation: true,
-                  contractAddress: this.contractDetails.address,
-                  contractMethodName: this.methodName,
-                  contractAmount: this.inputValue,
-                  contractSymbol: this.contractSymbol,
-                  contractAmountLabel: this.contractAmountLabel,
-                  label: this.transactionLabel,
-                  message: this.transactionMessage,
-                  timestamp: Date.now(),
-                  feeFiat: this.transactionFeeFiat,
-                };
-
-                // *async* save transaction message for contract, sender and (avoid alarm receiver for admin operations)
-                this.transactionUtils.saveTransactionDetails(pendingTransaction)
-                  .then((savedTransaction) => {
-                    // The transaction has been hashed and will be sent
-                    this.$emit('sent', savedTransaction);
-                  });
-
-                const thiss = this;
-                // FIXME workaround when can't execute .then(...) method, especially in pause, unpause.
-                this.walletUtils.watchTransactionStatus(hash, () => {
-                  thiss.$emit('success', thiss.transactionHash, thiss.methodName, thiss.autocompleteValue, thiss.inputValue);
-                });
-                this.dialog = false;
-              })
-              .on('error', (error) => {
-                console.debug('Error while sending admin transaction', error);
-                // The transaction has failed
-                this.error = this.walletUtils.truncateError(error);
-                // Display error on main screen only when dialog is not opened
-                if (!this.dialog) {
-                  this.$emit('error', this.error);
-                }
-              })
-              .then(() => {
-                this.$emit('success', this.transactionHash, this.methodName, this.autocompleteValue, this.inputValue);
-              })
-              .finally(() => {
-                this.loading = false;
-              });
-          })
-          .catch((e) => {
-            console.debug('Error while sending admin transaction', e);
-            this.error = this.walletUtils.truncateError(e);
-          })
-          .finally(() => {
-            this.loading = false;
-            this.walletUtils.lockBrowserWallet();
+          const thiss = this;
+          this.walletUtils.watchTransactionStatus(savedTransaction.hash, () => {
+            thiss.$emit('success', savedTransaction.hash, thiss.methodName, thiss.autocompleteValue, thiss.inputValue);
           });
-      } catch (e) {
-        console.debug('Error while sending admin transaction', e);
-        this.loading = false;
-        this.error = this.walletUtils.truncateError(e);
-      }
+        })
+        .catch((e) => {
+          console.debug('Error while sending admin transaction', e);
+          this.error = this.walletUtils.truncateError(e);
+        })
+        .finally(() => {
+          this.walletUtils.lockBrowserWallet();
+          this.loading = false;
+        });
     },
   },
 };
