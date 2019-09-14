@@ -1,4 +1,5 @@
 import {etherToFiat} from './WalletUtils.js';
+import {getSavedContractDetails} from './TokenUtils.js';
 
 export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration) {
   if (!transactionsLimit) {
@@ -101,8 +102,11 @@ function loadTransactionDetailsAndWatchPending(walletAddress, accountDetails, tr
   if (transactionDetails.contractAddress) {
     const contractDetails = window.walletContractsDetails[transactionDetails.contractAddress];
     if (contractDetails) {
-      addContractDetailsInTransation(transactionDetails, contractDetails);
       loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
+    } else {
+      getSavedContractDetails(transactionDetails.contractAddress).then(contractDetails => {
+        loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
+      });
     }
   } else {
     loadEtherTransactionProperties(walletAddress, transactionDetails);
@@ -143,6 +147,10 @@ function loadEtherTransactionProperties(walletAddress, transactionDetails) {
 }
 
 function loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails) {
+  if (contractDetails) {
+    addContractDetailsInTransation(transactionDetails, contractDetails);
+  }
+
   walletAddress = walletAddress && walletAddress.toLowerCase();
 
   if (!transactionDetails.fee && transactionDetails.gasUsed && transactionDetails.gasPrice) {

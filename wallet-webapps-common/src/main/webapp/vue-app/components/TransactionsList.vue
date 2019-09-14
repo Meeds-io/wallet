@@ -162,7 +162,7 @@
                       :profile-type="item.fromType"
                       :display-name="item.fromDisplayName"
                       :avatar="item.fromAvatar" />
-  
+
                     <span v-if="item.contractMethodName === 'transfer' && item.isReceiver">
                       {{ $t('exoplatform.wallet.label.receivedFrom') }}
                     </span>

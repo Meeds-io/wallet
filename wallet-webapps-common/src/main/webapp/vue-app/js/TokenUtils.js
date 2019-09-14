@@ -1,7 +1,8 @@
 import {etherToFiat} from './WalletUtils.js';
 import {getNonce, saveTransactionDetails} from './TransactionUtils.js';
 
-export function reloadContractDetails(contractDetails, walletAddress) {
+export function reloadContractDetails(walletAddress) {
+  const contractDetails = window.walletSettings && window.walletSettings.contractDetail;
   if (!contractDetails || !contractDetails.address) {
     return;
   }
@@ -37,7 +38,7 @@ export function getContractDetails(walletAddress) {
     window.walletContractsDetails[contractDetails.address] = contractDetails;
     window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
   }
-  return Promise.resolve(contractDetails);
+  return contractDetails;
 }
 
 /*

@@ -190,7 +190,13 @@ export default {
             this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
           }
         })
-        .then(() => this.reloadContract())
+        .then(() => {
+          if (this.contractDetails) {
+            return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
+          } else {
+            this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
+          }
+        })
         .then(() => this.$refs.walletSetup.init())
         .then(() => this.$refs.walletsTab.init())
         .catch((error) => {
@@ -225,10 +231,7 @@ export default {
       }
     },
     reloadContract() {
-      if (!this.contractDetails) {
-        this.contractDetails = window.walletSettings.contractDetail;
-      }
-      return this.tokenUtils.getContractDetails(this.walletAddress);
+      return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();
