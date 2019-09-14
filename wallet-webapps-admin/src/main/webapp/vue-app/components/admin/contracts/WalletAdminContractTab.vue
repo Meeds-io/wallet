@@ -216,7 +216,6 @@
             <transactions-list
               id="transactionsList"
               ref="transactionsList"
-              :account="contractDetails && contractDetails.address"
               :contract-details="contractDetails"
               :fiat-symbol="fiatSymbol"
               :error="error"

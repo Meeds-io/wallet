@@ -1,32 +1,20 @@
-import {searchWalletByAddress} from './AddressRegistry.js';
-import {etherToFiat, watchTransactionStatus} from './WalletUtils.js';
+import {etherToFiat} from './WalletUtils.js';
 
-export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
+export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
   }
 
-  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
-    const loadedTransactions = Object.assign({}, transactions);
-    const loadingPromises = [];
-
-    if (storedTransactions && storedTransactions.length) {
-      storedTransactions.forEach((storedTransaction) => {
-        if (loadedTransactions[storedTransaction.hash]) {
-          loadingPromises.push(loadedTransactions[storedTransaction.hash]);
-        } else {
-          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(account, contractDetails, transactions, storedTransaction, refreshCallback);
-          loadingPromises.push(loadingTransactionDetailsPromise);
-        }
-      });
-    }
-
-    return Promise.all(loadingPromises).catch((error) => {
-      if (`${error}`.indexOf('stopLoading') < 0) {
-        throw error;
+  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration)
+    .then((storedTransactions) => {
+      if (storedTransactions && storedTransactions.length) {
+        storedTransactions.forEach((storedTransaction) => {
+          loadTransactionDetailsAndWatchPending(account, contractDetails, transactions, storedTransaction);
+        });
       }
+  
+      return storedTransactions;
     });
-  });
 }
 
 export function saveTransactionDetails(transationDetails, contractDetails) {
@@ -62,7 +50,7 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
   const transactionHashToSearch = filterObject && filterObject.hash;
   const transactionContractMethodName = filterObject && filterObject.contractMethodName;
 
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account || ''}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
@@ -103,31 +91,23 @@ export function getSavedTransactionByHash(hash) {
   });
 }
 
-function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
-  if (!transactionDetails || !walletAddress) {
-    console.debug('Wrong method parameters', walletAddress, transactionDetails);
+function loadTransactionDetailsAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails) {
+  if (!transactionDetails) {
     return;
   }
 
   transactionDetails.type = transactionDetails.contractAddress ? 'contract' : 'ether';
 
-  if (watchLoadSuccess && transactionDetails.pending) {
-    watchTransactionStatus(transactionDetails.hash, watchLoadSuccess);
-  }
-
-  let resultPromise = null;
   if (transactionDetails.contractAddress) {
     const contractDetails = window.walletContractsDetails[transactionDetails.contractAddress];
     if (contractDetails) {
       addContractDetailsInTransation(transactionDetails, contractDetails);
-      resultPromise = loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
-    } else {
-      resultPromise = Promise.resolve();
+      loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
     }
   } else {
-    resultPromise = loadEtherTransactionProperties(walletAddress, transactionDetails);
+    loadEtherTransactionProperties(walletAddress, transactionDetails);
   }
-  return resultPromise.then(() => (transactions[transactionDetails.hash] = transactionDetails));
+  return transactions[transactionDetails.hash] = transactionDetails;
 }
 
 function addContractDetailsInTransation(transactionDetails, contractDetails) {
@@ -143,7 +123,7 @@ function addContractDetailsInTransation(transactionDetails, contractDetails) {
 }
 
 function loadEtherTransactionProperties(walletAddress, transactionDetails) {
-  walletAddress = walletAddress.toLowerCase();
+  walletAddress = walletAddress && walletAddress.toLowerCase();
   if (!transactionDetails.fee && transactionDetails.gasUsed && transactionDetails.gasPrice) {
     transactionDetails.fee = transactionDetails.gasUsed && transactionDetails.gasPrice && window.localWeb3.utils.fromWei(String(transactionDetails.gasUsed * transactionDetails.gasPrice), 'ether');
   }
@@ -151,32 +131,25 @@ function loadEtherTransactionProperties(walletAddress, transactionDetails) {
     transactionDetails.feeFiat = etherToFiat(transactionDetails.fee);
   }
 
-  const promises = [];
-  promises.push(retrieveWalletDetails(transactionDetails, 'from'));
-  promises.push(retrieveWalletDetails(transactionDetails, 'to'));
+  retrieveWalletDetails(transactionDetails, 'from');
+  retrieveWalletDetails(transactionDetails, 'to');
 
-  return Promise.all(promises).then(() => {
-    transactionDetails.isReceiver = walletAddress === transactionDetails.to;
-    transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
-    transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-    if (transactionDetails.date) {
-      transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
-    }
-  });
+  transactionDetails.isReceiver = walletAddress === transactionDetails.to;
+  transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
+  transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
+  if (transactionDetails.date) {
+    transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
+  }
 }
 
 function loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails) {
-  walletAddress = walletAddress.toLowerCase();
+  walletAddress = walletAddress && walletAddress.toLowerCase();
 
   if (!transactionDetails.fee && transactionDetails.gasUsed && transactionDetails.gasPrice) {
     transactionDetails.fee = window.localWeb3.utils.fromWei(String(transactionDetails.gasUsed * transactionDetails.gasPrice), 'ether');
   }
   if (!transactionDetails.feeFiat && transactionDetails.fee) {
     transactionDetails.feeFiat = etherToFiat(transactionDetails.fee);
-  }
-
-  if (!abiDecoder.getABIs() || !abiDecoder.getABIs().length) {
-    abiDecoder.addABI(JSON.parse(window.walletSettings.contractAbi));
   }
 
   // TODO I18N for labels
@@ -195,30 +168,23 @@ function loadContractTransactionProperties(walletAddress, transactionDetails, co
     transactionDetails.contractAmountLabel = 'Rewarded amount';
   }
 
-  const promises = [];
-  if (transactionDetails.from && transactionDetails.contractAddress.toLowerCase() !== transactionDetails.from) {
-    promises.push(retrieveWalletDetails(transactionDetails, 'from'));
-  }
-  if (transactionDetails.to && transactionDetails.contractAddress.toLowerCase() !== transactionDetails.to) {
-    promises.push(retrieveWalletDetails(transactionDetails, 'to'));
-  }
-  promises.push(retrieveWalletDetails(transactionDetails, 'by'));
+  retrieveWalletDetails(transactionDetails, 'from');
+  retrieveWalletDetails(transactionDetails, 'to');
+  retrieveWalletDetails(transactionDetails, 'by');
 
-  return Promise.all(promises).then(() => {
-    transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
-    transactionDetails.isReceiver = walletAddress === transactionDetails.to;
-    transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-    if (transactionDetails.date) {
-      transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
-    }
-    transactionDetails.adminIcon = transactionDetails.adminIcon || (transactionDetails.contractMethodName && transactionDetails.contractMethodName !== 'transfer' && transactionDetails.contractMethodName !== 'initializeAccount' && transactionDetails.contractMethodName !== 'transferFrom' && transactionDetails.contractMethodName !== 'approve' && transactionDetails.contractMethodName !== 'reward');
-  });
+  transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
+  transactionDetails.isReceiver = walletAddress === transactionDetails.to;
+  transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
+  if (transactionDetails.date) {
+    transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
+  }
+  transactionDetails.adminIcon = transactionDetails.adminIcon || (transactionDetails.contractMethodName && transactionDetails.contractMethodName !== 'transfer' && transactionDetails.contractMethodName !== 'initializeAccount' && transactionDetails.contractMethodName !== 'transferFrom' && transactionDetails.contractMethodName !== 'approve' && transactionDetails.contractMethodName !== 'reward');
 }
 
 function retrieveWalletDetails(transactionDetails, prefix) {
   if (!transactionDetails[`${prefix}DisplayName`]) {
-    const address = transactionDetails[prefix];
-    if (!address) {
+    const address = transactionDetails[prefix] && transactionDetails[prefix].toLowerCase();
+    if (!address || (transactionDetails.contractAddress && address === transactionDetails.contractAddress.toLowerCase())) {
       return;
     }
     transactionDetails[`${prefix}Address`] = address.toLowerCase();
@@ -234,17 +200,6 @@ function retrieveWalletDetails(transactionDetails, prefix) {
       transactionDetails[`${prefix}Type`] = transactionDetails[`${prefix}Wallet`].type;
       transactionDetails[`${prefix}Avatar`] = transactionDetails[`${prefix}Wallet`].avatar;
       transactionDetails[`${prefix}DisplayName`] = transactionDetails[`${prefix}Wallet`].name;
-    } else if (transactionDetails[`${prefix}Address`]) {
-      return searchWalletByAddress(transactionDetails[`${prefix}Address`]).then((item) => {
-        if (item && item.name && item.name.length) {
-          transactionDetails[`${prefix}TechnicalId`] = item.technicalId;
-          transactionDetails[`${prefix}SpaceId`] = item.spaceId;
-          transactionDetails[`${prefix}Username`] = item.id;
-          transactionDetails[`${prefix}Type`] = item.type;
-          transactionDetails[`${prefix}Avatar`] = item.avatar;
-          transactionDetails[`${prefix}DisplayName`] = item.name;
-        }
-      });
     }
   }
 }

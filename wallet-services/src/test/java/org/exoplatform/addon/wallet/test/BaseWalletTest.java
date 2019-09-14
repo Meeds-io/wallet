@@ -247,8 +247,15 @@ public abstract class BaseWalletTest {
 
     List<TransactionEntity> transactionEntities = new ArrayList<>();
     for (int i = 0; i < 60; i++) {
-      String contractAddressToUse = i % 2 == 0 ? contractAddress : otherContractAddress; // NOSONAR
-      String contractMethodNameToUse = i % 3 == 0 ? contractMethodName : i % 3 == 1 ? otherContractMethodName : null; // NOSONAR
+      String contractAddressToUse = null;
+      String contractMethodNameToUse = null;
+
+      if (StringUtils.isNotBlank(contractAddress)) {
+        contractAddressToUse = i % 2 == 0 ? contractAddress : otherContractAddress; // NOSONAR
+      }
+      if (StringUtils.isNotBlank(contractMethodName)) {
+        contractMethodNameToUse = i % 3 == 0 ? contractMethodName : i % 3 == 1 ? otherContractMethodName : null; // NOSONAR
+      }
 
       String to = i % 3 == 0 ? walletAddress : i % 3 == 1 ? secondAddress : thirdAddress; // NOSONAR
       String from = i % 3 == 0 ? thirdAddress : i % 3 == 1 ? walletAddress : secondAddress; // NOSONAR
@@ -302,7 +309,7 @@ public abstract class BaseWalletTest {
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     TransactionEntity transactionEntity = new TransactionEntity();
-    transactionEntity.setNetworkId(1);
+    transactionEntity.setNetworkId(WalletUtils.getNetworkId());
     transactionEntity.setHash(StringUtils.lowerCase(hash));
     transactionEntity.setContractAddress(StringUtils.lowerCase(contractAddress));
     transactionEntity.setContractMethodName(contractMethodName);

@@ -391,9 +391,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionDetail.setTimestamp(System.currentTimeMillis());
     }
 
-    if (transaction.getValue().compareTo(BigInteger.valueOf(0)) >= 0) {
+    if (transaction.getValue().compareTo(BigInteger.ZERO) >= 0) {
       BigInteger weiAmount = transaction.getValue();
-      transactionDetail.setValueDecimal(weiAmount, 18);
+      transactionDetail.setValueDecimal(weiAmount, ETHER_TO_WEI_DECIMALS);
     }
 
     String contractAddress = contractDetail.getAddress();
@@ -550,7 +550,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             }
             transactionDetail.setFrom(parameters.getNonIndexedValues().get(0).getValue().toString());
             BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-            transactionDetail.setValueDecimal(weiAmount, 18);
+            transactionDetail.setValueDecimal(weiAmount, ETHER_TO_WEI_DECIMALS);
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_SETSELLPRICE)) {
             transactionLogTreated = true;
@@ -589,7 +589,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
             transactionDetail.setContractAmountDecimal(amount, contractDecimals);
             BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-            transactionDetail.setValueDecimal(weiAmount, 18);
+            transactionDetail.setValueDecimal(weiAmount, ETHER_TO_WEI_DECIMALS);
             transactionDetail.setAdminOperation(false);
 
             if (transactionDetail.isSucceeded()) {

@@ -28,6 +28,7 @@ import org.exoplatform.addon.wallet.entity.TransactionEntity;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 
 public class TransactionStorageTest extends BaseWalletTest {
 
@@ -75,6 +76,32 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                               null,
                                                               0);
     assertEquals("Returned contract transactions list count with limit = 0 is not coherent", 30, transactions.size());
+  }
+
+  /**
+   * Test get list of transactions of a chosen network
+   */
+  @Test
+  public void testGetTransactions() {
+    String contractAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
+    String contractMethodName = "transfer";
+
+    long totalTransactionsSize = generateTransactions("0xe9dfec7864af9e581a85ce3987d026be0f50aaaa",
+                                                      contractAddress,
+                                                      contractMethodName).size();
+    totalTransactionsSize += generateTransactions("0xe9dfec7864af9e581a85ce3987d026be0f50bbbb", null, null).size();
+
+    assertTrue(totalTransactionsSize > 100);
+
+    TransactionStorage transactionStorage = getService(TransactionStorage.class);
+    List<TransactionDetail> transactions = transactionStorage.getTransactions(WalletUtils.getNetworkId(), Integer.MAX_VALUE);
+
+    assertNotNull("Returned transactions list is null", transactions);
+    assertEquals("Returned transactions list count is not coherent", totalTransactionsSize, transactions.size());
+
+    // Test pagination
+    transactions = transactionStorage.getTransactions(WalletUtils.getNetworkId(), 5);
+    assertEquals("Returned contract transactions list count is not coherent", 5, transactions.size());
   }
 
   /**

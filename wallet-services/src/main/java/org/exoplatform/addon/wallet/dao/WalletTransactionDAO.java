@@ -64,6 +64,16 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return query.getResultList();
   }
 
+  public List<TransactionEntity> getTransactions(long networkId, int limit) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getNetworkTransactions",
+                                                                              TransactionEntity.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    if (limit > 0) {
+      query.setMaxResults(limit);
+    }
+    return query.getResultList();
+  }
+
   public List<TransactionEntity> getWalletTransactions(long networkId,
                                                        String address,
                                                        String contractAddress,

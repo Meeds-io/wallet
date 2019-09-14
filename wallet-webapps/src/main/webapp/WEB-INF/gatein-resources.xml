@@ -47,9 +47,6 @@
         <as>EthereumQRPlugin</as>
       </depends>
       <depends>
-        <module>abiDecoder</module>
-      </depends>
-      <depends>
         <module>userPopupPlugin</module>
       </depends>
       <depends>
@@ -83,9 +80,6 @@
         <as>WalletCommon</as>
       </depends>
       <depends>
-        <module>walletJQueryUI</module>
-      </depends>
-      <depends>
         <module>fetchPolyfill</module>
       </depends>
       <depends>
@@ -105,9 +99,6 @@
       <depends>
         <module>ethQRCode</module>
         <as>EthereumQRPlugin</as>
-      </depends>
-      <depends>
-        <module>abiDecoder</module>
       </depends>
       <depends>
         <module>userPopupPlugin</module>
@@ -147,9 +138,6 @@
         <as>WalletCommon</as>
       </depends>
       <depends>
-        <module>walletJQueryUI</module>
-      </depends>
-      <depends>
         <module>fetchPolyfill</module>
       </depends>
       <depends>
@@ -169,9 +157,6 @@
       <depends>
         <module>ethQRCode</module>
         <as>EthereumQRPlugin</as>
-      </depends>
-      <depends>
-        <module>abiDecoder</module>
       </depends>
       <depends>
         <module>userPopupPlugin</module>

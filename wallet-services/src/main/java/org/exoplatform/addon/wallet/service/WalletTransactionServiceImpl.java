@@ -103,9 +103,17 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                  boolean onlyPending,
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException {
+    if (administration && !isUserRewardingAdmin(currentUser)) {
+      throw new IllegalAccessException("User " + currentUser + " is not allowed to get administrative transactions");
+    }
+
     if (contractService.isContract(address)) {
-      return getContractTransactions(address, contractMethodName, limit, currentUser);
-    } else {
+      if (isUserRewardingAdmin(currentUser)) {
+        return getContractTransactions(address, contractMethodName, limit, currentUser);
+      } else {
+        throw new IllegalAccessException("User " + currentUser + " is not allowed to get all contract transactions");
+      }
+    } else if (StringUtils.isNotBlank(address)) {
       return getWalletTransactions(address,
                                    contractAddress,
                                    contractMethodName,
@@ -114,6 +122,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                    onlyPending,
                                    administration,
                                    currentUser);
+    } else if (administration) {
+      return getTransactions(limit, currentUser);
+    } else {
+      throw new IllegalStateException("User " + currentUser + " is not allowed to get all contract transactions");
     }
   }
 
@@ -283,6 +295,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getMaxAttemptsToSend() {
     return maxAttemptsToSend;
+  }
+
+  private List<TransactionDetail> getTransactions(int limit, String currentUser) {
+    List<TransactionDetail> transactionDetails = transactionStorage.getTransactions(getNetworkId(), limit);
+    transactionDetails.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail, currentUser));
+    return transactionDetails;
   }
 
   private List<TransactionDetail> getContractTransactions(String contractAddress,

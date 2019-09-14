@@ -104,7 +104,6 @@
                         :contract-details="contractDetails"
                         @refresh="init()"
                         @display-transactions="openAccountDetail"
-                        @refresh-token-balance="refreshTokenBalance"
                         @error="error = $event" />
                     </v-flex>
                     <template v-if="initializationState !== 'DENIED'">
@@ -140,7 +139,6 @@
                     :wallet="wallet"
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
-                    @refresh-token-balance="refreshTokenBalance"
                     @transaction-sent="newPendingTransaction"
                     @error="error = $event" />
                 </v-flex>
@@ -423,9 +421,6 @@ export default {
       if(event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
         this.addressRegistry.refreshWallet(this.wallet);
       }
-    },
-    refreshTokenBalance() {
-      return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
     },
     reloadContract(event) {
       return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress)

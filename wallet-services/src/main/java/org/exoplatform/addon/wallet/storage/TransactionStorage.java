@@ -68,6 +68,17 @@ public class TransactionStorage {
 
   /**
    * @param networkId blockchain network id
+   * @param limit size limit of transactions to retrieve
+   * @return {@link List} of {@link TransactionDetail} for selected blockchain
+   *         network id
+   */
+  public List<TransactionDetail> getTransactions(long networkId, int limit) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getTransactions(networkId, limit);
+    return fromEntities(transactions);
+  }
+
+  /**
+   * @param networkId blockchain network id
    * @param address wallet address
    * @param contractAddress filter transactions by a contract address
    * @param contractMethodName filter transactions by a contract method

@@ -4,7 +4,6 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -317,7 +316,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (StringUtils.isBlank(receiverAddress)) {
       throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
     }
-    if (transactionDetail.getValue() < 0) {
+    if (transactionDetail.getValue() <= 0) {
       throw new IllegalArgumentException("ether amount parameter has to be a positive amount");
     }
 
@@ -336,7 +335,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     generateRawTransaction(receiverAddress,
                            null,
-                           BigDecimal.valueOf(transactionDetail.getValue()).toBigInteger(),
+                           etherAmount,
                            transactionDetail);
 
     transactionDetail.setNetworkId(this.networkId);

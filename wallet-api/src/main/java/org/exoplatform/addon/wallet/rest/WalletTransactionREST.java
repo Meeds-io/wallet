@@ -203,11 +203,6 @@ public class WalletTransactionREST implements ResourceContainer {
                                   @ApiParam(value = "limit transactions to retrieve", required = false) @QueryParam("limit") int limit,
                                   @ApiParam(value = "whether to include only pending or not", required = false) @QueryParam("pending") boolean onlyPending,
                                   @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
-
     String currentUserId = getCurrentUserId();
     try {
       List<TransactionDetail> transactionDetails = transactionService.getTransactions(address,
