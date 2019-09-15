@@ -200,7 +200,7 @@ export default {
           }));
           return;
         }
-  
+
         if (!receiver || !receiver.type || !receiver.id) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
             detail : this.$t('exoplatform.wallet.warning.emptyPaymentAmount')
@@ -240,120 +240,115 @@ export default {
         const gasPrice = this.settings.network.minGasPrice;
         const defaultGas = this.settings.network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
-        const isApprovedAccount = this.principalContractDetails.contract.methods.isApprovedAccount;
         const contractAddress = this.principalContractDetails.address;
-        const contractType = this.principalContractDetails.contractType;
         const amountWithDecimals = this.walletUtils.convertTokenAmountToSend(amount, this.principalContractDetails.decimals);
 
         let approvedSender = false;
         let approvedReceiver = false;
         let receiverAddress = null;
         let senderAddress = null;
+        let receiverWallet = null;
+        let senderWallet = null;
 
-        return this.addressRegistry.searchAddress(receiver.id, receiver.type)
-          .then((address) => {
-            receiverAddress = address;
+        return this.addressRegistry.searchWalletByTypeAndId(receiver.id, receiver.type)
+          .then((wallet) => {
+            receiverWallet = wallet;
+            approvedReceiver = receiverWallet && receiverWallet.isApproved;
+            if(!approvedReceiver) {
+              throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
+            }
+
+            receiverAddress = receiverWallet && receiverWallet.address;
             if (!receiverAddress || !receiverAddress.length) {
               throw new Error(this.$t('exoplatform.wallet.warning.receiverDoesntHaveWallet'));
             }
-
-            return this.addressRegistry.searchAddress(sender.id, sender.type)
-              .then((address) => {
-                senderAddress = address;
-
-                if (!senderAddress || !senderAddress.length) {
-                  throw new Error(this.$t('exoplatform.wallet.warning.senderDoesntHaveWallet'));
-                }
-
-                if(senderAddress.toLowerCase() !== this.walletAddress.toLowerCase()) {
-                  throw new Error(this.$t('exoplatform.wallet.warning.incoherentSenderWallet'));
-                }
-
-                if(senderAddress.toLowerCase() === receiverAddress.toLowerCase()) {
-                  throw new Error(this.$t('exoplatform.wallet.warning.receiverMustBeDifferentFromSender'));
-                }
-              });
           })
-          .then(() => {
-            return Promise.resolve(null)
-            // check approved account on ERT Token contract type only
-            .then(() => (contractType && isApprovedAccount(senderAddress).call()) || true)
-            .then((approved) => {
-              approvedSender = approved;
-              if(!approved) {
-                throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
-              }
-            })
-            // check approved account on ERT Token contract type only
-            .then(() => (contractType && isApprovedAccount(receiverAddress).call()) || true)
-            .then((approved) => {
-              approvedReceiver = approved;
-              if(!approved) {
-                throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
-              }
-            })
-            .then(() => transfer(receiverAddress, amountWithDecimals).estimateGas({
-              from: senderAddress,
-              gas: defaultGas,
-              gasPrice: gasPrice,
-            }))
-            .catch((e) => {
-              if(approvedReceiver && approvedSender) {
-                console.debug('Error estimating transaction fee', {
-                  from: senderAddress,
-                  to: receiverAddress,
-                  gas: defaultGas,
-                  gasPrice: gasPrice,
-                  balance: this.wallet.tokenBalance,
-                  amount: amount,
-                }, e);
+          .then(() => this.addressRegistry.searchWalletByTypeAndId(sender.id, sender.type))
+          .then((wallet) => {
+            senderWallet = wallet;
+            approvedSender = senderWallet && senderWallet.isApproved;
+            if(!approvedSender) {
+              throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
+            }
 
-                document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                  detail : this.$t('exoplatform.wallet.warning.errorSimulatingTransaction')
-                }));
-              } else {
-                document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                  detail : (e && e.message) || e,
-                }));
-              }
-              return;
-            })
-            .then((result) => {
-              if (!result) {
-                // Transaction estimation seems to have an error
-                return;
-              }
-              if (result > defaultGas) {
-                document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                  detail : this.$t('exoplatform.wallet.warning.lowPaymentTransactionFeeError')
-                }));
-                return;
-              }
+            senderAddress = senderWallet && senderWallet.address;
 
-              const transactionDetail = {
-                from: senderAddress.toLowerCase(),
-                to: receiverAddress.toLowerCase(),
-                value: 0,
+            if (!senderAddress || !senderAddress.length) {
+              throw new Error(this.$t('exoplatform.wallet.warning.senderDoesntHaveWallet'));
+            }
+
+            if(senderAddress.toLowerCase() !== this.walletAddress.toLowerCase()) {
+              throw new Error(this.$t('exoplatform.wallet.warning.incoherentSenderWallet'));
+            }
+
+            if(senderAddress.toLowerCase() === receiverAddress.toLowerCase()) {
+              throw new Error(this.$t('exoplatform.wallet.warning.receiverMustBeDifferentFromSender'));
+            }
+          })
+          .then(() => transfer(receiverAddress, amountWithDecimals).estimateGas({
+            from: senderAddress,
+            gas: defaultGas,
+            gasPrice: gasPrice,
+          }))
+          .catch((e) => {
+            if(approvedReceiver && approvedSender) {
+              console.debug('Error estimating transaction fee', {
+                from: senderAddress,
+                to: receiverAddress,
                 gas: defaultGas,
                 gasPrice: gasPrice,
-                pending: true,
-                contractAddress: contractAddress,
-                contractMethodName: 'transfer',
-                contractAmount: amount,
-                label: label,
-                message: message,
-                timestamp: Date.now()
-              };
+                balance: this.wallet.tokenBalance,
+                amount: amount,
+              }, e);
 
-              return this.tokenUtils.sendContractTransaction(transactionDetail, transfer, [receiverAddress, amountWithDecimals])
-                .then((savedTransaction) => {
-                  // The transaction has been hashed and is marked as pending in internal database
-                  document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
-                    detail : savedTransaction
-                  }));
-                  this.walletUtils.lockBrowserWallet();
-                });
-            });
+              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
+                detail : this.$t('exoplatform.wallet.warning.errorSimulatingTransaction')
+              }));
+            } else {
+              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
+                detail : (e && e.message) || e,
+              }));
+            }
+            return;
+          })
+          .then((result) => {
+            if (!result) {
+              // Transaction estimation seems to have an error
+              return;
+            }
+            if (result > defaultGas) {
+              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
+                detail : this.$t('exoplatform.wallet.warning.lowPaymentTransactionFeeError')
+              }));
+              return;
+            }
+
+            const transactionDetail = {
+              from: senderAddress.toLowerCase(),
+              to: receiverAddress.toLowerCase(),
+              value: 0,
+              gas: defaultGas,
+              gasPrice: gasPrice,
+              pending: true,
+              contractAddress: contractAddress,
+              contractMethodName: 'transfer',
+              contractAmount: amount,
+              label: label,
+              message: message,
+              timestamp: Date.now()
+            };
+
+            return this.tokenUtils.sendContractTransaction(transactionDetail, transfer, [receiverAddress, amountWithDecimals]);
+          })
+          .then((savedTransaction) => {
+            if (!savedTransaction) {
+              return;
+            }
+            // The transaction has been hashed and is marked as pending in internal database
+            document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
+              detail : savedTransaction
+            }));
+            this.walletUtils.lockBrowserWallet();
           })
           .catch((error) => {
             console.debug('sendTokens method - error', error);

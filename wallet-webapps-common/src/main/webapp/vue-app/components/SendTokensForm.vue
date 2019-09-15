@@ -112,6 +112,7 @@ import GasPriceChoice from './GasPriceChoice.vue';
 
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
+import {searchWalletByAddress} from '../js/AddressRegistry.js';
 
 export default {
   components: {
@@ -234,11 +235,9 @@ export default {
           this.warning = null;
           this.information = null;
 
-          return this.contractDetails.contract.methods
-            .isApprovedAccount(this.recipient)
-            .call()
-            .then((isApproved) => {
-              this.isApprovedRecipient = isApproved;
+          return searchWalletByAddress(this.recipient, true)
+            .then((receiverWallet) => {
+              this.isApprovedRecipient = receiverWallet && receiverWallet.isApproved;
               if (this.contractDetails && this.contractDetails.isPaused) {
                 this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
                 this.canSendToken = false;
