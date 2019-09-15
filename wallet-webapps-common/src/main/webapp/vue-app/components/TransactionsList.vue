@@ -779,7 +779,7 @@
                   </a>
                 </v-list-item-content>
               </v-list-item>
-              <v-list-item>
+              <v-list-item v-if="administration && item.nonce">
                 <v-list-item-content>
                   Nonce
                 </v-list-item-content>
