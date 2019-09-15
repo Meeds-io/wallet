@@ -300,6 +300,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       TransactionDetail transactionDetail = (TransactionDetail) methodArgs[0];
       String methodName = transactionDetail.getContractMethodName();
       parameters.put("hash", transactionDetail.getHash());
+      parameters.put("nonce", transactionDetail.getNonce());
+      parameters.put("sender", transactionDetail.getFromWallet());
+      parameters.put("receiver", transactionDetail.getToWallet());
 
       if (StringUtils.isNotBlank(transactionDetail.getContractAddress())) {
         parameters.put("contract_address", transactionDetail.getContractAddress());
@@ -307,8 +310,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       if (StringUtils.isNotBlank(methodName)) {
         parameters.put("contract_method", methodName);
       }
-      parameters.put("sender", transactionDetail.getFromWallet());
-      parameters.put("receiver", transactionDetail.getToWallet());
 
       double contractAmount = transactionDetail.getContractAmount();
       if (contractAmount > 0 && (StringUtils.equals(ERTTokenV2.FUNC_INITIALIZEACCOUNT, methodName)

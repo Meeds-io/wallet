@@ -249,6 +249,11 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             // Mark transaction as failed, ContractTransactionVerifierJob will
             // remake it as success if it detects it when it would be mined
             transactionDetail.setSucceeded(false);
+            // Cancel usage of transaction nonce to be able to reuse it if
+            // transaction is not arrived really on blockchain (tx can be purged
+            // from MemPool of miners when there are too many pending
+            // transaction: could happen on mainnet only)
+            transactionDetail.setNonce(0);
             LOG.debug("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
                       transactionHash,
                       pendingTransactionMaxDays);
