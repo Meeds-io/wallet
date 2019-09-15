@@ -228,6 +228,42 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
+  public void checkPendingTransactionValidity(TransactionDetail transactionDetail) {
+    if (transactionDetail == null || !transactionDetail.isPending()) {
+      return;
+    }
+    long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
+    if (pendingTransactionMaxDays > 0) {
+      long creationTimestamp = transactionDetail.getTimestamp();
+      if (creationTimestamp > 0) {
+        Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+        if (duration.toDays() >= pendingTransactionMaxDays) {
+          String transactionHash = transactionDetail.getHash();
+
+          Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
+          if (transaction == null) {// Transaction Not found on blockchain for
+                                    // more than max waiting days, marking
+                                    // transaction as failed in internal
+                                    // database
+            transactionDetail.setPending(false);
+            // Mark transaction as failed, ContractTransactionVerifierJob will
+            // remake it as success if it detects it when it would be mined
+            transactionDetail.setSucceeded(false);
+            LOG.debug("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
+                      transactionHash,
+                      pendingTransactionMaxDays);
+            getTransactionService().saveTransactionDetail(transactionDetail, true);
+          } else {
+            LOG.debug("Transaction '{}' was FOUND on blockchain for more than '{}' days, so avoid marking it as failed",
+                      transactionHash,
+                      pendingTransactionMaxDays);
+          }
+        }
+      }
+    }
+  }
+
+  @Override
   public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     if (transaction == null) {
@@ -240,25 +276,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         throw new IllegalStateException("Transaction with hash " + transactionHash
             + " wasn't found in internal database while it should have been retrieved from it.");
       }
-
       LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
-
-      long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
-      if (pendingTransactionMaxDays > 0) {
-        long creationTimestamp = transactionDetail.getTimestamp();
-        if (creationTimestamp > 0) {
-          Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
-          if (duration.toDays() >= pendingTransactionMaxDays) {
-            boolean broadcastTransactionMining = transactionDetail.isPending();
-            transactionDetail.setPending(false);
-            transactionDetail.setSucceeded(false);
-            LOG.debug("Transaction '{}' was not found on blockchain for more than '{}' days, so mark it as failed",
-                      transactionHash,
-                      pendingTransactionMaxDays);
-            getTransactionService().saveTransactionDetail(transactionDetail, broadcastTransactionMining);
-          }
-        }
-      }
       return;
     } else {
       String blockHash = transaction.getBlockHash();

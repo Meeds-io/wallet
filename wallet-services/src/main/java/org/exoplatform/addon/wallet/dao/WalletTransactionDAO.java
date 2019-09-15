@@ -123,11 +123,11 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return query.getResultList();
   }
 
-  public List<String> getPendingTransactionsHashes(long networkId) {
-    TypedQuery<String> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactionsHashes",
-                                                                   String.class);
+  public List<TransactionEntity> getPendingTransactions(long networkId) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactions",
+                                                                              TransactionEntity.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
-    List<String> resultList = query.getResultList();
+    List<TransactionEntity> resultList = query.getResultList();
     return resultList == null ? null : resultList;
   }
 

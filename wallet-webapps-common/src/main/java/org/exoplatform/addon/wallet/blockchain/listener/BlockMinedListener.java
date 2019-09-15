@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
@@ -47,13 +48,13 @@ public class BlockMinedListener extends Listener<Block, Boolean> implements ExoW
     ExoContainerContext.setCurrentContainer(this.container);
     RequestLifeCycle.begin(this.container);
     try {
-      List<String> pendingTransactionsHashes = transactionService.getPendingTransactionHashes();
+      List<TransactionDetail> pendingTransactions = transactionService.getPendingTransactions();
 
-      if (pendingTransactionsHashes.isEmpty()) {
+      if (pendingTransactions.isEmpty()) {
         LOG.debug("No pending transaction to check for block '{}'", blockNumber);
       } else {
         LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database in block {}",
-                  pendingTransactionsHashes.size(),
+                  pendingTransactions.size(),
                   blockNumber);
 
         @SuppressWarnings("rawtypes")
@@ -61,7 +62,10 @@ public class BlockMinedListener extends Listener<Block, Boolean> implements ExoW
         Set<String> minedTransactionHashes = transactions.stream()
                                                          .map(tx -> tx.get().toString().toLowerCase())
                                                          .collect(Collectors.toSet());
-        minedTransactionHashes.retainAll(pendingTransactionsHashes);
+        Set<String> pendingTransactionHashes = pendingTransactions.stream()
+                                                                  .map(TransactionDetail::getHash)
+                                                                  .collect(Collectors.toSet());
+        minedTransactionHashes.retainAll(pendingTransactionHashes);
         if (!minedTransactionHashes.isEmpty()) {
           for (String hash : minedTransactionHashes) {
             try { // NOSONAR
@@ -72,6 +76,13 @@ public class BlockMinedListener extends Listener<Block, Boolean> implements ExoW
             } catch (Exception e) {
               LOG.warn("Error checking mined transaction on blockchain: {}", hash, e);
             }
+          }
+        }
+
+        for (TransactionDetail transactionDetail : pendingTransactions) {
+          if (!minedTransactionHashes.contains(transactionDetail.getHash())
+              && (transactionDetail.getRawTransaction() == null || transactionDetail.getSentTimestamp() > 0)) {
+            blockchainTransactionService.checkPendingTransactionValidity(transactionDetail);
           }
         }
       }

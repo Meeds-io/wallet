@@ -121,7 +121,7 @@ public class ServiceLoaderServlet extends HttpServlet {
 
       addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
                                 "Add a job to verify if mined contract transactions are added in database",
-                                "0 0 * ? * * *");
+                                "0 0/5 * ? * * *");
       addBlockchainScheduledJob(TransactionSenderJob.class,
                                 "Configuration for transaction sending to blockchain",
                                 "0/30 * * * * ?");

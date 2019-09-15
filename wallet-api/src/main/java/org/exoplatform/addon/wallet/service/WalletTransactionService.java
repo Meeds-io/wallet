@@ -1,6 +1,7 @@
 package org.exoplatform.addon.wallet.service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
 
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
@@ -11,10 +12,10 @@ import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
 public interface WalletTransactionService {
 
   /**
-   * @return {@link List} of pending {@link TransactionDetail#getHash()} marked
-   *         as pending on blockchain
+   * @return {@link List} of pending {@link TransactionDetail} marked as pending
+   *         on blockchain
    */
-  public List<String> getPendingTransactionHashes();
+  public List<TransactionDetail> getPendingTransactions();
 
   /**
    * @param address wallet address

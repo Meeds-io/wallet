@@ -2,6 +2,8 @@ package org.exoplatform.addon.wallet.service;
 
 import java.io.IOException;
 
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+
 public interface BlockchainTransactionService {
 
   /**
@@ -27,5 +29,16 @@ public interface BlockchainTransactionService {
    * @param pendingTransactionFromDatabase
    */
   void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase);
+
+  /**
+   * Checks that a transaction marked as pending in internal database is valid
+   * and available on blockchain. If not and if it has exceede
+   * {@link WalletTransactionService#getPendingTransactionMaxDays()}, then mark
+   * it as 'failed'. I will be remade as 'Success' if
+   * ContractTransactionVerifierJob detects a Contract Log
+   * 
+   * @param transactionDetail
+   */
+  void checkPendingTransactionValidity(TransactionDetail transactionDetail);
 
 }

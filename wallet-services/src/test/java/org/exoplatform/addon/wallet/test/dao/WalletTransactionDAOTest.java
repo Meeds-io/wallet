@@ -172,13 +172,13 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
     // Search all pending transactions using the network id
-    List<String> transactions = walletTransactionDAO.getPendingTransactionsHashes(1);
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(1);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
 
     // Use non existing network ID
-    transactions = walletTransactionDAO.getPendingTransactionsHashes(2);
+    transactions = walletTransactionDAO.getPendingTransactions(2);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 
