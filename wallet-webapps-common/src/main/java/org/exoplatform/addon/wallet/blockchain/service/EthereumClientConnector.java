@@ -26,6 +26,7 @@ import java.util.concurrent.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
+import org.reactivestreams.Subscription;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
@@ -46,6 +47,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
+import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 
 /**
@@ -81,7 +83,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private String                   websocketURLSuffix         = null;
 
-  private Disposable               blockSubscribtion;
+  private Subscription             blockSubscribtion;
+
+  private Disposable               blockSubscribtionDisposable;
+
+  private boolean                  blockSubscribtionCatchedUpLastBlock;
 
   private long                     poolingInterval            = DEFAULT_POOLING_TIME;
 
@@ -128,8 +134,10 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public void stop() {
     this.serviceStopping = true;
     connectionVerifierExecutor.shutdownNow();
-    if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
-      this.blockSubscribtion.dispose();
+    if (this.blockSubscribtionDisposable != null && this.blockSubscribtion != null
+        && !this.blockSubscribtionDisposable.isDisposed()) {
+      this.blockSubscribtion.cancel();
+      this.blockSubscribtionDisposable.dispose();
     }
     closeConnection();
   }
@@ -339,28 +347,17 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
     // Close old subscription if exists
     try {
-      if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
-        this.blockSubscribtion.dispose();
+      if (this.blockSubscribtionDisposable != null && this.blockSubscribtion != null
+          && !this.blockSubscribtionDisposable.isDisposed()) {
+        this.blockSubscribtion.cancel();
+        this.blockSubscribtionDisposable.dispose();
       }
     } catch (Exception e) {
       LOG.warn("Error while disposing old subscription", e);
     }
 
     // Renew subscription that will trigger an event each time a block is mined
-    this.blockSubscribtion = getWeb3j()
-                                       .replayPastAndFutureBlocksFlowable(new DefaultBlockParameterNumber(this.lastWatchedBlockNumber),
-                                                                          false)
-                                       .subscribe(ethBlock -> {
-                                         if (ethBlock == null || ethBlock.getBlock() == null) {
-                                           return;
-                                         }
-
-                                         Block block = ethBlock.getBlock();
-                                         getListenerService().broadcast(NEW_BLOCK_MINED_EVENT, block, null);
-
-                                         long blockNumber = block.getNumber().longValue();
-                                         this.lastWatchedBlockNumber = Math.max(this.lastWatchedBlockNumber, blockNumber);
-                                       });
+    this.blockSubscribtionDisposable = subscribeToBlockMining();
   }
 
   public void setPoolingInterval(long poolingInterval) {
@@ -490,6 +487,35 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         LOG.warn("Error closing old websocket connection: {}", e1.getMessage());
       }
     }
+  }
+
+  private Disposable subscribeToBlockMining() {
+    this.blockSubscribtionCatchedUpLastBlock = false;
+    Flowable<EthBlock> blockFlowable =
+                                     getWeb3j().replayPastAndFutureBlocksFlowable(new DefaultBlockParameterNumber(this.lastWatchedBlockNumber),
+                                                                                  false);
+    return blockFlowable.subscribe(ethBlock -> handleNewBlockEvent(ethBlock),
+                                   // error occurred while subscribing
+                                   exception -> LOG.error("Error subscripting to mined blocks events", exception),
+                                   // catching last block
+                                   () -> this.blockSubscribtionCatchedUpLastBlock = true,
+                                   // subscribed successfully
+                                   subscription -> {
+                                     LOG.info("Subscribed to mined blocks events");
+                                     this.blockSubscribtion = subscription;
+                                   });
+  }
+
+  private void handleNewBlockEvent(EthBlock ethBlock) throws Exception {
+    if (ethBlock == null || ethBlock.getBlock() == null) {
+      return;
+    }
+
+    Block block = ethBlock.getBlock();
+    getListenerService().broadcast(NEW_BLOCK_MINED_EVENT, block, this.blockSubscribtionCatchedUpLastBlock);
+
+    long blockNumber = block.getNumber().longValue();
+    this.lastWatchedBlockNumber = Math.max(this.lastWatchedBlockNumber, blockNumber);
   }
 
   private ListenerService getListenerService() {

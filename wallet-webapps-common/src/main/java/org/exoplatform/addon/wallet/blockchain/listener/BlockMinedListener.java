@@ -1,7 +1,9 @@
 package org.exoplatform.addon.wallet.blockchain.listener;
 
-import java.util.List;
-import java.util.Set;
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.OPERATION;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
@@ -9,6 +11,8 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 
 import org.exoplatform.addon.wallet.service.BlockchainTransactionService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
+import org.exoplatform.addon.wallet.statistic.ExoWalletStatistic;
+import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -17,7 +21,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 @Asynchronous
-public class BlockMinedListener extends Listener<Block, Object> {
+public class BlockMinedListener extends Listener<Block, Boolean> implements ExoWalletStatisticService {
   private static final Log             LOG = ExoLogger.getLogger(BlockMinedListener.class);
 
   private ExoContainer                 container;
@@ -35,7 +39,8 @@ public class BlockMinedListener extends Listener<Block, Object> {
   }
 
   @Override
-  public void onEvent(Event<Block, Object> event) throws Exception {
+  @ExoWalletStatistic(local = false, service = "wallet", operation = OPERATION_GET_BLOCK)
+  public void onEvent(Event<Block, Boolean> event) throws Exception {
     Block block = event.getSource();
     long blockNumber = block.getNumber().longValue();
 
@@ -75,6 +80,27 @@ public class BlockMinedListener extends Listener<Block, Object> {
     } finally {
       RequestLifeCycle.end();
     }
+  }
+
+  @Override
+  public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) {
+    Map<String, Object> parameters = new HashMap<>();
+
+    @SuppressWarnings("unchecked")
+    Event<Block, Boolean> event = (Event<Block, Boolean>) methodArgs[0];
+
+    Block block = event.getSource();
+    boolean newBlock = event.getData();
+    if (newBlock) {
+      parameters.put(OPERATION, OPERATION_GET_BLOCK_BY_HASH);
+    } else {
+      parameters.put(OPERATION, OPERATION_GET_BLOCK_BY_NUMBER);
+    }
+    parameters.put("blockchain_network_id", getNetworkId());
+    parameters.put("blockchain_network_url_suffix", getBlockchainURLSuffix());
+    parameters.put("block_hash", block.getHash());
+    parameters.put("block_number", block.getNumber().longValue());
+    return parameters;
   }
 
 }

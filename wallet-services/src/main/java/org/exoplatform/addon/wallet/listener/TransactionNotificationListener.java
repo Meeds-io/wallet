@@ -50,7 +50,7 @@ import org.exoplatform.social.core.service.LinkProvider;
  */
 @Asynchronous
 public class TransactionNotificationListener extends Listener<Object, TransactionDetail> {
-  private static final Log         LOG                 = ExoLogger.getLogger(TransactionNotificationListener.class);
+  private static final Log         LOG       = ExoLogger.getLogger(TransactionNotificationListener.class);
 
   private ExoContainer             container;
 
@@ -58,9 +58,7 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
 
   private WalletAccountService     walletAccountService;
 
-  private long                     networkId           = 0;
-
-  private String                   blockchainURLSuffix = null;
+  private long                     networkId = 0;
 
   public TransactionNotificationListener(PortalContainer container) {
     this.container = container;
@@ -227,19 +225,6 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
       }
     }
     return networkId;
-  }
-
-  private String getBlockchainURLSuffix() {
-    if (blockchainURLSuffix == null) {
-      GlobalSettings settings = getSettings();
-      if (settings != null && settings.getNetwork() != null
-          && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
-        String websocketProviderURL = settings.getNetwork().getWebsocketProviderURL();
-        String[] urlParts = websocketProviderURL.split("/");
-        blockchainURLSuffix = urlParts[urlParts.length - 1];
-      }
-    }
-    return blockchainURLSuffix;
   }
 
   private WalletTransactionService getTransactionService() {
