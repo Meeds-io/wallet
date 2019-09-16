@@ -21,7 +21,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
     @NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address"),
-    @NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.sentDate = 0 AND tx.rawTransaction IS NOT NULL ORDER BY tx.createdDate ASC"),
+    @NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.sentDate = 0 AND tx.rawTransaction IS NOT NULL ORDER BY tx.nonce ASC"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactionSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address AND tx.sendingAttemptCount > 0"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactionAsSender", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address"),
 })

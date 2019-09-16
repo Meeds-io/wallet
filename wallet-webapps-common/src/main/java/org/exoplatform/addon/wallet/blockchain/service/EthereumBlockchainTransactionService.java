@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
@@ -196,9 +195,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   @Override
   public void sendRawTransactions() {
     List<TransactionDetail> transactions = getTransactionService().getTransactionsToSend();
-    transactions = transactions.stream()
-                               .sorted(Comparator.comparingLong(TransactionDetail::getTimestamp))
-                               .collect(Collectors.toList());
     Set<String> walletAddressesWithTransactionsSent = new HashSet<>();
     for (TransactionDetail transactionDetail : transactions) {
       String from = transactionDetail.getFrom();
