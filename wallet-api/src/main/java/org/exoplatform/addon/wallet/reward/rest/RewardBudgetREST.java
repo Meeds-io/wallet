@@ -46,7 +46,7 @@ public class RewardBudgetREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
-      RewardReport rewardReport = rewardService.getRewardReport(periodDateInSeconds);
+      RewardReport rewardReport = rewardService.computeRewardReport(periodDateInSeconds);
 
       for (WalletReward walletReward : rewardReport.getRewards()) {
         walletAccountService.retrieveWalletBlockchainState(walletReward.getWallet());

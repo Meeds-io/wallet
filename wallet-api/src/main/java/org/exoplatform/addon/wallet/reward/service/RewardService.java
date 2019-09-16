@@ -35,7 +35,7 @@ public interface RewardService {
    * @return a {@link Set} of {@link WalletReward} with the details of sent
    *         tokens and tokens to send
    */
-  public RewardReport getRewardReport(long periodDateInSeconds);
+  RewardReport computeRewardReport(long periodDateInSeconds);
 
   /**
    * Send rewards transactions
@@ -46,6 +46,6 @@ public interface RewardService {
    * @throws Exception if an error occurs while sending the rewards transactions
    *           on blockchain
    */
-  public void sendRewards(long periodDateInSeconds, String username) throws Exception; // NOSONAR
+  void sendRewards(long periodDateInSeconds, String username) throws Exception; // NOSONAR
 
 }

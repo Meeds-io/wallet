@@ -25,6 +25,9 @@ public class WalletReward implements Serializable {
   private RewardTransaction       transaction;
 
   @Exclude
+  private long                    poolId;
+
+  @Exclude
   private String                  poolName;
 
   private boolean                 enabled;

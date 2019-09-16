@@ -43,4 +43,5 @@ public interface RewardTransactionService {
    * @param rewardTransaction to save in DB
    */
   public void saveRewardTransaction(RewardTransaction rewardTransaction);
+
 }

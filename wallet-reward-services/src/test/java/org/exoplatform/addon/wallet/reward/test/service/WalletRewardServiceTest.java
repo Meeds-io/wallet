@@ -40,7 +40,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 03)
                                                                  .atEndOfMonth()
                                                                  .atStartOfDay());
-    RewardReport rewardReport = walletRewardService.getRewardReport(startDateInSeconds);
+    RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
     assertNotNull(rewardReport);
     assertNotNull(rewardReport.getRewards());
     assertEquals(0, rewardReport.getRewards().size());
@@ -55,7 +55,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       entitiesToClean.add(wallet);
     }
 
-    rewardReport = walletRewardService.getRewardReport(startDateInSeconds);
+    rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
     assertNotNull(rewardReport);
     // Even if settings are null, the returned rewards shouldn't be empty
     assertEquals(enabledWalletsCount, rewardReport.getRewards().size());
@@ -175,7 +175,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
         rewardTeamService.saveTeam(team);
       });
 
-      rewardReport = walletRewardService.getRewardReport(startDateInSeconds);
+      rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
 
       // check total budget to send
       double tokensToSend = rewardReport.getRewards().stream().mapToDouble(WalletReward::getTokensToSend).sum();
@@ -243,12 +243,14 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     RewardTransactionService rewardTransactionService = getService(RewardTransactionService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    RewardPeriodService rewardPeriodService = getService(RewardPeriodService.class);
 
     WalletRewardService walletRewardService = new WalletRewardService(walletAccountService,
                                                                       walletTransactionService,
                                                                       rewardSettingsService,
                                                                       rewardTransactionService,
-                                                                      rewardTeamService);
+                                                                      rewardTeamService,
+                                                                      rewardPeriodService);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
@@ -391,7 +393,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
                                       int enabledWalletsCount,
                                       long amount) {
     double sumOfTokensToSend = 0;
-    RewardReport rewardReport = walletRewardService.getRewardReport(startDateInSeconds);
+    RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
     assertNotNull(rewardReport);
     Set<WalletReward> rewards = rewardReport.getRewards();
     assertNotNull(rewards);

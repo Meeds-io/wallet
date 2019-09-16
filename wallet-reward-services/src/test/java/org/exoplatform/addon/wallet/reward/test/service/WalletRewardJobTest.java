@@ -34,12 +34,14 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     RewardTransactionService rewardTransactionService = getService(RewardTransactionService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    RewardPeriodService rewardPeriodService = getService(RewardPeriodService.class);
 
     WalletRewardService walletRewardService = new WalletRewardService(walletAccountService,
                                                                       walletTransactionService,
                                                                       rewardSettingsService,
                                                                       rewardTransactionService,
-                                                                      rewardTeamService);
+                                                                      rewardTeamService,
+                                                                      rewardPeriodService);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
 
@@ -115,7 +117,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(initialRewardPeriodsInProgress.size() + 1l, rewardPeriodsInProgress.size());
 
-      RewardReport rewardReport = walletRewardService.getRewardReport(startDateInSeconds);
+      RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
       Set<WalletReward> rewards = rewardReport.getRewards();
       for (WalletReward walletReward : rewards) {
         String hash = walletReward.getTransaction().getHash();

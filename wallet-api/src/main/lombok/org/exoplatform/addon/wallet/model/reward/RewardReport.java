@@ -95,6 +95,6 @@ public class RewardReport {
   public boolean isCompletelyProceeded() {
     // Can be greater if in the mean time of transaction confirmation, a member
     // has been invalidated / disabled / deleted
-    return countSuccess() >= countValidRewards();
+    return countTransactions() > 0 && countSuccess() >= countValidRewards();
   }
 }

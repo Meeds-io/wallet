@@ -40,7 +40,7 @@ public class RewardSuccessNotificationPluginTest extends BaseWalletRewardTest {
       transaction.setHash("hash");
       transaction.setTokensSent(2);
       transaction.setStatus(transactionStatus);
-      rewards.add(new WalletReward(null, null, transaction, null, true));
+      rewards.add(new WalletReward(null, null, transaction, 0, null, true));
     }
     rewardReport.setRewards(rewards);
 

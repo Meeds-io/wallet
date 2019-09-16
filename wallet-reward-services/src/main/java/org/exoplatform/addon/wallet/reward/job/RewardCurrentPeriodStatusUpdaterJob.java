@@ -16,15 +16,14 @@
  */
 package org.exoplatform.addon.wallet.reward.job;
 
-import static org.exoplatform.addon.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import org.quartz.*;
 
-import org.exoplatform.addon.wallet.model.reward.RewardPeriod;
-import org.exoplatform.addon.wallet.model.reward.RewardReport;
+import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.service.*;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
@@ -39,9 +38,9 @@ import org.exoplatform.services.log.Log;
  * through {@link ListenerService}
  */
 @DisallowConcurrentExecution
-public class RewardStatusVerifierJob implements Job {
+public class RewardCurrentPeriodStatusUpdaterJob implements Job {
 
-  private static final Log      LOG = ExoLogger.getLogger(RewardStatusVerifierJob.class);
+  private static final Log      LOG = ExoLogger.getLogger(RewardCurrentPeriodStatusUpdaterJob.class);
 
   private ExoContainer          container;
 
@@ -53,7 +52,7 @@ public class RewardStatusVerifierJob implements Job {
 
   private ListenerService       listenerService;
 
-  public RewardStatusVerifierJob() {
+  public RewardCurrentPeriodStatusUpdaterJob() {
     this.container = PortalContainer.getInstance();
   }
 
@@ -63,43 +62,11 @@ public class RewardStatusVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      Set<RewardPeriod> rewardPeriodsInProgress = getRewardSettingsService().getRewardPeriodsInProgress();
-      if (rewardPeriodsInProgress != null && !rewardPeriodsInProgress.isEmpty()) {
-        Iterator<RewardPeriod> rewardPeriodsIterator = rewardPeriodsInProgress.iterator();
-        boolean changed = false;
-        while (rewardPeriodsIterator.hasNext()) {
-          RewardPeriod rewardPeriod = rewardPeriodsIterator.next();
-          RewardReport rewardReport = getRewardService().computeRewardReport(rewardPeriod.getStartDateInSeconds());
-          if (rewardReport == null) {
-            continue;
-          }
-          if (rewardReport.isCompletelyProceeded()) {
-            LOG.debug("Rewards sent successfully for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
-                      rewardPeriod.getStartDateInSeconds(),
-                      rewardReport.countValidRewards(),
-                      rewardReport.countTransactions(),
-                      rewardReport.countSuccess(),
-                      rewardReport.countFailed(),
-                      rewardReport.countPending(),
-                      rewardReport.isCompletelyProceeded());
-
-            getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
-            changed = true;
-            rewardPeriodsIterator.remove();
-          } else {
-            LOG.debug("Reward always in progress for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
-                      rewardPeriod.getStartDateInSeconds(),
-                      rewardReport.countValidRewards(),
-                      rewardReport.countTransactions(),
-                      rewardReport.countSuccess(),
-                      rewardReport.countFailed(),
-                      rewardReport.countPending(),
-                      rewardReport.isCompletelyProceeded());
-          }
+      RewardSettings rewardSettings = getRewardSettings();
+      if (rewardSettings != null && rewardSettings.getPeriodType() != null) {
+        RewardReport rewardReport = getRewardService().computeRewardReport(System.currentTimeMillis());
+        if (rewardReport != null) {
           getRewardPeriodService().saveRewardReport(rewardReport);
-        }
-        if (changed) {
-          getRewardSettingsService().saveRewardPeriodInProgress(rewardPeriodsInProgress);
         }
       }
     } catch (Exception e) {

@@ -158,31 +158,6 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     return settingsValueString == null ? Collections.emptySet() : toRewardPeriods(settingsValueString);
   }
 
-  private String toRewardPeriodString(Set<RewardPeriod> rewardPeriods) {
-    JSONArray jsonArray = new JSONArray();
-    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
-      return null;
-    }
-    for (RewardPeriod rewardPeriod : rewardPeriods) {
-      jsonArray.put(toJsonString(rewardPeriod));
-    }
-    return jsonArray.toString();
-  }
-
-  private Set<RewardPeriod> toRewardPeriods(String settingsValueString) {
-    try {
-      JSONArray jsonArray = new JSONArray(settingsValueString);
-      Set<RewardPeriod> rewardPeriods = new HashSet<>();
-      for (int i = 0; i < jsonArray.length(); i++) {
-        String rewardPeriodString = jsonArray.getString(i);
-        rewardPeriods.add(fromJsonString(rewardPeriodString, RewardPeriod.class));
-      }
-      return rewardPeriods;
-    } catch (Exception e) {
-      throw new IllegalStateException("Error while parsing reward periods list", e);
-    }
-  }
-
   @Override
   public void registerPlugin(RewardPlugin rewardPlugin) {
     rewardPlugins.put(rewardPlugin.getPluginId(), rewardPlugin);
@@ -212,4 +187,30 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   public int getReminderDateInDays() {
     return reminderDateInDays;
   }
+
+  private String toRewardPeriodString(Set<RewardPeriod> rewardPeriods) {
+    JSONArray jsonArray = new JSONArray();
+    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
+      return null;
+    }
+    for (RewardPeriod rewardPeriod : rewardPeriods) {
+      jsonArray.put(toJsonString(rewardPeriod));
+    }
+    return jsonArray.toString();
+  }
+
+  private Set<RewardPeriod> toRewardPeriods(String settingsValueString) {
+    try {
+      JSONArray jsonArray = new JSONArray(settingsValueString);
+      Set<RewardPeriod> rewardPeriods = new HashSet<>();
+      for (int i = 0; i < jsonArray.length(); i++) {
+        String rewardPeriodString = jsonArray.getString(i);
+        rewardPeriods.add(fromJsonString(rewardPeriodString, RewardPeriod.class));
+      }
+      return rewardPeriods;
+    } catch (Exception e) {
+      throw new IllegalStateException("Error while parsing reward periods list", e);
+    }
+  }
+
 }

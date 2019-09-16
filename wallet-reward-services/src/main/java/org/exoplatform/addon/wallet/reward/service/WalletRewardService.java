@@ -55,23 +55,27 @@ public class WalletRewardService implements RewardService {
 
   private RewardTransactionService rewardTransactionService;
 
+  private RewardPeriodService      rewardPeriodService;
+
   private Boolean                  hasRewardInProgress = null;
 
   public WalletRewardService(WalletAccountService walletAccountService,
                              WalletTransactionService walletTransactionService,
                              RewardSettingsService rewardSettingsService,
                              RewardTransactionService rewardTransactionService,
-                             RewardTeamService rewardTeamService) {
+                             RewardTeamService rewardTeamService,
+                             RewardPeriodService rewardPeriodService) {
     this.walletAccountService = walletAccountService;
     this.walletTransactionService = walletTransactionService;
     this.rewardSettingsService = rewardSettingsService;
     this.rewardTeamService = rewardTeamService;
     this.rewardTransactionService = rewardTransactionService;
+    this.rewardPeriodService = rewardPeriodService;
   }
 
   @Override
   public void sendRewards(long periodDateInSeconds, String username) throws Exception {
-    RewardReport rewardReport = getRewardReport(periodDateInSeconds);
+    RewardReport rewardReport = computeRewardReport(periodDateInSeconds);
     if (rewardReport == null || rewardReport.getRewards() == null || rewardReport.getRewards().isEmpty()) {
       return;
     }
@@ -86,7 +90,7 @@ public class WalletRewardService implements RewardService {
 
     rewardSettingsService.addRewardPeriodInProgress(rewardReport.getPeriod());
 
-    Set<WalletReward> rewards = rewardReport.getRewards();
+    Set<WalletReward> rewards = new HashSet<>(rewardReport.getRewards());
     Iterator<WalletReward> rewardedWalletsIterator = rewards.iterator();
     while (rewardedWalletsIterator.hasNext()) {
       WalletReward walletReward = rewardedWalletsIterator.next();
@@ -160,13 +164,14 @@ public class WalletRewardService implements RewardService {
       rewardTransaction.setStartDateInSeconds(rewardPeriod.getStartDateInSeconds());
       rewardTransaction.setStatus(TRANSACTION_STATUS_PENDING);
       rewardTransaction.setTokensSent(transactionDetail.getContractAmount());
+      // TODO make reward transaction retrieved from DB instead of settings
       rewardTransactionService.saveRewardTransaction(rewardTransaction);
     }
-
+    rewardPeriodService.saveRewardReport(rewardReport);
   }
 
   @Override
-  public RewardReport getRewardReport(long periodDateInSeconds) {
+  public RewardReport computeRewardReport(long periodDateInSeconds) {
     if (periodDateInSeconds == 0) {
       throw new IllegalArgumentException("periodDate is mandatory");
     }
