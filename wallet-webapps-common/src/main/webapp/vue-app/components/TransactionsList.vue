@@ -779,14 +779,24 @@
                   </a>
                 </v-list-item-content>
               </v-list-item>
-              <v-list-item v-if="administration && item.nonce">
-                <v-list-item-content>
-                  Nonce
-                </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
-                  <strong>{{ item.nonce }}</strong>
-                </v-list-item-content>
-              </v-list-item>
+              <template v-if="administration">
+                <v-list-item v-if="item.nonce">
+                  <v-list-item-content>
+                    Nonce
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <strong>{{ item.nonce }}</strong>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item v-if="item.sentDateFormatted">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.sentDate') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <strong>{{ item.sentDateFormatted }}</strong>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
             </v-list>
           </v-expansion-panel-content>
         </v-expansion-panel>

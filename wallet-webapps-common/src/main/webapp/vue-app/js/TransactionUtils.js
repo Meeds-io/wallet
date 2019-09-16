@@ -140,9 +140,11 @@ function loadEtherTransactionProperties(walletAddress, transactionDetails) {
 
   transactionDetails.isReceiver = walletAddress === transactionDetails.to;
   transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
-  transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-  if (transactionDetails.date) {
-    transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
+  if (transactionDetails.timestamp) {
+    transactionDetails.dateFormatted = `${new Date(transactionDetails.timestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
+  if (transactionDetails.sentTimestamp) {
+    transactionDetails.sentDateFormatted = `${new Date(transactionDetails.sentTimestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
   }
 }
 
@@ -182,9 +184,11 @@ function loadContractTransactionProperties(walletAddress, transactionDetails, co
 
   transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
   transactionDetails.isReceiver = walletAddress === transactionDetails.to;
-  transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-  if (transactionDetails.date) {
-    transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
+  if (transactionDetails.timestamp) {
+    transactionDetails.dateFormatted = `${new Date(transactionDetails.timestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
+  if (transactionDetails.sentTimestamp) {
+    transactionDetails.sentDateFormatted = `${new Date(transactionDetails.sentTimestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
   }
   transactionDetails.adminIcon = transactionDetails.adminIcon || (transactionDetails.contractMethodName && transactionDetails.contractMethodName !== 'transfer' && transactionDetails.contractMethodName !== 'initializeAccount' && transactionDetails.contractMethodName !== 'transferFrom' && transactionDetails.contractMethodName !== 'approve' && transactionDetails.contractMethodName !== 'reward');
 }

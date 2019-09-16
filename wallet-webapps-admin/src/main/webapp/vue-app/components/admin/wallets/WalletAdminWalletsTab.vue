@@ -15,6 +15,11 @@
       <i class="uiIconWarning"></i>
       {{ $t('exoplatform.wallet.warning.adminWalletNotInitialized') }}
     </div>
+    <admin-wallet
+      v-if="!loading"
+      :admin-wallet="walletAdmin"
+      :contract-details="contractDetails"
+      @refresh-balance="refreshWallet(walletAdmin, true)" />
     <v-layout
       row
       wrap
@@ -34,9 +39,6 @@
           </v-btn>
           <v-btn value="space">
             {{ $t('exoplatform.wallet.label.spaces') }}
-          </v-btn>
-          <v-btn value="admin">
-            {{ $t('exoplatform.wallet.label.admin') }}
           </v-btn>
         </v-btn-toggle>
       </v-flex>
@@ -309,12 +311,14 @@
 import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
 import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
 import SendTokenModal from './modals/WalletAdminSendTokenModal.vue';
+import AdminWallet from './AdminWallet.vue';
 
 export default {
   components: {
     InitializeAccountModal,
     SendEtherModal,
     SendTokenModal,
+    AdminWallet,
   },
   props: {
     loading: {
@@ -375,7 +379,7 @@ export default {
       tokenAmount: null,
       limit: 10,
       pageSize: 10,
-      walletTypes: ['user', 'admin'],
+      walletTypes: ['user'],
       walletStatuses: ['disapproved'],
     };
   },

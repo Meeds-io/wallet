@@ -18,15 +18,6 @@
             <i class="uiIconError"></i>{{ error }}
           </div>
 
-          <wallet-setup
-            ref="walletSetup"
-            :wallet="wallet"
-            :refresh-index="refreshIndex"
-            :loading="loading"
-            is-administration
-            @refresh="init()"
-            @error="error = $event" />
-
           <v-dialog
             v-model="loading"
             attach="#walletDialogsParent"
@@ -186,8 +177,6 @@ export default {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug('Error connecting to network', error);
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
-          } else {
-            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
           }
         })
         .then(() => {
@@ -197,7 +186,6 @@ export default {
             this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
           }
         })
-        .then(() => this.$refs.walletSetup.init())
         .then(() => this.$refs.walletsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
