@@ -31,7 +31,9 @@ export default {
     document.addEventListener('exo-wallet-init', this.init);
     document.addEventListener('exo-wallet-send-tokens', this.sendTokens);
 
-    window.walletAddonInstalled = true;
+    window.walletAPIInitialized = true;
+
+    this.init();
 
     document.dispatchEvent(new CustomEvent('exo-wallet-installed'));
   },

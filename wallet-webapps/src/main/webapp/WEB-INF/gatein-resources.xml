@@ -34,13 +34,6 @@
         <as>$</as>
       </depends>
       <depends>
-        <module>walletCommon</module>
-        <as>WalletCommon</as>
-      </depends>
-      <depends>
-        <module>jQueryUI</module>
-      </depends>
-      <depends>
         <module>fetchPolyfill</module>
       </depends>
       <depends>
@@ -48,10 +41,6 @@
       </depends>
       <depends>
         <module>iePolyfills</module>
-      </depends>
-      <depends>
-        <module>Web3</module>
-        <as>LocalWeb3</as>
       </depends>
       <depends>
         <module>ethQRCode</module>
