@@ -267,6 +267,7 @@ export default {
   data() {
     return {
       search: '',
+      currentTimeInSeconds: Date.now() / 1000,
       displayDisabledUsers: false,
       selectedDate: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
       selectedDateMenu: false,
@@ -345,6 +346,9 @@ export default {
       return (this.rewardReport && this.rewardReport.validRewardCount) || 0;
     },
     sendingRewardsDisabled() {
+      if (this.isNotPastPeriod) {
+        return true;
+      }
       if (!this.walletRewards || !this.walletRewards.length) {
         return true;
       }
@@ -370,6 +374,9 @@ export default {
     },
     filteredIdentitiesList() {
       return (this.walletRewards && this.walletRewards.filter((wallet) => (this.displayDisabledUsers || wallet.enabled || wallet.tokensSent || wallet.tokensToSend) && this.filterItemFromList(wallet, this.search))) || [];
+    },
+    isNotPastPeriod() {
+      return !this.period || this.period.endDateInSeconds > this.currentTimeInSeconds;
     },
     totalTokens() {
       if (this.filteredIdentitiesList) {
