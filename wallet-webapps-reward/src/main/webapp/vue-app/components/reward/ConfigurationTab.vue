@@ -74,7 +74,7 @@
                         </v-flex>
                         <v-radio
                           :disabled="!configurationEditable"
-                          :label="$t('exoplatform.wallet.label.rewardFixedBudgetPlaceholder')"
+                          :label="$t('exoplatform.wallet.label.rewardFixedBudgetPerMember')"
                           value="FIXED_PER_MEMBER" />
                         <v-flex v-if="pluginSetting.budgetType === 'FIXED_PER_MEMBER'" class="rewardWalletConfiguration mb-2">
                           <v-text-field

@@ -5,6 +5,7 @@ import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +13,7 @@ import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 
 import lombok.*;
+import lombok.EqualsAndHashCode.Exclude;
 
 @Data
 @ToString
@@ -22,10 +24,13 @@ public class WalletReward implements Serializable {
 
   private Wallet                  wallet;
 
+  @Exclude
   private List<RewardTeam>        teams;
 
+  @Exclude
   private TransactionDetail       transaction;
 
+  @Exclude
   private Set<WalletPluginReward> rewards;
 
   public long getIdentityId() {
@@ -47,7 +52,8 @@ public class WalletReward implements Serializable {
     if (teams == null) {
       return null;
     }
-    return StringUtils.join(teams, ",");
+    Set<String> teamNames = teams.stream().map(RewardTeam::getName).collect(Collectors.toSet());
+    return StringUtils.join(teamNames, ",");
   }
 
   public RewardTeam getTeam() {

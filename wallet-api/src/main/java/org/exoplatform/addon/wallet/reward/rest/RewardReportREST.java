@@ -40,6 +40,10 @@ public class RewardReportREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+    if (periodDateInSeconds == 0) {
+      periodDateInSeconds = System.currentTimeMillis() / 1000;
+    }
+
     try {
       RewardReport rewardReport = rewardReportService.computeRewards(periodDateInSeconds);
       return Response.ok(rewardReport).build();

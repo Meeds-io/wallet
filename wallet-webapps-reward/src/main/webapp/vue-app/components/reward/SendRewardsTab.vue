@@ -36,10 +36,10 @@
         wrap
         class="text-center">
         <v-flex md4 xs12>
-          <h4>{{ $t('exoplatform.wallet.label.eligibleUsers') }}: <strong>{{ eligibleUsersCount }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.eligibleUsers') }}: <strong>{{ validRewardCount }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
-          <h4>{{ $t('exoplatform.wallet.label.totalBudget') }}: <strong>{{ walletUtils.toFixed(totalBudget) }} {{ symbol }}</strong></h4>
+          <h4>{{ $t('exoplatform.wallet.label.totalBudget') }}: <strong>{{ totalBudget }} {{ symbol }}</strong></h4>
         </v-flex>
         <v-flex md4 xs12>
           <h4>{{ $t('exoplatform.wallet.label.sent') }} {{ contractDetails && contractDetails.name }}: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
@@ -74,10 +74,10 @@
       :items="filteredIdentitiesList"
       :items-per-page="1000"
       :loading="loading"
-      :sortable="true"
-      item-key="address"
+      item-key="identityId"
       class="elevation-1 mr-3 mb-2"
-      hide-default-footer>
+      hide-default-footer
+      sortable>
       <template slot="item" slot-scope="props">
         <tr :active="props.selected">
           <td>
@@ -103,8 +103,8 @@
               display-no-address />
           </td>
           <td class="text-left">
-            <ul v-if="props.item.rewardTeams && props.item.rewardTeams.length">
-              <li v-for="team in props.item.rewardTeams" :key="team.id">
+            <ul v-if="props.item.teams">
+              <li v-for="team in props.item.teams" :key="team.id">
                 <template v-if="team.disabled">
                   <del class="red--text">{{ team.name }}</del> ({{ $t('exoplatform.wallet.label.disabledPool') }})
                 </template>
@@ -129,7 +129,7 @@
             </span>
           </td>
           <td class="text-center">
-            <template v-if="!props.item.transaction || !props.item.transaction.status">
+            <template v-if="!props.item.status">
               <v-icon
                 v-if="!props.item.wallet.address"
                 :title="$t('exoplatform.wallet.label.noAddress')"
@@ -147,15 +147,15 @@
               </div>
             </template>
             <v-progress-circular
-              v-else-if="props.item.transaction.status === 'pending'"
+              v-else-if="props.item.status === 'pending'"
               color="primary"
               indeterminate
               size="20" />
             <v-icon
               v-else
-              :color="props.item.transaction.status === 'success' ? 'success' : 'error'"
-              :title="props.item.transaction.status === 'success' ? 'Successfully proceeded' : props.item.transaction.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
-              v-text="props.item.transaction.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
+              :color="props.item.status === 'success' ? 'success' : 'error'"
+              :title="props.item.status === 'success' ? 'Successfully proceeded' : props.item.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
+              v-text="props.item.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
           </td>
           <td class="text-center">
             <span
@@ -233,16 +233,22 @@ export default {
     RewardDetailModal,
   },
   props: {
-    walletRewards: {
-      type: Array,
+    rewardReport: {
+      type: Object,
       default: function() {
-        return [];
+        return null;
       },
     },
-    periodType: {
+    periodDatesDisplay: {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    totalRewards: {
+      type: Array,
+      default: function() {
+        return [];
       },
     },
     contractDetails: {
@@ -257,30 +263,6 @@ export default {
         return null;
       },
     },
-    eligibleUsersCount: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    totalBudget: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    sentBudget: {
-      type: Number,
-      default: function() {
-        return 0;
-      },
-    },
-    totalRewards: {
-      type: Array,
-      default: function() {
-        return [];
-      },
-    },
   },
   data() {
     return {
@@ -288,8 +270,6 @@ export default {
       displayDisabledUsers: false,
       selectedDate: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
       selectedDateMenu: false,
-      selectedStartDate: null,
-      selectedEndDate: null,
       loading: false,
       sendingRewards: false,
       selectedWallet: null,
@@ -310,25 +290,25 @@ export default {
           text: this.$t('exoplatform.wallet.label.name'),
           align: 'left',
           sortable: true,
-          value: 'name',
+          value: 'wallet.name',
         },
         {
           text: this.$t('exoplatform.wallet.label.pools'),
           align: 'center',
-          sortable: false,
-          value: 'rewardTeams',
+          sortable: true,
+          value: 'poolName',
         },
         {
           text: this.$t('exoplatform.wallet.label.transaction'),
           align: 'center',
           sortable: true,
-          value: 'transaction.hash',
+          value: 'transaction.timestamp',
         },
         {
           text: this.$t('exoplatform.wallet.label.status'),
           align: 'center',
           sortable: true,
-          value: 'transaction.status',
+          value: 'status',
         },
         {
           text: (this.contractDetails && this.contractDetails.name),
@@ -341,10 +321,28 @@ export default {
           text: '',
           align: 'center',
           sortable: false,
-          value: 'actions',
+          value: 'rewards',
           width: '80px',
         },
       ];
+    },
+    walletRewards() {
+      return (this.rewardReport && this.rewardReport.rewards) || [];
+    },
+    period() {
+      return this.rewardReport && this.rewardReport.period;
+    },
+    periodType() {
+      return this.period && this.period.rewardPeriodType;
+    },
+    sentBudget() {
+      return (this.rewardReport && this.walletUtils.toFixed(this.rewardReport.tokensSent)) || 0;
+    },
+    totalBudget() {
+      return (this.rewardReport && this.walletUtils.toFixed(this.rewardReport.tokensToSend)) || 0;
+    },
+    validRewardCount() {
+      return (this.rewardReport && this.rewardReport.validRewardCount) || 0;
     },
     sendingRewardsDisabled() {
       if (!this.walletRewards || !this.walletRewards.length) {
@@ -353,24 +351,16 @@ export default {
       let disabledButton = true;
       for (const index in this.walletRewards) {
         const walletReward = this.walletRewards[index];
-        if (walletReward.enabled && walletReward.tokensToSend && (!walletReward.transaction || !walletReward.transaction.status || walletReward.transaction.status === 'error')) {
-          disabledButton = false;
-        }
         // If any transaction is still pending, then disable sending button
-        if (walletReward.transaction && walletReward.transaction.status === 'pending') {
+        if (walletReward.status === 'pending') {
           return true;
+        }
+
+        if (walletReward.enabled && walletReward.tokensToSend && (!walletReward.status || walletReward.status === 'error')) {
+          disabledButton = false;
         }
       }
       return disabledButton;
-    },
-    periodDatesDisplay() {
-      if (this.selectedStartDate && this.selectedEndDate) {
-        return `${this.selectedStartDate} ${this.$t('exoplatform.wallet.label.to')} ${this.selectedEndDate}`;
-      } else if (this.selectedStartDate) {
-        return this.selectedStartDate;
-      } else {
-        return '';
-      }
     },
     selectedDateInSeconds() {
       return this.selectedDate ? new Date(this.selectedDate).getTime() / 1000 : 0;
@@ -379,7 +369,7 @@ export default {
       return this.contractDetails && this.contractDetails.symbol ? this.contractDetails.symbol : '';
     },
     filteredIdentitiesList() {
-      return this.walletRewards ? this.walletRewards.filter((wallet) => (this.displayDisabledUsers || wallet.enabled || wallet.tokensSent || wallet.tokensToSend) && this.filterItemFromList(wallet, this.search)) : [];
+      return (this.walletRewards && this.walletRewards.filter((wallet) => (this.displayDisabledUsers || wallet.enabled || wallet.tokensSent || wallet.tokensToSend) && this.filterItemFromList(wallet, this.search))) || [];
     },
     totalTokens() {
       if (this.filteredIdentitiesList) {
@@ -400,22 +390,16 @@ export default {
       }
     },
     selectedDate() {
-      this.refreshDates()
-        .then(() => this.$nextTick())
-        .then(() => this.$emit('dates-changed'));
-    }
-  },
-  methods: {
-    refreshDates() {
       this.loading = true;
       this.lang = eXo.env.portal.language;
       return getRewardDates(new Date(this.selectedDate), this.periodType)
         .then((period) => {
-          this.selectedStartDate = this.formatDate(new Date(period.startDateInSeconds * 1000));
-          this.selectedEndDate = this.formatDate(new Date((period.endDateInSeconds -1) * 1000));
+          this.$emit('dates-changed', period);
         })
         .finally(() => this.loading = false);
-    },
+    }
+  },
+  methods: {
     filterItemFromList(walletReward, searchText) {
       if (!searchText || !searchText.length) {
         return true;
@@ -429,17 +413,10 @@ export default {
       if (address.indexOf(searchText) > -1) {
         return true;
       }
-      if (searchText === '-' && (!walletReward.rewardTeams || !walletReward.rewardTeams.length)) {
+      if (searchText === '-' || (walletReward.poolName || walletReward.poolName.indexOf(searchText) > -1)) {
         return true;
       }
-      const teams =
-        walletReward.rewardTeams && walletReward.rewardTeams.length
-          ? walletReward.rewardTeams
-              .map((team) => team.name)
-              .join(',')
-              .toLowerCase()
-          : '';
-      return teams.indexOf(searchText) > -1;
+      return false;
     },
     sendRewards() {
       this.error = null;
@@ -452,12 +429,6 @@ export default {
           this.$emit('refresh');
           this.sendingRewards = false;
         });
-    },
-    formatDate(date) {
-      if (!date) {
-        return null;
-      }
-      return date.toLocaleDateString(eXo.env.portal.language);
     },
   },
 };

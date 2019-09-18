@@ -249,11 +249,13 @@ public class WalletRewardReportService implements RewardReportService {
     boolean completelyProceeded = rewardReport.isCompletelyProceeded();
     for (Wallet wallet : wallets) {
       WalletReward walletReward = walletRewards.stream()
-                                               .filter(wr -> wr.getWallet() != null && wr.getWallet().equals(wallet))
+                                               .filter(wr -> wallet != null && wr.getWallet() != null
+                                                   && wr.getIdentityId() == wallet.getTechnicalId())
                                                .findFirst()
                                                .orElse(null);
       if (walletReward == null) {
         walletReward = new WalletReward();
+        walletRewards.add(walletReward);
       }
       walletReward.setWallet(wallet);
 
@@ -261,7 +263,6 @@ public class WalletRewardReportService implements RewardReportService {
         List<RewardTeam> rewardTeams = rewardTeamService.findTeamsByMemberId(walletReward.getIdentityId());
         walletReward.setTeams(rewardTeams);
       }
-      walletRewards.add(walletReward);
     }
     return walletRewards;
   }
@@ -519,9 +520,6 @@ public class WalletRewardReportService implements RewardReportService {
         while (membersIterator.hasNext()) {
           RewardTeamMember member = membersIterator.next();
           Long identityId = member.getIdentityId();
-          if (identityIds.contains(identityId)) {
-            throw new IllegalStateException("Team " + rewardTeam.getName() + " has a duplicated member in another Team");
-          }
           identityIds.add(identityId);
           // Retain in Teams collection only elligible members
           if (!earnedPoints.containsKey(identityId)) {
