@@ -28,4 +28,11 @@ public interface RewardReportStorage {
    */
   List<RewardPeriod> findRewardPeriodsByStatus(RewardStatus rewardStatus);
 
+  /**
+   * @param identityId
+   * @param limit limit of items to return
+   * @return a {@link List} of {@link WalletReward} for current person
+   */
+  List<WalletReward> listRewards(long identityId, int limit);
+
 }

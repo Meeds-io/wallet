@@ -40,7 +40,7 @@ public class RewardSuccessNotificationPluginTest extends BaseWalletRewardTest {
       transaction.setHash("hash");
       transaction.setContractAmount(2);
       transaction.setPending(true);
-      rewards.add(new WalletReward(null, null, transaction, null));
+      rewards.add(new WalletReward(null, null, transaction, null, null));
     }
     rewardReport.setRewards(rewards);
 
@@ -49,10 +49,14 @@ public class RewardSuccessNotificationPluginTest extends BaseWalletRewardTest {
 
     NotificationInfo notification = plugin.buildNotification(ctx);
     assertNotNull(notification);
-    assertEquals(String.valueOf(rewardReport.getFailedTransactionCount()), notification.getValueOwnerParameter(REWARD_FAIL_COUNT));
-    assertEquals(String.valueOf(rewardReport.getSuccessTransactionCount()), notification.getValueOwnerParameter(REWARD_SUCCESS_COUNT));
-    assertEquals(String.valueOf(rewardReport.getPendingTransactionCount()), notification.getValueOwnerParameter(REWARD_PENDING_COUNT));
-    assertEquals(String.valueOf(rewardReport.getTransactionsCount()), notification.getValueOwnerParameter(REWARD_TRANSACTION_COUNT));
+    assertEquals(String.valueOf(rewardReport.getFailedTransactionCount()),
+                 notification.getValueOwnerParameter(REWARD_FAIL_COUNT));
+    assertEquals(String.valueOf(rewardReport.getSuccessTransactionCount()),
+                 notification.getValueOwnerParameter(REWARD_SUCCESS_COUNT));
+    assertEquals(String.valueOf(rewardReport.getPendingTransactionCount()),
+                 notification.getValueOwnerParameter(REWARD_PENDING_COUNT));
+    assertEquals(String.valueOf(rewardReport.getTransactionsCount()),
+                 notification.getValueOwnerParameter(REWARD_TRANSACTION_COUNT));
     assertEquals(String.valueOf(rewardReport.getValidRewardCount()),
                  notification.getValueOwnerParameter(REWARD_VALID_MEMBERS_COUNT));
     assertEquals(String.valueOf(rewardReport.getTokensSent()), notification.getValueOwnerParameter(AMOUNT));

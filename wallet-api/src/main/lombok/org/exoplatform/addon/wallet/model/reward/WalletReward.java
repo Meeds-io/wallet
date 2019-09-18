@@ -33,6 +33,9 @@ public class WalletReward implements Serializable {
   @Exclude
   private Set<WalletPluginReward> rewards;
 
+  @Exclude
+  private RewardPeriod            period;
+
   public long getIdentityId() {
     return wallet == null ? 0 : wallet.getTechnicalId();
   }

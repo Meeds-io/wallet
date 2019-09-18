@@ -19,10 +19,13 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     return query.getResultList();
   }
 
-  public List<WalletRewardEntity> findRewardsByIdentityId(long identityId) {
+  public List<WalletRewardEntity> findRewardsByIdentityId(long identityId, int limit) {
     TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardsByIdentityId",
                                                                                WalletRewardEntity.class);
     query.setParameter("identityId", identityId);
+    if (limit > 0) {
+      query.setMaxResults(limit);
+    }
     return query.getResultList();
   }
 

@@ -13,18 +13,38 @@
             <v-btn
               icon
               small
-              @click="displayTransactionList">
+              @click="displayRewards">
               <v-icon color="primary">fa-search-plus</v-icon>
             </v-btn>
           </v-flex>
         </v-layout>
       </v-container>
     </v-card-title>
+    <v-navigation-drawer
+      id="rewardDetailsDrawer"
+      v-model="seeRewardDetails"
+      fixed
+      right
+      stateless
+      temporary
+      width="700"
+      max-width="100vw">
+      <reward-detail
+        ref="RewardDetail"
+        :wallet="wallet"
+        :contract-details="contractDetails"
+        @back="back()" />
+    </v-navigation-drawer>
   </v-card>
 </template>
 
 <script>
+import RewardDetail from './RewardDetail.vue'; 
+
 export default {
+  components: {
+    RewardDetail,
+  },
   props: {
     wallet: {
       type: Object,
@@ -39,15 +59,57 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      seeRewardDetails: false,
+      seeRewardDetailsPermanent: false,
+    };
+  },
   computed: {
     rewardBalance() {
       return (this.wallet && this.wallet.rewardBalance) || 0;
     }
   },
+  watch: {
+    seeRewardDetails() {
+      if (this.seeRewardDetails) {
+        $('body').addClass('hide-scroll');
+
+        const thiss = this;
+        setTimeout(() => {
+          thiss.seeRewardDetailsPermanent = true;
+        }, 200);
+      } else {
+        $('body').removeClass('hide-scroll');
+
+        this.seeRewardDetailsPermanent = false;
+      }
+    },
+  },
+  created() {
+    const thiss = this;
+    $(document).on('keydown', (event) => {
+      if (event.which === 27 && thiss.seeRewardDetailsPermanent && !$('.v-dialog:visible').length) {
+        thiss.back();
+      }
+    });
+  },
   methods: {
-    displayTransactionList() {
-      this.$emit('display-transactions');
-    }
+    displayRewards() {
+      this.seeRewardDetails = true;
+
+      this.$nextTick(() => {
+        const thiss = this;
+        $('.v-overlay').on('click', (event) => {
+          thiss.back();
+        });
+      });
+    },
+    back() {
+      this.seeRewardDetails = false;
+      this.seeRewardDetailsPermanent = false;
+      this.selectedAccount = null;
+    },
   }
 }
 </script>

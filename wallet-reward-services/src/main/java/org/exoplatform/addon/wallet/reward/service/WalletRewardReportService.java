@@ -37,6 +37,7 @@ import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.social.core.identity.model.Identity;
 
 /**
  * A service to manage reward reports
@@ -194,6 +195,16 @@ public class WalletRewardReportService implements RewardReportService {
   @Override
   public List<RewardPeriod> getRewardPeriodsInProgress() {
     return rewardReportStorage.findRewardPeriodsByStatus(RewardStatus.PENDING);
+  }
+
+  @Override
+  public List<WalletReward> listRewards(String currentUser, int limit) {
+    Identity identity = getIdentityByTypeAndId(WalletType.USER, currentUser);
+    if (identity == null) {
+      return Collections.emptyList();
+    } else {
+      return rewardReportStorage.listRewards(Long.parseLong(identity.getId()), limit);
+    }
   }
 
   private RewardPeriod getRewardPeriod(long periodDateInSeconds) {

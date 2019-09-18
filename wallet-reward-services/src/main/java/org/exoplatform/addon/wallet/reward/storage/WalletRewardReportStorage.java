@@ -96,14 +96,18 @@ public class WalletRewardReportStorage implements RewardReportStorage {
 
     if (rewardReport.isCompletelyProceeded()) {
       rewardPeriodEntity.setStatus(RewardStatus.SUCCESS);
-    } else if (rewardReport.getPendingTransactionCount() > 0) { // Always pending if some tx
-                                                  // failed
+    } else if (rewardReport.getPendingTransactionCount() > 0) { // Always
+                                                                // pending if
+                                                                // some tx
+      // failed
       rewardPeriodEntity.setStatus(RewardStatus.PENDING);
-    } else if (rewardReport.getFailedTransactionCount() > 0) { // If no failed and there are
-                                                 // somme errors
+    } else if (rewardReport.getFailedTransactionCount() > 0) { // If no failed
+                                                               // and there are
+      // somme errors
       rewardPeriodEntity.setStatus(RewardStatus.ERROR);
-    } else if (rewardReport.getTransactionsCount() > 0) { // If some transactions
-                                                       // was sent
+    } else if (rewardReport.getTransactionsCount() > 0) { // If some
+                                                          // transactions
+      // was sent
       rewardPeriodEntity.setStatus(RewardStatus.PENDING);
     } else {
       rewardPeriodEntity.setStatus(RewardStatus.ESTIMATION);
@@ -183,6 +187,21 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     return rewardPeriodEntities.stream().map(period -> toDTO(period)).collect(Collectors.toList());
   }
 
+  @Override
+  public List<WalletReward> listRewards(long identityId, int limit) {
+    List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByIdentityId(identityId, limit);
+    List<WalletReward> walletRewards = rewardEntities.stream()
+                                                     .map(rewardEntity -> toDTO(rewardEntity))
+                                                     .collect(Collectors.toList());
+    if (!walletRewards.isEmpty()) {
+      WalletReward walletReward = walletRewards.get(0);
+      Wallet wallet = walletReward.getWallet();
+      walletAccountService.retrieveWalletBlockchainState(wallet);
+      walletRewards.forEach(wr -> wr.setWallet(wallet));
+    }
+    return walletRewards;
+  }
+
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
     RewardPeriod rewardPeriod = new RewardPeriod(period.getPeriodType());
     rewardPeriod.setStartDateInSeconds(period.getStartTime());
@@ -211,6 +230,11 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     retrieveWallet(rewardEntity, walletReward);
     retrieveTransaction(rewardEntity, walletReward);
     retrieveRewardPlugins(rewardEntity, walletReward);
+    WalletRewardPeriodEntity periodEntity = rewardEntity.getPeriod();
+    if (periodEntity != null && periodEntity.getPeriodType() != null) {
+      RewardPeriodType rewardPeriodType = periodEntity.getPeriodType();
+      walletReward.setPeriod(rewardPeriodType.getPeriodOfTime(timeFromSeconds(periodEntity.getStartTime())));
+    }
     return walletReward;
   }
 

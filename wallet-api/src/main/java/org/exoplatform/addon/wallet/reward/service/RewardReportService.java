@@ -66,4 +66,11 @@ public interface RewardReportService {
    */
   List<RewardPeriod> getRewardPeriodsInProgress();
 
+  /**
+   * @param currentUser current user listing his rewards
+   * @param limit size limit of items to return
+   * @return a {@link List} of {@link WalletReward} of current user
+   */
+  List<WalletReward> listRewards(String currentUser, int limit);
+
 }

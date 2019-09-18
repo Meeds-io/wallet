@@ -1,6 +1,8 @@
 package org.exoplatform.addon.wallet.model.reward;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.formatTime;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -8,12 +10,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RewardPeriod {
-  private RewardPeriodType rewardPeriodType;
+public class RewardPeriod implements Serializable {
+  private static final long serialVersionUID = -4860665131754056537L;
 
-  private long             startDateInSeconds;
+  private RewardPeriodType  rewardPeriodType;
 
-  private long             endDateInSeconds;
+  private long              startDateInSeconds;
+
+  private long              endDateInSeconds;
 
   public RewardPeriod(RewardPeriodType rewardPeriodType) {
     this.rewardPeriodType = rewardPeriodType;

@@ -51,7 +51,7 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
       transaction.setHash("hash");
       transaction.setContractAmount(2);
       transaction.setPending(true);
-      rewards.add(new WalletReward(null, null, transaction, null));
+      rewards.add(new WalletReward(null, null, transaction, null, null));
     }
     rewardReport.setRewards(rewards);
     ctx.append(REWARD_REPORT_NOTIFICATION_PARAM, rewardReport);
