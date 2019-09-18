@@ -53,10 +53,6 @@ public class RewardUtils {
 
   public static final String                        REWARD_SETTINGS_KEY_NAME                 = "REWARD_SETTINGS";
 
-  public static final String                        REWARD_PERIODS_IN_PROGRESS               = "REWARD_PERIODS_IN_PROGRESS";
-
-  public static final String                        REWARD_PERIOD_SETTING_KEY                = "REWARD_PERIODS_";
-
   public static final String                        REWARD_SUCCESS_EVENT_NAME                =
                                                                               "exo.wallet.reward.report.success";
 

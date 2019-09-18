@@ -16,15 +16,13 @@
  */
 package org.exoplatform.addon.wallet.reward.job;
 
-import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
-
-import java.util.Iterator;
-import java.util.Set;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.getRewardSettings;
 
 import org.quartz.*;
 
-import org.exoplatform.addon.wallet.model.reward.*;
-import org.exoplatform.addon.wallet.reward.service.*;
+import org.exoplatform.addon.wallet.model.reward.RewardReport;
+import org.exoplatform.addon.wallet.model.reward.RewardSettings;
+import org.exoplatform.addon.wallet.reward.service.RewardReportService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -40,17 +38,11 @@ import org.exoplatform.services.log.Log;
 @DisallowConcurrentExecution
 public class RewardCurrentPeriodStatusUpdaterJob implements Job {
 
-  private static final Log      LOG = ExoLogger.getLogger(RewardCurrentPeriodStatusUpdaterJob.class);
+  private static final Log    LOG = ExoLogger.getLogger(RewardCurrentPeriodStatusUpdaterJob.class);
 
-  private ExoContainer          container;
+  private ExoContainer        container;
 
-  private RewardSettingsService rewardSettingsService;
-
-  private RewardService         rewardService;
-
-  private RewardPeriodService   rewardPeriodService;
-
-  private ListenerService       listenerService;
+  private RewardReportService rewardReportService;
 
   public RewardCurrentPeriodStatusUpdaterJob() {
     this.container = PortalContainer.getInstance();
@@ -64,9 +56,10 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
     try {
       RewardSettings rewardSettings = getRewardSettings();
       if (rewardSettings != null && rewardSettings.getPeriodType() != null) {
-        RewardReport rewardReport = getRewardService().computeRewardReport(System.currentTimeMillis());
+        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+        RewardReport rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
         if (rewardReport != null) {
-          getRewardPeriodService().saveRewardReport(rewardReport);
+          getRewardReportService().saveRewardReport(rewardReport);
         }
       }
     } catch (Exception e) {
@@ -77,31 +70,10 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
     }
   }
 
-  private RewardSettingsService getRewardSettingsService() {
-    if (rewardSettingsService == null) {
-      rewardSettingsService = CommonsUtils.getService(RewardSettingsService.class);
+  private RewardReportService getRewardReportService() {
+    if (rewardReportService == null) {
+      rewardReportService = CommonsUtils.getService(RewardReportService.class);
     }
-    return rewardSettingsService;
-  }
-
-  private RewardService getRewardService() {
-    if (rewardService == null) {
-      rewardService = CommonsUtils.getService(RewardService.class);
-    }
-    return rewardService;
-  }
-
-  private RewardPeriodService getRewardPeriodService() {
-    if (rewardPeriodService == null) {
-      rewardPeriodService = CommonsUtils.getService(RewardPeriodService.class);
-    }
-    return rewardPeriodService;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
+    return rewardReportService;
   }
 }

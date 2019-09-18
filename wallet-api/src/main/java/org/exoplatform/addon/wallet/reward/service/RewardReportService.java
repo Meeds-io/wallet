@@ -16,15 +16,15 @@
  */
 package org.exoplatform.addon.wallet.reward.service;
 
+import java.util.List;
 import java.util.Set;
 
-import org.exoplatform.addon.wallet.model.reward.RewardReport;
-import org.exoplatform.addon.wallet.model.reward.WalletReward;
+import org.exoplatform.addon.wallet.model.reward.*;
 
 /**
  * A storage service to save/load reward settings
  */
-public interface RewardService {
+public interface RewardReportService {
 
   /**
    * Compute rewards swicth configurations for the list of identities passed in
@@ -35,7 +35,7 @@ public interface RewardService {
    * @return a {@link Set} of {@link WalletReward} with the details of sent
    *         tokens and tokens to send
    */
-  RewardReport computeRewardReport(long periodDateInSeconds);
+  RewardReport computeRewards(long periodDateInSeconds);
 
   /**
    * Send rewards transactions
@@ -47,5 +47,23 @@ public interface RewardService {
    *           on blockchain
    */
   void sendRewards(long periodDateInSeconds, String username) throws Exception; // NOSONAR
+
+  /**
+   * Retrieve a {@link RewardReport} corresponding to a period of time
+   * 
+   * @param periodTimeInSeconds selected date period
+   * @return {@link RewardReport} if there is a saved one, else null
+   */
+  RewardReport getRewardReport(long periodTimeInSeconds);
+
+  /**
+   * @param rewardReport save generated reward report
+   */
+  void saveRewardReport(RewardReport rewardReport);
+
+  /**
+   * @return a {@link List} of {@link RewardPeriod} that are in progress
+   */
+  List<RewardPeriod> getRewardPeriodsInProgress();
 
 }

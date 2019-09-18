@@ -28,35 +28,32 @@ import lombok.Data;
 
 @Data
 public class RewardReport {
-
   private RewardPeriod      period  = null;
 
   private Set<WalletReward> rewards = new HashSet<>();
 
-  public long countPending() {
+  public long getPendingTransactionCount() {
     return rewards.stream()
-                  .filter(rewardItem -> rewardItem.getTransaction() != null
-                      && StringUtils.equals(rewardItem.getTransaction().getStatus(),
-                                            TRANSACTION_STATUS_PENDING))
+                  .filter(rewardItem -> StringUtils.equals(rewardItem.getStatus(),
+                                                           TRANSACTION_STATUS_PENDING))
                   .count();
   }
 
-  public long countSuccess() {
+  public long getSuccessTransactionCount() {
     return rewards.stream()
-                  .filter(rewardItem -> rewardItem.getTransaction() != null
-                      && StringUtils.equals(rewardItem.getTransaction().getStatus(),
-                                            TRANSACTION_STATUS_SUCCESS))
+                  .filter(rewardItem -> StringUtils.equals(rewardItem.getStatus(),
+                                                           TRANSACTION_STATUS_SUCCESS))
                   .count();
   }
 
-  public long countFailed() {
+  public long getFailedTransactionCount() {
     return rewards.stream()
-                  .filter(rewardItem -> rewardItem.getTransaction() != null
-                      && StringUtils.equals(rewardItem.getTransaction().getStatus(), TRANSACTION_STATUS_FAILED))
+                  .filter(rewardItem -> StringUtils.equals(rewardItem.getStatus(),
+                                                           TRANSACTION_STATUS_FAILED))
                   .count();
   }
 
-  public long countTransactions() {
+  public long getTransactionsCount() {
     return rewards.stream()
                   .filter(rewardItem -> rewardItem.getTransaction() != null)
                   .count();
@@ -68,33 +65,45 @@ public class RewardReport {
                   .collect(Collectors.toSet());
   }
 
-  public double totalAmount() {
+  public double getRemainingTokensToSend() {
     return rewards.stream()
-                  .mapToDouble(rewardItem -> rewardItem.getTokensSent())
+                  .mapToDouble(rewardItem -> rewardItem.getTokensSent() == 0 ? rewardItem.getTokensToSend() : 0)
                   .sum();
   }
 
-  public long countValidRewards() {
+  public long getValidRewardCount() {
     return rewards.stream()
                   .filter(rewardItem -> rewardItem.getTokensToSend() > 0)
                   .count();
   }
 
+  public double getTokensToSend() {
+    return rewards.stream()
+                  .mapToDouble(rewardItem -> rewardItem.getTokensToSend())
+                  .sum();
+  }
+
+  public double getTokensSent() {
+    return rewards.stream()
+                  .mapToDouble(rewardItem -> rewardItem.getTokensSent())
+                  .sum();
+  }
+
   public boolean hasSuccessTransactions() {
-    return countSuccess() > 0;
+    return getSuccessTransactionCount() > 0;
   }
 
   public boolean hasPendingTransactions() {
-    return countPending() > 0;
+    return getPendingTransactionCount() > 0;
   }
 
   public boolean hasErrorTransactions() {
-    return countFailed() > 0;
+    return getFailedTransactionCount() > 0;
   }
 
   public boolean isCompletelyProceeded() {
     // Can be greater if in the mean time of transaction confirmation, a member
     // has been invalidated / disabled / deleted
-    return countTransactions() > 0 && countSuccess() >= countValidRewards();
+    return getTransactionsCount() > 0 && getSuccessTransactionCount() >= getValidRewardCount();
   }
 }

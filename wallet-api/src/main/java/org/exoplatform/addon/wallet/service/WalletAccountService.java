@@ -147,6 +147,15 @@ public interface WalletAccountService {
   void saveWalletAddress(Wallet wallet, String currentUser) throws IllegalAccessException;
 
   /**
+   * Save wallet instance in internal database
+   * 
+   * @param wallet
+   * @param isNew
+   * @return save {@link Wallet}
+   */
+  Wallet saveWallet(Wallet wallet, boolean isNew);
+
+  /**
    * Remove User or Space wallet address association
    * 
    * @param address wallet address association to remove

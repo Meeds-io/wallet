@@ -9,9 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.exoplatform.addon.wallet.model.reward.RewardReport;
-import org.exoplatform.addon.wallet.model.reward.WalletReward;
-import org.exoplatform.addon.wallet.reward.service.RewardService;
-import org.exoplatform.addon.wallet.service.WalletAccountService;
+import org.exoplatform.addon.wallet.reward.service.RewardReportService;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
@@ -23,16 +21,13 @@ import io.swagger.annotations.*;
 @Path("/wallet/api/reward/")
 @RolesAllowed("rewarding")
 @Api(value = "/wallet/api/reward", description = "Manage wallet rewards") // NOSONAR
-public class RewardBudgetREST implements ResourceContainer {
-  private static final Log     LOG = ExoLogger.getLogger(RewardBudgetREST.class);
+public class RewardReportREST implements ResourceContainer {
+  private static final Log    LOG = ExoLogger.getLogger(RewardReportREST.class);
 
-  private RewardService        rewardService;
+  private RewardReportService rewardReportService;
 
-  private WalletAccountService walletAccountService;
-
-  public RewardBudgetREST(RewardService rewardService, WalletAccountService walletAccountService) {
-    this.rewardService = rewardService;
-    this.walletAccountService = walletAccountService;
+  public RewardReportREST(RewardReportService rewardReportService) {
+    this.rewardReportService = rewardReportService;
   }
 
   @GET
@@ -46,11 +41,7 @@ public class RewardBudgetREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
-      RewardReport rewardReport = rewardService.computeRewardReport(periodDateInSeconds);
-
-      for (WalletReward walletReward : rewardReport.getRewards()) {
-        walletAccountService.retrieveWalletBlockchainState(walletReward.getWallet());
-      }
+      RewardReport rewardReport = rewardReportService.computeRewards(periodDateInSeconds);
       return Response.ok(rewardReport).build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);
@@ -74,7 +65,7 @@ public class RewardBudgetREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
-      rewardService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
+      rewardReportService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);

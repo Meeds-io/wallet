@@ -15,6 +15,9 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_GAM_TEAM")
+@NamedQueries({
+    @NamedQuery(name = "RewardTeam.findTeamsByMemberId", query = "SELECT rt FROM RewardTeam rt JOIN rt.members mem WHERE mem.identityId = :identityId ORDER BY rt.id DESC"),
+})
 public class RewardTeamEntity implements Serializable {
 
   private static final long           serialVersionUID = 4475704534821391132L;

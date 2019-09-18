@@ -550,9 +550,6 @@ public class WalletAccountREST implements ResourceContainer {
   public Response getWallets() {
     try {
       Set<Wallet> wallets = accountService.listWallets();
-      for (Wallet wallet : wallets) {
-        accountService.retrieveWalletBlockchainState(wallet);
-      }
       return Response.ok(wallets).build();
     } catch (Exception e) {
       LOG.warn("Error retrieving list of wallets", e);

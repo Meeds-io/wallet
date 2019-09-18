@@ -15,7 +15,8 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_REWARD_PERIOD")
 @NamedQueries({
-    @NamedQuery(name = "RewardPeriod.getPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime >= :periodTime AND rp.endTime < :periodTime"),
+    @NamedQuery(name = "RewardPeriod.findRewardPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime"),
+    @NamedQuery(name = "RewardPlugin.findRewardPeriodsByStatus", query = "SELECT rp FROM RewardPeriod rp WHERE rp.status = :status"),
 })
 public class WalletRewardPeriodEntity implements Serializable {
 
@@ -27,6 +28,7 @@ public class WalletRewardPeriodEntity implements Serializable {
   @Column(name = "REWARD_PERIOD_ID")
   private Long              id;
 
+  @Enumerated(EnumType.ORDINAL)
   @Column(name = "PERIOD_TYPE", nullable = false)
   private RewardPeriodType  periodType;
 
@@ -36,6 +38,7 @@ public class WalletRewardPeriodEntity implements Serializable {
   @Column(name = "END_TIME", nullable = false)
   private Long              endTime;
 
+  @Enumerated(EnumType.ORDINAL)
   @Column(name = "STATUS", nullable = false)
   private RewardStatus      status;
 
@@ -77,6 +80,12 @@ public class WalletRewardPeriodEntity implements Serializable {
 
   public void setStatus(RewardStatus status) {
     this.status = status;
+  }
+
+  @Override
+  public String toString() {
+    return "WalletRewardPeriodEntity [id=" + id + ", periodType=" + periodType + ", startTime=" + startTime + ", endTime="
+        + endTime + ", status=" + status + "]";
   }
 
 }

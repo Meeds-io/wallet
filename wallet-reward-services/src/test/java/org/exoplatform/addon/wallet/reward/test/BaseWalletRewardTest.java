@@ -16,7 +16,7 @@ import org.exoplatform.addon.wallet.model.*;
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
-import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
+import org.exoplatform.addon.wallet.reward.dao.*;
 import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.addon.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.addon.wallet.reward.test.service.WalletRewardSettingsServiceTest;
@@ -24,6 +24,7 @@ import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.utils.RewardUtils;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.commons.utils.MapResourceBundle;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
@@ -101,6 +102,7 @@ public abstract class BaseWalletRewardTest {
     assertNotNull("Container shouldn't be null", container);
     assertTrue("Container should have been started", container.isStarted());
 
+    ExoContainerContext.setCurrentContainer(container);
     registerResourceBundleService();
 
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
@@ -110,23 +112,35 @@ public abstract class BaseWalletRewardTest {
 
   @Before
   public void beforeMethodTest() {
+    ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
   }
 
   @After
   public void afterMethodTest() {
+    RewardDAO rewardDAO = getService(RewardDAO.class);
+    RewardPeriodDAO rewardPeriodDAO = getService(RewardPeriodDAO.class);
+    RewardPluginDAO rewardPluginDAO = getService(RewardPluginDAO.class);
     WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
     AddressLabelDAO addressLabelDAO = getService(AddressLabelDAO.class);
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
     RewardTeamDAO rewardTeamDAO = getService(RewardTeamDAO.class);
+    WalletBlockchainStateDAO walletBlockchainStateDAO = getService(WalletBlockchainStateDAO.class);
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
 
     RewardSettings storedSettings = rewardSettingsService.getSettings();
     assertEquals(defaultSettings, storedSettings);
 
     RequestLifeCycle.end();
+
+    ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
+
+    rewardPluginDAO.deleteAll();
+    rewardDAO.deleteAll();
+    rewardPeriodDAO.deleteAll();
+    walletBlockchainStateDAO.deleteAll();
 
     if (!entitiesToClean.isEmpty()) {
       for (Serializable entity : entitiesToClean) {

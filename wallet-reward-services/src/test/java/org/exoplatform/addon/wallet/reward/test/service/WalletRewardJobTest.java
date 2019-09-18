@@ -18,6 +18,7 @@ import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob;
 import org.exoplatform.addon.wallet.reward.service.*;
+import org.exoplatform.addon.wallet.reward.storage.RewardReportStorage;
 import org.exoplatform.addon.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.addon.wallet.service.*;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
@@ -31,17 +32,14 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
   public void testSendRewards() throws Exception {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    RewardTransactionService rewardTransactionService = getService(RewardTransactionService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    RewardPeriodService rewardPeriodService = getService(RewardPeriodService.class);
+    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
 
-    WalletRewardService walletRewardService = new WalletRewardService(walletAccountService,
-                                                                      walletTransactionService,
-                                                                      rewardSettingsService,
-                                                                      rewardTransactionService,
-                                                                      rewardTeamService,
-                                                                      rewardPeriodService);
+    WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
+                                                                                  rewardSettingsService,
+                                                                                  rewardTeamService,
+                                                                                  rewardReportStorage);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
 
@@ -95,7 +93,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       RewardTeam rewardTeam6 = createTeamWithMembers(51, 60, RewardBudgetType.COMPUTED, false);
       teams.add(rewardTeam6);
 
-      Set<RewardPeriod> initialRewardPeriodsInProgress = rewardSettingsService.getRewardPeriodsInProgress();
+      List<RewardPeriod> initialRewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
       assertNotNull(initialRewardPeriodsInProgress);
 
       // Admin having enough funds
@@ -104,7 +102,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
-      Set<RewardPeriod> rewardPeriodsInProgress = rewardSettingsService.getRewardPeriodsInProgress();
+      List<RewardPeriod> rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(initialRewardPeriodsInProgress.size() + 1l, rewardPeriodsInProgress.size());
 
@@ -113,11 +111,11 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       // Executing job shouldn't mark reward transactions as sent until
       // transactions are marked as success and not pending
       rewardReportNotificationJob.execute(null);
-      rewardPeriodsInProgress = rewardSettingsService.getRewardPeriodsInProgress();
+      rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(initialRewardPeriodsInProgress.size() + 1l, rewardPeriodsInProgress.size());
 
-      RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
+      RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
       Set<WalletReward> rewards = rewardReport.getRewards();
       for (WalletReward walletReward : rewards) {
         String hash = walletReward.getTransaction().getHash();
@@ -129,7 +127,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
 
       rewardReportNotificationJob.execute(null);
 
-      rewardPeriodsInProgress = rewardSettingsService.getRewardPeriodsInProgress();
+      rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(0, rewardPeriodsInProgress.size());
     } finally {
@@ -156,6 +154,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
         transactionDetail.setHash(generateTransactionHash());
         transactionDetail.setPending(pendingTransactions);
         transactionDetail.setSucceeded(successTransactions);
+        transactionDetail.setContractMethodName("reward");
         RequestLifeCycle.begin(container);
         try {
           walletTransactionService.saveTransactionDetail(transactionDetail, false);

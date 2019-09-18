@@ -16,36 +16,25 @@
  */
 package org.exoplatform.addon.wallet.reward.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.exoplatform.addon.wallet.model.reward.RewardTeam;
-import org.exoplatform.addon.wallet.model.reward.RewardTeamMember;
-import org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO;
-import org.exoplatform.addon.wallet.reward.entity.RewardTeamEntity;
-import org.exoplatform.addon.wallet.reward.entity.RewardTeamMemberEntity;
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.manager.IdentityManager;
-import org.exoplatform.social.core.space.model.Space;
-import org.exoplatform.social.core.space.spi.SpaceService;
+import org.exoplatform.addon.wallet.reward.storage.RewardTeamStorage;
 
 /**
- * A storage service to save/load reward teams
+ * A service to manage reward teams
  */
 public class WalletRewardTeamService implements RewardTeamService {
 
-  private RewardTeamDAO rewardTeamDAO;
+  private RewardTeamStorage rewardTeamStorage;
 
-  public WalletRewardTeamService(RewardTeamDAO rewardTeamDAO) {
-    this.rewardTeamDAO = rewardTeamDAO;
+  public WalletRewardTeamService(RewardTeamStorage rewardTeamStorage) {
+    this.rewardTeamStorage = rewardTeamStorage;
   }
 
   @Override
   public List<RewardTeam> getTeams() {
-    List<RewardTeamEntity> teamEntities = rewardTeamDAO.findAll();
-    return teamEntities.stream().map(teamEntity -> toDTO(teamEntity)).collect(Collectors.toList());
+    return this.rewardTeamStorage.getTeams();
   }
 
   @Override
@@ -53,13 +42,7 @@ public class WalletRewardTeamService implements RewardTeamService {
     if (rewardTeam == null) {
       throw new IllegalArgumentException("Empty team to save");
     }
-    RewardTeamEntity teamEntity = fromDTO(rewardTeam);
-    if (teamEntity.getId() == null || teamEntity.getId() == 0) {
-      teamEntity = rewardTeamDAO.create(teamEntity);
-    } else {
-      teamEntity = rewardTeamDAO.update(teamEntity);
-    }
-    return toDTO(rewardTeamDAO.find(teamEntity.getId()));
+    return this.rewardTeamStorage.saveTeam(rewardTeam);
   }
 
   @Override
@@ -67,109 +50,15 @@ public class WalletRewardTeamService implements RewardTeamService {
     if (id == null || id == 0) {
       throw new IllegalArgumentException("Team id is required");
     }
-    RewardTeamEntity entity = rewardTeamDAO.find(id);
-    if (entity != null) {
-      rewardTeamDAO.delete(entity);
-    }
-    return toDTO(entity);
+    return this.rewardTeamStorage.removeTeam(id);
   }
 
-  private static RewardTeamEntity fromDTO(RewardTeam rewardTeam) {
-    if (rewardTeam == null) {
-      return null;
+  @Override
+  public List<RewardTeam> findTeamsByMemberId(long identityId) {
+    if (identityId == 0) {
+      throw new IllegalArgumentException("User identity id is required");
     }
-    RewardTeamEntity teamEntity = new RewardTeamEntity();
-    teamEntity.setId(rewardTeam.getId() == null || rewardTeam.getId() == 0 ? null : rewardTeam.getId());
-    teamEntity.setName(rewardTeam.getName());
-    teamEntity.setDescription(rewardTeam.getDescription());
-    teamEntity.setBudget(rewardTeam.getBudget());
-    teamEntity.setRewardType(rewardTeam.getRewardType());
-    teamEntity.setDisabled(rewardTeam.isDisabled());
-    if (rewardTeam.getManager() != null && rewardTeam.getManager().getIdentityId() != 0) {
-      teamEntity.setManager(rewardTeam.getManager().getIdentityId());
-    }
-    if (rewardTeam.getSpaceId() != null && rewardTeam.getSpaceId() != 0) {
-      teamEntity.setSpaceId(rewardTeam.getSpaceId());
-    }
-    if (rewardTeam.getMembers() != null && !rewardTeam.getMembers().isEmpty()) {
-      teamEntity.setMembers(rewardTeam.getMembers()
-                                      .stream()
-                                      .map(rewardTeamMember -> getRewardTeamMemberEntity(teamEntity,
-                                                                                         rewardTeamMember))
-                                      .collect(Collectors.toSet()));
-    }
-    return teamEntity;
-  }
-
-  private static RewardTeam toDTO(RewardTeamEntity teamEntity) {
-    if (teamEntity == null) {
-      return null;
-    }
-    RewardTeam rewardTeam = new RewardTeam();
-    rewardTeam.setId(teamEntity.getId());
-    rewardTeam.setName(teamEntity.getName());
-    rewardTeam.setDescription(teamEntity.getDescription());
-    rewardTeam.setBudget(teamEntity.getBudget());
-    rewardTeam.setManager(getRewardTeamMember(teamEntity.getManager()));
-    rewardTeam.setRewardType(teamEntity.getRewardType());
-    rewardTeam.setDisabled(teamEntity.getDisabled());
-    if (teamEntity.getSpaceId() != null && teamEntity.getSpaceId() != 0) {
-      SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
-      Space space = spaceService.getSpaceById(String.valueOf(teamEntity.getSpaceId()));
-      if (space != null) {
-        rewardTeam.setSpaceId(teamEntity.getSpaceId());
-        rewardTeam.setSpacePrettyName(space.getPrettyName());
-      }
-    }
-    if (teamEntity.getMembers() != null && !teamEntity.getMembers().isEmpty()) {
-      List<RewardTeamMember> list = teamEntity.getMembers()
-                                              .stream()
-                                              .map(teamMemberEntity -> getRewardTeamMember(teamMemberEntity))
-                                              .collect(Collectors.toList());
-      rewardTeam.setMembers(new ArrayList<>(list));
-    }
-    return rewardTeam;
-  }
-
-  private static RewardTeamMemberEntity getRewardTeamMemberEntity(RewardTeamEntity teamEntity,
-                                                                  RewardTeamMember rewardTeamMember) {
-    if (rewardTeamMember == null) {
-      return null;
-    }
-    RewardTeamMemberEntity teamMemberEntity = new RewardTeamMemberEntity();
-    teamMemberEntity.setId(rewardTeamMember.getTechnicalId() == null
-        || rewardTeamMember.getTechnicalId() == 0 ? null : rewardTeamMember.getTechnicalId());
-    teamMemberEntity.setIdentityId(rewardTeamMember.getIdentityId());
-    teamMemberEntity.setTeam(teamEntity);
-    return teamMemberEntity;
-  }
-
-  private static RewardTeamMember getRewardTeamMember(RewardTeamMemberEntity teamMemberEntity) {
-    if (teamMemberEntity == null) {
-      return null;
-    }
-    RewardTeamMember rewardTeamMember = getRewardTeamMember(teamMemberEntity.getIdentityId());
-    if (rewardTeamMember == null) {
-      return null;
-    }
-    rewardTeamMember.setTechnicalId(teamMemberEntity.getId());
-    return rewardTeamMember;
-  }
-
-  private static RewardTeamMember getRewardTeamMember(Long identityId) {
-    if (identityId == null || identityId == 0) {
-      return null;
-    }
-    IdentityManager identityManager = CommonsUtils.getService(IdentityManager.class);
-    Identity identity = identityManager.getIdentity(String.valueOf(identityId), true);
-    if (identity == null) {
-      return null;
-    }
-    RewardTeamMember rewardTeamMember = new RewardTeamMember();
-    rewardTeamMember.setId(identity.getRemoteId());
-    rewardTeamMember.setProviderId(identity.getProviderId());
-    rewardTeamMember.setIdentityId(Long.parseLong(identity.getId()));
-    return rewardTeamMember;
+    return this.rewardTeamStorage.findTeamsByMemberId(identityId);
   }
 
 }

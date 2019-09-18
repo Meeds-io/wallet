@@ -16,46 +16,46 @@ import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.service.*;
+import org.exoplatform.addon.wallet.reward.storage.RewardReportStorage;
 import org.exoplatform.addon.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.addon.wallet.service.*;
-import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.addon.wallet.utils.RewardUtils;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.container.component.RequestLifeCycle;
 
-public class WalletRewardServiceTest extends BaseWalletRewardTest {
+public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
 
   /**
    * Check that service is instantiated
    */
   @Test
   public void testServiceInstantiated() {
-    WalletRewardService walletRewardService = getService(WalletRewardService.class);
+    WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
     assertNotNull(walletRewardService);
   }
 
   @Test
   public void testComputeRewards() {
-    WalletRewardService walletRewardService = getService(WalletRewardService.class);
+    WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
     long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 03)
                                                                  .atEndOfMonth()
                                                                  .atStartOfDay());
-    RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
+    RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
     assertNotNull(rewardReport);
     assertNotNull(rewardReport.getRewards());
     assertEquals(0, rewardReport.getRewards().size());
 
-    WalletStorage walletStorage = getService(WalletStorage.class);
+    WalletAccountService accountService = getService(WalletAccountService.class);
     int enabledWalletsCount = 60;
     for (int i = 0; i < enabledWalletsCount; i++) {
       Wallet wallet = newWallet(i + 1l);
-      wallet = walletStorage.saveWallet(wallet, true);
+      wallet = accountService.saveWallet(wallet, true);
       updateWalletBlockchainState(wallet);
-      walletStorage.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+      accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
       entitiesToClean.add(wallet);
     }
 
-    rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
+    rewardReport = walletRewardService.computeRewards(startDateInSeconds);
     assertNotNull(rewardReport);
     // Even if settings are null, the returned rewards shouldn't be empty
     assertEquals(enabledWalletsCount, rewardReport.getRewards().size());
@@ -131,19 +131,19 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       customPluginSetting.setThreshold(0);
       rewardSettingsService.saveSettings(newSettings);
 
-      List<RewardTeam> teams = new ArrayList<>();
-
       RewardTeam rewardTeam1 = createTeamWithMembers(1, 10, RewardBudgetType.COMPUTED, true);
-      teams.add(rewardTeam1);
       RewardTeam rewardTeam2 = createTeamWithMembers(11, 20, RewardBudgetType.FIXED, true);
-      teams.add(rewardTeam2);
       RewardTeam rewardTeam3 = createTeamWithMembers(21, 30, RewardBudgetType.FIXED_PER_MEMBER, true);
-      teams.add(rewardTeam3);
       RewardTeam rewardTeam4 = createTeamWithMembers(31, 40, RewardBudgetType.FIXED_PER_MEMBER, true);
-      teams.add(rewardTeam4);
       RewardTeam rewardTeam5 = createTeamWithMembers(41, 50, RewardBudgetType.COMPUTED, true);
-      teams.add(rewardTeam5);
       RewardTeam rewardTeam6 = createTeamWithMembers(51, 60, RewardBudgetType.COMPUTED, true);
+
+      List<RewardTeam> teams = new ArrayList<>();
+      teams.add(rewardTeam1);
+      teams.add(rewardTeam2);
+      teams.add(rewardTeam3);
+      teams.add(rewardTeam4);
+      teams.add(rewardTeam5);
       teams.add(rewardTeam6);
 
       // Check computed amount for plugin per wallet with teams (each having 10
@@ -175,7 +175,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
         rewardTeamService.saveTeam(team);
       });
 
-      rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
+      rewardReport = walletRewardService.computeRewards(startDateInSeconds);
 
       // check total budget to send
       double tokensToSend = rewardReport.getRewards().stream().mapToDouble(WalletReward::getTokensToSend).sum();
@@ -184,7 +184,8 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       // Check budget of team having a defined budget as 'fixed'
       double tokensSentToTeam2 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam2.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam2.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(rewardTeam2.getBudget(), tokensSentToTeam2, 0);
@@ -193,14 +194,16 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       // 'fixed per member'
       double tokensSentToTeam3 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam3.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam3.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(rewardTeam3.getBudget() * rewardTeam3.getMembers().size(), tokensSentToTeam3, 0);
 
       double tokensSentToTeam4 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam4.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam4.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(rewardTeam4.getBudget() * rewardTeam4.getMembers().size(), tokensSentToTeam4, 0);
@@ -212,21 +215,24 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
 
       double tokensSentToTeam1 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam1.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam1.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(tokensSentToOtherTeam, tokensSentToTeam1, 0);
 
       double tokensSentToTeam5 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam5.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam5.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(tokensSentToOtherTeam, tokensSentToTeam5, 0);
 
       double tokensSentToTeam6 = rewardReport.getRewards()
                                              .stream()
-                                             .filter(walletReward -> rewardTeam6.getName().equals(walletReward.getPoolName()))
+                                             .filter(walletReward -> walletReward.getTeam() != null
+                                                 && rewardTeam6.getId().equals(walletReward.getTeam().getId()))
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(tokensSentToOtherTeam, tokensSentToTeam6, 0);
@@ -240,17 +246,14 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
   public void testSendRewards() throws Exception {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    RewardTransactionService rewardTransactionService = getService(RewardTransactionService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    RewardPeriodService rewardPeriodService = getService(RewardPeriodService.class);
+    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
 
-    WalletRewardService walletRewardService = new WalletRewardService(walletAccountService,
-                                                                      walletTransactionService,
-                                                                      rewardSettingsService,
-                                                                      rewardTransactionService,
-                                                                      rewardTeamService,
-                                                                      rewardPeriodService);
+    WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
+                                                                                  rewardSettingsService,
+                                                                                  rewardTeamService,
+                                                                                  rewardReportStorage);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
@@ -279,13 +282,13 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
       customPluginSetting.setEnabled(true);
       rewardSettingsService.saveSettings(newSettings);
 
-      WalletStorage walletStorage = getService(WalletStorage.class);
+      WalletAccountService accountService = getService(WalletAccountService.class);
       int enabledWalletsCount = 60;
       for (int i = 0; i < enabledWalletsCount; i++) {
         Wallet wallet = newWallet(i + 1l);
-        wallet = walletStorage.saveWallet(wallet, true);
+        wallet = accountService.saveWallet(wallet, true);
         updateWalletBlockchainState(wallet);
-        walletStorage.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+        accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
         entitiesToClean.add(wallet);
       }
 
@@ -355,6 +358,7 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
         transactionDetail.setHash(generateTransactionHash());
         transactionDetail.setPending(pendingTransactions);
         transactionDetail.setSucceeded(successTransactions);
+        transactionDetail.setContractMethodName("reward");
         RequestLifeCycle.begin(container);
         try {
           walletTransactionService.saveTransactionDetail(transactionDetail, false);
@@ -388,24 +392,24 @@ public class WalletRewardServiceTest extends BaseWalletRewardTest {
     return rewardTeam;
   }
 
-  private double checkComputedRewards(WalletRewardService walletRewardService,
+  private double checkComputedRewards(WalletRewardReportService walletRewardService,
                                       long startDateInSeconds,
                                       int enabledWalletsCount,
                                       long amount) {
     double sumOfTokensToSend = 0;
-    RewardReport rewardReport = walletRewardService.computeRewardReport(startDateInSeconds);
+    RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
     assertNotNull(rewardReport);
     Set<WalletReward> rewards = rewardReport.getRewards();
     assertNotNull(rewards);
 
-    assertEquals(enabledWalletsCount, rewardReport.countValidRewards());
+    assertEquals(enabledWalletsCount, rewardReport.getValidRewardCount());
     for (WalletReward walletReward : rewardReport.getValidRewards()) {
       assertNotNull(walletReward);
       assertNotNull(walletReward.getWallet());
       assertNotNull(walletReward.getRewards());
       assertEquals(1, walletReward.getRewards().size());
       assertEquals(0, walletReward.getTokensSent(), 0);
-      long tokensToSend = walletReward.getWallet().getTechnicalId() * amount;
+      long tokensToSend = walletReward.getIdentityId() * amount;
       sumOfTokensToSend += tokensToSend;
       assertEquals("Wallet '" + walletReward + "' has an unexpected reward amount",
                    tokensToSend,

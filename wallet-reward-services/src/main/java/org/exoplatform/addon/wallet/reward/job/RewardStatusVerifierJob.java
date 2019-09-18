@@ -18,14 +18,13 @@ package org.exoplatform.addon.wallet.reward.job;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
 
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import org.quartz.*;
 
 import org.exoplatform.addon.wallet.model.reward.RewardPeriod;
 import org.exoplatform.addon.wallet.model.reward.RewardReport;
-import org.exoplatform.addon.wallet.reward.service.*;
+import org.exoplatform.addon.wallet.reward.service.RewardReportService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -41,17 +40,13 @@ import org.exoplatform.services.log.Log;
 @DisallowConcurrentExecution
 public class RewardStatusVerifierJob implements Job {
 
-  private static final Log      LOG = ExoLogger.getLogger(RewardStatusVerifierJob.class);
+  private static final Log    LOG = ExoLogger.getLogger(RewardStatusVerifierJob.class);
 
-  private ExoContainer          container;
+  private ExoContainer        container;
 
-  private RewardSettingsService rewardSettingsService;
+  private RewardReportService rewardReportService;
 
-  private RewardService         rewardService;
-
-  private RewardPeriodService   rewardPeriodService;
-
-  private ListenerService       listenerService;
+  private ListenerService     listenerService;
 
   public RewardStatusVerifierJob() {
     this.container = PortalContainer.getInstance();
@@ -63,43 +58,38 @@ public class RewardStatusVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      Set<RewardPeriod> rewardPeriodsInProgress = getRewardSettingsService().getRewardPeriodsInProgress();
+      List<RewardPeriod> rewardPeriodsInProgress = getRewardReportService().getRewardPeriodsInProgress();
       if (rewardPeriodsInProgress != null && !rewardPeriodsInProgress.isEmpty()) {
         Iterator<RewardPeriod> rewardPeriodsIterator = rewardPeriodsInProgress.iterator();
-        boolean changed = false;
         while (rewardPeriodsIterator.hasNext()) {
           RewardPeriod rewardPeriod = rewardPeriodsIterator.next();
-          RewardReport rewardReport = getRewardService().computeRewardReport(rewardPeriod.getStartDateInSeconds());
+          RewardReport rewardReport = getRewardReportService().computeRewards(rewardPeriod.getStartDateInSeconds());
           if (rewardReport == null) {
             continue;
           }
           if (rewardReport.isCompletelyProceeded()) {
             LOG.debug("Rewards sent successfully for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
                       rewardPeriod.getStartDateInSeconds(),
-                      rewardReport.countValidRewards(),
-                      rewardReport.countTransactions(),
-                      rewardReport.countSuccess(),
-                      rewardReport.countFailed(),
-                      rewardReport.countPending(),
+                      rewardReport.getValidRewardCount(),
+                      rewardReport.getTransactionsCount(),
+                      rewardReport.getSuccessTransactionCount(),
+                      rewardReport.getFailedTransactionCount(),
+                      rewardReport.getPendingTransactionCount(),
                       rewardReport.isCompletelyProceeded());
 
             getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
-            changed = true;
             rewardPeriodsIterator.remove();
           } else {
             LOG.debug("Reward always in progress for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
                       rewardPeriod.getStartDateInSeconds(),
-                      rewardReport.countValidRewards(),
-                      rewardReport.countTransactions(),
-                      rewardReport.countSuccess(),
-                      rewardReport.countFailed(),
-                      rewardReport.countPending(),
+                      rewardReport.getValidRewardCount(),
+                      rewardReport.getTransactionsCount(),
+                      rewardReport.getSuccessTransactionCount(),
+                      rewardReport.getFailedTransactionCount(),
+                      rewardReport.getPendingTransactionCount(),
                       rewardReport.isCompletelyProceeded());
           }
-          getRewardPeriodService().saveRewardReport(rewardReport);
-        }
-        if (changed) {
-          getRewardSettingsService().saveRewardPeriodInProgress(rewardPeriodsInProgress);
+          getRewardReportService().saveRewardReport(rewardReport);
         }
       }
     } catch (Exception e) {
@@ -110,25 +100,11 @@ public class RewardStatusVerifierJob implements Job {
     }
   }
 
-  private RewardSettingsService getRewardSettingsService() {
-    if (rewardSettingsService == null) {
-      rewardSettingsService = CommonsUtils.getService(RewardSettingsService.class);
+  private RewardReportService getRewardReportService() {
+    if (rewardReportService == null) {
+      rewardReportService = CommonsUtils.getService(RewardReportService.class);
     }
-    return rewardSettingsService;
-  }
-
-  private RewardService getRewardService() {
-    if (rewardService == null) {
-      rewardService = CommonsUtils.getService(RewardService.class);
-    }
-    return rewardService;
-  }
-
-  private RewardPeriodService getRewardPeriodService() {
-    if (rewardPeriodService == null) {
-      rewardPeriodService = CommonsUtils.getService(RewardPeriodService.class);
-    }
-    return rewardPeriodService;
+    return rewardReportService;
   }
 
   private ListenerService getListenerService() {

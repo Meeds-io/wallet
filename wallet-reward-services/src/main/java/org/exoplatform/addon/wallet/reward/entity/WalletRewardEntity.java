@@ -15,7 +15,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @NamedQueries({
     @NamedQuery(name = "Reward.findRewardsByPeriodId", query = "SELECT rw FROM Reward rw WHERE rw.period.id = :periodId"),
     @NamedQuery(name = "Reward.findRewardsByIdentityId", query = "SELECT rw FROM Reward rw WHERE rw.identityId = :identityId"),
-    @NamedQuery(name = "Reward.findRewardByIdentityIdAndPeriod", query = "SELECT rw FROM Reward rw WHERE rw.identityId = :identityId AND rw.period.id = :periodId"),
+    @NamedQuery(name = "Reward.findRewardByIdentityIdAndPeriodId", query = "SELECT rw FROM Reward rw WHERE rw.identityId = :identityId AND rw.period.id = :periodId"),
 })
 public class WalletRewardEntity implements Serializable {
 

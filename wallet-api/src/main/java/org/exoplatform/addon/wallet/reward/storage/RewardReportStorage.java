@@ -1,9 +1,10 @@
-package org.exoplatform.addon.wallet.reward.service;
+package org.exoplatform.addon.wallet.reward.storage;
 
-import org.exoplatform.addon.wallet.model.reward.RewardPeriodType;
-import org.exoplatform.addon.wallet.model.reward.RewardReport;
+import java.util.List;
 
-public interface RewardPeriodService {
+import org.exoplatform.addon.wallet.model.reward.*;
+
+public interface RewardReportStorage {
 
   /**
    * Retrieve a {@link RewardReport} corresponding to a period of time
@@ -18,5 +19,13 @@ public interface RewardPeriodService {
    * @param rewardReport save generated reward report
    */
   void saveRewardReport(RewardReport rewardReport);
+
+  /**
+   * Retrieve the list of periods switch rewards payment status
+   * 
+   * @param rewardStatus
+   * @return list of {@link RewardPeriod}
+   */
+  List<RewardPeriod> findRewardPeriodsByStatus(RewardStatus rewardStatus);
 
 }

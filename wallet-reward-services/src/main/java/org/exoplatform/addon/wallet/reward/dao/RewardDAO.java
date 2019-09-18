@@ -26,8 +26,8 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     return query.getResultList();
   }
 
-  public WalletRewardEntity findRewardByIdentityIdAndPeriod(long identityId, long periodId) {
-    TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardByIdentityIdAndPeriod",
+  public WalletRewardEntity findRewardByIdentityIdAndPeriodId(long identityId, long periodId) {
+    TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardByIdentityIdAndPeriodId",
                                                                                WalletRewardEntity.class);
     query.setParameter("periodId", periodId);
     query.setParameter("identityId", identityId);

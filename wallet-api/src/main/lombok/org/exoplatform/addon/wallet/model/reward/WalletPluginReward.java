@@ -9,7 +9,6 @@ import lombok.ToString;
 @Data
 @ToString
 public class WalletPluginReward implements Serializable {
-
   private static final long serialVersionUID = 1622627645862974585L;
 
   private String            pluginId;

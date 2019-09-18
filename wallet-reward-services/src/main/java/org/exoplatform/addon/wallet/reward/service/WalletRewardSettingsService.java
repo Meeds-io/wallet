@@ -23,41 +23,32 @@ import static org.exoplatform.addon.wallet.utils.WalletUtils.toJsonString;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
 
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
-import org.exoplatform.container.xml.InitParams;
 
 /**
  * A storage service to save/load reward transactions
  */
 public class WalletRewardSettingsService implements RewardSettingsService {
 
-  private static final String       REMINDER_DAYS_PARAMETER = "reminder.days";
-
   private SettingService            settingService;
 
-  private RewardSettings            rewardSettings;
+  private RewardSettings            configuredRewardSettings;
 
-  private Map<String, RewardPlugin> rewardPlugins           = new HashMap<>();
+  private Map<String, RewardPlugin> rewardPlugins = new HashMap<>();
 
-  private int                       reminderDateInDays      = 3;
-
-  public WalletRewardSettingsService(SettingService settingService, InitParams params) {
+  public WalletRewardSettingsService(SettingService settingService) {
     this.settingService = settingService;
-    if (params != null && params.containsKey(REMINDER_DAYS_PARAMETER)) {
-      this.reminderDateInDays = Integer.parseInt(params.getValueParam(REMINDER_DAYS_PARAMETER).getValue());
-    }
   }
 
   @Override
   public RewardSettings getSettings() {
     // Retrieve cached reward settings
-    if (this.rewardSettings != null) {
-      return this.rewardSettings.clone();
+    if (this.configuredRewardSettings != null) {
+      return this.configuredRewardSettings.clone();
     }
 
     SettingValue<?> settingsValue =
@@ -66,15 +57,17 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
                                                                                            : settingsValue.getValue().toString();
 
-    RewardSettings storedRewardSettings = fromJsonString(settingsValueString, RewardSettings.class);
-    if (storedRewardSettings == null) {
-      storedRewardSettings = new RewardSettings();
+    RewardSettings rewardSettings = null;
+    if (settingsValueString == null) {
+      rewardSettings = new RewardSettings();
+    } else {
+      rewardSettings = fromJsonString(settingsValueString, RewardSettings.class);
     }
 
-    Set<RewardPluginSettings> pluginSettings = storedRewardSettings.getPluginSettings();
+    Set<RewardPluginSettings> pluginSettings = rewardSettings.getPluginSettings();
     if (pluginSettings == null) {
       pluginSettings = new HashSet<>();
-      storedRewardSettings.setPluginSettings(pluginSettings);
+      rewardSettings.setPluginSettings(pluginSettings);
     }
 
     // Add configured plugin settings if not already stored
@@ -103,8 +96,8 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     }
 
     // Cache reward settings
-    this.rewardSettings = storedRewardSettings;
-    return this.rewardSettings;
+    this.configuredRewardSettings = rewardSettings;
+    return this.configuredRewardSettings;
   }
 
   @Override
@@ -126,36 +119,7 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME, SettingValue.create(settingsString));
 
     // Purge cached settings
-    this.rewardSettings = null;
-  }
-
-  @Override
-  public void addRewardPeriodInProgress(RewardPeriod rewardPeriod) {
-    Set<RewardPeriod> rewardPeriods = getRewardPeriodsInProgress();
-    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
-      rewardPeriods = new HashSet<>();
-    }
-    rewardPeriods.add(rewardPeriod);
-    saveRewardPeriodInProgress(rewardPeriods);
-  }
-
-  @Override
-  public void saveRewardPeriodInProgress(Set<RewardPeriod> rewardPeriods) {
-    String rewardPeriodString = toRewardPeriodString(rewardPeriods);
-    if (StringUtils.isBlank(rewardPeriodString)) {
-      settingService.remove(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS);
-    } else {
-      settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS, SettingValue.create(rewardPeriodString));
-    }
-  }
-
-  @Override
-  public Set<RewardPeriod> getRewardPeriodsInProgress() {
-    SettingValue<?> settingsValue = settingService.get(REWARD_CONTEXT, REWARD_SCOPE, REWARD_PERIODS_IN_PROGRESS);
-    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
-                                                                                           : settingsValue.getValue().toString();
-
-    return settingsValueString == null ? Collections.emptySet() : toRewardPeriods(settingsValueString);
+    this.configuredRewardSettings = null;
   }
 
   @Override
@@ -163,14 +127,15 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     rewardPlugins.put(rewardPlugin.getPluginId(), rewardPlugin);
 
     // Purge cached settings
-    this.rewardSettings = null;
+    this.configuredRewardSettings = null;
   }
 
+  @Override
   public void unregisterPlugin(String pluginId) {
     rewardPlugins.remove(pluginId);
 
     // Purge cached settings
-    this.rewardSettings = null;
+    this.configuredRewardSettings = null;
   }
 
   @Override
@@ -181,36 +146,6 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   @Override
   public RewardPlugin getRewardPlugin(String pluginId) {
     return rewardPlugins.get(pluginId);
-  }
-
-  @Override
-  public int getReminderDateInDays() {
-    return reminderDateInDays;
-  }
-
-  private String toRewardPeriodString(Set<RewardPeriod> rewardPeriods) {
-    JSONArray jsonArray = new JSONArray();
-    if (rewardPeriods == null || rewardPeriods.isEmpty()) {
-      return null;
-    }
-    for (RewardPeriod rewardPeriod : rewardPeriods) {
-      jsonArray.put(toJsonString(rewardPeriod));
-    }
-    return jsonArray.toString();
-  }
-
-  private Set<RewardPeriod> toRewardPeriods(String settingsValueString) {
-    try {
-      JSONArray jsonArray = new JSONArray(settingsValueString);
-      Set<RewardPeriod> rewardPeriods = new HashSet<>();
-      for (int i = 0; i < jsonArray.length(); i++) {
-        String rewardPeriodString = jsonArray.getString(i);
-        rewardPeriods.add(fromJsonString(rewardPeriodString, RewardPeriod.class));
-      }
-      return rewardPeriods;
-    } catch (Exception e) {
-      throw new IllegalStateException("Error while parsing reward periods list", e);
-    }
   }
 
 }

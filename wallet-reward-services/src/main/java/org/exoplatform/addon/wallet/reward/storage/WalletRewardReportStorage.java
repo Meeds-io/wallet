@@ -1,9 +1,8 @@
-package org.exoplatform.addon.wallet.reward.service;
+package org.exoplatform.addon.wallet.reward.storage;
 
-import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.timeFromSeconds;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,9 +17,9 @@ import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-public class WalletRewardPeriodService implements RewardPeriodService {
+public class WalletRewardReportStorage implements RewardReportStorage {
 
-  private static final Log         LOG = ExoLogger.getLogger(WalletRewardService.class);
+  private static final Log         LOG = ExoLogger.getLogger(WalletRewardReportStorage.class);
 
   private RewardPluginDAO          rewardPluginDAO;
 
@@ -30,27 +29,33 @@ public class WalletRewardPeriodService implements RewardPeriodService {
 
   private RewardTeamDAO            rewardTeamDAO;
 
+  private RewardTeamStorage        rewardTeamStorage;
+
   private WalletAccountService     walletAccountService;
 
   private WalletTransactionService walletTransactionService;
 
-  public WalletRewardPeriodService(RewardPluginDAO rewardPluginDAO,
+  public WalletRewardReportStorage(RewardPluginDAO rewardPluginDAO,
                                    RewardDAO rewardDAO,
                                    RewardPeriodDAO rewardPeriodDAO,
                                    RewardTeamDAO rewardTeamDAO,
+                                   RewardTeamStorage rewardTeamStorage,
                                    WalletAccountService walletAccountService,
                                    WalletTransactionService walletTransactionService) {
     this.rewardPluginDAO = rewardPluginDAO;
     this.rewardDAO = rewardDAO;
     this.rewardPeriodDAO = rewardPeriodDAO;
     this.rewardTeamDAO = rewardTeamDAO;
+    this.rewardTeamStorage = rewardTeamStorage;
     this.walletAccountService = walletAccountService;
     this.walletTransactionService = walletTransactionService;
   }
 
   @Override
   public RewardReport getRewardReport(RewardPeriodType periodType, long periodTimeInSeconds) {
-    WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType, periodTimeInSeconds);
+    RewardPeriod period = periodType.getPeriodOfTime(timeFromSeconds(periodTimeInSeconds));
+    WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
+                                                                                                period.getStartDateInSeconds());
     if (rewardPeriodEntity == null) {
       return null;
     }
@@ -60,56 +65,7 @@ public class WalletRewardPeriodService implements RewardPeriodService {
 
     List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByPeriodId(rewardPeriodEntity.getId());
     if (rewardEntities != null) {
-      Set<WalletReward> rewards = rewardEntities.stream().map(rewardEntity -> {
-        WalletReward walletReward = new WalletReward();
-        walletReward.setEnabled(rewardEntity.isEnabled());
-        if (rewardEntity.getTeam() != null) {
-          walletReward.setPoolId(rewardEntity.getTeam().getId());
-          walletReward.setPoolName(rewardEntity.getTeam().getName());
-        }
-        walletReward.setEnabled(rewardEntity.isEnabled());
-        Wallet wallet = walletAccountService.getWalletByIdentityId(rewardEntity.getIdentityId());
-        walletReward.setWallet(wallet);
-        String transactionHash = rewardEntity.getTransactionHash();
-        if (StringUtils.isBlank(transactionHash)) {
-          TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
-          if (!StringUtils.equals(transactionDetail.getContractMethodName(), "reward")) {
-            LOG.warn("Transaction with hash {} is not a reward transaction, data seems not coherent", transactionHash);
-            return null;
-          }
-          RewardTransaction rewardTransaction = new RewardTransaction();
-          rewardTransaction.setHash(transactionDetail.getHash());
-          rewardTransaction.setPeriodType(periodType.name());
-          rewardTransaction.setReceiverId(wallet.getId());
-          rewardTransaction.setReceiverIdentityId(wallet.getTechnicalId());
-          rewardTransaction.setReceiverType(wallet.getType());
-          rewardTransaction.setStartDateInSeconds(periodOfTime.getStartDateInSeconds());
-          if (transactionDetail.isPending()) {
-            rewardTransaction.setStatus(TRANSACTION_STATUS_PENDING);
-          } else if (transactionDetail.isSucceeded()) {
-            rewardTransaction.setStatus(TRANSACTION_STATUS_SUCCESS);
-          } else {
-            rewardTransaction.setStatus(TRANSACTION_STATUS_FAILED);
-          }
-          rewardTransaction.setTokensSent(transactionDetail.getContractAmount());
-          walletReward.setTransaction(rewardTransaction);
-
-          List<WalletRewardPluginEntity> rewardsPluginEntities =
-                                                               rewardPluginDAO.findRewardPluginsByPeriodId(rewardEntity.getId());
-          if (rewardsPluginEntities != null) {
-            Set<WalletPluginReward> rewardPlugins = rewardsPluginEntities.stream().map(rewardPluginEntity -> {
-              WalletPluginReward pluginReward = new WalletPluginReward();
-              pluginReward.setPluginId(rewardPluginEntity.getPluginId());
-              pluginReward.setPoolsUsed(rewardPluginEntity.isPoolUsed());
-              pluginReward.setPoints(rewardPluginEntity.getPoints());
-              pluginReward.setAmount(rewardPluginEntity.getAmount());
-              return pluginReward;
-            }).collect(Collectors.toSet());
-            walletReward.setRewards(rewardPlugins);
-          }
-        }
-        return walletReward;
-      }).collect(Collectors.toSet());
+      Set<WalletReward> rewards = rewardEntities.stream().map(rewardEntity -> toDTO(rewardEntity)).collect(Collectors.toSet());
       rewardReport.setRewards(rewards);
     }
     return rewardReport;
@@ -129,7 +85,7 @@ public class WalletRewardPeriodService implements RewardPeriodService {
       LOG.debug("Reward report shouldn't be modified because it has been already marked as completed");
     }
 
-    if (rewardReport.countValidRewards() == 0 || rewardReport.totalAmount() == 0) {
+    if (rewardReport.getValidRewardCount() == 0 || rewardReport.getTokensSent() == 0) {
       LOG.debug("Reward report doesn't have valid rewards yet, thus it will not be saved");
       return;
     }
@@ -140,13 +96,13 @@ public class WalletRewardPeriodService implements RewardPeriodService {
 
     if (rewardReport.isCompletelyProceeded()) {
       rewardPeriodEntity.setStatus(RewardStatus.SUCCESS);
-    } else if (rewardReport.countPending() > 0) { // Always pending if some tx
+    } else if (rewardReport.getPendingTransactionCount() > 0) { // Always pending if some tx
                                                   // failed
       rewardPeriodEntity.setStatus(RewardStatus.PENDING);
-    } else if (rewardReport.countFailed() > 0) { // If no failed and there are
+    } else if (rewardReport.getFailedTransactionCount() > 0) { // If no failed and there are
                                                  // somme errors
       rewardPeriodEntity.setStatus(RewardStatus.ERROR);
-    } else if (rewardReport.countTransactions() > 0) { // If some transactions
+    } else if (rewardReport.getTransactionsCount() > 0) { // If some transactions
                                                        // was sent
       rewardPeriodEntity.setStatus(RewardStatus.PENDING);
     } else {
@@ -166,8 +122,8 @@ public class WalletRewardPeriodService implements RewardPeriodService {
       if (walletReward.getWallet() == null || StringUtils.isBlank(walletReward.getWallet().getAddress())) {
         continue;
       }
-      long identityId = walletReward.getWallet().getTechnicalId();
-      WalletRewardEntity rewardEntity = rewardDAO.findRewardByIdentityIdAndPeriod(identityId, rewardPeriodEntity.getId());
+      long identityId = walletReward.getIdentityId();
+      WalletRewardEntity rewardEntity = rewardDAO.findRewardByIdentityIdAndPeriodId(identityId, rewardPeriodEntity.getId());
       if (rewardEntity == null) {
         rewardEntity = new WalletRewardEntity();
       }
@@ -177,14 +133,14 @@ public class WalletRewardPeriodService implements RewardPeriodService {
       rewardEntity.setIdentityId(identityId);
       rewardEntity.setPeriod(rewardPeriodEntity);
 
-      RewardTransaction rewardTransaction = walletReward.getTransaction();
-      if (rewardTransaction != null) {
-        rewardEntity.setTransactionHash(rewardTransaction.getHash());
-      }
+      TransactionDetail rewardTransaction = walletReward.getTransaction();
+      rewardEntity.setTransactionHash(rewardTransaction == null ? null : rewardTransaction.getHash());
 
-      long poolId = walletReward.getPoolId();
-      if (poolId > 0) {
-        RewardTeamEntity teamEntity = rewardTeamDAO.find(poolId);
+      RewardTeam team = walletReward.getTeam();
+      if (team == null) {
+        rewardEntity.setTeam(null);
+      } else {
+        RewardTeamEntity teamEntity = rewardTeamDAO.find(team.getId());
         rewardEntity.setTeam(teamEntity);
       }
 
@@ -198,6 +154,7 @@ public class WalletRewardPeriodService implements RewardPeriodService {
       if (rewardPlugins == null || rewardPlugins.isEmpty()) {
         continue;
       }
+
       for (WalletPluginReward rewardPlugin : rewardPlugins) {
         WalletRewardPluginEntity rewardPluginEntity =
                                                     rewardPluginDAO.findRewardPluginByRewardIdAndPlugin(rewardEntity.getId(),
@@ -218,6 +175,76 @@ public class WalletRewardPeriodService implements RewardPeriodService {
         }
       }
     }
+  }
+
+  @Override
+  public List<RewardPeriod> findRewardPeriodsByStatus(RewardStatus rewardStatus) {
+    List<WalletRewardPeriodEntity> rewardPeriodEntities = rewardPeriodDAO.findRewardPeriodsByStatus(rewardStatus);
+    return rewardPeriodEntities.stream().map(period -> toDTO(period)).collect(Collectors.toList());
+  }
+
+  private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
+    RewardPeriod rewardPeriod = new RewardPeriod(period.getPeriodType());
+    rewardPeriod.setStartDateInSeconds(period.getStartTime());
+    rewardPeriod.setEndDateInSeconds(period.getEndTime());
+    return rewardPeriod;
+  }
+
+  private void retrieveRewardPlugins(WalletRewardEntity rewardEntity, WalletReward walletReward) {
+    Set<WalletPluginReward> rewardPlugins = getRewardPluginsByRewardId(rewardEntity.getId());
+    walletReward.setRewards(rewardPlugins);
+  }
+
+  private Set<WalletPluginReward> getRewardPluginsByRewardId(Long rewardId) {
+    List<WalletRewardPluginEntity> rewardsPluginEntities = rewardPluginDAO.findRewardPluginsByPeriodId(rewardId);
+    if (rewardsPluginEntities != null) {
+      return rewardsPluginEntities.stream()
+                                  .map(entity -> toDTO(entity))
+                                  .collect(Collectors.toSet());
+    }
+    return Collections.emptySet();
+  }
+
+  private WalletReward toDTO(WalletRewardEntity rewardEntity) {
+    WalletReward walletReward = new WalletReward();
+    retrieveTeam(rewardEntity, walletReward);
+    retrieveWallet(rewardEntity, walletReward);
+    retrieveTransaction(rewardEntity, walletReward);
+    retrieveRewardPlugins(rewardEntity, walletReward);
+    return walletReward;
+  }
+
+  private WalletPluginReward toDTO(WalletRewardPluginEntity rewardPluginEntity) {
+    WalletPluginReward pluginReward = new WalletPluginReward();
+    pluginReward.setPluginId(rewardPluginEntity.getPluginId());
+    pluginReward.setPoolsUsed(rewardPluginEntity.isPoolUsed());
+    pluginReward.setPoints(rewardPluginEntity.getPoints());
+    pluginReward.setAmount(rewardPluginEntity.getAmount());
+    return pluginReward;
+  }
+
+  private void retrieveTransaction(WalletRewardEntity rewardEntity, WalletReward walletReward) {
+    String transactionHash = rewardEntity.getTransactionHash();
+    if (StringUtils.isNotBlank(transactionHash)) {
+      TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
+      if (!StringUtils.equals(transactionDetail.getContractMethodName(), "reward")) {
+        LOG.warn("Transaction with hash {} is not a reward transaction, data seems not coherent", transactionHash);
+      }
+      walletReward.setTransaction(transactionDetail);
+    }
+  }
+
+  private void retrieveTeam(WalletRewardEntity rewardEntity, WalletReward walletReward) {
+    if (rewardEntity.getTeam() != null) {
+      long teamId = rewardEntity.getTeam().getId();
+      RewardTeam team = rewardTeamStorage.getTeamById(teamId);
+      walletReward.setTeams(Collections.singletonList(team));
+    }
+  }
+
+  private void retrieveWallet(WalletRewardEntity rewardEntity, WalletReward walletReward) {
+    Wallet wallet = walletAccountService.getWalletByIdentityId(rewardEntity.getIdentityId());
+    walletReward.setWallet(wallet);
   }
 
 }

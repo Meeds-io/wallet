@@ -24,13 +24,13 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardPeriodService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardPeriodService</type>
+    <key>org.exoplatform.addon.wallet.reward.storage.RewardTeamStorage</key>
+    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardTeamStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardTransactionService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardTransactionService</type>
+    <key>org.exoplatform.addon.wallet.reward.storage.RewardReportStorage</key>
+    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardReportStorage</type>
   </component>
 
   <component>
@@ -55,18 +55,11 @@
         <description>Kudos reward plugin</description>
       </component-plugin>
     </component-plugins>
-    <init-params>
-      <value-param>
-        <name>reminder.days</name>
-        <description>Days before reward end date to remind managers</description>
-        <value>${exo.addon.wallet.reward.reminder.days:3}</value>
-      </value-param>
-    </init-params>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardService</type>
+    <key>org.exoplatform.addon.wallet.reward.service.RewardReportService</key>
+    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardReportService</type>
   </component>
 
   <component>
@@ -78,7 +71,7 @@
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.rest.RewardBudgetREST</type>
+    <type>org.exoplatform.addon.wallet.reward.rest.RewardReportREST</type>
   </component>
 
   <external-component-plugins>

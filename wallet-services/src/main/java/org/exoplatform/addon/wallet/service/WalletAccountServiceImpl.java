@@ -85,7 +85,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   public Set<Wallet> listWallets() {
     Set<Wallet> wallets = accountStorage.listWallets();
-    wallets.forEach(wallet -> hideWalletOwnerPrivateInformation(wallet));
+    wallets.forEach(wallet -> {
+      retrieveWalletBlockchainState(wallet);
+      hideWalletOwnerPrivateInformation(wallet);
+    });
     return wallets;
   }
 
@@ -378,6 +381,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     } catch (Exception e) {
       LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
     }
+  }
+
+  @Override
+  public Wallet saveWallet(Wallet wallet, boolean isNew) {
+    return accountStorage.saveWallet(wallet, isNew);
   }
 
   @Override
