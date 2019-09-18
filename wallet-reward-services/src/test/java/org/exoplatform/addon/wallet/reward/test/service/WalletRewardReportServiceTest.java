@@ -340,6 +340,91 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     }
   }
 
+  @Test
+  public void testListRewards() throws Exception {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    RewardTeamService rewardTeamService = getService(RewardTeamService.class);
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
+
+    WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
+                                                                                  rewardSettingsService,
+                                                                                  rewardTeamService,
+                                                                                  rewardReportStorage);
+
+    WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
+    resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
+
+    int contractDecimals = WalletUtils.getContractDetail().getDecimals();
+    long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 05)
+                                                                 .atEndOfMonth()
+                                                                 .atStartOfDay());
+
+    RewardSettings defaultSettings = rewardSettingsService.getSettings();
+    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
+    try {
+      // Build new settings
+      RewardSettings newSettings = cloneSettings(rewardSettingsService.getSettings());
+      Set<RewardPluginSettings> newPluginSettings = newSettings.getPluginSettings();
+
+      newSettings.setPeriodType(RewardPeriodType.MONTH);
+      RewardPluginSettings customPluginSetting = newPluginSettings.stream()
+                                                                  .filter(plugin -> CUSTOM_PLUGIN_ID.equals(plugin.getPluginId()))
+                                                                  .findFirst()
+                                                                  .orElse(null);
+      double sumOfTokensToSend = 5490d;
+      customPluginSetting.setUsePools(true); // NOSONAR
+      customPluginSetting.setBudgetType(RewardBudgetType.FIXED);
+      customPluginSetting.setAmount(sumOfTokensToSend);
+      customPluginSetting.setThreshold(0);
+      customPluginSetting.setEnabled(true);
+      rewardSettingsService.saveSettings(newSettings);
+
+      WalletAccountService accountService = getService(WalletAccountService.class);
+      int enabledWalletsCount = 60;
+      for (int i = 0; i < enabledWalletsCount; i++) {
+        Wallet wallet = newWallet(i + 1l);
+        wallet = accountService.saveWallet(wallet, true);
+        updateWalletBlockchainState(wallet);
+        accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+        entitiesToClean.add(wallet);
+      }
+
+      // Build teams
+      List<RewardTeam> teams = new ArrayList<>();
+      RewardTeam rewardTeam1 = createTeamWithMembers(1, 10, RewardBudgetType.COMPUTED, false);
+      teams.add(rewardTeam1);
+      RewardTeam rewardTeam2 = createTeamWithMembers(11, 20, RewardBudgetType.FIXED, false);
+      teams.add(rewardTeam2);
+      RewardTeam rewardTeam3 = createTeamWithMembers(21, 30, RewardBudgetType.FIXED_PER_MEMBER, false);
+      teams.add(rewardTeam3);
+      RewardTeam rewardTeam4 = createTeamWithMembers(31, 40, RewardBudgetType.FIXED_PER_MEMBER, false);
+      teams.add(rewardTeam4);
+      RewardTeam rewardTeam5 = createTeamWithMembers(41, 50, RewardBudgetType.COMPUTED, false);
+      teams.add(rewardTeam5);
+      RewardTeam rewardTeam6 = createTeamWithMembers(51, 60, RewardBudgetType.COMPUTED, false);
+      teams.add(rewardTeam6);
+
+      List<WalletReward> walletRewards = walletRewardService.listRewards("root3", 10);
+      assertNotNull(walletRewards);
+      assertEquals(0, walletRewards.size());
+
+      // Admin having enough funds
+      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+             .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
+      walletRewardService.sendRewards(startDateInSeconds, "root");
+      Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
+
+      walletRewards = walletRewardService.listRewards("root3", 10);
+      assertNotNull(walletRewards);
+      assertEquals(1, walletRewards.size());
+    } finally {
+      rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
+      rewardSettingsService.saveSettings(defaultSettings);
+    }
+  }
+
   private void resetTokenAdminService(WalletTransactionService walletTransactionService,
                                       WalletTokenAdminService tokenAdminService,
                                       boolean pendingTransactions,

@@ -72,6 +72,10 @@ public class WalletRewardReportService implements RewardReportService {
       throw new IllegalAccessException("User " + username + " is not allowed to send rewards");
     }
     RewardReport rewardReport = computeRewards(periodDateInSeconds);
+    if (rewardReport.getPeriod().getEndDateInSeconds() > (System.currentTimeMillis() / 1000)) {
+      throw new IllegalStateException("Can't send rewards for current period");
+    }
+
     if (rewardReport == null || rewardReport.getRewards() == null || rewardReport.getRewards().isEmpty()) {
       return;
     }
