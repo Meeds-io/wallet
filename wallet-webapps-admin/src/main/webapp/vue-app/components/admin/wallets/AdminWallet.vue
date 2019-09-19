@@ -24,6 +24,12 @@
           size="20" />
         <template v-else>
           {{ tokenBalanceLabel }}
+          <v-icon
+            v-if="adminBalanceTooLow"
+            color="orange"
+            :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
+            warning
+          </v-icon>
         </template>
       </div>
     </v-flex>
@@ -78,6 +84,12 @@ export default {
         return null;
       },
     },
+    initialTokenAmount: {
+      type: Number,
+      default: function() {
+        return 0;
+      },
+    },
     adminWallet: {
       type: Object,
       default: function() {
@@ -86,6 +98,12 @@ export default {
     },
   },
   computed: {
+    adminBalance() {
+      return (this.adminWallet && this.walletUtils.toFixed(this.adminWallet.tokenBalance)) || 0;
+    },
+    adminBalanceTooLow() {
+      return this.adminBalance < this.initialTokenAmount;
+    },
     requestFundsLink() {
       return (this.adminWalletAddress && `https://www.exoplatform.com/request-rewards-funds?address=${this.adminWalletAddress}`) || '#';
     },

@@ -95,9 +95,9 @@
           <v-expansion-panel-content>
             <v-list class="px-0 ml-2" dense>
               <v-list-item
-                v-for="(plugin, index) in item.rewards"
+                v-for="(plugin, indexReward) in item.rewards"
                 :id="`plugin-${plugin.pluginId}`"
-                :key="index">
+                :key="indexReward">
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.rewardedFor', {0 : plugin.points, 1 : plugin.pluginId}) }}
                 </v-list-item-content>

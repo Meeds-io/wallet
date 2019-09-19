@@ -48,7 +48,10 @@
           <h4>
             {{ $t('exoplatform.wallet.label.adminBalance') }}:
             <strong>{{ adminBalance }} {{ symbol }}</strong>
-            <v-icon v-if="adminBalanceTooLow" color="orange" :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
+            <v-icon
+              v-if="adminBalanceTooLow"
+              color="orange"
+              :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
               warning
             </v-icon>
           </h4>

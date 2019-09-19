@@ -18,6 +18,7 @@
     <admin-wallet
       v-if="!loading"
       :admin-wallet="walletAdmin"
+      :initial-token-amount="tokenAmount"
       :contract-details="contractDetails"
       @refresh-balance="refreshWallet(walletAdmin, true)" />
     <v-layout
