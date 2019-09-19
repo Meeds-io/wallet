@@ -17,10 +17,13 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.countSentContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.fromAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate"),
     @NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
-    @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx.hash FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
+    @NamedQuery(name = "WalletTransaction.getNetworkTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId ORDER BY tx.createdDate DESC"),
+    @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
-    @NamedQuery(name = "WalletTransaction.getTransactionByAddressAndNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.fromAddress = :fromAddress AND tx.nonce = :nonce"),
-    @NamedQuery(name = "WalletTransaction.getEtherTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.value > 0"),
+    @NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address"),
+    @NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.sentDate = 0 AND tx.rawTransaction IS NOT NULL ORDER BY tx.nonce ASC"),
+    @NamedQuery(name = "WalletTransaction.countPendingTransactionSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address AND tx.sendingAttemptCount > 0"),
+    @NamedQuery(name = "WalletTransaction.countPendingTransactionAsSender", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address"),
 })
 public class TransactionEntity implements Serializable {
 
@@ -94,6 +97,15 @@ public class TransactionEntity implements Serializable {
 
   @Column(name = "NONCE")
   private long              nonce;
+
+  @Column(name = "RAW_TRANSACTION")
+  private String            rawTransaction;
+
+  @Column(name = "SENT_DATE")
+  private long              sentDate;
+
+  @Column(name = "SENDING_ATTEMPT_COUNT")
+  private long              sendingAttemptCount;
 
   public long getId() {
     return id;
@@ -269,6 +281,30 @@ public class TransactionEntity implements Serializable {
 
   public void setNonce(long nonce) {
     this.nonce = nonce;
+  }
+
+  public String getRawTransaction() {
+    return rawTransaction;
+  }
+
+  public void setRawTransaction(String rawTransaction) {
+    this.rawTransaction = rawTransaction;
+  }
+
+  public long getSentDate() {
+    return sentDate;
+  }
+
+  public void setSentDate(long sentDate) {
+    this.sentDate = sentDate;
+  }
+
+  public long getSendingAttemptCount() {
+    return sendingAttemptCount;
+  }
+
+  public void setSendingAttemptCount(long sendingAttemptCount) {
+    this.sendingAttemptCount = sendingAttemptCount;
   }
 
 }

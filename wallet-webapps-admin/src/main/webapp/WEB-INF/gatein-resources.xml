@@ -24,9 +24,6 @@
         <as>$</as>
       </depends>
       <depends>
-        <module>jQueryUI</module>
-      </depends>
-      <depends>
         <module>fetchPolyfill</module>
       </depends>
       <depends>
@@ -42,9 +39,6 @@
       <depends>
         <module>ethQRCode</module>
         <as>EthereumQRPlugin</as>
-      </depends>
-      <depends>
-        <module>abiDecoder</module>
       </depends>
       <depends>
         <module>userPopupPlugin</module>

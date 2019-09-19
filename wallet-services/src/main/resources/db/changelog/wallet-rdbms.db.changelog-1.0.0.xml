@@ -208,4 +208,19 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-21">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="RAW_TRANSACTION" type="CLOB"/>
+      <column name="SENT_DATE" type="BIGINT" defaultValueNumeric="0" />
+      <column name="SENDING_ATTEMPT_COUNT" type="BIGINT" defaultValueNumeric="0" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="wallet" id="1.3.0-22">
+    <createIndex tableName="ADDONS_WALLET_TRANSACTION" indexName="IDX_ADDONS_WALLET_06">
+      <column name="PENDING" type="BOOLEAN"/>
+      <column name="NETWORK_ID" type="BIGINT" />
+    </createIndex>
+  </changeSet>
+
 </databaseChangeLog>

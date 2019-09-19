@@ -14,7 +14,7 @@
       :team="selectedTeam"
       :teams="teams"
       :wallet-rewards="walletRewards"
-      @saved="refreshTeams(true)"
+      @saved="teamSaved"
       @close="selectedTeam = null" />
     <div
       v-show="!selectedTeam"
@@ -103,7 +103,6 @@
                     <v-list-item v-if="item.rewardType === 'FIXED_PER_MEMBER'">
                       <v-list-item-content>
                         {{ $t('exoplatform.wallet.label.fixedTotalbudget') }}:
-                        Fixed budget per member:
                       </v-list-item-content>
                       <v-list-item-content class="align-end">
                         {{ Number(walletUtils.toFixed(item.budget)) }} {{ symbol }}
@@ -114,7 +113,7 @@
                         {{ $t('exoplatform.wallet.label.budget') }}:
                       </v-list-item-content>
                       <v-list-item-content class="align-end">
-                        {{ $t('exoplatform.wallet.label.computed') }}:
+                        {{ $t('exoplatform.wallet.label.computed') }}
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item>
@@ -124,7 +123,7 @@
                       <v-flex
                         class="align-center">
                         <strong>
-                          {{ period }}
+                          {{ periodDatesDisplay }}
                         </strong>
                       </v-flex>
                       <v-flex class="align-end pl-1">
@@ -225,13 +224,19 @@
 <script>
 import AddTeamForm from './TeamForm.vue';
 
-import {getRewardTeams, saveRewardTeam, removeRewardTeam} from '../../js/RewardServices.js';
+import {saveRewardTeam, removeRewardTeam} from '../../js/RewardServices.js';
 
 export default {
   components: {
     AddTeamForm,
   },
   props: {
+    teams: {
+      type: Array,
+      default: function() {
+        return [];
+      },
+    },
     walletRewards: {
       type: Array,
       default: function() {
@@ -244,16 +249,10 @@ export default {
         return null;
       },
     },
-    period: {
+    periodDatesDisplay: {
       type: String,
       default: function() {
         return null;
-      },
-    },
-    eligiblePoolsUsersCount: {
-      type: Number,
-      default: function() {
-        return 0;
       },
     },
   },
@@ -272,6 +271,9 @@ export default {
     symbol() {
       return this.contractDetails && this.contractDetails.symbol ? this.contractDetails.symbol : '';
     },
+    eligiblePoolsUsersCount() {
+      return this.walletRewards.filter(wallet =>  wallet.poolTokensToSend > 0).length;
+    },
   },
   watch: {
     selectedTeam() {
@@ -283,22 +285,9 @@ export default {
     },
   },
   methods: {
-    refresh() {
+    teamSaved() {
+      this.$emit('refresh-teams');
       this.selectedTeam = null;
-      this.$emit('refresh');
-    },
-    refreshTeams(refreshAll) {
-      return getRewardTeams()
-        .then((teams) => {
-          this.teams = teams;
-          if(refreshAll) {
-            this.refresh();
-          }
-        })
-        .catch((e) => {
-          console.debug('Error getting teams list', e);
-          this.error = this.$t('exoplatform.wallet.error.errorRetrievingPool');
-        });
     },
     disableTeam(team, disable) {
       if(team.id === 0) {
@@ -311,7 +300,7 @@ export default {
       delete teamToSave.validMembersWallets;
       return saveRewardTeam(teamToSave)
         .then(() => {
-          this.refreshTeams(true);
+          this.$emit('refresh-teams');
         })
         .catch((e) => {
           console.debug('Error saving pool', e);
@@ -329,7 +318,7 @@ export default {
         .then((status) => {
           if (status) {
             this.teamToDelete = null;
-            return this.refreshTeams(true);
+            this.$emit('refresh-teams');
           } else {
             this.error = this.$t('exoplatform.wallet.error.errorRemovingPool');
           }

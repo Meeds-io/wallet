@@ -74,8 +74,11 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private long              nonce;
 
-  @Exclude
-  private boolean           exceededMaxWaitMiningTime;
+  private String            rawTransaction;
+
+  private long              sentTimestamp;
+
+  private long              sendingAttemptCount;
 
   @Override
   public TransactionDetail clone() { // NOSONAR

@@ -81,6 +81,12 @@
     white-space: pre-line;
   }
 
+  .rewardDetailSummary {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: 28px;
+  }
+
   #accountListContainer {
     max-width: 100%;
     box-sizing: border-box;
@@ -166,7 +172,7 @@
       }
     }
   }
-  #accountDetailsDrawer, #contractDetailsDrawer {
+  #accountDetailsDrawer, #contractDetailsDrawer, #rewardDetailsDrawer {
     z-index: 1050;
   }
   .no-padding .v-toolbar__content {
@@ -473,6 +479,10 @@
       border-top: 1px solid rgba(0,0,0,.12) !important;
     }
 
+    .v-expansion-panel-content {
+      box-sizing: border-box;
+    }
+
     .v-list {
       max-width: ~"calc(100vw - 30px)";
       display: block;
@@ -606,7 +616,7 @@
     }
   }
   .walletSummaryActions {
-    margin-top: 22px;
+    margin-top: 5px;
 
     .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
       width: 98%;

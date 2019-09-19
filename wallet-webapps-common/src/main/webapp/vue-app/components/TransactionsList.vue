@@ -61,7 +61,7 @@
   
                   <v-list-item-title v-else-if="item.type === 'ether'">
                     <profile-chip
-                      v-if="displayFullTransaction"
+                      v-if="displayFullTransaction && item.isReceiver"
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -162,7 +162,7 @@
                       :profile-type="item.fromType"
                       :display-name="item.fromDisplayName"
                       :avatar="item.fromAvatar" />
-  
+
                     <span v-if="item.contractMethodName === 'transfer' && item.isReceiver">
                       {{ $t('exoplatform.wallet.label.receivedFrom') }}
                     </span>
@@ -779,14 +779,24 @@
                   </a>
                 </v-list-item-content>
               </v-list-item>
-              <v-list-item>
-                <v-list-item-content>
-                  Nonce
-                </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
-                  <strong>{{ item.nonce }}</strong>
-                </v-list-item-content>
-              </v-list-item>
+              <template v-if="administration">
+                <v-list-item v-if="item.nonce">
+                  <v-list-item-content>
+                    Nonce
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <strong>{{ item.nonce }}</strong>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item v-if="item.sentDateFormatted">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.sentDate') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <strong>{{ item.sentDateFormatted }}</strong>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
             </v-list>
           </v-expansion-panel-content>
         </v-expansion-panel>
@@ -813,7 +823,7 @@
 import WalletAddress from './WalletAddress.vue';
 import ProfileChip from './ProfileChip.vue';
 
-import {getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
+import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
 import {loadTransactions} from '../js/TransactionUtils.js';
 
 export default {
@@ -822,12 +832,6 @@ export default {
     WalletAddress,
   },
   props: {
-    fiatSymbol: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     account: {
       type: String,
       default: function() {
@@ -870,6 +874,12 @@ export default {
         return false;
       },
     },
+    fiatSymbol: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
   },
   data() {
     return {
@@ -907,7 +917,7 @@ export default {
   },
   watch: {
     transactionsLimit() {
-      if (this.transactionsLimit !== this.transactionsPerPage && this.account && !this.loading) {
+      if (this.transactionsLimit !== this.transactionsPerPage && !this.loading) {
         this.init(true).catch((error) => {
           console.debug('account field change event - error', error);
           this.loading = false;
@@ -916,7 +926,7 @@ export default {
       }
     },
     contractDetails() {
-      if (this.contractDetails && this.account) {
+      if (this.contractDetails) {
         this.limitReached = false;
         this.transactions = {};
         this.transactionsLimit = this.transactionsPerPage;
@@ -933,13 +943,11 @@ export default {
     this.addressEtherscanLink = getAddressEtherscanlink();
     this.tokenEtherscanLink = getTokenEtherscanlink();
 
-    if (this.account) {
-      this.init().catch((error) => {
-        console.debug('init method - error', error);
-        this.loading = false;
-        this.$emit('error', `${this.$t('exoplatform.wallet.error.accountInitializationError')}: ${error}`);
-      });
-    }
+    this.init().catch((error) => {
+      console.debug('init method - error', error);
+      this.loading = false;
+      this.$emit('error', `${this.$t('exoplatform.wallet.error.accountInitializationError')}: ${error}`);
+    });
   },
   methods: {
     init(ignoreSelected) {
@@ -978,23 +986,21 @@ export default {
         });
     },
     loadRecentTransaction(limit) {
-      const thiss = this;
       const filterObject = {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration, (transactionDetails) => {
-        if (transactionDetails && thiss.transactions) {
-          const TransactionToUpdate = Object.values(thiss.transactions).find(transaction => transaction && transaction.hash === transactionDetails.hash);
-          if (TransactionToUpdate) {
-            Object.assign(TransactionToUpdate, transactionDetails);
-            thiss.forceUpdateList();
-          }
-        }
-      })
+      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration)
         .then(() => {
           const totalTransactionsCount = Object.keys(this.transactions).length;
           this.limitReached = (totalTransactionsCount <= this.transactionsLimit && (totalTransactionsCount % this.transactionsPerPage) > 0) || (totalTransactionsCount < this.transactionsLimit);
+
+          Object.values(this.transactions).filter(tx => tx.pending).forEach(transaction => {
+            watchTransactionStatus(transaction.hash, (transactionDetails) => {
+              Object.assign(transaction, transactionDetails);
+              this.forceUpdateList();
+            });
+          });
         })
         .catch((e) => {
           console.debug('loadTransactions - method error', e);

@@ -170,10 +170,18 @@ public class WalletUtils {
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.addon.wallet.addressAssociation.modification";
 
+  public static final String                          NEW_BLOCK_MINED_EVENT                    =
+                                                                            "exo.addon.wallet.block.mined";
+
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
                                                                                     "exo.addon.wallet.transaction.mined";
 
   public static final String                          TRANSACTION_PENDING_MAX_DAYS             = "transaction.pending.maxDays";
+
+  public static final String                          MAX_PENDING_TRANSACTIONS_TO_SEND         = "transaction.pending.maxToSend";
+
+  public static final String                          MAX_SENDING_TRANSACTIONS_ATTEMPTS        =
+                                                                                        "transaction.pending.maxSendingAttempts";
 
   public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
@@ -226,15 +234,17 @@ public class WalletUtils {
 
   public static final String                          OPERATION_GET_TRANSACTION                = "eth_getTransactionByHash";
 
+  public static final String                          OPERATION_GET_BLOCK                      = "eth_getBlockByXXX";
+
+  public static final String                          OPERATION_GET_BLOCK_BY_NUMBER            = "eth_getBlockByNumber";
+
+  public static final String                          OPERATION_GET_BLOCK_BY_HASH              = "eth_getBlockByHash";
+
   public static final String                          OPERATION_GET_TRANSACTION_RECEIPT        = "eth_getTransactionReceipt";
 
   public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
 
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
-
-  public static final String                          OPERATION_SEND_ADMIN_TOKEN_TRANSACTION   = "SEND_TOKEN_ADMIN_TRANSACTION";
-
-  public static final String                          OPERATION_SEND_ADMIN_ETHER_TRANSACTION   = "SEND_ADMIN_ETHER_TRANSACTION";
 
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,
@@ -281,6 +291,8 @@ public class WalletUtils {
   public static final String                          TOKEN_FUNC_DEPOSIT_FUNDS                 = "depositFunds";
 
   public static final String                          ETHER_FUNC_SEND_FUNDS                    = "ether_transfer";
+
+  public static String                                blockchainUrlSuffix                      = null;                                   // NOSONAR
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {
@@ -757,6 +769,19 @@ public class WalletUtils {
       }
     }
     return Locale.getDefault();
+  }
+
+  public static final String getBlockchainURLSuffix() {
+    if (blockchainUrlSuffix == null) {
+      GlobalSettings settings = getSettings();
+      if (settings != null && settings.getNetwork() != null
+          && StringUtils.isNotBlank(settings.getNetwork().getWebsocketProviderURL())) {
+        String websocketProviderURL = settings.getNetwork().getWebsocketProviderURL();
+        String[] urlParts = websocketProviderURL.split("/");
+        blockchainUrlSuffix = urlParts[urlParts.length - 1];
+      }
+    }
+    return blockchainUrlSuffix;
   }
 
   private static final WalletTokenAdminService getWalletTokenAdminService() {

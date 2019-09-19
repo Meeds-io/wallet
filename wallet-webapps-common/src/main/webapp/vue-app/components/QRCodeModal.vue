@@ -138,7 +138,9 @@ export default {
   },
   methods: {
     computeCanvas() {
-      this.$refs.qrCode.computeCanvas();
+      if (this.$refs && this.$refs.qrCode) {
+        this.$refs.qrCode.computeCanvas();
+      }
     },
   },
 };

@@ -8,7 +8,7 @@
     content-class="uiPopup with-overflow"
     width="500px"
     max-width="100vw"
-    persistent
+    hide-overlay
     @keydown.esc="dialog = false">
     <template v-if="!noButton" v-slot:activator="{ on }">
       <a href="javascript:void(0);" v-on="on">

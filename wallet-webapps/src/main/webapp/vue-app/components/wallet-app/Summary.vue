@@ -158,17 +158,7 @@ export default {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },
   },
-  created() {
-    this.loadPendingTransactions();
-  },
   methods: {
-    refreshBalance(accountDetails) {
-      if (accountDetails && accountDetails.isContract) {
-        this.$emit('refresh-token-balance', accountDetails);
-      } else {
-        this.$emit('refresh-balance');
-      }
-    },
     requestAccessAuthorization() {
       return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${this.walletAddress}`, {
         credentials: 'include',
@@ -182,22 +172,6 @@ export default {
         this.$emit('error', String(e));
       });
     },
-    loadLastTransaction() {
-      this.lastTransaction = null;
-      const lastTransactions = {};
-
-      return this.transactionUtils.loadTransactions(
-        this.walletAddress,
-        null,
-        lastTransactions,
-        false,
-        1,
-        null,
-        true
-      ).then(() => {
-        this.lastTransaction = lastTransactions && lastTransactions.length && lastTransactions[0];
-      });
-    },
     loadPendingTransactions() {
       Object.keys(this.pendingTransactions).forEach((key) => delete this.pendingTransactions[key]);
 
@@ -206,25 +180,19 @@ export default {
         null,
         this.pendingTransactions,
         true,
-        10,
-        null,
-        true,
-        (transaction) => {
-          this.refreshBalance(this.contractDetail);
-          if (this.pendingTransactions[transaction.hash]) {
-            delete this.pendingTransactions[transaction.hash];
-          }
-          this.updatePendingTransactionsIndex++;
-        },
-        (error, transaction) => {
-          this.$emit('error', error);
-          if (this.pendingTransactions[transaction.hash]) {
-            delete this.pendingTransactions[transaction.hash];
-          }
-          this.updatePendingTransactionsIndex++;
-        }
-      ).then(() => {
+        100,
+      ).then((transactions) => {
+        // Refresh counting pending transactions
         this.updatePendingTransactionsIndex++;
+
+        transactions.forEach(transaction => {
+          this.walletUtils.watchTransactionStatus(transaction.hash, (transaction) => {
+            if (this.pendingTransactions[transaction.hash]) {
+              delete this.pendingTransactions[transaction.hash];
+            }
+            this.updatePendingTransactionsIndex++;
+          });
+        });
       });
     },
   },

@@ -1,67 +1,39 @@
-import {searchWalletByAddress} from './AddressRegistry.js';
-import {etherToFiat, watchTransactionStatus} from './WalletUtils.js';
+import {etherToFiat} from './WalletUtils.js';
+import {getSavedContractDetails} from './TokenUtils.js';
 
-export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration, refreshCallback) {
+export function loadTransactions(account, contractDetails, transactions, onlyPending, transactionsLimit, filterObject, isAdministration) {
   if (!transactionsLimit) {
     transactionsLimit = 10;
   }
 
-  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration).then((storedTransactions) => {
-    const loadedTransactions = Object.assign({}, transactions);
-    const loadingPromises = [];
-
-    if (storedTransactions && storedTransactions.length) {
-      storedTransactions.forEach((storedTransaction) => {
-        if (loadedTransactions[storedTransaction.hash]) {
-          loadingPromises.push(loadedTransactions[storedTransaction.hash]);
-        } else {
-          const loadingTransactionDetailsPromise = loadTransactionDetailsFromContractAndWatchPending(account, contractDetails, transactions, storedTransaction, refreshCallback);
-          loadingPromises.push(loadingTransactionDetailsPromise);
-        }
-      });
-    }
-
-    return Promise.all(loadingPromises).catch((error) => {
-      if (`${error}`.indexOf('stopLoading') < 0) {
-        throw error;
+  return getStoredTransactions(account, contractDetails && contractDetails.isContract && contractDetails.address, transactionsLimit, filterObject, onlyPending, isAdministration)
+    .then((storedTransactions) => {
+      if (storedTransactions && storedTransactions.length) {
+        storedTransactions.forEach((storedTransaction) => {
+          loadTransactionDetailsAndWatchPending(account, contractDetails, transactions, storedTransaction);
+        });
       }
+  
+      return storedTransactions;
     });
-  });
 }
 
-export function saveTransactionDetails(transaction, contractDetails) {
-  try {
-    const transationDetails = {
-      networkId: transaction.networkId || window.walletSettings.network.id,
-      hash: transaction.hash,
-      nonce: (transaction.nonce && Number(transaction.nonce)) || 0,
-      contractAddress: transaction.contractAddress,
-      contractMethodName: transaction.contractMethodName,
-      pending: (transaction.pending && Boolean(transaction.pending)) || false,
-      gasPrice: transaction.gasPrice || 0,
-      from: transaction.from || '',
-      to: transaction.to || '',
-      by: transaction.by || '',
-      label: transaction.label || '',
-      message: transaction.message || '',
-      value: transaction.value ? Number(transaction.value) : 0,
-      contractAmount: transaction.contractAmount ? Number(transaction.contractAmount) : 0,
-      adminOperation: transaction.adminOperation ? Boolean(transaction.adminOperation) : false,
-      timestamp: transaction.timestamp ? Number(transaction.timestamp) : 0,
-    };
-    return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(transationDetails),
-    });
-  } catch (e) {
-    console.debug('Error saving pending transaction', e);
-    throw e;
-  }
+export function saveTransactionDetails(transationDetails, contractDetails) {
+  return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(transationDetails),
+  }).then(resp => {
+    if(resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error while sending transaction');
+    }
+  });
 }
 
 export function getTransactionsAmounts(walletAddress, periodicity, selectedDate) {
@@ -79,7 +51,7 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
   const transactionHashToSearch = filterObject && filterObject.hash;
   const transactionContractMethodName = filterObject && filterObject.contractMethodName;
 
-  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/transaction/getTransactions?address=${account || ''}&contractAddress=${contractAddress || ''}&contractMethodName=${transactionContractMethodName || ''}&limit=${limit}&hash=${transactionHashToSearch || ''}&pending=${onlyPending || false}&administration=${isAdministration || false}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
@@ -95,15 +67,10 @@ export function getStoredTransactions(account, contractAddress, limit, filterObj
     });
 }
 
-export function getSavedTransactionByNonce(from, nonce) {
-  return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByNonce?from=${from}&nonce=${Number(nonce)}`, {credentials: 'include'}).then((resp) => {
+export function getNonce(from) {
+  return fetch(`/portal/rest/wallet/api/transaction/getNonce?from=${from}`, {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {
-      const contentType = resp.headers && resp.headers.get('content-type');
-      if (contentType && contentType.indexOf('application/json') !== -1) {
-        return resp.json();
-      } else {
-        return null;
-      }
+      return resp.text();
     } else {
       return null;
     }
@@ -125,31 +92,26 @@ export function getSavedTransactionByHash(hash) {
   });
 }
 
-function loadTransactionDetailsFromContractAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails, watchLoadSuccess) {
-  if (!transactionDetails || !walletAddress) {
-    console.debug('Wrong method parameters', walletAddress, transactionDetails);
+function loadTransactionDetailsAndWatchPending(walletAddress, accountDetails, transactions, transactionDetails) {
+  if (!transactionDetails) {
     return;
   }
 
   transactionDetails.type = transactionDetails.contractAddress ? 'contract' : 'ether';
 
-  if (watchLoadSuccess && transactionDetails.pending) {
-    watchTransactionStatus(transactionDetails.hash, watchLoadSuccess);
-  }
-
-  let resultPromise = null;
   if (transactionDetails.contractAddress) {
     const contractDetails = window.walletContractsDetails[transactionDetails.contractAddress];
     if (contractDetails) {
-      addContractDetailsInTransation(transactionDetails, contractDetails);
-      resultPromise = loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
+      loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
     } else {
-      resultPromise = Promise.resolve();
+      getSavedContractDetails(transactionDetails.contractAddress).then(contractDetails => {
+        loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails);
+      });
     }
   } else {
-    resultPromise = loadEtherTransactionProperties(walletAddress, transactionDetails);
+    loadEtherTransactionProperties(walletAddress, transactionDetails);
   }
-  return resultPromise.then(() => (transactions[transactionDetails.hash] = transactionDetails));
+  return transactions[transactionDetails.hash] = transactionDetails;
 }
 
 function addContractDetailsInTransation(transactionDetails, contractDetails) {
@@ -165,7 +127,7 @@ function addContractDetailsInTransation(transactionDetails, contractDetails) {
 }
 
 function loadEtherTransactionProperties(walletAddress, transactionDetails) {
-  walletAddress = walletAddress.toLowerCase();
+  walletAddress = walletAddress && walletAddress.toLowerCase();
   if (!transactionDetails.fee && transactionDetails.gasUsed && transactionDetails.gasPrice) {
     transactionDetails.fee = transactionDetails.gasUsed && transactionDetails.gasPrice && window.localWeb3.utils.fromWei(String(transactionDetails.gasUsed * transactionDetails.gasPrice), 'ether');
   }
@@ -173,32 +135,31 @@ function loadEtherTransactionProperties(walletAddress, transactionDetails) {
     transactionDetails.feeFiat = etherToFiat(transactionDetails.fee);
   }
 
-  const promises = [];
-  promises.push(retrieveWalletDetails(transactionDetails, 'from'));
-  promises.push(retrieveWalletDetails(transactionDetails, 'to'));
+  retrieveWalletDetails(transactionDetails, 'from');
+  retrieveWalletDetails(transactionDetails, 'to');
 
-  return Promise.all(promises).then(() => {
-    transactionDetails.isReceiver = walletAddress === transactionDetails.to;
-    transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
-    transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-    if (transactionDetails.date) {
-      transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
-    }
-  });
+  transactionDetails.isReceiver = walletAddress === transactionDetails.to;
+  transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
+  if (transactionDetails.timestamp) {
+    transactionDetails.dateFormatted = `${new Date(transactionDetails.timestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
+  if (transactionDetails.sentTimestamp) {
+    transactionDetails.sentDateFormatted = `${new Date(transactionDetails.sentTimestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
 }
 
 function loadContractTransactionProperties(walletAddress, transactionDetails, contractDetails) {
-  walletAddress = walletAddress.toLowerCase();
+  if (contractDetails) {
+    addContractDetailsInTransation(transactionDetails, contractDetails);
+  }
+
+  walletAddress = walletAddress && walletAddress.toLowerCase();
 
   if (!transactionDetails.fee && transactionDetails.gasUsed && transactionDetails.gasPrice) {
     transactionDetails.fee = window.localWeb3.utils.fromWei(String(transactionDetails.gasUsed * transactionDetails.gasPrice), 'ether');
   }
   if (!transactionDetails.feeFiat && transactionDetails.fee) {
     transactionDetails.feeFiat = etherToFiat(transactionDetails.fee);
-  }
-
-  if (!abiDecoder.getABIs() || !abiDecoder.getABIs().length) {
-    abiDecoder.addABI(JSON.parse(window.walletSettings.contractAbi));
   }
 
   // TODO I18N for labels
@@ -217,30 +178,25 @@ function loadContractTransactionProperties(walletAddress, transactionDetails, co
     transactionDetails.contractAmountLabel = 'Rewarded amount';
   }
 
-  const promises = [];
-  if (transactionDetails.from && transactionDetails.contractAddress.toLowerCase() !== transactionDetails.from) {
-    promises.push(retrieveWalletDetails(transactionDetails, 'from'));
-  }
-  if (transactionDetails.to && transactionDetails.contractAddress.toLowerCase() !== transactionDetails.to) {
-    promises.push(retrieveWalletDetails(transactionDetails, 'to'));
-  }
-  promises.push(retrieveWalletDetails(transactionDetails, 'by'));
+  retrieveWalletDetails(transactionDetails, 'from');
+  retrieveWalletDetails(transactionDetails, 'to');
+  retrieveWalletDetails(transactionDetails, 'by');
 
-  return Promise.all(promises).then(() => {
-    transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
-    transactionDetails.isReceiver = walletAddress === transactionDetails.to;
-    transactionDetails.date = transactionDetails.date || (transactionDetails.timestamp && new Date(transactionDetails.timestamp));
-    if (transactionDetails.date) {
-      transactionDetails.dateFormatted = `${transactionDetails.date.toLocaleDateString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric'})} - ${transactionDetails.date.toLocaleTimeString()}`;
-    }
-    transactionDetails.adminIcon = transactionDetails.adminIcon || (transactionDetails.contractMethodName && transactionDetails.contractMethodName !== 'transfer' && transactionDetails.contractMethodName !== 'initializeAccount' && transactionDetails.contractMethodName !== 'transferFrom' && transactionDetails.contractMethodName !== 'approve' && transactionDetails.contractMethodName !== 'reward');
-  });
+  transactionDetails.amountFiat = transactionDetails.amountFiat || (transactionDetails.value && etherToFiat(transactionDetails.value));
+  transactionDetails.isReceiver = walletAddress === transactionDetails.to;
+  if (transactionDetails.timestamp) {
+    transactionDetails.dateFormatted = `${new Date(transactionDetails.timestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
+  if (transactionDetails.sentTimestamp) {
+    transactionDetails.sentDateFormatted = `${new Date(transactionDetails.sentTimestamp).toLocaleString(eXo.env.portal.language, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'})}`;
+  }
+  transactionDetails.adminIcon = transactionDetails.adminIcon || (transactionDetails.contractMethodName && transactionDetails.contractMethodName !== 'transfer' && transactionDetails.contractMethodName !== 'initializeAccount' && transactionDetails.contractMethodName !== 'transferFrom' && transactionDetails.contractMethodName !== 'approve' && transactionDetails.contractMethodName !== 'reward');
 }
 
 function retrieveWalletDetails(transactionDetails, prefix) {
   if (!transactionDetails[`${prefix}DisplayName`]) {
-    const address = transactionDetails[prefix];
-    if (!address) {
+    const address = transactionDetails[prefix] && transactionDetails[prefix].toLowerCase();
+    if (!address || (transactionDetails.contractAddress && address === transactionDetails.contractAddress.toLowerCase())) {
       return;
     }
     transactionDetails[`${prefix}Address`] = address.toLowerCase();
@@ -256,17 +212,6 @@ function retrieveWalletDetails(transactionDetails, prefix) {
       transactionDetails[`${prefix}Type`] = transactionDetails[`${prefix}Wallet`].type;
       transactionDetails[`${prefix}Avatar`] = transactionDetails[`${prefix}Wallet`].avatar;
       transactionDetails[`${prefix}DisplayName`] = transactionDetails[`${prefix}Wallet`].name;
-    } else if (transactionDetails[`${prefix}Address`]) {
-      return searchWalletByAddress(transactionDetails[`${prefix}Address`]).then((item) => {
-        if (item && item.name && item.name.length) {
-          transactionDetails[`${prefix}TechnicalId`] = item.technicalId;
-          transactionDetails[`${prefix}SpaceId`] = item.spaceId;
-          transactionDetails[`${prefix}Username`] = item.id;
-          transactionDetails[`${prefix}Type`] = item.type;
-          transactionDetails[`${prefix}Avatar`] = item.avatar;
-          transactionDetails[`${prefix}DisplayName`] = item.name;
-        }
-      });
     }
   }
 }

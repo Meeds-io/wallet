@@ -39,7 +39,7 @@
               <i class="uiIconWarning"></i> {{ $t('exoplatform.wallet.warning.poolMemberDuplicated') }}:
               <ul>
                 <li v-for="duplicatedWallet in duplicatedWallets" :key="duplicatedWallet.id">
-                  <code>{{ duplicatedWallet.name }}</code>
+                  <code>{{ duplicatedWallet.wallet.name }}</code>
                 </li>
               </ul>
             </div>
@@ -82,15 +82,13 @@
               eager>
               <send-rewards-tab
                 ref="sendRewards"
-                :wallet-rewards="walletRewards"
-                :contract-details="contractDetails"
-                :period-type="rewardSettings.periodType"
-                :transaction-etherscan-link="transactionEtherscanLink"
-                :total-budget="totalBudget"
-                :sent-budget="sentBudget"
-                :eligible-users-count="eligibleUsersCount"
+                :reward-report="rewardReport"
+                :admin-wallet="adminWallet"
                 :total-rewards="totalRewards"
-                @dates-changed="refreshRewardSettings"
+                :contract-details="contractDetails"
+                :period-dates-display="periodDatesDisplay"
+                :transaction-etherscan-link="transactionEtherscanLink"
+                @dates-changed="refreshRewards($event)"
                 @refresh="refreshRewards"
                 @error="error = $event" />
             </v-tab-item>
@@ -100,11 +98,12 @@
               eager>
               <teams-list-tab
                 ref="rewardTeams"
+                :teams="teams"
                 :wallet-rewards="walletRewards"
+                :period="period"
+                :period-dates-display="periodDatesDisplay"
                 :contract-details="contractDetails"
-                :period="periodDatesDisplay"
-                :eligible-pools-users-count="eligiblePoolsUsersCount"
-                @teams-refreshed="refreshRewardSettings"
+                @refresh-teams="refreshRewardSettings"
                 @refresh="refreshRewardSettings"
                 @error="error = $event" />
             </v-tab-item>
@@ -131,7 +130,7 @@ import SendRewardsTab from './SendRewardsTab.vue';
 import TeamsListTab from './TeamsListTab.vue';
 import ConfigurationTab from './ConfigurationTab.vue';
 
-import {getRewardSettings, computeRewards} from '../../js/RewardServices.js';
+import {getRewardTeams, getRewardSettings, computeRewards} from '../../js/RewardServices.js';
 
 export default {
   components: {
@@ -142,52 +141,41 @@ export default {
   data() {
     return {
       loading: false,
-      wallet: null,
       error: null,
+      rewardReport: null,
+      adminWallet: null,
       settingWarnings: [],
       selectedTab: 'SendRewards',
       transactionEtherscanLink: null,
       addressEtherscanLink: null,
       contractDetails: null,
-      periodDatesDisplay: null,
-      periodType: null,
-      duplicatedWallets: [],
       rewardSettings: {},
       totalRewards: [],
       teams: [],
-      walletRewards: [],
     };
   },
   computed: {
-    validUsers() {
-      return this.walletRewards.filter(wallet => wallet.enabled && wallet.tokensToSend);
+    duplicatedWallets() {
+      return (this.walletRewards && this.walletRewards.filter(walletReward => walletReward.teams && walletReward.teams.length > 1)) || [];
     },
-    eligiblePoolsUsersCount() {
-      return this.validUsers.filter(wallet =>  !wallet.disabledPool && wallet.poolTokensToSend).length;
+    period() {
+      return this.rewardReport && this.rewardReport.period;
     },
-    eligibleUsersCount() {
-      return this.validUsers.filter(wallet =>  wallet.tokensToSend || wallet.tokensSent).length;
+    walletRewards() {
+      return (this.rewardReport && this.rewardReport.rewards) || [];
     },
-    sentBudget() {
-      if (this.walletRewards && this.walletRewards.length) {
-        let sentTokens = 0;
-        this.walletRewards.forEach((wallet) => {
-          sentTokens += (Number(wallet.tokensSent) || 0);
-        });
-        return sentTokens;
+    periodType() {
+      return this.rewardSettings && this.rewardSettings.periodType;
+    },
+    periodDatesDisplay() {
+      const selectedStartDate = this.period && this.formatDate(new Date(this.period.startDateInSeconds * 1000));
+      const selectedEndDate = this.period && this.formatDate(new Date((this.period.endDateInSeconds -1) * 1000));
+      if (selectedStartDate && selectedEndDate) {
+        return `${selectedStartDate} ${this.$t('exoplatform.wallet.label.to')} ${selectedEndDate}`;
+      } else if (selectedStartDate) {
+        return selectedStartDate;
       } else {
-        return 0;
-      }
-    },
-    totalBudget() {
-      if (this.walletRewards && this.walletRewards.length) {
-        let totalBudget = 0;
-        this.walletRewards.forEach((wallet) => {
-          totalBudget += (Number(wallet.tokensSent) || Number(wallet.tokensToSend) || 0);
-        });
-        return totalBudget;
-      } else {
-        return 0;
+        return '';
       }
     },
   },
@@ -208,9 +196,11 @@ export default {
           if (!window.walletSettings) {
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
-          this.wallet = window.walletSettings.wallet;
           this.contractDetails = window.walletSettings.contractDetail;
+
+          return this.addressRegistry.searchWalletByTypeAndId('admin', 'admin');
         })
+        .then((adminWallet) => this.adminWallet = adminWallet)
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
           console.debug('init method - error', e);
@@ -223,77 +213,64 @@ export default {
     refreshRewardSettings() {
       this.loading = true;
       return getRewardSettings()
-        .then(settings => {
-          this.rewardSettings = settings || {};
-          this.periodType = this.rewardSettings.periodType;
-          this.$refs.configurationTab.init();
-          return this.$nextTick();
-        })
-        .then(() => this.$refs.rewardTeams.refreshTeams())
-        .then(() => this.$refs.sendRewards.refreshDates())
+        .then(settings => this.rewardSettings = settings || {})
+        .then(() => this.$nextTick())
+        .then(() => this.$refs.configurationTab.init())
+        .then(() => this.refreshTeams())
         .then(() => this.$nextTick())
         .then(() => this.refreshRewards())
         .finally(() => this.loading = false);
     },
-    refreshRewards() {
-      this.loading = true;
-      this.periodDatesDisplay = this.$refs.sendRewards.periodDatesDisplay;
-      const teams = this.$refs.rewardTeams.teams || [];
-      this.duplicatedWallets = [];
+    refreshRewards(period) {
       if(!this.checkConfigurationConsistency()) {
         return;
       }
 
-      return computeRewards(this.$refs.sendRewards.selectedDateInSeconds)
+      period = period || this.period;
+      const selectedDateInSeconds = period && period.startDateInSeconds;
+
+      this.loading = true;
+      return computeRewards(selectedDateInSeconds)
         .then(rewardReport => {
           if(rewardReport.error) {
             this.error = (typeof rewardReport.error === 'object' ? rewardReport.error[0] : rewardReport.error);
             return;
           }
-          this.walletRewards = rewardReport.rewards;
+          this.rewardReport = rewardReport;
+          return this.$nextTick();
+        })
+        .then(() => {
           this.computeTotalRewardsByPlugin();
 
+          // Watch pending transactions
           this.walletRewards.forEach(walletReward => {
-            if (walletReward && walletReward.transaction && walletReward.transaction.hash && walletReward.transaction.status === 'pending') {
+            if (walletReward.status === 'pending') {
               this.walletUtils.watchTransactionStatus(walletReward.transaction.hash, (transactionDetail) => {
-                walletReward.transaction.status = transactionDetail.succeeded ? 'success' : 'error';
+                walletReward.status = transactionDetail.succeeded ? 'success' : 'error';
               });
             }
           });
 
-          teams.forEach((team) => {
+          // compute valid members per team
+          this.teams.forEach((team) => {
             team.validMembersWallets = [];
             team.computedBudget = 0;
 
             if (team.id && team.members) {
               team.members.forEach((memberObject) => {
                 const walletReward = this.walletRewards.find((walletReward) => walletReward.wallet && walletReward.wallet.id && walletReward.wallet.technicalId === memberObject.identityId);
-                if (walletReward) {
-                  if (walletReward.rewardTeams && walletReward.rewardTeams.length) {
-                    walletReward.rewardTeams.push(team);
-                    this.duplicatedWallets.push(walletReward.wallet);
-                  } else {
-                    this.$set(walletReward, 'rewardTeams', [team]);
-                  }
-                  if(walletReward.enabled && walletReward.poolTokensToSend) {
-                    team.validMembersWallets.push(walletReward);
-                  }
+                if (walletReward && walletReward.enabled && walletReward.poolTokensToSend) {
+                  team.validMembersWallets.push(walletReward);
                 }
               });
             }
           });
 
-          const membersWithEmptyTeam = this.walletRewards.filter((walletReward) => !walletReward.rewardTeams || !walletReward.rewardTeams.length);
+          // Build 'No Team Members' team
+          const membersWithEmptyTeam = this.walletRewards.filter((walletReward) => !walletReward.team);
           if (membersWithEmptyTeam && membersWithEmptyTeam.length) {
-            const validMembersWallets = [];
-            membersWithEmptyTeam.forEach(walletReward => {
-              if(walletReward.enabled && walletReward.poolTokensToSend) {
-                validMembersWallets.push(walletReward);
-              }
-            });
-
             // Members with no Team
-            let noTeamMembers = teams.find(team => !team.id);
+            let noTeamMembers = this.teams.find(team => !team.id);
             if(!noTeamMembers) {
               noTeamMembers = {
                 id: 0,
@@ -303,38 +280,57 @@ export default {
                 computedBudget: 0,
                 noTeam: true,
               };
-              teams.push(noTeamMembers);
+              this.teams.push(noTeamMembers);
             }
             noTeamMembers.members = membersWithEmptyTeam.map(walletReward => walletReward.wallet);
-            noTeamMembers.validMembersWallets = validMembersWallets;
+            noTeamMembers.validMembersWallets = membersWithEmptyTeam.filter(walletReward => walletReward.enabled && walletReward.poolTokensToSend);
           }
 
-          if (teams && teams.length) {
-            teams.sort((team1, team2) => Number(team1.id) - Number(team2.id));
+          // Sort teams by order of creation
+          if (this.teams && this.teams.length) {
+            this.teams.sort((team1, team2) => Number(team1.id) - Number(team2.id));
           }
 
-          teams.forEach((team) => {
-            if (team.validMembersWallets && team.validMembersWallets.length) {
+          // Compute Team total budgets
+          this.teams
+            .filter(team => team.validMembersWallets && team.validMembersWallets.length)
+            .forEach(team => {
               team.computedBudget = team.validMembersWallets.reduce((total, walletReward) => total += walletReward.poolTokensToSend || 0, 0);
-            }
-          });
+            });
         })
         .finally(() => this.loading = false);
+    },
+    refreshTeams() {
+      return getRewardTeams()
+        .then(teams => this.teams = teams || [])
+        .catch((e) => {
+          console.debug('Error getting teams list', e);
+          this.error = this.$t('exoplatform.wallet.error.errorRetrievingPool');
+        });
     },
     computeTotalRewardsByPlugin() {
       const totalRewards = {};
       if(this.rewardSettings && this.rewardSettings.pluginSettings && this.rewardSettings.pluginSettings.length) {
         this.rewardSettings.pluginSettings.forEach(pluginSetting => totalRewards[pluginSetting.pluginId] = {pluginId: pluginSetting.pluginId, total: 0})
       }
+
       this.walletRewards.forEach(walletReward => {
         if (walletReward && walletReward.rewards) {
           walletReward.rewards.forEach(rewardDetail => totalRewards[rewardDetail.pluginId] && (totalRewards[rewardDetail.pluginId].total += rewardDetail.points));
         }
       });
+
       this.totalRewards = Object.values(totalRewards);
     },
     checkConfigurationConsistency() {
       this.settingWarnings = [];
+
+      if (!this.contractDetails) {
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
+      } else if (!this.periodType) {
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
+        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.missingRewardPeriodicity'));
+      }
 
       if(!this.rewardSettings) {
         this.settingWarnings.push(this.$t('exoplatform.wallet.error.emptySettings'));
@@ -350,19 +346,13 @@ export default {
         }
       }
 
-      if (!this.contractDetails) {
-        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
+      return !this.settingWarnings.length;
+    },
+    formatDate(date) {
+      if (!date) {
+        return null;
       }
-
-      if (!this.periodType) {
-        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
-        this.settingWarnings.push(this.$t('exoplatform.wallet.warning.missingRewardPeriodicity'));
-      }
-
-      if(this.settingWarnings.length) {
-        return false;
-      }
-      return true;
+      return date.toLocaleDateString(eXo.env.portal.language);
     },
   },
 };

@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode.Exclude;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RewardPluginSettings implements Serializable, Cloneable {
-
   private static final long serialVersionUID = -843790790474775405L;
 
   private String            pluginId;
@@ -37,4 +36,5 @@ public class RewardPluginSettings implements Serializable, Cloneable {
       return new RewardPluginSettings(pluginId, enabled, threshold, usePools, budgetType, amount);
     }
   }
+
 }

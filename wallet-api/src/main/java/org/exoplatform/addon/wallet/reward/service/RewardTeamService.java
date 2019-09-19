@@ -45,4 +45,12 @@ public interface RewardTeamService {
    * @return removed reward team
    */
   public RewardTeam removeTeam(Long id);
+
+  /**
+   * Find reward teams by identity id
+   * 
+   * @param identityId user social identity id
+   * @return {@link List} of {@link RewardTeam}
+   */
+  public List<RewardTeam> findTeamsByMemberId(long identityId);
 }

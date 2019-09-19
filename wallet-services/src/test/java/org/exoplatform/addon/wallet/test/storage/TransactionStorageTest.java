@@ -20,7 +20,6 @@ import static org.junit.Assert.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -29,6 +28,7 @@ import org.exoplatform.addon.wallet.entity.TransactionEntity;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.storage.TransactionStorage;
 import org.exoplatform.addon.wallet.test.BaseWalletTest;
+import org.exoplatform.addon.wallet.utils.WalletUtils;
 
 public class TransactionStorageTest extends BaseWalletTest {
 
@@ -76,6 +76,32 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                               null,
                                                               0);
     assertEquals("Returned contract transactions list count with limit = 0 is not coherent", 30, transactions.size());
+  }
+
+  /**
+   * Test get list of transactions of a chosen network
+   */
+  @Test
+  public void testGetTransactions() {
+    String contractAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
+    String contractMethodName = "transfer";
+
+    long totalTransactionsSize = generateTransactions("0xe9dfec7864af9e581a85ce3987d026be0f50aaaa",
+                                                      contractAddress,
+                                                      contractMethodName).size();
+    totalTransactionsSize += generateTransactions("0xe9dfec7864af9e581a85ce3987d026be0f50bbbb", null, null).size();
+
+    assertTrue(totalTransactionsSize > 100);
+
+    TransactionStorage transactionStorage = getService(TransactionStorage.class);
+    List<TransactionDetail> transactions = transactionStorage.getTransactions(WalletUtils.getNetworkId(), Integer.MAX_VALUE);
+
+    assertNotNull("Returned transactions list is null", transactions);
+    assertEquals("Returned transactions list count is not coherent", totalTransactionsSize, transactions.size());
+
+    // Test pagination
+    transactions = transactionStorage.getTransactions(WalletUtils.getNetworkId(), 5);
+    assertEquals("Returned contract transactions list count is not coherent", 5, transactions.size());
   }
 
   /**
@@ -193,13 +219,13 @@ public class TransactionStorageTest extends BaseWalletTest {
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
 
     // Search all pending transactions using the network id
-    Set<String> transactions = transactionStorage.getPendingTransactionHashes(1);
+    List<TransactionDetail> transactions = transactionStorage.getPendingTransaction(1);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
 
     // Use non existing network ID
-    transactions = transactionStorage.getPendingTransactionHashes(2);
+    transactions = transactionStorage.getPendingTransaction(2);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 
@@ -209,7 +235,7 @@ public class TransactionStorageTest extends BaseWalletTest {
   @Test
   public void testGetTransactionByHash() {
     String hashOfTX = "0x51a6e8ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceadb";
-    long createdDateInSeconds = System.currentTimeMillis() / 1000;
+    long createdDateInMilliSeconds = System.currentTimeMillis();
     createTransactionDetail(hashOfTX,
                             null,
                             0, // token amount
@@ -223,17 +249,12 @@ public class TransactionStorageTest extends BaseWalletTest {
                             true, // isSuccess
                             true, // isPending
                             true, // isAdminOperation
-                            createdDateInSeconds); // Simulate storing timestamp
-                                                   // in seconds
+                            null,
+                            createdDateInMilliSeconds);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     TransactionDetail transactionDetail = transactionStorage.getTransactionByHash(hashOfTX);
     assertNotNull("Can't find previously saved transaction with given hash", transactionDetail);
-
-    long createdDateInMilliSeconds = createdDateInSeconds * 1000;
-    assertEquals("Created date should be returned in milliseconds even if it's saved using seconds",
-                 createdDateInMilliSeconds,
-                 transactionDetail.getTimestamp());
 
     transactionDetail =
                       transactionStorage.getTransactionByHash("0x111111ef52f723ab8e52eed07b7ebbe165ec892664616434c946e387424ceaaa");
@@ -260,6 +281,7 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                                   true, // isSuccess
                                                                   true, // isPending
                                                                   true, // isAdminOperation
+                                                                  null,
                                                                   0);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);

@@ -26,17 +26,14 @@
           <v-list-item-content>{{ $t('exoplatform.wallet.label.rewardsSent') }}:</v-list-item-content>
           <v-list-item-content class="align-end">{{ walletUtils.toFixed(wallet.tokensSent) }} {{ symbol }}</v-list-item-content>
         </v-list-item>
-        <v-list-item v-if="wallet.tokensToSend">
+        <v-list-item v-else-if="wallet.tokensToSend">
           <v-list-item-content>{{ $t('exoplatform.wallet.label.computedRewardsToSend') }}:</v-list-item-content>
           <v-list-item-content class="align-end">{{ walletUtils.toFixed(wallet.tokensToSend) }} {{ symbol }}</v-list-item-content>
         </v-list-item>
         <template v-if="rewards.length">
-          <v-list-item>
-            <v-list-item-content>{{ $t('exoplatform.wallet.label.computedRewardsDetails') }}:</v-list-item-content>
-          </v-list-item>
           <v-divider />
           <v-list-item v-for="reward in rewards" :key="reward.pluginId">
-            <v-list-item-content class="pl-3">{{ $t('exoplatform.wallet.label.rewardPluginPointDetails', {0: reward.points, 1: reward.pluginId}) }}:</v-list-item-content>
+            <v-list-item-content>{{ $t('exoplatform.wallet.label.rewardPluginPointDetails', {0: reward.points, 1: reward.pluginId}) }}:</v-list-item-content>
             <v-list-item-content class="align-end">{{ walletUtils.toFixed(reward.amount) }} {{ symbol }}</v-list-item-content>
           </v-list-item>
         </template>

@@ -53,8 +53,7 @@
       :selected-transaction-hash="selectedTransactionHash"
       :selected-contract-method-name="selectedContractMethodName"
       :error="error"
-      @error="error = $event"
-      @refresh-balance="refreshBalance" />
+      @error="error = $event" />
   </v-flex>
 </template>
 

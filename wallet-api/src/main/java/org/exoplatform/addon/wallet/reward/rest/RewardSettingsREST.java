@@ -95,7 +95,7 @@ public class RewardSettingsREST implements ResourceContainer {
     }
     RewardPeriodType rewardPeriodType = RewardPeriodType.valueOf(periodType);
     RewardPeriod rewardPeriod = rewardPeriodType.getPeriodOfTime(timeFromSeconds(dateInSeconds));
-    return Response.ok(rewardPeriod.toString()).build();
+    return Response.ok(rewardPeriod).build();
   }
 
 }

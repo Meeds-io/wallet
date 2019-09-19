@@ -1,6 +1,7 @@
 package org.exoplatform.addon.wallet.reward.notification.test;
 
-import static org.exoplatform.addon.wallet.utils.RewardUtils.*;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.getRewardSettings;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -10,12 +11,14 @@ import java.util.Set;
 import org.junit.Test;
 
 import org.exoplatform.addon.wallet.model.reward.*;
+import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.reward.notification.RewardSuccessNotificationPlugin;
 import org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider;
 import org.exoplatform.addon.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.channel.ChannelManager;
-import org.exoplatform.commons.api.notification.model.*;
+import org.exoplatform.commons.api.notification.model.MessageInfo;
+import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.config.PluginConfig;
 import org.exoplatform.commons.api.notification.service.setting.PluginContainer;
 import org.exoplatform.commons.api.notification.service.setting.PluginSettingService;
@@ -32,13 +35,11 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
   public void testBuildMessage() {
     InitParams params = getParams();
     RewardSuccessNotificationPlugin plugin = new RewardSuccessNotificationPlugin(params);
-    ChannelKey channel = ChannelKey.key("WEB_CHANNEL");
 
     RewardSuccessTemplateProvider templateProvider = new RewardSuccessTemplateProvider(container, params);
     templateProvider.setWebTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
 
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
-    String transactionStatus = TRANSACTION_STATUS_PENDING;
 
     RewardReport rewardReport = new RewardReport();
     RewardPeriod rewardPeriod = RewardPeriod.getCurrentPeriod(getRewardSettings());
@@ -46,11 +47,11 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
 
     Set<WalletReward> rewards = new HashSet<>();
     for (int i = 0; i < 30; i++) {
-      RewardTransaction transaction = new RewardTransaction();
+      TransactionDetail transaction = new TransactionDetail();
       transaction.setHash("hash");
-      transaction.setTokensSent(2);
-      transaction.setStatus(transactionStatus);
-      rewards.add(new WalletReward(null, null, transaction, null, true));
+      transaction.setContractAmount(2);
+      transaction.setPending(true);
+      rewards.add(new WalletReward(null, null, transaction, null, null));
     }
     rewardReport.setRewards(rewards);
     ctx.append(REWARD_REPORT_NOTIFICATION_PARAM, rewardReport);

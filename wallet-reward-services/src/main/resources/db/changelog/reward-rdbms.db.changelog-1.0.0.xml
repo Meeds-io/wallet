@@ -82,4 +82,69 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-6">
+    <createTable tableName="ADDONS_WALLET_REWARD_PERIOD">
+      <column name="REWARD_PERIOD_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_REWARD_PERIOD_ID"/>
+      </column>
+      <column name="PERIOD_TYPE" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="START_TIME" type="BIGINT" defaultValueNumeric="0" />
+      <column name="END_TIME" type="BIGINT" defaultValueNumeric="0" />
+      <column name="STATUS" type="INT" defaultValueNumeric="0" />
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-7">
+    <createTable tableName="ADDONS_WALLET_REWARD">
+      <column name="REWARD_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_REWARD_ID"/>
+      </column>
+      <column name="IDENTITY_ID" type="BIGINT" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="REWARD_PERIOD_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_REWARD_PERIOD_01" references="ADDONS_WALLET_REWARD_PERIOD(REWARD_PERIOD_ID)" nullable="false" />
+      </column>
+      <column name="TEAM_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_GAM_02" references="ADDONS_WALLET_GAM_TEAM(TEAM_ID)" nullable="true"/>
+      </column>
+      <column name="TRANSACTION_HASH" type="VARCHAR(100)" />
+      <column name="ENABLED" type="BOOLEAN" defaultValueBoolean="false"/>
+      <column name="TOKENS_TO_SEND" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="TOKENS_SENT" type="DOUBLE" defaultValueNumeric="0" />
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-8">
+    <createTable tableName="ADDONS_WALLET_REWARD_PLUGIN">
+      <column name="REWARD_PLUGIN_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_REWARD_PLUGIN_ID"/>
+      </column>
+      <column name="REWARD_ID" type="BIGINT">
+        <constraints foreignKeyName="FK_WALLET_REWARD_ID_01" references="ADDONS_WALLET_REWARD(REWARD_ID)" nullable="false"/>
+      </column>
+      <column name="PLUGIN_ID" type="VARCHAR(100)" />
+      <column name="POOL_USED" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="POINTS" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="AMOUNT" type="DOUBLE" defaultValueNumeric="0" />
+    </createTable>
+    <modifySql dbms="mysql">
+      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+    </modifySql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-9" dbms="oracle,postgresql">
+    <createSequence sequenceName="SEQ_WALLET_REWARD_PERIOD_ID" startValue="1"/>
+    <createSequence sequenceName="SEQ_WALLET_REWARD_ID" startValue="1"/>
+    <createSequence sequenceName="SEQ_WALLET_REWARD_PLUGIN_ID" startValue="1"/>
+  </changeSet>
+
 </databaseChangeLog>

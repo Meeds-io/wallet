@@ -104,7 +104,6 @@
                         :contract-details="contractDetails"
                         @refresh="init()"
                         @display-transactions="openAccountDetail"
-                        @refresh-token-balance="refreshTokenBalance"
                         @error="error = $event" />
                     </v-flex>
                     <template v-if="initializationState !== 'DENIED'">
@@ -140,7 +139,6 @@
                     :wallet="wallet"
                     :is-read-only="isReadOnly"
                     @display-transactions="openAccountDetail"
-                    @refresh-token-balance="refreshTokenBalance"
                     @transaction-sent="newPendingTransaction"
                     @error="error = $event" />
                 </v-flex>
@@ -376,8 +374,15 @@ export default {
         })
         .then((result, error) => {
           this.handleError(error);
+          if (this.contractDetails) {
+            return this.reloadContract();
+          } else {
+            this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
+          }
+        })
+        .then((result, error) => {
+          this.handleError(error);
 
-          this.contractDetails = this.settings.contractDetail;
           this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
@@ -387,16 +392,8 @@ export default {
           if (this.settings.network.maxGasPrice) {
             this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
           }
+          return this.$nextTick();
         })
-        .then((result, error) => {
-          this.handleError(error);
-          return this.tokenUtils.getContractDetails(this.walletAddress);
-        })
-        .then((result, error) => {
-          this.handleError(error);
-          this.$forceUpdate();
-        })
-        .then(() => this.$nextTick())
         .then(() => this.periodChanged(this.periodicity))
         .catch((e) => {
           console.debug('init method - error', e);
@@ -424,14 +421,8 @@ export default {
         this.addressRegistry.refreshWallet(this.wallet);
       }
     },
-    refreshTokenBalance() {
-      return this.tokenUtils.refreshTokenBalance(this.walletAddress, this.contractDetails);
-    },
-    reloadContract(event) {
-      return this.tokenUtils.reloadContractDetails(this.contractDetails, this.walletAddress)
-        .then((contractDetails, error) => {
-          this.handleError(error);
-        });
+    reloadContract() {
+      return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
     },
     openAccountDetail(methodName, hash) {
       this.error = null;

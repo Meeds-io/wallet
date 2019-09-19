@@ -1,10 +1,10 @@
 package org.exoplatform.addon.wallet.storage;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
+import static org.exoplatform.addon.wallet.utils.WalletUtils.formatTransactionHash;
 
-import java.math.BigInteger;
-import java.time.*;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,18 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.exoplatform.addon.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.addon.wallet.entity.TransactionEntity;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 public class TransactionStorage {
-
-  private static final Log     LOG                         = ExoLogger.getLogger(TransactionStorage.class);
-
-  private static final long    MINIMUM_CREATED_DATE_MILLIS =
-                                                           LocalDate.of(2018, 1, 1)
-                                                                    .atStartOfDay(ZoneOffset.systemDefault())
-                                                                    .toEpochSecond()
-                                                               * 1000;
 
   private WalletTransactionDAO walletTransactionDAO;
 
@@ -31,20 +21,75 @@ public class TransactionStorage {
     this.walletTransactionDAO = walletTransactionDAO;
   }
 
-  public Set<String> getPendingTransactionHashes(long networkId) {
-    return walletTransactionDAO.getPendingTransactionHashes(networkId);
+  /**
+   * @param networkId blockchain network id
+   * @return {@link List} of {@link TransactionDetail} marked as pending in
+   *         internal database
+   */
+  public List<TransactionDetail> getPendingTransaction(long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(networkId);
+    return fromEntities(transactions);
   }
 
+  /**
+   * @param networkId blockchain network id
+   * @return {@link List} of {@link TransactionDetail} not yet sent on
+   *         blockchain
+   */
+  public List<TransactionDetail> getTransactionsToSend(long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getTransactionsToSend(networkId);
+    return fromEntities(transactions);
+  }
+
+  /**
+   * @param networkId blockchain network id
+   * @param fromAddress wallet address
+   * @return the max used nonce from stored transactions in internal database
+   */
+  public long getMaxUsedNonce(long networkId, String fromAddress) {
+    return walletTransactionDAO.getMaxUsedNonce(networkId, fromAddress);
+  }
+
+  /**
+   * @param contractAddress filter transactions by a contract address
+   * @param contractMethodName filter transactions by a contract method
+   * @param limit size limit of transactions to retrieve
+   * @return {@link List} of {@link TransactionDetail} with corresponding filter
+   *         entries
+   */
   public List<TransactionDetail> getContractTransactions(String contractAddress,
                                                          String contractMethodName,
                                                          int limit) {
     List<TransactionEntity> transactions = walletTransactionDAO.getContractTransactions(StringUtils.lowerCase(contractAddress),
                                                                                         contractMethodName,
                                                                                         limit);
-    return transactions == null ? Collections.emptyList()
-                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
+    return fromEntities(transactions);
   }
 
+  /**
+   * @param networkId blockchain network id
+   * @param limit size limit of transactions to retrieve
+   * @return {@link List} of {@link TransactionDetail} for selected blockchain
+   *         network id
+   */
+  public List<TransactionDetail> getTransactions(long networkId, int limit) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getTransactions(networkId, limit);
+    return fromEntities(transactions);
+  }
+
+  /**
+   * @param networkId blockchain network id
+   * @param address wallet address
+   * @param contractAddress filter transactions by a contract address
+   * @param contractMethodName filter transactions by a contract method
+   * @param hash retrieve include in the list of transactions this hash even if
+   *          the limit is reached
+   * @param limit size limit of transactions to retrieve
+   * @param pending whether include pending or not
+   * @param administration whether include administration transactions or not
+   * @return {@link List} of {@link TransactionDetail} with corresponding filter
+   *         entries
+   */
   public List<TransactionDetail> getWalletTransactions(long networkId,
                                                        String address,
                                                        String contractAddress,
@@ -74,11 +119,15 @@ public class TransactionStorage {
                                    pending,
                                    administration);
     }
-    return transactions == null ? Collections.emptyList()
-                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
+    return fromEntities(transactions);
 
   }
 
+  /**
+   * Saves a decoded transaction detail in internal database
+   * 
+   * @param transactionDetail decoded transaction detail
+   */
   public void saveTransactionDetail(TransactionDetail transactionDetail) {
     TransactionEntity transactionEntity = toEntity(transactionDetail);
     if (transactionDetail.getTimestamp() <= 0) {
@@ -92,20 +141,38 @@ public class TransactionStorage {
     }
   }
 
+  /**
+   * Retrieve a {@link TransactionDetail} identified by its blockchain hash
+   * 
+   * @param hash blockchain transaction hash
+   * @return {@link TransactionDetail}
+   */
   public TransactionDetail getTransactionByHash(String hash) {
     hash = formatTransactionHash(hash);
     TransactionEntity transactionEntity = walletTransactionDAO.getTransactionByHash(hash);
     return fromEntity(transactionEntity);
   }
 
-  public TransactionDetail getTransactionByAddressAndNonce(String fromAddress, long nonce) {
-    TransactionEntity transactionEntity = walletTransactionDAO.getTransactionByAddressAndNonce(fromAddress, nonce);
-    return fromEntity(transactionEntity);
+  /**
+   * @param networkId blockchain network id
+   * @param fromAddress transaction sender address
+   * @return count of pending transactions sent on a blockchain network for a
+   *         specified user
+   */
+  public long countPendingTransactionSent(long networkId, String fromAddress) {
+    return walletTransactionDAO.countPendingTransactionSent(networkId, fromAddress);
   }
 
   /**
-   * Return contract amount received during a period of time
-   * 
+   * @param networkId blockchain network id
+   * @param fromAddress transaction sender address
+   * @return count of pending transactions of a sender
+   */
+  public long countPendingTransactionAsSender(long networkId, String fromAddress) {
+    return walletTransactionDAO.countPendingTransactionAsSender(networkId, fromAddress);
+  }
+
+  /**
    * @param contractAddress blockchain contract address
    * @param address wallet address
    * @param startDate start date of selected period
@@ -119,11 +186,23 @@ public class TransactionStorage {
     return walletTransactionDAO.countReceivedContractAmount(contractAddress, address, startDate, endDate);
   }
 
+  /**
+   * @param contractAddress blockchain contract address
+   * @param address wallet address
+   * @param startDate start date of selected period
+   * @param endDate end date of selected period
+   * @return sum of token amounts sent during selected period
+   */
   public double countSentContractAmount(String contractAddress,
                                         String address,
                                         ZonedDateTime startDate,
                                         ZonedDateTime endDate) {
     return walletTransactionDAO.countSentContractAmount(contractAddress, address, startDate, endDate);
+  }
+
+  private List<TransactionDetail> fromEntities(List<TransactionEntity> transactions) {
+    return transactions == null ? Collections.emptyList()
+                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {
@@ -136,21 +215,6 @@ public class TransactionStorage {
     detail.setContractAddress(entity.getContractAddress());
     detail.setContractAmount(entity.getContractAmount());
     detail.setContractMethodName(entity.getContractMethodName());
-    // FIXME Workaround for old bug when adding timestamp in seconds // NOSONAR
-    if (entity.getCreatedDate() > 0 && entity.getCreatedDate() < MINIMUM_CREATED_DATE_MILLIS) {
-      LOG.debug("Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.", entity.getHash());
-      entity.setCreatedDate(entity.getCreatedDate() * 1000);
-      walletTransactionDAO.update(entity);
-    }
-    // FIXME workaround to update amount that was stored in WEI // NOSONAR
-    if (entity.getValue() > 10000L && (StringUtils.isBlank(entity.getContractAddress())
-        || StringUtils.isBlank(entity.getContractMethodName())
-        || StringUtils.equals(entity.getContractMethodName(), TOKEN_FUNC_INITIALIZEACCOUNT)
-        || StringUtils.equals(entity.getContractMethodName(), TOKEN_FUNC_SETSELLPRICE))) {
-      LOG.debug("[from DB] Transaction {} has a value in WEI, converting it to ether.", entity.getHash());
-      entity.setValue(convertFromDecimals(new BigInteger(String.valueOf(entity.getValue())), ETHER_TO_WEI_DECIMALS));
-      walletTransactionDAO.update(entity);
-    }
     detail.setTimestamp(entity.getCreatedDate());
     detail.setValue(entity.getValue());
     detail.setIssuerId(entity.getIssuerIdentityId());
@@ -168,6 +232,9 @@ public class TransactionStorage {
     detail.setTokenFee(entity.getTokenFee());
     detail.setNoContractFunds(entity.isNoContractFunds());
     detail.setNonce(entity.getNonce());
+    detail.setSentTimestamp(entity.getSentDate());
+    detail.setSendingAttemptCount(entity.getSendingAttemptCount());
+    detail.setRawTransaction(entity.getRawTransaction());
     return detail;
   }
 
@@ -195,12 +262,11 @@ public class TransactionStorage {
     entity.setGasUsed(detail.getGasUsed());
     entity.setNoContractFunds(detail.isNoContractFunds());
     entity.setNonce(detail.getNonce());
+    entity.setSentDate(detail.getSentTimestamp());
+    entity.setSendingAttemptCount(detail.getSendingAttemptCount());
+    entity.setRawTransaction(detail.getRawTransaction());
     if (detail.getTimestamp() == 0) {
       entity.setCreatedDate(System.currentTimeMillis());
-    } else if (detail.getTimestamp() < MINIMUM_CREATED_DATE_MILLIS) {
-      LOG.debug("[to store on DB] Transaction {} has a 'CreatedDate' in seconds, converting it to milliseconds.",
-                entity.getHash());
-      detail.setTimestamp(detail.getTimestamp() * 1000);
     }
     entity.setCreatedDate(detail.getTimestamp());
     if (detail.getIssuer() != null) {

@@ -224,7 +224,7 @@ public class WalletAccountREST implements ResourceContainer {
       Wallet wallet = accountService.saveWalletBackupState(currentUserId, walletId, backedUp);
       return Response.ok(wallet).build();
     } catch (IllegalAccessException e) {
-      LOG.debug("User '{}' is not allowed to change backup state of wallet with id {}", currentUserId, walletId, e);
+      LOG.warn("User '{}' is not allowed to change backup state of wallet with id {}", currentUserId, walletId, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving wallet backup state: User {} attempts to change backup state wallet with id {}",
@@ -268,6 +268,7 @@ public class WalletAccountREST implements ResourceContainer {
         return Response.ok(storedWallet.getPassPhrase()).build();
       }
     } catch (IllegalAccessException e) {
+      LOG.warn("User '{}' is not allowed to save wallet {}", currentUserId, wallet, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving address: User " + currentUserId + " attempts to save address of "
@@ -549,9 +550,6 @@ public class WalletAccountREST implements ResourceContainer {
   public Response getWallets() {
     try {
       Set<Wallet> wallets = accountService.listWallets();
-      for (Wallet wallet : wallets) {
-        accountService.retrieveWalletBlockchainState(wallet);
-      }
       return Response.ok(wallets).build();
     } catch (Exception e) {
       LOG.warn("Error retrieving list of wallets", e);

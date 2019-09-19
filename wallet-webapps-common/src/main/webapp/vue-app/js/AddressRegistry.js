@@ -35,18 +35,6 @@ export function saveNewAddress(id, type, address, isBrowserWallet) {
       address: address,
       enabled: true,
     }),
-  }).then((resp) => {
-    if (resp && resp.ok) {
-      if (isBrowserWallet) {
-        // Save the address as generated using a browser wallet
-        localStorage.setItem(`exo-wallet-${type}-${id}`, address);
-      }
-
-      return resp;
-    } else {
-      console.error('Error saving wallet address', resp);
-      throw new Error('Error saving wallet address');
-    }
   });
 }
 

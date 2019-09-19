@@ -82,6 +82,7 @@ export function sendRewards(periodDateInSeconds) {
 }
 
 export function computeRewards(periodDateInSeconds) {
+  periodDateInSeconds = periodDateInSeconds || parseInt(Date.now() / 1000);
   return fetch(`/portal/rest/wallet/api/reward/compute?periodDateInSeconds=${periodDateInSeconds}`, {
     method: 'GET',
     credentials: 'include',

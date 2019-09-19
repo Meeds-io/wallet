@@ -30,8 +30,10 @@ import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.model.transaction.TransactionStatistics;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.addon.wallet.service.WalletTransactionService;
 import org.exoplatform.common.http.HTTPStatus;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
@@ -49,37 +51,51 @@ public class WalletTransactionREST implements ResourceContainer {
 
   private WalletTransactionService transactionService;
 
+  private WalletTokenAdminService  walletTokenAdminService;
+
   public WalletTransactionREST(WalletTransactionService transactionService) {
     this.transactionService = transactionService;
   }
 
   @POST
   @Path("saveTransactionDetails")
+  @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", notes = "returns empty response")
+  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", produces = "application/json", notes = "returns saved transaction detail")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response saveTransactionDetails(@ApiParam(value = "transaction detail object", required = true) TransactionDetail transactionDetail) {
-    if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getHash())
-        || StringUtils.isBlank(transactionDetail.getFrom())) {
+    if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
       LOG.warn("Bad request sent to server with empty transaction details: {}",
                transactionDetail == null ? "" : transactionDetail.toString());
       return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     String currentUserId = getCurrentUserId();
+    // Fix generated transaction hash from Web3js to use generated hash from
+    // Web3j
+    if (transactionDetail.getId() == 0 && StringUtils.isNotBlank(transactionDetail.getRawTransaction())) {
+      String transactionHash = getWalletTokenAdminService().generateHash(transactionDetail.getRawTransaction());
+      transactionDetail.setHash(transactionHash);
+    } else if (StringUtils.isBlank(transactionDetail.getHash())) {
+      LOG.warn("Bad request sent to server with empty transaction hash");
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    } else {
+      transactionDetail.setSentTimestamp(System.currentTimeMillis());
+    }
+
     try {
       transactionService.saveTransactionDetail(transactionDetail, currentUserId);
-      return Response.ok().build();
+      return Response.ok(transactionDetail).build();
     } catch (IllegalAccessException e) {
       LOG.warn("User {} is attempting to save transaction {}", currentUserId, transactionDetail, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
-      LOG.error("Error saving transaction message", e);
+      LOG.error("Error saving transaction message {}", transactionDetail, e);
       return Response.serverError().build();
     }
   }
@@ -110,33 +126,29 @@ public class WalletTransactionREST implements ResourceContainer {
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("getSavedTransactionByNonce")
+  @Path("getNonce")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get saved transaction in internal database by sender address with a specified nonce", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
+  @ApiOperation(value = "Get nonce to include in next transaction to send for a wallet", httpMethod = "GET", response = Response.class, notes = "returns transaction nonce")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getSavedTransactionByNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress,
-                                             @ApiParam(value = "Sender transaction nonce", required = true) @QueryParam("nonce") long nonce) {
-    if (nonce == 0) {
-      LOG.warn("Empty transaction nonce", nonce);
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
+  public Response getNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress) {
     if (StringUtils.isBlank(fromAddress)) {
       LOG.warn("Empty transaction sender", fromAddress);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
+    String currentUser = getCurrentUserId();
     try {
-      TransactionDetail transactionDetail = transactionService.getTransactionByNonce(fromAddress,
-                                                                                     nonce,
-                                                                                     getCurrentUserId());
-      return Response.ok(transactionDetail).build();
+      long nonce = transactionService.getNonce(fromAddress, currentUser);
+      return Response.ok(String.valueOf(nonce)).build();
+    } catch (IllegalAccessException e) {
+      LOG.warn("User {} attempts to display last nonce of address {}", currentUser, fromAddress, e);
+      return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
-      LOG.error("Error getting transaction with address {} and nonce {}", fromAddress, nonce, e);
+      LOG.error("Error getting nonce for address {}", fromAddress, e);
       return Response.serverError().build();
     }
   }
@@ -193,11 +205,6 @@ public class WalletTransactionREST implements ResourceContainer {
                                   @ApiParam(value = "limit transactions to retrieve", required = false) @QueryParam("limit") int limit,
                                   @ApiParam(value = "whether to include only pending or not", required = false) @QueryParam("pending") boolean onlyPending,
                                   @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
-    if (StringUtils.isBlank(address)) {
-      LOG.warn(EMPTY_ADDRESS_ERROR, address);
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
-
     String currentUserId = getCurrentUserId();
     try {
       List<TransactionDetail> transactionDetails = transactionService.getTransactions(address,
@@ -210,12 +217,26 @@ public class WalletTransactionREST implements ResourceContainer {
                                                                                       currentUserId);
       return Response.ok(transactionDetails).build();
     } catch (IllegalAccessException e) {
-      LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address);
+      LOG.warn("User {} attempts to display transactions of address {}", currentUserId, address, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Error getting transactions of wallet " + address, e);
       return Response.serverError().build();
     }
+  }
+
+  /**
+   * Workaround: WalletTokenAdminService retrieved here instead of dependency
+   * injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return wallet token service
+   */
+  private WalletTokenAdminService getWalletTokenAdminService() {
+    if (walletTokenAdminService == null) {
+      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return walletTokenAdminService;
   }
 
 }

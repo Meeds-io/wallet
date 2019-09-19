@@ -74,12 +74,12 @@ public class RewardSuccessNotificationPlugin extends BaseNotificationPlugin {
                            .with(REWARD_PERIOD_TYPE, period.getRewardPeriodType().name())
                            .with(REWARD_START_PERIOD_DATE, String.valueOf(period.getStartDateInSeconds()))
                            .with(REWARD_END_PERIOD_DATE, String.valueOf(period.getEndDateInSeconds()))
-                           .with(REWARD_SUCCESS_COUNT, String.valueOf(rewardReport.countSuccess()))
-                           .with(REWARD_FAIL_COUNT, String.valueOf(rewardReport.countFailed()))
-                           .with(REWARD_PENDING_COUNT, String.valueOf(rewardReport.countPending()))
-                           .with(REWARD_TRANSACTION_COUNT, String.valueOf(rewardReport.countTransactions()))
-                           .with(REWARD_VALID_MEMBERS_COUNT, String.valueOf(rewardReport.countValidRewards()))
-                           .with(AMOUNT, String.valueOf(rewardReport.totalAmount()))
+                           .with(REWARD_SUCCESS_COUNT, String.valueOf(rewardReport.getSuccessTransactionCount()))
+                           .with(REWARD_FAIL_COUNT, String.valueOf(rewardReport.getFailedTransactionCount()))
+                           .with(REWARD_PENDING_COUNT, String.valueOf(rewardReport.getPendingTransactionCount()))
+                           .with(REWARD_TRANSACTION_COUNT, String.valueOf(rewardReport.getTransactionsCount()))
+                           .with(REWARD_VALID_MEMBERS_COUNT, String.valueOf(rewardReport.getValidRewardCount()))
+                           .with(AMOUNT, String.valueOf(rewardReport.getTokensSent()))
                            .key(getKey())
                            .end();
   }

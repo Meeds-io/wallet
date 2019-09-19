@@ -10,7 +10,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RewardSettings implements Serializable, Cloneable {
-
   private static final long         serialVersionUID = -8650247964730374760L;
 
   private RewardPeriodType          periodType       = RewardPeriodType.DEFAULT;

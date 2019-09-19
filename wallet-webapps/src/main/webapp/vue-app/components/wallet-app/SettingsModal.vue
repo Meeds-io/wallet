@@ -61,8 +61,8 @@
               id="keys"
               value="keys"
               eager>
-              <v-card flat>
-                <v-card-text class="pb-0">
+              <div>
+                <div>
                   <qr-code
                     ref="qrCode"
                     :to="walletAddress"
@@ -71,8 +71,8 @@
                   <div class="text-center">
                     <wallet-address :value="walletAddress" :allow-edit="false" />
                   </div>
-                </v-card-text>
-                <v-card-text v-if="browserWalletExists" class="text-center pb-0">
+                </div>
+                <div v-if="browserWalletExists" class="text-center pt-3">
                   <backup-modal
                     ref="walletBackupModal"
                     :display-complete-message="false"
@@ -80,8 +80,8 @@
                       $emit('backed-up');
                       refreshFromSettings();
                     " />
-                </v-card-text>
-                <v-card-text class="text-center">
+                </div>
+                <div class="text-center pt-3">
                   <import-key-modal
                     ref="walletImportKeyModal"
                     :is-space="isSpace"
@@ -90,8 +90,8 @@
                       $emit('settings-changed');
                       refreshFromSettings();
                     " />
-                </v-card-text>
-              </v-card>
+                </div>
+              </div>
             </v-tab-item>
           </v-tabs-items>
         </v-flex>
@@ -159,6 +159,7 @@ export default {
   data() {
     return {
       settings: false,
+      browserWalletExists: false,
       loading: false,
       dialog: false,
       error: null,
@@ -176,12 +177,11 @@ export default {
       if (this.walletAddress) {
         this.$nextTick(() => {
           this.refreshFromSettings();
-          this.$refs.qrCode.computeCanvas();
+          if (this.$refs && this.$refs.qrCode) {
+            this.$refs.qrCode.computeCanvas();
+          }
         });
       }
-    },
-    browserWalletExists() {
-      return this.settings && this.settings.userPreferences && this.settings.browserWalletExists;
     },
     appLoading() {
       if (!this.appLoading) {
@@ -192,6 +192,7 @@ export default {
       if (this.open) {
         this.error = null;
         this.settings = window.walletSettings || {wallet: {}, userPreferences: {}};
+        this.browserWalletExists = this.settings && this.settings.browserWalletExists;
 
         // Workaround to display slider on first popin open
         if (this.$refs.settingsTabs) {

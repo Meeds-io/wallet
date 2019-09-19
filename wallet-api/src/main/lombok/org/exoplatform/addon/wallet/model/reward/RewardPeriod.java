@@ -1,42 +1,26 @@
 package org.exoplatform.addon.wallet.model.reward;
 
-import java.time.LocalDateTime;
+import static org.exoplatform.addon.wallet.utils.RewardUtils.formatTime;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RewardPeriod {
+public class RewardPeriod implements Serializable {
+  private static final long serialVersionUID = -4860665131754056537L;
 
-  private RewardPeriodType rewardPeriodType;
+  private RewardPeriodType  rewardPeriodType;
 
-  private long             startDateInSeconds;
+  private long              startDateInSeconds;
 
-  private long             endDateInSeconds;
+  private long              endDateInSeconds;
 
   public RewardPeriod(RewardPeriodType rewardPeriodType) {
     this.rewardPeriodType = rewardPeriodType;
-  }
-
-  public JSONObject toJSONObject() {
-    JSONObject jsonObject = new JSONObject();
-    try {
-      jsonObject.put("startDateInSeconds", startDateInSeconds);
-      jsonObject.put("endDateInSeconds", endDateInSeconds);
-      jsonObject.put("rewardPeriodType", rewardPeriodType.name());
-    } catch (JSONException e) {
-      throw new IllegalStateException("Error while converting Object to JSON", e);
-    }
-    return jsonObject;
-  }
-
-  @Override
-  public String toString() {
-    return toJSONObject().toString();
   }
 
   public static RewardPeriod getCurrentPeriod(RewardSettings rewardSettings) {
@@ -51,6 +35,14 @@ public class RewardPeriod {
       rewardPeriodType = rewardSettings.getPeriodType();
     }
     return rewardPeriodType.getPeriodOfTime(localDateTime);
+  }
+
+  public String getStartDateFormatted(String lang) {
+    return formatTime(startDateInSeconds, lang);
+  }
+
+  public String getEndDateFormatted(String lang) {
+    return formatTime(startDateInSeconds, lang);
   }
 
 }

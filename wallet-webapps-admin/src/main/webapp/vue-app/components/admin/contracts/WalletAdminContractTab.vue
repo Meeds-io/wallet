@@ -216,7 +216,6 @@
             <transactions-list
               id="transactionsList"
               ref="transactionsList"
-              :account="contractDetails && contractDetails.address"
               :contract-details="contractDetails"
               :fiat-symbol="fiatSymbol"
               :error="error"
@@ -425,6 +424,11 @@ export default {
     this.$nextTick(() => this.selectedTab = 'transactions');
   },
   methods: {
+    refreshTransactionList() {
+      if (this.$refs.transactionsList) {
+        this.$refs.transactionsList.init();
+      }
+    },
     successSendingEther() {
       this.refreshBalance()
         .then(() => {

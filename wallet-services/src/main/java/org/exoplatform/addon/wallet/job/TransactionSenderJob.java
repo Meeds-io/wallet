@@ -10,15 +10,15 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 @DisallowConcurrentExecution
-public class PendingTransactionVerifierJob implements Job {
+public class TransactionSenderJob implements Job {
 
-  private static final Log             LOG = ExoLogger.getLogger(PendingTransactionVerifierJob.class);
+  private static final Log             LOG = ExoLogger.getLogger(TransactionSenderJob.class);
 
   private ExoContainer                 container;
 
   private BlockchainTransactionService blockchainTransactionService;
 
-  public PendingTransactionVerifierJob() {
+  public TransactionSenderJob() {
     this.container = PortalContainer.getInstance();
   }
 
@@ -28,9 +28,9 @@ public class PendingTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      getBlockchainTransactionService().checkPendingTransactions();
+      getBlockchainTransactionService().sendRawTransactions();
     } catch (Exception e) {
-      LOG.error("Error while checking pending transactions", e);
+      LOG.error("Error while sending raw transactions", e);
     } finally {
       RequestLifeCycle.end();
       ExoContainerContext.setCurrentContainer(currentContainer);

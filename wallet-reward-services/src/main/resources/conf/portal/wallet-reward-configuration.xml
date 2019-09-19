@@ -8,8 +8,29 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardTransactionService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardTransactionService</type>
+    <type>org.exoplatform.addon.wallet.reward.dao.RewardPluginDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.reward.dao.RewardDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.reward.dao.RewardPeriodDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.reward.storage.RewardTeamStorage</key>
+    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardTeamStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.addon.wallet.reward.storage.RewardReportStorage</key>
+    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardReportStorage</type>
   </component>
 
   <component>
@@ -34,18 +55,11 @@
         <description>Kudos reward plugin</description>
       </component-plugin>
     </component-plugins>
-    <init-params>
-      <value-param>
-        <name>reminder.days</name>
-        <description>Days before reward end date to remind managers</description>
-        <value>${exo.addon.wallet.reward.reminder.days:3}</value>
-      </value-param>
-    </init-params>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardService</type>
+    <key>org.exoplatform.addon.wallet.reward.service.RewardReportService</key>
+    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardReportService</type>
   </component>
 
   <component>
@@ -57,7 +71,7 @@
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.rest.RewardBudgetREST</type>
+    <type>org.exoplatform.addon.wallet.reward.rest.RewardReportREST</type>
   </component>
 
   <external-component-plugins>
@@ -91,6 +105,22 @@
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob"/>
           <property name="expression" value="${exo.addon.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Add a job to current period reward estimation</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for reward report updater for current period</description>
+          <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
+          <property name="expression" value="${exo.addon.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
         </properties-param>
       </init-params>
     </component-plugin>

@@ -1,9 +1,8 @@
 import {etherToFiat} from './WalletUtils.js';
-import {getSavedTransactionByNonce} from './TransactionUtils.js';
+import {getNonce, saveTransactionDetails} from './TransactionUtils.js';
 
-const NONCE_TOO_LOW_ERROR = 'nonce too low';
-
-export function reloadContractDetails(contractDetails, walletAddress) {
+export function reloadContractDetails(walletAddress) {
+  const contractDetails = window.walletSettings && window.walletSettings.contractDetail;
   if (!contractDetails || !contractDetails.address) {
     return;
   }
@@ -39,7 +38,7 @@ export function getContractDetails(walletAddress) {
     window.walletContractsDetails[contractDetails.address] = contractDetails;
     window.walletContractsDetails[contractDetails.address.toLowerCase()] = contractDetails;
   }
-  return Promise.resolve(contractDetails);
+  return contractDetails;
 }
 
 /*
@@ -194,80 +193,38 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
   }
 }
 
-export function sendContractTransaction(txDetails, hashCallback, errorCallback) {
-  // suppose you want to call a function named myFunction of myContract
-  const transactionToSend = {
-    to: txDetails.contractAddress,
-    from: txDetails.senderAddress,
-    data: txDetails.method(...txDetails.parameters).encodeABI(),
-    gas: txDetails.gas,
-    gasPrice: txDetails.gasPrice,
-  };
-
-  return getNewTransactionNonce(txDetails.senderAddress).then((nonce) => {
-    // Increment manually nonce if we have the last transaction always pending
-    transactionToSend.nonce = nonce;
-
-    return sendTransaction(transactionToSend, hashCallback, errorCallback);
-  });
-}
-
-function sendTransaction(transactionToSend, hashCallback, errorCallback) {
-  return window.localWeb3.eth
-    .sendTransaction(transactionToSend, (error, hash) => {
-      if (!error && hash) {
-        if (hashCallback) {
-          hashCallback(hash, (transactionToSend.nonce && Number(transactionToSend.nonce)) || 0);
-        }
-      }
+export function sendContractTransaction(transactionDetail, method, parameters) {
+  let nonce = 0;
+  return getNewTransactionNonce(transactionDetail.from)
+    .then((computedNonce) => {
+      nonce = computedNonce;
+      const transactionToSend = {
+        nonce: nonce,
+        to: transactionDetail.contractAddress,
+        gasPrice: transactionDetail.gasPrice,
+        gas: transactionDetail.gas,
+        value: 0,
+        data: method(...parameters).encodeABI(),
+      };
+      return window.localWeb3.eth.accounts.signTransaction(transactionToSend, window.localWeb3.eth.accounts.wallet[0].privateKey)
     })
-    .catch(error => {
-      if (error) {
-        manageTransactionError(error, null, transactionToSend, hashCallback, errorCallback)
+    .then((signedTransactionDetail) => {
+      if (!signedTransactionDetail.rawTransaction) {
+        throw new Error(`Can't generate a transaction to send`);
       }
+      transactionDetail.nonce = nonce;
+      transactionDetail.rawTransaction = signedTransactionDetail.rawTransaction;
+      return saveTransactionDetails(transactionDetail);
     });
-}
-
-function manageTransactionError(error, hash, transactionToSend, hashCallback, errorCallback) {
-  // Workaround to stop polling from blockchain waiting for receipt
-  if (error && String(error).indexOf('Failed to check for transaction receipt') >= 0) {
-    return;
-  // Transaction nonce is not correct
-  } else if(String(error).indexOf(NONCE_TOO_LOW_ERROR) >= 0 || String(error).indexOf('transaction underpriced') >= 0 || String(error).indexOf('known transaction') >= 0) {
-    console.debug(`Transaction wasn't sent because its nonce `, Number(transactionToSend.nonce) ,` isn't correct, increment it and retry`);
-    transactionToSend.nonce = Number(transactionToSend.nonce) + 1;
-    return sendTransaction(transactionToSend, hashCallback, errorCallback);
-  } else {
-    console.error('Error fetching transaction with hash', hash, error);
-    if (errorCallback) {
-      errorCallback(error);
-    } else {
-      throw error;
-    }
-  }
 }
 
 function getNewTransactionNonce(walletAddress) {
   return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending')
-  .then(nonce => {
-    return getTransactionNonceFromServer(walletAddress, nonce);
-  })
-  .catch((e) => {
-    console.debug('Error getting last nonce of wallet address', walletAddress, e);
-  });
-}
-
-function getTransactionNonceFromServer(walletAddress, nonce) {
-  // Verify if the generated nonce doesn't already exist for an address
-  return getSavedTransactionByNonce(walletAddress, nonce)
-    .then((transaction) => {
-      // A transaction with same nonce has been already sent
-      if (transaction) {
-        console.debug('Transaction was found on server eXo with the same nonce ', nonce, '. Reattempting by incrementing nonce');
-        return getTransactionNonceFromServer(walletAddress, ++nonce);
-      } else {
-        return nonce;
-      }
+    .then(nonce => 
+      getNonce(walletAddress)
+        .then(savedNonce => Math.max(Number(nonce), Number(savedNonce))))
+    .catch((e) => {
+      console.debug('Error getting last nonce of wallet address', walletAddress, e);
     });
 }
 

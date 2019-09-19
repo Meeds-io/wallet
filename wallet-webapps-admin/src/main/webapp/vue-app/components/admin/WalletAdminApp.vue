@@ -18,15 +18,6 @@
             <i class="uiIconError"></i>{{ error }}
           </div>
 
-          <wallet-setup
-            ref="walletSetup"
-            :wallet="wallet"
-            :refresh-index="refreshIndex"
-            :loading="loading"
-            is-administration
-            @refresh="init()"
-            @error="error = $event" />
-
           <v-dialog
             v-model="loading"
             attach="#walletDialogsParent"
@@ -78,7 +69,7 @@
                 :address-etherscan-link="addressEtherscanLink"
                 :contract-details="contractDetails"
                 :is-admin="isAdmin"
-                @pending="pendingTransaction"
+                @pending="$refs && $refs.contractDetail && $refs.contractDetail.refreshTransactionList()"
                 @wallets-loaded="wallets = $event" />
             </v-tab-item>
             <v-tab-item
@@ -186,12 +177,15 @@ export default {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
             console.debug('Error connecting to network', error);
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
-          } else {
-            this.error = this.$t('exoplatform.wallet.warning.walletNotConfigured');
           }
         })
-        .then(() => this.reloadContract())
-        .then(() => this.$refs.walletSetup.init())
+        .then(() => {
+          if (this.contractDetails) {
+            return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
+          } else {
+            this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
+          }
+        })
         .then(() => this.$refs.walletsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
@@ -225,10 +219,7 @@ export default {
       }
     },
     reloadContract() {
-      if (!this.contractDetails) {
-        this.contractDetails = window.walletSettings.contractDetail;
-      }
-      return this.tokenUtils.getContractDetails(this.walletAddress);
+      return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
     },
     pendingTransaction(transaction) {
       const recipient = transaction.to.toLowerCase();

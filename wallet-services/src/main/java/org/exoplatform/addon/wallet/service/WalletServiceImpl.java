@@ -141,11 +141,6 @@ public class WalletServiceImpl implements WalletService, Startable {
 
       ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
       this.configuredGlobalSettings.setContractDetail(contractDetail);
-
-      // TODO if stored contractDetail is empty, its computing // NOSONAR
-      // is moved to EthereumWalletTokenAdminService because we can't access
-      // blockchain from here see package-info of
-      // EthereumWalletTokenAdminService class for more details
     } finally {
       RequestLifeCycle.end();
     }
