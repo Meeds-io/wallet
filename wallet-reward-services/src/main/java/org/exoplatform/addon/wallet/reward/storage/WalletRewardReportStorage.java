@@ -240,6 +240,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
 
   private WalletPluginReward toDTO(WalletRewardPluginEntity rewardPluginEntity) {
     WalletPluginReward pluginReward = new WalletPluginReward();
+    pluginReward.setIdentityId(rewardPluginEntity.getReward().getIdentityId());
     pluginReward.setPluginId(rewardPluginEntity.getPluginId());
     pluginReward.setPoolsUsed(rewardPluginEntity.isPoolUsed());
     pluginReward.setPoints(rewardPluginEntity.getPoints());

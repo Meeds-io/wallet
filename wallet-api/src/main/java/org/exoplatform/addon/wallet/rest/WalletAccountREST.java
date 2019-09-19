@@ -268,7 +268,7 @@ public class WalletAccountREST implements ResourceContainer {
         return Response.ok(storedWallet.getPassPhrase()).build();
       }
     } catch (IllegalAccessException e) {
-      LOG.warn("User '{}' is not allowed to save wallet", currentUserId, wallet, e);
+      LOG.warn("User '{}' is not allowed to save wallet {}", currentUserId, wallet, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
     } catch (Exception e) {
       LOG.error("Unknown error occurred while saving address: User " + currentUserId + " attempts to save address of "

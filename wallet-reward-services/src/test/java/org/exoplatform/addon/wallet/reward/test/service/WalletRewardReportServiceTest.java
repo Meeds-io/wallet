@@ -419,6 +419,27 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       walletRewards = walletRewardService.listRewards("root3", 10);
       assertNotNull(walletRewards);
       assertEquals(1, walletRewards.size());
+
+      WalletReward walletReward = walletRewards.get(0);
+      assertNotNull(walletReward);
+      assertNotNull(walletReward.getPeriod());
+      assertNotNull(walletReward.getTransaction());
+      assertEquals(RewardUtils.TRANSACTION_STATUS_SUCCESS, walletReward.getStatus());
+      assertNotNull(walletReward.getWallet());
+      assertEquals(3, walletReward.getIdentityId());
+      assertEquals(3, walletReward.getWallet().getTechnicalId());
+      assertNotNull(walletReward.getTeam());
+      assertNotNull(walletReward.getTeams());
+      assertEquals(1, walletReward.getTeams().size());
+
+      assertNotNull(walletReward.getRewards());
+      assertEquals(1, walletReward.getRewards().size());
+      WalletPluginReward pluginReward = walletReward.getRewards().iterator().next();
+      assertNotNull(pluginReward);
+      assertEquals(CUSTOM_PLUGIN_ID, pluginReward.getPluginId());
+      assertEquals(3, pluginReward.getPoints(), 0);
+      assertEquals(3, pluginReward.getIdentityId());
+      assertEquals(58, pluginReward.getAmount(), 0.1);
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
