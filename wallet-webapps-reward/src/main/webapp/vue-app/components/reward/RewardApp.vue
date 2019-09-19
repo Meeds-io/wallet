@@ -83,6 +83,7 @@
               <send-rewards-tab
                 ref="sendRewards"
                 :reward-report="rewardReport"
+                :admin-wallet="adminWallet"
                 :total-rewards="totalRewards"
                 :contract-details="contractDetails"
                 :period-dates-display="periodDatesDisplay"
@@ -142,6 +143,7 @@ export default {
       loading: false,
       error: null,
       rewardReport: null,
+      adminWallet: null,
       settingWarnings: [],
       selectedTab: 'SendRewards',
       transactionEtherscanLink: null,
@@ -195,7 +197,10 @@ export default {
             throw new Error(this.$t('exoplatform.wallet.error.emptySettings'));
           }
           this.contractDetails = window.walletSettings.contractDetail;
+
+          return this.addressRegistry.searchWalletByTypeAndId('admin', 'admin');
         })
+        .then((adminWallet) => this.adminWallet = adminWallet)
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
           console.debug('init method - error', e);

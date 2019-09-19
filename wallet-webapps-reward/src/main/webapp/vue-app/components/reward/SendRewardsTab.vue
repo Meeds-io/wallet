@@ -44,6 +44,15 @@
         <v-flex md4 xs12>
           <h4>{{ $t('exoplatform.wallet.label.sent') }} {{ contractDetails && contractDetails.name }}: <strong>{{ walletUtils.toFixed(sentBudget) }} {{ symbol }}</strong></h4>
         </v-flex>
+        <v-flex md4 xs12>
+          <h4>
+            {{ $t('exoplatform.wallet.label.adminBalance') }}:
+            <strong>{{ adminBalance }} {{ symbol }}</strong>
+            <v-icon v-if="adminBalanceTooLow" color="orange" :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
+              warning
+            </v-icon>
+          </h4>
+        </v-flex>
         <v-flex
           v-for="totalReward in totalRewards"
           :key="totalReward.pluginId"
@@ -239,6 +248,12 @@ export default {
         return null;
       },
     },
+    adminWallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
     periodDatesDisplay: {
       type: String,
       default: function() {
@@ -326,6 +341,12 @@ export default {
           width: '80px',
         },
       ];
+    },
+    adminBalance() {
+      return (this.adminWallet && this.walletUtils.toFixed(this.adminWallet.tokenBalance)) || 0;
+    },
+    adminBalanceTooLow() {
+      return this.rewardReport && this.adminWallet && this.rewardReport.remainingTokensToSend && this.adminWallet.tokenBalance < this.rewardReport.remainingTokensToSend;
     },
     walletRewards() {
       return (this.rewardReport && this.rewardReport.rewards) || [];
