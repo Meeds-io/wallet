@@ -44,9 +44,9 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 07)
-                                                                 .atEndOfMonth()
-                                                                 .atStartOfDay());
+    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 07)
+                                                                           .atEndOfMonth()
+                                                                           .atStartOfDay());
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);

@@ -96,8 +96,8 @@ public class RewardUtils {
     return LocalDateTime.ofInstant(Instant.ofEpochSecond(createdDate), TimeZone.getDefault().toZoneId());
   }
 
-  public static long timeToSeconds(LocalDateTime time) {
-    return time.atZone(ZoneOffset.systemDefault()).toEpochSecond();
+  public static long timeToSecondsAtDayStart(LocalDateTime time) {
+    return time.toLocalDate().atStartOfDay().atZone(ZoneOffset.systemDefault()).toEpochSecond();
   }
 
   public static final String getCurrentUserId() {
