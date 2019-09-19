@@ -46,7 +46,7 @@
         </v-flex>
         <v-flex md4 xs12>
           <h4>
-            {{ $t('exoplatform.wallet.label.adminBalance') }}:
+            {{ $t('exoplatform.wallet.title.adminWalletFunds') }}:
             <strong>{{ adminBalance }} {{ symbol }}</strong>
             <v-icon
               v-if="adminBalanceTooLow"

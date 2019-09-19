@@ -4,10 +4,22 @@
     xs12
     class="mt-4 mb-6">
     <v-flex
-      class="headline my-auto text-center text-md-right"
-      md4
+      class="headline mx-auto mb-7 text-center"
       xs12>
-      {{ $t('exoplatform.wallet.title.adminWallet') }}
+      <a
+        :href="requestFundsLink"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="no-wrap">
+        {{ $t('exoplatform.wallet.button.requestFunds') }}
+      </a>
+    </v-flex>
+
+    <v-flex
+      class="headline my-auto text-center text-md-right"
+      md5
+      xs12>
+      {{ $t('exoplatform.wallet.title.adminWalletFunds') }}
     </v-flex>
 
     <v-flex
@@ -50,26 +62,6 @@
           {{ etherBalanceLabel }}
         </template>
       </div>
-    </v-flex>
-
-    <v-flex
-      class="my-auto text-center text-md-left no-wrap"
-      md4
-      xs12>
-      <v-btn
-        icon
-        text
-        class="mr-4"
-        @click="$emit('refresh-balance')">
-        <v-icon color="grey">refresh</v-icon>
-      </v-btn>
-      <a
-        :href="requestFundsLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="no-wrap">
-        {{ $t('exoplatform.wallet.button.requestFunds') }}
-      </a>
     </v-flex>
   </v-layout>
 </template>
