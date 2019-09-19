@@ -19,6 +19,8 @@
           :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
           display-remember-me
           class="d-flex"
+          @opened="dialogOpened = true"
+          @closed="dialogOpened = false"
           @reseted="$emit('settings-changed')" />
       </div>
     </v-card-title>
@@ -29,13 +31,16 @@
           {{ $t('exoplatform.wallet.label.encryptionKeys') }}
         </h4>
         <h5>{{ $t('exoplatform.wallet.message.encryptionKeysManagement') }}</h5>
-        <button class="ignore-vuetify-classes btn" @click="$emit('manage-keys')">
+        <button
+          :disabled="dialogOpened"
+          class="ignore-vuetify-classes btn"
+          @click="$emit('manage-keys')">
           <v-icon small>fa-qrcode</v-icon>
           {{ $t('exoplatform.wallet.button.manageKeys') }}
         </button>
         <v-switch
           v-model="hasKeyOnServerSide"
-          :disabled="!browserWalletExists"
+          :disabled="!browserWalletExists || dialogOpened"
           :label="$t('exoplatform.wallet.button.keepMyKeysSafeOnServer')"
           @change="$refs.confirmDialog.open()" />
       </div>
@@ -48,6 +53,8 @@
       :title="confirmTitle"
       :ok-label="confirmOkLabel"
       :cancel-label="$t('exoplatform.wallet.button.cancel')"
+      @dialog-opened="dialogOpened = true"
+      @dialog-closed="dialogOpened = false"
       @ok="saveKeysOnServer"
       @closed="init" />
   </v-card>
@@ -73,6 +80,7 @@ export default {
     return {
       loading: false,
       settings: false,
+      dialogOpened: false,
       hasKeyOnServerSide: false,
       browserWalletExists: false,
     };
@@ -103,17 +111,20 @@ export default {
     saveKeysOnServer() {
       if (this.hasKeyOnServerSide) {
         return this.walletUtils.sendPrivateKeyToServer(this.walletAddress)
-          .then((result, error) => {
-            if (error) {
-              throw error;
-            }
-          })
+          .then(() => this.settings.userPreferences.hasKeyOnServerSide = true)
           .catch(error => {
             console.debug("Error occurred", error);
-            this.hasKeyOnServerSide = false;
-          });
+            this.hasKeyOnServerSide = this.settings.userPreferences.hasKeyOnServerSide;
+          })
+          .finally(() => this.dialogOpened = false);
       } else {
-        return this.walletUtils.removeServerSideBackup(this.walletAddress);
+        return this.walletUtils.removeServerSideBackup(this.walletAddress)
+          .then(() => this.settings.userPreferences.hasKeyOnServerSide = false)
+          .catch(error => {
+            console.debug("Error occurred", error);
+            this.hasKeyOnServerSide = this.settings.userPreferences.hasKeyOnServerSide;
+          })
+          .finally(() => this.dialogOpened = false);
       }
     },
   }

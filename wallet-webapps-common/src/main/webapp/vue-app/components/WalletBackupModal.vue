@@ -48,6 +48,7 @@
           ">
           <v-text-field
             v-if="dialog && !walletPrivateKey"
+            ref="walletPassword"
             v-model="walletPassword"
             :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
             :rules="[rules.min]"
@@ -58,6 +59,7 @@
             counter
             autocomplete="current-passord"
             autofocus
+            validate-on-blur
             @click:append="walletPasswordShow = !walletPasswordShow" />
         </v-form>
       </v-card-text>

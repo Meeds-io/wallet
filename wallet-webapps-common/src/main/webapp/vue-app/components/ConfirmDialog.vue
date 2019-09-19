@@ -90,6 +90,15 @@ export default {
   data: () => ({
     dialog: false,
   }),
+  watch: {
+    dialog() {
+      if (this.dialog) {
+        this.$emit('dialog-opened');
+      } else {
+        this.$emit('dialog-closed');
+      }
+    },
+  },
   methods: {
     ok() {
       this.$emit('ok');

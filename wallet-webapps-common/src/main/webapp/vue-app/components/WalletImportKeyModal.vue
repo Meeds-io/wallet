@@ -66,6 +66,7 @@
             name="walletPrivateKey"
             autocomplete="off"
             autofocus
+            validate-on-blur
             @click:append="walletPrivateKeyShow = !walletPrivateKeyShow" />
           <v-text-field
             v-model="walletPassword"
@@ -149,6 +150,9 @@ export default {
       this.walletPasswordShow = false;
       this.error = null;
       this.loading = false;
+      if (this.$refs.form) {
+        this.$refs.form.reset();
+      }
     },
     importWallet() {
       this.error = null;

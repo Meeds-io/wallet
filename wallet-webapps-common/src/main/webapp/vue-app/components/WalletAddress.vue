@@ -21,6 +21,7 @@
       placeholder="Label"
       class="walletAddressLabelInput mr-2"
       autofocus
+      validate-on-blur
       @click="ignoreDefaultActions"
       @keydown.esc="reset"
       @keyup.enter="save">

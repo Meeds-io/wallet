@@ -22,6 +22,7 @@
           :ignore-current-user="!isSpace"
           autofocus
           required
+          validate-on-blur
           @item-selected="
             recipient = $event.address;
             $emit('receiver-selected', $event);
