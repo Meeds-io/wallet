@@ -100,4 +100,9 @@ public interface WalletService {
    */
   void setConfiguredContractDetail(ContractDetail contractDetail);
 
+  /**
+   * @return true if wallet admin is enabled on Token contract else return false
+   */
+  boolean isEnabled();
+
 }

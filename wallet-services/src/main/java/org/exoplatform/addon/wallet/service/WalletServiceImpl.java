@@ -183,6 +183,7 @@ public class WalletServiceImpl implements WalletService, Startable {
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);
+    userSettings.setEnabled(isEnabled());
 
     String accessPermission = globalSettings.getAccessPermission();
     boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
@@ -314,6 +315,11 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
     String fundRequestSentString = notificationInfo.getOwnerParameter().get(FUNDS_REQUEST_SENT);
     return Boolean.parseBoolean(fundRequestSentString);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return accountService.isAdminAccountEnabled();
   }
 
   private void computeInitialFundsSettings() {

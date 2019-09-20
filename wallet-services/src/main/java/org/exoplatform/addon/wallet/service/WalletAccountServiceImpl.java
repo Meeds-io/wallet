@@ -3,13 +3,10 @@ package org.exoplatform.addon.wallet.service;
 import static org.exoplatform.addon.wallet.statistic.StatisticUtils.OPERATION;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
-import java.security.Provider;
-import java.security.Security;
 import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.picocontainer.Startable;
 
 import org.exoplatform.addon.wallet.model.*;
@@ -18,6 +15,9 @@ import org.exoplatform.addon.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.addon.wallet.storage.AddressLabelStorage;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
@@ -45,6 +45,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private static final String     STATISTIC_OPERATION_DISABLE             = "disable";
 
+  private ExoContainer            container;
+
   private WalletTokenAdminService tokenAdminService;
 
   private WalletStorage           accountStorage;
@@ -55,9 +57,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private String                  adminAccountPassword;
 
-  public WalletAccountServiceImpl(WalletStorage walletAccountStorage,
+  private boolean                 adminAccountEnabled;
+
+  public WalletAccountServiceImpl(ExoContainer container,
+                                  WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
                                   InitParams params) {
+    this.container = container;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)
@@ -68,13 +74,19 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public void start() {
-    Provider provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-    if (provider == null) {
-      LOG.info("No BouncyCastleProvider defined, register new one");
-      provider = new org.bouncycastle.jce.provider.BouncyCastleProvider();
-      Security.addProvider(provider);
+    ExoContainerContext.setCurrentContainer(container);
+    RequestLifeCycle.begin(this.container);
+    try {
+      Wallet adminWallet = getAdminWallet();
+      retrieveWalletBlockchainState(adminWallet);
+
+      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled() && adminWallet.getIsApproved() != null
+          && adminWallet.getIsApproved() && adminWallet.getAdminLevel() >= 2;
+    } catch (Exception e) {
+      LOG.error("Error starting service", e);
+    } finally {
+      RequestLifeCycle.end();
     }
-    LOG.info("Start wallet with BouncyCastleProvider version: {}", provider.getVersion());
   }
 
   @Override
@@ -106,6 +118,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         continue;
       }
       refreshWalletFromBlockchain(wallet, contractDetail, walletsModifications);
+
+      // Checks if admin wallet was newly enabled from blockchain
+      if (!this.adminAccountEnabled && WalletType.isAdmin(wallet.getType())) {
+        this.adminAccountEnabled = wallet.isEnabled() && wallet.getIsApproved() != null
+            && wallet.getIsApproved() && wallet.getAdminLevel() >= 2;
+      }
     }
   }
 
@@ -226,6 +244,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return null;
     }
     return getWalletOfIdentity(identity);
+  }
+
+  @Override
+  public Wallet getAdminWallet() {
+    return getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
   }
 
   @Override
@@ -655,6 +678,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       }
     }
     return parameters;
+  }
+
+  @Override
+  public boolean isAdminAccountEnabled() {
+    return adminAccountEnabled;
   }
 
   private void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {

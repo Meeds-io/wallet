@@ -142,6 +142,7 @@ export default {
             const result = {
               error : this.error,
               needPassword : this.needPassword,
+              enabled : this.settings && this.settings.enabled,
               symbol : this.principalContractDetails && this.principalContractDetails.symbol,
             };
             document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : result}));

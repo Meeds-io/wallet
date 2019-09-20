@@ -31,11 +31,6 @@ public interface WalletTokenAdminService {
   Wallet createAdminAccount(String privateKey, String issuerUsername) throws IllegalAccessException;
 
   /**
-   * @return Admin wallet object
-   */
-  Wallet getAdminWallet();
-
-  /**
    * @return Admin wallet address
    */
   String getAdminWalletAddress();

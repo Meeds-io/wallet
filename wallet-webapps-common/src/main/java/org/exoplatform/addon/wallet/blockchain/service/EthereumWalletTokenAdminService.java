@@ -104,7 +104,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
 
     // Create admin wallet if not exists
-    Wallet wallet = getAdminWallet();
+    Wallet wallet = getAccountService().getAdminWallet();
     if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
       createAdminAccount();
       LOG.info("Admin wallet created");
@@ -186,13 +186,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public Wallet getAdminWallet() {
-    return getAccountService().getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
-  }
-
-  @Override
   public String getAdminWalletAddress() {
-    Wallet adminWallet = getAdminWallet();
+    Wallet adminWallet = getAccountService().getAdminWallet();
     return adminWallet == null ? null : adminWallet.getAddress();
   }
 

@@ -52,6 +52,13 @@ public interface WalletAccountService {
   Wallet getWalletByTypeAndId(String type, String remoteId);
 
   /**
+   * Retrieves admin wallet from internal database
+   * 
+   * @return {@link Wallet} of administrator
+   */
+  Wallet getAdminWallet();
+
+  /**
    * Save wallet private key for a wallet identified by identity type and
    * remoteId
    * 
@@ -272,5 +279,10 @@ public interface WalletAccountService {
    * @param wallet object to refresh
    */
   void retrieveWalletBlockchainState(Wallet wallet);
+
+  /**
+   * @return true if wallet admin is enabled on Token contract else return false
+   */
+  boolean isAdminAccountEnabled();
 
 }
