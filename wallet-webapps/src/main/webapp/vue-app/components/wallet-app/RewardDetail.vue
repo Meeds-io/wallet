@@ -77,7 +77,7 @@
                   </v-list-item-title>
                   <v-list-item-subtitle>
                     <v-list-item-action-text v-if="item.transaction.timestamp">
-                      {{ formatDate(item.transaction.timestamp) }}
+                      {{ formatDate(item.transaction.timestamp, true) }}
                     </v-list-item-action-text>
                   </v-list-item-subtitle>
                 </v-list-item-content>
@@ -204,11 +204,11 @@ export default {
         this.error = this.$t('exoplatform.wallet.error.errorListingRewards');
       });
     },
-    formatDate(timeInSeconds) {
+    formatDate(timeInSeconds, seconds) {
       if (!timeInSeconds) {
         return '';
       }
-      return new Date(timeInSeconds * 1000).toLocaleDateString(eXo.env.portal.language);
+      return new Date(timeInSeconds * ((seconds && 1) || 1000)).toLocaleDateString(eXo.env.portal.language);
     },
   },
 };

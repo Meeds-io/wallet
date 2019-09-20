@@ -66,6 +66,11 @@ public interface RewardReportService {
    */
   List<RewardPeriod> getRewardPeriodsInProgress();
 
+  /*
+   * Return list of reward reports not sent yet
+   */
+  List<RewardPeriod> getRewardPeriodsNotSent();
+
   /**
    * @param currentUser current user listing his rewards
    * @param limit size limit of items to return

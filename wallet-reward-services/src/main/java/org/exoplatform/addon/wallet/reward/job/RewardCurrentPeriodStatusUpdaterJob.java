@@ -18,10 +18,11 @@ package org.exoplatform.addon.wallet.reward.job;
 
 import static org.exoplatform.addon.wallet.utils.RewardUtils.getRewardSettings;
 
+import java.util.List;
+
 import org.quartz.*;
 
-import org.exoplatform.addon.wallet.model.reward.RewardReport;
-import org.exoplatform.addon.wallet.model.reward.RewardSettings;
+import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.reward.service.RewardReportService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.*;
@@ -56,9 +57,23 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
     try {
       RewardSettings rewardSettings = getRewardSettings();
       if (rewardSettings != null && rewardSettings.getPeriodType() != null) {
+        List<RewardPeriod> rewardPeriods = getRewardReportService().getRewardPeriodsNotSent();
+        if (rewardPeriods != null && !rewardPeriods.isEmpty()) {
+          for (RewardPeriod rewardPeriod : rewardPeriods) {
+            long startDateInSeconds = rewardPeriod.getStartDateInSeconds();
+            RewardReport rewardReport = getRewardReportService().getRewardReport(startDateInSeconds);
+            if (rewardReport != null) {
+              rewardReport = getRewardReportService().computeRewards(startDateInSeconds);
+              getRewardReportService().saveRewardReport(rewardReport);
+            }
+          }
+        }
+
+        // Compute and save current period if not estimated yet
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        RewardReport rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
-        if (rewardReport != null) {
+        RewardReport rewardReport = getRewardReportService().getRewardReport(currentTimeInSeconds);
+        if (rewardReport == null) {
+          rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
           getRewardReportService().saveRewardReport(rewardReport);
         }
       }

@@ -202,6 +202,11 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public List<RewardPeriod> getRewardPeriodsNotSent() {
+    return rewardReportStorage.findRewardPeriodsByStatus(RewardStatus.ESTIMATION);
+  }
+
+  @Override
   public List<WalletReward> listRewards(String currentUser, int limit) {
     Identity identity = getIdentityByTypeAndId(WalletType.USER, currentUser);
     if (identity == null) {
