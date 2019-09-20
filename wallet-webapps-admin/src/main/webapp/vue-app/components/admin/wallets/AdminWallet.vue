@@ -10,7 +10,7 @@
         :href="requestFundsLink"
         target="_blank"
         rel="noopener noreferrer"
-        class="no-wrap">
+        class="no-wrap requestFundsLink">
         {{ $t('exoplatform.wallet.button.requestFunds') }}
       </a>
     </v-flex>

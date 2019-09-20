@@ -11,9 +11,9 @@
     <div v-if="error" class="alert alert-error v-content">
       <i class="uiIconError"></i>{{ error }}
     </div>
-    <div v-if="!loading && !useWalletAdmin" class="alert alert-warning v-content">
-      <i class="uiIconWarning"></i>
-      {{ $t('exoplatform.wallet.warning.adminWalletNotInitialized') }}
+    <div v-if="!loading && !useWalletAdmin" class="red--text wrap title">
+      <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart1') }}</div>
+      <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart2') }}</div>
     </div>
     <admin-wallet
       v-if="!loading"
