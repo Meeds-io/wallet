@@ -138,7 +138,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
         saveLastWatchedBlockNumber(lastWatchedBlockNumber);
       }
-      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber);
+      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber + 1);
     } catch (Exception e) {
       LOG.error("Error while getting latest block number from blockchain with network id: {}", getNetworkId(), e);
     }
