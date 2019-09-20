@@ -209,7 +209,7 @@
                 class="mr-4"
                 indeterminate
                 size="20" />
-              <v-menu v-else-if="isAdmin" offset-y>
+              <v-menu v-else offset-y>
                 <template v-slot:activator="{ on }">
                   <v-btn
                     icon
@@ -352,12 +352,6 @@ export default {
         return null;
       },
     },
-    isAdmin: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
   },
   data() {
     return {
@@ -471,9 +465,6 @@ export default {
     },
     walletTableHeaders() {
       const walletTableHeaders = this.walletHeaders.slice();
-      if (!this.isAdmin) {
-        walletTableHeaders.splice(walletTableHeaders.length - 1, 1);
-      }
       if (!this.contractDetails) {
         walletTableHeaders.splice(4, 1);
       }

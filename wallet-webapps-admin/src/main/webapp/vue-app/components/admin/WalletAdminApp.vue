@@ -68,7 +68,6 @@
                 :refresh-index="refreshIndex"
                 :address-etherscan-link="addressEtherscanLink"
                 :contract-details="contractDetails"
-                :is-admin="isAdmin"
                 @pending="$refs && $refs.contractDetail && $refs.contractDetail.refreshTransactionList()"
                 @wallets-loaded="wallets = $event" />
             </v-tab-item>
@@ -129,7 +128,6 @@ export default {
       wallet: null,
       refreshIndex: 1,
       contractDetails: null,
-      isAdmin: null,
       addressEtherscanLink: null,
       wallets: [],
       anchor: document.URL.indexOf('#') >= 0 ? document.URL.split('#')[1] : null,
@@ -166,7 +164,6 @@ export default {
           }
           this.settings = window.walletSettings;
           this.fiatSymbol = window.walletSettings.fiatSymbol || '$';
-          this.isAdmin = window.walletSettings.admin;
           this.wallet = window.walletSettings.wallet;
         })
         .then(() => this.walletUtils.initWeb3(false, true))

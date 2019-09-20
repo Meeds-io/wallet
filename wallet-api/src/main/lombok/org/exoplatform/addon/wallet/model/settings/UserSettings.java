@@ -19,9 +19,6 @@ public class UserSettings extends GlobalSettings {
   private WalletSettings    userPreferences;
 
   @Exclude
-  private boolean           isAdmin          = false;
-
-  @Exclude
   private boolean           walletEnabled    = true;
 
   @Exclude

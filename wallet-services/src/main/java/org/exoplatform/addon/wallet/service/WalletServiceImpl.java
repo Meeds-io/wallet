@@ -183,7 +183,6 @@ public class WalletServiceImpl implements WalletService, Startable {
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);
-    userSettings.setAdmin(isUserRewardingAdmin(currentUser));
 
     String accessPermission = globalSettings.getAccessPermission();
     boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
@@ -210,7 +209,7 @@ public class WalletServiceImpl implements WalletService, Startable {
       userSettings.setWalletEnabled(userSettings.isWalletEnabled() && wallet.isEnabled());
     }
 
-    if (userSettings.isWalletEnabled() || userSettings.isAdmin()) {
+    if (userSettings.isWalletEnabled()) {
       userSettings.setCometdToken(webSocketService.getUserToken(currentUser));
       userSettings.setCometdContext(webSocketService.getCometdContextName());
       // Append user preferences
