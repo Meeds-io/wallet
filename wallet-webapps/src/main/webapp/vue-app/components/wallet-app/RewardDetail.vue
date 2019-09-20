@@ -61,10 +61,7 @@
           :id="`reward-${item.transaction.hash}`"
           :key="index"
           :value="item.selected">
-          <v-expansion-panel-header
-            :expand-icon="false"
-            hide-actions
-            class="border-box-sizing px-0 py-0">
+          <v-expansion-panel-header class="border-box-sizing px-0 py-0">
             <v-list
               :class="item.selected && 'blue lighten-5'"
               two-line
