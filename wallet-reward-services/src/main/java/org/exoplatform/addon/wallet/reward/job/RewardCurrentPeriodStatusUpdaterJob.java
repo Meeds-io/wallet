@@ -60,6 +60,9 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
         List<RewardPeriod> rewardPeriods = getRewardReportService().getRewardPeriodsNotSent();
         if (rewardPeriods != null && !rewardPeriods.isEmpty()) {
           for (RewardPeriod rewardPeriod : rewardPeriods) {
+            LOG.info("Compute rewards for period from {} to {}",
+                     rewardPeriod.getStartDateFormatted("en"),
+                     rewardPeriod.getEndDateFormatted("en"));
             long startDateInSeconds = rewardPeriod.getStartDateInSeconds();
             RewardReport rewardReport = getRewardReportService().getRewardReport(startDateInSeconds);
             if (rewardReport != null) {

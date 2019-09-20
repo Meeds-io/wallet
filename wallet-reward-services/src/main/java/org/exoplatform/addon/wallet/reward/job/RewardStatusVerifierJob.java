@@ -80,7 +80,7 @@ public class RewardStatusVerifierJob implements Job {
             getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
             rewardPeriodsIterator.remove();
           } else {
-            LOG.debug("Reward always in progress for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
+            LOG.debug("Reward not completed for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
                       rewardPeriod.getStartDateInSeconds(),
                       rewardReport.getValidRewardCount(),
                       rewardReport.getTransactionsCount(),
