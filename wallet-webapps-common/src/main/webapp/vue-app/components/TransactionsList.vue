@@ -622,7 +622,7 @@
                   {{ $t('exoplatform.wallet.label.transactionLabel') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-right paragraph">
-                  <div class="no-wrap">
+                  <div class="wrap">
                     {{ item.label }}
                   </div>
                 </v-list-item-content>
@@ -633,7 +633,7 @@
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-right paragraph">
-                  <div class="no-wrap">
+                  <div class="wrap">
                     {{ item.message }}
                   </div>
                 </v-list-item-content>
@@ -688,7 +688,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.fromAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.fromAddress}`"
@@ -703,7 +703,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.toAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.toAddress}`"
@@ -729,7 +729,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.contractAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="tokenEtherscanLink"
                     :href="`${tokenEtherscanLink}${item.contractAddress}`"
@@ -766,7 +766,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionHash') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="transactionEtherscanLink"
                     :href="`${transactionEtherscanLink}${item.hash}`"
