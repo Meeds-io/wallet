@@ -227,7 +227,7 @@
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
                         <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
-                          <v-list-item @click="openAcceptInitializationModal(props.item)">
+                          <v-list-item :disabled="adminNotHavingEnoughToken" @click="openAcceptInitializationModal(props.item)">
                             <v-list-item-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
                           <v-list-item v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
@@ -236,12 +236,12 @@
                           <v-divider />
                         </template>
                         <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
-                          <v-list-item @click="openSendEtherModal(props.item)">
+                          <v-list-item :disabled="adminNotHavingEnoughEther" @click="openSendEtherModal(props.item)">
                             <v-list-item-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
-                        <v-list-item v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" @click="openSendTokenModal(props.item)">
+                        <v-list-item v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" :disabled="adminNotHavingEnoughToken" @click="openSendTokenModal(props.item)">
                           <v-list-item-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
                         </v-list-item>
                         <v-divider />
@@ -431,6 +431,12 @@ export default {
     },
     walletAdmin() {
       return this.wallets && this.wallets.find(wallet => wallet && wallet.type === 'admin');
+    },
+    adminNotHavingEnoughToken() {
+      return this.walletAdmin.tokenBalance < this.tokenAmount;
+    },
+    adminNotHavingEnoughEther() {
+      return this.walletAdmin.etherBalance < this.etherAmount;
     },
     useWalletAdmin() {
       return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
