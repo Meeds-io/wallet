@@ -52,6 +52,7 @@
       :administration="isAdministration"
       :selected-transaction-hash="selectedTransactionHash"
       :selected-contract-method-name="selectedContractMethodName"
+      :display-full-transaction="isAdministration"
       :error="error"
       @error="error = $event" />
   </v-flex>

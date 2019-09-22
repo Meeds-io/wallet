@@ -449,49 +449,59 @@
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'initializeAccount'">
-                    <profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
-                    </span>
-                    <profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
+                    <template v-if="item.toAddress === account && !administration">
+                      {{ $t('exoplatform.wallet.label.YourWalletWasInitialized') }}
+                    </template>
+                    <template v-else>
+                      <profile-chip
+                        v-if="displayFullTransaction"
+                        :address="item.fromAddress"
+                        :profile-id="item.fromUsername"
+                        :profile-technical-id="item.fromTechnicalId"
+                        :space-id="item.fromSpaceId"
+                        :profile-type="item.fromType"
+                        :display-name="item.fromDisplayName"
+                        :avatar="item.fromAvatar" />
+                      <span>
+                        {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
+                      </span>
+                      <profile-chip
+                        :address="item.toAddress"
+                        :profile-id="item.toUsername"
+                        :profile-technical-id="item.toTechnicalId"
+                        :space-id="item.toSpaceId"
+                        :profile-type="item.toType"
+                        :display-name="item.toDisplayName"
+                        :avatar="item.toAvatar" />
+                    </template>
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'reward'">
-                    <profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.rewarded') }}
-                    </span>
-                    <profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
+                    <template v-if="item.toAddress === account && !administration">
+                      {{ $t('exoplatform.wallet.label.YouWasRewarded') }}
+                    </template>
+                    <template v-else>
+                      <profile-chip
+                        v-if="displayFullTransaction"
+                        :address="item.fromAddress"
+                        :profile-id="item.fromUsername"
+                        :profile-technical-id="item.fromTechnicalId"
+                        :space-id="item.fromSpaceId"
+                        :profile-type="item.fromType"
+                        :display-name="item.fromDisplayName"
+                        :avatar="item.fromAvatar" />
+                      <span>
+                        {{ $t('exoplatform.wallet.label.rewarded') }}
+                      </span>
+                      <profile-chip
+                        :address="item.toAddress"
+                        :profile-id="item.toUsername"
+                        :profile-technical-id="item.toTechnicalId"
+                        :space-id="item.toSpaceId"
+                        :profile-type="item.toType"
+                        :display-name="item.toDisplayName"
+                        :avatar="item.toAvatar" />
+                    </template>
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'depositFunds'">
