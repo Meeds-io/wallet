@@ -57,8 +57,8 @@ export default {
   computed: {
     normalChoiceLabel() {
       return window.walletSettings.useDynamicGasPrice ?
-          this.$t('exoplatform.wallet.label.transactionFeeNormal') :
-            this.$t('exoplatform.wallet.label.transactionFeeDynamic');
+          this.$t('exoplatform.wallet.label.transactionFeeDynamic'):
+             this.$t('exoplatform.wallet.label.transactionFeeNormal');
     },
   },
   watch: {
