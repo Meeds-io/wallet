@@ -21,7 +21,7 @@ export function getContractDetails(walletAddress) {
     contractDetails.isContract = true;
     contractDetails.isOwner = contractDetails.owner === walletAddress && walletAddress.toLowerCase();
     contractDetails.fiatBalance = contractDetails.fiatBalance || (contractDetails.etherBalance && etherToFiat(contractDetails.etherBalance));
-    if (!contractDetails.contract) {
+    if (!contractDetails.contract && walletAddress) {
       try {
         contractDetails.contract = getContractInstance(walletAddress, contractDetails.address);
       } catch (e) {
@@ -203,7 +203,7 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
         to: transactionDetail.contractAddress,
         gasPrice: transactionDetail.gasPrice,
         gas: transactionDetail.gas,
-        value: 0,
+        value: (transactionDetail && transactionDetail.value && window.localWeb3.utils.toWei(String(transactionDetail.value), 'ether')) || 0,
         data: method(...parameters).encodeABI(),
       };
       return window.localWeb3.eth.accounts.signTransaction(transactionToSend, window.localWeb3.eth.accounts.wallet[0].privateKey)

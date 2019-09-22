@@ -15,8 +15,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.addon.wallet.blockchain.listener.*;
 import org.exoplatform.addon.wallet.blockchain.service.*;
-import org.exoplatform.addon.wallet.job.ContractTransactionVerifierJob;
-import org.exoplatform.addon.wallet.job.TransactionSenderJob;
+import org.exoplatform.addon.wallet.job.*;
 import org.exoplatform.addon.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.addon.wallet.model.settings.GlobalSettings;
 import org.exoplatform.addon.wallet.service.*;
@@ -125,6 +124,13 @@ public class ServiceLoaderServlet extends HttpServlet {
       addBlockchainScheduledJob(TransactionSenderJob.class,
                                 "Configuration for transaction sending to blockchain",
                                 "0/30 * * * * ?");
+
+      WalletService walletService = container.getComponentInstanceOfType(WalletService.class);
+      if (walletService.isUseDynamicGasPrice()) {
+        addBlockchainScheduledJob(GasPriceUpdaterJob.class,
+                                  "A job to update gas price from blockchain",
+                                  "0 0/2 * * * ?");
+      }
 
       LOG.debug("Blockchain Service instances created");
     } catch (Throwable e) {

@@ -9,7 +9,13 @@
         <div class="content">
         </div>
         <div class="status">
-          <%= ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER_URL, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)%>
+          <%=
+            ACCOUNT_TYPE.equals("admin") ?
+              _ctx.appRes("Notification.message.AdminFundReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL) :
+              ACCOUNT_TYPE.equals("space") ?
+                _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER_URL, SYMBOL) :
+                _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)
+          %>
         </div>
         <% if(org.apache.commons.lang.StringUtils.isNotBlank(MESSAGE)) { %>
           <div class="content">

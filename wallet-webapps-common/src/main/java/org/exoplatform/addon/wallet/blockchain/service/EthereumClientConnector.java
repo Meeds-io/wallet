@@ -263,6 +263,18 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
                      .getTransactionCount();
   }
 
+  /**
+   * @return current
+   * @throws IOException if an error occurs while sending transaction to
+   *           blockchain
+   */
+  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_GAS_PRICE)
+  public BigInteger getGasPrice() throws IOException {
+    return getWeb3j().ethGasPrice()
+                     .send()
+                     .getGasPrice();
+  }
+
   public Web3j getWeb3j() {
     this.waitConnection();
     return web3j;
@@ -291,6 +303,10 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     case OPERATION_GET_TRANSACTION_COUNT:
       parameters.put("wallet_address", methodArgs[0]);
       break;
+    case OPERATION_GET_GAS_PRICE:
+      BigInteger gasPriceInWei = (BigInteger) result;
+      parameters.put("ga_price_gwei", convertFromDecimals(BigInteger.valueOf(gasPriceInWei.longValue()), GWEI_TO_WEI_DECIMALS));
+      break;
     case OPERATION_GET_LAST_BLOCK_NUMBER:
       parameters.put("last_block_number", result);
       break;
@@ -310,6 +326,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       parameters.put("nonce", transactionDetail.getNonce());
       parameters.put("sender", transactionDetail.getFromWallet());
       parameters.put("receiver", transactionDetail.getToWallet());
+      parameters.put("gas_price",
+                     convertFromDecimals(BigInteger.valueOf((long) transactionDetail.getGasPrice()), GWEI_TO_WEI_DECIMALS));
 
       if (StringUtils.isNotBlank(transactionDetail.getContractAddress())) {
         parameters.put("contract_address", transactionDetail.getContractAddress());

@@ -14,7 +14,7 @@ import org.exoplatform.web.security.codec.CodecInitializer;
 
 public class CachedAccountStorage extends WalletStorage {
 
-  private FutureExoCache<WalletCacheKey, Wallet, Object> walletFutureCache = null;
+  private FutureExoCache<WalletCacheKey, Wallet, String> walletFutureCache = null;
 
   public CachedAccountStorage(CacheService cacheService,
                               WalletAccountDAO walletAccountDAO,
@@ -27,27 +27,27 @@ public class CachedAccountStorage extends WalletStorage {
 
     // Future cache is used for clustered environment improvements (usage of
     // putLocal VS put)
-    this.walletFutureCache = new FutureExoCache<>(new Loader<WalletCacheKey, Wallet, Object>() {
+    this.walletFutureCache = new FutureExoCache<>(new Loader<WalletCacheKey, Wallet, String>() {
       @Override
-      public Wallet retrieve(Object context, WalletCacheKey cacheKey) throws Exception {
+      public Wallet retrieve(String contractAddress, WalletCacheKey cacheKey) throws Exception {
         if (StringUtils.isBlank(cacheKey.getAddress())) {
-          return CachedAccountStorage.super.getWalletByIdentityId(cacheKey.getIdentityId());
+          return CachedAccountStorage.super.getWalletByIdentityId(cacheKey.getIdentityId(), contractAddress);
         } else {
-          return CachedAccountStorage.super.getWalletByAddress(cacheKey.getAddress());
+          return CachedAccountStorage.super.getWalletByAddress(cacheKey.getAddress(), contractAddress);
         }
       }
     }, walletCache);
   }
 
   @Override
-  public Wallet getWalletByAddress(String address) {
-    Wallet wallet = this.walletFutureCache.get(null, new WalletCacheKey(address));
+  public Wallet getWalletByAddress(String address, String contractAddress) {
+    Wallet wallet = this.walletFutureCache.get(contractAddress, new WalletCacheKey(address));
     return wallet == null ? null : wallet.clone();
   }
 
   @Override
-  public Wallet getWalletByIdentityId(long identityId) {
-    Wallet wallet = this.walletFutureCache.get(null, new WalletCacheKey(identityId));
+  public Wallet getWalletByIdentityId(long identityId, String contractAddress) {
+    Wallet wallet = this.walletFutureCache.get(contractAddress, new WalletCacheKey(identityId));
     return wallet == null ? null : wallet.clone();
   }
 
@@ -67,7 +67,7 @@ public class CachedAccountStorage extends WalletStorage {
     String oldAddress = null;
     if (!isNew) {
       // Retrieve old wallet address
-      Wallet oldWallet = getWalletByIdentityId(wallet.getTechnicalId());
+      Wallet oldWallet = getWalletByIdentityId(wallet.getTechnicalId(), null);
       oldAddress = oldWallet == null ? null : oldWallet.getAddress();
     }
     Wallet newWallet = super.saveWallet(wallet, isNew);
@@ -104,7 +104,7 @@ public class CachedAccountStorage extends WalletStorage {
   public void removeWalletPrivateKey(long walletId) {
     super.removeWalletPrivateKey(walletId);
 
-    Wallet wallet = super.getWalletByIdentityId(walletId);
+    Wallet wallet = super.getWalletByIdentityId(walletId, null);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
       this.walletFutureCache.remove(new WalletCacheKey(walletId));
@@ -118,7 +118,7 @@ public class CachedAccountStorage extends WalletStorage {
 
     this.walletFutureCache.remove(new WalletCacheKey(walletId));
 
-    Wallet wallet = super.getWalletByIdentityId(walletId);
+    Wallet wallet = super.getWalletByIdentityId(walletId, null);
     if (wallet != null) {
       // Remove cached wallet for 'hasKeyOnServerSide' property
       this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));

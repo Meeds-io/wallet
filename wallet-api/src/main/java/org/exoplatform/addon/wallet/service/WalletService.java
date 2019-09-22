@@ -105,4 +105,22 @@ public interface WalletService {
    */
   boolean isEnabled();
 
+  /**
+   * Sets gas price from blockchain network
+   * 
+   * @param blockchainGasPrice gas price in WEI
+   */
+  void setDynamicGasPrice(long blockchainGasPrice);
+
+  /**
+   * @return gas price retrieved from blockchain
+   */
+  long getDynamicGasPrice();
+
+  /**
+   * @return true if services are configured to use dynamic gas price from
+   *         blockchain, else false
+   */
+  boolean isUseDynamicGasPrice();
+
 }

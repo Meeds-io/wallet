@@ -133,10 +133,10 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    wallet = walletStorage.getWalletByAddress(WALLET_ADDRESS_1);
+    wallet = walletStorage.getWalletByAddress(WALLET_ADDRESS_1, null);
     checkWalletContent(wallet, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_1, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
-    wallet = walletStorage.getWalletByAddress("new-address");
+    wallet = walletStorage.getWalletByAddress("new-address", null);
     assertNull("Shouldn't find wallet with not recognized address", wallet);
   }
 
@@ -154,10 +154,10 @@ public class WalletStorageTest extends BaseWalletTest {
     assertNotNull(wallet);
     this.entitiesToClean.add(wallet);
 
-    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID, null);
     checkWalletContent(wallet, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_1, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
-    wallet = walletStorage.getWalletByIdentityId(1523);
+    wallet = walletStorage.getWalletByIdentityId(1523, null);
     assertNull(wallet);
   }
 
@@ -219,7 +219,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     walletStorage.saveWalletPrivateKey(wallet.getTechnicalId(), WALLET_PRIVATE_KEY_CONTENT);
 
-    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID, null);
     assertTrue(wallet.isHasPrivateKey());
     String content = walletStorage.getWalletPrivateKey(CURRENT_USER_IDENTITY_ID);
     assertEquals(WALLET_PRIVATE_KEY_CONTENT, content);
@@ -229,7 +229,7 @@ public class WalletStorageTest extends BaseWalletTest {
     content = walletStorage.getWalletPrivateKey(CURRENT_USER_IDENTITY_ID);
     assertEquals(newContent, content);
 
-    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+    wallet = walletStorage.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID, null);
     assertTrue(wallet.isHasPrivateKey());
   }
 
@@ -273,14 +273,14 @@ public class WalletStorageTest extends BaseWalletTest {
 
     String content = walletStorage.getWalletPrivateKey(walletId);
     assertNotNull(content);
-    wallet = walletStorage.getWalletByIdentityId(walletId);
+    wallet = walletStorage.getWalletByIdentityId(walletId, null);
     assertTrue(wallet.isHasPrivateKey());
 
     walletStorage.removeWalletPrivateKey(walletId);
     content = walletStorage.getWalletPrivateKey(walletId);
     assertNull(content);
 
-    wallet = walletStorage.getWalletByIdentityId(walletId);
+    wallet = walletStorage.getWalletByIdentityId(walletId, null);
     assertFalse(wallet.isHasPrivateKey());
   }
 
@@ -326,7 +326,7 @@ public class WalletStorageTest extends BaseWalletTest {
     // Test no blockchain state is added
     walletStorage.saveWalletBlockchainState(wallet, contractAddress);
 
-    wallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId());
+    wallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId(), contractAddress);
     walletStorage.retrieveWalletBlockchainState(wallet, contractAddress);
     assertNotNull(wallet);
     assertNotNull(wallet.getEtherBalance());
@@ -341,7 +341,7 @@ public class WalletStorageTest extends BaseWalletTest {
     wallet.setIsInitialized(true);
     walletStorage.saveWalletBlockchainState(wallet, contractAddress);
 
-    Wallet storedWallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId());
+    Wallet storedWallet = walletStorage.getWalletByIdentityId(wallet.getTechnicalId(), contractAddress);
     walletStorage.retrieveWalletBlockchainState(storedWallet, contractAddress);
     assertEquals(wallet.getEtherBalance(), storedWallet.getEtherBalance(), 0);
     assertEquals(wallet.getTokenBalance(), storedWallet.getTokenBalance(), 0);

@@ -230,6 +230,7 @@ public class TransactionStorage {
     detail.setGasPrice(entity.getGasPrice());
     detail.setGasUsed(entity.getGasUsed());
     detail.setTokenFee(entity.getTokenFee());
+    detail.setEtherFee(entity.getEtherFee());
     detail.setNoContractFunds(entity.isNoContractFunds());
     detail.setNonce(entity.getNonce());
     detail.setSentTimestamp(entity.getSentDate());
@@ -259,6 +260,7 @@ public class TransactionStorage {
     entity.setValue(detail.getValue());
     entity.setGasPrice(detail.getGasPrice());
     entity.setTokenFee(detail.getTokenFee());
+    entity.setEtherFee(detail.getEtherFee());
     entity.setGasUsed(detail.getGasUsed());
     entity.setNoContractFunds(detail.isNoContractFunds());
     entity.setNonce(detail.getNonce());

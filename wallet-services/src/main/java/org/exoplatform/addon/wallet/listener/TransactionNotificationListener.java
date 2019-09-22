@@ -210,6 +210,8 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
     default:
       break;
     }
+    parameters.put("token_fee", transactionDetail.getTokenFee());
+    parameters.put("ether_fee", transactionDetail.getEtherFee());
     parameters.put("transaction", transactionDetail.getHash());
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");

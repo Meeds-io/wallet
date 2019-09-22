@@ -352,6 +352,11 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
   }
 
+  @Override
+  public long refreshBlockchainGasPrice() throws IOException {
+    return ethereumClientConnector.getGasPrice().longValue();
+  }
+
   private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {
     return (transaction, exception) -> {
       if (transaction != null && transaction.getTransactionHash() != null) {
@@ -404,6 +409,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     } else {
       transactionDetail.setTo(receiverAddress);
       transactionDetail.setTokenFee(0);
+      transactionDetail.setEtherFee(0);
       transactionDetail.setContractAddress(null);
       transactionDetail.setContractMethodName(null);
       transactionDetail.setContractAmount(0);
@@ -447,7 +453,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         } else if (TRANSACTIONFEE_EVENT_HASH.equals(topic)) {
           EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
           BigInteger tokenFee = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+          BigInteger etherFee = (BigInteger) parameters.getNonIndexedValues().get(2).getValue();
           transactionDetail.setTokenFee(convertFromDecimals(tokenFee, contractDecimals));
+          transactionDetail.setEtherFee(convertFromDecimals(etherFee, ETHER_TO_WEI_DECIMALS));
           continue;
         }
 

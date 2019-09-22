@@ -241,7 +241,10 @@
                           </v-list-item>
                           <v-divider />
                         </template>
-                        <v-list-item v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0" :disabled="adminNotHavingEnoughToken" @click="openSendTokenModal(props.item)">
+                        <v-list-item
+                          v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0"
+                          :disabled="adminNotHavingEnoughToken"
+                          @click="openSendTokenModal(props.item)">
                           <v-list-item-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
                         </v-list-item>
                         <v-divider />

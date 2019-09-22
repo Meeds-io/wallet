@@ -99,9 +99,6 @@ export default {
             this.needPassword = this.settings.browserWalletExists && !this.settings.storedPassword;
             this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;
             this.isReadOnly = this.settings.isReadOnly;
-            if (this.settings.network.maxGasPrice) {
-              this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
-            }
             this.principalContractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
 
             if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
@@ -192,6 +189,7 @@ export default {
         const password = sendTokensRequest.password;
         const receiver = sendTokensRequest.receiver;
         const sender = sendTokensRequest.sender;
+        const gasPrice = sendTokensRequest.gasPrice || this.settings.network.normalGasPrice;
         const label = sendTokensRequest.label;
         const message = sendTokensRequest.message;
   
@@ -238,7 +236,6 @@ export default {
           return;
         }
   
-        const gasPrice = this.settings.network.minGasPrice;
         const defaultGas = this.settings.network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
         const contractAddress = this.principalContractDetails.address;

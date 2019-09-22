@@ -80,8 +80,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       Wallet adminWallet = getAdminWallet();
       retrieveWalletBlockchainState(adminWallet);
 
-      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled() && adminWallet.getIsApproved() != null
-          && adminWallet.getIsApproved() && adminWallet.getAdminLevel() >= 2;
+      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled() && adminWallet.getAdminLevel() != null
+          && adminWallet.getAdminLevel() >= 2;
     } catch (Exception e) {
       LOG.error("Error starting service", e);
     } finally {
@@ -121,8 +121,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
       // Checks if admin wallet was newly enabled from blockchain
       if (!this.adminAccountEnabled && WalletType.isAdmin(wallet.getType())) {
-        this.adminAccountEnabled = wallet.isEnabled() && wallet.getIsApproved() != null
-            && wallet.getIsApproved() && wallet.getAdminLevel() >= 2;
+        this.adminAccountEnabled = wallet.isEnabled() && wallet.getAdminLevel() != null && wallet.getAdminLevel() >= 2;
       }
     }
   }
@@ -314,7 +313,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (address == null) {
       throw new IllegalArgumentException("address is mandatory");
     }
-    Wallet wallet = accountStorage.getWalletByAddress(address);
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
     if (wallet != null) {
       Identity identity = getIdentityById(wallet.getTechnicalId());
       computeWalletFromIdentity(wallet, identity);
@@ -350,7 +349,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalArgumentException("User name is mandatory");
     }
 
-    Wallet wallet = accountStorage.getWalletByIdentityId(identityId);
+    Wallet wallet = accountStorage.getWalletByIdentityId(identityId, getContractAddress());
     if (wallet == null) {
       throw new IllegalStateException("Can't find wallet with id " + identityId);
     }
@@ -372,7 +371,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     computeWalletIdentity(wallet);
 
-    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId());
+    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), getContractAddress());
     boolean isNew = oldWallet == null;
 
     checkCanSaveWallet(wallet, oldWallet, currentUser);
@@ -416,7 +415,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
     }
-    Wallet wallet = accountStorage.getWalletByAddress(address);
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
@@ -446,7 +445,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return;
     }
     long identityId = Long.parseLong(identity.getId());
-    Wallet wallet = accountStorage.getWalletByIdentityId(identityId);
+    Wallet wallet = accountStorage.getWalletByIdentityId(identityId, getContractAddress());
 
     if (wallet == null) {
       throw new IllegalStateException("Can't find wallet with type/id: " + type + "/" + remoteId);
@@ -460,7 +459,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
     }
-    Wallet wallet = accountStorage.getWalletByAddress(address);
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
@@ -501,7 +500,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (StringUtils.isBlank(currentUser)) {
       throw new IllegalArgumentException("Modifier username is mandatory");
     }
-    Wallet wallet = accountStorage.getWalletByAddress(address);
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
     if (wallet == null) {
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
@@ -540,7 +539,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (initializationState == null) {
       throw new IllegalArgumentException("Initialization state is mandatory");
     }
-    Wallet wallet = accountStorage.getWalletByAddress(address);
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
     if (wallet == null) {
       LOG.info(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
       return;
@@ -700,7 +699,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     }
 
     Wallet walletByAddress =
-                           accountStorage.getWalletByAddress(wallet.getAddress());
+                           accountStorage.getWalletByAddress(wallet.getAddress(), getContractAddress());
     if (walletByAddress != null && walletByAddress.getId() != null && !walletByAddress.getId().equals(wallet.getId())) {
       throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to assign address of wallet of "
           + walletByAddress);
@@ -730,7 +729,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private Wallet getWalletOfIdentity(Identity identity) {
     long identityId = Long.parseLong(identity.getId());
-    Wallet wallet = accountStorage.getWalletByIdentityId(identityId);
+    Wallet wallet = accountStorage.getWalletByIdentityId(identityId, getContractAddress());
     if (wallet == null) {
       wallet = new Wallet();
       wallet.setEnabled(true);

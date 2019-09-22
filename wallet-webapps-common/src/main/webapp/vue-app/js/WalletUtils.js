@@ -606,6 +606,7 @@ function createLocalWeb3Instance(isSpace) {
       window.walletSettings.isReadOnly = !window.walletSettings.browserWalletExists;
     }
   } else {
+    initEmptyWeb3Instance();
     // Wallet not configured
     throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
   }

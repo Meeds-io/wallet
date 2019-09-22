@@ -69,26 +69,36 @@ public class WalletStorage {
 
   /**
    * @param identityId user/space technical identty id
+   * @param contractAddress contract address to use for wallet blockchain state
    * @return {@link Wallet} details for identity
    */
-  public Wallet getWalletByIdentityId(long identityId) {
+  public Wallet getWalletByIdentityId(long identityId, String contractAddress) {
     WalletEntity walletEntity = walletAccountDAO.find(identityId);
     if (walletEntity == null) {
       return null;
     }
-    return fromEntity(walletEntity);
+    Wallet wallet = fromEntity(walletEntity);
+    if (StringUtils.isNotBlank(contractAddress)) {
+      retrieveWalletApprovalBlockchainState(wallet, contractAddress);
+    }
+    return wallet;
   }
 
   /**
    * @param address wallet address
+   * @param contractAddress contract address to use for wallet blockchain state
    * @return {@link Wallet} details identified by address
    */
-  public Wallet getWalletByAddress(String address) {
+  public Wallet getWalletByAddress(String address, String contractAddress) {
     WalletEntity walletEntity = walletAccountDAO.findByAddress(address.toLowerCase());
     if (walletEntity == null) {
       return null;
     }
-    return fromEntity(walletEntity);
+    Wallet wallet = fromEntity(walletEntity);
+    if (StringUtils.isNotBlank(contractAddress)) {
+      retrieveWalletApprovalBlockchainState(wallet, contractAddress);
+    }
+    return wallet;
   }
 
   /**
@@ -261,6 +271,22 @@ public class WalletStorage {
       blockchainStateDAO.create(blockchainStateEntity);
     } else {
       blockchainStateDAO.update(blockchainStateEntity);
+    }
+  }
+
+  private void retrieveWalletApprovalBlockchainState(Wallet wallet, String contractAddress) {
+    if (wallet == null) {
+      throw new IllegalArgumentException("wallet is mandatory");
+    }
+
+    if (StringUtils.isBlank(contractAddress)) {
+      throw new IllegalArgumentException("contractAddress is mandatory");
+    }
+
+    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(wallet.getTechnicalId(),
+                                                                                                     contractAddress);
+    if (blockchainStateEntity != null) {
+      wallet.setIsApproved(blockchainStateEntity.isApproved());
     }
   }
 

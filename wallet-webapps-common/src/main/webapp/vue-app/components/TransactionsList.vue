@@ -905,7 +905,7 @@ export default {
       const sortedTransactions = {};
       Object.values(transactions)
         .filter((transaction) => transaction && !transaction.ignore)
-        .sort((transaction1, transaction2) => (transaction2.date || 0) - (transaction1.date || 0))
+        .sort((transaction1, transaction2) => (transaction2.timestamp || 0) - (transaction1.timestamp || 0))
         .forEach((transaction) => {
           sortedTransactions[transaction.hash] = transaction;
         });

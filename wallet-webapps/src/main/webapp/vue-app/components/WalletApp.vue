@@ -408,11 +408,7 @@ export default {
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
           this.fiatSymbol = this.settings.fiatSymbol || '$';
-          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.normalGasPrice), 'ether');
-
-          if (this.settings.network.maxGasPrice) {
-            this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
-          }
+          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.minGasPrice), 'ether');
           return this.$nextTick();
         })
         .then(() => this.periodChanged(this.periodicity))

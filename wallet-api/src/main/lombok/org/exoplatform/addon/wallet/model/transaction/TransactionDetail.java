@@ -68,6 +68,8 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private double            tokenFee;
 
+  private double            etherFee;
+
   private boolean           noContractFunds;
 
   private long              timestamp;

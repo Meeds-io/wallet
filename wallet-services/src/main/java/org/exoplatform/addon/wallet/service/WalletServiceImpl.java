@@ -46,21 +46,27 @@ import org.exoplatform.services.log.Log;
  */
 public class WalletServiceImpl implements WalletService, Startable {
 
-  private static final Log       LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
+  private static final Log             LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
 
-  private ExoContainer           container;
+  private ExoContainer                 container;
 
-  private WalletContractService  contractService;
+  private WalletContractService        contractService;
 
-  private WalletAccountService   accountService;
+  private WalletAccountService         accountService;
 
-  private SettingService         settingService;
+  private SettingService               settingService;
 
-  private WebNotificationStorage webNotificationStorage;
+  private BlockchainTransactionService blockchainTransactionService;
 
-  private WalletWebSocketService webSocketService;
+  private WebNotificationStorage       webNotificationStorage;
 
-  private GlobalSettings         configuredGlobalSettings = new GlobalSettings();
+  private WalletWebSocketService       webSocketService;
+
+  private GlobalSettings               configuredGlobalSettings = new GlobalSettings();
+
+  private boolean                      useDynamicGasPrice;
+
+  private long                         dynamicGasPrice;
 
   public WalletServiceImpl(WalletContractService contractService,
                            WalletAccountService accountService,
@@ -74,54 +80,63 @@ public class WalletServiceImpl implements WalletService, Startable {
     this.webSocketService = webSocketService;
     this.webNotificationStorage = webNotificationStorage;
 
+    NetworkSettings network = this.configuredGlobalSettings.getNetwork();
     if (params.containsKey(NETWORK_ID)) {
       String value = params.getValueParam(NETWORK_ID).getValue();
       long defaultNetworkId = Long.parseLong(value);
-      this.configuredGlobalSettings.getNetwork().setId(defaultNetworkId);
+      network.setId(defaultNetworkId);
     }
 
     if (params.containsKey(NETWORK_URL)) {
       String defaultNetworkURL = params.getValueParam(NETWORK_URL).getValue();
-      this.configuredGlobalSettings.getNetwork().setProviderURL(defaultNetworkURL);
+      network.setProviderURL(defaultNetworkURL);
     }
 
     if (params.containsKey(NETWORK_WS_URL)) {
       String defaultNetworkWsURL = params.getValueParam(NETWORK_WS_URL).getValue();
-      this.configuredGlobalSettings.getNetwork().setWebsocketProviderURL(defaultNetworkWsURL);
+      network.setWebsocketProviderURL(defaultNetworkWsURL);
     }
+
+    if (params.containsKey(GAS_LIMIT)) {
+      String value = params.getValueParam(GAS_LIMIT).getValue();
+      long gasLimit = Long.parseLong(value);
+      network.setGasLimit(gasLimit);
+    }
+
+    long minGasPrice = DEFAULT_MIN_GAS_PRICE;
+    if (params.containsKey(MIN_GAS_PRICE)) {
+      String value = params.getValueParam(MIN_GAS_PRICE).getValue();
+      minGasPrice = Long.parseLong(value);
+    }
+    network.setMinGasPrice(minGasPrice);
+
+    long normalGasPrice = DEFAULT_MIN_GAS_PRICE;
+    if (params.containsKey(NORMAL_GAS_PRICE)) {
+      String value = params.getValueParam(NORMAL_GAS_PRICE).getValue();
+      normalGasPrice = Long.parseLong(value);
+    }
+    network.setNormalGasPrice(normalGasPrice);
+
+    long maxGasPrice = DEFAULT_MIN_GAS_PRICE;
+    if (params.containsKey(MAX_GAS_PRICE)) {
+      String value = params.getValueParam(MAX_GAS_PRICE).getValue();
+      maxGasPrice = Long.parseLong(value);
+    }
+    network.setMaxGasPrice(maxGasPrice);
 
     if (params.containsKey(ACCESS_PERMISSION)) {
       String defaultAccessPermission = params.getValueParam(ACCESS_PERMISSION).getValue();
       this.configuredGlobalSettings.setAccessPermission(defaultAccessPermission);
     }
 
-    if (params.containsKey(GAS_LIMIT)) {
-      String value = params.getValueParam(GAS_LIMIT).getValue();
-      long gasLimit = Long.parseLong(value);
-      this.configuredGlobalSettings.getNetwork().setGasLimit(gasLimit);
-    }
-
-    if (params.containsKey(MIN_GAS_PRICE)) {
-      String value = params.getValueParam(MIN_GAS_PRICE).getValue();
-      long minGasPrice = Long.parseLong(value);
-      this.configuredGlobalSettings.getNetwork().setMinGasPrice(minGasPrice);
-    }
-
-    if (params.containsKey(NORMAL_GAS_PRICE)) {
-      String value = params.getValueParam(NORMAL_GAS_PRICE).getValue();
-      long normalGasPrice = Long.parseLong(value);
-      this.configuredGlobalSettings.getNetwork().setNormalGasPrice(normalGasPrice);
-    }
-
-    if (params.containsKey(MAX_GAS_PRICE)) {
-      String value = params.getValueParam(MAX_GAS_PRICE).getValue();
-      long maxGasPrice = Long.parseLong(value);
-      this.configuredGlobalSettings.getNetwork().setMaxGasPrice(maxGasPrice);
-    }
-
     if (params.containsKey(TOKEN_ADDRESS)) {
       String contractAddress = params.getValueParam(TOKEN_ADDRESS).getValue();
       this.configuredGlobalSettings.setContractAddress(contractAddress);
+    }
+
+    if (params.containsKey(USE_DYNAMIC_GAS_PRICE)) {
+      String useDynamicGasPriceParamValue = params.getValueParam(USE_DYNAMIC_GAS_PRICE).getValue();
+      this.useDynamicGasPrice = Boolean.parseBoolean(useDynamicGasPriceParamValue);
     }
   }
 
@@ -237,6 +252,10 @@ public class WalletServiceImpl implements WalletService, Startable {
       }
       walletSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));
     }
+    if (this.isUseDynamicGasPrice()) {
+      userSettings.setUseDynamicGasPrice(true);
+      userSettings.getNetwork().setNormalGasPrice(getDynamicGasPrice());
+    }
     return userSettings;
   }
 
@@ -322,6 +341,48 @@ public class WalletServiceImpl implements WalletService, Startable {
     return accountService.isAdminAccountEnabled();
   }
 
+  @Override
+  public boolean isUseDynamicGasPrice() {
+    return useDynamicGasPrice;
+  }
+
+  @Override
+  public long getDynamicGasPrice() {
+    if (!useDynamicGasPrice) {
+      LOG.warn("Dynamic gas price was configured to not be used!");
+    }
+
+    if (dynamicGasPrice == 0) {
+      try {
+        long gasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
+        setDynamicGasPrice(gasPrice);
+      } catch (Exception e) {
+        LOG.warn("Error retrieving gas price from blockchain. Return normal gas price setting", e);
+        return getSettings().getNetwork().getNormalGasPrice();
+      }
+    }
+    return dynamicGasPrice;
+  }
+
+  @Override
+  public void setDynamicGasPrice(long blockchainGasPrice) {
+    NetworkSettings network = getSettings().getNetwork();
+    Long maxGasPriceInWei = network.getMaxGasPrice();
+    Long minGasPriceInWei = network.getMinGasPrice();
+    if (blockchainGasPrice > maxGasPriceInWei) {
+      LOG.info("GAS Price detected on blockchain '{}' GWEI exceeds maximum allowed gas price '{}' GWEI, thus the maximum gas price will be used instead.",
+               convertFromDecimals(BigInteger.valueOf(blockchainGasPrice), GWEI_TO_WEI_DECIMALS),
+               convertFromDecimals(BigInteger.valueOf(maxGasPriceInWei), GWEI_TO_WEI_DECIMALS));
+      blockchainGasPrice = maxGasPriceInWei;
+    } else if (blockchainGasPrice < minGasPriceInWei) {
+      LOG.info("GAS Price detected on blockchain '{}' GWEI is lower than minimum allowed gas price '{}' GWEI, thus the minimum gas price will be used instead.",
+               convertFromDecimals(BigInteger.valueOf(blockchainGasPrice), GWEI_TO_WEI_DECIMALS),
+               convertFromDecimals(BigInteger.valueOf(minGasPriceInWei), GWEI_TO_WEI_DECIMALS));
+      blockchainGasPrice = minGasPriceInWei;
+    }
+    this.dynamicGasPrice = blockchainGasPrice;
+  }
+
   private void computeInitialFundsSettings() {
     SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
                                                                         WALLET_SCOPE,
@@ -340,8 +401,8 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   private void computeInitialEtherFund(InitialFundsSettings initialFundsSettings) {
     NetworkSettings network = this.configuredGlobalSettings.getNetwork();
-    long gasLimit = 150000L; // Default max gas per contract transaction
-    long gasPrice = 15000000000L; // Default max gas price per contract
+    long gasLimit = 200000L; // Default max gas per contract transaction
+    long gasPrice = 20000000000L; // Default max gas price per contract
                                   // transaction
     if (network != null) {
       if (network.getGasLimit() != null && network.getGasLimit() > 0) {
@@ -364,6 +425,13 @@ public class WalletServiceImpl implements WalletService, Startable {
       settingService = CommonsUtils.getService(SettingService.class);
     }
     return settingService;
+  }
+
+  private BlockchainTransactionService getBlockchainTransactionService() {
+    if (blockchainTransactionService == null) {
+      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
+    }
+    return blockchainTransactionService;
   }
 
 }
