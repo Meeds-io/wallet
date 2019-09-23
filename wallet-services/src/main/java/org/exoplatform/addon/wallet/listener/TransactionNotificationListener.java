@@ -19,6 +19,7 @@ package org.exoplatform.addon.wallet.listener;
 import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
 import static org.exoplatform.addon.wallet.utils.WalletUtils.*;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -212,6 +213,9 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
     }
     parameters.put("token_fee", transactionDetail.getTokenFee());
     parameters.put("ether_fee", transactionDetail.getEtherFee());
+    parameters.put("gas_price",
+                   convertFromDecimals(BigInteger.valueOf((long) transactionDetail.getGasPrice()), GWEI_TO_WEI_DECIMALS));
+    parameters.put("gas_used", transactionDetail.getGasUsed());
     parameters.put("transaction", transactionDetail.getHash());
     parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
     parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
