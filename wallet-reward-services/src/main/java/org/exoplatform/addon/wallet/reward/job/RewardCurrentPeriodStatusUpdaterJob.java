@@ -74,11 +74,8 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
 
         // Compute and save current period if not estimated yet
         long currentTimeInSeconds = System.currentTimeMillis() / 1000;
-        RewardReport rewardReport = getRewardReportService().getRewardReport(currentTimeInSeconds);
-        if (rewardReport == null) {
-          rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
-          getRewardReportService().saveRewardReport(rewardReport);
-        }
+        RewardReport rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
+        getRewardReportService().saveRewardReport(rewardReport);
       }
     } catch (Exception e) {
       LOG.error("Error while checking pending rewards", e);
