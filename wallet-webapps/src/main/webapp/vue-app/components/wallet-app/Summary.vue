@@ -81,7 +81,7 @@
               @error="$emit('error', $event)" />
           </v-flex>
           <v-flex
-            :class="isSpace ? 'offset-md1 offset-xs0 md3 xs12': 'offset-md1 offset-xs0 md3 xs6'"
+            :class="isSpace ? 'offset-md5 offset-xs0 md3 xs12': 'offset-md1 offset-xs0 md3 xs6'"
             pr-0
             pl-0
             text-center>
