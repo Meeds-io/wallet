@@ -172,7 +172,6 @@ export default {
       walletPassword: '',
       walletPasswordShow: false,
       recipient: null,
-      isApprovedRecipient: true,
       disabledRecipient: false,
       canSendToken: true,
       amount: null,
@@ -237,7 +236,6 @@ export default {
         this.warning = null;
         this.information = null;
 
-        this.isApprovedRecipient = true;
         this.canSendToken = true;
       }
 
@@ -258,12 +256,8 @@ export default {
                 this.canSendToken = true;
                 return;
               }
-              this.isApprovedRecipient = receiverWallet.isApproved;
               if (this.contractDetails && this.contractDetails.isPaused) {
                 this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
-                this.canSendToken = false;
-              } else if (!this.isApprovedRecipient) {
-                this.warning = this.$t('exoplatform.wallet.warning.recipientIsDisapproved');
                 this.canSendToken = false;
               } else {
                 this.canSendToken = true;
@@ -324,7 +318,7 @@ export default {
               from: this.contractDetails.contract.options.from,
               gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
-              value: String(window.localWeb3.utils.toWei(String(this.etherAmount), 'ether')),
+              value: (this.etherAmount && window.localWeb3.utils.toWei(String(this.etherAmount), 'ether')) || 0,
             })
             .then((estimatedGas) => {
               // Add 10% to ensure that the operation doesn't take more than the estimation
