@@ -56,28 +56,43 @@ public class RewardCurrentPeriodStatusUpdaterJob implements Job {
     RequestLifeCycle.begin(this.container);
     try {
       RewardSettings rewardSettings = getRewardSettings();
-      if (rewardSettings != null && rewardSettings.getPeriodType() != null) {
-        List<RewardPeriod> rewardPeriods = getRewardReportService().getRewardPeriodsNotSent();
-        if (rewardPeriods != null && !rewardPeriods.isEmpty()) {
-          for (RewardPeriod rewardPeriod : rewardPeriods) {
-            LOG.info("Compute rewards for period from {} to {}",
-                     rewardPeriod.getStartDateFormatted("en"),
-                     rewardPeriod.getEndDateFormatted("en"));
-            long startDateInSeconds = rewardPeriod.getStartDateInSeconds();
-            RewardReport rewardReport = getRewardReportService().getRewardReport(startDateInSeconds);
-            if (rewardReport != null) {
-              rewardReport = getRewardReportService().computeRewards(startDateInSeconds);
-              getRewardReportService().saveRewardReport(rewardReport);
-            }
+      if (rewardSettings == null) {
+        return;
+      }
+      RewardPeriodType periodType = rewardSettings.getPeriodType();
+      if (periodType == null) {
+        return;
+      }
+      List<RewardPeriod> rewardPeriods = getRewardReportService().getRewardPeriodsNotSent();
+      boolean currentPeriodSaved = false;
+      long currentTimeInSeconds = System.currentTimeMillis() / 1000;
+      if (rewardPeriods != null && !rewardPeriods.isEmpty()) {
+        for (RewardPeriod rewardPeriod : rewardPeriods) {
+          if (periodType != rewardPeriod.getRewardPeriodType()) {
+            continue;
+          }
+          LOG.info("Compute rewards for period from {} to {}",
+                   rewardPeriod.getStartDateFormatted("en"),
+                   rewardPeriod.getEndDateFormatted("en"));
+          long startDateInSeconds = rewardPeriod.getStartDateInSeconds();
+          RewardReport rewardReport = getRewardReportService().getRewardReport(startDateInSeconds);
+          if (rewardReport != null) {
+            rewardReport = getRewardReportService().computeRewards(startDateInSeconds);
+            currentPeriodSaved = currentPeriodSaved || (currentTimeInSeconds >= rewardPeriod.getStartDateInSeconds()
+                && currentTimeInSeconds < rewardPeriod.getEndDateInSeconds());
+            getRewardReportService().saveRewardReport(rewardReport);
           }
         }
+      }
 
+      if (!currentPeriodSaved) {
         // Compute and save current period if not estimated yet
-        long currentTimeInSeconds = System.currentTimeMillis() / 1000;
         RewardReport rewardReport = getRewardReportService().computeRewards(currentTimeInSeconds);
         getRewardReportService().saveRewardReport(rewardReport);
       }
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       LOG.error("Error while checking pending rewards", e);
     } finally {
       RequestLifeCycle.end();

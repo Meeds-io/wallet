@@ -42,7 +42,7 @@ public class RewardPeriod implements Serializable {
   }
 
   public String getEndDateFormatted(String lang) {
-    return formatTime(startDateInSeconds, lang);
+    return formatTime(endDateInSeconds, lang);
   }
 
 }
