@@ -413,7 +413,6 @@ export default {
         })
         .then(() => this.periodChanged(this.periodicity))
         .catch((e) => {
-          console.debug('init method - error', e);
           const error = `${e}`;
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
@@ -423,6 +422,7 @@ export default {
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
+            console.debug('init method - error', e);
             this.error = error;
           }
         })
