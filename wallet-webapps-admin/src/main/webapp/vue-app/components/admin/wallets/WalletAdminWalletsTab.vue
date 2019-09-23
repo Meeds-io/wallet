@@ -430,10 +430,10 @@ export default {
       return this.wallets && this.wallets.find(wallet => wallet && wallet.type === 'admin');
     },
     adminNotHavingEnoughToken() {
-      return this.walletAdmin.tokenBalance < this.tokenAmount;
+      return this.walletAdmin && this.walletAdmin.tokenBalance < this.tokenAmount;
     },
     adminNotHavingEnoughEther() {
-      return this.walletAdmin.etherBalance < this.etherAmount;
+      return this.walletAdmin && this.walletAdmin.etherBalance < this.etherAmount;
     },
     useWalletAdmin() {
       return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
