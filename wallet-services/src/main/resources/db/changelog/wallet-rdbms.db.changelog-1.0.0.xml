@@ -229,4 +229,12 @@
     </addColumn>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-24" dbms="mysql">
+    <sql>
+      ALTER TABLE ADDONS_WALLET_TRANSACTION MODIFY COLUMN LABEL LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+      ALTER TABLE ADDONS_WALLET_TRANSACTION MODIFY COLUMN MESSAGE LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+      ALTER TABLE ADDONS_WALLET_LABEL MODIFY COLUMN LABEL VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
