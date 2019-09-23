@@ -85,11 +85,6 @@ public class WalletRewardReportStorage implements RewardReportStorage {
       LOG.debug("Reward report shouldn't be modified because it has been already marked as completed");
     }
 
-    if (rewardReport.getValidRewardCount() == 0 || rewardReport.getTokensToSend() == 0) {
-      LOG.debug("Reward report doesn't have valid rewards yet, thus it will not be saved");
-      return;
-    }
-
     rewardPeriodEntity.setPeriodType(period.getRewardPeriodType());
     rewardPeriodEntity.setStartTime(period.getStartDateInSeconds());
     rewardPeriodEntity.setEndTime(period.getEndDateInSeconds());
