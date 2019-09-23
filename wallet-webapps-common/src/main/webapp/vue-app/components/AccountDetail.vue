@@ -42,7 +42,6 @@
         </v-flex>
       </v-layout>
     </div>
-    <v-divider />
 
     <transactions-list
       id="transactionsList"
