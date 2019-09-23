@@ -46,7 +46,7 @@
     <transactions-list
       id="transactionsList"
       ref="transactionsList"
-      :account="wallet && wallet.address"
+      :wallet="wallet"
       :contract-details="contractDetails"
       :fiat-symbol="fiatSymbol"
       :administration="isAdministration"

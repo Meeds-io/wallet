@@ -449,8 +449,13 @@
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'initializeAccount'">
-                    <template v-if="item.toAddress === account && !administration">
-                      {{ $t('exoplatform.wallet.label.YourWalletWasInitialized') }}
+                    <template v-if="item.toAddress === walletAddress && !administration">
+                      <template v-if="isSpaceWallet">
+                        {{ $t('exoplatform.wallet.label.SpaceWalletWasInitialized') }}
+                      </template>
+                      <template v-else>
+                        {{ $t('exoplatform.wallet.label.YourWalletWasInitialized') }}
+                      </template>
                     </template>
                     <template v-else>
                       <profile-chip
@@ -477,7 +482,7 @@
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'reward'">
-                    <template v-if="item.toAddress === account && !administration">
+                    <template v-if="item.toAddress === walletAddress && !administration">
                       {{ $t('exoplatform.wallet.label.YouWasRewarded') }}
                     </template>
                     <template v-else>
@@ -839,8 +844,8 @@ export default {
     WalletAddress,
   },
   props: {
-    account: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -902,6 +907,13 @@ export default {
     };
   },
   computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
+    isSpaceWallet() {
+      console.warn('this.wallet.type', this.wallet && this.wallet.type);
+      return this.wallet && this.wallet.type === 'space';
+    },
     contractName() {
       return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
     },
@@ -997,7 +1009,7 @@ export default {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration)
+      return loadTransactions(this.walletAddress, this.contractDetails, this.transactions, false, limit, filterObject, this.administration)
         .then(() => {
           const totalTransactionsCount = Object.keys(this.transactions).length;
           this.limitReached = (totalTransactionsCount <= this.transactionsLimit && (totalTransactionsCount % this.transactionsPerPage) > 0) || (totalTransactionsCount < this.transactionsLimit);
