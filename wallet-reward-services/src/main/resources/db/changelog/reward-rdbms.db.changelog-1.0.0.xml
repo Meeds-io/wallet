@@ -71,17 +71,6 @@
     <createSequence sequenceName="SEQ_WALLET_GAM_TEAM_MEMBER_ID" startValue="1"/>
   </changeSet>
 
-  <changeSet author="reward" id="1.0.0-5">
-    <preConditions onFail="MARK_RAN">
-      <not>
-        <columnExists tableName="ADDONS_WALLET_GAM_TEAM" columnName="TEAM_DISABLED"/>
-      </not>
-    </preConditions>
-    <addColumn tableName="ADDONS_WALLET_GAM_TEAM">
-      <column name="TEAM_DISABLED" type="BOOLEAN" defaultValueBoolean="false"/>
-    </addColumn>
-  </changeSet>
-
   <changeSet author="reward" id="1.0.0-6">
     <createTable tableName="ADDONS_WALLET_REWARD_PERIOD">
       <column name="REWARD_PERIOD_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
