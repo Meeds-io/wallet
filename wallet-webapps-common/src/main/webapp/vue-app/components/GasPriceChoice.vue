@@ -63,20 +63,7 @@ export default {
   },
   watch: {
     choice() {
-      switch (this.choice) {
-        case 1:
-          this.$emit('changed', window.walletSettings.network.minGasPrice);
-          break;
-        case 2:
-          this.$emit('changed', window.walletSettings.network.normalGasPrice);
-          break;
-        case 3:
-          this.$emit('changed', window.walletSettings.network.maxGasPrice);
-          break;
-        default:
-          this.$emit('changed', 0);
-          break;
-      }
+      this.$emit('changed', this.getGasPrice());
     },
   },
   created() {
@@ -97,7 +84,21 @@ export default {
         this.choice = 1;
       }
     }
-    this.$emit('changed', this.choice);
+    this.$emit('changed', this.getGasPrice());
+  },
+  methods: {
+    getGasPrice() {
+      switch (this.choice) {
+        case 1:
+          return window.walletSettings.network.minGasPrice;
+        case 2:
+          return window.walletSettings.network.normalGasPrice;
+        case 3:
+          return window.walletSettings.network.maxGasPrice;
+        default:
+          return 0;
+      }
+    }
   },
 };
 </script>
