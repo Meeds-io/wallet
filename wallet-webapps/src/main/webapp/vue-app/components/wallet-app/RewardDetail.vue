@@ -1,8 +1,8 @@
 <template>
   <v-flex class="transactionsList">
-    <v-card class="rewardDetailTop">
+    <div class="rewardDetailTop">
       <v-layout row>
-        <v-flex class="xs11 headline text-left">
+        <v-flex class="xs11 title text-left">
           <v-icon color="purple" class="px-2">fa-trophy</v-icon>
           <span>
             {{ $t('exoplatform.wallet.label.myRewards') }}
@@ -19,29 +19,44 @@
           </v-btn>
         </v-flex>
       </v-layout>
-    </v-card>
-    <v-card class="card--flex-toolbar" flat>
-      <div v-if="error && !loading" class="alert alert-error">
-        <i class="uiIconError"></i>{{ error }}
-      </div>
-
-      <v-layout class="rewardDetailSummary">
-        <v-flex>
-          <v-row>
-            <v-col class="title text-left my-auto">{{ $t('exoplatform.wallet.label.rewardBalance') }}</v-col>
-            <v-col class="headline text-right my-auto primary--text">{{ wallet.rewardBalance }} {{ symbol }}</v-col>
-          </v-row>
-          <v-row>
-            <v-col class="title text-left my-auto">{{ $t('exoplatform.wallet.label.nextPayEstimation') }}</v-col>
-            <v-col class="headline text-right my-auto primary--text">{{ nextPayEstimation }} {{ symbol }}</v-col>
-          </v-row>
-          <v-row v-if="actualPool">
-            <v-col class="title text-left my-auto">{{ $t('exoplatform.wallet.label.actualPool') }}</v-col>
-            <v-col class="headline text-right my-auto primary--text">{{ actualPool }}</v-col>
-          </v-row>
-        </v-flex>
-      </v-layout>
-
+    </div>
+    <v-divider />
+    <div v-if="error && !loading" class="alert alert-error">
+      <i class="uiIconError"></i>{{ error }}
+    </div>
+    <v-layout class="ma-2">
+      <v-flex md4 xs12>
+        <v-card flat>
+          <v-card-title class="title text-wrap">
+            {{ $t('exoplatform.wallet.label.rewardBalance') }}
+          </v-card-title>
+          <v-card-text>
+            {{ walletUtils.toFixed(wallet.rewardBalance) }} {{ symbol }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex md4 xs12>
+        <v-card flat>
+          <v-card-title class="title text-wrap">
+            {{ $t('exoplatform.wallet.label.nextPayEstimation') }}
+          </v-card-title>
+          <v-card-text>
+            {{ walletUtils.toFixed(nextPayEstimation) }} {{ symbol }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex md4 xs12>
+        <v-card flat>
+          <v-card-title class="title text-wrap">
+            {{ $t('exoplatform.wallet.label.actualPool') }}
+          </v-card-title>
+          <v-card-text>
+            {{ actualPool }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+    <v-card flat>
       <div v-if="loading" class="grey--text">
         {{ $t('exoplatform.wallet.message.loadingRecentRewards') }}...
       </div>

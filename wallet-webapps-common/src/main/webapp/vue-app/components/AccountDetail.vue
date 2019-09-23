@@ -3,10 +3,10 @@
     v-if="contractDetails && contractDetails.icon"
     id="accountDetail"
     class="text-center white layout column">
-    <v-card-title class="align-start accountDetailSummary">
-      <v-layout row>
-        <v-flex class="xs10 offset-xs1 headline title">
-          <span v-if="wallet">
+    <div class="rewardDetailTop">
+      <v-layout row class="ma-0">
+        <v-flex class="xs11 title text-left">
+          <span v-if="wallet" class="pl-4">
             <template v-if="isAdministration">
               {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
               <profile-chip
@@ -26,7 +26,7 @@
               {{ $t('exoplatform.wallet.label.transactionsList') }}
             </template>
           </span>
-          <span v-else>
+          <span v-else class="pl-4">
             {{ contractDetails.title }}
           </span>
         </v-flex>
@@ -41,7 +41,8 @@
           </v-btn>
         </v-flex>
       </v-layout>
-    </v-card-title>
+    </div>
+    <v-divider />
 
     <transactions-list
       id="transactionsList"
