@@ -361,7 +361,7 @@
 
 <script>
 import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
-import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
+import InitializeAccountModal from './modals/WalletAdminInitializeModal.vue';
 import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
 
 export default {

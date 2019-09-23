@@ -189,10 +189,33 @@ export default {
         const password = sendTokensRequest.password;
         const receiver = sendTokensRequest.receiver;
         const sender = sendTokensRequest.sender;
-        const gasPrice = sendTokensRequest.gasPrice || this.settings.network.normalGasPrice;
         const label = sendTokensRequest.label;
         const message = sendTokensRequest.message;
-  
+
+        const network = this.settings.network;
+
+        network.minGasPriceEther = network.minGasPriceEther || window.localWeb3.utils.fromWei(String(network.minGasPrice * Number(network.gasLimit)), 'ether').toString();
+        network.normalGasPriceEther = network.normalGasPriceEther || window.localWeb3.utils.fromWei(String(network.normalGasPrice * Number(network.gasLimit)), 'ether').toString();
+        network.maxGasPriceEther = network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(network.maxGasPrice * Number(network.gasLimit)), 'ether').toString();
+
+        let gasPrice = sendTokensRequest.gasPrice || network.normalGasPrice;
+        const gasPriceEther = window.localWeb3.utils.fromWei(String(Number(gasPrice) * Number(network.gasLimit)), 'ether').toString();
+
+        if (this.wallet.etherBalance < gasPriceEther) {
+          console.debug(`User can't be charged for transaction fees using parametered gas price. Thus normal gas price will be used`);
+          if (this.wallet.etherBalance < network.normalGasPriceEther) {
+            console.debug(`User can't be charged for transaction fees using normal gas price. Thus min gas price will be used`);
+            if (this.wallet.etherBalance < network.minGasPriceEther) {
+              console.debug(`User can't be charged for transaction fees using minimal gas price. Thus return an error`);
+              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
+                detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
+              }));
+              return;
+            }
+            gasPrice = network.minGasPrice;
+          }
+        }
+
         if (!amount || Number.isNaN(parseFloat(amount)) || !Number.isFinite(amount) || amount <= 0) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
             detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
@@ -236,7 +259,7 @@ export default {
           return;
         }
   
-        const defaultGas = this.settings.network.gasLimit;
+        const defaultGas = network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
         const contractAddress = this.principalContractDetails.address;
         const amountWithDecimals = this.walletUtils.convertTokenAmountToSend(amount, this.principalContractDetails.decimals);
