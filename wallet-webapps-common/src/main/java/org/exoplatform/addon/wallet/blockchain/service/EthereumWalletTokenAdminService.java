@@ -45,8 +45,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private static final int         ADMIN_WALLET_MIN_LEVEL                  = 2;
 
-  private static final long        DEFAULT_ADMIN_GAS                       = 300000l;
-
   private static final String      NO_CONFIGURED_CONTRACT_ADDRESS          = "No configured contract address";
 
   private static final String      TRANSACTION_DETAIL_IS_MANDATORY         = "Transaction detail is mandatory";
@@ -104,7 +102,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
 
     // Create admin wallet if not exists
-    Wallet wallet = getAdminWallet();
+    Wallet wallet = getAccountService().getAdminWallet();
     if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
       createAdminAccount();
       LOG.info("Admin wallet created");
@@ -186,13 +184,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public Wallet getAdminWallet() {
-    return getAccountService().getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
-  }
-
-  @Override
   public String getAdminWalletAddress() {
-    Wallet adminWallet = getAdminWallet();
+    Wallet adminWallet = getAccountService().getAdminWallet();
     return adminWallet == null ? null : adminWallet.getAddress();
   }
 
@@ -677,7 +670,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     Long adminGasPrice = getAdminGasPrice();
     BigInteger gasPrice = BigInteger.valueOf(adminGasPrice);
     transactionDetail.setGasPrice(adminGasPrice);
-    BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
+    BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
     BigInteger nonceToUse = getAdminNonce();
     transactionDetail.setNonce(nonceToUse.longValue());
 
@@ -715,7 +708,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     // Retrieve cached contract instance
     if (this.ertInstance == null) {
       BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice());
-      BigInteger gasLimit = BigInteger.valueOf(DEFAULT_ADMIN_GAS);
+      BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
       Web3j web3j = getClientConnector().getWeb3j();
 
       this.ertInstance = ERTTokenV2.load(contractAddress,
@@ -752,10 +745,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
       throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
     }
-  }
-
-  private Long getAdminGasPrice() {
-    return getSettings().getNetwork().getNormalGasPrice();
   }
 
   private Credentials getAdminCredentials() {

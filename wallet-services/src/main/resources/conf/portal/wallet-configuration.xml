@@ -68,6 +68,11 @@
         <description>Maximum attempts to send a transaction to blockchain</description>
         <value>${exo.wallet.transaction.pending.maxSendingAttempts:3}</value>
       </value-param>
+      <value-param>
+        <name>transaction.logAllContractTransactions</name>
+        <description>Whether to log all transactions made on principal contract or not</description>
+        <value>${exo.wallet.transaction.logAllContractTransactions:false}</value>
+      </value-param>
     </init-params>
   </component>
 
@@ -113,9 +118,14 @@
         <value>${exo.wallet.blockchain.token.address:0xc76987d43b77c45d51653b6eb110b9174acce8fb}</value>
       </value-param>
       <value-param>
+        <name>useDynamicGasPrice</name>
+        <description>A parameter to make used gas price for all wallet based applications use dynamic gas price</description>
+        <value>${exo.wallet.blockchain.useDynamicGasPrice:true}</value>
+      </value-param>
+      <value-param>
         <name>gasLimit</name>
         <description>Blockchain transaction gas limit</description>
-        <value>${exo.wallet.transaction.gas.limit:150000}</value>
+        <value>${exo.wallet.transaction.gas.limit:200000}</value>
       </value-param>
       <value-param>
         <name>cheapGasPrice</name>
@@ -130,7 +140,7 @@
       <value-param>
         <name>fastGasPrice</name>
         <description>Default used gas for transactions</description>
-        <value>${exo.wallet.transaction.gas.fastPrice:15000000000}</value>
+        <value>${exo.wallet.transaction.gas.fastPrice:20000000000}</value>
       </value-param>
       <value-param>
         <name>accessPermission</name>

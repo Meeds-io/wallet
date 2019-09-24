@@ -26,7 +26,6 @@ import java.util.concurrent.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
-import org.reactivestreams.Subscription;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
@@ -48,6 +47,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 import io.reactivex.Flowable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * A Web3j connector class to interact with Ethereum Blockchain
@@ -58,7 +58,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private static final int         MINIMUM_POOLING_TIME       = 15 * 1000;
 
-  private static final int         DEFAULT_POOLING_TIME       = 30 * 1000;
+  private static final int         DEFAULT_POOLING_TIME       = 60 * 1000;
 
   private Web3j                    web3j                      = null;
 
@@ -82,9 +82,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private String                   websocketURLSuffix         = null;
 
-  private Subscription             blockSubscribtion;
+  private Disposable               blockSubscribtion;
 
-  private long                     poolingInterval            = DEFAULT_POOLING_TIME;
+  private long                     poolingInterval            = 0;
 
   private long                     lastWatchedBlockNumber;
 
@@ -93,6 +93,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public EthereumClientConnector() {
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
+
+    String poolingIntervalParam = System.getProperty("exo.wallet.blockchain.pooling.intervalInSeconds");
+    if (StringUtils.isNotBlank(poolingIntervalParam)) {
+      setPoolingInterval(Long.parseLong(poolingIntervalParam) * 1000);
+    } else {
+      setPoolingInterval(DEFAULT_POOLING_TIME);
+    }
   }
 
   @Override
@@ -256,6 +263,18 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
                      .getTransactionCount();
   }
 
+  /**
+   * @return current
+   * @throws IOException if an error occurs while sending transaction to
+   *           blockchain
+   */
+  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_GAS_PRICE)
+  public BigInteger getGasPrice() throws IOException {
+    return getWeb3j().ethGasPrice()
+                     .send()
+                     .getGasPrice();
+  }
+
   public Web3j getWeb3j() {
     this.waitConnection();
     return web3j;
@@ -284,6 +303,10 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     case OPERATION_GET_TRANSACTION_COUNT:
       parameters.put("wallet_address", methodArgs[0]);
       break;
+    case OPERATION_GET_GAS_PRICE:
+      BigInteger gasPriceInWei = (BigInteger) result;
+      parameters.put("ga_price_gwei", convertFromDecimals(BigInteger.valueOf(gasPriceInWei.longValue()), GWEI_TO_WEI_DECIMALS));
+      break;
     case OPERATION_GET_LAST_BLOCK_NUMBER:
       parameters.put("last_block_number", result);
       break;
@@ -303,6 +326,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       parameters.put("nonce", transactionDetail.getNonce());
       parameters.put("sender", transactionDetail.getFromWallet());
       parameters.put("receiver", transactionDetail.getToWallet());
+      parameters.put("gas_price",
+                     convertFromDecimals(BigInteger.valueOf((long) transactionDetail.getGasPrice()), GWEI_TO_WEI_DECIMALS));
 
       if (StringUtils.isNotBlank(transactionDetail.getContractAddress())) {
         parameters.put("contract_address", transactionDetail.getContractAddress());
@@ -411,7 +436,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         boolean reconnected = this.webSocketClient.reconnectBlocking();
         if (reconnected) {
           LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
-          renewBlockSubscription(this.lastWatchedBlockNumber);
+          renewBlockSubscription(this.lastWatchedBlockNumber + 1);
         }
         return reconnected;
       } else {
@@ -480,9 +505,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     if (this.blockSubscribtion != null) {
       LOG.info("Close mined blocks subscription");
       try {
-        this.blockSubscribtion.cancel();
+        this.blockSubscribtion.dispose();
       } catch (Exception e) {
-        LOG.warn("Error when closing old subscription", e);
+        LOG.warn("Error when closing old subscription", e.getMessage());
       }
     }
   }
@@ -497,16 +522,25 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   private void initSubscribe(Flowable<EthBlock> flowable) {
-    flowable
-            .doOnError(exception -> {
-              LOG.error("Error subscripting to mined blocks events, reattempt subsciption it", exception);
-              renewBlockSubscription(this.lastWatchedBlockNumber);
-            })
-            .doOnSubscribe(subscription -> {
-              LOG.info("Subscribed to mined blocks events");
-              this.blockSubscribtion = subscription;
-            });
-    flowable.subscribe(ethBlock -> handleNewBlockEvent(ethBlock));
+    blockSubscribtion = flowable.subscribe(ethBlock -> handleNewBlockEvent(ethBlock), exception -> {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Subscription to mined blocks events is interrupted, reattempt subsciption it !", exception);
+      } else {
+        LOG.info("Subscription to mined blocks events is interrupted with message: {}, reattempt subsciption it !",
+                 getLastExceptionMessage(exception));
+      }
+      renewBlockSubscription(this.lastWatchedBlockNumber + 1);
+    });
+  }
+
+  private String getLastExceptionMessage(Throwable exception) {
+    if (exception == null) {
+      return "NO EXCEPTION MESSAGE";
+    } else if (exception.getCause() == null) {
+      return exception.getMessage();
+    } else {
+      return getLastExceptionMessage(exception.getCause());
+    }
   }
 
   private void handleNewBlockEvent(EthBlock ethBlock) throws Exception {

@@ -170,6 +170,25 @@
       <div id="walletDialogsParent">
       </div>
     </main>
+    <main v-else-if="!isApplicationEnabled" id="walletDisabledContent">
+      <v-layout wrap class="mt-7">
+        <v-flex class="mx-auto text-center title" xs12>
+          {{ $t('exoplatform.wallet.info.walletApplicationDisabledPart1') }}
+        </v-flex>
+        <v-flex class="mt-2 mx-auto text-center title" xs12>
+          {{ $t('exoplatform.wallet.info.walletApplicationDisabledPart2') }}
+        </v-flex>
+        <v-flex class="mx-auto text-center title mt-7" xs12>
+          <a
+            href="https://www.exoplatform.com/rewarding-program"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="no-wrap requestFundsLink">
+            {{ $t('exoplatform.wallet.info.walletApplicationDisabledLink') }}
+          </a>
+        </v-flex>
+      </v-layout>
+    </main>
     <main v-else-if="!loading" id="walletDisabledContent">
       <v-layout>
         <v-flex>
@@ -215,6 +234,7 @@ export default {
   data() {
     return {
       isWalletEnabled: false,
+      isApplicationEnabled: true,
       loading: true,
       disabledYear: true,
       disabledMonth: false,
@@ -350,8 +370,9 @@ export default {
           this.handleError(error);
           this.settings = window.walletSettings || {wallet: {}, network: {}};
           this.wallet = this.settings.wallet;
+          this.isApplicationEnabled = this.settings.enabled;
 
-          if (!this.settings.walletEnabled) {
+          if (!this.settings.walletEnabled || !this.isApplicationEnabled) {
             this.isWalletEnabled = false;
             this.$forceUpdate();
             throw new Error(this.$t('exoplatform.wallet.warning.walletDisconnected'));
@@ -387,16 +408,11 @@ export default {
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
           this.fiatSymbol = this.settings.fiatSymbol || '$';
-          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.normalGasPrice), 'ether');
-
-          if (this.settings.network.maxGasPrice) {
-            this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
-          }
+          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.minGasPrice), 'ether');
           return this.$nextTick();
         })
         .then(() => this.periodChanged(this.periodicity))
         .catch((e) => {
-          console.debug('init method - error', e);
           const error = `${e}`;
 
           if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
@@ -406,6 +422,7 @@ export default {
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
+            console.debug('init method - error', e);
             this.error = error;
           }
         })

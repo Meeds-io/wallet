@@ -70,7 +70,10 @@
               required
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-            <gas-price-choice :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
+            <gas-price-choice
+              :wallet="wallet"
+              :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`"
+              @changed="gasPrice = $event" />
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -139,7 +142,7 @@ export default {
       return this.walletUtils.estimateTransactionFeeFiat(this.gasEstimation, this.gasPrice);
     },
     disableSend() {
-      return this.loading;
+      return this.loading || !this.gasPrice;
     },
     method() {
       return this.contractDetails.contract.methods[this.methodName];
@@ -164,7 +167,7 @@ export default {
       this.error = null;
       this.gasEstimation = null;
       if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.network.minGasPrice;
+        this.gasPrice = window.walletSettings.network.normalGasPrice;
       }
       this.fiatSymbol = window.walletSettings.fiatSymbol;
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;

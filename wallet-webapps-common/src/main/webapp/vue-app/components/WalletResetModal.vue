@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :disabled="disabled"
-    attach="#walletDialogsParent"
+    attach="#walletSecurityDialogsParent"
     content-class="uiPopup with-overflow"
     class="walletResetModal"
     width="500px"
@@ -17,14 +17,14 @@
         ">
         <template>
           <button
-            :disabled="!browserWalletExists"
+            :disabled="!browserWalletExists || dialog"
             class="ignore-vuetify-classes btn"
             v-on="on">
             {{ $t('exoplatform.wallet.button.changeWalletPassword') }}
           </button>
           <v-switch
             v-model="rememberPasswordStored"
-            :disabled="!browserWalletExists"
+            :disabled="!browserWalletExists || dialog"
             :label="$t('exoplatform.wallet.label.rememberPasswordInBrowser')"
             @change="changeRememberMe" />
         </template>
@@ -83,6 +83,7 @@
             counter
             autocomplete="current-passord"
             autofocus
+            validate-on-blur
             @click:append="walletPasswordShow = !walletPasswordShow" />
 
           <v-text-field
@@ -181,14 +182,18 @@ export default {
     dialog() {
       this.loading = true;
       if (this.dialog) {
+        this.$emit('opened');
         if (this.$refs.form) {
           this.$refs.form.reset();
         }
         if (!this.browserWalletExists) {
           this.error = this.$t('exoplatform.wallet.error.cantResetWallet');
         }
-      } else if (this.rememberPasswordToChange) {
-        this.init();
+      } else{
+        this.$emit('closed');
+        if (this.rememberPasswordToChange) {
+          this.init();
+        }
       }
       this.loading = false;
     },

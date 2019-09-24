@@ -24,10 +24,7 @@
           :id="`transaction-${item.hash}`"
           :key="index"
           :value="item.selected">
-          <v-expansion-panel-header
-            :expand-icon="false"
-            hide-actions
-            class="border-box-sizing px-0 py-0">
+          <v-expansion-panel-header class="border-box-sizing px-0 py-0">
             <v-list
               :class="item.selected && 'blue lighten-5'"
               two-line
@@ -452,49 +449,64 @@
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'initializeAccount'">
-                    <profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
-                    </span>
-                    <profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
+                    <template v-if="item.toAddress === walletAddress && !administration">
+                      <template v-if="isSpaceWallet">
+                        {{ $t('exoplatform.wallet.label.SpaceWalletWasInitialized') }}
+                      </template>
+                      <template v-else>
+                        {{ $t('exoplatform.wallet.label.YourWalletWasInitialized') }}
+                      </template>
+                    </template>
+                    <template v-else>
+                      <profile-chip
+                        v-if="displayFullTransaction"
+                        :address="item.fromAddress"
+                        :profile-id="item.fromUsername"
+                        :profile-technical-id="item.fromTechnicalId"
+                        :space-id="item.fromSpaceId"
+                        :profile-type="item.fromType"
+                        :display-name="item.fromDisplayName"
+                        :avatar="item.fromAvatar" />
+                      <span>
+                        {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
+                      </span>
+                      <profile-chip
+                        :address="item.toAddress"
+                        :profile-id="item.toUsername"
+                        :profile-technical-id="item.toTechnicalId"
+                        :space-id="item.toSpaceId"
+                        :profile-type="item.toType"
+                        :display-name="item.toDisplayName"
+                        :avatar="item.toAvatar" />
+                    </template>
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'reward'">
-                    <profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.rewarded') }}
-                    </span>
-                    <profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
+                    <template v-if="item.toAddress === walletAddress && !administration">
+                      {{ $t('exoplatform.wallet.label.YouWasRewarded') }}
+                    </template>
+                    <template v-else>
+                      <profile-chip
+                        v-if="displayFullTransaction"
+                        :address="item.fromAddress"
+                        :profile-id="item.fromUsername"
+                        :profile-technical-id="item.fromTechnicalId"
+                        :space-id="item.fromSpaceId"
+                        :profile-type="item.fromType"
+                        :display-name="item.fromDisplayName"
+                        :avatar="item.fromAvatar" />
+                      <span>
+                        {{ $t('exoplatform.wallet.label.rewarded') }}
+                      </span>
+                      <profile-chip
+                        :address="item.toAddress"
+                        :profile-id="item.toUsername"
+                        :profile-technical-id="item.toTechnicalId"
+                        :space-id="item.toSpaceId"
+                        :profile-type="item.toType"
+                        :display-name="item.toDisplayName"
+                        :avatar="item.toAvatar" />
+                    </template>
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'depositFunds'">
@@ -625,7 +637,7 @@
                   {{ $t('exoplatform.wallet.label.transactionLabel') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-right paragraph">
-                  <div class="no-wrap">
+                  <div class="wrap">
                     {{ item.label }}
                   </div>
                 </v-list-item-content>
@@ -636,7 +648,7 @@
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-right paragraph">
-                  <div class="no-wrap">
+                  <div class="wrap">
                     {{ item.message }}
                   </div>
                 </v-list-item-content>
@@ -691,7 +703,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.fromAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.fromAddress}`"
@@ -706,7 +718,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.toAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.toAddress}`"
@@ -732,7 +744,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.contractAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="tokenEtherscanLink"
                     :href="`${tokenEtherscanLink}${item.contractAddress}`"
@@ -769,7 +781,7 @@
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionHash') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-right text-truncate">
                   <a
                     v-if="transactionEtherscanLink"
                     :href="`${transactionEtherscanLink}${item.hash}`"
@@ -832,8 +844,8 @@ export default {
     WalletAddress,
   },
   props: {
-    account: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -895,6 +907,13 @@ export default {
     };
   },
   computed: {
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
+    isSpaceWallet() {
+      console.warn('this.wallet.type', this.wallet && this.wallet.type);
+      return this.wallet && this.wallet.type === 'space';
+    },
     contractName() {
       return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
     },
@@ -908,7 +927,7 @@ export default {
       const sortedTransactions = {};
       Object.values(transactions)
         .filter((transaction) => transaction && !transaction.ignore)
-        .sort((transaction1, transaction2) => (transaction2.date || 0) - (transaction1.date || 0))
+        .sort((transaction1, transaction2) => (transaction2.timestamp || 0) - (transaction1.timestamp || 0))
         .forEach((transaction) => {
           sortedTransactions[transaction.hash] = transaction;
         });
@@ -990,7 +1009,7 @@ export default {
         hash: this.selectedTransactionHash,
         contractMethodName: this.selectedContractMethodName,
       };
-      return loadTransactions(this.account, this.contractDetails, this.transactions, false, limit, filterObject, this.administration)
+      return loadTransactions(this.walletAddress, this.contractDetails, this.transactions, false, limit, filterObject, this.administration)
         .then(() => {
           const totalTransactionsCount = Object.keys(this.transactions).length;
           this.limitReached = (totalTransactionsCount <= this.transactionsLimit && (totalTransactionsCount % this.transactionsPerPage) > 0) || (totalTransactionsCount < this.transactionsLimit);

@@ -125,7 +125,7 @@ export function initEmptyWeb3Instance() {
   window.localWeb3 = new LocalWeb3();
 }
 
-export function initWeb3(isSpace, isAdmin) {
+export function initWeb3(isSpace) {
   if (!window.walletSettings || !window.walletSettings.userPreferences) {
     // User settings aren't loaded
     throw new Error(constants.ERROR_WALLET_SETTINGS_NOT_LOADED);
@@ -148,7 +148,7 @@ export function initSettings(isSpace, useCometd) {
       }
     })
     .then((settings) => {
-      if (!settings || !(settings.walletEnabled || (settings.wallet && settings.admin))) {
+      if (!settings || !settings.walletEnabled) {
         window.walletSettings = {walletEnabled: false};
         return;
       } else {
@@ -606,6 +606,7 @@ function createLocalWeb3Instance(isSpace) {
       window.walletSettings.isReadOnly = !window.walletSettings.browserWalletExists;
     }
   } else {
+    initEmptyWeb3Instance();
     // Wallet not configured
     throw new Error(constants.ERROR_WALLET_NOT_CONFIGURED);
   }

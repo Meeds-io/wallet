@@ -37,9 +37,9 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
   @Test
   public void testComputeRewards() {
     WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
-    long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 03)
-                                                                 .atEndOfMonth()
-                                                                 .atStartOfDay());
+    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 03)
+                                                                           .atEndOfMonth()
+                                                                           .atStartOfDay());
     RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
     assertNotNull(rewardReport);
     assertNotNull(rewardReport.getRewards());
@@ -258,9 +258,9 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 04)
-                                                                 .atEndOfMonth()
-                                                                 .atStartOfDay());
+    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 04)
+                                                                           .atEndOfMonth()
+                                                                           .atStartOfDay());
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
@@ -357,9 +357,9 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSeconds(YearMonth.of(2019, 05)
-                                                                 .atEndOfMonth()
-                                                                 .atStartOfDay());
+    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 05)
+                                                                           .atEndOfMonth()
+                                                                           .atStartOfDay());
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);

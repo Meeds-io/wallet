@@ -21,6 +21,7 @@
       placeholder="Label"
       class="walletAddressLabelInput mr-2"
       autofocus
+      validate-on-blur
       @click="ignoreDefaultActions"
       @keydown.esc="reset"
       @keyup.enter="save">
@@ -41,7 +42,7 @@
         {{ value }}
       </template>
     </a>
-    <v-slide-x-reverse-transition v-if="allowEdit && displayLabel && isAdmin" mode="out-in">
+    <v-slide-x-reverse-transition v-if="allowEdit && displayLabel" mode="out-in">
       <v-icon
         id="walletAddressEdit"
         :key="`icon-${isEditing}`"
@@ -104,7 +105,6 @@ export default {
     return {
       isEditing: false,
       loading: false,
-      isAdmin: null,
       addressEtherscanLink: null,
       labelDetail: {},
       labelDetailToEdit: {},
@@ -112,7 +112,6 @@ export default {
   },
   created() {
     this.init();
-    this.isAdmin = window.walletSettings && window.walletSettings.admin;
     document.addEventListener('exo-wallet-label-changed', this.refresh);
   },
   methods: {

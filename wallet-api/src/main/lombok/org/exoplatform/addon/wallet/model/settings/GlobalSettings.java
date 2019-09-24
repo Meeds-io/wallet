@@ -26,6 +26,8 @@ public class GlobalSettings implements Serializable, Cloneable {
 
   private String               accessPermission = null;
 
+  private boolean              enabled;
+
   @Exclude
   @ToString.Exclude
   private String               contractAbi      = null;                      // NOSONAR

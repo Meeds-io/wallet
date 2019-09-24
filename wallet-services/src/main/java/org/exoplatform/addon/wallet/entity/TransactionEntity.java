@@ -92,6 +92,9 @@ public class TransactionEntity implements Serializable {
   @Column(name = "TOKEN_FEE")
   private double            tokenFee;
 
+  @Column(name = "ETHER_FEE")
+  private double            etherFee;
+
   @Column(name = "NO_CONTRACT_FUNDS")
   private boolean           noContractFunds;
 
@@ -265,6 +268,14 @@ public class TransactionEntity implements Serializable {
 
   public void setTokenFee(double tokenFee) {
     this.tokenFee = tokenFee;
+  }
+
+  public double getEtherFee() {
+    return etherFee;
+  }
+
+  public void setEtherFee(double etherFee) {
+    this.etherFee = etherFee;
   }
 
   public boolean isNoContractFunds() {

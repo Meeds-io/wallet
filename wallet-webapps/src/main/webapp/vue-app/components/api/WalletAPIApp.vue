@@ -99,9 +99,6 @@ export default {
             this.needPassword = this.settings.browserWalletExists && !this.settings.storedPassword;
             this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;
             this.isReadOnly = this.settings.isReadOnly;
-            if (this.settings.network.maxGasPrice) {
-              this.settings.network.maxGasPriceEther = this.settings.network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(this.settings.network.maxGasPrice), 'ether').toString();
-            }
             this.principalContractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
 
             if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
@@ -123,7 +120,6 @@ export default {
             }
           })
           .catch((e) => {
-            console.debug('init method - error', e);
             const error = `${e}`;
 
             if (error.indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) >= 0) {
@@ -133,6 +129,7 @@ export default {
             } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
               this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
             } else {
+              console.debug('init method - error', e);
               this.error = (e && e.message) || e;
             }
           })
@@ -142,6 +139,7 @@ export default {
             const result = {
               error : this.error,
               needPassword : this.needPassword,
+              enabled : this.settings && this.settings.enabled,
               symbol : this.principalContractDetails && this.principalContractDetails.symbol,
             };
             document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : result}));
@@ -193,7 +191,31 @@ export default {
         const sender = sendTokensRequest.sender;
         const label = sendTokensRequest.label;
         const message = sendTokensRequest.message;
-  
+
+        const network = this.settings.network;
+
+        network.minGasPriceEther = network.minGasPriceEther || window.localWeb3.utils.fromWei(String(network.minGasPrice * Number(network.gasLimit)), 'ether').toString();
+        network.normalGasPriceEther = network.normalGasPriceEther || window.localWeb3.utils.fromWei(String(network.normalGasPrice * Number(network.gasLimit)), 'ether').toString();
+        network.maxGasPriceEther = network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(network.maxGasPrice * Number(network.gasLimit)), 'ether').toString();
+
+        let gasPrice = sendTokensRequest.gasPrice || network.normalGasPrice;
+        const gasPriceEther = window.localWeb3.utils.fromWei(String(Number(gasPrice) * Number(network.gasLimit)), 'ether').toString();
+
+        if (this.wallet.etherBalance < gasPriceEther) {
+          console.debug(`User can't be charged for transaction fees using parametered gas price. Thus normal gas price will be used`);
+          if (this.wallet.etherBalance < network.normalGasPriceEther) {
+            console.debug(`User can't be charged for transaction fees using normal gas price. Thus min gas price will be used`);
+            if (this.wallet.etherBalance < network.minGasPriceEther) {
+              console.debug(`User can't be charged for transaction fees using minimal gas price. Thus return an error`);
+              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
+                detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
+              }));
+              return;
+            }
+            gasPrice = network.minGasPrice;
+          }
+        }
+
         if (!amount || Number.isNaN(parseFloat(amount)) || !Number.isFinite(amount) || amount <= 0) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
             detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
@@ -237,8 +259,7 @@ export default {
           return;
         }
   
-        const gasPrice = this.settings.network.minGasPrice;
-        const defaultGas = this.settings.network.gasLimit;
+        const defaultGas = network.gasLimit;
         const transfer = this.principalContractDetails.contract.methods.transfer;
         const contractAddress = this.principalContractDetails.address;
         const amountWithDecimals = this.walletUtils.convertTokenAmountToSend(amount, this.principalContractDetails.decimals);

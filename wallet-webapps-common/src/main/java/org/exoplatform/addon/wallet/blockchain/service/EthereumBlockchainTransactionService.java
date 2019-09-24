@@ -138,7 +138,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
         saveLastWatchedBlockNumber(lastWatchedBlockNumber);
       }
-      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber);
+      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber + 1);
     } catch (Exception e) {
       LOG.error("Error while getting latest block number from blockchain with network id: {}", getNetworkId(), e);
     }
@@ -175,7 +175,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     for (String transactionHash : transactionHashes) {
       // Pending transactions in database are already managed by
       // checkPendingTransactions() method
-      if (getTransactionService().getTransactionByHash(transactionHash) != null) {
+      TransactionDetail transaction = getTransactionService().getTransactionByHash(transactionHash);
+      if (transaction != null && (transaction.isSucceeded() || transaction.isPending())) {
         continue;
       }
 
@@ -268,16 +269,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     if (transaction == null) {
-      if (!pendingTransactionFromDatabase) {
+      if (pendingTransactionFromDatabase) {
+        TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+        if (transactionDetail == null) {
+          throw new IllegalStateException("Transaction with hash " + transactionHash
+              + " wasn't found in internal database while it should have been retrieved from it.");
+        }
+        LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
+      } else {
         throw new IllegalStateException("Transaction with hash " + transactionHash
             + " is not marked as pending but the transaction wasn't found on blockchain");
       }
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
-      if (transactionDetail == null) {
-        throw new IllegalStateException("Transaction with hash " + transactionHash
-            + " wasn't found in internal database while it should have been retrieved from it.");
-      }
-      LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
       return;
     } else {
       String blockHash = transaction.getBlockHash();
@@ -285,7 +287,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           || transaction.getBlockNumber() == null) {
         if (!pendingTransactionFromDatabase) {
           throw new IllegalStateException("Transaction " + transactionHash
-              + " is marked as pending in blockchain while it's not marked as pending");
+              + " is marked as pending in blockchain while it's not marked as pending in database");
         }
         LOG.debug("Transaction {} is marked as pending in database and is always pending on blockchain", transactionHash);
         return;
@@ -316,12 +318,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionDetail.setPending(true);
     }
 
-    boolean broadcastMinedTransaction = transactionDetail.isPending();
-
     TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
     if (transactionReceipt == null) {
       throw new IllegalStateException("Couldn't find transaction receipt with hash '" + transactionHash + "' on blockchain");
     }
+
+    // When transaction status in database is different from blockchain
+    // transaction status
+    boolean broadcastMinedTransaction = transactionDetail.isPending()
+        || (transactionDetail.isSucceeded() != transactionReceipt.isStatusOK());
 
     if (pendingTransactionFromDatabase && !transactionDetail.isPending()) {
       LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
@@ -348,8 +353,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       // Check if it has a know wallet from internal database before saving
       if (hasKnownWalletInTransaction(transactionDetail)) {
         getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
+      } else if (getTransactionService().isLogAllTransaction()) {
+        logStatistics(transactionDetail);
       }
     }
+  }
+
+  @Override
+  public long refreshBlockchainGasPrice() throws IOException {
+    return ethereumClientConnector.getGasPrice().longValue();
   }
 
   private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {
@@ -404,6 +416,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     } else {
       transactionDetail.setTo(receiverAddress);
       transactionDetail.setTokenFee(0);
+      transactionDetail.setEtherFee(0);
       transactionDetail.setContractAddress(null);
       transactionDetail.setContractMethodName(null);
       transactionDetail.setContractAmount(0);
@@ -447,7 +460,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         } else if (TRANSACTIONFEE_EVENT_HASH.equals(topic)) {
           EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
           BigInteger tokenFee = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
+          BigInteger etherFee = (BigInteger) parameters.getNonIndexedValues().get(2).getValue();
           transactionDetail.setTokenFee(convertFromDecimals(tokenFee, contractDecimals));
+          transactionDetail.setEtherFee(convertFromDecimals(etherFee, ETHER_TO_WEI_DECIMALS));
           continue;
         }
 

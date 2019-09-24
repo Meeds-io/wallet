@@ -71,7 +71,7 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Default initial funds settings shouldn't be null", initialFunds);
     assertNotNull("Default initial ether fund setting shouldn't be null", initialFunds.getEtherAmount());
     assertEquals("Unexpected default initial token fund amount", 0, initialFunds.getTokenAmount(), 0);
-    assertEquals("Unexpected default initial ether fund amount", 0.003, initialFunds.getEtherAmount(), 0);
+    assertEquals("Unexpected default initial ether fund amount", 0.004, initialFunds.getEtherAmount(), 0);
     assertNull("Unexpected default initial fund holder", initialFunds.getFundsHolder());
     NetworkSettings networkSettings = settings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);

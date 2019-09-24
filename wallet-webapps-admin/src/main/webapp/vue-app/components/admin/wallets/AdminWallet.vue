@@ -10,7 +10,7 @@
         :href="requestFundsLink"
         target="_blank"
         rel="noopener noreferrer"
-        class="no-wrap">
+        class="no-wrap requestFundsLink">
         {{ $t('exoplatform.wallet.button.requestFunds') }}
       </a>
     </v-flex>
@@ -97,7 +97,7 @@ export default {
       return this.adminBalance < this.initialTokenAmount;
     },
     requestFundsLink() {
-      return (this.adminWalletAddress && `https://www.exoplatform.com/request-rewards-funds?address=${this.adminWalletAddress}`) || '#';
+      return (this.adminWalletAddress && `https://www.exoplatform.com/rewarding-program?address=${this.adminWalletAddress}`) || '#';
     },
     adminWalletAddress() {
       return (this.adminWallet && this.adminWallet.address) || '';

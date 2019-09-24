@@ -41,4 +41,13 @@ public interface BlockchainTransactionService {
    */
   void checkPendingTransactionValidity(TransactionDetail transactionDetail);
 
+  /**
+   * Refreshes gas price from blockchain and cache it
+   * 
+   * @return last gas price retrieved from blockchain
+   * @throws IOException when an error occurs while requesting gas price from
+   *           blockchain
+   */
+  long refreshBlockchainGasPrice() throws IOException;
+
 }

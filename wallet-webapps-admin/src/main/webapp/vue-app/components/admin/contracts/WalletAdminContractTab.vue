@@ -37,7 +37,7 @@
             v-if="adminLevel >= 5"
             ref="addAdminModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.addAdmin')"
             :autocomplete-label="$t('exoplatform.wallet.label.account')"
             :autocomplete-placeholder="$t('exoplatform.wallet.label.addAdminPlaceholder')"
@@ -87,7 +87,7 @@
             v-if="adminLevel >= 5"
             ref="removeAdminModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.removeAdmin')"
             :autocomplete-label="$t('exoplatform.wallet.label.account')"
             :autocomplete-placeholder="$t('exoplatform.wallet.label.removeAdminPlaceholder')"
@@ -101,7 +101,7 @@
             v-if="adminLevel >= 4"
             ref="approveAccountModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.approveAccount')"
             :autocomplete-label="$t('exoplatform.wallet.label.account')"
             :autocomplete-placeholder="$t('exoplatform.wallet.label.approveAccountPlaceholder')"
@@ -113,7 +113,7 @@
             v-if="adminLevel >= 4"
             ref="disapproveAccountModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.disapproveAccount')"
             :autocomplete-label="$t('exoplatform.wallet.label.account')"
             :autocomplete-placeholder="$t('exoplatform.wallet.label.disapproveAccountPlaceholder')"
@@ -127,7 +127,7 @@
             v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.pauseContract')"
             method-name="pause"
             @sent="newTransactionPending"
@@ -137,7 +137,7 @@
             v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.unPauseContract')"
             method-name="unPause"
             @sent="newTransactionPending"
@@ -149,7 +149,7 @@
             v-if="adminLevel >= 5"
             ref="setSellPriceModal"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.setSellPrice')"
             :input-label="$t('exoplatform.wallet.label.sellPriceOfToken', {0: `${contractDetails && contractDetails.name}`})"
             :input-placeholder="$t('exoplatform.wallet.label.sellPriceOfTokenInEther', {0: `${contractDetails && contractDetails.name}`})"
@@ -163,10 +163,20 @@
             v-if="contractDetails && contractDetails.isOwner"
             ref="transferOwnership"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :title="$t('exoplatform.wallet.button.transferOwnership')"
             :autocomplete-label="$t('exoplatform.wallet.label.newTokenOwner')"
             :autocomplete-placeholder="$t('exoplatform.wallet.label.newTokenOwnerPlaceholder')"
+            method-name="transferOwnership"
+            @sent="newTransactionPending"
+            @success="successTransaction"
+            @error="transactionError" />
+
+          <initialize-account-modal
+            v-if="adminLevel >= 5"
+            ref="initializeAccount"
+            :contract-details="contractDetails"
+            :wallet="userWallet"
             method-name="transferOwnership"
             @sent="newTransactionPending"
             @success="successTransaction"
@@ -176,7 +186,7 @@
             v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"
-            :wallet-address="walletAddress"
+            :wallet="userWallet"
             :implementation-version="3"
             @sent="newTransactionPending"
             @success="successTransaction"
@@ -351,11 +361,13 @@
 
 <script>
 import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
+import InitializeAccountModal from './modals/WalletAdminInitializeModal.vue';
 import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
 
 export default {
   components: {
     ContractAdminModal,
+    InitializeAccountModal,
     UpgradeTokenModal,
   },
   props: {

@@ -96,7 +96,10 @@
               flat
               no-resize />
 
-            <gas-price-choice :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`" @changed="gasPrice = $event" />
+            <gas-price-choice
+              :wallet="wallet"
+              :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`"
+              @changed="gasPrice = $event" />
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -155,8 +158,8 @@ export default {
         return null;
       },
     },
-    walletAddress: {
-      type: String,
+    wallet: {
+      type: Object,
       default: function() {
         return null;
       },
@@ -210,7 +213,7 @@ export default {
       return this.walletUtils.estimateTransactionFeeFiat(this.gasEstimation, this.gasPrice);
     },
     disableSend() {
-      return this.loading || (this.inputLabel && this.inputValue !== 0 && !this.inputValue) || (this.autocompleteLabel && !this.autocompleteValue);
+      return this.loading || !this.gasPrice || (this.inputLabel && this.inputValue !== 0 && !this.inputValue) || (this.autocompleteLabel && !this.autocompleteValue);
     },
     method() {
       return this.contractDetails.contract.methods[this.methodName];
@@ -275,7 +278,7 @@ export default {
       this.transactionMessage = '';
       this.settings = window.walletSettings || {network: {}}
       if (!this.gasPrice) {
-        this.gasPrice = this.settings.network.minGasPrice;
+        this.gasPrice = this.settings.network.normalGasPrice;
       }
       this.fiatSymbol = this.settings.fiatSymbol || '$';
       this.storedPassword = this.settings.storedPassword && this.settings.browserWalletExists;

@@ -1,129 +1,141 @@
 <template>
-  <v-card id="sendTokenForm" flat>
-    <v-card-text class="pt-0">
+  <v-dialog
+    v-model="dialog"
+    :disabled="disabled"
+    attach="#walletDialogsParent"
+    content-class="uiPopup with-overflow"
+    width="500px"
+    max-width="100vw"
+    persistent
+    @keydown.esc="dialog = false">
+    <template v-if="!noButton" v-slot:activator="{ on }">
+      <button
+        :value="true"
+        class="ignore-vuetify-classes btn"
+        v-on="on"
+        @click="dialog = true">
+        {{ $t('exoplatform.wallet.button.initializeWallet') }}
+      </button>
+    </template>
+    <v-card class="elevation-12">
+      <div class="ignore-vuetify-classes popupHeader ClearFix">
+        <a
+          class="uiIconClose pull-right"
+          aria-hidden="true"
+          @click="dialog = false"></a>
+        <span class="ignore-vuetify-classes PopupTitle popupTitle">
+          {{ $t('exoplatform.wallet.title.initializeWallet') }}
+        </span>
+      </div>
+
       <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
-      </div> <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
-        <i class="uiIconWarning"></i>{{ warning }}
-      </div> <div v-if="!error && !warning && information && information.length" class="alert alert-info v-content">
-        <i class="uiIconInfo"></i>{{ information }}
       </div>
-      <v-form
-        ref="form"
-        @submit="
-          $event.preventDefault();
-          $event.stopPropagation();
-        ">
-        <address-auto-complete
-          ref="autocomplete"
-          :disabled="loading || disabledRecipient"
-          :input-label="$t('exoplatform.wallet.label.recipient')"
-          :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
-          :ignore-current-user="!isSpace"
-          autofocus
-          required
-          validate-on-blur
-          @item-selected="
-            recipient = $event.address;
-            $emit('receiver-selected', $event);
-          " />
 
-        <v-text-field
-          v-model.number="amount"
-          :disabled="loading"
-          :label="$t('exoplatform.wallet.label.amount')"
-          :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
-          name="amount"
-          required
-          @input="$emit('amount-selected', amount)" />
+      <v-card id="sendTokenForm" flat>
+        <v-card-text class="pt-0">
+          <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
+            <i class="uiIconWarning"></i>{{ warning }}
+          </div>
+          <div v-if="!error && !warning && information && information.length" class="alert alert-info v-content">
+            <i class="uiIconInfo"></i>{{ information }}
+          </div>
+          <v-form
+            ref="form"
+            @submit="
+              $event.preventDefault();
+              $event.stopPropagation();
+            ">
+            <address-auto-complete
+              ref="autocomplete"
+              :disabled="loading || disabledRecipient"
+              :input-label="$t('exoplatform.wallet.label.recipient')"
+              :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
+              :ignore-current-user="!isSpace"
+              autofocus
+              required
+              validate-on-blur
+              @item-selected="
+                recipient = $event.address;
+                $emit('receiver-selected', $event);
+              " />
 
-        <v-text-field
-          v-if="!storedPassword"
-          v-model="walletPassword"
-          :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
-          :type="walletPasswordShow ? 'text' : 'password'"
-          :disabled="loading"
-          :rules="mandatoryRule"
-          :label="$t('exoplatform.wallet.label.walletPassword')"
-          :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
-          name="walletPassword"
-          counter
-          required
-          autocomplete="current-passord"
-          @click:append="walletPasswordShow = !walletPasswordShow" />
-        <gas-price-choice
-          :wallet="wallet"
-          :estimated-fee="transactionFeeString"
-          @changed="gasPrice = $event" />
-        <v-text-field
-          v-model="transactionLabel"
-          :disabled="loading"
-          :label="$t('exoplatform.wallet.label.transactionLabel')"
-          :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
-          type="text"
-          name="transactionLabel" />
-        <v-textarea
-          v-model="transactionMessage"
-          :disabled="loading"
-          :label="$t('exoplatform.wallet.label.transactionMessage')"
-          :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
-          name="tokenTransactionMessage"
-          rows="3"
-          flat
-          no-resize />
-      </v-form>
-      <qr-code-modal
-        ref="qrCodeModal"
-        :to="recipient"
-        :from="walletAddress"
-        :amount="0"
-        :is-contract="true"
-        :args-names="['_to', '_value']"
-        :args-types="['address', 'uint256']"
-        :args-values="[recipient, amount]"
-        :open="showQRCodeModal"
-        :function-payable="false"
-        :title="$t('exoplatform.wallet.title.sendTokenQRCode')"
-        :information="$t('exoplatform.wallet.message.sendTokenQRCodeMessage')"
-        function-name="transfer"
-        @close="showQRCodeModal = false" />
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <button
-        :disabled="disabled"
-        :loading="loading"
-        class="ignore-vuetify-classes btn btn-primary mr-1"
-        @click="sendTokens">
-        {{ $t('exoplatform.wallet.button.send') }}
-      </button>
-      <button
-        :disabled="disabled"
-        class="ignore-vuetify-classes btn"
-        color="secondary"
-        @click="showQRCodeModal = true">
-        {{ $t('exoplatform.wallet.button.qrCode') }}
-      </button>
-      <v-spacer />
-    </v-card-actions>
-  </v-card>
+            <v-text-field
+              v-model.number="amount"
+              :disabled="loading"
+              :label="$t('exoplatform.wallet.label.amount')"
+              :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
+              name="amount"
+              required />
+
+            <v-text-field
+              v-model.number="etherAmount"
+              :disabled="loading"
+              :label="$t('exoplatform.wallet.label.etherAmount')"
+              :placeholder="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
+              name="etherAmount"
+              required />
+
+            <v-text-field
+              v-if="!storedPassword"
+              v-model="walletPassword"
+              :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+              :type="walletPasswordShow ? 'text' : 'password'"
+              :disabled="loading"
+              :rules="mandatoryRule"
+              :label="$t('exoplatform.wallet.label.walletPassword')"
+              :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
+              name="walletPassword"
+              counter
+              required
+              autocomplete="current-passord"
+              @click:append="walletPasswordShow = !walletPasswordShow" />
+            <gas-price-choice
+              :wallet="wallet"
+              :estimated-fee="transactionFeeString"
+              @changed="gasPrice = $event" />
+            <v-text-field
+              v-model="transactionLabel"
+              :disabled="loading"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
+              type="text"
+              name="transactionLabel" />
+            <v-textarea
+              v-model="transactionMessage"
+              :disabled="loading"
+              :label="$t('exoplatform.wallet.label.transactionMessage')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
+              name="tokenTransactionMessage"
+              rows="3"
+              flat
+              no-resize />
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <button
+            :disabled="disabled"
+            :loading="loading"
+            class="ignore-vuetify-classes btn btn-primary mr-1"
+            @click="sendTokens">
+            {{ $t('exoplatform.wallet.button.send') }}
+          </button>
+          <button
+            class="ignore-vuetify-classes btn"
+            color="secondary"
+            @click="dialog = false">
+            {{ $t('exoplatform.wallet.button.cancel') }}
+          </button>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
-import AddressAutoComplete from './AddressAutoComplete.vue';
-import QrCodeModal from './QRCodeModal.vue';
-import GasPriceChoice from './GasPriceChoice.vue';
-
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
-import {sendContractTransaction} from '../js/TokenUtils.js';
-import {searchWalletByAddress} from '../js/AddressRegistry.js';
-
 export default {
-  components: {
-    QrCodeModal,
-    GasPriceChoice,
-    AddressAutoComplete,
-  },
   props: {
     wallet: {
       type: Object,
@@ -152,19 +164,18 @@ export default {
   },
   data() {
     return {
+      dialog: false,
       loading: false,
-      showQRCodeModal: false,
       storedPassword: false,
       transactionLabel: '',
       transactionMessage: '',
       walletPassword: '',
       walletPasswordShow: false,
       recipient: null,
-      notificationId: null,
-      isApprovedRecipient: true,
       disabledRecipient: false,
       canSendToken: true,
       amount: null,
+      etherAmount: null,
       isSpace: false,
       gasPrice: 0,
       estimatedGas: 0,
@@ -185,12 +196,12 @@ export default {
     transactionFeeString() {
       if (this.transactionFeeToken) {
         if (this.contractDetails) {
-          return `${toFixed(this.transactionFeeToken)} ${this.contractDetails && this.contractDetails.symbol}`;
+          return `${this.walletUtils.toFixed(this.transactionFeeToken)} ${this.contractDetails && this.contractDetails.symbol}`;
         } else {
           return '';
         }
       } else if (this.transactionFeeFiat) {
-        return `${toFixed(this.transactionFeeFiat)} ${this.fiatSymbol}`;
+        return `${this.walletUtils.toFixed(this.transactionFeeFiat)} ${this.fiatSymbol}`;
       }
       return '';
     },
@@ -204,10 +215,10 @@ export default {
       return this.transactionFeeInWei ? window.localWeb3.utils.fromWei(String(this.transactionFeeInWei), 'ether') : 0;
     },
     transactionFeeFiat() {
-      return this.transactionFeeEther ? etherToFiat(this.transactionFeeEther) : 0;
+      return this.transactionFeeEther ? this.walletUtils.etherToFiat(this.transactionFeeEther) : 0;
     },
     transactionFeeToken() {
-      return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei));
+      return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : this.walletUtils.toFixed(this.transactionFeeInWei / this.sellPriceInWei));
     },
   },
   watch: {
@@ -225,7 +236,6 @@ export default {
         this.warning = null;
         this.information = null;
 
-        this.isApprovedRecipient = true;
         this.canSendToken = true;
       }
 
@@ -239,19 +249,15 @@ export default {
           this.warning = null;
           this.information = null;
 
-          return searchWalletByAddress(this.recipient, true)
+          return this.addressRegistry.searchWalletByAddress(this.recipient, true)
             .then((receiverWallet) => {
               // Unknown wallet address
               if (!receiverWallet || !receiverWallet.address || !receiverWallet.id) {
                 this.canSendToken = true;
                 return;
               }
-              this.isApprovedRecipient = receiverWallet.isApproved;
               if (this.contractDetails && this.contractDetails.isPaused) {
                 this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
-                this.canSendToken = false;
-              } else if (!this.isApprovedRecipient) {
-                this.warning = this.$t('exoplatform.wallet.warning.recipientIsDisapproved');
                 this.canSendToken = false;
               } else {
                 this.canSendToken = true;
@@ -276,10 +282,8 @@ export default {
       });
       this.loading = false;
       this.disabledRecipient = false;
-      this.showQRCodeModal = false;
       this.recipient = null;
       this.amount = null;
-      this.notificationId = null;
       this.warning = null;
       this.error = null;
       this.walletPassword = '';
@@ -309,11 +313,12 @@ export default {
         if (recipient) {
           // Estimate gas
           this.contractDetails.contract.methods
-            .transfer(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
+            .initializeAccount(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
             .estimateGas({
               from: this.contractDetails.contract.options.from,
               gas: window.walletSettings.network.gasLimit,
               gasPrice: this.gasPrice,
+              value: (this.etherAmount && window.localWeb3.utils.toWei(String(this.etherAmount), 'ether')) || 0,
             })
             .then((estimatedGas) => {
               // Add 10% to ensure that the operation doesn't take more than the estimation
@@ -352,7 +357,7 @@ export default {
         return;
       }
 
-      const unlocked = unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : hashCode(this.walletPassword));
+      const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? window.walletSettings.userP : this.walletUtils.hashCode(this.walletPassword));
       if (!unlocked) {
         this.error = this.$t('exoplatform.wallet.warning.wrongPassword');
         return;
@@ -369,17 +374,19 @@ export default {
 
       const sender = this.contractDetails.contract.options.from;
       const receiver = this.recipient;
-      const transfer =  this.contractDetails.contract.methods.transfer;
+      const initializeAccount =  this.contractDetails.contract.methods.initializeAccount;
+
+      this.etherAmount = this.etherAmount || 0;
 
       const transactionDetail = {
         from: sender.toLowerCase(),
         to: receiver,
-        value: 0,
+        value: this.etherAmount,
         gas: window.walletSettings.network.gasLimit,
         gasPrice: this.gasPrice,
         pending: true,
         contractAddress: this.contractDetails.address,
-        contractMethodName: 'transfer',
+        contractMethodName: 'initializeAccount',
         contractAmount: this.amount,
         label: this.transactionLabel,
         message: this.transactionMessage,
@@ -391,11 +398,12 @@ export default {
 
       this.error = null;
       this.loading = true;
-      return transfer(this.recipient, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
+      return initializeAccount(this.recipient, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
         .estimateGas({
           from: sender,
           gas: window.walletSettings.network.gasLimit,
           gasPrice: this.gasPrice,
+          value: String(window.localWeb3.utils.toWei(String(this.etherAmount), 'ether')),
         })
         .catch((e) => {
           console.error('Error estimating necessary gas', e);
@@ -406,35 +414,29 @@ export default {
             this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
             return;
           }
-          return sendContractTransaction(transactionDetail, transfer, [receiver, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
+          return this.tokenUtils.sendContractTransaction(transactionDetail, initializeAccount, [receiver, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
         })
         .then((savedTransaction, error) => {
           if (error) {
             throw error;
           }
           if (savedTransaction) {
-            // The transaction has been hashed and will be sent
-            this.$emit(
-              'sent',
-              savedTransaction,
-              this.contractDetails
-            );
+            this.$emit('sent', savedTransaction);
+            this.dialog = false;
 
-            this.$emit('close');
-
-            if (this.notificationId) {
-              // Asynchronously mark notification as sent
-              markFundRequestAsSent(this.notificationId);
-            }
+            const thiss = this;
+            this.walletUtils.watchTransactionStatus(savedTransaction.hash, () => {
+              thiss.$emit('success', savedTransaction.hash, thiss.methodName, thiss.autocompleteValue, thiss.inputValue);
+            });
           }
         })
         .catch((e) => {
-          console.debug('Web3 contract.transfer method - error', e);
-          this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+          console.debug('Web3 contract.initializeAccount method - error', e);
+          this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${this.walletUtils.truncateError(e)}`;
         })
         .finally(() => {
           this.loading = false;
-          lockBrowserWallet();
+          this.walletUtils.lockBrowserWallet();
         });
     },
     checkErrors() {

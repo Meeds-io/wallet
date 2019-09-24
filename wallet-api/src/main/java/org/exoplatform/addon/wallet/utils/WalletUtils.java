@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.utils;
 
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -35,17 +37,19 @@ import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.portal.Constants;
+import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.organization.OrganizationService;
-import org.exoplatform.services.organization.UserProfile;
+import org.exoplatform.services.organization.*;
 import org.exoplatform.services.resources.ResourceBundleService;
 import org.exoplatform.services.security.*;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -76,6 +80,8 @@ public class WalletUtils {
 
   public static final int                             ETHER_TO_WEI_DECIMALS                    = 18;
 
+  public static final int                             GWEI_TO_WEI_DECIMALS                     = 9;
+
   public static final JsonParser                      JSON_PARSER                              = new JsonParserImpl();
 
   public static final JsonGenerator                   JSON_GENERATOR                           = new JsonGeneratorImpl();
@@ -93,7 +99,15 @@ public class WalletUtils {
 
   public static final String                          TOKEN_ADDRESS                            = "tokenAddress";
 
+  public static final String                          USE_DYNAMIC_GAS_PRICE                    = "useDynamicGasPrice";
+
   public static final String                          GAS_LIMIT                                = "gasLimit";
+
+  public static final long                            DEFAULT_MIN_GAS_PRICE                    = 4000000000L;
+
+  public static final long                            DEFAULT_NORMAL_GAS_PRICE                 = 10000000000L;
+
+  public static final long                            DEFAULT_MAX_GAS_PRICE                    = 20000000000L;
 
   public static final String                          MIN_GAS_PRICE                            = "cheapGasPrice";
 
@@ -183,6 +197,9 @@ public class WalletUtils {
   public static final String                          MAX_SENDING_TRANSACTIONS_ATTEMPTS        =
                                                                                         "transaction.pending.maxSendingAttempts";
 
+  public static final String                          LOG_ALL_CONTRACT_TRANSACTIONS            =
+                                                                                    "transaction.logAllContractTransactions";
+
   public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
   public static final String                          WALLET_RECEIVER_NOTIFICATION_ID          =
@@ -225,6 +242,8 @@ public class WalletUtils {
   public static final String                          FUNDS_ACCEPT_URL                         = "fundsAcceptUrl";
 
   public static final String                          OPERATION_GET_TRANSACTION_COUNT          = "eth_getTransactionCount";
+
+  public static final String                          OPERATION_GET_GAS_PRICE                  = "eth_getGasPrice";
 
   public static final String                          OPERATION_READ_FROM_TOKEN                = "eth_call";
 
@@ -318,6 +337,14 @@ public class WalletUtils {
       }
     } else if (WalletType.isUser(wallet.getType())) {
       return Collections.singletonList(wallet.getId());
+    } else if (WalletType.isAdmin(wallet.getType())) {
+      try {
+        return new ArrayList<>(getRewardAdministrators());
+      } catch (Exception e) {
+        LOG.error("Error while building notification receivers. Send notification to super administrator only", e);
+        UserACL userACL = CommonsUtils.getService(UserACL.class);
+        return Collections.singletonList(userACL.getSuperUser());
+      }
     } else {
       return Collections.emptyList();
     }
@@ -426,6 +453,22 @@ public class WalletUtils {
         wallet.setId(identity.getRemoteId());
       }
     }
+  }
+
+  public static Set<String> getRewardAdministrators() throws Exception {
+    OrganizationService organizationService = CommonsUtils.getService(OrganizationService.class);
+
+    Set<String> adminUsers = new HashSet<>();
+    Group rewardingGroup = organizationService.getGroupHandler().findGroupById(REWARDINGS_GROUP);
+    if (rewardingGroup != null) {
+      ListAccess<Membership> rewardingMembers = organizationService.getMembershipHandler()
+                                                                   .findAllMembershipsByGroup(rewardingGroup);
+      Membership[] members = rewardingMembers.load(0, rewardingMembers.getSize());
+      for (Membership membership : members) {
+        adminUsers.add(membership.getUserName());
+      }
+    }
+    return adminUsers;
   }
 
   public static final boolean isUserRewardingAdmin(String username) {
@@ -678,6 +721,18 @@ public class WalletUtils {
     return getWalletService().getSettings();
   }
 
+  public static final Long getGasLimit() {
+    return getSettings().getNetwork().getGasLimit();
+  }
+
+  public static final Long getAdminGasPrice() {
+    if (getWalletService().isUseDynamicGasPrice()) {
+      return getWalletService().getDynamicGasPrice();
+    } else {
+      return getSettings().getNetwork().getNormalGasPrice();
+    }
+  }
+
   public static final ContractDetail getContractDetail() {
     GlobalSettings settings = getSettings();
     if (settings == null || settings.getContractDetail() == null) {
@@ -782,6 +837,78 @@ public class WalletUtils {
       }
     }
     return blockchainUrlSuffix;
+  }
+
+  public static final void logStatistics(TransactionDetail transactionDetail) {
+    if (transactionDetail == null) {
+      return;
+    }
+    String contractMethodName = transactionDetail.getContractMethodName();
+
+    if (StringUtils.isBlank(contractMethodName)) {
+      contractMethodName = ETHER_FUNC_SEND_FUNDS;
+    }
+
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put(LOCAL_SERVICE, "wallet");
+    parameters.put(OPERATION, transformCapitalWithUnderscore(contractMethodName));
+    parameters.put("blockchain_network_id", getNetworkId());
+    parameters.put("blockchain_network_url_suffix", getBlockchainURLSuffix());
+
+    if (transactionDetail.getIssuerId() > 0 || transactionDetail.getIssuer() != null) {
+      parameters.put("user_social_id",
+                     transactionDetail.getIssuerId() > 0 ? transactionDetail.getIssuerId()
+                                                         : transactionDetail.getIssuer().getTechnicalId());
+    }
+
+    if (transactionDetail.getFromWallet() != null) {
+      parameters.put("sender", transactionDetail.getFromWallet());
+    } else if (transactionDetail.getFrom() != null) {
+      parameters.put("sender_wallet_address", transactionDetail.getFrom());
+    }
+
+    if (transactionDetail.getToWallet() != null) {
+      parameters.put("receiver", transactionDetail.getToWallet());
+    } else if (transactionDetail.getTo() != null) {
+      parameters.put("receiver_wallet_address", transactionDetail.getTo());
+    }
+
+    if (transactionDetail.getByWallet() != null) {
+      parameters.put("by", transactionDetail.getByWallet());
+    } else if (transactionDetail.getBy() != null) {
+      parameters.put("by_wallet_address", transactionDetail.getBy());
+    }
+
+    switch (contractMethodName) {
+    case CONTRACT_FUNC_INITIALIZEACCOUNT:
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case ETHER_FUNC_SEND_FUNDS:
+      parameters.put("amount_ether", transactionDetail.getValue());
+      break;
+    case CONTRACT_FUNC_TRANSFORMTOVESTED:
+    case CONTRACT_FUNC_TRANSFERFROM:
+    case CONTRACT_FUNC_TRANSFER:
+    case CONTRACT_FUNC_APPROVE:
+    case CONTRACT_FUNC_REWARD:
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case CONTRACT_FUNC_ADDADMIN:
+      parameters.put("admin_level", transactionDetail.getValue());
+      break;
+    default:
+      break;
+    }
+    parameters.put("token_fee", transactionDetail.getTokenFee());
+    parameters.put("ether_fee", transactionDetail.getEtherFee());
+    parameters.put("gas_price",
+                   convertFromDecimals(BigInteger.valueOf((long) transactionDetail.getGasPrice()), GWEI_TO_WEI_DECIMALS));
+    parameters.put("gas_used", transactionDetail.getGasUsed());
+    parameters.put("transaction", transactionDetail.getHash());
+    parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
+    parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
+    StatisticUtils.addStatisticEntry(parameters);
   }
 
   private static final WalletTokenAdminService getWalletTokenAdminService() {

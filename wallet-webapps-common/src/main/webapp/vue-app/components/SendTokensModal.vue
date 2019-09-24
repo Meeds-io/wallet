@@ -12,6 +12,7 @@
     @keydown.esc="dialog = false">
     <template v-slot:activator="{ on }">
       <v-btn
+        :disabled="isReadOnly"
         class="btn btn-primary"
         v-on="on">
         <v-icon color="white" class="mr-1">

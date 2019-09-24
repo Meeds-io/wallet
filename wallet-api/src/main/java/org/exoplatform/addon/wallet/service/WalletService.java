@@ -100,4 +100,27 @@ public interface WalletService {
    */
   void setConfiguredContractDetail(ContractDetail contractDetail);
 
+  /**
+   * @return true if wallet admin is enabled on Token contract else return false
+   */
+  boolean isEnabled();
+
+  /**
+   * Sets gas price from blockchain network
+   * 
+   * @param blockchainGasPrice gas price in WEI
+   */
+  void setDynamicGasPrice(long blockchainGasPrice);
+
+  /**
+   * @return gas price retrieved from blockchain
+   */
+  long getDynamicGasPrice();
+
+  /**
+   * @return true if services are configured to use dynamic gas price from
+   *         blockchain, else false
+   */
+  boolean isUseDynamicGasPrice();
+
 }

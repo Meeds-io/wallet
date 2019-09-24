@@ -57,6 +57,11 @@ public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
     String message = ctx.value(MESSAGE_PARAMETER);
     String hash = ctx.value(HASH_PARAMETER);
 
+    // Don't send notifications about Admin wallet sending funds
+    if (senderAccountDetail == null || StringUtils.equals(senderAccountDetail.getId(), WALLET_ADMIN_REMOTE_ID)) {
+      return null;
+    }
+
     List<String> toList = getNotificationReceiversUsers(senderAccountDetail, receiverAccountDetail.getId());
     if (toList == null || toList.isEmpty()) {
       return null;

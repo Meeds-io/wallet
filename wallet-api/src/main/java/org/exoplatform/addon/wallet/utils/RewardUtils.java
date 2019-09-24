@@ -1,11 +1,10 @@
 package org.exoplatform.addon.wallet.utils;
 
-import static org.exoplatform.addon.wallet.utils.WalletUtils.REWARDINGS_GROUP;
-
 import java.lang.reflect.Method;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,9 +15,7 @@ import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.container.ExoContainer;
-import org.exoplatform.services.organization.*;
 import org.exoplatform.services.security.ConversationState;
 
 public class RewardUtils {
@@ -96,8 +93,8 @@ public class RewardUtils {
     return LocalDateTime.ofInstant(Instant.ofEpochSecond(createdDate), TimeZone.getDefault().toZoneId());
   }
 
-  public static long timeToSeconds(LocalDateTime time) {
-    return time.atZone(ZoneOffset.systemDefault()).toEpochSecond();
+  public static long timeToSecondsAtDayStart(LocalDateTime time) {
+    return time.toLocalDate().atStartOfDay().atZone(ZoneOffset.systemDefault()).toEpochSecond();
   }
 
   public static final String getCurrentUserId() {
@@ -134,22 +131,6 @@ public class RewardUtils {
       return null;
     }
     return serviceInstance;
-  }
-
-  public static Set<String> getRewardAdministrators() throws Exception {
-    OrganizationService organizationService = CommonsUtils.getService(OrganizationService.class);
-
-    Set<String> adminUsers = new HashSet<>();
-    Group rewardingGroup = organizationService.getGroupHandler().findGroupById(REWARDINGS_GROUP);
-    if (rewardingGroup != null) {
-      ListAccess<Membership> rewardingMembers = organizationService.getMembershipHandler()
-                                                                   .findAllMembershipsByGroup(rewardingGroup);
-      Membership[] members = rewardingMembers.load(0, rewardingMembers.getSize());
-      for (Membership membership : members) {
-        adminUsers.add(membership.getUserName());
-      }
-    }
-    return adminUsers;
   }
 
   public static final RewardSettings getRewardSettings() {

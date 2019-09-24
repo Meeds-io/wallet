@@ -41,7 +41,7 @@ public abstract class BaseWalletTest {
 
   protected static final String    TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
 
-  protected static final int       GAS_USED                 = 150000;
+  protected static final int       GAS_USED                 = 160000;
 
   protected static final double    GAS_PRICE                = 0.000000004d;
 

@@ -77,17 +77,18 @@ public class WalletRewardReportStorage implements RewardReportStorage {
       throw new IllegalArgumentException("reward report is null");
     }
     RewardPeriod period = rewardReport.getPeriod();
+    LOG.info("Saving reward report for period from {} to {}",
+             period.getStartDateFormatted("en"),
+             period.getEndDateFormatted("en"));
+
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(period.getRewardPeriodType(),
                                                                                                 period.getStartDateInSeconds());
     if (rewardPeriodEntity == null) {
       rewardPeriodEntity = new WalletRewardPeriodEntity();
     } else if (rewardPeriodEntity.getStatus() == RewardStatus.SUCCESS) {
-      LOG.debug("Reward report shouldn't be modified because it has been already marked as completed");
-    }
-
-    if (rewardReport.getValidRewardCount() == 0 || rewardReport.getTokensSent() == 0) {
-      LOG.debug("Reward report doesn't have valid rewards yet, thus it will not be saved");
-      return;
+      LOG.warn("Reward report  from {} to {} shouldn't be modified because it has been already marked as completed.",
+               period.getStartDateFormatted("en"),
+               period.getEndDateFormatted("en"));
     }
 
     rewardPeriodEntity.setPeriodType(period.getRewardPeriodType());

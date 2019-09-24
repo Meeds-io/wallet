@@ -108,6 +108,8 @@
         <v-spacer />
       </v-card-actions>
     </v-card>
+    <div id="walletSecurityDialogsParent">
+    </div>
   </v-dialog>
 </template>
 
