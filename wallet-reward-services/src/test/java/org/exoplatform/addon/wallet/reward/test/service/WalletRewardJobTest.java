@@ -16,6 +16,7 @@ import org.mockito.stubbing.Answer;
 import org.exoplatform.addon.wallet.model.Wallet;
 import org.exoplatform.addon.wallet.model.reward.*;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.addon.wallet.reward.api.RewardPlugin;
 import org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob;
 import org.exoplatform.addon.wallet.reward.service.*;
 import org.exoplatform.addon.wallet.reward.storage.RewardReportStorage;
@@ -27,6 +28,23 @@ import org.exoplatform.addon.wallet.utils.WalletUtils;
 import org.exoplatform.container.component.RequestLifeCycle;
 
 public class WalletRewardJobTest extends BaseWalletRewardTest {
+
+  @Test
+  public void testGetRewardPlugins() {
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    Collection<RewardPlugin> rewardPlugins = rewardSettingsService.getRewardPlugins();
+    assertEquals(2, rewardPlugins.size());
+
+    RewardPeriod period = RewardPeriodType.WEEK.getPeriodOfTime(RewardUtils.timeFromSeconds(System.currentTimeMillis() / 1000));
+    for (RewardPlugin rewardPlugin : rewardPlugins) {
+      try {
+        rewardPlugin.getEarnedPoints(Collections.singleton(1l), period.getStartDateInSeconds(), period.getEndDateInSeconds());
+        // Submodules aren't loaded yet
+      } catch (Exception e) {
+        // Expected
+      }
+    }
+  }
 
   @Test
   public void testSendRewards() throws Exception {

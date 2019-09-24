@@ -175,7 +175,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     for (String transactionHash : transactionHashes) {
       // Pending transactions in database are already managed by
       // checkPendingTransactions() method
-      if (getTransactionService().getTransactionByHash(transactionHash) != null) {
+      TransactionDetail transaction = getTransactionService().getTransactionByHash(transactionHash);
+      if (transaction != null && (transaction.isSucceeded() || transaction.isPending())) {
         continue;
       }
 
@@ -268,16 +269,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     if (transaction == null) {
-      if (!pendingTransactionFromDatabase) {
+      if (pendingTransactionFromDatabase) {
+        TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+        if (transactionDetail == null) {
+          throw new IllegalStateException("Transaction with hash " + transactionHash
+              + " wasn't found in internal database while it should have been retrieved from it.");
+        }
+        LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
+      } else {
         throw new IllegalStateException("Transaction with hash " + transactionHash
             + " is not marked as pending but the transaction wasn't found on blockchain");
       }
-      TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
-      if (transactionDetail == null) {
-        throw new IllegalStateException("Transaction with hash " + transactionHash
-            + " wasn't found in internal database while it should have been retrieved from it.");
-      }
-      LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
       return;
     } else {
       String blockHash = transaction.getBlockHash();
@@ -285,7 +287,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           || transaction.getBlockNumber() == null) {
         if (!pendingTransactionFromDatabase) {
           throw new IllegalStateException("Transaction " + transactionHash
-              + " is marked as pending in blockchain while it's not marked as pending");
+              + " is marked as pending in blockchain while it's not marked as pending in database");
         }
         LOG.debug("Transaction {} is marked as pending in database and is always pending on blockchain", transactionHash);
         return;
@@ -316,12 +318,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionDetail.setPending(true);
     }
 
-    boolean broadcastMinedTransaction = transactionDetail.isPending();
-
     TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
     if (transactionReceipt == null) {
       throw new IllegalStateException("Couldn't find transaction receipt with hash '" + transactionHash + "' on blockchain");
     }
+
+    // When transaction status in database is different from blockchain
+    // transaction status
+    boolean broadcastMinedTransaction = transactionDetail.isPending()
+        || (transactionDetail.isSucceeded() != transactionReceipt.isStatusOK());
 
     if (pendingTransactionFromDatabase && !transactionDetail.isPending()) {
       LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
@@ -348,6 +353,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       // Check if it has a know wallet from internal database before saving
       if (hasKnownWalletInTransaction(transactionDetail)) {
         getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
+      } else if (getTransactionService().isLogAllTransaction()) {
+        logStatistics(transactionDetail);
       }
     }
   }

@@ -16,6 +16,8 @@
  */
 package org.exoplatform.addon.wallet.utils;
 
+import static org.exoplatform.addon.wallet.statistic.StatisticUtils.*;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -35,6 +37,7 @@ import org.exoplatform.addon.wallet.model.transaction.FundsRequest;
 import org.exoplatform.addon.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.addon.wallet.service.WalletService;
 import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
+import org.exoplatform.addon.wallet.statistic.StatisticUtils;
 import org.exoplatform.commons.api.notification.model.ArgumentLiteral;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.api.settings.data.Scope;
@@ -193,6 +196,9 @@ public class WalletUtils {
 
   public static final String                          MAX_SENDING_TRANSACTIONS_ATTEMPTS        =
                                                                                         "transaction.pending.maxSendingAttempts";
+
+  public static final String                          LOG_ALL_CONTRACT_TRANSACTIONS            =
+                                                                                    "transaction.logAllContractTransactions";
 
   public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
@@ -831,6 +837,78 @@ public class WalletUtils {
       }
     }
     return blockchainUrlSuffix;
+  }
+
+  public static final void logStatistics(TransactionDetail transactionDetail) {
+    if (transactionDetail == null) {
+      return;
+    }
+    String contractMethodName = transactionDetail.getContractMethodName();
+
+    if (StringUtils.isBlank(contractMethodName)) {
+      contractMethodName = ETHER_FUNC_SEND_FUNDS;
+    }
+
+    Map<String, Object> parameters = new HashMap<>();
+    parameters.put(LOCAL_SERVICE, "wallet");
+    parameters.put(OPERATION, transformCapitalWithUnderscore(contractMethodName));
+    parameters.put("blockchain_network_id", getNetworkId());
+    parameters.put("blockchain_network_url_suffix", getBlockchainURLSuffix());
+
+    if (transactionDetail.getIssuerId() > 0 || transactionDetail.getIssuer() != null) {
+      parameters.put("user_social_id",
+                     transactionDetail.getIssuerId() > 0 ? transactionDetail.getIssuerId()
+                                                         : transactionDetail.getIssuer().getTechnicalId());
+    }
+
+    if (transactionDetail.getFromWallet() != null) {
+      parameters.put("sender", transactionDetail.getFromWallet());
+    } else if (transactionDetail.getFrom() != null) {
+      parameters.put("sender_wallet_address", transactionDetail.getFrom());
+    }
+
+    if (transactionDetail.getToWallet() != null) {
+      parameters.put("receiver", transactionDetail.getToWallet());
+    } else if (transactionDetail.getTo() != null) {
+      parameters.put("receiver_wallet_address", transactionDetail.getTo());
+    }
+
+    if (transactionDetail.getByWallet() != null) {
+      parameters.put("by", transactionDetail.getByWallet());
+    } else if (transactionDetail.getBy() != null) {
+      parameters.put("by_wallet_address", transactionDetail.getBy());
+    }
+
+    switch (contractMethodName) {
+    case CONTRACT_FUNC_INITIALIZEACCOUNT:
+      parameters.put("amount_ether", transactionDetail.getValue());
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case ETHER_FUNC_SEND_FUNDS:
+      parameters.put("amount_ether", transactionDetail.getValue());
+      break;
+    case CONTRACT_FUNC_TRANSFORMTOVESTED:
+    case CONTRACT_FUNC_TRANSFERFROM:
+    case CONTRACT_FUNC_TRANSFER:
+    case CONTRACT_FUNC_APPROVE:
+    case CONTRACT_FUNC_REWARD:
+      parameters.put("amount_token", transactionDetail.getContractAmount());
+      break;
+    case CONTRACT_FUNC_ADDADMIN:
+      parameters.put("admin_level", transactionDetail.getValue());
+      break;
+    default:
+      break;
+    }
+    parameters.put("token_fee", transactionDetail.getTokenFee());
+    parameters.put("ether_fee", transactionDetail.getEtherFee());
+    parameters.put("gas_price",
+                   convertFromDecimals(BigInteger.valueOf((long) transactionDetail.getGasPrice()), GWEI_TO_WEI_DECIMALS));
+    parameters.put("gas_used", transactionDetail.getGasUsed());
+    parameters.put("transaction", transactionDetail.getHash());
+    parameters.put(STATUS, transactionDetail.isSucceeded() ? "ok" : "ko");
+    parameters.put(STATUS_CODE, transactionDetail.isSucceeded() ? "200" : "500");
+    StatisticUtils.addStatisticEntry(parameters);
   }
 
   private static final WalletTokenAdminService getWalletTokenAdminService() {

@@ -143,4 +143,10 @@ public interface WalletTransactionService {
    */
   long getMaxAttemptsToSend();
 
+  /**
+   * @return true if all transactions including uknown ones detected on contract
+   *         has to be logged, else false
+   */
+  boolean isLogAllTransaction();
+
 }

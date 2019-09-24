@@ -51,6 +51,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private long                  maxAttemptsToSend;
 
+  private boolean               logAllTransaction;
+
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
                                       WalletContractService contractService,
@@ -71,6 +73,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       if (params.containsKey(MAX_SENDING_TRANSACTIONS_ATTEMPTS)) {
         String value = params.getValueParam(MAX_SENDING_TRANSACTIONS_ATTEMPTS).getValue();
         this.maxAttemptsToSend = Long.parseLong(value);
+      }
+      if (params.containsKey(LOG_ALL_CONTRACT_TRANSACTIONS)) {
+        String value = params.getValueParam(LOG_ALL_CONTRACT_TRANSACTIONS).getValue();
+        this.logAllTransaction = Boolean.parseBoolean(value);
       }
     }
     if (this.maxParallelPendingTransactions <= 0) {
@@ -295,6 +301,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getMaxAttemptsToSend() {
     return maxAttemptsToSend;
+  }
+
+  @Override
+  public boolean isLogAllTransaction() {
+    return logAllTransaction;
   }
 
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
