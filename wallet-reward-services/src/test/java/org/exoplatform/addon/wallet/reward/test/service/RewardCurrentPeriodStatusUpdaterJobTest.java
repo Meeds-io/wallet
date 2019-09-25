@@ -15,7 +15,8 @@ import org.exoplatform.addon.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJ
 import org.exoplatform.addon.wallet.reward.service.*;
 import org.exoplatform.addon.wallet.reward.storage.RewardReportStorage;
 import org.exoplatform.addon.wallet.reward.test.BaseWalletRewardTest;
-import org.exoplatform.addon.wallet.service.*;
+import org.exoplatform.addon.wallet.service.WalletAccountService;
+import org.exoplatform.addon.wallet.service.WalletTokenAdminService;
 import org.exoplatform.addon.wallet.storage.WalletStorage;
 import org.exoplatform.addon.wallet.utils.RewardUtils;
 import org.exoplatform.addon.wallet.utils.WalletUtils;
@@ -27,7 +28,6 @@ public class RewardCurrentPeriodStatusUpdaterJobTest extends BaseWalletRewardTes
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
-    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
     RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
 
     WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
@@ -35,7 +35,7 @@ public class RewardCurrentPeriodStatusUpdaterJobTest extends BaseWalletRewardTes
                                                                                   rewardTeamService,
                                                                                   rewardReportStorage);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
-    resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
+    resetTokenAdminService(tokenAdminService);
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
@@ -92,10 +92,7 @@ public class RewardCurrentPeriodStatusUpdaterJobTest extends BaseWalletRewardTes
     }
   }
 
-  private void resetTokenAdminService(WalletTransactionService walletTransactionService,
-                                      WalletTokenAdminService tokenAdminService,
-                                      boolean pendingTransactions,
-                                      boolean successTransactions) throws Exception { // NOSONAR
+  private void resetTokenAdminService(WalletTokenAdminService tokenAdminService) throws Exception {
     if (container.getComponentInstanceOfType(WalletTokenAdminService.class) != null) {
       container.unregisterComponent(WalletTokenAdminService.class);
     }
