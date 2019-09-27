@@ -444,7 +444,7 @@ export default {
       if (address.indexOf(searchText) > -1) {
         return true;
       }
-      if (searchText === '-' || (walletReward.poolName || walletReward.poolName.indexOf(searchText) > -1)) {
+      if (searchText === '-' || (walletReward.poolName && walletReward.poolName.indexOf(searchText) > -1)) {
         return true;
       }
       return false;

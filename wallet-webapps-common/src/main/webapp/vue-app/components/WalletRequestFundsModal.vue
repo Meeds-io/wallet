@@ -77,7 +77,6 @@
           {{ $t('exoplatform.wallet.button.sendRequest') }}
         </button>
         <button
-          :disabled="disabled"
           class="ignore-vuetify-classes btn ml-2"
           @click="dialog = false">
           {{ $t('exoplatform.wallet.button.close') }}
