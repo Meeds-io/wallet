@@ -10,7 +10,7 @@
   </parent>
   <groupId>org.exoplatform.addons.wallet</groupId>
   <artifactId>wallet</artifactId>
-  <version>1.0.x-SNAPSHOT</version>
+  <version>2.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>eXo Add-on:: Wallet Add-on</name>
   <description>eXo Wallet Add-on</description>
@@ -32,7 +32,7 @@
   </scm>
   <properties>
     <!-- 3rd party libraries versions -->
-    <org.exoplatform.platform.version>5.3.x-SNAPSHOT</org.exoplatform.platform.version>
+    <org.exoplatform.platform.version>6.0.x-SNAPSHOT</org.exoplatform.platform.version>
     <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
 
     <!-- Ethereum We3j for Java library -->
