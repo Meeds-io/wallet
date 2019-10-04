@@ -124,6 +124,9 @@ public class ServiceLoaderServlet extends HttpServlet {
       addBlockchainScheduledJob(TransactionSenderJob.class,
                                 "Configuration for transaction sending to blockchain",
                                 "0/30 * * * * ?");
+      addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
+                                "Configuration for pending transactions check on blockchain",
+                                "0 15 7 * * ?");
 
       WalletService walletService = container.getComponentInstanceOfType(WalletService.class);
       if (walletService.isUseDynamicGasPrice()) {

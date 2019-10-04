@@ -50,4 +50,14 @@ public interface BlockchainTransactionService {
    */
   long refreshBlockchainGasPrice() throws IOException;
 
+  /**
+   * checks transactions marked as pending in DB and verify their status on
+   * blockchain. If mined, the status gets updated on DB, else wait for next
+   * trigger time.
+   * 
+   * @param pendingTransactionMaxDays mas days to keep transactions not sent on
+   *          blockchain as pending. If equals or less than 0, no duration check
+   */
+  void checkPendingTransactions(long pendingTransactionMaxDays);
+
 }

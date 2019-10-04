@@ -150,6 +150,23 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
+  public void checkPendingTransactions(long pendingTransactionMaxDays) {
+    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+    if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
+      LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
+                pendingTransactions.size());
+
+      for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
+        try { // NOSONAR
+          checkTransactionStatusOnBlockchain(pendingTransactionDetail.getHash(), true);
+        } catch (Exception e) {
+          LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
+        }
+      }
+    }
+  }
+
+  @Override
   public void scanNewerBlocks() throws IOException {
     long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
     long lastWatchedBlockNumber = getLastWatchedBlockNumber();
