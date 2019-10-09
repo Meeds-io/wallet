@@ -276,6 +276,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             LOG.debug("Transaction '{}' was FOUND on blockchain for more than '{}' days, so avoid marking it as failed",
                       transactionHash,
                       pendingTransactionMaxDays);
+            checkTransactionStatusOnBlockchain(transactionHash, transaction, true);
           }
         }
       }
@@ -285,6 +286,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   @Override
   public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
+    checkTransactionStatusOnBlockchain(transactionHash, transaction, pendingTransactionFromDatabase);
+  }
+
+  @Override
+  public long refreshBlockchainGasPrice() throws IOException {
+    return ethereumClientConnector.getGasPrice().longValue();
+  }
+
+  private void checkTransactionStatusOnBlockchain(String transactionHash,
+                                                  Transaction transaction,
+                                                  boolean pendingTransactionFromDatabase) {
     if (transaction == null) {
       if (pendingTransactionFromDatabase) {
         TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
@@ -293,6 +305,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
               + " wasn't found in internal database while it should have been retrieved from it.");
         }
         LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
+        if (transactionDetail.getRawTransaction() == null) {
+          checkPendingTransactionValidity(transactionDetail);
+        }
       } else {
         throw new IllegalStateException("Transaction with hash " + transactionHash
             + " is not marked as pending but the transaction wasn't found on blockchain");
@@ -374,11 +389,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         logStatistics(transactionDetail);
       }
     }
-  }
-
-  @Override
-  public long refreshBlockchainGasPrice() throws IOException {
-    return ethereumClientConnector.getGasPrice().longValue();
   }
 
   private BiConsumer<? super EthSendTransaction, ? super Throwable> handleTransactionSending(final TransactionDetail transactionDetail) {

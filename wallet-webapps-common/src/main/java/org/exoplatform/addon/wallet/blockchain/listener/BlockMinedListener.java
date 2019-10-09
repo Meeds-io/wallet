@@ -78,13 +78,6 @@ public class BlockMinedListener extends Listener<Block, Boolean> implements ExoW
             }
           }
         }
-
-        for (TransactionDetail transactionDetail : pendingTransactions) {
-          if (!minedTransactionHashes.contains(transactionDetail.getHash())
-              && (transactionDetail.getRawTransaction() == null || transactionDetail.getSentTimestamp() > 0)) {
-            blockchainTransactionService.checkPendingTransactionValidity(transactionDetail);
-          }
-        }
       }
     } catch (Exception e) {
       LOG.error("Error while checking pending transactions on mined block '{}'", blockNumber, e);
