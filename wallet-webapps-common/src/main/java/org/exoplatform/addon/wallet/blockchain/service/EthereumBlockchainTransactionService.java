@@ -190,10 +190,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     boolean processed = true;
     for (String transactionHash : transactionHashes) {
-      // Pending transactions in database are already managed by
-      // checkPendingTransactions() method
       TransactionDetail transaction = getTransactionService().getTransactionByHash(transactionHash);
-      if (transaction != null && (transaction.isSucceeded() || transaction.isPending())) {
+      if (transaction != null && transaction.isSucceeded()) {
         continue;
       }
 
