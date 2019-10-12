@@ -3,7 +3,7 @@ package org.exoplatform.addon.wallet.reward.test.service;
 import static org.junit.Assert.*;
 
 import java.math.BigInteger;
-import java.time.YearMonth;
+import java.time.*;
 import java.util.*;
 import java.util.stream.LongStream;
 
@@ -338,6 +338,54 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
     }
+  }
+
+  @Test
+  public void testSaveRewardReport() {
+    RewardReport rewardReport = new RewardReport();
+    LocalDateTime date = LocalDateTime.now();
+
+    WalletAccountService accountService = getService(WalletAccountService.class);
+
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    RewardSettings defaultSettings = rewardSettingsService.getSettings();
+
+    RewardPeriod period = defaultSettings.getPeriodType().getPeriodOfTime(date);
+    rewardReport.setPeriod(period);
+    Set<WalletReward> rewards = new HashSet<>();
+    for (int i = 0; i < 20; i++) {
+      Wallet wallet = newWallet(i + 1l);
+      wallet = accountService.saveWallet(wallet, true);
+      updateWalletBlockchainState(wallet);
+      accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+      entitiesToClean.add(wallet);
+
+      WalletReward walletReward = new WalletReward();
+      walletReward.setWallet(wallet);
+      walletReward.setPeriod(period);
+      Set<WalletPluginReward> pluginRewards = new HashSet<>();
+      for (int j = 0; j < 10; j++) {
+        WalletPluginReward pluginReward = new WalletPluginReward();
+        pluginReward.setAmount(5);
+        pluginReward.setIdentityId(wallet.getTechnicalId());
+        pluginReward.setPluginId("plugin" + j);
+        pluginReward.setPoints(5);
+        pluginReward.setPoolsUsed(false);
+        pluginRewards.add(pluginReward);
+      }
+      walletReward.setRewards(pluginRewards);
+      rewards.add(walletReward);
+    }
+    rewardReport.setRewards(rewards);
+
+    RewardReportService rewardReportService = getService(RewardReportService.class);
+    rewardReportService.saveRewardReport(rewardReport);
+
+    RequestLifeCycle.end();
+    RequestLifeCycle.begin(container);
+
+    RewardReport savedRewardReport = rewardReportService.getRewardReport(date.toEpochSecond(ZoneOffset.UTC));
+    assertEquals(rewardReport, savedRewardReport);
   }
 
   @Test

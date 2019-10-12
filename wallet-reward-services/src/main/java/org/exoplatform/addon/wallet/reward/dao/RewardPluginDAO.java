@@ -12,17 +12,19 @@ import org.exoplatform.services.log.Log;
 public class RewardPluginDAO extends GenericDAOJPAImpl<WalletRewardPluginEntity, Long> {
   private static final Log LOG = ExoLogger.getLogger(RewardPluginDAO.class);
 
-  public List<WalletRewardPluginEntity> findRewardPluginsByPeriodId(long rewardId) {
+  public List<WalletRewardPluginEntity> getRewardPluginsByRewardId(long rewardId) {
     TypedQuery<WalletRewardPluginEntity> query = getEntityManager().createNamedQuery("RewardPlugin.getRewardPluginsByRewardId",
                                                                                      WalletRewardPluginEntity.class);
     query.setParameter("rewardId", rewardId);
     return query.getResultList();
   }
 
-  public WalletRewardPluginEntity findRewardPluginByRewardIdAndPlugin(long rewardId, String pluginId) {
-    TypedQuery<WalletRewardPluginEntity> query = getEntityManager().createNamedQuery("RewardPlugin.getRewardPluginsByRewardId",
-                                                                                     WalletRewardPluginEntity.class);
+  public WalletRewardPluginEntity getRewardPluginsByRewardIdAndPluginId(long rewardId, String pluginId) {
+    TypedQuery<WalletRewardPluginEntity> query =
+                                               getEntityManager().createNamedQuery("RewardPlugin.getRewardPluginsByRewardIdAndPluginId",
+                                                                                   WalletRewardPluginEntity.class);
     query.setParameter("rewardId", rewardId);
+    query.setParameter("pluginId", pluginId);
     List<WalletRewardPluginEntity> result = query.getResultList();
     if (result == null || result.isEmpty()) {
       return null;

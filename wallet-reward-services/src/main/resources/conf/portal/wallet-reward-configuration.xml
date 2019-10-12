@@ -104,7 +104,7 @@
           <property name="jobName" value="RewardStatusVerifierJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob"/>
-          <property name="expression" value="${exo.addon.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
+          <property name="expression" value="${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
         </properties-param>
       </init-params>
     </component-plugin>
@@ -120,7 +120,7 @@
           <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
-          <property name="expression" value="${exo.addon.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
+          <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
         </properties-param>
       </init-params>
     </component-plugin>

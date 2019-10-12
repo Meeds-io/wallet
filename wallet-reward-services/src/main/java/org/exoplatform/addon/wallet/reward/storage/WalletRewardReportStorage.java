@@ -162,7 +162,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
 
       for (WalletPluginReward rewardPlugin : rewardPlugins) {
         WalletRewardPluginEntity rewardPluginEntity =
-                                                    rewardPluginDAO.findRewardPluginByRewardIdAndPlugin(rewardEntity.getId(),
+                                                    rewardPluginDAO.getRewardPluginsByRewardIdAndPluginId(rewardEntity.getId(),
                                                                                                         rewardPlugin.getPluginId());
         if (rewardPluginEntity == null) {
           rewardPluginEntity = new WalletRewardPluginEntity();
@@ -216,7 +216,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
   }
 
   private Set<WalletPluginReward> getRewardPluginsByRewardId(Long rewardId) {
-    List<WalletRewardPluginEntity> rewardsPluginEntities = rewardPluginDAO.findRewardPluginsByPeriodId(rewardId);
+    List<WalletRewardPluginEntity> rewardsPluginEntities = rewardPluginDAO.getRewardPluginsByRewardId(rewardId);
     if (rewardsPluginEntities != null) {
       return rewardsPluginEntities.stream()
                                   .map(entity -> toDTO(entity))

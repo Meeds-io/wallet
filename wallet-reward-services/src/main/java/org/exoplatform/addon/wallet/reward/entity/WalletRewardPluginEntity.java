@@ -14,6 +14,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @Table(name = "ADDONS_WALLET_REWARD_PLUGIN")
 @NamedQueries({
     @NamedQuery(name = "RewardPlugin.getRewardPluginsByRewardId", query = "SELECT rp FROM RewardPlugin rp WHERE rp.reward.id = :rewardId"),
+    @NamedQuery(name = "RewardPlugin.getRewardPluginsByRewardIdAndPluginId", query = "SELECT rp FROM RewardPlugin rp WHERE rp.reward.id = :rewardId AND rp.pluginId = :pluginId"),
 })
 public class WalletRewardPluginEntity implements Serializable {
 
