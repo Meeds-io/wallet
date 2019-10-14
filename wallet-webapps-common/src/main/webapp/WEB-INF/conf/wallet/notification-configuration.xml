@@ -55,7 +55,7 @@
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.addon.wallet.notification.plugin.WalletReceiverNotificationPlugin</type>
+      <type>org.exoplatform.wallet.notification.plugin.WalletReceiverNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.WalletReceiverNotificationPlugin</name>
@@ -92,7 +92,7 @@
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.addon.wallet.notification.plugin.WalletSenderNotificationPlugin</type>
+      <type>org.exoplatform.wallet.notification.plugin.WalletSenderNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.WalletSenderNotificationPlugin</name>
@@ -129,7 +129,7 @@
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.addon.wallet.notification.plugin.FundsRequestNotificationPlugin</type>
+      <type>org.exoplatform.wallet.notification.plugin.FundsRequestNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.FundsRequestNotificationPlugin</name>
@@ -166,7 +166,7 @@
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessNotificationPlugin</type>
+      <type>org.exoplatform.wallet.reward.notification.RewardSuccessNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.RewardSuccessNotificationPlugin</name>
@@ -205,7 +205,7 @@
     <component-plugin>
       <name>web.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.notification.provider.WebTemplateProvider</type>
+      <type>org.exoplatform.wallet.notification.provider.WebTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -216,7 +216,7 @@
     <component-plugin>
       <name>mail.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.notification.provider.MailTemplateProvider</type>
+      <type>org.exoplatform.wallet.notification.provider.MailTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -227,7 +227,7 @@
     <component-plugin>
       <name>push.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.notification.provider.MobilePushTemplateProvider</type>
+      <type>org.exoplatform.wallet.notification.provider.MobilePushTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -238,7 +238,7 @@
     <component-plugin>
       <name>web.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -249,7 +249,7 @@
     <component-plugin>
       <name>mail.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -260,7 +260,7 @@
     <component-plugin>
       <name>push.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.addon.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>

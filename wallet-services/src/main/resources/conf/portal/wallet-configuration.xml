@@ -4,42 +4,42 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 
   <component>
-    <type>org.exoplatform.addon.wallet.dao.AddressLabelDAO</type>
+    <type>org.exoplatform.wallet.dao.AddressLabelDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.dao.WalletAccountDAO</type>
+    <type>org.exoplatform.wallet.dao.WalletAccountDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.dao.WalletTransactionDAO</type>
+    <type>org.exoplatform.wallet.dao.WalletTransactionDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.dao.WalletPrivateKeyDAO</type>
+    <type>org.exoplatform.wallet.dao.WalletPrivateKeyDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.dao.WalletBlockchainStateDAO</type>
+    <type>org.exoplatform.wallet.dao.WalletBlockchainStateDAO</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.storage.WalletStorage</key>
-    <type>org.exoplatform.addon.wallet.storage.cached.CachedAccountStorage</type>
+    <key>org.exoplatform.wallet.storage.WalletStorage</key>
+    <type>org.exoplatform.wallet.storage.cached.CachedAccountStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.storage.TransactionStorage</key>
-    <type>org.exoplatform.addon.wallet.storage.cached.CachedTransactionStorage</type>
+    <key>org.exoplatform.wallet.storage.TransactionStorage</key>
+    <type>org.exoplatform.wallet.storage.cached.CachedTransactionStorage</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.storage.AddressLabelStorage</type>
+    <type>org.exoplatform.wallet.storage.AddressLabelStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.service.WalletAccountService</key>
-    <type>org.exoplatform.addon.wallet.service.WalletAccountServiceImpl</type>
+    <key>org.exoplatform.wallet.service.WalletAccountService</key>
+    <type>org.exoplatform.wallet.service.WalletAccountServiceImpl</type>
     <init-params>
       <value-param>
         <name>admin.wallet.key</name>
@@ -50,8 +50,8 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.service.WalletTransactionService</key>
-    <type>org.exoplatform.addon.wallet.service.WalletTransactionServiceImpl</type>
+    <key>org.exoplatform.wallet.service.WalletTransactionService</key>
+    <type>org.exoplatform.wallet.service.WalletTransactionServiceImpl</type>
     <init-params>
       <value-param>
         <name>transaction.pending.maxDays</name>
@@ -77,25 +77,25 @@
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.service.WalletContractService</key>
-    <type>org.exoplatform.addon.wallet.service.WalletContractServiceImpl</type>
+    <key>org.exoplatform.wallet.service.WalletContractService</key>
+    <type>org.exoplatform.wallet.service.WalletContractServiceImpl</type>
     <init-params>
       <value-param>
         <name>contract.abi.path</name>
         <description>Token Contract ABI path</description>
-        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.json}</value>
+        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/wallet/contract/ERTTokenV2.json}</value>
       </value-param>
       <value-param>
         <name>contract.bin.path</name>
         <description>Token Contract BIN path</description>
-        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/addon/wallet/contract/ERTTokenV2.bin}</value>
+        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/wallet/contract/ERTTokenV2.bin}</value>
       </value-param>
     </init-params>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.service.WalletService</key>
-    <type>org.exoplatform.addon.wallet.service.WalletServiceImpl</type>
+    <key>org.exoplatform.wallet.service.WalletService</key>
+    <type>org.exoplatform.wallet.service.WalletServiceImpl</type>
     <init-params>
       <value-param>
         <name>networkId</name>
@@ -151,31 +151,31 @@
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.service.WalletWebSocketService</type>
+    <type>org.exoplatform.wallet.service.WalletWebSocketService</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletSettingsREST</type>
+    <type>org.exoplatform.wallet.rest.WalletSettingsREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletAccountREST</type>
+    <type>org.exoplatform.wallet.rest.WalletAccountREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletContractREST</type>
+    <type>org.exoplatform.wallet.rest.WalletContractREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletTransactionREST</type>
+    <type>org.exoplatform.wallet.rest.WalletTransactionREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.rest.WalletAdminTransactionREST</type>
+    <type>org.exoplatform.wallet.rest.WalletAdminTransactionREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.plugin.WalletAdminIdentityProvider</type>
+    <type>org.exoplatform.wallet.plugin.WalletAdminIdentityProvider</type>
   </component>
 
   <external-component-plugins>
@@ -187,7 +187,7 @@
       <init-params>
         <values-param>
           <name>providers</name>
-          <value>org.exoplatform.addon.wallet.plugin.WalletAdminIdentityProvider</value>
+          <value>org.exoplatform.wallet.plugin.WalletAdminIdentityProvider</value>
         </values-param>
       </init-params>
     </component-plugin>
@@ -198,7 +198,7 @@
     <component-plugin>
       <name>wallet</name>
       <set-method>addFeaturePlugin</set-method>
-      <type>org.exoplatform.addon.wallet.plugin.WalletFeaturePlugin</type>
+      <type>org.exoplatform.wallet.plugin.WalletFeaturePlugin</type>
     </component-plugin>
   </external-component-plugins>
 

@@ -8,40 +8,9 @@
   <artifactId>wallet-webapps-admin</artifactId>
   <packaging>war</packaging>
   <name>eXo Add-on:: Wallet - Admin Application</name>
-  <dependencies>
-    <dependency>
-      <groupId>org.exoplatform.wallet</groupId>
-      <artifactId>ert-contract</artifactId>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
   <build>
     <finalName>wallet-admin</finalName>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.exoplatform.wallet</groupId>
-                  <artifactId>ert-contract</artifactId>
-                  <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/contracts</outputDirectory>
-                  <includes>**/*.bin,**/*.json</includes>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>

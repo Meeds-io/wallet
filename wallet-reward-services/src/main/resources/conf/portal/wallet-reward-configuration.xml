@@ -4,74 +4,74 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO</type>
+    <type>org.exoplatform.wallet.reward.dao.RewardTeamDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.dao.RewardPluginDAO</type>
+    <type>org.exoplatform.wallet.reward.dao.RewardPluginDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.dao.RewardDAO</type>
+    <type>org.exoplatform.wallet.reward.dao.RewardDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.dao.RewardPeriodDAO</type>
+    <type>org.exoplatform.wallet.reward.dao.RewardPeriodDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.dao.RewardTeamDAO</type>
+    <type>org.exoplatform.wallet.reward.dao.RewardTeamDAO</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.storage.RewardTeamStorage</key>
-    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardTeamStorage</type>
+    <key>org.exoplatform.wallet.reward.storage.RewardTeamStorage</key>
+    <type>org.exoplatform.wallet.reward.storage.WalletRewardTeamStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.storage.RewardReportStorage</key>
-    <type>org.exoplatform.addon.wallet.reward.storage.WalletRewardReportStorage</type>
+    <key>org.exoplatform.wallet.reward.storage.RewardReportStorage</key>
+    <type>org.exoplatform.wallet.reward.storage.WalletRewardReportStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardTeamService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardTeamService</type>
+    <key>org.exoplatform.wallet.reward.service.RewardTeamService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardTeamService</type>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardSettingsService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardSettingsService</type>
+    <key>org.exoplatform.wallet.reward.service.RewardSettingsService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardSettingsService</type>
     <component-plugins>
       <component-plugin>
         <name>gamification</name>
         <set-method>registerPlugin</set-method>
-        <type>org.exoplatform.addon.wallet.reward.plugin.GamificationRewardPlugin</type>
+        <type>org.exoplatform.wallet.reward.plugin.GamificationRewardPlugin</type>
         <description>Gamification points reward plugin</description>
       </component-plugin>
       <component-plugin>
         <name>kudos</name>
         <set-method>registerPlugin</set-method>
-        <type>org.exoplatform.addon.wallet.reward.plugin.KudosRewardPlugin</type>
+        <type>org.exoplatform.wallet.reward.plugin.KudosRewardPlugin</type>
         <description>Kudos reward plugin</description>
       </component-plugin>
     </component-plugins>
   </component>
 
   <component>
-    <key>org.exoplatform.addon.wallet.reward.service.RewardReportService</key>
-    <type>org.exoplatform.addon.wallet.reward.service.WalletRewardReportService</type>
+    <key>org.exoplatform.wallet.reward.service.RewardReportService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardReportService</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.rest.RewardTeamREST</type>
+    <type>org.exoplatform.wallet.reward.rest.RewardTeamREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.rest.RewardSettingsREST</type>
+    <type>org.exoplatform.wallet.reward.rest.RewardSettingsREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.addon.wallet.reward.rest.RewardReportREST</type>
+    <type>org.exoplatform.wallet.reward.rest.RewardReportREST</type>
   </component>
 
   <external-component-plugins>
@@ -103,7 +103,7 @@
           <description>Configuration for rewards transactions status verifier</description>
           <property name="jobName" value="RewardStatusVerifierJob"/>
           <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardStatusVerifierJob"/>
+          <property name="job" value="org.exoplatform.wallet.reward.job.RewardStatusVerifierJob"/>
           <property name="expression" value="${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
         </properties-param>
       </init-params>
@@ -119,7 +119,7 @@
           <description>Configuration for reward report updater for current period</description>
           <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
           <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.addon.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
+          <property name="job" value="org.exoplatform.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
           <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
         </properties-param>
       </init-params>
@@ -131,7 +131,7 @@
     <component-plugin>
       <name>exo.wallet.reward.report.success</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.addon.wallet.reward.listener.RewardSucceedNotificationListener</type>
+      <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
     </component-plugin>
   </external-component-plugins>
 
