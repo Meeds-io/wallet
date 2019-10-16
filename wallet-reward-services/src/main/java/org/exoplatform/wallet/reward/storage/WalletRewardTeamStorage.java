@@ -30,7 +30,6 @@ import org.exoplatform.wallet.model.reward.RewardTeamMember;
 import org.exoplatform.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.wallet.reward.entity.RewardTeamMemberEntity;
-import org.exoplatform.wallet.reward.storage.RewardTeamStorage;
 
 /**
  * A storage service to save/load reward teams

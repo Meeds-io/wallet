@@ -35,7 +35,6 @@ import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.reward.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.api.RewardPlugin;
-import org.exoplatform.wallet.reward.service.*;
 import org.exoplatform.wallet.reward.storage.RewardReportStorage;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTokenAdminService;

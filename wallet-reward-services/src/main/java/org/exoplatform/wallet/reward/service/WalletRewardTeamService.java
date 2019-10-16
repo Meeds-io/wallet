@@ -19,7 +19,6 @@ package org.exoplatform.wallet.reward.service;
 import java.util.List;
 
 import org.exoplatform.wallet.model.reward.RewardTeam;
-import org.exoplatform.wallet.reward.service.RewardTeamService;
 import org.exoplatform.wallet.reward.storage.RewardTeamStorage;
 
 /**

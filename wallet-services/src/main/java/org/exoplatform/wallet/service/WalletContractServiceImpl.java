@@ -22,7 +22,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
-import org.exoplatform.wallet.service.*;
 
 public class WalletContractServiceImpl implements WalletContractService, Startable {
 

@@ -40,7 +40,6 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.settings.*;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
-import org.exoplatform.wallet.service.*;
 
 /**
  * A storage service to save/load information used by users and spaces wallets

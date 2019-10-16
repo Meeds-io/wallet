@@ -19,8 +19,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.model.*;
-import org.exoplatform.wallet.service.WalletAccountService;
-import org.exoplatform.wallet.service.WalletTokenAdminService;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.wallet.storage.AddressLabelStorage;

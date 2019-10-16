@@ -28,7 +28,6 @@ import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.wallet.model.reward.*;
 import org.exoplatform.wallet.reward.api.RewardPlugin;
-import org.exoplatform.wallet.reward.service.RewardSettingsService;
 
 /**
  * A storage service to save/load reward transactions

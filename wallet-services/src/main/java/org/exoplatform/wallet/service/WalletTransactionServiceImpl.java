@@ -20,7 +20,6 @@ import org.exoplatform.social.core.space.spi.SpaceService;
 import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
-import org.exoplatform.wallet.service.*;
 import org.exoplatform.wallet.storage.TransactionStorage;
 
 public class WalletTransactionServiceImpl implements WalletTransactionService {

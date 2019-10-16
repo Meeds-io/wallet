@@ -18,7 +18,8 @@ package org.exoplatform.wallet.reward.job;
 
 import static org.exoplatform.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import org.quartz.*;
 
