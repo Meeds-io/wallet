@@ -35,8 +35,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
-import org.exoplatform.wallet.service.WalletTokenAdminService;
-import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.service.*;
 
 import io.swagger.annotations.*;
 
@@ -45,13 +44,15 @@ import io.swagger.annotations.*;
 @Api(value = "/wallet/api/transaction", description = "Manages internally stored transactions") // NOSONAR
 public class WalletTransactionREST implements ResourceContainer {
 
-  private static final String      EMPTY_ADDRESS_ERROR = "Bad request sent to server with empty address {}";
+  private static final String          EMPTY_ADDRESS_ERROR = "Bad request sent to server with empty address {}";
 
-  private static final Log         LOG                 = ExoLogger.getLogger(WalletTransactionREST.class);
+  private static final Log             LOG                 = ExoLogger.getLogger(WalletTransactionREST.class);
 
-  private WalletTransactionService transactionService;
+  private BlockchainTransactionService blockchainTransactionService;
 
-  private WalletTokenAdminService  walletTokenAdminService;
+  private WalletTransactionService     transactionService;
+
+  private WalletTokenAdminService      walletTokenAdminService;
 
   public WalletTransactionREST(WalletTransactionService transactionService) {
     this.transactionService = transactionService;
@@ -225,9 +226,32 @@ public class WalletTransactionREST implements ResourceContainer {
     }
   }
 
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("refreshTransactionFromBlockchain")
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "refresh transaction detail from blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "return transaction detail refreshed from blockchain")
+  @ApiResponses(value = {
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = 500, message = "Internal server error") })
+  public Response refreshTransactionFromBlockchain(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash) {
+    if (StringUtils.isBlank(hash)) {
+      LOG.warn("Bad request sent to server with empty transaction hash");
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+    try {
+      TransactionDetail transactionDetail = getBlockchainTransactionService().refreshTransactionFromBlockchain(hash);
+      return Response.ok(transactionDetail).build();
+    } catch (Exception e) {
+      LOG.error("Error refreshing transaction with hash {} from blockchain", hash, e);
+      return Response.serverError().build();
+    }
+  }
+
   /**
-   * Workaround: WalletTokenAdminService retrieved here instead of dependency
-   * injection using constructor because the service is added after
+   * Workaround: {@link WalletTokenAdminService} retrieved here instead of
+   * dependency injection using constructor because the service is added after
    * PortalContainer startup. (See PLF-8123)
    * 
    * @return wallet token service
@@ -237,6 +261,20 @@ public class WalletTransactionREST implements ResourceContainer {
       walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
     return walletTokenAdminService;
+  }
+
+  /**
+   * Workaround: {@link BlockchainTransactionService} retrieved here instead of
+   * dependency injection using constructor because the service is added after
+   * PortalContainer startup. (See PLF-8123)
+   * 
+   * @return blockchain transaction service
+   */
+  public BlockchainTransactionService getBlockchainTransactionService() {
+    if (blockchainTransactionService == null) {
+      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
+    }
+    return blockchainTransactionService;
   }
 
 }

@@ -616,6 +616,18 @@
                   </div>
                 </v-list-item-content>
               </v-list-item>
+
+              <v-list-item v-if="administration && !item.refreshed && userAdminLevel">
+                <v-list-item-content>
+                  <v-btn
+                    class="btn ignore-vuetify-classes"
+                    :loading="item.refreshing"
+                    @click="refreshFromBlockchain(item)">
+                    {{ $t('exoplatform.wallet.button.refresh') }}
+                  </v-btn>
+                </v-list-item-content>
+              </v-list-item>
+
               <v-list-item v-if="administration && item.issuer">
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.issuer') }}
@@ -631,7 +643,7 @@
                     :avatar="item.issuer.avatar" />
                 </v-list-item-content>
               </v-list-item>
-  
+
               <v-list-item v-if="item.label" class="dynamic-height">
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionLabel') }}
@@ -836,7 +848,7 @@ import WalletAddress from './WalletAddress.vue';
 import ProfileChip from './ProfileChip.vue';
 
 import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
-import {loadTransactions} from '../js/TransactionUtils.js';
+import {loadTransactions, refreshTransactionDetail} from '../js/TransactionUtils.js';
 
 export default {
   components: {
@@ -916,6 +928,9 @@ export default {
     },
     contractName() {
       return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
+    },
+    userAdminLevel() {
+      return this.settings && this.settings.wallet && this.settings.wallet.adminLevel;
     },
     sortedTransactions() {
       // A trick to force update computed list
@@ -1025,6 +1040,25 @@ export default {
           console.debug('loadTransactions - method error', e);
           this.$emit('error', `${e}`);
         });
+    },
+    refreshFromBlockchain(transactionDetail) {
+      if (!transactionDetail || !transactionDetail.hash) {
+        return;
+      }
+      this.$set(transactionDetail, 'refreshing', true);
+      this.$forceUpdate();
+
+      refreshTransactionDetail(transactionDetail.hash)
+        .then(refreshedTransactionDetail => {
+          if (refreshedTransactionDetail) {
+            Object.assign(transactionDetail, refreshedTransactionDetail);
+            this.$set(transactionDetail, 'refreshed', true);
+          }
+        })
+        .finally(() => {
+          this.$set(transactionDetail, 'refreshing', false);
+          this.$forceUpdate();
+        })
     },
     forceUpdateList() {
       try {

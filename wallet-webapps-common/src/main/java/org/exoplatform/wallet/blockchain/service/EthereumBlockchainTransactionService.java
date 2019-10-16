@@ -31,12 +31,12 @@ import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.methods.response.*;
 
-import org.exoplatform.wallet.contract.ERTTokenV2;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.contract.ERTTokenV2;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
@@ -285,6 +285,16 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     checkTransactionStatusOnBlockchain(transactionHash, transaction, pendingTransactionFromDatabase);
+  }
+
+  @Override
+  public TransactionDetail refreshTransactionFromBlockchain(String hash) {
+    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(hash);
+    if (transactionDetail == null) {
+      return null;
+    }
+    checkTransactionStatusOnBlockchain(hash, true);
+    return getTransactionService().getTransactionByHash(hash);
   }
 
   @Override

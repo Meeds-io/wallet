@@ -31,6 +31,15 @@ public interface BlockchainTransactionService {
   void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase);
 
   /**
+   * This will refresh transaction from blockchain if the transaction is marked
+   * as pending or marked as error
+   * 
+   * @param hash hash of transaction to update
+   * @return refreshed {@link TransactionDetail} from blockchain
+   */
+  TransactionDetail refreshTransactionFromBlockchain(String hash);
+
+  /**
    * Checks that a transaction marked as pending in internal database is valid
    * and available on blockchain. If not and if it has exceede
    * {@link WalletTransactionService#getPendingTransactionMaxDays()}, then mark

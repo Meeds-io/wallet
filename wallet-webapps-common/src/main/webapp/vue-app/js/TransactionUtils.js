@@ -18,6 +18,22 @@ export function loadTransactions(account, contractDetails, transactions, onlyPen
     });
 }
 
+export function refreshTransactionDetail(hash) {
+  return fetch(`/portal/rest/wallet/api/transaction/refreshTransactionFromBlockchain?hash=${hash}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+    },
+  }).then(resp => {
+    if(resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error while sending transaction');
+    }
+  });
+}
+
 export function saveTransactionDetails(transationDetails, contractDetails) {
   return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
     method: 'POST',
