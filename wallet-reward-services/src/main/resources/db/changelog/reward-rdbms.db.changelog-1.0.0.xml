@@ -143,4 +143,10 @@
     </sql>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-11">
+    <addColumn tableName="ADDONS_WALLET_GAM_TEAM">
+      <column name="TEAM_DELETED" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

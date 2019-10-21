@@ -59,4 +59,12 @@ public interface RewardTeamStorage {
    * @return {@link List} of {@link RewardTeam}
    */
   public List<RewardTeam> findTeamsByMemberId(long identityId);
+
+  /**
+   * Retrieve team identified by its technical id
+   * 
+   * @param teamId team DB ID
+   * @return {@link RewardTeam}
+   */
+  public RewardTeam getTeamsById(long teamId);
 }

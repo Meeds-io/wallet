@@ -18,4 +18,11 @@ public class RewardTeamDAO extends GenericDAOJPAImpl<RewardTeamEntity, Long> {
     return result == null ? Collections.emptyList() : result;
   }
 
+  public List<RewardTeamEntity> findNotDeletedTeams() {
+    TypedQuery<RewardTeamEntity> query = getEntityManager().createNamedQuery("RewardTeam.findNoDeletedTeams",
+                                                                             RewardTeamEntity.class);
+    List<RewardTeamEntity> result = query.getResultList();
+    return result == null ? Collections.emptyList() : result;
+  }
+
 }

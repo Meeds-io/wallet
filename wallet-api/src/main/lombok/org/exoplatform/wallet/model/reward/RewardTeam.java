@@ -37,6 +37,9 @@ public class RewardTeam implements Serializable {
   private boolean                disabled;
 
   @Exclude
+  private boolean                deleted;
+
+  @Exclude
   private RewardTeamMember       manager;
 
   @Exclude

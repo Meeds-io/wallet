@@ -61,4 +61,11 @@ public class WalletRewardTeamService implements RewardTeamService {
     return this.rewardTeamStorage.findTeamsByMemberId(identityId);
   }
 
+  public RewardTeam getTeamsById(long teamId) {
+    if (teamId == 0) {
+      throw new IllegalArgumentException("Team id is required");
+    }
+    return this.rewardTeamStorage.getTeamsById(teamId);
+  }
+
 }

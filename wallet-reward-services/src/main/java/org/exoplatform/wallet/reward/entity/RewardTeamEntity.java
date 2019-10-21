@@ -16,7 +16,8 @@ import org.exoplatform.wallet.model.reward.RewardBudgetType;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_GAM_TEAM")
 @NamedQueries({
-    @NamedQuery(name = "RewardTeam.findTeamsByMemberId", query = "SELECT rt FROM RewardTeam rt JOIN rt.members mem WHERE mem.identityId = :identityId ORDER BY rt.id DESC"),
+    @NamedQuery(name = "RewardTeam.findNoDeletedTeams", query = "SELECT rt FROM RewardTeam rt WHERE rt.deleted = FALSE ORDER BY rt.id DESC"),
+    @NamedQuery(name = "RewardTeam.findTeamsByMemberId", query = "SELECT rt FROM RewardTeam rt JOIN rt.members mem WHERE rt.deleted = FALSE AND mem.identityId = :identityId ORDER BY rt.id DESC"),
 })
 public class RewardTeamEntity implements Serializable {
 
@@ -48,6 +49,9 @@ public class RewardTeamEntity implements Serializable {
 
   @Column(name = "TEAM_DISABLED")
   private Boolean                     disabled;
+
+  @Column(name = "TEAM_DELETED")
+  private Boolean                     deleted;
 
   @OneToMany(mappedBy = "team", fetch = FetchType.EAGER, cascade = { CascadeType.ALL }, orphanRemoval = true)
   private Set<RewardTeamMemberEntity> members          = new HashSet<>();
@@ -114,6 +118,14 @@ public class RewardTeamEntity implements Serializable {
 
   public void setDisabled(Boolean disabled) {
     this.disabled = disabled;
+  }
+
+  public void setDeleted(Boolean deleted) {
+    this.deleted = deleted;
+  }
+
+  public Boolean getDeleted() {
+    return deleted;
   }
 
   public Set<RewardTeamMemberEntity> getMembers() {

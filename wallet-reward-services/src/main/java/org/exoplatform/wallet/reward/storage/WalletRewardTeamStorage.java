@@ -44,7 +44,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
 
   @Override
   public List<RewardTeam> getTeams() {
-    List<RewardTeamEntity> teamEntities = rewardTeamDAO.findAll();
+    List<RewardTeamEntity> teamEntities = rewardTeamDAO.findNotDeletedTeams();
     return teamEntities.stream().map(teamEntity -> toDTO(teamEntity)).collect(Collectors.toList());
   }
 
@@ -69,7 +69,8 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     }
     RewardTeamEntity entity = rewardTeamDAO.find(teamId);
     if (entity != null) {
-      rewardTeamDAO.delete(entity);
+      entity.setDeleted(true);
+      rewardTeamDAO.update(entity);
     }
     return toDTO(entity);
   }
@@ -89,6 +90,12 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     return entities.stream().map(team -> toDTO(team)).collect(Collectors.toList());
   }
 
+  @Override
+  public RewardTeam getTeamsById(long teamId) {
+    RewardTeamEntity teamEntity = rewardTeamDAO.find(teamId);
+    return toDTO(teamEntity);
+  }
+
   private static RewardTeamEntity fromDTO(RewardTeam rewardTeam) {
     if (rewardTeam == null) {
       return null;
@@ -100,6 +107,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     teamEntity.setBudget(rewardTeam.getBudget());
     teamEntity.setRewardType(rewardTeam.getRewardType());
     teamEntity.setDisabled(rewardTeam.isDisabled());
+    teamEntity.setDeleted(rewardTeam.isDeleted());
     if (rewardTeam.getManager() != null && rewardTeam.getManager().getIdentityId() != 0) {
       teamEntity.setManager(rewardTeam.getManager().getIdentityId());
     }
@@ -128,6 +136,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     rewardTeam.setManager(getRewardTeamMember(teamEntity.getManager()));
     rewardTeam.setRewardType(teamEntity.getRewardType());
     rewardTeam.setDisabled(teamEntity.getDisabled());
+    rewardTeam.setDeleted(teamEntity.getDeleted());
     if (teamEntity.getSpaceId() != null && teamEntity.getSpaceId() != 0) {
       SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
       Space space = spaceService.getSpaceById(String.valueOf(teamEntity.getSpaceId()));

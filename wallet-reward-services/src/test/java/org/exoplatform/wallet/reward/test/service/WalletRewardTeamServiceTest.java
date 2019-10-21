@@ -67,12 +67,18 @@ public class WalletRewardTeamServiceTest extends BaseWalletRewardTest {
     RewardTeam rewardTeam = newRewardTeam();
 
     rewardTeam = rewardTeamService.saveTeam(rewardTeam);
+    assertFalse(rewardTeam.isDeleted());
     List<RewardTeam> teams = rewardTeamService.getTeams();
     assertEquals(1, teams.size());
 
     rewardTeamService.removeTeam(rewardTeam.getId());
     teams = rewardTeamService.getTeams();
     assertEquals(0, teams.size());
+
+    rewardTeam = rewardTeamService.getTeamsById(rewardTeam.getId());
+    assertTrue(rewardTeam.isDeleted());
+
+    entitiesToClean.add(rewardTeam);
   }
 
 }
