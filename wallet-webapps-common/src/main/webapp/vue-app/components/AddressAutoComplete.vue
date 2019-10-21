@@ -197,19 +197,19 @@ export default {
         return searchWallets(value).then((data) => {
           this.items = data;
           if (!this.items) {
-            if (this.currentUserItem) {
+            if (this.currentUserItem && !this.ignoreCurrentUser) {
               this.items = [this.currentUserItem];
             } else {
               this.items = [];
             }
-          } else if (this.currentUserItem) {
+          } else if (this.currentUserItem && !this.ignoreCurrentUser) {
             this.items.push(this.currentUserItem);
           }
         })
         .finally(() => {
           this.isLoadingSuggestions = false;
         });
-      } else if (this.currentUserItem) {
+      } else if (this.currentUserItem && !this.ignoreCurrentUser) {
         this.items = [this.currentUserItem];
       } else {
         this.items = [];
