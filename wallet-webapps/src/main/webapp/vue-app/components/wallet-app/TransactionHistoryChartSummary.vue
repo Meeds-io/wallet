@@ -78,6 +78,8 @@ export default {
   watch: {
     periodicity(newVal) {
       this.selectedPickerDate = this.selectedDate = new Date().toISOString().substr(0, 7);
+      this.updateDatePickerSelection();
+      this.$emit('period-changed', this.periodicity, this.selectedDate);
     },
     selectedDate(newVal) {
       this.$emit('period-changed', this.periodicity, this.selectedDate);
@@ -87,7 +89,7 @@ export default {
     this.lang = eXo.env.portal.language;
   },
   methods: {
-    openDatePicker() {
+    updateDatePickerSelection() {
       if (this.periodicity === 'month') {
         if (this.$refs.datePicker) {
           this.$refs.datePicker.activePicker = 'MONTH';
@@ -97,6 +99,9 @@ export default {
           this.$refs.datePicker.activePicker = 'YEAR';
         }
       }
+    },
+    openDatePicker() {
+      this.updateDatePickerSelection();
       this.selectDateMenu = true;
     },
     selectPeriod(date) {
