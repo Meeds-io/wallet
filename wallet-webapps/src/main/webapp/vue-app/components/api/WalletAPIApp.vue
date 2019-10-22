@@ -57,7 +57,7 @@ export default {
           if(settings.sender.type === 'space') {
             isSpace = true;
             window.walletSpaceGroup = settings.sender.id;
-          } else {
+          } else if (settings.sender.id !== eXo.env.portal.userName) {
             throw new Error(this.$t('exoplatform.wallet.warning.walletInitializationFailure'));
           }
         }
