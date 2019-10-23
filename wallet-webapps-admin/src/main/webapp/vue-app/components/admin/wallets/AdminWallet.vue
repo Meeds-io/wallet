@@ -63,6 +63,19 @@
         </template>
       </div>
     </v-flex>
+
+    <v-flex
+      class="my-auto text-center text-md-left no-wrap"
+      md1
+      xs12>
+      <v-btn
+        icon
+        text
+        class="ml-4"
+        @click="$emit('refresh-balance')">
+        <v-icon color="grey">refresh</v-icon>
+      </v-btn>
+    </v-flex>
   </v-layout>
 </template>
 
