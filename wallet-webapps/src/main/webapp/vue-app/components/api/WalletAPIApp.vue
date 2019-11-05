@@ -208,7 +208,7 @@ export default {
             if (this.wallet.etherBalance < network.minGasPriceEther) {
               console.debug(`User can't be charged for transaction fees using minimal gas price. Thus return an error`);
               document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
+                detail : this.$t('exoplatform.wallet.warning.noEnoughFunds')
               }));
               return;
             }
