@@ -145,17 +145,17 @@ public class WalletServiceImpl implements WalletService, Startable {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      this.configuredGlobalSettings.setContractAbi(contractService.getContractAbi().toString());
-      this.configuredGlobalSettings.setContractBin(contractService.getContractBinary());
       this.computeInitialFundsSettings();
 
+      this.configuredGlobalSettings.setContractAbi(contractService.getContractAbi().toString());
+      this.configuredGlobalSettings.setContractBin(contractService.getContractBinary());
       String contractAddress = this.configuredGlobalSettings.getContractAddress();
       if (StringUtils.isBlank(contractAddress)) {
-        return;
+        LOG.warn("Contract address configuration is empty");
+      } else {
+        ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
+        this.configuredGlobalSettings.setContractDetail(contractDetail);
       }
-
-      ContractDetail contractDetail = this.contractService.getContractDetail(contractAddress);
-      this.configuredGlobalSettings.setContractDetail(contractDetail);
     } finally {
       RequestLifeCycle.end();
     }
@@ -172,6 +172,20 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   @Override
+  public InitialFundsSettings getInitialFundsSettings() {
+    SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
+                                                                        WALLET_SCOPE,
+                                                                        INITIAL_FUNDS_KEY_NAME);
+
+    InitialFundsSettings initialFundsSettings = null;
+    if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
+      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(),
+                                            InitialFundsSettings.class);
+    }
+    return initialFundsSettings;
+  }
+
+  @Override
   public void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings) {
     if (initialFundsSettings == null) {
       throw new IllegalArgumentException("initialFundsSettings parameter is mandatory");
@@ -183,9 +197,6 @@ public class WalletServiceImpl implements WalletService, Startable {
                             WALLET_SCOPE,
                             INITIAL_FUNDS_KEY_NAME,
                             SettingValue.create(toJsonString(initialFundsSettings)));
-
-    // Clear cached in memory stored settings
-    this.configuredGlobalSettings.setInitialFunds(initialFundsSettings);
   }
 
   @Override
@@ -194,7 +205,7 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   @Override
-  public UserSettings getUserSettings(String spaceId, String currentUser) {
+  public UserSettings getUserSettings(String spaceId, String currentUser, boolean isAdministration) {
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);
@@ -251,6 +262,9 @@ public class WalletServiceImpl implements WalletService, Startable {
         userSettings.setWallet(wallet);
       }
       walletSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));
+      if (isAdministration && isUserMemberOfGroupOrUser(currentUser, REWARDINGS_GROUP)) {
+        userSettings.setInitialFunds(getInitialFundsSettings());
+      }
     }
     if (this.isUseDynamicGasPrice()) {
       userSettings.setUseDynamicGasPrice(true);
@@ -384,25 +398,23 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   private void computeInitialFundsSettings() {
-    SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
-                                                                        WALLET_SCOPE,
-                                                                        INITIAL_FUNDS_KEY_NAME);
-
-    InitialFundsSettings initialFundsSettings = null;
-    if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
-      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(),
-                                            InitialFundsSettings.class);
-    } else {
+    InitialFundsSettings initialFundsSettings = getInitialFundsSettings();
+    if (initialFundsSettings == null) {
       initialFundsSettings = new InitialFundsSettings();
     }
-    computeInitialEtherFund(initialFundsSettings);
-    this.configuredGlobalSettings.setInitialFunds(initialFundsSettings);
+
+    // Compute initial funds switch configured gas limit and max gas price
+    double etherAmount = computeInitialEtherFund();
+    initialFundsSettings.setEtherAmount(etherAmount);
+
+    // Save computed ether initial fund
+    saveInitialFundsSettings(initialFundsSettings);
   }
 
-  private void computeInitialEtherFund(InitialFundsSettings initialFundsSettings) {
+  private double computeInitialEtherFund() {
     NetworkSettings network = this.configuredGlobalSettings.getNetwork();
-    long gasLimit = 200000L; // Default max gas per contract transaction
-    long gasPrice = 20000000000L; // Default max gas price per contract
+    long gasLimit = 200000L; // Default gas limit to use in contract transaction
+    long gasPrice = 20000000000L; // Default max gas price to use in contract
                                   // transaction
     if (network != null) {
       if (network.getGasLimit() != null && network.getGasLimit() > 0) {
@@ -417,7 +429,7 @@ public class WalletServiceImpl implements WalletService, Startable {
     double etherAmountMaxDecimals = 3; // max decimals to use in ether initial
                                        // funds
     double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
-    initialFundsSettings.setEtherAmount(Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals);
+    return Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals;
   }
 
   private SettingService getSettingService() {

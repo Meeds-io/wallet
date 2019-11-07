@@ -410,14 +410,6 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   @Test
   public void testRemoveWalletByAddress() throws IllegalAccessException {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
-    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
-
-    String group = "/platform/rewarding";
-    MembershipEntry entry = new MembershipEntry(group, MembershipEntry.ANY_TYPE);
-    Set<MembershipEntry> entryTest = new HashSet<>();
-    entryTest.add(entry);
-    org.exoplatform.services.security.Identity identity = new org.exoplatform.services.security.Identity(CURRENT_USER, entryTest);
-    identityRegistry.register(identity);
 
     try {
       walletAccountService.removeWalletByAddress(null, CURRENT_USER);

@@ -16,11 +16,11 @@ public class GlobalSettings implements Serializable, Cloneable {
 
   private static final long    serialVersionUID = 8987967110410722896L;
 
-  private InitialFundsSettings initialFunds     = new InitialFundsSettings();
-
   private NetworkSettings      network          = new NetworkSettings();
 
   private ContractDetail       contractDetail   = new ContractDetail();
+
+  private InitialFundsSettings initialFunds     = null;
 
   private String               contractAddress  = null;
 
@@ -30,7 +30,7 @@ public class GlobalSettings implements Serializable, Cloneable {
 
   @Exclude
   @ToString.Exclude
-  private String               contractAbi      = null;                      // NOSONAR
+  private String               contractAbi      = null;                 // NOSONAR
 
   @Exclude
   @ToString.Exclude

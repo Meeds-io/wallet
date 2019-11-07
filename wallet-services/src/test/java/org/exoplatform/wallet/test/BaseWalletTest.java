@@ -2,6 +2,7 @@ package org.exoplatform.wallet.test;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -9,17 +10,18 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 import org.junit.rules.TestName;
+import org.mockito.Mockito;
 
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.security.*;
 import org.exoplatform.wallet.dao.*;
 import org.exoplatform.wallet.entity.*;
 import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.service.WalletAccountService;
-import org.exoplatform.wallet.service.WalletService;
+import org.exoplatform.wallet.service.*;
 import org.exoplatform.wallet.storage.*;
 import org.exoplatform.wallet.storage.cached.CachedAccountStorage;
 import org.exoplatform.wallet.storage.cached.CachedTransactionStorage;
@@ -43,7 +45,9 @@ public abstract class BaseWalletTest {
 
   protected static final int       GAS_USED                 = 160000;
 
-  protected static final double    GAS_PRICE                = 0.000000004d;
+  protected static final double    GAS_PRICE                = 0.000000006d;
+
+  protected static final long      GAS_PRICE_WEI            = 6000000000l;
 
   protected static final String    RAW_TRANSACTION          = "RAW_TRANSACTION";
 
@@ -89,12 +93,30 @@ public abstract class BaseWalletTest {
   public TestName                  testName                 = new TestName();
 
   @BeforeClass
-  public static void beforeTest() {
+  public static void beforeTest() throws IOException {
     container = PortalContainer.getInstance();
     assertNotNull("Container shouldn't be null", container);
     assertTrue("Container should have been started", container.isStarted());
 
+    BlockchainTransactionService blockchainTransactionService =
+                                                              container.getComponentInstanceOfType(BlockchainTransactionService.class);
+    if (blockchainTransactionService != null) {
+      container.unregisterComponent(BlockchainTransactionService.class);
+    }
+    blockchainTransactionService = Mockito.mock(BlockchainTransactionService.class);
+    Mockito.when(blockchainTransactionService.refreshBlockchainGasPrice()).thenReturn(GAS_PRICE_WEI);
+    container.registerComponentInstance(BlockchainTransactionService.class, blockchainTransactionService);
+
     setContractDetails();
+
+    setRoot1AsAdmin();
+  }
+
+  private static void setRoot1AsAdmin() {
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    Identity identity = buildUserIdentityAsAdmin(CURRENT_USER);
+    identityRegistry.register(identity);
   }
 
   @Before
@@ -394,8 +416,16 @@ public abstract class BaseWalletTest {
     return hashStringBuffer.toString();
   }
 
-  protected <T> T getService(Class<T> componentType) {
+  protected static <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
+  }
+
+  protected static org.exoplatform.services.security.Identity buildUserIdentityAsAdmin(String currentUser) {
+    String group = "/platform/rewarding";
+    MembershipEntry entry = new MembershipEntry(group, MembershipEntry.ANY_TYPE);
+    Set<MembershipEntry> entryTest = new HashSet<>();
+    entryTest.add(entry);
+    return new org.exoplatform.services.security.Identity(currentUser, entryTest);
   }
 
   protected Wallet newWallet() {

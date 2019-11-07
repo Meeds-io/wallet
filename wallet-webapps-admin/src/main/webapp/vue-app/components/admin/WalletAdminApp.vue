@@ -156,7 +156,7 @@ export default {
       this.forceUpdate();
       this.error = null;
 
-      return this.walletUtils.initSettings(false, true)
+      return this.walletUtils.initSettings(false, true, true)
         .then(() => {
           if (!window.walletSettings) {
             this.forceUpdate();

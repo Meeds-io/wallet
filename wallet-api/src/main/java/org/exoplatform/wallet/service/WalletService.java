@@ -34,6 +34,11 @@ public interface WalletService {
   void saveInitialFundsSettings(InitialFundsSettings initialFundsSettings);
 
   /**
+   * @return saved initial funds in internal store
+   */
+  InitialFundsSettings getInitialFundsSettings();
+
+  /**
    * Retrieves global stored settings used for all users.
    * 
    * @return {@link GlobalSettings} global settings of default watched
@@ -48,10 +53,12 @@ public interface WalletService {
    * 
    * @param spaceId space pretty name to include its settings
    * @param currentUser username to include its preferences
+   * @param isAdministration whether the settings to retrieve are for
+   *          administration or not
    * @return {@link UserSettings} user settings with user and space preferences
    *         included into it
    */
-  UserSettings getUserSettings(String spaceId, String currentUser);
+  UserSettings getUserSettings(String spaceId, String currentUser, boolean isAdministration);
 
   /**
    * Save user preferences of Wallet

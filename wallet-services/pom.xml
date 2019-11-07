@@ -8,7 +8,7 @@
   <artifactId>wallet-services</artifactId>
   <name>eXo Add-on:: Wallet - Services</name>
   <properties>
-    <exo.test.coverage.ratio>0.54</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.56</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>

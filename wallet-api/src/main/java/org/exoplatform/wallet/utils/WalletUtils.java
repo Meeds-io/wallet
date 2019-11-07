@@ -311,7 +311,7 @@ public class WalletUtils {
 
   public static final String                          ETHER_FUNC_SEND_FUNDS                    = "ether_transfer";
 
-  public static String                                blockchainUrlSuffix                      = null;                                   // NOSONAR
+  public static String                                blockchainUrlSuffix                      = null;                                 // NOSONAR
 
   public static final String getCurrentUserId() {
     if (ConversationState.getCurrent() != null && ConversationState.getCurrent().getIdentity() != null) {
@@ -911,15 +911,15 @@ public class WalletUtils {
     StatisticUtils.addStatisticEntry(parameters);
   }
 
-  private static final WalletTokenAdminService getWalletTokenAdminService() {
+  public static final WalletTokenAdminService getWalletTokenAdminService() {
     return CommonsUtils.getService(WalletTokenAdminService.class);
   }
 
-  private static final WalletService getWalletService() {
+  public static final WalletService getWalletService() {
     return CommonsUtils.getService(WalletService.class);
   }
 
-  private static final SpaceService getSpaceService() {
+  public static final SpaceService getSpaceService() {
     return CommonsUtils.getService(SpaceService.class);
   }
 

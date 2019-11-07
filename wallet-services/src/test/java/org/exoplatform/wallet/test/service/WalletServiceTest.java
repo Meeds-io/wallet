@@ -17,6 +17,7 @@
 package org.exoplatform.wallet.test.service;
 
 import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
+import static org.exoplatform.wallet.utils.WalletUtils.getWalletService;
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import org.picocontainer.Startable;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
+import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.settings.*;
@@ -67,12 +69,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Contract ABI should have been computed after container startup", settings.getContractAbi());
     assertNotNull("Contract BIN should have been computed after container startup", settings.getContractBin());
     assertNotNull("Default contract address shouldn't be null", settings.getContractAddress());
-    InitialFundsSettings initialFunds = settings.getInitialFunds();
-    assertNotNull("Default initial funds settings shouldn't be null", initialFunds);
-    assertNotNull("Default initial ether fund setting shouldn't be null", initialFunds.getEtherAmount());
-    assertEquals("Unexpected default initial token fund amount", 0, initialFunds.getTokenAmount(), 0);
-    assertEquals("Unexpected default initial ether fund amount", 0.004, initialFunds.getEtherAmount(), 0);
-    assertNull("Unexpected default initial fund holder", initialFunds.getFundsHolder());
     NetworkSettings networkSettings = settings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
     assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
@@ -146,7 +142,7 @@ public class WalletServiceTest extends BaseWalletTest {
 
     IdentityManagerMock identityManagerMock = getService(IdentityManagerMock.class);
     identityManagerMock.getOrCreateIdentity(OrganizationIdentityProvider.NAME, CURRENT_USER, false);
-    UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER);
+    UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER, false);
     assertEquals("Data version are not equals", dataVersion, userSettings.getUserPreferences().getDataVersion());
   }
 
@@ -157,12 +153,31 @@ public class WalletServiceTest extends BaseWalletTest {
   public void testGetUserSettings() {
     WalletService walletService = getService(WalletService.class);
 
-    UserSettings userSettings = walletService.getUserSettings(null, CURRENT_USER);
+    String currentUser = "root15";
+
+    UserSettings userSettings = walletService.getUserSettings(null, currentUser, false);
     assertNotNull("User settings shouldn't be null", userSettings);
     assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
     assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
-    assertNotNull("Initial funds shouldn't be null", userSettings.getInitialFunds());
     assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
+
+    userSettings = walletService.getUserSettings(null, currentUser, true);
+    assertNotNull("User settings shouldn't be null", userSettings);
+    assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
+    assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
+    assertNull("Initial funds should be null when user doesn't belong to rewarding group", userSettings.getInitialFunds());
+    assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
+
+    // Add user to admin group
+    org.exoplatform.services.security.Identity identity = buildUserIdentityAsAdmin(currentUser);
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+    identityRegistry.register(identity);
+    try {
+      userSettings = walletService.getUserSettings(null, currentUser, true);
+      assertNotNull("Initial funds shouldn't be null when user belongs to rewarding group", userSettings.getInitialFunds());
+    } finally {
+      identityRegistry.unregister(currentUser);
+    }
   }
 
   /**
@@ -176,7 +191,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Global settings shouldn't be null", globalSettings);
     assertNotNull("Contract address shouldn't be null", globalSettings.getContractAddress());
     assertNotNull("Contract bin shouldn't be null", globalSettings.getContractBin());
-    assertNotNull("Initial funds shouldn't be null", globalSettings.getInitialFunds());
     assertNotNull("Access permission shouldn't be null", globalSettings.getAccessPermission());
   }
 
@@ -229,7 +243,7 @@ public class WalletServiceTest extends BaseWalletTest {
                                  WalletService walletService) {
     GlobalSettings settings = walletService.getSettings();
     assertNotNull("Settings service shouldn't be null", settings);
-    InitialFundsSettings initialFunds = settings.getInitialFunds();
+    InitialFundsSettings initialFunds = getWalletService().getInitialFundsSettings();
     assertNotNull("Initial found shouldn't be null", initialFunds);
     assertEquals("Funds Holder shouldn't be null", fundsHolder, initialFunds.getFundsHolder());
     assertEquals("Token Amount are not equals", tokenAmount, initialFunds.getTokenAmount(), 0);

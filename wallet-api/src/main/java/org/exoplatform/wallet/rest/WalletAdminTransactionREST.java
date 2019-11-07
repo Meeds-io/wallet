@@ -17,7 +17,7 @@
 package org.exoplatform.wallet.rest;
 
 import static org.exoplatform.wallet.utils.WalletUtils.getCurrentUserId;
-import static org.exoplatform.wallet.utils.WalletUtils.getSettings;
+import static org.exoplatform.wallet.utils.WalletUtils.getWalletService;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -30,7 +30,7 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.exoplatform.wallet.model.settings.GlobalSettings;
+import org.exoplatform.wallet.model.settings.InitialFundsSettings;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
 
@@ -106,10 +106,15 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     }
 
     try {
-      GlobalSettings settings = getSettings();
-      if (settings == null || settings.getInitialFunds() == null || settings.getInitialFunds().getEtherAmount() <= 0) {
+      InitialFundsSettings initialFundsSettings = getWalletService().getInitialFundsSettings();
+      if (initialFundsSettings == null || initialFundsSettings.getEtherAmount() <= 0) {
         throw new IllegalStateException("Can't send ether to wallet " + receiver
-            + " because no default ether amount is configured in settings: " + settings);
+            + " because no default ether amount is configured in settings: " + initialFundsSettings);
+      }
+      if (etherAmount > initialFundsSettings.getEtherAmount()) {
+        throw new IllegalStateException("Can't send ether to wallet " + receiver
+            + " because ether amount " + etherAmount + " is greater than configured initial fund ether amount: "
+            + initialFundsSettings.getEtherAmount());
       }
 
       TransactionDetail transactionDetail = new TransactionDetail();
@@ -144,15 +149,15 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     }
 
     try {
-      GlobalSettings settings = getSettings();
-      if (settings == null || settings.getInitialFunds() == null || settings.getInitialFunds().getTokenAmount() <= 0) {
+      InitialFundsSettings initialFundsSettings = getWalletService().getInitialFundsSettings();
+      if (initialFundsSettings == null || initialFundsSettings.getTokenAmount() <= 0) {
         throw new IllegalStateException("Can't send tokens to wallet " + receiver
-            + " because no default token amount is configured in settings: " + settings);
+            + " because no default token amount is configured in settings: " + initialFundsSettings);
       }
 
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
-      transactionDetail.setContractAmount(settings.getInitialFunds().getTokenAmount());
+      transactionDetail.setContractAmount(initialFundsSettings.getTokenAmount());
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, currentUserId);

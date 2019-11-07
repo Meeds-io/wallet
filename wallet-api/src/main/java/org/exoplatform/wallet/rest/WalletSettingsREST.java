@@ -53,10 +53,11 @@ public class WalletSettingsREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getSettings(@ApiParam(value = "Space pretty name", required = false) @QueryParam("spaceId") String spaceId) {
+  public Response getSettings(@ApiParam(value = "Space pretty name", required = false) @QueryParam("spaceId") String spaceId,
+                              @ApiParam(value = "Space pretty name", required = false) @QueryParam("administration") boolean isAdministration) {
     String currentUser = getCurrentUserId();
     try {
-      UserSettings userSettings = walletService.getUserSettings(spaceId, currentUser);
+      UserSettings userSettings = walletService.getUserSettings(spaceId, currentUser, isAdministration);
       return Response.ok(userSettings).build();
     } catch (Exception e) {
       LOG.error("Error getting settings for user {} and spaceId {}", currentUser, spaceId, e);

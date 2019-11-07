@@ -134,12 +134,13 @@ export function initWeb3(isSpace) {
   return createLocalWeb3Instance(isSpace);
 }
 
-export function initSettings(isSpace, useCometd) {
+export function initSettings(isSpace, useCometd, isAdministration) {
   const spaceId = (isSpace && window.walletSpaceGroup) || '';
+  isAdministration = isAdministration || false;
 
   clearCache();
 
-  return fetch(`/portal/rest/wallet/api/settings?spaceId=${spaceId}`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/settings?spaceId=${spaceId}&administration=${isAdministration}`, {credentials: 'include'})
     .then((resp) => {
       if (resp && resp.ok) {
         return resp.json();
