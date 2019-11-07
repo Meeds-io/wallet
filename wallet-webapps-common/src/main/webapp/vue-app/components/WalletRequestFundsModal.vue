@@ -45,6 +45,7 @@
             :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
             required
             ignore-current-user
+            no-address
             validate-on-blur
             @item-selected="recipient = $event" />
   

@@ -211,6 +211,18 @@ export default {
     },
   },
   watch: {
+    dialog() {
+      if (!this.dialog) {
+        this.recipient = null;
+        this.amount = null;
+        this.notificationId = null;
+        this.warning = null;
+        this.error = null;
+        this.walletPassword = '';
+        this.walletPasswordShow = false;
+        this.error = null;
+      }
+    },
     contractDetails() {
       if (this.contractDetails && this.contractDetails.isPaused) {
         this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
@@ -277,14 +289,6 @@ export default {
       this.loading = false;
       this.disabledRecipient = false;
       this.showQRCodeModal = false;
-      this.recipient = null;
-      this.amount = null;
-      this.notificationId = null;
-      this.warning = null;
-      this.error = null;
-      this.walletPassword = '';
-      this.walletPasswordShow = false;
-      this.error = null;
       this.isSpace = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.type === 'space';
       this.transactionLabel = this.defaultLabel;
       this.transactionMessage = this.defaultMessage;
