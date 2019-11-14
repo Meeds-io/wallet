@@ -30,10 +30,12 @@ import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.methods.response.*;
+import org.web3j.tx.Contract;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
-import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.ERTTokenV2;
@@ -126,8 +128,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private SettingService           settingService;
 
-  public EthereumBlockchainTransactionService(EthereumClientConnector ethereumClientConnector) {
+  public EthereumBlockchainTransactionService(SettingService settingService,
+                                              EthereumClientConnector ethereumClientConnector,
+                                              WalletTransactionService transactionService,
+                                              WalletAccountService accountService) {
+    this.settingService = settingService;
     this.ethereumClientConnector = ethereumClientConnector;
+    this.transactionService = transactionService;
+    this.accountService = accountService;
   }
 
   @Override
@@ -150,8 +158,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void checkPendingTransactions(long pendingTransactionMaxDays) {
-    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+  public void checkPendingTransactions() {
+    List<TransactionDetail> pendingTransactions = transactionService.getPendingTransactions();
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
@@ -190,7 +198,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     boolean processed = true;
     for (String transactionHash : transactionHashes) {
-      TransactionDetail transaction = getTransactionService().getTransactionByHash(transactionHash);
+      TransactionDetail transaction = transactionService.getTransactionByHash(transactionHash);
       if (transaction != null && transaction.isSucceeded()) {
         continue;
       }
@@ -210,19 +218,19 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   public void sendRawTransactions() {
-    List<TransactionDetail> transactions = getTransactionService().getTransactionsToSend();
+    List<TransactionDetail> transactions = transactionService.getTransactionsToSend();
     Set<String> walletAddressesWithTransactionsSent = new HashSet<>();
     for (TransactionDetail transactionDetail : transactions) {
       String from = transactionDetail.getFrom();
-      if (transactionDetail.getSendingAttemptCount() > getTransactionService().getMaxAttemptsToSend()) {
+      if (transactionDetail.getSendingAttemptCount() > transactionService.getMaxAttemptsToSend()) {
         // Mark transaction as error and stop trying sending it to blockchain
         transactionDetail.setPending(false);
         transactionDetail.setSucceeded(false);
-        getTransactionService().saveTransactionDetail(transactionDetail, true);
+        transactionService.saveTransactionDetail(transactionDetail, true);
         continue;
       }
 
-      if (walletAddressesWithTransactionsSent.contains(from) || !getTransactionService().canSendTransactionToBlockchain(from)) {
+      if (walletAddressesWithTransactionsSent.contains(from) || !transactionService.canSendTransactionToBlockchain(from)) {
         continue;
       }
       walletAddressesWithTransactionsSent.add(from);
@@ -235,7 +243,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         LOG.error("Error while sending transaction {} to blockchain", transactionDetail, e);
       }
       transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
-      getTransactionService().saveTransactionDetail(transactionDetail, false);
+      transactionService.saveTransactionDetail(transactionDetail, false);
     }
   }
 
@@ -244,32 +252,47 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     if (transactionDetail == null || !transactionDetail.isPending()) {
       return;
     }
-    long pendingTransactionMaxDays = getTransactionService().getPendingTransactionMaxDays();
+    long pendingTransactionMaxDays = transactionService.getPendingTransactionMaxDays();
     if (pendingTransactionMaxDays > 0) {
-      long creationTimestamp = transactionDetail.getTimestamp();
-      if (creationTimestamp > 0) {
-        Duration duration = Duration.ofMillis(System.currentTimeMillis() - creationTimestamp);
+      long sentTimestamp = transactionDetail.getRawTransaction() == null ? transactionDetail.getTimestamp()
+                                                                         : transactionDetail.getSentTimestamp();
+      if (sentTimestamp > 0) {
+        Duration duration = Duration.ofMillis(System.currentTimeMillis() - sentTimestamp);
         if (duration.toDays() >= pendingTransactionMaxDays) {
           String transactionHash = transactionDetail.getHash();
 
           Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
-          if (transaction == null) {// Transaction Not found on blockchain for
-                                    // more than max waiting days, marking
-                                    // transaction as failed in internal
-                                    // database
-            transactionDetail.setPending(false);
-            // Mark transaction as failed, ContractTransactionVerifierJob will
-            // remake it as success if it detects it when it would be mined
-            transactionDetail.setSucceeded(false);
-            // Cancel usage of transaction nonce to be able to reuse it if
-            // transaction is not arrived really on blockchain (tx can be purged
-            // from MemPool of miners when there are too many pending
-            // transaction: could happen on mainnet only)
-            transactionDetail.setNonce(0);
-            LOG.debug("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
-                      transactionHash,
-                      pendingTransactionMaxDays);
-            getTransactionService().saveTransactionDetail(transactionDetail, true);
+          if (transaction == null) {
+            // Transaction Not found on blockchain for more than max waiting
+            // days, marking transaction as failed in internal database if it's
+            // not sent using a raw transaction stored in internal database or
+            // if the sending attempts has reached the maximum allowed attempts
+            if (transactionDetail.getRawTransaction() == null
+                || transactionDetail.getSendingAttemptCount() > transactionService.getMaxAttemptsToSend()) {
+              transactionDetail.setPending(false);
+              // Mark transaction as failed, ContractTransactionVerifierJob will
+              // remake it as success if it detects it when it would be mined
+              transactionDetail.setSucceeded(false);
+              // Cancel usage of transaction nonce to be able to reuse it if
+              // transaction is not arrived really on blockchain (tx can be
+              // purged
+              // from MemPool of miners when there are too many pending
+              // transaction: could happen on mainnet only)
+              transactionDetail.setNonce(0);
+              LOG.debug("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
+                        transactionHash,
+                        pendingTransactionMaxDays);
+              transactionService.saveTransactionDetail(transactionDetail, true);
+            } else {
+              // Raw transaction was sent to blockchain but it seems that it
+              // wasn't sent successfully, thus it will be sent again
+              transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
+              transactionDetail.setSentTimestamp(0);
+              LOG.debug("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, it will be resent again",
+                        transactionHash,
+                        pendingTransactionMaxDays);
+              transactionService.saveTransactionDetail(transactionDetail, false);
+            }
           } else {
             LOG.debug("Transaction '{}' was FOUND on blockchain for more than '{}' days, so avoid marking it as failed",
                       transactionHash,
@@ -289,12 +312,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   @Override
   public TransactionDetail refreshTransactionFromBlockchain(String hash) {
-    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(hash);
+    TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
     if (transactionDetail == null) {
       return null;
     }
     checkTransactionStatusOnBlockchain(hash, true);
-    return getTransactionService().getTransactionByHash(hash);
+    return transactionService.getTransactionByHash(hash);
   }
 
   @Override
@@ -307,15 +330,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                                                   boolean pendingTransactionFromDatabase) {
     if (transaction == null) {
       if (pendingTransactionFromDatabase) {
-        TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+        TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
         if (transactionDetail == null) {
           throw new IllegalStateException("Transaction with hash " + transactionHash
               + " wasn't found in internal database while it should have been retrieved from it.");
         }
         LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
-        if (transactionDetail.getRawTransaction() == null) {
-          checkPendingTransactionValidity(transactionDetail);
-        }
+        checkPendingTransactionValidity(transactionDetail);
       } else {
         throw new IllegalStateException("Transaction with hash " + transactionHash
             + " is not marked as pending but the transaction wasn't found on blockchain");
@@ -339,7 +360,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       throw new IllegalStateException("Principal contract detail wasn't found in database");
     }
 
-    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(transactionHash);
+    TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
     if (transactionDetail == null) {
       if (pendingTransactionFromDatabase) {
         throw new IllegalStateException("Transaction with hash " + transactionHash
@@ -377,23 +398,23 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     if (pendingTransactionFromDatabase) {
       // Only save modifications if it's coming from database
-      getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
+      transactionService.saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
     } else {
       // Compute wallets
       if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
-        transactionDetail.setFromWallet(getAccountService().getWalletByAddress(transactionDetail.getFrom()));
+        transactionDetail.setFromWallet(accountService.getWalletByAddress(transactionDetail.getFrom()));
       }
       if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
-        transactionDetail.setToWallet(getAccountService().getWalletByAddress(transactionDetail.getTo()));
+        transactionDetail.setToWallet(accountService.getWalletByAddress(transactionDetail.getTo()));
       }
       if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
-        transactionDetail.setByWallet(getAccountService().getWalletByAddress(transactionDetail.getBy()));
+        transactionDetail.setByWallet(accountService.getWalletByAddress(transactionDetail.getBy()));
       }
 
       // Check if it has a know wallet from internal database before saving
       if (hasKnownWalletInTransaction(transactionDetail)) {
-        getTransactionService().saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
-      } else if (getTransactionService().isLogAllTransaction()) {
+        transactionService.saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
+      } else if (transactionService.isLogAllTransaction()) {
         logStatistics(transactionDetail);
       }
     }
@@ -407,19 +428,29 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                   transaction.getTransactionHash());
         transactionDetail.setHash(transaction.getTransactionHash());
       }
-      // Exception occurred while sending to blockchain
-      if (exception != null) {
-        LOG.warn("Error when sending transaction {}.", transactionDetail, exception);
+      if (transaction.getError() != null || exception != null || StringUtils.isBlank(transaction.getResult())) {
+        String errorMessage = transaction.getError() == null ? null : transaction.getError().getMessage();
+        LOG.warn("Error when sending transaction {} - {}.", transactionDetail, errorMessage, exception);
+
         Transaction transactionFromBlockchain = ethereumClientConnector.getTransaction(transaction.getTransactionHash());
+
         // An exception occurred
         if (transactionFromBlockchain == null) {
-          transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
-        } else {
           transactionDetail.setPending(false);
-          transactionDetail.setSucceeded(false);
+          transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() + 1);
+          transactionDetail.setSentTimestamp(0);
+        } else {
+          TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transaction.getTransactionHash());
+          transactionDetail.setPending(receipt == null);
+          transactionDetail.setSucceeded(receipt != null && receipt.isStatusOK());
         }
       }
-      getTransactionService().saveTransactionDetail(transactionDetail, false);
+      RequestLifeCycle.begin(PortalContainer.getInstance());
+      try {
+        transactionService.saveTransactionDetail(transactionDetail, false);
+      } finally {
+        RequestLifeCycle.end();
+      }
     };
   }
 
@@ -461,7 +492,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
     if (!transactionReceipt.isStatusOK()) {
       if (StringUtils.equals(transactionDetail.getContractMethodName(), FUNC_INITIALIZEACCOUNT)) {
-        getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
+        accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
       }
       return;
     }
@@ -493,7 +524,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           transactionDetail.setNoContractFunds(true);
           continue;
         } else if (TRANSACTIONFEE_EVENT_HASH.equals(topic)) {
-          EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
+          EventValues parameters = Contract.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
           BigInteger tokenFee = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
           BigInteger etherFee = (BigInteger) parameters.getNonIndexedValues().get(2).getValue();
           transactionDetail.setTokenFee(convertFromDecimals(tokenFee, contractDecimals));
@@ -508,7 +539,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           }
           transactionDetail.setContractMethodName(methodName);
           if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSFER_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(TRANSFER_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -523,7 +554,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(false);
           } else if (StringUtils.equals(methodName, FUNC_APPROVE)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(APPROVAL_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(APPROVAL_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -538,7 +569,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
               continue;
             }
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(APPROVEDACCOUNT_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(APPROVEDACCOUNT_EVENT, log);
             transactionDetail.setFrom(transactionReceipt.getFrom());
             if (parameters == null) {
               continue;
@@ -547,7 +578,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_DISAPPROVEACCOUNT)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(DISAPPROVEDACCOUNT_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(DISAPPROVEDACCOUNT_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -556,7 +587,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_ADDADMIN)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(ADDEDADMIN_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(ADDEDADMIN_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -566,7 +597,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_REMOVEADMIN)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(REMOVEDADMIN_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(REMOVEDADMIN_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -575,7 +606,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_UPGRADEDATA)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(UPGRADEDDATA_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(UPGRADEDDATA_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -584,7 +615,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_UPGRADEIMPLEMENTATION)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(UPGRADED_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(UPGRADED_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -593,7 +624,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, TOKEN_FUNC_DEPOSIT_FUNDS)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(DEPOSITRECEIVED_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(DEPOSITRECEIVED_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -603,7 +634,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_SETSELLPRICE)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TOKENPRICECHANGED_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(TOKENPRICECHANGED_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -611,7 +642,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_TRANSFORMTOVESTED)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(VESTING_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(VESTING_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -621,7 +652,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_TRANSFEROWNERSHIP)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(TRANSFEROWNERSHIP_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(TRANSFEROWNERSHIP_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -629,7 +660,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_INITIALIZEACCOUNT)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(INITIALIZATION_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(INITIALIZATION_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -642,13 +673,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setAdminOperation(false);
 
             if (transactionDetail.isSucceeded()) {
-              getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.INITIALIZED);
+              accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.INITIALIZED);
             } else {
-              getAccountService().setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
+              accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
             }
           } else if (StringUtils.equals(methodName, FUNC_REWARD)) {
             transactionLogTreated = true;
-            EventValues parameters = ERTTokenV2.staticExtractEventParameters(REWARD_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(REWARD_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -671,9 +702,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private long getLastWatchedBlockNumber() {
     long networkId = getNetworkId();
-    SettingValue<?> lastBlockNumberValue = getSettingService().get(WALLET_CONTEXT,
-                                                                   WALLET_SCOPE,
-                                                                   LAST_BLOCK_NUMBER_KEY_NAME + networkId);
+    SettingValue<?> lastBlockNumberValue = settingService.get(WALLET_CONTEXT,
+                                                              WALLET_SCOPE,
+                                                              LAST_BLOCK_NUMBER_KEY_NAME + networkId);
     if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
       return Long.valueOf(lastBlockNumberValue.getValue().toString());
     }
@@ -684,31 +715,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     long networkId = getNetworkId();
 
     LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
-    getSettingService().set(WALLET_CONTEXT,
-                            WALLET_SCOPE,
-                            LAST_BLOCK_NUMBER_KEY_NAME + networkId,
-                            SettingValue.create(lastWatchedBlockNumber));
-  }
-
-  private SettingService getSettingService() {
-    if (settingService == null) {
-      settingService = CommonsUtils.getService(SettingService.class);
-    }
-    return settingService;
-  }
-
-  private WalletTransactionService getTransactionService() {
-    if (transactionService == null) {
-      transactionService = CommonsUtils.getService(WalletTransactionService.class);
-    }
-    return transactionService;
-  }
-
-  private WalletAccountService getAccountService() {
-    if (accountService == null) {
-      accountService = CommonsUtils.getService(WalletAccountService.class);
-    }
-    return accountService;
+    settingService.set(WALLET_CONTEXT,
+                       WALLET_SCOPE,
+                       LAST_BLOCK_NUMBER_KEY_NAME + networkId,
+                       SettingValue.create(lastWatchedBlockNumber));
   }
 
 }

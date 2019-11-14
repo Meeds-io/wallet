@@ -56,12 +56,12 @@
       <value-param>
         <name>transaction.pending.maxDays</name>
         <description>Maximum days to wait until transaction is added to blockchain, if exxceeding this duration, transaction will be marked as failed</description>
-        <value>${exo.wallet.transaction.pending.maxDays:3}</value>
+        <value>${exo.wallet.transaction.pending.maxDays:1}</value>
       </value-param>
       <value-param>
         <name>transaction.pending.maxToSend</name>
         <description>Maximum parallel pending transactions to send for a given wallet</description>
-        <value>${exo.wallet.transaction.pending.maxToSend:3}</value>
+        <value>${exo.wallet.transaction.pending.maxToSend:5}</value>
       </value-param>
       <value-param>
         <name>transaction.pending.maxSendingAttempts</name>

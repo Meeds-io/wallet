@@ -13,6 +13,7 @@ import javax.servlet.http.*;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
@@ -93,7 +94,13 @@ public class ServiceLoaderServlet extends HttpServlet {
       web3jConnector.start(true);
 
       // Blockchain transaction decoder
-      EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(web3jConnector);
+      SettingService settingService = container.getComponentInstanceOfType(SettingService.class);
+      WalletTransactionService walletTransactionService = container.getComponentInstanceOfType(WalletTransactionService.class);
+      WalletAccountService walletAccountService = container.getComponentInstanceOfType(WalletAccountService.class);
+      EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(settingService,
+                                                                                                                web3jConnector,
+                                                                                                                walletTransactionService,
+                                                                                                                walletAccountService);
       container.registerComponentInstance(BlockchainTransactionService.class,
                                           transactionDecoderService);
 

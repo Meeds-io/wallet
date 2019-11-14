@@ -102,7 +102,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
 
     long count = walletTransactionService.getPendingTransactionMaxDays();
-    assertEquals("Wrong default value for 'Pending transaction MaxDays'", 3, count);
+    assertEquals("Wrong default value for 'Pending transaction MaxDays'", 1, count);
   }
 
   /**
@@ -231,7 +231,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    long maxAttemptsToSend = walletTransactionService.getMaxAttemptsToSend();
+    long maxAttemptsToSend = walletTransactionService.getMaxParallelPendingTransactions();
     for (int i = 0; i < maxAttemptsToSend; i++) {
       assertTrue(walletTransactionService.canSendTransactionToBlockchain(WALLET_ADDRESS_1));
 

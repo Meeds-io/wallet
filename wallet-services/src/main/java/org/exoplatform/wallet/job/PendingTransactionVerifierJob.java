@@ -8,7 +8,6 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
-import org.exoplatform.wallet.service.WalletTransactionService;
 
 @DisallowConcurrentExecution
 public class PendingTransactionVerifierJob implements Job {
@@ -16,8 +15,6 @@ public class PendingTransactionVerifierJob implements Job {
   private static final Log             LOG = ExoLogger.getLogger(PendingTransactionVerifierJob.class);
 
   private ExoContainer                 container;
-
-  private WalletTransactionService     walletTransactionService;
 
   private BlockchainTransactionService blockchainTransactionService;
 
@@ -31,8 +28,7 @@ public class PendingTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      long pendingTransactionMaxDays = getWalletTransactionService().getPendingTransactionMaxDays();
-      getBlockchainTransactionService().checkPendingTransactions(pendingTransactionMaxDays);
+      getBlockchainTransactionService().checkPendingTransactions();
     } catch (Exception e) {
       LOG.error("Error while checking pending transactions", e);
     } finally {
@@ -46,12 +42,5 @@ public class PendingTransactionVerifierJob implements Job {
       blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
     }
     return blockchainTransactionService;
-  }
-
-  private WalletTransactionService getWalletTransactionService() {
-    if (walletTransactionService == null) {
-      walletTransactionService = CommonsUtils.getService(WalletTransactionService.class);
-    }
-    return walletTransactionService;
   }
 }

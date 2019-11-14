@@ -149,4 +149,9 @@ public interface WalletTransactionService {
    */
   boolean isLogAllTransaction();
 
+  /**
+   * @return Max parallel transactions
+   */
+  long getMaxParallelPendingTransactions();
+
 }

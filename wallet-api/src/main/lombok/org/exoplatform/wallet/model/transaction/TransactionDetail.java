@@ -54,8 +54,10 @@ public class TransactionDetail implements Serializable, Cloneable {
   @Exclude
   private Wallet            byWallet;
 
+  @ToString.Exclude
   private String            label;
 
+  @ToString.Exclude
   private String            message;
 
   private double            value;

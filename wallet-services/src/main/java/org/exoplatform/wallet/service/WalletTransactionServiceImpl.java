@@ -195,7 +195,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
     // Compute income and outcome
     for (LocalDate startDate : periodList) {
-      ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneOffset.systemDefault());
+      ZonedDateTime startDateTime = startDate.atStartOfDay(ZoneId.systemDefault());
       ZonedDateTime endDateTime = getEndDate(startDate, periodicity);
 
       String contractAddress = getContractAddress();
@@ -301,6 +301,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getMaxAttemptsToSend() {
     return maxAttemptsToSend;
+  }
+
+  @Override
+  public long getMaxParallelPendingTransactions() {
+    return maxParallelPendingTransactions;
   }
 
   @Override
@@ -462,8 +467,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                                                       selectedDay.getMonthValue())
                                                                                   .atEndOfMonth()
                                                                                   .plusDays(1)
-                                                                                  .atStartOfDay(ZoneOffset.systemDefault())
+                                                                                  .atStartOfDay(ZoneId.systemDefault())
                                                                        : selectedDay.plusDays(1)
-                                                                                    .atStartOfDay(ZoneOffset.systemDefault());
+                                                                                    .atStartOfDay(ZoneId.systemDefault());
   }
 }

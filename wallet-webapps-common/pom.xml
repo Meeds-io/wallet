@@ -8,6 +8,9 @@
   <artifactId>wallet-webapps-common</artifactId>
   <packaging>war</packaging>
   <name>eXo Add-on:: Wallet - Common Webapp</name>
+  <properties>
+    <exo.test.coverage.ratio>0.05</exo.test.coverage.ratio>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -33,6 +36,12 @@
       <groupId>org.exoplatform.commons</groupId>
       <artifactId>commons-component-common</artifactId>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.exoplatform.commons</groupId>
@@ -55,9 +64,7 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Web3j and bouncycastle added in WAR lib folder
-    to force load bouncycastle version from Webapp ClassLoader
-    instead of shared class loader -->
+    <!-- Web3j and bouncycastle added in WAR lib folder to force load bouncycastle version from Webapp ClassLoader instead of shared class loader -->
     <dependency>
       <groupId>org.exoplatform.wallet</groupId>
       <artifactId>ert-contract</artifactId>
@@ -159,6 +166,27 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <finalName>wallet-common</finalName>
@@ -168,16 +196,16 @@
         <artifactId>jcabi-maven-plugin</artifactId>
         <!-- Workaround for bug https://github.com/jcabi/jcabi-aspects/issues/257 -->
         <dependencies>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjtools</artifactId>
-                <version>1.9.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjweaver</artifactId>
-                <version>1.9.1</version>
-            </dependency>
+          <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>1.9.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.1</version>
+          </dependency>
         </dependencies>
       </plugin>
       <plugin>
