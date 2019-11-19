@@ -40,7 +40,7 @@ public class BlockMinedListener extends Listener<Block, Boolean> implements ExoW
   }
 
   @Override
-  @ExoWalletStatistic(local = false, service = "wallet", operation = OPERATION_GET_BLOCK)
+  @ExoWalletStatistic(local = false, service = "blockchain", operation = OPERATION_GET_BLOCK)
   public void onEvent(Event<Block, Boolean> event) throws Exception {
     Block block = event.getSource();
     long blockNumber = block.getNumber().longValue();
