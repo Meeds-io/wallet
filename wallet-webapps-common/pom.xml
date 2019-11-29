@@ -50,7 +50,7 @@
     </dependency>
     <dependency>
       <groupId>org.exoplatform.social</groupId>
-      <artifactId>social-component-core-jpa</artifactId>
+      <artifactId>social-component-core</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
