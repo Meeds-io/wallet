@@ -43,7 +43,7 @@
               <boolean>true</boolean>
             </field>
             <field name="importMode">
-              <string>merge</string>
+              <string>insert</string>
             </field>
             <field name="predefinedOwner">
               <collection type="java.util.HashSet">
@@ -68,7 +68,7 @@
               <boolean>true</boolean>
             </field>
             <field name="importMode">
-              <string>OVERWRITE</string>
+              <string>insert</string>
             </field>
             <field name="predefinedOwner">
               <collection type="java.util.HashSet">
@@ -78,7 +78,7 @@
               </collection>
             </field>
             <field name="location">
-              <string>war:/conf/wallet/portal</string>
+              <string>war:/conf/portal</string>
             </field>
           </object>
         </object-param>

@@ -22,15 +22,15 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_3.xsd http://www.exoplatform.org/xml/ns/kernel_1_3.xsd"
   xmlns="http://www.exoplatform.org/xml/ns/kernel_1_3.xsd">
 
-  <import profiles="all">war:/conf/wallet/wallet-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/cache-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/bundle-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/organization-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/portal-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/dynamic-container-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/application-registry-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/administration-menu-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/user-page-configuration.xml</import>
-  <import profiles="all">war:/conf/wallet/notification-configuration.xml</import>
+  <import>war:/conf/wallet/wallet-configuration.xml</import>
+  <import>war:/conf/wallet/cache-configuration.xml</import>
+  <import>war:/conf/wallet/bundle-configuration.xml</import>
+  <import>war:/conf/wallet/organization-configuration.xml</import>
+  <import>war:/conf/wallet/portal-configuration.xml</import>
+  <import>war:/conf/wallet/dynamic-container-configuration.xml</import>
+  <import>war:/conf/wallet/application-registry-configuration.xml</import>
+  <import>war:/conf/wallet/user-page-configuration.xml</import>
+  <import>war:/conf/wallet/notification-configuration.xml</import>
+  <import>war:/conf/portal/reward-menu-configuration.xml</import>
 
 </configuration>
