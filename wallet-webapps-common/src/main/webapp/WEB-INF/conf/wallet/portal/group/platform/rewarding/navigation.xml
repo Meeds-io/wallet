@@ -39,11 +39,6 @@
                 <label>Reward</label>
                 <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
             </node>
-            <node>
-                <name>kudosAdministration</name>
-                <label>Kudos</label>
-                <page-reference>group::/platform/administrators::kudosAdministration</page-reference>
-            </node>
         </node>
     </page-nodes>
 </node-navigation>

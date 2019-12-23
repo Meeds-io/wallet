@@ -31,6 +31,6 @@
   <import>war:/conf/wallet/application-registry-configuration.xml</import>
   <import>war:/conf/wallet/user-page-configuration.xml</import>
   <import>war:/conf/wallet/notification-configuration.xml</import>
-  <import>war:/conf/portal/reward-menu-configuration.xml</import>
+  <import>war:/conf/wallet/reward-menu-configuration.xml</import>
 
 </configuration>
