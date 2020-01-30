@@ -30,11 +30,6 @@
             <label>Reward</label>
             <page-reference>group::/platform/rewarding::rewardAdministration</page-reference>
             <node>
-                <name>kudosAdministration</name>
-                <label>Kudos</label>
-                <page-reference>group::/platform/administrators::kudosAdministration</page-reference>
-            </node>
-            <node>
                 <name>walletAdministration</name>
                 <label>Wallet</label>
                 <page-reference>group::/platform/rewarding::walletAdministration</page-reference>
