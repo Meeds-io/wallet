@@ -8,13 +8,6 @@
 
   <portal-skin>
     <skin-name>Enterprise</skin-name>
-    <skin-module>customModuleVuetify</skin-module>
-    <css-path>/../EnterpriseSkin/skin/css/vuetify/vuetify-all.css</css-path>
-    <css-priority>10</css-priority>
-  </portal-skin>
-
-  <portal-skin>
-    <skin-name>Enterprise</skin-name>
     <skin-module>customModuleWallet</skin-module>
     <css-path>/css/wallet.css</css-path>
     <css-priority>11</css-priority>
