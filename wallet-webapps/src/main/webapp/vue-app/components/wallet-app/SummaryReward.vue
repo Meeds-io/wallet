@@ -23,7 +23,7 @@
     <v-navigation-drawer
       id="rewardDetailsDrawer"
       v-model="seeRewardDetails"
-      fixed
+      absolute
       right
       stateless
       temporary

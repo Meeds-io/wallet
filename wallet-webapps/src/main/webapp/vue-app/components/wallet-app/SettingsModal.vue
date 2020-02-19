@@ -1,7 +1,6 @@
 <template>
   <v-dialog
     v-model="dialog"
-    attach="#walletDialogsParent"
     content-class="uiPopup with-overflow not-draggable"
     class="walletSettingsModal"
     width="700px"

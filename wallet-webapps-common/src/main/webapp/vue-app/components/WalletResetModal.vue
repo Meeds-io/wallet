@@ -2,7 +2,6 @@
   <v-dialog
     v-model="dialog"
     :disabled="disabled"
-    attach="#walletSecurityDialogsParent"
     content-class="uiPopup with-overflow"
     class="walletResetModal"
     width="500px"

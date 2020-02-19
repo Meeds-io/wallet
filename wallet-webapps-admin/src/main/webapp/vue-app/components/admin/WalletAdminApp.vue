@@ -20,7 +20,6 @@
 
           <v-dialog
             v-model="loading"
-            attach="#walletDialogsParent"
             persistent
             hide-overlay
             width="300">

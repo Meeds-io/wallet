@@ -2,7 +2,6 @@
   <v-dialog
     v-model="dialog"
     :width="width"
-    attach="#walletDialogsParent"
     content-class="uiPopup"
     max-width="100vw"
     hide-overlay

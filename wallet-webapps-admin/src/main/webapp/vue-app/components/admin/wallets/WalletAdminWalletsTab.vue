@@ -291,7 +291,7 @@
     <v-navigation-drawer
       id="accountDetailsDrawer"
       v-model="seeAccountDetails"
-      fixed
+      absolute
       temporary
       right
       stateless

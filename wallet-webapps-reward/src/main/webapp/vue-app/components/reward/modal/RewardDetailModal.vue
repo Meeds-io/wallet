@@ -3,7 +3,6 @@
     v-model="dialog"
     content-class="uiPopup"
     width="400px"
-    attach="#walletDialogsParent"
     max-width="100vw"
     @keydown.esc="dialog = false">
     <v-card v-if="wallet" class="elevation-12">
