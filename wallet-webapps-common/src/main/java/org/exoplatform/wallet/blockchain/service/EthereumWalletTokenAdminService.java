@@ -78,8 +78,11 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Integer                  configuredContractDecimals;
 
-  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector) {
+  private String                   adminPrivateKey;
+
+  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector, String adminPrivateKey) {
     this.clientConnector = clientConnector;
+    this.adminPrivateKey = adminPrivateKey;
   }
 
   @Override
@@ -104,8 +107,18 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     // Create admin wallet if not exists
     Wallet wallet = getAccountService().getAdminWallet();
     if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
-      createAdminAccount();
-      LOG.info("Admin wallet created");
+      if (StringUtils.isBlank(adminPrivateKey)) {
+        createAdminAccount();
+      } else {
+        try {
+          createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
+          LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
+        } catch (Exception e) {
+          createAdminAccount();
+        }
+      }
+    } else {
+      LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
     }
   }
 
@@ -118,6 +131,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   public void createAdminAccount() {
     try {
       this.createAdminAccount(null, getUserACL().getSuperUser());
+      LOG.info("Admin wallet created");
     } catch (IllegalAccessException e) {
       throw new IllegalStateException("This exception shouldn't be thrown because no ACL check is made on server side method call",
                                       e);

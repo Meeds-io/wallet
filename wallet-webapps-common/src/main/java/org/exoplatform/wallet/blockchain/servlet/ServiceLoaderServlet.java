@@ -105,7 +105,8 @@ public class ServiceLoaderServlet extends HttpServlet {
                                           transactionDecoderService);
 
       // Instantiate service with current webapp classloader
-      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector);
+      String adminPrivateKey = System.getProperty("exo.wallet.admin.privateKey", null);
+      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector, adminPrivateKey);
       container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
 
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);

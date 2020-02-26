@@ -118,11 +118,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         continue;
       }
       refreshWalletFromBlockchain(wallet, contractDetail, walletsModifications);
-
-      // Checks if admin wallet was newly enabled from blockchain
-      if (!this.adminAccountEnabled && WalletType.isAdmin(wallet.getType())) {
-        this.adminAccountEnabled = wallet.isEnabled() && wallet.getAdminLevel() != null && wallet.getAdminLevel() >= 2;
-      }
     }
   }
 
@@ -167,6 +162,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       } catch (Exception e) {
         LOG.error("Error refreshing wallet state on blockchain", e);
       }
+    }
+
+    // Checks if admin wallet was newly enabled from blockchain
+    if (WalletType.isAdmin(wallet.getType())) {
+      this.adminAccountEnabled = wallet.isEnabled() && wallet.getAdminLevel() != null && wallet.getAdminLevel() >= 2;
     }
   }
 
