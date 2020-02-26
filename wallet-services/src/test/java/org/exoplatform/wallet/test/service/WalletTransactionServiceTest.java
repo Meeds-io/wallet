@@ -250,7 +250,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                     false,
                                                                     RAW_TRANSACTION,
                                                                     System.currentTimeMillis());
-      transactionDetail.setSendingAttemptCount(1);
+      transactionDetail.setSentTimestamp(System.currentTimeMillis());
       walletTransactionService.saveTransactionDetail(transactionDetail, false);
       entitiesToClean.add(transactionDetail);
     }
