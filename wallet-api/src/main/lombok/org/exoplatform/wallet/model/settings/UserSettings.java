@@ -35,5 +35,7 @@ public class UserSettings extends GlobalSettings {
 
   public UserSettings(GlobalSettings globalSettings) {
     super(globalSettings);
+    setNetwork(getNetwork().clone());
+    getNetwork().setWebsocketProviderURL(null);
   }
 }

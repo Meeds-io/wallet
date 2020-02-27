@@ -161,6 +161,20 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
     assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
 
+    NetworkSettings networkSettings = userSettings.getNetwork();
+    assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
+    assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
+    assertNotNull("Default blockchain network gas limit shouldn't be null", networkSettings.getGasLimit());
+    assertNotNull("Default blockchain tansaction minimum gas price shouldn't be null",
+                  networkSettings.getMinGasPrice());
+    assertNotNull("Default blockchain tansaction normal gas price shouldn't be null",
+                  networkSettings.getNormalGasPrice());
+    assertNotNull("Default blockchain tansaction maximum gas price shouldn't be null",
+                  networkSettings.getMaxGasPrice());
+    assertNotNull("Default blockchain network http URL shouldn't be null", networkSettings.getProviderURL());
+    assertNull("Default blockchain network websocket URL must be null",
+                  networkSettings.getWebsocketProviderURL());
+
     userSettings = walletService.getUserSettings(null, currentUser, true);
     assertNotNull("User settings shouldn't be null", userSettings);
     assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
