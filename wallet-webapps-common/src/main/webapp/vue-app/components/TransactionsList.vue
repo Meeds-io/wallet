@@ -820,6 +820,14 @@
                     <strong>{{ item.sentDateFormatted }}</strong>
                   </v-list-item-content>
                 </v-list-item>
+                <v-list-item v-if="item.sendingAttemptCount">
+                  <v-list-item-content>
+                    {{ $t('exoplatform.wallet.label.sendingAttemptCount') }}
+                  </v-list-item-content>
+                  <v-list-item-content class="align-end text-right">
+                    <strong>{{ item.sendingAttemptCount }}</strong>
+                  </v-list-item-content>
+                </v-list-item>
               </template>
             </v-list>
           </v-expansion-panel-content>

@@ -37,17 +37,19 @@ import org.web3j.utils.Async;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.exoplatform.wallet.contract.ERTTokenV2;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.contract.ERTTokenV2;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
 
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.exceptions.UndeliverableException;
+import io.reactivex.plugins.RxJavaPlugins;
 
 /**
  * A Web3j connector class to interact with Ethereum Blockchain
@@ -111,6 +113,16 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     this.websocketURL = getWebsocketURL();
     this.networkId = getNetworkId();
     this.serviceStarted = true;
+
+    // Default unhandeled errors management
+    if (RxJavaPlugins.getErrorHandler() == null) {
+      RxJavaPlugins.setErrorHandler(e -> {
+        if (e instanceof UndeliverableException) {
+          e = e.getCause();
+        }
+        LOG.warn("Unhandeled error happened while communicating with blockchain", e);
+      });
+    }
 
     // Blockchain connection verifier
     connectionVerifierExecutor.scheduleAtFixedRate(() -> {
@@ -502,7 +514,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   private void closeBlockSubscription() {
-    if (this.blockSubscribtion != null) {
+    if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
       LOG.info("Close mined blocks subscription");
       try {
         this.blockSubscribtion.dispose();

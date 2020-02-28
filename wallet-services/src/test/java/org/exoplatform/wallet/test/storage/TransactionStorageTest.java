@@ -286,6 +286,7 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
     TransactionDetail savedTransactionDetail = transactionStorage.getTransactionByHash(transactionDetail.getHash());
+
     assertEquals("Stored transaction detail is not equals to built one", transactionDetail, savedTransactionDetail);
 
     transactionDetail.setContractMethodName("transfer");

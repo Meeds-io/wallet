@@ -129,10 +129,13 @@ public class TransactionStorage {
    * @param transactionDetail decoded transaction detail
    */
   public void saveTransactionDetail(TransactionDetail transactionDetail) {
-    TransactionEntity transactionEntity = toEntity(transactionDetail);
     if (transactionDetail.getTimestamp() <= 0) {
       transactionDetail.setTimestamp(System.currentTimeMillis());
     }
+    if (transactionDetail.getSentTimestamp() <= 0 && StringUtils.isBlank(transactionDetail.getRawTransaction())) {
+      transactionDetail.setSentTimestamp(transactionDetail.getTimestamp());
+    }
+    TransactionEntity transactionEntity = toEntity(transactionDetail);
     if (transactionEntity.getId() == 0) {
       transactionEntity = walletTransactionDAO.create(transactionEntity);
       transactionDetail.setId(transactionEntity.getId());

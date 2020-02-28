@@ -102,12 +102,12 @@ public class EthereumBlockchainTransactionServiceTest {
     blockchainTransactionService.checkPendingTransactions();
 
     // Verify that transaction has been saved with no sentTimestamp and
-    // increased SendingAttemptCount
+    // SendingAttemptCount remained the same with the check
     Mockito.verify(walletTransactionService, Mockito.times(sendingAttemptCount))
            .saveTransactionDetail(Matchers.eq(transactionDetail), Matchers.eq(false));
 
     assertEquals("SendingTimetamp should be reset to resend transaction to blockchain", 0, transactionDetail.getSentTimestamp());
-    assertEquals("SendingAttemptCount is not incremented", sendingAttemptCount + 1L, transactionDetail.getSendingAttemptCount());
+    assertEquals("SendingAttemptCount is not incremented", sendingAttemptCount, transactionDetail.getSendingAttemptCount());
   }
 
   private EthereumBlockchainTransactionService newServiceInstance() {

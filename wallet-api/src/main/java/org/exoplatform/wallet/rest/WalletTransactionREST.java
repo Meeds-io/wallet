@@ -79,14 +79,12 @@ public class WalletTransactionREST implements ResourceContainer {
     String currentUserId = getCurrentUserId();
     // Fix generated transaction hash from Web3js to use generated hash from
     // Web3j
-    if (transactionDetail.getId() == 0 && StringUtils.isNotBlank(transactionDetail.getRawTransaction())) {
+    if (StringUtils.isNotBlank(transactionDetail.getRawTransaction())) {
       String transactionHash = getWalletTokenAdminService().generateHash(transactionDetail.getRawTransaction());
       transactionDetail.setHash(transactionHash);
     } else if (StringUtils.isBlank(transactionDetail.getHash())) {
       LOG.warn("Bad request sent to server with empty transaction hash");
       return Response.status(HTTPStatus.BAD_REQUEST).build();
-    } else {
-      transactionDetail.setSentTimestamp(System.currentTimeMillis());
     }
 
     try {
