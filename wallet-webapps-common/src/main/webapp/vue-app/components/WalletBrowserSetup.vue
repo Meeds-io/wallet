@@ -21,14 +21,13 @@
           <v-text-field
             v-if="!loading"
             v-model="walletPassword"
-            :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+            :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             :disabled="loading || loadingWalletBrowser"
             :label="$t('exoplatform.wallet.label.walletPassword')"
             :placeholder="$t('exoplatform.wallet.label.setWalletPasswordPlaceholder')"
             name="walletPassword"
-            counter
             required
             autocomplete="new-passord"
             @click:append="walletPasswordShow = !walletPasswordShow" />

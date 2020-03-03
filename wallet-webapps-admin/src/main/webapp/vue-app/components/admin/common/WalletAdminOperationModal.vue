@@ -63,14 +63,13 @@
             <v-text-field
               v-if="dialog && !storedPassword"
               v-model="walletPassword"
-              :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+              :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
               :type="walletPasswordShow ? 'text' : 'password'"
               :disabled="loading"
               :autofocus="!inputLabel && !autocompleteLabel"
               :label="$t('exoplatform.wallet.label.walletPassword')"
               :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
-              counter
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
 

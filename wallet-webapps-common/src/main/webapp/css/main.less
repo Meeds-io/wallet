@@ -98,9 +98,6 @@
       white-space: normal;
     }
   }
-  .v-autocomplete label {
-    z-index: 1002;
-  }
   .v-btn {
     border: 0;
     box-sizing: border-box;
@@ -337,21 +334,6 @@
       width: -moz-max-content;
     }
   }
-  .autocompleteSelectedItem {
-    cursor: pointer;
-    margin: 0 3px 3px 0;
-    padding: 2px 6px;
-    background: #578dc9;
-    color: #fff;
-    border: 1px solid #215ab2;
-    border-radius: 3px;
-    font-size: 15px;
-
-    > .v-chip__content {
-      height: auto;
-      padding: 0;
-    }
-  }
 
   .inlineIconButton {
     margin: 0 5px 2px;
@@ -403,6 +385,7 @@
 
   .additionalToolbar {
     width: 100%;
+    height: auto !important;
 
     > div {
       height: auto !important;
@@ -496,6 +479,22 @@
   }
 }
 
+.autocompleteSelectedItem {
+  cursor: pointer !important;
+  margin: 0 3px 3px 0 !important;
+  padding: 2px 6px !important;
+  background: #578dc9 !important;
+  color: #fff !important;
+  border: 1px solid #215ab2 !important;
+  border-radius: 3px !important;
+  font-size: 15px !important;
+
+  > .v-chip__content {
+    height: auto !important;
+    padding: 0 !important;
+  }
+}
+
 .contactAutoComplete {
   position: relative;
 
@@ -572,7 +571,9 @@
       width: 98%;
       box-sizing: border-box;
     }
-
+    .walletSummaryAction {
+      min-height: 57px;
+    }
   }
   .transactionHistoryChart {
     height: 450px;

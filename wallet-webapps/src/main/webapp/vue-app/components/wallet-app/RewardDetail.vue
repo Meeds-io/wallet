@@ -27,7 +27,7 @@
     <v-layout class="ma-2">
       <v-flex md4 xs12>
         <v-card flat>
-          <v-card-title class="title text-wrap">
+          <v-card-title class="title text-wrap text-break">
             {{ $t('exoplatform.wallet.label.rewardBalance') }}
           </v-card-title>
           <v-card-text>
@@ -37,7 +37,7 @@
       </v-flex>
       <v-flex md4 xs12>
         <v-card flat>
-          <v-card-title class="title text-wrap">
+          <v-card-title class="title text-wrap text-break">
             {{ $t('exoplatform.wallet.label.nextPayEstimation') }}
           </v-card-title>
           <v-card-text>
@@ -47,7 +47,7 @@
       </v-flex>
       <v-flex md4 xs12>
         <v-card flat>
-          <v-card-title class="title text-wrap">
+          <v-card-title class="title text-wrap text-break">
             {{ $t('exoplatform.wallet.label.actualPool') }}
           </v-card-title>
           <v-card-text>

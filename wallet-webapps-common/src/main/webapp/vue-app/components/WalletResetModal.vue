@@ -72,14 +72,13 @@
           <v-text-field
             v-if="dialog"
             v-model="walletPassword"
-            :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+            :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             :disabled="loading"
             :label="rememberPasswordToChange ? $t('exoplatform.wallet.label.walletPassword') : $t('exoplatform.wallet.label.currentWalletPassword')"
             :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
             name="walletPassword"
-            counter
             autocomplete="current-passord"
             autofocus
             validate-on-blur
@@ -88,7 +87,7 @@
           <v-text-field
             v-if="!rememberPasswordToChange && dialog"
             v-model="newWalletPassword"
-            :append-icon="newWalletPasswordShow ? 'visibility_off' : 'visibility'"
+            :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="newWalletPasswordShow ? 'text' : 'password'"
             :disabled="loading"

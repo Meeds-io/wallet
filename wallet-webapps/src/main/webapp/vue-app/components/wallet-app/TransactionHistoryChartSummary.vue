@@ -27,6 +27,7 @@
           :locale="lang"
           :show-current="false"
           :max="maxDate"
+          class="border-box-sizing"
           min="2018"
           @input="selectPeriod"
           @update:picker-date="selectPeriod" />

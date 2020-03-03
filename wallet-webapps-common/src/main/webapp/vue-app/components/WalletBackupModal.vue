@@ -49,13 +49,12 @@
             v-if="dialog && !walletPrivateKey"
             ref="walletPassword"
             v-model="walletPassword"
-            :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+            :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             name="walletPassword"
             label="Current wallet password"
             placeholder="Enter your current wallet password"
-            counter
             autocomplete="current-passord"
             autofocus
             validate-on-blur

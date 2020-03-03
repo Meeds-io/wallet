@@ -56,7 +56,7 @@
           <v-text-field
             v-if="dialog"
             v-model="walletPrivateKey"
-            :append-icon="walletPrivateKeyShow ? 'visibility_off' : 'visibility'"
+            :append-icon="walletPrivateKeyShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.priv]"
             :type="walletPrivateKeyShow ? 'text' : 'password'"
             :disabled="loading"
@@ -69,7 +69,7 @@
             @click:append="walletPrivateKeyShow = !walletPrivateKeyShow" />
           <v-text-field
             v-model="walletPassword"
-            :append-icon="walletPasswordShow ? 'visibility_off' : 'visibility'"
+            :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             :disabled="loading"

@@ -27,6 +27,7 @@
           :first-day-of-week="1"
           :type="!periodType || periodType === 'WEEK' ? 'date' : 'month'"
           :locale="lang"
+          class="border-box-sizing"
           @input="selectedDateMenu = false" />
       </v-menu>
     </v-card-text>

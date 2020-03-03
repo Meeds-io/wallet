@@ -8,7 +8,6 @@
       :search-input.sync="searchTerm"
       :label="inputLabel"
       :disabled="disabled"
-      :attach="`#${id}`"
       :placeholder="inputPlaceholder"
       :content-class="`contactAutoCompleteContent ${bigField && 'bigContactAutoComplete'}`"
       :filter="filterIgnoredItems"
