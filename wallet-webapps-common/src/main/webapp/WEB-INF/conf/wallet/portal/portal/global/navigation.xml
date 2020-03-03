@@ -29,9 +29,9 @@
     <page-nodes>
         <node>
             <name>wallet</name>
-            <label>Wallet</label>
+            <label>#{portal.global.wallet}</label>
             <visibility>SYSTEM</visibility>
-            <page-reference>portal::intranet::wallet</page-reference>
+            <page-reference>portal::global::wallet</page-reference>
         </node>
     </page-nodes>
 </node-navigation>
