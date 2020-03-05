@@ -24,9 +24,6 @@ import * as walletUtils from './js/WalletUtils.js';
 import * as tokenUtils from './js/TokenUtils.js';
 import * as transactionUtils from './js/TransactionUtils.js';
 
-// Added to watch changes on less file
-import './../css/main.less';
-
 const WalletCommon = {
   install: (Vue, options) => {
     Vue.prototype.constants = constants;
@@ -56,4 +53,5 @@ const WalletCommon = {
     Vue.component('wallet-setup', WalletSetup);
   },
 };
-window.WalletCommon = WalletCommon;
+
+window.WalletCommon = WalletCommon;

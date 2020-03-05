@@ -2,14 +2,14 @@
   <portal-skin>
     <skin-name>Enterprise</skin-name>
     <skin-module>wallet</skin-module>
-    <css-path>/css/platform.css</css-path>
+    <css-path>/skin/css/platform.css</css-path>
     <css-priority>100</css-priority>
   </portal-skin>
 
   <portal-skin>
     <skin-name>Enterprise</skin-name>
     <skin-module>customModuleWallet</skin-module>
-    <css-path>/css/wallet.css</css-path>
+    <css-path>/skin/css/main.css</css-path>
     <css-priority>11</css-priority>
   </portal-skin>
 
