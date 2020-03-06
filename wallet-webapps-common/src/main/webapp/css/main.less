@@ -1,3 +1,6 @@
+@import "variables.less";
+@import "mixins.less";
+
 .selectBoxVuetifyParent {
   position: relative;
 
@@ -114,12 +117,12 @@
 
     &.btn-primary {
       color: rgb(255, 255, 255);
-      background-color: #578dc9;
+      background-color: @primaryColor;
       transition: initial;
 
       &:hover {
         color: rgb(255, 255, 255);
-        background-color: rgb(71, 106, 156);
+        background-color: @btnPrimaryHoverBackgroundColor;
         background-position: 0px -45px;
       }
     }
@@ -270,13 +273,18 @@
   }
 
   .primary--text {
-    color: #578dc9 !important;
+    color: @tertiaryColor !important;
   }
 
   .primary:not([disabled]) {
-    background-color: #578dc9 !important;
+    background-color: @primaryColor !important;
     color: #fff;
   }
+
+  .v-tabs-slider.primary {
+    background-color: @tertiaryColor !important;
+  }
+
 
   .v-text-field .v-label--active {
     top: 0;
@@ -483,9 +491,9 @@
   cursor: pointer !important;
   margin: 0 3px 3px 0 !important;
   padding: 2px 6px !important;
-  background: #578dc9 !important;
+  background: @primaryColor !important;
   color: #fff !important;
-  border: 1px solid #215ab2 !important;
+  border: 1px solid @primaryColor !important;
   border-radius: 3px !important;
   font-size: 15px !important;
 
@@ -538,7 +546,7 @@
     }
 
     .tokenBalance {
-      color: #578DC9;
+      color: @primaryColor;
     }
 
     .rewardBalance, .lastTransactionBalance {
