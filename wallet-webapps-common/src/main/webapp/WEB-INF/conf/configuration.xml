@@ -32,5 +32,6 @@
   <import>war:/conf/wallet/user-page-configuration.xml</import>
   <import>war:/conf/wallet/notification-configuration.xml</import>
   <import>war:/conf/wallet/reward-menu-configuration.xml</import>
+  <import>war:/conf/wallet/app-center-configuration.xml</import>
 
 </configuration>
