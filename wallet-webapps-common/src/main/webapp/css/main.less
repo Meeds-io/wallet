@@ -273,7 +273,7 @@
   }
 
   .primary--text {
-    color: @tertiaryColor !important;
+    color: @primaryColor !important;
   }
 
   .primary:not([disabled]) {
@@ -540,13 +540,11 @@
   .walletSummaryBalance {
     display: inline-block;
     width: 100%;
-
     .title, .headline {
       color: #808080;
     }
-
     .tokenBalance {
-      color: @primaryColor;
+      color: @tertiaryColor;
     }
 
     .rewardBalance, .lastTransactionBalance {
