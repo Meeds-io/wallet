@@ -9,7 +9,7 @@
     <!-- WARs -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-common:war</include>
       </includes>
@@ -18,7 +18,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps:war</include>
       </includes>
@@ -27,7 +27,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-admin:war</include>
       </includes>
@@ -36,7 +36,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-reward:war</include>
       </includes>
@@ -46,7 +46,7 @@
     <!-- Libraries -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>org.exoplatform.wallet:ert-contract:jar</include>
       </includes>
@@ -55,7 +55,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-api:jar</include>
       </includes>
@@ -64,7 +64,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-services:jar</include>
       </includes>
@@ -73,7 +73,7 @@
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>/</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-reward-services:jar</include>
       </includes>
