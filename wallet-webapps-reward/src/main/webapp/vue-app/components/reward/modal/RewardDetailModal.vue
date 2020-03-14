@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="dialog"
-    content-class="uiPopup"
+    content-class="uiPopup walletDialog"
     width="400px"
     max-width="100vw"
     @keydown.esc="dialog = false">

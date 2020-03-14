@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :width="width"
-    content-class="uiPopup"
+    content-class="uiPopup walletDialog"
     max-width="100vw"
     hide-overlay
     @keydown.esc="close">

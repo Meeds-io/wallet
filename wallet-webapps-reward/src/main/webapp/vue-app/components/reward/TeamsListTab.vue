@@ -23,7 +23,7 @@
       <v-btn
         :title="$t('exoplatform.wallet.button.addNewPool')"
         color="primary"
-        class="btn btn-primary"
+        class="btn btn-primary pa-0"
         icon
         large
         dark

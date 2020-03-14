@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="dialog"
-    content-class="uiPopup with-overflow not-draggable"
+    content-class="uiPopup with-overflow not-draggable walletDialog"
     class="walletSettingsModal"
     width="700px"
     max-width="100vw"

@@ -1,6 +1,0 @@
-.uiIconAppSpaceWallet:before, .uiIconWalletMyWallet:before, .uiIconAppwallet:before, .uiIconAppWallet:before, .uiIconExt-wallet:before {
-    content: "\e9ba" !important;
-}
-.uiIconSendFunds:before {
-  content: none !important
-}

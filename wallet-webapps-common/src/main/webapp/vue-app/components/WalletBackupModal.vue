@@ -4,7 +4,7 @@
     v-model="dialog"
     :disabled="disabled"
     class="fixLinkHeight"
-    content-class="uiPopup with-overflow"
+    content-class="uiPopup with-overflow walletDialog"
     width="500px"
     max-width="100vw"
     hide-overlay
