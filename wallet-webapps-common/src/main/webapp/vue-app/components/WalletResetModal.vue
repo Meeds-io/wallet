@@ -2,7 +2,7 @@
   <v-dialog
     v-model="dialog"
     :disabled="disabled"
-    content-class="uiPopup with-overflow"
+    content-class="uiPopup with-overflow walletDialog"
     class="walletResetModal"
     width="500px"
     max-width="100vw"

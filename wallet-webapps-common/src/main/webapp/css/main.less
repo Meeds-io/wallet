@@ -1,3 +1,6 @@
+@import "variables.less";
+@import "mixins.less";
+
 .selectBoxVuetifyParent {
   position: relative;
 
@@ -27,7 +30,7 @@
   }
 }
 
-#WalletApp, #SpaceWalletApp, #RewardApp, #WalletAdminApp {
+#WalletApp, #SpaceWalletApp, #RewardApp, #WalletAdminApp, .walletDialog {
   background: transparent;
 
   .applicationToolbar {
@@ -96,32 +99,6 @@
       height: auto;
       min-height: 29px;
       white-space: normal;
-    }
-  }
-  .v-btn {
-    border: 0;
-    box-sizing: border-box;
-
-    &.btn {
-      padding: 0 10px;
-      padding: 3px 10px;
-      border-bottom-color: #e1e8ee;
-      text-shadow: none!important;
-      color: #4d5466;
-      background-color: #fff;
-      background-image: none;
-    }
-
-    &.btn-primary {
-      color: rgb(255, 255, 255);
-      background-color: #578dc9;
-      transition: initial;
-
-      &:hover {
-        color: rgb(255, 255, 255);
-        background-color: rgb(71, 106, 156);
-        background-position: 0px -45px;
-      }
     }
   }
   #accountDetailsDrawer, #contractDetailsDrawer, #rewardDetailsDrawer {
@@ -216,7 +193,7 @@
 
   .walletAddressCmp {
     .copyToClipboardInput {
-      position: absolute;
+      position: fixed;
       left:-9999px;
     }
     .v-chip__content {
@@ -247,9 +224,6 @@
       margin-right: 15px;
     }
 
-    .fixLinkHeight {
-      min-height: 31px;
-    }
   }
 
   #walletPrivateKey code {
@@ -267,15 +241,6 @@
   #requestMessage {
     height: auto;
     margin: 0;
-  }
-
-  .primary--text {
-    color: #578dc9 !important;
-  }
-
-  .primary:not([disabled]) {
-    background-color: #578dc9 !important;
-    color: #fff;
   }
 
   .v-text-field .v-label--active {
@@ -461,7 +426,6 @@
 
       &.v-btn--active {
         opacity: 1;
-        color: #333 !important;
       }
     }
   }
@@ -483,9 +447,9 @@
   cursor: pointer !important;
   margin: 0 3px 3px 0 !important;
   padding: 2px 6px !important;
-  background: #578dc9 !important;
+  background: @primaryColor !important;
   color: #fff !important;
-  border: 1px solid #215ab2 !important;
+  border: 1px solid @primaryColor !important;
   border-radius: 3px !important;
   font-size: 15px !important;
 
@@ -509,7 +473,7 @@
   }
 
   .v-list__tile:hover {
-    background-color: #578dc9;
+    background-color: @primaryColor;
     color: #fff;
     transition: unset;
     transform: none;
@@ -532,13 +496,11 @@
   .walletSummaryBalance {
     display: inline-block;
     width: 100%;
-
     .title, .headline {
       color: #808080;
     }
-
     .tokenBalance {
-      color: #578DC9;
+      color: @tertiaryColor;
     }
 
     .rewardBalance, .lastTransactionBalance {
@@ -667,6 +629,10 @@
 
 }
 
+.fixLinkHeight {
+  min-height: 31px;
+}
+
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {
   #WalletApp, #SpaceWalletApp {
@@ -692,4 +658,11 @@
       transform: translate(0px,0px) !important;
     }
   }
+}
+
+.uiIconAppSpaceWallet:before, .uiIconWalletMyWallet:before, .uiIconAppwallet:before, .uiIconAppWallet:before, .uiIconExt-wallet:before {
+    content: "\e9ba" !important;
+}
+.uiIconSendFunds:before {
+  content: none !important
 }

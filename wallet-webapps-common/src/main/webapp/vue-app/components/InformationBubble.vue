@@ -1,7 +1,7 @@
 <template>
   <v-dialog
     v-model="dialog"
-    :content-class="title && 'uiPopup'"
+    :content-class="title ? 'uiPopup walletDialog' : 'walletDialog'"
     hide-overlay
     width="300px"
     max-width="100vw"
