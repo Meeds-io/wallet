@@ -8,10 +8,12 @@ const config = merge(webpackCommonConfig, {
     wallet: './src/main/webapp/vue-app/wallet.js',
     walletAPI: './src/main/webapp/vue-app/walletAPI.js',
     spaceWallet: './src/main/webapp/vue-app/spaceWallet.js',
+    walletBalance: './src/main/webapp/vue-app/WalletBalance.js',
   },
   output: {
     path: path.join(__dirname, 'target/wallet/'),
-    filename: 'js/[name].bundle.js'
+    filename: 'js/[name].bundle.js',
+    libraryTarget: 'amd'
   },
   externals: {
     vue: 'Vue',
