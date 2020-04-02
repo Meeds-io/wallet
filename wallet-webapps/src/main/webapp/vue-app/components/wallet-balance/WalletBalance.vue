@@ -28,7 +28,7 @@
                 justify-center>
                 <v-card flat>
                   <v-card-text class="pa-2">
-                    <a :href="url('wallet')" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
+                    <a :href="url" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
                   </v-card-text>
                 </v-card>
               </v-flex>
@@ -45,7 +45,8 @@
   export default {
     data() {
       return {
-        walletBalance: ''
+        walletBalance: '',
+        walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`
       }
     },
     created() {
@@ -58,10 +59,7 @@
                   this.walletBalance = Math.trunc(data.tokenBalance);
                 }
         )
-      },
-      url(pagelink) {
-        return`${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/${ pagelink }` ;
-      },
+      }
     }
   }
 </script>
