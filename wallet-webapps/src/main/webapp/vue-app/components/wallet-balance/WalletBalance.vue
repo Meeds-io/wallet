@@ -28,7 +28,7 @@
                 justify-center>
                 <v-card flat>
                   <v-card-text class="pa-2">
-                    <a :href="url" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
+                    <a :href="walletUrl" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
                   </v-card-text>
                 </v-card>
               </v-flex>
