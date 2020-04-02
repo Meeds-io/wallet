@@ -9,8 +9,7 @@
           row
           wrap
           mx-0
-          style="cursor: pointer"
-          @click="navigateTo('wallet')">
+          style="cursor: pointer">
           <v-flex
             d-flex
             sx12>
@@ -28,7 +27,9 @@
                 xs12 
                 justify-center>
                 <v-card flat>
-                  <v-card-text class="display-1 font-weight-bold pa-2 big-number">{{ walletBalance }} Ȼ</v-card-text>
+                  <v-card-text class="pa-2">
+                    <a :href="url('wallet')" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
+                  </v-card-text>
                 </v-card>
               </v-flex>
             </v-layout>
@@ -58,8 +59,8 @@
                 }
         )
       },
-      navigateTo(pagelink) {
-        location.href=`${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/${ pagelink }` ;
+      url(pagelink) {
+        return`${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/${ pagelink }` ;
       },
     }
   }
