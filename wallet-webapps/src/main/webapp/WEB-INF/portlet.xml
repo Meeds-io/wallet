@@ -79,4 +79,24 @@
        <keywords>Space Wallet Application</keywords>
      </portlet-info>
    </portlet>
+
+    <portlet>
+        <portlet-name>WalletBalance</portlet-name>
+        <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+        <init-param>
+            <name>portlet-view-dispatched-file-path</name>
+            <value>/walletBalance.html</value>
+        </init-param>
+        <init-param>
+            <description>List of profiles that can be used to enable this portlet</description>
+            <name>exo.profiles</name>
+            <value>wallet</value>
+        </init-param>
+        <supports>
+            <mime-type>text/html</mime-type>
+        </supports>
+        <portlet-info>
+            <title>WalletBalance</title>
+        </portlet-info>
+    </portlet>
 </portlet-app>

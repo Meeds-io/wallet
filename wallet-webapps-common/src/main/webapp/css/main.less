@@ -10,7 +10,7 @@
     position: absolute !important;
     width: 100%;
     z-index: 1050 !important;
-    
+
     .v-list {
       padding: 0;
     }
@@ -366,7 +366,7 @@
   .dynamic-height .v-list__tile {
     height: auto;
     min-height: 40px;
-    
+
     .v-list__tile__content.align-end {
       max-width: ~"calc(100% - 110px)";
     }
@@ -632,7 +632,13 @@
 .fixLinkHeight {
   min-height: 31px;
 }
-
+#walletBalancePortlet {
+  .big-number {
+    font-size  : 2.4rem !important;
+    line-height: 2.5rem;
+    color      : @darkGrey;
+  }
+}
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {
   #WalletApp, #SpaceWalletApp {
@@ -665,4 +671,28 @@
 }
 .uiIconSendFunds:before {
   content: none !important
+}
+
+@media (min-width: 1201px) and (max-width: 1300px) {
+  #walletBalancePortlet {
+    .big-number {
+      font-size: 2rem !important;
+    }
+  }
+}
+
+ @media (max-width: 1200px) {
+  #walletBalancePortlet {
+    .big-number {
+      margin-top: 20px;
+    }
+  }
+}
+
+ @media (max-width: 599px) {
+  #walletBalancePortlet {
+    .big-number {
+      margin-top: 0;
+    }
+  }
 }
