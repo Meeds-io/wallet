@@ -19,7 +19,10 @@
               class="white">
               <v-flex d-flex xs12>
                 <v-card flat>
-                  <v-card-text class="subtitle-2 grey--text pa-2">{{ this.$t('exoplatform.wallet.title.walletBalanceTitle') }}</v-card-text>
+                  <v-card-text
+                    class="subtitle-2 grey--text pa-2">
+                    <span :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-header skeleton-border-radius'">{{ this.$t('exoplatform.wallet.title.walletBalanceTitle') }}</span>
+                  </v-card-text>
                 </v-card>
               </v-flex>
               <v-flex 
@@ -28,7 +31,10 @@
                 justify-center>
                 <v-card flat>
                   <v-card-text class="pa-2">
-                    <a :href="walletUrl" class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
+                    <a
+                      :href="walletUrl"
+                      class="display-1 font-weight-bold big-number"
+                      :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-border-radius'">{{ walletBalance }} Ȼ</a>
                   </v-card-text>
                 </v-card>
               </v-flex>
@@ -46,7 +52,8 @@
     data() {
       return {
         walletBalance: '',
-        walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`
+        walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`,
+        firstLoadingWalletBalance: true,
       }
     },
     created() {
@@ -55,9 +62,12 @@
     methods: {
       getRewardBalance() {
         getWalletAccount().then(
-                (data) => {
-                  this.walletBalance = Math.trunc(data.tokenBalance);
-                }
+          (data) => {
+            this.walletBalance = Math.trunc(data.tokenBalance);
+              if (this.firstLoadingWalletBalance) {
+                this.firstLoadingWalletBalance = false;
+              }
+            }
         )
       }
     }
