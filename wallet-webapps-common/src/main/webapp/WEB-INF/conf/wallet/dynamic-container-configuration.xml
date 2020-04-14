@@ -166,7 +166,7 @@
         </value-param>
         <value-param>
           <name>containerName</name>
-          <value>WalletContainer</value>
+          <value>WalletWidgetContainer</value>
         </value-param>
         <object-param>
           <name>WalletBalance</name>

@@ -20,8 +20,8 @@
               <v-flex d-flex xs12>
                 <v-card flat>
                   <v-card-text
-                    class="subtitle-2 grey--text pa-2">
-                    <span :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-header skeleton-border-radius'">{{ this.$t('exoplatform.wallet.title.walletBalanceTitle') }}</span>
+                    class="subtitle-2 header-title-color pa-2">
+                    <span :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-header skeleton-border-radius'">{{ $t('exoplatform.wallet.title.walletBalanceTitle') }}</span>
                   </v-card-text>
                 </v-card>
               </v-flex>
