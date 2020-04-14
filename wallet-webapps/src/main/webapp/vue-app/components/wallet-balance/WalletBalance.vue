@@ -20,7 +20,7 @@
               <v-flex d-flex xs12>
                 <v-card flat>
                   <v-card-text
-                    class="subtitle-2 header-title-color pa-2">
+                    class="subtitle-2 text-sub-title pa-2">
                     <span :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-header skeleton-border-radius'">{{ $t('exoplatform.wallet.title.walletBalanceTitle') }}</span>
                   </v-card-text>
                 </v-card>
@@ -33,8 +33,8 @@
                   <v-card-text class="pa-2">
                     <a
                       :href="walletUrl"
-                      class="display-1 font-weight-bold big-number"
-                      :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-border-radius'">{{ walletBalance }} Ȼ</a>
+                      :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-border-radius'"
+                      class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
                   </v-card-text>
                 </v-card>
               </v-flex>
