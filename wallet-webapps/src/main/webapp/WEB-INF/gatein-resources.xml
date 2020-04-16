@@ -52,6 +52,9 @@
       <depends>
         <module>spacePopupPlugin</module>
       </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
     </module>
   </portlet>
 
