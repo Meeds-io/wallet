@@ -16,6 +16,7 @@ export default {
       principalContractDetails: null,
       error: null,
       settings: null,
+      profileExtensionInstalled: false,
     };
   },
   created() {
@@ -52,6 +53,11 @@ export default {
         console.debug("Wallet API application start loading");
 
         const settings = event && event.detail;
+        if (!this.profileExtensionInstalled && settings && settings.contractDetail && settings.contractDetail.name) {
+          this.registerExternalExtensions(this.$t('exoplatform.wallet.title.sendToken', {0: settings.contractDetail.name}));
+          this.profileExtensionInstalled = true;
+        }
+
         let isSpace = false;
         if(settings && settings.sender) {
           if(settings.sender.type === 'space') {
@@ -69,6 +75,11 @@ export default {
 
             document.dispatchEvent(new CustomEvent('exo-wallet-settings-loaded', {detail : this.settings}));
 
+            if (!this.profileExtensionInstalled && this.settings && this.settings.contractDetail && this.settings.contractDetail.name) {
+              this.registerExternalExtensions(this.$t('exoplatform.wallet.title.sendToken', {0: this.settings.contractDetail.name}));
+              this.profileExtensionInstalled = true;
+            }
+
             if (!this.settings.walletEnabled) {
               this.isWalletEnabled = false;
               this.isReadOnly = true;
@@ -82,6 +93,7 @@ export default {
             }
             this.isWalletEnabled = true;
             this.isReadOnly = false;
+
             return this.walletUtils.initWeb3();
           })
           .then((result, error) => {
@@ -382,6 +394,21 @@ export default {
           detail : (e && e.message) || e,
         }));
       }
+    },
+    registerExternalExtensions(title) {
+      const profileExtensionAction = {
+        title: title,
+        icon: 'uiIconLightBlue mdi mdi-send material-icons',
+        order: 30,
+        enabled: () => true,
+        click: (profile) => {
+          const type = profile.username ? 'user':'space';
+          const name = profile.username ? profile.username : profile.prettyName;
+          window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet?receiver=${name}&receiver_type=${type}&principal=true`
+        },
+      };
+      extensionRegistry.registerExtension('profile-extension', 'action', profileExtensionAction);
+      document.dispatchEvent(new CustomEvent('profile-extension-updated', { detail: profileExtensionAction}));
     },
   },
 };

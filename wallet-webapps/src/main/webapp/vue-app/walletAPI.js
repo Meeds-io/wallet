@@ -29,3 +29,7 @@ document.addEventListener('exo-wallet-init', () => {
 });
 
 window.walletAddonInstalled = true;
+
+document.addEventListener('profile-extension-init', () => {
+  document.dispatchEvent(new CustomEvent('exo-wallet-init'));
+});

@@ -18,7 +18,7 @@
             {{ $t('exoplatform.wallet.title.sendTokenModalForWallet', {0: contractDetails && contractDetails.name, 1: wallet.name}) }}
           </template>
           <template v-else>
-            {{ $t('exoplatform.wallet.title.sendTokenModal', {0: contractDetails && contractDetails.name}) }}
+            {{ $t('exoplatform.wallet.title.sendToken', {0: contractDetails && contractDetails.name}) }}
           </template>
         </span>
       </div>

@@ -28,7 +28,8 @@
         "isMaximized": true,
         "abiDecoder": true,
         "WalletCommon": true,
-        "VueChart": true
+        "VueChart": true,
+        "extensionRegistry": true
     },
     "parserOptions": {
         "sourceType": "module",
