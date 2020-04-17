@@ -1,7 +1,3 @@
-<template>
-  <v-app id="WalletAPIApp" class="hidden VuetifyApp" />
-</template>
-
 <script>
 export default {
   data() {
@@ -21,10 +17,6 @@ export default {
   },
   created() {
     if ((!eXo && eXo.env) || !eXo.env.portal || !eXo.env.portal.userName || !eXo.env.portal.userName.length) {
-      this.isWalletEnabled = false;
-      return;
-    }
-    if (eXo.env.portal.profileOwner && eXo.env.portal.profileOwner !== eXo.env.portal.userName) {
       this.isWalletEnabled = false;
       return;
     }
