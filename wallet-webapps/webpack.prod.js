@@ -9,6 +9,7 @@ const config = merge(webpackCommonConfig, {
     walletAPI: './src/main/webapp/vue-app/walletAPI.js',
     spaceWallet: './src/main/webapp/vue-app/spaceWallet.js',
     walletBalance: './src/main/webapp/vue-app/WalletBalance.js',
+    walletOverview: './src/main/webapp/vue-app/wallet-overview/main.js',
   },
   output: {
     path: path.join(__dirname, 'target/wallet/'),
