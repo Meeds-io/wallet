@@ -220,9 +220,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       } else if (!StringUtils.equals(wallet.getId(), currentUser)) {
         hideWalletOwnerPrivateInformation(wallet);
       }
-      if (canAccessWallet(wallet, currentUser)) {
-        retrieveWalletBlockchainState(wallet);
-      }
+      retrieveWalletBlockchainState(wallet);
     }
     return wallet;
   }
