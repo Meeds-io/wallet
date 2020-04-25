@@ -8,11 +8,11 @@
       <div class="text-header-title text-sub-title text-no-wrap">
         {{ title || '' }}
       </div>
+      <v-spacer />
       <i
         v-if="clickable"
-        class="uiIconInformation clickable primary--text my-auto ml-3"
+        class="uiIconInformation clickable primary--text my-auto ml-3 pb-2"
         @click="openDrawer"></i>
-      <v-spacer />
     </v-toolbar>
     <v-card
       :class="clickable && 'clickable' || ''"
