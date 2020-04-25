@@ -1,5 +1,23 @@
 <template>
-  <div v-if="rewards">
+  <div v-if="rewards && rewards.length">
+    <v-list-item>
+      <v-list-item-content class="align-end text-left">
+        <v-list-item-title :title="period">
+          <i class="fa fa-trophy px-2 tertiary--text"></i>
+          {{ periodShort }}
+          <i class="uiIconInformation text-sub-title my-auto ml-3"></i>
+        </v-list-item-title>
+        <v-list-item-subtitle class="pl-10">
+          {{ $t('exoplatform.wallet.label.sentDate') }}: {{ sentDate }}
+        </v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-icon class="my-auto">
+        <span class="primary--text">
+          {{ rewardAmount }}
+        </span>
+      </v-list-item-icon>
+    </v-list-item>
+
     <wallet-overview-reward-plugin-item
       v-for="(plugin, i) in rewards"
       :id="`plugin-${plugin.pluginId}`"
@@ -21,10 +39,102 @@ export default {
       default: 'sent',
     },
   },
+  data: () => ({
+    lang: eXo.env.portal.language,
+    dateFormat: {
+      dateStyle: 'long',
+    },
+  }),
   computed: {
     rewards() {
       return this.rewardItem && this.rewardItem.rewards && this.rewardItem.rewards.length && this.rewardItem.rewards.filter(plugin => plugin.amount);
-    }
+    },
+    rewardEarnedAmount() {
+      return parseInt(this.rewardItem.tokensSent * 100) / 100;
+    },
+    rewardAmount() {
+      return `${this.rewardEarnedAmount} ${this.symbol}`;
+    },
+    sentDate() {
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.transaction.sentTimestamp));
+    },
+    periodStartDate() {
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.period.startDateInSeconds * 1000));
+    },
+    periodEndDate() {
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date((this.rewardItem.period.endDateInSeconds - 1) * 1000));
+    },
+    periodLabelKey() {
+      return `exoplatform.wallet.label.${this.rewardItem.period.rewardPeriodType.toLowerCase()}ShortPeriod`;
+    },
+    periodShort() {
+      const startDate = new Date(this.rewardItem.period.startDateInSeconds * 1000);
+      const year = startDate.getFullYear();
+
+      switch(this.rewardItem.period.rewardPeriodType) {
+      case 'WEEK':
+      case 'week': {
+        const weekNumber = this.getWeekNumber(startDate);
+        return this.$t(this.periodLabelKey, {
+          0: weekNumber,
+          1: year,
+        });
+      }
+      case 'MONTH':
+      case 'month': {
+        const month = new window.Intl.DateTimeFormat(this.lang, {month: 'long'}).format(startDate);
+        return this.$t(this.periodLabelKey, {
+          0: month,
+          1: year,
+        });
+      }
+      case 'QUARTER':
+      case 'quarter': {
+        const quarterNumber = this.getQuarterNumber(startDate);
+        return this.$t(this.periodLabelKey, {
+          0: quarterNumber,
+          1: year,
+        });
+      }
+      case 'SEMESTER':
+      case 'semester': {
+        const semesterNumber = this.getSemesterNumber(startDate);
+        return this.$t(this.periodLabelKey, {
+          0: semesterNumber,
+          1: year,
+        });
+      }
+      case 'YEAR':
+      case 'year': {
+        return this.$t(this.periodLabelKey, {
+          0: year,
+        });
+      }
+      }
+      return '';
+    },
+    period() {
+      return this.$t(`exoplatform.wallet.label.rewardedForPeriod`, {
+        0: this.periodStartDate,
+        1: this.periodEndDate,
+      });
+    },
+  },
+  methods: {
+    getSemesterNumber(startDate) {
+      return Math.ceil((startDate.getMonth() + 1) / 6);
+    },
+    getQuarterNumber(startDate) {
+      return Math.ceil((startDate.getMonth() + 1) / 3);
+    },
+    getWeekNumber(startDate) {
+      const date = new Date(startDate);
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+
+      const week1Date = new Date(date.getFullYear(), 0, 4);
+      return 1 + Math.round(((date.getTime() - week1Date.getTime()) / 86400000 - 3 + (week1Date.getDay() + 6) % 7) / 7);
+    },
   },
 };
 </script>
