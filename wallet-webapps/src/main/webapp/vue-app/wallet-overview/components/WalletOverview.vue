@@ -61,7 +61,7 @@ export default {
   methods: {
     openDrawer() {
       if (this.owner) {
-        this.$refs.walletOverviewDrawer.open(this.title, );
+        this.$refs.walletOverviewDrawer.open(this.title);
       }
     },
     refresh() {
@@ -77,7 +77,7 @@ export default {
             this.currencyName = contract && contract.name;
             this.currencySymbol = contract && contract.symbol;
             if (this.currencyName) {
-              this.title = this.$t('exoplatform.wallet.title.rewardsOverview', {0: this.currencyName});
+              this.title = this.$t('exoplatform.wallet.title.rewardedBalance', {0: this.currencyName});
             }
           })
           .finally(() => {
