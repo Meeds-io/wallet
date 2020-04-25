@@ -1,13 +1,14 @@
 <template>
-  <v-list-item two-line>
+  <v-list-item v-if="pluginEarnedAmount" dense>
+    <v-list-item-icon class="my-auto" />
     <v-list-item-content class="align-end text-left">
-      <v-list-item-title>
-        {{ plugin.points }} {{ plugin.pluginId }}
-      </v-list-item-title>
-      <v-list-item-subtitle v-text="period" />
+      <v-list-item-subtitle>
+        <span class="text-sub-title caption uiIcon" :class="iconClass"></span>
+        <span class="text-sub-title caption">{{ plugin.points }} {{ pluginName }}</span>
+      </v-list-item-subtitle>
     </v-list-item-content>
     <v-list-item-icon class="my-auto">
-      <span class="primary--text">
+      <span class="text-sub-title caption">
         {{ pluginAmount }}
       </span>
     </v-list-item-icon>
@@ -30,28 +31,18 @@ export default {
       default: 'sent',
     },
   },
-  data: () => ({
-    lang: eXo.env.portal.language,
-    dateFormat: {
-      dateStyle: 'long',
-    },
-  }),
   computed: {
-    periodStartDate() {
-      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.period.startDateInSeconds * 1000));
+    pluginName() {
+      return this.plugin.pluginId.charAt(0).toUpperCase() + this.plugin.pluginId.slice(1);
     },
-    periodEndDate() {
-      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date((this.rewardItem.period.endDateInSeconds - 1) * 1000));
+    iconClass() {
+      return `uiIconReward${this.pluginName}`;
+    },
+    pluginEarnedAmount() {
+      return parseInt(this.plugin.amount * 100) / 100;
     },
     pluginAmount() {
-      const amount = parseInt(this.plugin.amount * 100) / 100;
-      return `${amount} ${this.symbol}`;
-    },
-    period() {
-      return this.$t(`exoplatform.wallet.label.${this.rewardItem.period.rewardPeriodType.toLowerCase()}Period`, {
-        0: this.periodStartDate,
-        1: this.periodEndDate,
-      });
+      return `${this.pluginEarnedAmount} ${this.symbol}`;
     },
   },
 };
