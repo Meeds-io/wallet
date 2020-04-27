@@ -5,14 +5,25 @@
       height="48"
       flat
       class="border-box-sizing py-3">
-      <div class="text-header-title text-sub-title text-no-wrap">
-        {{ title || '' }}
+      <div
+        :class="skeleton && 'skeleton-text skeleton-text-width skeleton-background skeleton-text-height-thick skeleton-border-radius'"
+        class="text-header-title text-sub-title text-no-wrap">
+        {{ skeleton && '&nbsp;' || title || '' }}
       </div>
       <v-spacer />
-      <i
-        v-if="clickable"
-        class="uiIconInformation clickable primary--text my-auto ml-3 pb-2"
-        @click="openDrawer"></i>
+      <v-btn
+        v-if="clickable || skeleton"
+        :disabled="skeleton"
+        :class="skeleton && 'skeleton-background skeleton-text'"
+        icon
+        outlined
+        small
+        @click="editWorkExperiences">
+        <i
+          v-if="!skeleton"
+          class="uiIconInformation clickable primary--text my-auto pb-2 mr-1"
+          @click="openDrawer"></i>
+      </v-btn>
     </v-toolbar>
     <v-card
       :class="clickable && 'clickable' || ''"
@@ -20,15 +31,25 @@
       flat>
       <v-card-text
         class="justify-center ma-auto py-5 d-flex flex-no-wrap"
-        @click="clickable && openDrawer()">
-        <v-icon
-          v-if="currencySymbol"
-          size="48"
-          class="tertiary-color walletOverviewCurrencySymbol px-2">
-          {{ currencySymbol }}
-        </v-icon>
-        <div class="text-color display-2 text-left font-weight-bold walletOverviewBalance">
-          {{ rewardBalance }}
+        @click="!skeleton && clickable && openDrawer()">
+        <div
+          :class="skeleton && 'skeleton-background skeleton-border-radius skeleton-text-half-width skeleton-text-height-block skeleton-text my-2'"
+          class="justify-center d-flex flex-no-wrap">
+          <template v-if="skeleton">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          </template>
+          <template v-else>
+            <v-icon
+              v-if="currencySymbol"
+              class="tertiary-color walletOverviewCurrencySymbol px-2"
+              size="48">
+              {{ currencySymbol }}
+            </v-icon>
+            <div
+              class="text-color display-2 text-left font-weight-bold walletOverviewBalance">
+              {{ rewardBalance }}
+            </div>
+          </template>
         </div>
       </v-card-text>
     </v-card>
