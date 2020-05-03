@@ -72,6 +72,10 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private ScheduledExecutorService connectionVerifierExecutor = null;
 
+  private boolean                  permanentlyScanBlockchain  = false;
+
+  private boolean                  listeningToBlockchain      = false;
+
   private boolean                  connectionInProgress       = false;
 
   private boolean                  serviceStarted             = false;
@@ -102,6 +106,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     } else {
       setPoolingInterval(DEFAULT_POOLING_TIME);
     }
+
+    String permanentlyScanParam = System.getProperty("exo.wallet.blockchain.permanentlyScan", "false");
+    permanentlyScanBlockchain = Boolean.parseBoolean(permanentlyScanParam);
   }
 
   @Override
@@ -124,25 +131,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       });
     }
 
-    // Blockchain connection verifier
-    connectionVerifierExecutor.scheduleAtFixedRate(() -> {
-      try {
-        if (isConnected()) {
-          return;
-        } else {
-          connect();
-        }
-      } catch (Throwable e) {
-        if (LOG.isDebugEnabled()) {
-          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint", e);
-        } else {
-          LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
-        }
+    if (permanentlyScanBlockchain) {
+      startListeningBlockchain();
+      if (blocking) {
+        waitConnection();
       }
-    }, 0, 10, TimeUnit.SECONDS);
-
-    if (blocking) {
-      waitConnection();
     }
   }
 
@@ -150,8 +143,33 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public void stop() {
     this.serviceStopping = true;
     connectionVerifierExecutor.shutdownNow();
-    closeBlockSubscription();
+    stopListeningToBlockchain();
     closeConnection();
+  }
+
+  public void startListeningBlockchain() {
+    // Blockchain connection verifier
+    connectionVerifierExecutor.scheduleAtFixedRate(this::checkConnection, 0, 10, TimeUnit.SECONDS);
+  }
+
+  public void stopListeningToBlockchain() {
+    if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
+      LOG.info("Close mined blocks subscription");
+      try {
+        this.blockSubscribtion.dispose();
+      } catch (Exception e) {
+        LOG.warn("Error when closing old subscription", e.getMessage());
+      }
+      this.listeningToBlockchain = false;
+    }
+  }
+
+  public boolean isPermanentlyScanBlockchain() {
+    return permanentlyScanBlockchain;
+  }
+
+  public boolean isListeningToBlockchain() {
+    return listeningToBlockchain;
   }
 
   /**
@@ -288,7 +306,12 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   public Web3j getWeb3j() {
-    this.waitConnection();
+    if (isPermanentlyScanBlockchain()) {
+      this.waitConnection();
+    } else {
+      checkConnection();
+    }
+
     return web3j;
   }
 
@@ -378,7 +401,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     LOG.info("Start watching mined blocks from blockchain from block '{}'", this.lastWatchedBlockNumber);
 
     // Close old subscription if exists
-    closeBlockSubscription();
+    stopListeningToBlockchain();
 
     // Renew subscription that will trigger an event each time a block is mined
     subscribeToBlockMining();
@@ -482,6 +505,21 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
+  private void checkConnection() {
+    try {
+      if (!isConnected()) {
+        connect();
+        waitConnection();
+      }
+    } catch (Throwable e) {
+      if (LOG.isDebugEnabled()) {
+        LOG.warn("Error while checking connection status to Etherreum Websocket endpoint", e);
+      } else {
+        LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
+      }
+    }
+  }
+
   private void closeConnection() {
     if (web3j != null) {
       LOG.info("Closing blockchain connection");
@@ -513,22 +551,12 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  private void closeBlockSubscription() {
-    if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
-      LOG.info("Close mined blocks subscription");
-      try {
-        this.blockSubscribtion.dispose();
-      } catch (Exception e) {
-        LOG.warn("Error when closing old subscription", e.getMessage());
-      }
-    }
-  }
-
   private void subscribeToBlockMining() {
     // Replay all blocks until last mined one
     LOG.debug("Replay all blocks starting from number '{}' until last mined one {}.",
               this.lastWatchedBlockNumber,
               this.lastBlockNumber);
+    this.listeningToBlockchain = true;
     Flowable<EthBlock> blocksFlowable = getWeb3j().replayPastAndFutureBlocksFlowable(getLastWatchedBlock(), false);
     initSubscribe(blocksFlowable);
   }

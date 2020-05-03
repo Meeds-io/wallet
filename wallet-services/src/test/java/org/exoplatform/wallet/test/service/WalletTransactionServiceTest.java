@@ -344,6 +344,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   System.currentTimeMillis());
     entitiesToClean.add(transactionDetail);
 
+    assertEquals(1, walletTransactionService.countPendingTransactions());
     pendingTransactions = walletTransactionService.getPendingTransactions();
     assertNotNull(pendingTransactions);
     assertEquals(1, pendingTransactions.size());

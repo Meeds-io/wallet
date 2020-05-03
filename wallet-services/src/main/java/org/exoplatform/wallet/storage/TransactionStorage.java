@@ -31,6 +31,10 @@ public class TransactionStorage {
     return fromEntities(transactions);
   }
 
+  public int countPendingTransactions(long networkId) {
+    return walletTransactionDAO.countPendingTransactions(networkId);
+  }
+
   /**
    * @param networkId blockchain network id
    * @return {@link List} of {@link TransactionDetail} not yet sent on

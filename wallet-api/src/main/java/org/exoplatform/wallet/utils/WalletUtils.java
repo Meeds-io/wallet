@@ -155,6 +155,9 @@ public class WalletUtils {
   public static final String                          TRANSACTION_MODIFIED_EVENT               =
                                                                                  "exo.wallet.transaction.modified";
 
+  public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     =
+                                                                                           "exo.wallet.transaction.sent";
+
   public static final String                          WALLET_ENABLED_EVENT                     = "exo.wallet.enabled";
 
   public static final String                          WALLET_DISABLED_EVENT                    = "exo.wallet.disabled";
@@ -387,7 +390,7 @@ public class WalletUtils {
 
   public static Identity getIdentityByTypeAndId(WalletType type, String remoteId) {
     IdentityManager identityManager = CommonsUtils.getService(IdentityManager.class);
-    return identityManager.getOrCreateIdentity(type.getProviderId(), remoteId, true);
+    return identityManager.getOrCreateIdentity(type.getProviderId(), remoteId);
   }
 
   public static String getSpacePrettyName(String id) {
