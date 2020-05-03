@@ -119,6 +119,12 @@ public class ServiceLoaderServlet extends HttpServlet {
       listernerService.addListener(KNOWN_TRANSACTION_MINED_EVENT, new TransactionMinedListener());
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new TransactionNotificationListener(container));
       listernerService.addListener(TRANSACTION_MODIFIED_EVENT, new WebSocketTransactionListener());
+      listernerService.addListener(TRANSACTION_MODIFIED_EVENT,
+                                   new TransactionMinedAndUpdatedListener(walletTransactionService,
+                                                                          web3jConnector));
+      listernerService.addListener(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
+                                   new TransactionSentToBlockchainListener(walletTransactionService,
+                                                                           web3jConnector));
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());
 

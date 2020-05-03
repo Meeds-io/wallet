@@ -101,6 +101,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
+  public int countPendingTransactions() {
+    return transactionStorage.countPendingTransactions(getNetworkId());
+  }
+
+  @Override
   public List<TransactionDetail> getTransactions(String address,
                                                  String contractAddress,
                                                  String contractMethodName,

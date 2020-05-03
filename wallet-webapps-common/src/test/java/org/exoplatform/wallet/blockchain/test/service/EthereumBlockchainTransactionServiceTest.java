@@ -81,7 +81,7 @@ public class EthereumBlockchainTransactionServiceTest {
     Mockito.when(walletTransactionService.getPendingTransactions()).thenReturn(Collections.singletonList(transactionDetail));
     Mockito.when(walletTransactionService.getTransactionByHash(Matchers.eq(TX_HASH))).thenReturn(transactionDetail);
 
-    // Check pending transaction not sent after MEX_PENDING_DAYS and verify that
+    // Check pending transaction not sent after MAX_PENDING_DAYS and verify that
     // it will be sent again
     blockchainTransactionService.checkPendingTransactions();
 
@@ -97,7 +97,7 @@ public class EthereumBlockchainTransactionServiceTest {
     sentTimestamp = sentTimestamp - ONE_DAY_IN_MS * MAX_TRANSACTION_PENDING_DAYS - 1;
     transactionDetail.setSentTimestamp(sentTimestamp);
 
-    // Check pending transaction not sent after MEX_PENDING_DAYS and verify that
+    // Check pending transaction not sent after MAX_PENDING_DAYS and verify that
     // it will be sent again
     blockchainTransactionService.checkPendingTransactions();
 

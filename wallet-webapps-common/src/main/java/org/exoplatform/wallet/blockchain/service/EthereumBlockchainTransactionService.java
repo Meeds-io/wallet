@@ -35,9 +35,11 @@ import org.web3j.tx.Contract;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.ERTTokenV2;
@@ -130,6 +132,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private SettingService           settingService;
 
+  private ListenerService          listenerService;
+
+  private long                     networkId;
+
   public EthereumBlockchainTransactionService(SettingService settingService,
                                               EthereumClientConnector ethereumClientConnector,
                                               WalletTransactionService transactionService,
@@ -143,14 +149,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   @Override
   public void start() {
     try {
-      long lastWatchedBlockNumber = getLastWatchedBlockNumber();
-      if (lastWatchedBlockNumber <= 0) {
-        lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
-        saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+      networkId = getNetworkId();
+      if (ethereumClientConnector.isPermanentlyScanBlockchain()) {
+        startWatchingBlockchain(getLastWatchedBlockNumber());
       }
-      ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber + 1);
     } catch (Exception e) {
-      LOG.error("Error while getting latest block number from blockchain with network id: {}", getNetworkId(), e);
+      LOG.error("Error while getting latest block number from blockchain with network id: {}", networkId, e);
     }
   }
 
@@ -162,9 +166,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   @Override
   public void checkPendingTransactions() {
     List<TransactionDetail> pendingTransactions = transactionService.getPendingTransactions();
+
     if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
       LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
                 pendingTransactions.size());
+
+      startWatchingBlockchain(getLastWatchedBlockNumber());
 
       for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
         try { // NOSONAR
@@ -173,6 +180,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
         }
       }
+    } else if (!ethereumClientConnector.isPermanentlyScanBlockchain()) {
+      stopWatchingBlockchain();
     }
   }
 
@@ -266,7 +275,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
         transactionDetail.setSendingAttemptCount(sendingAttemptCount + 1);
         transactionDetail.setSentTimestamp(System.currentTimeMillis());
+
         transactionService.saveTransactionDetail(transactionDetail, false);
+
+        getListenerService().broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
       } catch (Throwable e) {
         if (isIOException(e)) {
           LOG.error("IO Error while sending transaction {} to blockchain", transactionDetail, e);
@@ -377,6 +389,24 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     return ethereumClientConnector.getGasPrice().longValue();
   }
 
+  private void stopWatchingBlockchain() {
+    ethereumClientConnector.stopListeningToBlockchain();
+  }
+
+  private void startWatchingBlockchain(long lastWatchedBlockNumber) {
+    try {
+      if (!ethereumClientConnector.isListeningToBlockchain()) {
+        if (lastWatchedBlockNumber <= 0) {
+          lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+          saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+        }
+        ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber + 1);
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException("Error watching blockchain starting from block " + lastWatchedBlockNumber, e);
+    }
+  }
+
   private void checkTransactionStatusOnBlockchain(String transactionHash,
                                                   Transaction transaction,
                                                   boolean pendingTransactionFromDatabase) {
@@ -426,7 +456,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       }
 
       transactionDetail = new TransactionDetail();
-      transactionDetail.setNetworkId(getNetworkId());
+      transactionDetail.setNetworkId(networkId);
       transactionDetail.setHash(transactionHash);
       transactionDetail.setPending(true);
     }
@@ -776,7 +806,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   private long getLastWatchedBlockNumber() {
-    long networkId = getNetworkId();
     SettingValue<?> lastBlockNumberValue = settingService.get(WALLET_CONTEXT,
                                                               WALLET_SCOPE,
                                                               LAST_BLOCK_NUMBER_KEY_NAME + networkId);
@@ -787,8 +816,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   private void saveLastWatchedBlockNumber(long lastWatchedBlockNumber) {
-    long networkId = getNetworkId();
-
     LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
     settingService.set(WALLET_CONTEXT,
                        WALLET_SCOPE,
@@ -802,6 +829,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
     return "Code: " + transactionError.getCode() + ", Message: " + transactionError.getMessage() + ", Data: "
         + transactionError.getData();
+  }
+
+  private ListenerService getListenerService() {
+    if (listenerService == null) {
+      listenerService = CommonsUtils.getService(ListenerService.class);
+    }
+    return listenerService;
   }
 
   private boolean isIOException(Throwable exception) {

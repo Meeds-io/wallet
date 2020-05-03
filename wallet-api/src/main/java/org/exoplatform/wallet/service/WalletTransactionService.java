@@ -18,6 +18,11 @@ public interface WalletTransactionService {
   public List<TransactionDetail> getPendingTransactions();
 
   /**
+   * @return pending transactions count
+   */
+  int countPendingTransactions();
+
+  /**
    * @param address wallet address
    * @param contractAddress contract address to use to filter transactions
    * @param contractMethodName the contract method name to use to filter on
