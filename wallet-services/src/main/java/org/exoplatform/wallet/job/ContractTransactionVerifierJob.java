@@ -7,7 +7,9 @@ import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
+import org.exoplatform.wallet.service.WalletAccountService;
 
 @DisallowConcurrentExecution
 public class ContractTransactionVerifierJob implements Job {
@@ -17,6 +19,8 @@ public class ContractTransactionVerifierJob implements Job {
   private ExoContainer                 container;
 
   private BlockchainTransactionService blockchainTransactionService;
+
+  private WalletAccountService         walletAccountService;
 
   public ContractTransactionVerifierJob() {
     this.container = PortalContainer.getInstance();
@@ -28,7 +32,11 @@ public class ContractTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      getBlockchainTransactionService().scanNewerBlocks();
+      // Refresh gas price only when admin wallet has been initialized
+      Wallet adminWallet = getWalletAccountService().getAdminWallet();
+      if (adminWallet != null && adminWallet.getIsInitialized() != null && adminWallet.getIsInitialized().booleanValue()) {
+        getBlockchainTransactionService().scanNewerBlocks();
+      }
     } catch (Exception e) {
       LOG.error("Error while checking pending transactions", e);
     } finally {
@@ -42,5 +50,12 @@ public class ContractTransactionVerifierJob implements Job {
       blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
     }
     return blockchainTransactionService;
+  }
+
+  public WalletAccountService getWalletAccountService() {
+    if (walletAccountService == null) {
+      walletAccountService = CommonsUtils.getService(WalletAccountService.class);
+    }
+    return walletAccountService;
   }
 }
