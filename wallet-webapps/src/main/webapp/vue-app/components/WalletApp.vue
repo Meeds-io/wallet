@@ -183,7 +183,7 @@
             href="https://www.exoplatform.com/rewarding-program"
             target="_blank"
             rel="noopener noreferrer"
-            class="no-wrap requestFundsLink">
+            class="requestFundsLink">
             {{ $t('exoplatform.wallet.info.walletApplicationDisabledLink') }}
           </a>
         </v-flex>
