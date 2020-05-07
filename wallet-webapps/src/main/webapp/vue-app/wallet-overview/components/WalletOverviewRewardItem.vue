@@ -59,16 +59,16 @@ export default {
       return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.transaction.sentTimestamp));
     },
     periodStartDate() {
-      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.period.startDateInSeconds * 1000));
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.rewardItem.period.startDateInSeconds * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
     periodEndDate() {
-      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date((this.rewardItem.period.endDateInSeconds - 1) * 1000));
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date((this.rewardItem.period.endDateInSeconds - new Date().getTimezoneOffset() * 60 * 1000 - 1) * 1000));
     },
     periodLabelKey() {
       return `exoplatform.wallet.label.${this.rewardItem.period.rewardPeriodType.toLowerCase()}ShortPeriod`;
     },
     periodShort() {
-      const startDate = new Date(this.rewardItem.period.startDateInSeconds * 1000);
+      const startDate = new Date(this.rewardItem.period.startDateInSeconds * 1000 + 86400000);
       const year = startDate.getFullYear();
 
       switch(this.rewardItem.period.rewardPeriodType) {
