@@ -392,7 +392,7 @@ export default {
         title: title,
         icon: 'uiIconLightBlue mdi mdi-send material-icons',
         order: 30,
-        enabled: () => true,
+        enabled: (profile) => profile.enabled && !profile.deleted,
         click: (profile) => {
           const type = profile.username ? 'user':'space';
           const name = profile.username ? profile.username : profile.prettyName;
