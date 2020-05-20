@@ -58,8 +58,9 @@
     </portlet-info>
   </portlet>
   <portlet>
+    <description xml:lang="EN">Space Wallet Portlet</description>
     <portlet-name>SpaceWallet</portlet-name>
-    <display-name xml:lang="EN">Space Wallet Application</display-name>
+    <display-name xml:lang="EN">Wallet</display-name>
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
