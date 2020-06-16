@@ -771,14 +771,14 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   private Object getAdminWalletKeys() {
-    String adminPrivateKey = getAccountService().getPrivateKeyByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
-    if (StringUtils.isBlank(adminPrivateKey)) {
+    String privateKey = getAccountService().getPrivateKeyByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
+    if (StringUtils.isBlank(privateKey)) {
       return null;
     }
     WalletFile adminWallet = null;
     try {
       ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
-      adminWallet = objectMapper.readerFor(WalletFile.class).readValue(adminPrivateKey);
+      adminWallet = objectMapper.readerFor(WalletFile.class).readValue(privateKey);
     } catch (Exception e) {
       throw new IllegalStateException("An error occurred while parsing admin wallet keys", e);
     }
