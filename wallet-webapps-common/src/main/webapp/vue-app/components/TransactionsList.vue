@@ -617,7 +617,7 @@
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="item.fromUsername === currentUser && item.pending && item.contractAddress && item.sentTimestamp">
+              <v-list-item v-if="item.pending && item.contractAddress && item.sentTimestamp">
                 <v-list-item-content>
                   <send-tokens-modal
                     ref="boostTransactionModal"
