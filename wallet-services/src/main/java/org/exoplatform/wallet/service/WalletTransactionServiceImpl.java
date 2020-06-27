@@ -293,7 +293,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
               }
               transaction.setPending(false);
               transaction.setSucceeded(false);
-              broadcastTransactionReplacedEvent(transaction.getHash(), validPendingTransaction.getHash());
+              broadcastTransactionReplacedEvent(transaction, validPendingTransaction);
               saveTransactionDetail(transaction, true);
             });
           }
@@ -488,8 +488,51 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
   }
 
-  private void broadcastTransactionReplacedEvent(String oldHash, String newHash) {
+  private void broadcastTransactionReplacedEvent(TransactionDetail oldTransaction, TransactionDetail newTransaction) {
+    String oldHash = "";
+    String newHash = "";
     try {
+      if (oldTransaction == null || newTransaction == null || oldTransaction.isPending() || newTransaction.isPending()) {
+        return;
+      }
+      oldHash = oldTransaction.getHash();
+      newHash = newTransaction.getHash();
+      if (oldTransaction.getContractAmount() != newTransaction.getContractAmount()) {
+        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same amount: {} != {}",
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAmount(),
+                 newTransaction.getContractAmount());
+        return;
+      }
+      if (StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
+        throw new IllegalStateException("Issuer of transaction replacement must be the same wallet address: "
+            + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
+      }
+      if (StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
+        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target wallet: {} != {}",
+                 oldHash,
+                 newHash,
+                 oldTransaction.getTo(),
+                 newTransaction.getTo());
+        return;
+      }
+      if (StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
+        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract: {} != {}",
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAddress(),
+                 newTransaction.getContractAddress());
+        return;
+      }
+      if (StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
+        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract method: {} != {}",
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractMethodName(),
+                 newTransaction.getContractMethodName());
+        return;
+      }
       Map<String, String> transaction = new HashMap<>();
       transaction.put("oldHash", oldHash);
       transaction.put("newHash", newHash);
