@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response.Error;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.tx.Contract;
@@ -366,6 +367,25 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                transactionHash,
                pendingTransactionMaxDays);
       transactionService.saveTransactionDetail(transactionDetail, true);
+      return;
+    }
+
+    if (transactionDetail.isPending()) {
+      long nonce = transactionDetail.getNonce();
+      BigInteger lastMinedTransactionNonce = null;
+      try {
+        lastMinedTransactionNonce = ethereumClientConnector.getNonce(transactionDetail.getFrom(),
+                                                                     DefaultBlockParameterName.LATEST);
+      } catch (IOException e) {
+        LOG.warn("Error retrieving last nonce of {}", transactionDetail.getFrom(), e);
+        return;
+      }
+      if (lastMinedTransactionNonce != null && nonce < lastMinedTransactionNonce.longValue()) {
+        transactionDetail.setPending(false);
+        LOG.info("Transaction '{}' was sent with same nonce as previous mined transaction, so mark it as not pending anymore",
+                 transactionHash);
+        transactionService.saveTransactionDetail(transactionDetail, true);
+      }
     }
   }
 

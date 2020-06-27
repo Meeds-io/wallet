@@ -713,7 +713,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private BigInteger getAdminNonce() throws IOException {
     String adminAddress = getAdminWalletAddress();
-    long blockchainNonce = getClientConnector().getNonce(adminAddress).longValue();
+    long blockchainNonce = getClientConnector().getNonce(adminAddress, DefaultBlockParameterName.PENDING).longValue();
     long storedNonce = getTransactionService().getNonce(adminAddress);
     return BigInteger.valueOf(Long.max(blockchainNonce, storedNonce));
   }

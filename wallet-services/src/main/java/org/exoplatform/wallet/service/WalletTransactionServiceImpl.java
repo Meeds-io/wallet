@@ -280,7 +280,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         // none succeeded
         if (!transactionSucceeded) {
           Optional<TransactionDetail> maxNonceTransaction = transactionsByNonce.stream()
-                                                                               .max((tx1, tx2) -> {
+                                                                               .max((tx1, tx2) -> { // NOSONAR
                                                                                  return (int) (tx1.getGasPrice()
                                                                                      - tx2.getGasPrice());
                                                                                });
@@ -293,6 +293,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
               }
               transaction.setPending(false);
               transaction.setSucceeded(false);
+              saveTransactionDetail(transaction, true);
             });
           }
         }
