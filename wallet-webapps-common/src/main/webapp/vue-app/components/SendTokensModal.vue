@@ -96,10 +96,10 @@ export default {
   },
   computed: {
     tokenBalance() {
-      return this.contractDetails && this.wallet.tokenBalance;
+      return this.wallet && this.wallet.tokenBalance;
     },
     etherBalance() {
-      return this.contractDetails && this.wallet.etherBalance;
+      return this.wallet && this.wallet.etherBalance;
     },
     canBoostTransaction() {
       return this.transaction && this.wallet && this.wallet.isApproved && ((this.wallet.type === 'user' && this.wallet.id === eXo.env.portal.userName) || (this.wallet.type === 'space' && this.wallet.spaceAdministrator));
