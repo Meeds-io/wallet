@@ -159,4 +159,13 @@ public interface WalletTransactionService {
    */
   long getMaxParallelPendingTransactions();
 
+  /**
+   * Cancels other transactions having same nonce as the corresponding
+   * transaction sent
+   * 
+   * @param transactionDetail of type {@link TransactionDetail} that boosted a
+   *          previous {@link TransactionDetail} having the same nonce
+   */
+  public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
+
 }

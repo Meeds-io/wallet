@@ -237,4 +237,10 @@
     </sql>
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-25">
+    <addColumn tableName="ADDONS_WALLET_TRANSACTION">
+      <column name="BOOST" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

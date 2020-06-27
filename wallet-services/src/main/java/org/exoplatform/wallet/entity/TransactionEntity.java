@@ -21,6 +21,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactions", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
+    @NamedQuery(name = "WalletTransaction.getTransactionsByNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address"),
     @NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address"),
     @NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.sentDate = 0 AND tx.rawTransaction IS NOT NULL ORDER BY tx.nonce ASC"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactionSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address AND tx.sendingAttemptCount > 0"),
@@ -101,6 +102,9 @@ public class TransactionEntity implements Serializable {
 
   @Column(name = "NONCE")
   private long              nonce;
+
+  @Column(name = "BOOST")
+  private boolean           boost;
 
   @Column(name = "RAW_TRANSACTION")
   private String            rawTransaction;
@@ -293,6 +297,14 @@ public class TransactionEntity implements Serializable {
 
   public void setNonce(long nonce) {
     this.nonce = nonce;
+  }
+
+  public boolean isBoost() {
+    return boost;
+  }
+
+  public void setBoost(boolean boost) {
+    this.boost = boost;
   }
 
   public String getRawTransaction() {
