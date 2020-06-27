@@ -3,9 +3,11 @@ package org.exoplatform.wallet.test.service;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
+import org.exoplatform.services.listener.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.test.BaseWalletTest;
@@ -50,6 +52,97 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     assertNotNull(storedTransactionDetail);
     assertEquals(transactionDetail, storedTransactionDetail);
     entitiesToClean.add(storedTransactionDetail);
+  }
+
+  /**
+   * Test
+   * {@link WalletTransactionService#cancelTransactionsWithSameNonce(TransactionDetail)}
+   */
+  @Test
+  public void testCancelTransactionDetail() {
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  null,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, true);
+    TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+
+    TransactionDetail transactionDetailReplacement = storedTransactionDetail.clone();
+    transactionDetailReplacement.setHash(generateTransactionHash());
+    transactionDetailReplacement.setId(0);
+    transactionDetailReplacement.setPending(false);
+    walletTransactionService.saveTransactionDetail(transactionDetailReplacement, true);
+    TransactionDetail storedTransactionDetailReplacement = walletTransactionService.getTransactionByHash(transactionDetailReplacement.getHash());
+
+    entitiesToClean.add(storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetailReplacement);
+
+    assertNotNull(storedTransactionDetail);
+    assertNotNull(storedTransactionDetailReplacement);
+
+    assertEquals(storedTransactionDetail.getNonce(), storedTransactionDetailReplacement.getNonce());
+    assertNotEquals(storedTransactionDetail.getHash(), storedTransactionDetailReplacement.getHash());
+
+    final AtomicBoolean listenerInvoked = new AtomicBoolean(false);
+    ListenerService listenerService = getService(ListenerService.class);
+    listenerService.addListener(WalletUtils.KNOWN_TRANSACTION_REPLACED_EVENT, new Listener<Object, Object>() {
+      @Override
+      public void onEvent(Event<Object, Object> event) throws Exception {
+        listenerInvoked.set(true);
+      }
+    });
+
+    TransactionDetail errorReplacingTransaction = storedTransactionDetailReplacement.clone();
+    errorReplacingTransaction.setFrom("another address");
+    walletTransactionService.cancelTransactionsWithSameNonce(errorReplacingTransaction);
+    assertFalse(listenerInvoked.get());
+
+    storedTransactionDetail.setPending(true);
+    walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
+    errorReplacingTransaction = storedTransactionDetailReplacement.clone();
+    errorReplacingTransaction.setTo("Another address");
+    walletTransactionService.cancelTransactionsWithSameNonce(errorReplacingTransaction);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertFalse(storedTransactionDetail.isPending());
+    assertFalse(storedTransactionDetail.isSucceeded());
+    assertFalse(listenerInvoked.get());
+
+    storedTransactionDetail.setPending(true);
+    walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
+    errorReplacingTransaction = storedTransactionDetailReplacement.clone();
+    errorReplacingTransaction.setContractAmount(5000);
+    walletTransactionService.cancelTransactionsWithSameNonce(errorReplacingTransaction);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertFalse(storedTransactionDetail.isPending());
+    assertFalse(storedTransactionDetail.isSucceeded());
+    assertFalse(listenerInvoked.get());
+
+    storedTransactionDetail.setPending(true);
+    walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
+    errorReplacingTransaction = storedTransactionDetailReplacement.clone();
+    errorReplacingTransaction.setContractAddress("another address");
+    walletTransactionService.cancelTransactionsWithSameNonce(errorReplacingTransaction);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertFalse(storedTransactionDetail.isPending());
+    assertFalse(storedTransactionDetail.isSucceeded());
+    assertFalse(listenerInvoked.get());
+
+    storedTransactionDetail.setPending(true);
+    walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
+    walletTransactionService.cancelTransactionsWithSameNonce(storedTransactionDetailReplacement);
+    assertTrue(listenerInvoked.get());
   }
 
   /**
