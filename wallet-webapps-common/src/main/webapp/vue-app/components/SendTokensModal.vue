@@ -39,6 +39,7 @@
       <send-tokens-form
         ref="sendTokensForm"
         :wallet="wallet"
+        :transaction="transaction"
         :contract-details="contractDetails"
         @sent="$emit('sent', $event, contractDetails)"
         @close="dialog = false"
@@ -58,6 +59,12 @@ export default {
   },
   props: {
     wallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+    transaction: {
       type: Object,
       default: function() {
         return null;
@@ -94,6 +101,9 @@ export default {
     etherBalance() {
       return this.contractDetails && this.wallet.etherBalance;
     },
+    canBoostTransaction() {
+      return this.transaction && this.wallet && this.wallet.isApproved && ((this.wallet.type === 'user' && this.wallet.id === eXo.env.portal.userName) || (this.wallet.type === 'space' && this.wallet.spaceAdministrator));
+    },
     disabled() {
       return this.isReadOnly || (this.wallet && !this.wallet.isApproved) || !this.tokenBalance || this.tokenBalance === 0 || (typeof this.tokenBalance === 'string' && (!this.tokenBalance.length || this.tokenBalance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
@@ -104,14 +114,19 @@ export default {
     },
     dialog() {
       if (this.dialog) {
-        this.$nextTick().then(() => this.$refs.sendTokensForm.init());
+        this.$nextTick().then(() => {
+          if (this.transaction && this.transaction.fromWallet) {
+            this.prepareSendForm(this.transaction.toWallet.id, this.transaction.toWallet.type, this.transaction.contractAmount);
+          }
+          this.$refs.sendTokensForm.init();
+        });
       } else {
         this.$emit('close');
       }
     },
   },
   methods: {
-    prepareSendForm(receiver, receiverType, amount, notificationId, keepDialogOpen) {
+    prepareSendForm(receiver, receiverType, amount, notificationId) {
       if (!this.contractDetails) {
         console.debug('prepareSendForm error - no accounts found');
         return;
