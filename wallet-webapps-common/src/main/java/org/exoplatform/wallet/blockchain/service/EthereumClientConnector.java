@@ -279,16 +279,23 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   /**
-   * Retruns current nonce to use for next transaction to use on blockchain for
-   * a selected wallet address
-   * 
+   * Retruns nonce corresponding for a given wallet address:
+   *
+   *  * if using {@link DefaultBlockParameterName#LATEST}, this will return last mined transaction nonce
+   *
+   *  * if using {@link DefaultBlockParameterName#PENDING}, this will return last pending transaction nonce that can be used to compute next pending transaction nonce
+   *
    * @param walletAddress wallet adres to determine its next nonce
+   * @param blockParameterName {@link DefaultBlockParameterName} value
    * @return next transaction nonce
    * @throws IOException if an I/O problem happens when connecting to blockchain
    */
   @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION_COUNT)
-  public BigInteger getNonce(String walletAddress) throws IOException {
-    return getWeb3j().ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)
+  public BigInteger getNonce(String walletAddress, DefaultBlockParameterName blockParameterName) throws IOException {
+    if (blockParameterName == null) {
+      blockParameterName = DefaultBlockParameterName.LATEST;
+    }
+    return getWeb3j().ethGetTransactionCount(walletAddress, blockParameterName)
                      .send()
                      .getTransactionCount();
   }
