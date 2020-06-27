@@ -243,7 +243,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         continue;
       }
 
-      if (walletAddressesWithTransactionsSent.contains(from) || !transactionService.canSendTransactionToBlockchain(from)) {
+      if (!transactionDetail.isBoost()
+          && (walletAddressesWithTransactionsSent.contains(from) || !transactionService.canSendTransactionToBlockchain(from))) {
         continue;
       }
       walletAddressesWithTransactionsSent.add(from);
@@ -553,6 +554,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     } finally {
       if (transactionModified) {
         transactionService.saveTransactionDetail(transactionDetail, false);
+        if (transactionDetail.isBoost()) {
+          transactionService.cancelTransactionsWithSameNonce(transactionDetail);
+        }
       }
     }
 

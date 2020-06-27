@@ -149,6 +149,19 @@ public class TransactionStorage {
   }
 
   /**
+   * Return list of transactions for a given address that corresponds to a nonce
+   * 
+   * @param networkId blockchain network id
+   * @param fromAddress transaction sender address
+   * @param nonce Nonce of the transaction
+   * @return {@link List} of {@link TransactionDetail}
+   */
+  public List<TransactionDetail> getTransactionsByNonce(long networkId, String fromAddress, long nonce) {
+    List<TransactionEntity> transactionEntities = walletTransactionDAO.getTransactionsByNonce(networkId, fromAddress, nonce);
+    return this.fromEntities(transactionEntities);
+  }
+  
+  /**
    * Retrieve a {@link TransactionDetail} identified by its blockchain hash
    * 
    * @param hash blockchain transaction hash
@@ -243,6 +256,7 @@ public class TransactionStorage {
     detail.setSentTimestamp(entity.getSentDate());
     detail.setSendingAttemptCount(entity.getSendingAttemptCount());
     detail.setRawTransaction(entity.getRawTransaction());
+    detail.setBoost(entity.isBoost());
     return detail;
   }
 
@@ -271,6 +285,7 @@ public class TransactionStorage {
     entity.setGasUsed(detail.getGasUsed());
     entity.setNoContractFunds(detail.isNoContractFunds());
     entity.setNonce(detail.getNonce());
+    entity.setBoost(detail.isBoost());
     entity.setSentDate(detail.getSentTimestamp());
     entity.setSendingAttemptCount(detail.getSendingAttemptCount());
     entity.setRawTransaction(detail.getRawTransaction());
