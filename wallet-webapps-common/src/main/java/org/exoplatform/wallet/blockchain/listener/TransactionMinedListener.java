@@ -7,6 +7,7 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
 import org.exoplatform.wallet.contract.ERTTokenV2;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.*;
@@ -21,9 +22,15 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
 
   private WalletContractService    contractService;
 
-  private WalletTransactionService transactionService;
+  private WalletTransactionService walletTransactionService;
+
+  private EthereumClientConnector  web3jConnector;
 
   private ListenerService          listenerService;
+
+  public TransactionMinedListener(EthereumClientConnector web3jConnector) {
+    this.web3jConnector = web3jConnector;
+  }
 
   @Override
   public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
@@ -53,6 +60,10 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
     // Refresh modified wallets in blockchain
     if (!walletsModifications.isEmpty()) {
       getAccountService().refreshWalletsFromBlockchain(walletsModifications);
+    }
+
+    if (transactionDetail.isSucceeded() || web3jConnector.getTransaction(transactionDetail.getHash()) != null) {
+      walletTransactionService.cancelTransactionsWithSameNonce(transactionDetail);
     }
 
     getListenerService().broadcast(TRANSACTION_MODIFIED_EVENT, null, transactionDetail);
@@ -105,10 +116,10 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
   }
 
   private WalletTransactionService getTransactionService() {
-    if (transactionService == null) {
-      transactionService = CommonsUtils.getService(WalletTransactionService.class);
+    if (walletTransactionService == null) {
+      walletTransactionService = CommonsUtils.getService(WalletTransactionService.class);
     }
-    return transactionService;
+    return walletTransactionService;
   }
 
   private WalletAccountService getAccountService() {

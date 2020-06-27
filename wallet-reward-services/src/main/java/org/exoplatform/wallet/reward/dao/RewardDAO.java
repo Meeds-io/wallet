@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -44,6 +45,7 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     return result.get(0);
   }
 
+  @ExoTransactional
   public void replaceRewardTransactions(String oldHash, String newHash) {
     Query query = getEntityManager().createNamedQuery("Reward.updateTransactionHash");
     query.setParameter("oldHash", oldHash);

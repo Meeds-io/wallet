@@ -136,7 +136,7 @@
     <component-plugin>
       <name>exo.wallet.transaction.replaced</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
+      <type>org.exoplatform.wallet.reward.listener.TransactionReplacedListener</type>
     </component-plugin>
   </external-component-plugins>
 

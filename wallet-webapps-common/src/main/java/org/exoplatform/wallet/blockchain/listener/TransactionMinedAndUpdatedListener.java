@@ -20,11 +20,6 @@ public class TransactionMinedAndUpdatedListener extends Listener<Object, Transac
 
   @Override
   public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
-    TransactionDetail transactionDetail = event.getData();
-    if (transactionDetail.isSucceeded() || web3jConnector.getTransaction(transactionDetail.getHash()) != null) {
-      walletTransactionService.cancelTransactionsWithSameNonce(transactionDetail);
-    }
-
     if (!this.web3jConnector.isPermanentlyScanBlockchain() && this.walletTransactionService.countPendingTransactions() == 0) {
       this.web3jConnector.stopListeningToBlockchain();
     }

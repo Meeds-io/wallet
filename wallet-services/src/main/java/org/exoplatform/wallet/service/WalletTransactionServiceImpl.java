@@ -267,38 +267,23 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail) {
-    if (transactionDetail.isBoost()) {
-      List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(transactionDetail.getNetworkId(),
-                                                                                              transactionDetail.getFrom(),
-                                                                                              transactionDetail.getNonce());
-      if (transactionsByNonce.size() > 1) {
-        boolean transactionSucceeded = transactionsByNonce.stream()
-                                                          .anyMatch(transaction -> !transaction.isPending()
-                                                              && transaction.isSucceeded());
-        // Change status of other transactions having same nonce only when
-        // none succeeded
-        if (!transactionSucceeded) {
-          Optional<TransactionDetail> maxNonceTransaction = transactionsByNonce.stream()
-                                                                               .max((tx1, tx2) -> { // NOSONAR
-                                                                                 return (int) (tx1.getGasPrice()
-                                                                                     - tx2.getGasPrice());
-                                                                               });
-          TransactionDetail validPendingTransaction = maxNonceTransaction.isPresent() ? maxNonceTransaction.get() : null;
-          if (validPendingTransaction != null) {
-            transactionsByNonce.forEach(transaction -> {
-              if (!transaction.isPending()
-                  || StringUtils.equalsIgnoreCase(transaction.getHash(), validPendingTransaction.getHash())) {
-                return;
-              }
-              transaction.setPending(false);
-              transaction.setSucceeded(false);
-              broadcastTransactionReplacedEvent(transaction, validPendingTransaction);
-              saveTransactionDetail(transaction, true);
-            });
-          }
+  public void cancelTransactionsWithSameNonce(TransactionDetail replacingTransaction) {
+    List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(replacingTransaction.getNetworkId(),
+                                                                                            replacingTransaction.getFrom(),
+                                                                                            replacingTransaction.getNonce());
+    if (transactionsByNonce.size() > 1) {
+      // Change status of other transactions having same nonce only when
+      // none succeeded
+      transactionsByNonce.forEach(replacedTransaction -> {
+        if (!replacedTransaction.isPending()
+            || StringUtils.equalsIgnoreCase(replacedTransaction.getHash(), replacingTransaction.getHash())) {
+          return;
         }
-      }
+        replacedTransaction.setPending(false);
+        replacedTransaction.setSucceeded(false);
+        broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
+        saveTransactionDetail(replacedTransaction, true);
+      });
     }
   }
 
@@ -472,20 +457,25 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
     try {
-      Map<String, Object> transaction = new HashMap<>();
-      transaction.put("hash", transactionDetail.getHash());
-      transaction.put("from", transactionDetail.getFromWallet() == null ? 0 : transactionDetail.getFromWallet().getTechnicalId());
-      transaction.put("to", transactionDetail.getToWallet() == null ? 0 : transactionDetail.getToWallet().getTechnicalId());
-      transaction.put("contractAddress", transactionDetail.getContractAddress());
-      transaction.put("contractAmount", transactionDetail.getContractAmount());
-      transaction.put("contractMethodName", transactionDetail.getContractMethodName());
-      transaction.put("etherAmount", transactionDetail.getValue());
-      transaction.put("status", transactionDetail.isSucceeded());
-      transaction.put("issuerId", transactionDetail.getIssuerId());
+      Map<String, Object> transaction = transactionToMap(transactionDetail);
       getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
     }
+  }
+
+  private Map<String, Object> transactionToMap(TransactionDetail transactionDetail) {
+    Map<String, Object> transaction = new HashMap<>();
+    transaction.put("hash", transactionDetail.getHash());
+    transaction.put("from", transactionDetail.getFromWallet() == null ? 0 : transactionDetail.getFromWallet().getTechnicalId());
+    transaction.put("to", transactionDetail.getToWallet() == null ? 0 : transactionDetail.getToWallet().getTechnicalId());
+    transaction.put("contractAddress", transactionDetail.getContractAddress());
+    transaction.put("contractAmount", transactionDetail.getContractAmount());
+    transaction.put("contractMethodName", transactionDetail.getContractMethodName());
+    transaction.put("etherAmount", transactionDetail.getValue());
+    transaction.put("status", transactionDetail.isSucceeded());
+    transaction.put("issuerId", transactionDetail.getIssuerId());
+    return transaction;
   }
 
   private void broadcastTransactionReplacedEvent(TransactionDetail oldTransaction, TransactionDetail newTransaction) {
@@ -505,11 +495,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                  newTransaction.getContractAmount());
         return;
       }
-      if (StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
         throw new IllegalStateException("Issuer of transaction replacement must be the same wallet address: "
             + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
       }
-      if (StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target wallet: {} != {}",
                  oldHash,
                  newHash,
@@ -517,7 +507,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                  newTransaction.getTo());
         return;
       }
-      if (StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract: {} != {}",
                  oldHash,
                  newHash,
@@ -525,7 +515,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                  newTransaction.getContractAddress());
         return;
       }
-      if (StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract method: {} != {}",
                  oldHash,
                  newHash,
@@ -533,9 +523,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                  newTransaction.getContractMethodName());
         return;
       }
-      Map<String, String> transaction = new HashMap<>();
+      Map<String, Object> transaction = transactionToMap(newTransaction);
       transaction.put("oldHash", oldHash);
-      transaction.put("newHash", newHash);
       getListenerService().broadcast(KNOWN_TRANSACTION_REPLACED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction replaced event: from {} to {}", oldHash, newHash, e);
