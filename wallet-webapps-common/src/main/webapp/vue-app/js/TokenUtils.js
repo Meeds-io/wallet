@@ -201,7 +201,6 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
       nonce = computedNonce;
       const transactionToSend = {
         nonce: nonce,
-        boost: transactionDetail.boost || false,
         to: transactionDetail.contractAddress,
         gasPrice: transactionDetail.gasPrice,
         gas: transactionDetail.gas,
