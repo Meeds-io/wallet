@@ -574,9 +574,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     } finally {
       if (transactionModified) {
         transactionService.saveTransactionDetail(transactionDetail, false);
-        if (transactionDetail.isBoost()) {
-          transactionService.cancelTransactionsWithSameNonce(transactionDetail);
-        }
+      }
+      if (transactionDetail.isBoost()) {
+        transactionService.cancelTransactionsWithSameNonce(transactionDetail);
       }
     }
 
