@@ -293,6 +293,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
               }
               transaction.setPending(false);
               transaction.setSucceeded(false);
+              broadcastTransactionReplacedEvent(transaction.getHash(), validPendingTransaction.getHash());
               saveTransactionDetail(transaction, true);
             });
           }
@@ -484,6 +485,17 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
+    }
+  }
+
+  private void broadcastTransactionReplacedEvent(String oldHash, String newHash) {
+    try {
+      Map<String, String> transaction = new HashMap<>();
+      transaction.put("oldHash", oldHash);
+      transaction.put("newHash", newHash);
+      getListenerService().broadcast(KNOWN_TRANSACTION_REPLACED_EVENT, null, transaction);
+    } catch (Exception e) {
+      LOG.warn("Error while broadcasting transaction replaced event: from {} to {}", oldHash, newHash, e);
     }
   }
 

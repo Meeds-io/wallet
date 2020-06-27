@@ -193,6 +193,9 @@ public class WalletUtils {
   public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
                                                                                     "exo.wallet.transaction.mined";
 
+  public static final String                          KNOWN_TRANSACTION_REPLACED_EVENT         =
+                                                                                       "exo.wallet.transaction.replaced";
+
   public static final String                          TRANSACTION_PENDING_MAX_DAYS             = "transaction.pending.maxDays";
 
   public static final String                          MAX_PENDING_TRANSACTIONS_TO_SEND         = "transaction.pending.maxToSend";
