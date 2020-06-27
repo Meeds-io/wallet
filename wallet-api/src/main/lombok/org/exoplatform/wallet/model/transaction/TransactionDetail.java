@@ -78,6 +78,8 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   private long              nonce;
 
+  private boolean           boost;
+
   private String            rawTransaction;
 
   private long              sentTimestamp;

@@ -10,6 +10,14 @@
     @keydown.esc="dialog = false">
     <template v-slot:activator="{ on }">
       <v-btn
+        v-if="canBoostTransaction"
+        color="primary"
+        text
+        v-on="on">
+        {{ $t('exoplatform.wallet.button.boost') }}
+      </v-btn>
+      <v-btn
+        v-else-if="!transaction"
         :disabled="isReadOnly"
         class="btn btn-primary"
         v-on="on">
