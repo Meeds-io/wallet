@@ -546,7 +546,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         // An exception occurred
         if (transactionFromBlockchain == null) {
           TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-          transactionDetail.setPending(receipt == null);
+          transactionDetail.setPending(receipt == null && transactionError == null);
           transactionDetail.setSucceeded(receipt != null && receipt.isStatusOK());
           transactionModified = true;
         }
