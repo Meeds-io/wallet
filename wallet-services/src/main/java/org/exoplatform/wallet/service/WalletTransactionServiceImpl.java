@@ -267,6 +267,40 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
+  public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail) {
+    if (transactionDetail.isBoost()) {
+      List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(transactionDetail.getNetworkId(),
+                                                                                              transactionDetail.getFrom(),
+                                                                                              transactionDetail.getNonce());
+      if (transactionsByNonce.size() > 1) {
+        boolean transactionSucceeded = transactionsByNonce.stream()
+                                                          .anyMatch(transaction -> !transaction.isPending()
+                                                              && transaction.isSucceeded());
+        // Change status of other transactions having same nonce only when
+        // none succeeded
+        if (!transactionSucceeded) {
+          Optional<TransactionDetail> maxNonceTransaction = transactionsByNonce.stream()
+                                                                               .max((tx1, tx2) -> {
+                                                                                 return (int) (tx1.getGasPrice()
+                                                                                     - tx2.getGasPrice());
+                                                                               });
+          TransactionDetail validPendingTransaction = maxNonceTransaction.isPresent() ? maxNonceTransaction.get() : null;
+          if (validPendingTransaction != null) {
+            transactionsByNonce.forEach(transaction -> {
+              if (!transaction.isPending()
+                  || StringUtils.equalsIgnoreCase(transaction.getHash(), validPendingTransaction.getHash())) {
+                return;
+              }
+              transaction.setPending(false);
+              transaction.setSucceeded(false);
+            });
+          }
+        }
+      }
+    }
+  }
+
+  @Override
   public void saveTransactionDetail(TransactionDetail transactionDetail, String currentUser) throws IllegalAccessException {
     if (StringUtils.isBlank(currentUser)) {
       throw new IllegalArgumentException("username is mandatory");

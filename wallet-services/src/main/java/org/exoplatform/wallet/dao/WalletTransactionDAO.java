@@ -17,6 +17,7 @@
 package org.exoplatform.wallet.dao;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -28,6 +29,8 @@ import org.exoplatform.wallet.entity.TransactionEntity;
 
 public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, Long> {
 
+  private static final String NONCE_PARAM                = "nonce";
+  
   private static final String HASH_PARAM                 = "hash";
 
   private static final String START_DATE                 = "startDate";
@@ -145,6 +148,16 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     query.setParameter(HASH_PARAM, StringUtils.lowerCase(hash));
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+  }
+
+  public List<TransactionEntity> getTransactionsByNonce(long networkId, String fromAddress, long nonce) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getTransactionsByNonce",
+                                                                              TransactionEntity.class);
+    query.setParameter(NONCE_PARAM, nonce);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    List<TransactionEntity> resultList = query.getResultList();
+    return resultList == null || resultList.isEmpty() ? Collections.emptyList() : resultList;
   }
 
   public long getMaxUsedNonce(long networkId, String fromAddress) {
