@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2018 eXo Platform SAS. This is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License 
+  for more details. You should have received a copy of the GNU Lesser General Public License along with this software; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF site: http://www.fsf.org. -->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
+
+  <component>
+    <type>org.exoplatform.wallet.reward.dao.RewardTeamDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.dao.RewardPluginDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.dao.RewardDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.dao.RewardPeriodDAO</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.dao.RewardTeamDAO</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.reward.storage.RewardTeamStorage</key>
+    <type>org.exoplatform.wallet.reward.storage.WalletRewardTeamStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.reward.storage.RewardReportStorage</key>
+    <type>org.exoplatform.wallet.reward.storage.WalletRewardReportStorage</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.reward.service.RewardTeamService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardTeamService</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.reward.service.RewardSettingsService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardSettingsService</type>
+    <component-plugins>
+      <component-plugin>
+        <name>gamification</name>
+        <set-method>registerPlugin</set-method>
+        <type>org.exoplatform.wallet.reward.plugin.GamificationRewardPlugin</type>
+        <description>Gamification points reward plugin</description>
+      </component-plugin>
+      <component-plugin>
+        <name>kudos</name>
+        <set-method>registerPlugin</set-method>
+        <type>org.exoplatform.wallet.reward.plugin.KudosRewardPlugin</type>
+        <description>Kudos reward plugin</description>
+      </component-plugin>
+    </component-plugins>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.reward.service.RewardReportService</key>
+    <type>org.exoplatform.wallet.reward.service.WalletRewardReportService</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.rest.RewardTeamREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.rest.RewardSettingsREST</type>
+  </component>
+
+  <component>
+    <type>org.exoplatform.wallet.reward.rest.RewardReportREST</type>
+  </component>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.commons.api.persistence.DataInitializer</target-component>
+    <component-plugin>
+      <name>WalletRDBMSChangeLogsPlugin</name>
+      <set-method>addChangeLogsPlugin</set-method>
+      <type>org.exoplatform.commons.persistence.impl.ChangeLogsPlugin</type>
+      <init-params>
+        <values-param>
+          <name>changelogs</name>
+          <description>Change logs of Wallet RDBMS</description>
+          <value>db/changelog/reward-rdbms.db.changelog-master.xml</value>
+        </values-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Add a job to verify if rewards sent having pending transactions are completely successfully sent</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for rewards transactions status verifier</description>
+          <property name="jobName" value="RewardStatusVerifierJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.reward.job.RewardStatusVerifierJob"/>
+          <property name="expression" value="${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Add a job to current period reward estimation</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for reward report updater for current period</description>
+          <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
+          <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.reward.report.success</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.replaced</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+</configuration>
