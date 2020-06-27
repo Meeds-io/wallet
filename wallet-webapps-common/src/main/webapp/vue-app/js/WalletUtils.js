@@ -90,37 +90,6 @@ export function gasToFiat(amount, gasPriceInEther) {
   return 0;
 }
 
-export function retrieveFiatExchangeRate() {
-  window.walletSettings.fiatSymbol = window.walletSettings.userPreferences.currency && constants.FIAT_CURRENCIES[window.walletSettings.userPreferences.currency] ? constants.FIAT_CURRENCIES[window.walletSettings.userPreferences.currency].symbol : '$';
-
-  const currency = window.walletSettings && window.walletSettings.userPreferences.currency ? window.walletSettings.userPreferences.currency : 'usd';
-
-  const etherToFiatExchangeObject = localStorage.getItem(`exo-wallet-exchange-${currency}`);
-  const etherToFiatExchangeLastCheckTime = localStorage.getItem(`exo-wallet-exchange-${currency}-time`);
-
-  let promise = null;
-  if (!etherToFiatExchangeObject || !etherToFiatExchangeLastCheckTime || Number(etherToFiatExchangeLastCheckTime) - Date.now() > 86400000) {
-    promise = retrieveFiatExchangeRateOnline(currency);
-  } else {
-    promise = Promise.resolve(etherToFiatExchangeObject);
-  }
-
-  // Retrieve Fiat <=> Ether exchange rate
-  return promise.then((content) => {
-    if (etherToFiatExchangeObject && (!content || !content.length || !content[0][`price_${currency}`])) {
-      // Try to get old information from local storage
-      content = localStorage.getItem(`exo-wallet-exchange-${currency}`);
-      if (content) {
-        content = JSON.parse(content);
-      }
-    }
-
-    window.walletSettings.usdPrice = content ? parseFloat(content[0].price_usd) : 0;
-    window.walletSettings.fiatPrice = content ? parseFloat(content[0][`price_${currency}`]) : 0;
-    window.walletSettings.priceLastUpdated = content ? new Date(parseInt(content[0].last_updated) * 1000) : null;
-  });
-}
-
 export function initEmptyWeb3Instance() {
   window.localWeb3 = new LocalWeb3();
 }
@@ -193,9 +162,7 @@ export function initSettings(isSpace, useCometd, isAdministration) {
 
       const accountId = getRemoteId(isSpace);
       if (isSpace && accountId) {
-        return initSpaceAccount(accountId).then(retrieveFiatExchangeRate);
-      } else {
-        return retrieveFiatExchangeRate();
+        return initSpaceAccount(accountId);
       }
     })
     .catch((e) => {
@@ -647,30 +614,6 @@ function clearCache() {
       sessionStorage.removeItem(key);
     }
   });
-}
-
-function retrieveFiatExchangeRateOnline(currency) {
-  // Retrieve Fiat <=> Ether exchange rate
-  return fetch(`https://api.coinmarketcap.com/v1/ticker/ethereum/?convert=${currency}`, {
-    referrerPolicy: 'no-referrer',
-    headers: {
-      Origin: '',
-    },
-  })
-    .then((resp) => {
-      if (resp && resp.ok) {
-        return resp.json();
-      }
-    })
-    .then((content) => {
-      if (content && content.length && content[0][`price_${currency}`]) {
-        localStorage.setItem(`exo-wallet-exchange-${currency}`, JSON.stringify(content));
-        localStorage.setItem(`exo-wallet-exchange-${currency}-time`, Date.now());
-      }
-    })
-    .catch((error) => {
-      console.debug('error retrieving currency exchange, trying to get exchange from local store', error);
-    });
 }
 
 function initCometd(settings) {
