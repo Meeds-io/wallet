@@ -35,4 +35,13 @@ public interface RewardReportStorage {
    */
   List<WalletReward> listRewards(long identityId, int limit);
 
+  /**
+   * Replaces an old reward transaction hash to a new one, that had boosted the
+   * first one
+   * 
+   * @param oldHash old Transaction hash
+   * @param newHash new Transaction hash
+   */
+  void replaceRewardTransactions(String oldHash, String newHash);
+
 }

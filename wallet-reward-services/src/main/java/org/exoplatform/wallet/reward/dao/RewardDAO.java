@@ -2,6 +2,7 @@ package org.exoplatform.wallet.reward.dao;
 
 import java.util.List;
 
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
@@ -41,6 +42,13 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
       LOG.warn("More than one reward was found for identityId {} and periodId {}", identityId, periodId);
     }
     return result.get(0);
+  }
+
+  public void replaceRewardTransactions(String oldHash, String newHash) {
+    Query query = getEntityManager().createNamedQuery("Reward.updateTransactionHash");
+    query.setParameter("oldHash", oldHash);
+    query.setParameter("newHash", newHash);
+    query.executeUpdate();
   }
 
 }

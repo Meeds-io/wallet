@@ -42,13 +42,13 @@
     <key>org.exoplatform.wallet.reward.service.RewardSettingsService</key>
     <type>org.exoplatform.wallet.reward.service.WalletRewardSettingsService</type>
     <component-plugins>
-      <component-plugin>
+      <component-plugin profiles="gamification">
         <name>gamification</name>
         <set-method>registerPlugin</set-method>
         <type>org.exoplatform.wallet.reward.plugin.GamificationRewardPlugin</type>
         <description>Gamification points reward plugin</description>
       </component-plugin>
-      <component-plugin>
+      <component-plugin profiles="kudos">
         <name>kudos</name>
         <set-method>registerPlugin</set-method>
         <type>org.exoplatform.wallet.reward.plugin.KudosRewardPlugin</type>
@@ -130,6 +130,11 @@
     <target-component>org.exoplatform.services.listener.ListenerService</target-component>
     <component-plugin>
       <name>exo.wallet.reward.report.success</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.replaced</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.reward.listener.RewardSucceedNotificationListener</type>
     </component-plugin>

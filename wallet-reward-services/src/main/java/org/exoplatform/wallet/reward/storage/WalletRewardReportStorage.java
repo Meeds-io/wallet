@@ -203,6 +203,11 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     return walletRewards;
   }
 
+  @Override
+  public void replaceRewardTransactions(String oldHash, String newHash) {
+    rewardDAO.replaceRewardTransactions(oldHash, newHash);
+  }
+
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
     RewardPeriod rewardPeriod = new RewardPeriod(period.getPeriodType());
     rewardPeriod.setStartDateInSeconds(period.getStartTime());

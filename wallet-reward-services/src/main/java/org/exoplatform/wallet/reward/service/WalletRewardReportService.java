@@ -216,6 +216,11 @@ public class WalletRewardReportService implements RewardReportService {
     }
   }
 
+  @Override
+  public void replaceRewardTransactions(String oldHash, String newHash) {
+    rewardReportStorage.replaceRewardTransactions(oldHash, newHash);
+  }
+
   private RewardPeriod getRewardPeriod(long periodDateInSeconds) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     RewardPeriodType periodType = rewardSettings.getPeriodType();
