@@ -541,8 +541,8 @@ export function estimateTransactionFeeEther(gas, gasPrice) {
   if (!gasPrice || !gas) {
     return 0;
   }
-  const gasFeeWei = parseInt(gas * gasPrice);
-  return LocalWeb3.utils.fromWei(String(gasFeeWei), 'ether');
+  const gasFeeWei = LocalWeb3.utils.toBN(gas).mul(LocalWeb3.utils.toBN(gasPrice));
+  return LocalWeb3.utils.fromWei(gasFeeWei.toString(), 'ether');
 }
 
 export function estimateTransactionFeeFiat(gas, gasPrice) {

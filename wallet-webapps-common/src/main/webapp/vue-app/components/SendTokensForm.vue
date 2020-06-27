@@ -30,7 +30,7 @@
 
         <v-text-field
           v-model.number="amount"
-          :disabled="loading"
+          :disabled="loading || transaction"
           :label="$t('exoplatform.wallet.label.amount')"
           :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
           name="amount"
@@ -53,17 +53,19 @@
         <gas-price-choice
           :wallet="wallet"
           :estimated-fee="transactionFeeString"
+          :slider="!!transaction"
+          :min-gas-price="transaction && transaction.gasPrice"
           @changed="gasPrice = $event" />
         <v-text-field
           v-model="transactionLabel"
-          :disabled="loading"
+          :disabled="loading || transaction"
           :label="$t('exoplatform.wallet.label.transactionLabel')"
           :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
           type="text"
           name="transactionLabel" />
         <v-textarea
           v-model="transactionMessage"
-          :disabled="loading"
+          :disabled="loading || transaction"
           :label="$t('exoplatform.wallet.label.transactionMessage')"
           :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
           name="tokenTransactionMessage"
@@ -125,6 +127,12 @@ export default {
   },
   props: {
     wallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+    transaction: {
       type: Object,
       default: function() {
         return null;
@@ -286,14 +294,22 @@ export default {
         }
       });
       this.loading = false;
-      this.disabledRecipient = false;
+      this.disabledRecipient = !!this.transaction;
       this.showQRCodeModal = false;
       this.isSpace = window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.type === 'space';
-      this.transactionLabel = this.defaultLabel;
-      this.transactionMessage = this.defaultMessage;
-      if (!this.gasPrice) {
-        this.gasPrice = window.walletSettings.network.normalGasPrice;
+
+      if (this.transaction) {
+        this.transactionLabel = this.transaction.label || '';
+        this.transactionMessage = this.transaction.message || '';
+        this.gasPrice = this.transaction.gasPrice + 1;
+      } else {
+        this.transactionLabel = this.defaultLabel;
+        this.transactionMessage = this.defaultMessage;
+        if (!this.gasPrice) {
+          this.gasPrice = window.walletSettings.network.normalGasPrice;
+        }
       }
+
       this.fiatSymbol = window.walletSettings.fiatSymbol;
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(() => {
@@ -392,13 +408,24 @@ export default {
         tokenFee: this.transactionFeeToken,
       };
 
+      if (this.transaction) {
+        Object.assign(transactionDetail, {
+          nonce: this.transaction.nonce,
+          label: this.transaction.label || '',
+          message: this.transaction.message || '',
+          contractAmount: this.transaction.contractAmount,
+          to: this.transaction.toWallet.address,
+          boost: true,
+        });
+      }
+
       this.error = null;
       this.loading = true;
-      return transfer(this.recipient, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
+      return transfer(transactionDetail.to, convertTokenAmountToSend(transactionDetail.contractAmount, this.contractDetails.decimals).toString())
         .estimateGas({
-          from: sender,
-          gas: window.walletSettings.network.gasLimit,
-          gasPrice: this.gasPrice,
+          from: transactionDetail.from,
+          gas: transactionDetail.gas,
+          gasPrice: transactionDetail.gasPrice,
         })
         .catch((e) => {
           console.error('Error estimating necessary gas', e);

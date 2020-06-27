@@ -617,7 +617,18 @@
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="administration && !item.refreshed && userAdminLevel">
+              <v-list-item v-if="item.fromUsername === currentUser && item.pending && item.contractAddress && item.sentTimestamp">
+                <v-list-item-content>
+                  <send-tokens-modal
+                    ref="boostTransactionModal"
+                    :wallet="wallet"
+                    :transaction="item"
+                    :contract-details="contractDetails"
+                    @sent="transactionSent" />
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item v-if="administration && !item.refreshed">
                 <v-list-item-content>
                   <v-btn
                     class="btn ignore-vuetify-classes"
@@ -854,6 +865,7 @@
 <script>
 import WalletAddress from './WalletAddress.vue';
 import ProfileChip from './ProfileChip.vue';
+import SendTokensModal from './SendTokensModal.vue';
 
 import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
 import {loadTransactions, refreshTransactionDetail} from '../js/TransactionUtils.js';
@@ -862,6 +874,7 @@ export default {
   components: {
     ProfileChip,
     WalletAddress,
+    SendTokensModal,
   },
   props: {
     wallet: {
@@ -918,6 +931,7 @@ export default {
       // A trick to force update computed list
       // since the attribute this.transactions is modified outside the component
       refreshIndex: 1,
+      currentUser: eXo.env.portal.userName,
       loading: false,
       settings: null,
       transactionsLimit: 10,
@@ -931,7 +945,6 @@ export default {
       return this.wallet && this.wallet.address;
     },
     isSpaceWallet() {
-      console.warn('this.wallet.type', this.wallet && this.wallet.type);
       return this.wallet && this.wallet.type === 'space';
     },
     contractName() {
@@ -961,7 +974,6 @@ export default {
     transactionsLimit() {
       if (this.transactionsLimit !== this.transactionsPerPage && !this.loading) {
         this.init(true).catch((error) => {
-          console.debug('account field change event - error', error);
           this.loading = false;
           this.$emit('error', `Account loading error: ${error}`);
         });
@@ -992,6 +1004,10 @@ export default {
     });
   },
   methods: {
+    transactionSent() {
+      this.$emit('refresh');
+      this.init();
+    },
     init(ignoreSelected) {
       this.loading = true;
       this.error = null;

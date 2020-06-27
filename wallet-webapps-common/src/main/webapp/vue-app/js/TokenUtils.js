@@ -195,7 +195,8 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
 
 export function sendContractTransaction(transactionDetail, method, parameters) {
   let nonce = 0;
-  return getNewTransactionNonce(transactionDetail.from)
+  const gettingNoncePromise = transactionDetail.boost ? Promise.resolve(transactionDetail.nonce) : getNewTransactionNonce(transactionDetail.from);
+  return gettingNoncePromise
     .then((computedNonce) => {
       nonce = computedNonce;
       const transactionToSend = {

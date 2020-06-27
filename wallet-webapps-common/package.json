@@ -19,7 +19,7 @@
     "lint": "eslint --fix ./src/main/webapp/vue-app/*.js ./src/main/webapp/vue-app/**/*.js ./src/main/webapp/vue-app/**/*.vue",
     "eslint-check": "eslint --print-config . | eslint-config-prettier-check",
     "build": "webpack --config webpack.prod.js --mode production",
-    "ganache-cli": "ganache-cli --account=0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3,100000000000000000000 --networkId 4452364 -b 120 --debug --db ~/.ganache-data"
+    "ganache-cli": "ganache-cli --account=0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3,100000000000000000000 --networkId 4452364 -b 5 --debug --verbose --db ~/.ganache-data"
   },
   "author": "eXo",
   "license": "LGPL",
@@ -43,7 +43,7 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
     "flush-promises": "^1.0.2",
-    "ganache-cli": "^6.5.1",
+    "ganache-cli": "^6.9.1",
     "jest": "^22.4.4",
     "jest-fetch-mock": "^1.7.5",
     "jest-localstorage-mock": "^2.2.0",
