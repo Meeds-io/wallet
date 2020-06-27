@@ -11,6 +11,7 @@
     <template v-slot:activator="{ on }">
       <v-btn
         v-if="canBoostTransaction"
+        v-show="showBoostButton"
         color="primary"
         text
         v-on="on">
@@ -52,6 +53,7 @@
 import SendTokensForm from './SendTokensForm.vue';
 
 import {checkFundRequestStatus} from '../js/WalletUtils.js';
+import {getTransactionCount} from '../js/TokenUtils.js';
 
 export default {
   components: {
@@ -91,7 +93,8 @@ export default {
   },
   data() {
     return {
-      dialog: null,
+      dialog: false,
+      firstPendingTransaction: false,
     };
   },
   computed: {
@@ -100,6 +103,9 @@ export default {
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance;
+    },
+    showBoostButton() {
+      return this.canBoostTransaction && this.firstPendingTransaction;
     },
     canBoostTransaction() {
       return this.transaction && this.wallet && this.wallet.isApproved && ((this.wallet.type === 'user' && this.wallet.id === eXo.env.portal.userName) || (this.wallet.type === 'space' && this.wallet.spaceAdministrator));
@@ -124,6 +130,17 @@ export default {
         this.$emit('close');
       }
     },
+  },
+  created() {
+    if (this.canBoostTransaction) {
+      if (this.wallet.lastMinedNonce === 0 || this.wallet.lastMinedNonce > 0) {
+        this.firstPendingTransaction = this.wallet.nextNonceToMine === this.transaction.nonce;
+      }
+      getTransactionCount(this.wallet.address).then(nonce => {
+        this.wallet.nextNonceToMine = nonce;
+        this.firstPendingTransaction = this.wallet.nextNonceToMine === this.transaction.nonce;
+      });
+    }
   },
   methods: {
     prepareSendForm(receiver, receiverType, amount, notificationId) {

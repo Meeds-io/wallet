@@ -219,8 +219,12 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
     });
 }
 
+export function getTransactionCount(walletAddress, status) {
+  return window.localWeb3.eth.getTransactionCount(walletAddress, status || 'latest')
+}
+
 function getNewTransactionNonce(walletAddress) {
-  return window.localWeb3.eth.getTransactionCount(walletAddress, 'pending')
+    return getTransactionCount(walletAddress, 'pending')
     .then(nonce => 
       getNonce(walletAddress)
         .then(savedNonce => Math.max(Number(nonce), Number(savedNonce))))
