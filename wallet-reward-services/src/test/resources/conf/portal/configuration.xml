@@ -39,7 +39,7 @@
   </component>
 
   <import>jar:/conf/portal/wallet-configuration.xml</import>
-  <import>jar:/conf/portal/wallet-reward-configuration.xml</import>
+  <import>jar:/conf/portal/test-wallet-reward-configuration.xml</import>
   <import>jar:/conf/portal/test-organization-configuration.xml</import>
 
   <remove-configuration>org.exoplatform.commons.search.index.IndexingOperationProcessor</remove-configuration>
