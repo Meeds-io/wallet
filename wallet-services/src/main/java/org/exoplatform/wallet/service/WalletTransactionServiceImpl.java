@@ -11,6 +11,9 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
@@ -282,6 +285,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         replacedTransaction.setPending(false);
         replacedTransaction.setSucceeded(false);
         broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
+        // Force to restart Transaction to make sure the change is taken into account
+        restartTransactions();
         saveTransactionDetail(replacedTransaction, true);
       });
     }
@@ -555,4 +560,34 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                                        : selectedDay.plusDays(1)
                                                                                     .atStartOfDay(ZoneId.systemDefault());
   }
+
+  protected void restartTransactions() {
+    int i = 0;
+    // Close transactions until no encapsulated transaction
+    boolean success = true;
+    do {
+      try {
+        end();
+        i++;
+      } catch (IllegalStateException e) {
+        success = false;
+      }
+    } while (success);
+
+    // Restart transactions with the same number of encapsulations
+    for (int j = 0; j < i; j++) {
+      begin();
+    }
+  }
+
+  protected void begin() {
+    PortalContainer container = PortalContainer.getInstance();
+    ExoContainerContext.setCurrentContainer(container);
+    RequestLifeCycle.begin(container);
+  }
+
+  protected void end() {
+    RequestLifeCycle.end();
+  }
+
 }
