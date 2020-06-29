@@ -26,7 +26,7 @@
     <page>
         <name>walletAdministration</name>
         <title>Wallet adminsitration</title>
-        <access-permissions>*:/platform/rewarding</access-permissions>
+        <access-permissions>*:/platform/rewarding;*:/platform/professional</access-permissions>
         <edit-permission>manager:/platform/rewarding</edit-permission>
         <portlet-application>
             <portlet>
@@ -34,14 +34,14 @@
                 <portlet-ref>WalletAdmin</portlet-ref>
             </portlet>
             <title>Wallet adminsitration</title>
-            <access-permissions>*:/platform/rewarding</access-permissions>
+            <access-permissions>*:/platform/rewarding;*:/platform/professional</access-permissions>
             <show-info-bar>false</show-info-bar>
         </portlet-application>
     </page>
     <page>
         <name>rewardAdministration</name>
         <title>Reward administration</title>
-        <access-permissions>*:/platform/rewarding</access-permissions>
+        <access-permissions>*:/platform/rewarding;*:/platform/professional</access-permissions>
         <edit-permission>manager:/platform/rewarding</edit-permission>
         <portlet-application>
             <portlet>
@@ -49,7 +49,7 @@
                 <portlet-ref>RewardAdmin</portlet-ref>
             </portlet>
             <title>Reward administration</title>
-            <access-permissions>*:/platform/rewarding</access-permissions>
+            <access-permissions>*:/platform/rewarding;*:/platform/professional</access-permissions>
             <show-info-bar>false</show-info-bar>
         </portlet-application>
     </page>

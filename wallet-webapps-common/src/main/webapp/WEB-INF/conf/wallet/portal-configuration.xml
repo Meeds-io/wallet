@@ -71,6 +71,9 @@
                 <value>
                   <string>/platform/rewarding</string>
                 </value>
+                <value>
+                  <string>/platform/professional</string>
+                </value>
               </collection>
             </field>
             <field name="location">
