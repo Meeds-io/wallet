@@ -75,7 +75,7 @@ public class WalletContractREST implements ResourceContainer {
 
   @GET
   @Path("bin/{name}")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Retrieves contract binary", httpMethod = "GET", response = Response.class, notes = "returns contract bin content")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -103,7 +103,7 @@ public class WalletContractREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("abi/{name}")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Retrieves contract ABI", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract ABI object")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),

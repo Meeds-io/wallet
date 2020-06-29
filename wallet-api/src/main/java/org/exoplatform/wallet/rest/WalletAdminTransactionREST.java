@@ -37,7 +37,7 @@ import org.exoplatform.wallet.service.WalletTokenAdminService;
 import io.swagger.annotations.*;
 
 @Path("/wallet/api/admin/transaction")
-@RolesAllowed("rewarding")
+@RolesAllowed({"rewarding","professional"})
 @Api(value = "/wallet/api/admin/transaction", description = "Manages admin wallet transactions to send on blockchain") // NOSONAR
 public class WalletAdminTransactionREST implements ResourceContainer {
 
@@ -49,7 +49,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
   @POST
   @Path("intiialize")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -84,7 +84,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
   @POST
   @Path("sendEther")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Send ether using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -132,7 +132,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
 
   @POST
   @Path("sendToken")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Send tokens using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),

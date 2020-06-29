@@ -122,7 +122,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("enable")
   @GET
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Enable or disable a wallet identified by its address", httpMethod = "GET", response = Response.class, notes = "returns empty response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -146,7 +146,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("setInitializationStatus")
   @GET
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Modify initialization status of wallet", httpMethod = "GET", response = Response.class, notes = "returns empty response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -410,7 +410,7 @@ public class WalletAccountREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("saveOrDeleteAddressLabel")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Saves or deletes a label associated to an address. If label is empty, then deletes it, else saves it.", httpMethod = "POST", consumes = "application/json", produces = "application/json", response = Response.class, notes = "returns saved label object")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -540,7 +540,7 @@ public class WalletAccountREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Get list of wallet accounts", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns array of wallets objects")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -559,7 +559,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @GET
   @Path("refreshWalletFromBlockchain")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "force refresh wallet from blockchain", httpMethod = "GET", response = Response.class, notes = "returns no response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.NO_CONTENT, message = "Request fulfilled"),

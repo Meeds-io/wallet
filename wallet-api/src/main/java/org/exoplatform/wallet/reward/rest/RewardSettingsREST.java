@@ -20,7 +20,7 @@ import org.exoplatform.wallet.reward.service.RewardSettingsService;
 import io.swagger.annotations.*;
 
 @Path("/wallet/api/reward/settings")
-@RolesAllowed("rewarding")
+@RolesAllowed({"rewarding","professional"})
 @Api(value = "/wallet/api/reward/settings", description = "Manage reward module settings") // NOSONAR
 public class RewardSettingsREST implements ResourceContainer {
   private static final Log      LOG = ExoLogger.getLogger(RewardSettingsREST.class);
@@ -33,7 +33,7 @@ public class RewardSettingsREST implements ResourceContainer {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Get reward settings", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward settings object")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -52,7 +52,7 @@ public class RewardSettingsREST implements ResourceContainer {
   @POST
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Get reward settings", httpMethod = "POST", response = Response.class, produces = "application/json", notes = "returns reward settings object")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),

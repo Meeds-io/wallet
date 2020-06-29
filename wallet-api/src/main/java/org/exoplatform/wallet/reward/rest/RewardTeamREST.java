@@ -17,7 +17,7 @@ import org.exoplatform.wallet.reward.service.RewardTeamService;
 import io.swagger.annotations.*;
 
 @Path("/wallet/api/reward/team")
-@RolesAllowed("rewarding")
+@RolesAllowed({"rewarding","professional"})
 @Api(value = "/wallet/api/reward/team", description = "Manage reward teams (pools)") // NOSONAR
 public class RewardTeamREST implements ResourceContainer {
   private static final Log  LOG = ExoLogger.getLogger(RewardTeamREST.class);
@@ -31,7 +31,7 @@ public class RewardTeamREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Get reward teams with their members", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns the list of reward team objects")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -48,7 +48,7 @@ public class RewardTeamREST implements ResourceContainer {
 
   @GET
   @Path("remove")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Remove a reward team", httpMethod = "GET", response = Response.class, notes = "returns empty response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -73,7 +73,7 @@ public class RewardTeamREST implements ResourceContainer {
   @Path("save")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "Save a reward team", httpMethod = "POST", response = Response.class, consumes = "application/json", produces = "application/json", notes = "returns saved reward team object")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),

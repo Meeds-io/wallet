@@ -227,7 +227,7 @@ public class WalletTransactionREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("refreshTransactionFromBlockchain")
-  @RolesAllowed("rewarding")
+  @RolesAllowed({"rewarding","professional"})
   @ApiOperation(value = "refresh transaction detail from blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "return transaction detail refreshed from blockchain")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
