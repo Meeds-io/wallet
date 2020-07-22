@@ -206,18 +206,8 @@ export default {
         const gasPriceEther = window.localWeb3.utils.fromWei(String(Number(gasPrice) * Number(network.gasLimit)), 'ether').toString();
 
         if (this.wallet.etherBalance < gasPriceEther) {
-          console.debug(`User can't be charged for transaction fees using parametered gas price. Thus normal gas price will be used`);
-          if (this.wallet.etherBalance < network.normalGasPriceEther) {
-            console.debug(`User can't be charged for transaction fees using normal gas price. Thus min gas price will be used`);
-            if (this.wallet.etherBalance < network.minGasPriceEther) {
-              console.debug(`User can't be charged for transaction fees using minimal gas price. Thus return an error`);
-              document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                detail : this.$t('exoplatform.wallet.warning.noEnoughFunds')
-              }));
-              return;
-            }
-            gasPrice = network.minGasPrice;
-          }
+          console.debug(`User can't be charged for transaction fees using parametered gas price. Thus gas price will be computed from user ether balance`);
+          gasPrice = parseInt(gasPrice * this.wallet.etherBalance / gasPriceEther);
         }
 
         if (!amount || Number.isNaN(parseFloat(amount)) || !Number.isFinite(amount) || amount <= 0) {
