@@ -31,7 +31,10 @@
           @input="selectedDateMenu = false" />
       </v-menu>
     </v-card-text>
-    <v-container fluid grid-list-md>
+    <v-container
+      fluid
+      grid-list-md
+      class="border-box-sizing">
       <v-layout
         row
         wrap
@@ -66,7 +69,7 @@
         </v-flex>
       </v-layout>
     </v-container>
-    <v-container>
+    <v-container class="border-box-sizing">
       <v-layout>
         <v-flex md4 xs12>
           <v-switch v-model="displayDisabledUsers" :label="$t('exoplatform.wallet.label.displayDisabledUsers')" />

@@ -336,7 +336,7 @@ export default {
             })
             .then((estimatedGas) => {
               // Add 10% to ensure that the operation doesn't take more than the estimation
-              this.estimatedGas = estimatedGas * 1.1;
+              this.estimatedGas = parseInt(estimatedGas * 1.1);
             })
             .catch((e) => {
               console.debug('Error while estimating gas', e);
