@@ -115,7 +115,7 @@ public class StatisticUtils {
     }
     logEntry.append("\"");
 
-    STATISTIC_LOG.info(logEntry.toString());
+    STATISTIC_LOG.debug(logEntry.toString());
   }
 
   public static final String transformCapitalWithUnderscore(String string) {
