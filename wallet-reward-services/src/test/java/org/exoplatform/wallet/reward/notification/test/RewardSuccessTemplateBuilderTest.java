@@ -82,7 +82,7 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
     MessageInfo message = templateProvider.getBuilder().buildMessage(ctx);
     assertNotNull(message);
     assertNotNull(message.getPluginId());
-    assertEquals("Reward success!", message.getBody());
+    assertEquals("Reward success!", message.getBody().replaceAll("(?s)<!--.*?-->", "").trim());
   }
 
   private InitParams getParams() {
