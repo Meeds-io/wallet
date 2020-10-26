@@ -15,10 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-app
-    id="walletBalancePortlet"
-    flat
-    dark>
+  <v-app flat dark>
     <main>
       <v-container pa-0>
         <v-layout
@@ -35,9 +32,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               class="white">
               <v-flex d-flex xs12>
                 <v-card flat>
-                  <v-card-text
-                    class="subtitle-2 text-sub-title pa-2">
-                    <span :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-header skeleton-border-radius'">{{ $t('exoplatform.wallet.title.walletBalanceTitle') }}</span>
+                  <v-card-text class="subtitle-2 text-sub-title pa-2">
+                    {{ $t('exoplatform.wallet.title.walletBalanceTitle') }}
                   </v-card-text>
                 </v-card>
               </v-flex>
@@ -47,10 +43,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 justify-center>
                 <v-card flat>
                   <v-card-text class="pa-2">
-                    <a
-                      :href="walletUrl"
-                      :class="firstLoadingWalletBalance && 'skeleton-text skeleton-background skeleton-border-radius'"
-                      class="display-1 font-weight-bold big-number">{{ walletBalance }} Ȼ</a>
+                    <a :href="walletUrl" class="text-color display-1 font-weight-bold big-number">
+                      {{ walletBalance }} {{ currencySymbol }}
+                    </a>
                   </v-card-text>
                 </v-card>
               </v-flex>
@@ -69,22 +64,30 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       return {
         walletBalance: '',
         walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`,
+        currencySymbol: '',
         firstLoadingWalletBalance: true,
       }
     },
     created() {
-      this.getRewardBalance();
+      this.getRewardBalance()
+        .then(() => this.$root.$emit('application-loaded'));
     },
     methods: {
       getRewardBalance() {
-        getWalletAccount().then(
-          (data) => {
-            this.walletBalance = Math.trunc(data.tokenBalance);
-              if (this.firstLoadingWalletBalance) {
-                this.firstLoadingWalletBalance = false;
-              }
-            }
-        )
+        return getWalletAccount().then(data => {
+          this.walletBalance = Math.trunc(data.tokenBalance);
+          if (!this.currencySymbol) {
+            // Search settings in a sync way
+            return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
+              .then((resp) => resp && resp.ok && resp.json())
+              .then(settings => {
+                const contract = settings && settings.contractDetail;
+                this.currencySymbol = contract && contract.symbol;
+                return this.$nextTick();
+              });
+          }
+          return this.$nextTick();
+        });
       }
     }
   }

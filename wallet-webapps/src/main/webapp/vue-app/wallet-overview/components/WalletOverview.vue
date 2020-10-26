@@ -21,22 +21,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       height="48"
       flat
       class="border-box-sizing py-3">
-      <div
-        :class="skeleton && 'skeleton-text skeleton-text-width skeleton-background skeleton-text-height-thick skeleton-border-radius'"
-        class="text-header-title text-sub-title text-no-wrap">
-        {{ skeleton && '&nbsp;' || title || '' }}
+      <div class="text-header-title text-sub-title text-no-wrap">
+        {{ title || '' }}
       </div>
       <v-spacer />
       <v-btn
-        v-if="clickable || skeleton"
-        :disabled="skeleton"
-        :class="skeleton && 'skeleton-background skeleton-text'"
+        v-if="clickable"
         icon
         outlined
         small
         @click="editWorkExperiences">
         <i
-          v-if="!skeleton"
           class="uiIconInformation clickable primary--text my-auto pb-2 mr-1"
           @click="openDrawer"></i>
       </v-btn>
@@ -47,14 +42,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       flat>
       <v-card-text
         class="justify-center ma-auto py-5 d-flex flex-no-wrap"
-        @click="!skeleton && clickable && openDrawer()">
-        <div
-          :class="skeleton && 'skeleton-background skeleton-border-radius skeleton-text-half-width skeleton-text-height-block skeleton-text my-2'"
-          class="justify-center d-flex flex-no-wrap">
-          <template v-if="skeleton">
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          </template>
-          <template v-else>
+        @click="clickable && openDrawer()">
+        <div class="justify-center d-flex flex-no-wrap">
+          <template>
             <v-icon
               v-if="currencySymbol"
               class="tertiary-color walletOverviewCurrencySymbol px-2"
@@ -85,7 +75,6 @@ export default {
     currencyName: null,
     currencySymbol: null,
     rewardBalance: 0,
-    skeleton: true,
   }),
   computed: {
     clickable() {
@@ -102,43 +91,31 @@ export default {
       }
     },
     refresh() {
-      let loading = 1;
-
-      if (!this.currencyName) {
-        loading++;
-        // Search settings in a sync way
-        fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
-          .then((resp) => resp && resp.ok && resp.json())
-          .then(settings => {
-            const contract = settings && settings.contractDetail;
-            this.currencyName = contract && contract.name;
-            this.currencySymbol = contract && contract.symbol;
-            if (this.currencyName) {
-              this.title = this.$t('exoplatform.wallet.title.rewardedBalance', {0: this.currencyName});
-            }
-          })
-          .finally(() => {
-            loading--;
-            if (loading === 0) {
-              this.skeleton = false;
-              // Decrement 'loading' effect after having incremented it in main.js
-              document.dispatchEvent(new CustomEvent('hideTopBarLoading'));
-            }
-          });
-      }
-
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
         .then((resp) => resp && resp.ok && resp.json())
         .then(wallet => {
           this.rewardBalance = parseInt(wallet && wallet.rewardBalance * 100 || 0) / 100;
         })
-        .finally(() => {
-          loading--;
-          if (loading === 0) {
-            this.skeleton = false;
-            // Decrement 'loading' effect after having incremented it in main.js
-            document.dispatchEvent(new CustomEvent('hideTopBarLoading'));
+        .then(() => {
+          if (!this.currencyName) {
+            // Search settings in a sync way
+            return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
+              .then((resp) => resp && resp.ok && resp.json())
+              .then(settings => {
+                const contract = settings && settings.contractDetail;
+                this.currencyName = contract && contract.name;
+                this.currencySymbol = contract && contract.symbol;
+                if (this.currencyName) {
+                  this.title = this.$t('exoplatform.wallet.title.rewardedBalance', {0: this.currencyName});
+                }
+                return this.$nextTick();
+              });
           }
+          return this.$nextTick();
+        })
+        .finally(() => {
+          this.$root.$emit('application-loaded');
+          document.dispatchEvent(new CustomEvent('hideTopBarLoading'));
         });
     },
   },
