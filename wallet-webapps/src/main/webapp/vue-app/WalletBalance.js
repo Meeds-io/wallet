@@ -14,7 +14,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import walletBalanceApp from './components/wallet-balance/WalletBalance.vue';
+import WalletBalanceApp from './components/wallet-balance/WalletBalance.vue';
+Vue.component('wallet-balance-app', WalletBalanceApp);
 
 Vue.use(Vuetify);
 
@@ -29,15 +30,18 @@ const lang = eXo && eXo.env && eXo.env.portal && eXo.env.portal.language || 'en'
 const resourceBundleName = 'locale.addon.Wallet';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/${resourceBundleName}-${lang}.json`;
 
+const appId = 'walletBalance';
+const cacheId = `${appId}_${eXo.env.portal.profileOwnerIdentityId}`;
+
 export function init() {
-// getting locale ressources
-exoi18n.loadLanguageAsync(lang, url)
-    .then(i18n => {
-        // init Vue app when locale ressources are ready
-        new Vue({
-            render: h => h(walletBalanceApp),
-            i18n,
-            vuetify,
-        }).$mount('#walletBalance');
-    });
+  exoi18n.loadLanguageAsync(lang, url).then(i18n => {
+    const appElement = document.createElement('div');
+    appElement.id = appId;
+
+    new Vue({
+      template: `<wallet-balance-app id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
+      i18n,
+      vuetify,
+    }).$mount(appElement);
+  });
 }
