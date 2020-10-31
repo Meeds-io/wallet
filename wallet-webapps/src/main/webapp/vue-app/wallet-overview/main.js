@@ -47,6 +47,9 @@ export function init() {
 
     // init Vue app when locale ressources are ready
     new Vue({
+      mounted() {
+        document.dispatchEvent(new CustomEvent('hideTopBarLoading'));
+      },
       template: `<wallet-overview id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
       i18n,
       vuetify,
