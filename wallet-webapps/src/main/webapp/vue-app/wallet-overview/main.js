@@ -38,14 +38,21 @@ const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'e
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
 
 const appId = 'WalletOverview';
+const cacheId = `${appId}_${eXo.env.portal.profileOwnerIdentityId}`;
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-  // init Vue app when locale ressources are ready
+    const appElement = document.createElement('div');
+    appElement.id = appId;
+
+    // init Vue app when locale ressources are ready
     new Vue({
-      template: `<wallet-overview id="${appId}" />`,
+      mounted() {
+        document.dispatchEvent(new CustomEvent('hideTopBarLoading'));
+      },
+      template: `<wallet-overview id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
       i18n,
       vuetify,
-    }).$mount(`#${appId}`);
+    }).$mount(appElement);
   });
 }
