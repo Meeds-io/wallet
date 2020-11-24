@@ -21,7 +21,7 @@ $( document ).ready(function() {
       eXo.social.tiptip.extraActions.push({
         appendContentTo(divUIAction, ownerId, type) {
           if(!type || type === 'username') {
-            divUIAction.append(`<a title="Send Funds" class="sendFundsTipTipButton" href="/portal/intranet/wallet?receiver=${ownerId}&receiver_type=user&principal=true">
+            divUIAction.append(`<a title="Send Funds" class="sendFundsTipTipButton" href="/portal/${eXo.env.portal.portalName}/wallet?receiver=${ownerId}&receiver_type=user&principal=true">
                 <i aria-hidden="true" class="uiIconSendFunds material-icons">send</i>
             </a>`);
           }
