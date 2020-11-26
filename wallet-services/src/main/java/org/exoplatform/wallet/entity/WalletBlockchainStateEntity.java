@@ -29,7 +29,10 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_BLOCKCHAIN_STATE")
 @NamedQueries({
-    @NamedQuery(name = "WalletBlockchainState.findByWalletIdAndContract", query = "SELECT wb FROM WalletBlockchainState wb WHERE wb.wallet.id = :walletId AND  wb.contractAddress = :contractAddress"),
+  @NamedQuery(
+      name = "WalletBlockchainState.findByWalletIdAndContract",
+      query = "SELECT wb FROM WalletBlockchainState wb WHERE wb.wallet.id = :walletId AND  wb.contractAddress = :contractAddress ORDER BY wb.id DESC"
+  ),
 })
 public class WalletBlockchainStateEntity implements Serializable {
   private static final long serialVersionUID = -7294965683405044055L;

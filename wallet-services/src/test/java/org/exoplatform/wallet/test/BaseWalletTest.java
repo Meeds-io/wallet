@@ -151,6 +151,8 @@ public abstract class BaseWalletTest {
 
     LOG.info("Cleaning {} objects after test finished", entitiesToClean.size());
 
+    walletBlockchainStateDAO.deleteAll();
+
     if (!entitiesToClean.isEmpty()) {
       Iterator<Serializable> iterator = entitiesToClean.iterator();
       while (iterator.hasNext()) {
