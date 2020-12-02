@@ -45,6 +45,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <value>
                 <string>*:/platform/users</string>
                 </value>
+                <value>
+                  <string>*:/platform/externals</string>
+                </value>
               </collection>
             </field>
             <field name="title">
@@ -88,6 +91,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <collection type="java.util.ArrayList">
                 <value>
                 <string>*:/platform/users</string>
+                </value>
+                <value>
+                  <string>*:/platform/externals</string>
                 </value>
               </collection>
             </field>
@@ -133,6 +139,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <value>
                 <string>*:/platform/users</string>
                 </value>
+                <value>
+                  <string>*:/platform/externals</string>
+                </value>
               </collection>
             </field>
             <field name="title">
@@ -177,6 +186,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <value>
                   <string>*:/platform/users</string>
                 </value>
+                <value>
+                  <string>*:/platform/externals</string>
+                </value>
               </collection>
             </field>
             <field name="title">
@@ -220,6 +232,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <collection type="java.util.ArrayList">
                 <value>
                 <string>*:/platform/users</string>
+                </value>
+                <value>
+                  <string>*:/platform/externals</string>
                 </value>
               </collection>
             </field>
