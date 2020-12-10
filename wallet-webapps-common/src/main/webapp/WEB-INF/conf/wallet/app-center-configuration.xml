@@ -32,6 +32,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <name>override</name>
           <value>${exo.app-center.wallet.override:false}</value>
         </value-param>
+        <value-param>
+          <name>override-mode</name>
+          <value>${exo.app-center.wallet.override-mode:merge}</value>
+        </value-param>
         <object-param>
           <name>application</name>
           <description>description</description>
