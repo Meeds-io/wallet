@@ -22,12 +22,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <parent>
     <artifactId>addons-parent-pom</artifactId>
     <groupId>org.exoplatform.addons</groupId>
-    <version>13-M01</version>
+    <version>13-RC01</version>
     <relativePath/>
   </parent>
   <groupId>org.exoplatform.addons.wallet</groupId>
   <artifactId>wallet</artifactId>
-  <version>2.1.x-SNAPSHOT</version>
+  <version>2.2.x-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>eXo Add-on:: Wallet Add-on</name>
   <description>eXo Wallet Add-on</description>
@@ -49,9 +49,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </scm>
   <properties>
     <!-- 3rd party libraries versions -->
-    <org.exoplatform.social.version>6.1.x-SNAPSHOT</org.exoplatform.social.version>
+    <org.exoplatform.social.version>6.2.x-SNAPSHOT</org.exoplatform.social.version>
     <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
-    <org.exoplatform.platform-ui.version>6.1.x-SNAPSHOT</org.exoplatform.platform-ui.version>
+    <org.exoplatform.platform-ui.version>6.2.x-SNAPSHOT</org.exoplatform.platform-ui.version>
 
     <!-- Ethereum We3j for Java library -->
     <org.web3j.version>4.5.11</org.web3j.version>
