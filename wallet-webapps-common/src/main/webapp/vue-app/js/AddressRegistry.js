@@ -29,14 +29,14 @@ export function searchWallets(filter) {
     .then(() => searchSpaces(filter))
     .then((spaces) => (items = items.concat(spaces)))
     .catch((e) => {
-      console.debug('searchWallets method - error', e);
+      console.error('searchWallets method - error', e);
     });
 }
 
 /*
  * Return the address of a user or space
  */
-export function saveNewAddress(id, type, address, isBrowserWallet) {
+export function saveNewAddress(id, type, address) {
   address = address.toLowerCase();
   return fetch('/portal/rest/wallet/api/account/saveAddress', {
     method: 'POST',
@@ -56,7 +56,7 @@ export function saveNewAddress(id, type, address, isBrowserWallet) {
 
 export function refreshWallet(wallet, refreshOnBlockchain) {
   if (!wallet && !wallet.address && !(wallet.id && wallet.type)) {
-    console.debug("can't refresh wallet with empty identifiers", wallet);
+    console.error('can\'t refresh wallet with empty identifiers', wallet);
     return Promise.resolve(null);
   }
   let promise = null;
@@ -144,7 +144,7 @@ export function searchWalletByAddress(address, noCache) {
       }
     })
     .catch((e) => {
-      console.debug('searchFullName method - error', e);
+      console.error('searchFullName method - error', e);
     });
 }
 

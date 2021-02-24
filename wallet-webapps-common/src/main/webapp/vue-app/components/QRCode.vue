@@ -161,8 +161,8 @@ export default {
       }
 
       return this.qr.toCanvas(options, {
-          selector: `#${this.id}`,
-        })
+        selector: `#${this.id}`,
+      })
         .then((res, err) => {
           if (err) {
             console.error('qrCode', err);

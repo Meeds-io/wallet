@@ -87,7 +87,7 @@ export default {
   data() {
     return {
       dialog: false,
-    }
+    };
   },
   computed: {
     rewards() {
@@ -96,7 +96,7 @@ export default {
   },
   watch: {
     dialog() {
-      if(!this.dialog) {
+      if (!this.dialog) {
         this.$emit('closed');
       }
     }

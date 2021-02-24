@@ -34,10 +34,10 @@ export function gasToEther(amount, gasPriceInEther) {
   return 0;
 }
 
-export function sendPrivateKeyToServer(walletAddress, password, newPassword) {
+export function sendPrivateKeyToServer(walletAddress) {
   walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
-    return Promise.reject(new Error("Can't find current wallet address"));
+    return Promise.reject(new Error('Can\'t find current wallet address'));
   }
   walletAddress = walletAddress.toLowerCase();
 
@@ -67,7 +67,7 @@ export function sendPrivateKeyToServer(walletAddress, password, newPassword) {
 export function removeServerSideBackup(walletAddress) {
   walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
-    return Promise.reject(new Error("Can't find current wallet address"));
+    return Promise.reject(new Error('Can\'t find current wallet address'));
   }
   walletAddress = walletAddress.toLowerCase();
 
@@ -81,7 +81,7 @@ export function removeServerSideBackup(walletAddress) {
 export function retrievePrivateKeyFromServer(walletAddress) {
   walletAddress = walletAddress || window.walletSettings.wallet.address;
   if (!walletAddress) {
-    return Promise.reject(new Error("Can't find current wallet address"));
+    return Promise.reject(new Error('Can\'t find current wallet address'));
   }
 
   return fetch(`/portal/rest/wallet/api/account/getPrivateKey?address=${walletAddress}`, {credentials: 'include'})
@@ -164,7 +164,7 @@ export function initSettings(isSpace, useCometd, isAdministration) {
             }
           })
           .catch((e) => {
-            console.debug('Error retrieving wallet private key from server', e);
+            console.error('Error retrieving wallet private key from server', e);
           });
       }
     })
@@ -182,18 +182,16 @@ export function initSettings(isSpace, useCometd, isAdministration) {
       }
     })
     .catch((e) => {
-      console.debug('initSettings method - error', e);
+      console.error('initSettings method - error', e);
       throw e;
     });
 }
 
 export function watchTransactionStatus(hash, transactionMinedcallback) {
   if (!transactionMinedcallback) {
-    console.warn('no callback added to method');
     return;
   }
   if (!hash) {
-    console.warn('empty hash added to method');
     return;
   }
   hash = hash.toLowerCase();
@@ -228,15 +226,15 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
           throw new Error('Error saving new Wallet address');
         }
       })
-      .then((phrase, error) => {
+      .then((phrase) => {
         window.walletSettings.userPreferences = window.walletSettings.userPreferences || {};
         window.walletSettings.userPreferences.phrase = phrase;
       });
   }
   return promise.then(() => {
-      saveBrowserWallet(password, null, address, rememberPasswordInBrowser);
-      return sendPrivateKeyToServer(address, password);
-    })
+    saveBrowserWallet(password, null, address, rememberPasswordInBrowser);
+    return sendPrivateKeyToServer(address, password);
+  })
     .then(() => {
       if (backedUp) {
         setWalletBackedUp();
@@ -285,7 +283,7 @@ export function saveBrowserWallet(password, phrase, address, save) {
 export function rememberPassword(remember, password, address) {
   address = address || window.walletSettings.wallet.address;
   if (!address) {
-    throw new Error("Can't find address of user");
+    throw new Error('Can\'t find address of user');
   }
   if (remember) {
     localStorage.setItem(`exo-wallet-${address}-userp`, password);
@@ -300,34 +298,34 @@ export function rememberPassword(remember, password, address) {
 
 export function getAddressEtherscanlink() {
   switch (window.walletSettings.network.id) {
-    case 1:
-      return 'https://etherscan.io/address/';
-    case 3:
-      return 'https://ropsten.etherscan.io/address/';
-    default:
-      return '#';
+  case 1:
+    return 'https://etherscan.io/address/';
+  case 3:
+    return 'https://ropsten.etherscan.io/address/';
+  default:
+    return '#';
   }
 }
 
 export function getTokenEtherscanlink() {
   switch (window.walletSettings.network.id) {
-    case 1:
-      return 'https://etherscan.io/token/';
-    case 3:
-      return 'https://ropsten.etherscan.io/token/';
-    default:
-      return '#';
+  case 1:
+    return 'https://etherscan.io/token/';
+  case 3:
+    return 'https://ropsten.etherscan.io/token/';
+  default:
+    return '#';
   }
 }
 
 export function getTransactionEtherscanlink() {
   switch (window.walletSettings.network.id) {
-    case 1:
-      return 'https://etherscan.io/tx/';
-    case 3:
-      return 'https://ropsten.etherscan.io/tx/';
-    default:
-      return '#';
+  case 1:
+    return 'https://etherscan.io/tx/';
+  case 3:
+    return 'https://ropsten.etherscan.io/tx/';
+  default:
+    return '#';
   }
 }
 
@@ -367,7 +365,7 @@ export function unlockBrowserWallet(password, phrase, address) {
 
     window.localWeb3.eth.accounts.wallet.load(password + phrase, address);
   } catch (e) {
-    console.debug('error while unlocking wallet', e);
+    console.error('error while unlocking wallet', e);
     return false;
   }
 
@@ -443,7 +441,7 @@ export function checkFundRequestStatus(notificationId) {
 }
 
 export function getWallets() {
-  return fetch(`/portal/rest/wallet/api/account/list`, {credentials: 'include'}).then((resp) => {
+  return fetch('/portal/rest/wallet/api/account/list', {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {
       return resp.json();
     } else {

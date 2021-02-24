@@ -20,8 +20,8 @@ Vue.component('wallet-balance-app', WalletBalanceApp);
 Vue.use(Vuetify);
 
 const vuetify = new Vuetify({
-    dark: true,
-    iconfont: '',
+  dark: true,
+  iconfont: '',
 });
 
 // getting language of user

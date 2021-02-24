@@ -218,7 +218,7 @@ export default {
         .then((adminWallet) => this.adminWallet = adminWallet)
         .then(() => this.refreshRewardSettings())
         .catch((e) => {
-          console.debug('init method - error', e);
+          console.error  ('init method - error', e);
           this.error = e ? String(e) : this.$t('exoplatform.wallet.error.unknownError');
         })
         .finally(() => {
@@ -237,7 +237,7 @@ export default {
         .finally(() => this.loading = false);
     },
     refreshRewards(period) {
-      if(!this.checkConfigurationConsistency()) {
+      if (!this.checkConfigurationConsistency()) {
         return;
       }
 
@@ -247,7 +247,7 @@ export default {
       this.loading = true;
       return computeRewards(selectedDateInSeconds)
         .then(rewardReport => {
-          if(rewardReport.error) {
+          if (rewardReport.error) {
             this.error = (typeof rewardReport.error === 'object' ? rewardReport.error[0] : rewardReport.error);
             return;
           }
@@ -286,7 +286,7 @@ export default {
           if (membersWithEmptyTeam && membersWithEmptyTeam.length) {
             // Members with no Team
             let noTeamMembers = this.teams.find(team => !team.id);
-            if(!noTeamMembers) {
+            if (!noTeamMembers) {
               noTeamMembers = {
                 id: 0,
                 name: this.$t('exoplatform.wallet.label.noPoolUsers'),
@@ -319,14 +319,14 @@ export default {
       return getRewardTeams()
         .then(teams => this.teams = teams || [])
         .catch((e) => {
-          console.debug('Error getting teams list', e);
+          console.error  ('Error getting teams list', e);
           this.error = this.$t('exoplatform.wallet.error.errorRetrievingPool');
         });
     },
     computeTotalRewardsByPlugin() {
       const totalRewards = {};
-      if(this.rewardSettings && this.rewardSettings.pluginSettings && this.rewardSettings.pluginSettings.length) {
-        this.rewardSettings.pluginSettings.forEach(pluginSetting => totalRewards[pluginSetting.pluginId] = {pluginId: pluginSetting.pluginId, total: 0})
+      if (this.rewardSettings && this.rewardSettings.pluginSettings && this.rewardSettings.pluginSettings.length) {
+        this.rewardSettings.pluginSettings.forEach(pluginSetting => totalRewards[pluginSetting.pluginId] = {pluginId: pluginSetting.pluginId, total: 0});
       }
 
       this.walletRewards.forEach(walletReward => {
@@ -347,14 +347,14 @@ export default {
         this.settingWarnings.push(this.$t('exoplatform.wallet.warning.missingRewardPeriodicity'));
       }
 
-      if(!this.rewardSettings) {
+      if (!this.rewardSettings) {
         this.settingWarnings.push(this.$t('exoplatform.wallet.error.emptySettings'));
       } else {
-        if(!this.rewardSettings.pluginSettings || !this.rewardSettings.pluginSettings.length) {
+        if (!this.rewardSettings.pluginSettings || !this.rewardSettings.pluginSettings.length) {
           this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noPluginConfiguration'));
         } else {
           this.rewardSettings.pluginSettings.forEach(pluginSetting => {
-            if(pluginSetting && !pluginSetting.budgetType) {
+            if (pluginSetting && !pluginSetting.budgetType) {
               this.settingWarnings.push(this.$t('exoplatform.wallet.warning.noRewardBudgetConfiguredForPlugin', {0: pluginSetting.pluginId}));
             }
           });

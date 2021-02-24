@@ -153,6 +153,6 @@ export default {
       return `${this.walletUtils.toFixed(this.etherBalance)} eth`;
     },
   },
-}
+};
 
 </script>

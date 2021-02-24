@@ -436,7 +436,7 @@ export default {
   },
   watch: {
     selectedWallet() {
-      if(this.selectedWallet) {
+      if (this.selectedWallet) {
         this.$refs.rewardDetails.open();
       }
     },

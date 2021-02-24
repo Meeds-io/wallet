@@ -499,7 +499,7 @@ export default {
       return this.wallets.filter(this.isDisplayWallet).slice(0, this.limit);
     },
     filteredWallets() {
-      if(this.displayedWallets && this.displayedWallets.length) {
+      if (this.displayedWallets && this.displayedWallets.length) {
         const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
         const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
         // Set 'displayedWallet' attribute on wallets, used to know whether to retrieve
@@ -529,7 +529,7 @@ export default {
   },
   methods: {
     init() {
-      if(this.loadingWallets) {
+      if (this.loadingWallets) {
         return;
       }
 
@@ -606,9 +606,7 @@ export default {
         const thiss = this;
         $('.v-overlay')
           .off('click')
-          .on('click', (event) => {
-            thiss.back();
-          });
+          .on('click', () => thiss.back());
       });
     },
     back() {
@@ -621,7 +619,7 @@ export default {
       this.error = null;
       return this.walletUtils.enableWallet(wallet.address, enable)
         .then((result) => {
-          if(result) {
+          if (result) {
             return this.addressRegistry.refreshWallet(wallet);
           } else {
             this.error = (enable && this.$t('exoplatform.wallet.error.errorEnablingWallet', {0: wallet.name})) || this.$t('exoplatform.wallet.error.errorDisablingWallet', {0: wallet.name});
@@ -669,7 +667,7 @@ export default {
       this.$refs.informationModal.open();
     },
     changeWalletInitializationStatus(wallet, status) {
-      if(wallet) {
+      if (wallet) {
         return this.walletUtils.saveWalletInitializationStatus(wallet.address, status)
           .then(() => {
             return this.refreshWallet(wallet);

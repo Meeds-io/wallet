@@ -177,14 +177,14 @@ export default {
       return fetch(`/portal/rest/wallet/api/account/requestAuthorization?address=${this.walletAddress}`, {
         credentials: 'include',
       }).then((resp) => {
-        if(!resp || !resp.ok) {
+        if (!resp || !resp.ok) {
           throw new Error(this.$t('exoplatform.wallet.error.errorRequestingAuthorization'));
         }
         this.$emit('refresh');
       })
-      .catch(e => {
-        this.$emit('error', String(e));
-      });
+        .catch(e => {
+          this.$emit('error', String(e));
+        });
     },
     loadPendingTransactions() {
       Object.keys(this.pendingTransactions).forEach((key) => delete this.pendingTransactions[key]);

@@ -129,7 +129,7 @@ export default {
         return this.walletUtils.sendPrivateKeyToServer(this.walletAddress)
           .then(() => this.settings.userPreferences.hasKeyOnServerSide = true)
           .catch(error => {
-            console.debug("Error occurred", error);
+            console.error('Error occurred', error);
             this.hasKeyOnServerSide = this.settings.userPreferences.hasKeyOnServerSide;
           })
           .finally(() => this.dialogOpened = false);
@@ -137,12 +137,12 @@ export default {
         return this.walletUtils.removeServerSideBackup(this.walletAddress)
           .then(() => this.settings.userPreferences.hasKeyOnServerSide = false)
           .catch(error => {
-            console.debug("Error occurred", error);
+            console.error('Error occurred', error);
             this.hasKeyOnServerSide = this.settings.userPreferences.hasKeyOnServerSide;
           })
           .finally(() => this.dialogOpened = false);
       }
     },
   }
-}
+};
 </script>

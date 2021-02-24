@@ -186,7 +186,7 @@ export default {
   },
   watch: {
     autofocus() {
-      if(this.autofocus) {
+      if (this.autofocus) {
         this.$refs.selectAutoComplete.focus();
       }
     },
@@ -207,7 +207,7 @@ export default {
           name: window.walletSettings.contractDetail.name,
           id: value,
         });
-      } else if(value.length) {
+      } else if (value.length) {
         this.isLoadingSuggestions = true;
         return searchWallets(value).then((data) => {
           this.items = data;
@@ -221,9 +221,9 @@ export default {
             this.items.push(this.currentUserItem);
           }
         })
-        .finally(() => {
-          this.isLoadingSuggestions = false;
-        });
+          .finally(() => {
+            this.isLoadingSuggestions = false;
+          });
       } else if (this.currentUserItem && !this.ignoreCurrentUser) {
         this.items = [this.currentUserItem];
       } else {
@@ -239,7 +239,7 @@ export default {
         if (!this.noAddress && isAddress) {
           return searchWalletByAddress(this.selectedValue)
             .then(details => {
-              if(details && details.type) {
+              if (details && details.type) {
                 this.addressLoad = 'success';
                 this.$emit('item-selected', {
                   id: details.id,
@@ -283,7 +283,7 @@ export default {
               }
             })
             .catch((error) => {
-              console.debug('searchAddress method - error', error);
+              console.error('searchAddress method - error', error);
               this.addressLoad = 'error';
             });
         }

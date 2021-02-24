@@ -193,8 +193,8 @@ export default {
               })
               .catch((e) => {
                 thiss.loading = false;
-                console.debug('saveBrowserWalletInstance method - error', e);
-                thiss.error = `Error processing new keys`;
+                console.error('saveBrowserWalletInstance method - error', e);
+                thiss.error = 'Error processing new keys';
               });
           } else {
             thiss.loading = false;
@@ -202,7 +202,7 @@ export default {
           }
         } catch (e) {
           thiss.loading = false;
-          console.debug('Error importing private key', e);
+          console.error('Error importing private key', e);
           thiss.error = this.$t('exoplatform.wallet.error.errorImportingPrivateKey');
         }
       }, 200);

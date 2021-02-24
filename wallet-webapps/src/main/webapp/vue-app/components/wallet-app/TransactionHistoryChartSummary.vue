@@ -93,12 +93,12 @@ export default {
     }
   },
   watch: {
-    periodicity(newVal) {
+    periodicity() {
       this.selectedPickerDate = this.selectedDate = new Date().toISOString().substr(0, 7);
       this.updateDatePickerSelection();
       this.$emit('period-changed', this.periodicity, this.selectedDate);
     },
-    selectedDate(newVal) {
+    selectedDate() {
       this.$emit('period-changed', this.periodicity, this.selectedDate);
     },
   },
@@ -139,5 +139,5 @@ export default {
       }
     },
   },
-}
+};
 </script>

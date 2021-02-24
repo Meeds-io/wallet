@@ -42,7 +42,7 @@ export function getContractDetails(walletAddress) {
         contractDetails.contract = getContractInstance(walletAddress, contractDetails.address);
       } catch (e) {
         transformContracDetailsToFailed(contractDetails);
-        console.debug('getContractDetails method - error retrieving contract instance', contractDetails.address, new Error(e));
+        console.error('getContractDetails method - error retrieving contract instance', contractDetails.address, new Error(e));
       }
     }
 
@@ -90,7 +90,7 @@ export function deployContract(contractInstance, account, gasLimit, gasPrice, tr
     .on('transactionHash', (hash) => {
       return transactionHashCallback && transactionHashCallback((transactionHash = hash));
     })
-    .on('receipt', (receipt) => {
+    .on('receipt', () => {
       return transactionHashCallback && transactionHashCallback(transactionHash);
     });
 }
@@ -117,7 +117,7 @@ export function getSavedContractDetails(address) {
       return contractDetails && contractDetails.address ? contractDetails : null;
     })
     .catch((e) => {
-      console.debug('Error getting contract details from server', e);
+      console.error('Error getting contract details from server', e);
       return null;
     });
 }
@@ -200,7 +200,7 @@ export function getContractInstance(account, address, usePromise, abi, bin) {
       return contractInstance;
     }
   } catch (e) {
-    console.debug('An error occurred while retrieving contract instance', new Error(e));
+    console.error('An error occurred while retrieving contract instance', new Error(e));
     if (usePromise) {
       return Promise.reject(e);
     } else {
@@ -223,11 +223,11 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
         value: (transactionDetail && transactionDetail.value && window.localWeb3.utils.toWei(String(transactionDetail.value), 'ether')) || 0,
         data: method(...parameters).encodeABI(),
       };
-      return window.localWeb3.eth.accounts.signTransaction(transactionToSend, window.localWeb3.eth.accounts.wallet[0].privateKey)
+      return window.localWeb3.eth.accounts.signTransaction(transactionToSend, window.localWeb3.eth.accounts.wallet[0].privateKey);
     })
     .then((signedTransactionDetail) => {
       if (!signedTransactionDetail.rawTransaction) {
-        throw new Error(`Can't generate a transaction to send`);
+        throw new Error('Can\'t generate a transaction to send');
       }
       transactionDetail.nonce = nonce;
       transactionDetail.rawTransaction = signedTransactionDetail.rawTransaction;
@@ -236,16 +236,16 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
 }
 
 export function getTransactionCount(walletAddress, status) {
-  return window.localWeb3.eth.getTransactionCount(walletAddress, status || 'latest')
+  return window.localWeb3.eth.getTransactionCount(walletAddress, status || 'latest');
 }
 
 function getNewTransactionNonce(walletAddress) {
-    return getTransactionCount(walletAddress, 'pending')
+  return getTransactionCount(walletAddress, 'pending')
     .then(nonce => 
       getNonce(walletAddress)
         .then(savedNonce => Math.max(Number(nonce), Number(savedNonce))))
     .catch((e) => {
-      console.debug('Error getting last nonce of wallet address', walletAddress, e);
+      console.error('Error getting last nonce of wallet address', walletAddress, e);
     });
 }
 

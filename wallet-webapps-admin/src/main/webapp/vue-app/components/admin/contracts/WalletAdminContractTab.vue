@@ -475,7 +475,7 @@ export default {
               this.$set(wallet, 'approved', approved);
             })
             .catch((e) => {
-              console.debug('Error getting approval of account', wallet.address, e);
+              console.error('Error getting approval of account', wallet.address, e);
               delete wallet['approved'];
             })
         );
@@ -490,7 +490,7 @@ export default {
               this.$set(wallet, 'adminLevel', level);
             })
             .catch((e) => {
-              console.debug('Error getting admin level of account', wallet.address, e);
+              console.error('Error getting admin level of account', wallet.address, e);
               delete wallet['adminLevel'];
             })
         );
@@ -518,16 +518,14 @@ export default {
       return this.tokenUtils.getSavedContractDetails(this.contractDetails.address).then((contractDetails) => {
         Object.assign(this.contractDetails, contractDetails);
       })
-      .finally(() => {
-        this.$set(this.contractDetails, 'loadingBalance', false);
-      });
+        .finally(() => {
+          this.$set(this.contractDetails, 'loadingBalance', false);
+        });
     },
     loadApprovedWalletsFromContract() {
       this.approvedWalletsLoadedFromContract = true;
       this.loadWalletsFromContract('ApprovedAccount', 'target', this.approvedWallets)
-      .then((result, error) => {
-        this.approvedWalletsLoadedFromContract = false;
-      });
+        .then(() => this.approvedWalletsLoadedFromContract = false);
     },
     loadAdminWalletsFromContract() {
       this.loadWalletsFromContract('AddedAdmin', 'target', this.adminWallets);
@@ -545,7 +543,7 @@ export default {
           },
         })
           .then((events) => {
-            if(events && events.length) {
+            if (events && events.length) {
               const promises = [];
               events.forEach((event) => {
                 if (event.returnValues && event.returnValues[paramName]) {
@@ -553,16 +551,16 @@ export default {
                   let wallet = this.wallets.find(walletTmp => walletTmp.address && walletTmp.address.toLowerCase() === address);
                   if (!wallet) {
                     wallet = {
-                        address: address,
+                      address: address,
                     };
                   }
-                  if(this.contractDetails.owner && address.toLowerCase() === this.contractDetails.owner.toLowerCase()) {
+                  if (this.contractDetails.owner && address.toLowerCase() === this.contractDetails.owner.toLowerCase()) {
                     wallet.owner = true;
-                    wallet.name = "Admin";
+                    wallet.name = 'Admin';
                   }
                   walletsArray.unshift(wallet);
                   promises.push(
-                      Promise.resolve(this.retrieveAccountDetails(wallet))
+                    Promise.resolve(this.retrieveAccountDetails(wallet))
                   );
                 }
               });
@@ -570,23 +568,23 @@ export default {
             }
           })
           .catch((e) => {
-            console.debug('Error loading wallets from Contract', e);
+            console.error('Error loading wallets from Contract', e);
           })
           .finally(() => {
             this.loadingApprovedWalletsFromContract = false;
             this.loadingAdminWalletsFromContract = false;
           });
-      } catch(e) {
+      } catch (e) {
         this.loadingApprovedWalletsFromContract = false;
         this.loadingAdminWalletsFromContract = false;
-        console.debug('Error loading wallets from Contract', e);
+        console.error('Error loading wallets from Contract', e);
         return Promise.reject(e);
       }
     },
-    successTransaction(hash, methodName, autoCompleteValue, inputValue) {
-      if(methodName === 'disapproveAccount') {
+    successTransaction(hash, methodName, autoCompleteValue) {
+      if (methodName === 'disapproveAccount') {
         const index = this.approvedWallets.findIndex(wallet => wallet.address === autoCompleteValue);
-        if(index >= 0) {
+        if (index >= 0) {
           this.approvedWallets.splice(index, 1);
         }
       }

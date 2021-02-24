@@ -143,7 +143,7 @@ export default {
         .then(() => this.$emit('saved', initialFunds))
         .catch((e) => {
           this.loading = false;
-          console.debug('fetch settings - error', e);
+          console.error('fetch settings - error', e);
           this.error = this.$t('exoplatform.wallet.warning.errorSavingSettings');
         });
     },

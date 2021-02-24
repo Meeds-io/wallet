@@ -339,7 +339,7 @@ export default {
               this.estimatedGas = parseInt(estimatedGas * 1.1);
             })
             .catch((e) => {
-              console.debug('Error while estimating gas', e);
+              console.error('Error while estimating gas', e);
             });
         }
       }
@@ -445,7 +445,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.debug('Web3 contract.initializeAccount method - error', e);
+          console.error('Web3 contract.initializeAccount method - error', e);
           this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${this.walletUtils.truncateError(e)}`;
         })
         .finally(() => {
@@ -456,7 +456,7 @@ export default {
     checkErrors() {
       this.error = null;
 
-      if(!this.contractDetails) {
+      if (!this.contractDetails) {
         return;
       }
 

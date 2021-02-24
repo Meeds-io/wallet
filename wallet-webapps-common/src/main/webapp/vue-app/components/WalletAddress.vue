@@ -135,7 +135,7 @@ export default {
       this.refresh();
     },
     refresh() {
-      if(!this.value) {
+      if (!this.value) {
         return;
       }
       this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network.id);
@@ -158,10 +158,10 @@ export default {
     },
     editOrSave(event) {
       this.ignoreDefaultActions(event);
-      if(!this.allowEdit) {
+      if (!this.allowEdit) {
         return;
       }
-      if(this.isEditing) {
+      if (this.isEditing) {
         return this.save();
       } else {
         this.isEditing = !this.isEditing;
@@ -173,7 +173,7 @@ export default {
       this.isEditing = false;
     },
     save() {
-      if(!this.allowEdit) {
+      if (!this.allowEdit) {
         return;
       }
 
@@ -182,12 +182,12 @@ export default {
         .then((labelDetail) => {
           this.labelDetail = labelDetail;
 
-          if(!window.walletSettings.userPreferences.addresesLabels) {
+          if (!window.walletSettings.userPreferences.addresesLabels) {
             window.walletSettings.userPreferences.addresesLabels = [];
           }
           const walletAddress = this.value.toLowerCase();
           const labelDetailToChange = window.walletSettings.userPreferences.addresesLabels.find(label => label && label.address && label.address.toLowerCase() === walletAddress);
-          if(labelDetailToChange) {
+          if (labelDetailToChange) {
             Object.assign(labelDetailToChange, labelDetail);
           } else {
             window.walletSettings.userPreferences.addresesLabels.push(this.labelDetail);
@@ -206,8 +206,8 @@ export default {
       if (document.execCommand) {
         try {
           document.execCommand('copy');
-        } catch(e) {
-          console.debug('Error executing document.execCommand', e);
+        } catch (e) {
+          console.error('Error executing document.execCommand', e);
         }
       }
     },

@@ -158,7 +158,7 @@ export default {
     walletBackedUp() {
       this.error = null;
       setWalletBackedUp()
-        .then(wallet => {
+        .then(() => {
           this.$emit('backed-up');
           this.dialog = false;
         }).catch((error) => {

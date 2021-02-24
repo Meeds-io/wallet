@@ -203,7 +203,7 @@ export default {
         if (!this.browserWalletExists) {
           this.error = this.$t('exoplatform.wallet.error.cantResetWallet');
         }
-      } else{
+      } else {
         this.$emit('closed');
         if (this.rememberPasswordToChange) {
           this.init();
@@ -274,8 +274,8 @@ export default {
                     this.dialog = false;
                   })
                   .catch(e => {
-                    console.debug('Error saving private key on server', e);
-                    this.error = String(e)
+                    console.error('Error saving private key on server', e);
+                    this.error = String(e);
                   })
                   .finally(() => {
                     this.loading = false;
@@ -287,7 +287,7 @@ export default {
             thiss.loading = false;
           } catch (e) {
             thiss.loading = false;
-            console.debug('saveWallet method error', e);
+            console.error('saveWallet method error', e);
             thiss.error = String(e);
             return;
           }

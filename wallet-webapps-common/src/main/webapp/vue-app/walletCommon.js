@@ -41,7 +41,7 @@ import * as tokenUtils from './js/TokenUtils.js';
 import * as transactionUtils from './js/TransactionUtils.js';
 
 const WalletCommon = {
-  install: (Vue, options) => {
+  install: (Vue) => {
     Vue.prototype.constants = constants;
     Vue.prototype.addressRegistry = addressRegistry;
     Vue.prototype.walletUtils = walletUtils;

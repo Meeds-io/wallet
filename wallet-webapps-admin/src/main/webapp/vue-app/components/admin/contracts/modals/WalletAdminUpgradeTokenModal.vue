@@ -249,7 +249,7 @@ export default {
           return true;
         })
         .catch((e) => {
-          console.debug('deployContract method - error', e);
+          console.error('deployContract method - error', e);
           this.error = this.$t('exoplatform.wallet.warning.contractUpgradeError', {0: this.walletUtils.truncateError(String(e))});
         })
         .finally(() => {
@@ -260,7 +260,7 @@ export default {
       return this.upgradeToken(true);
     },
     saveUpgradeState(state) {
-      window.localStorage.setItem(`exo-wallet-upgrade-v2-${this.contractDetails.address}`, JSON.stringify(state))
+      window.localStorage.setItem(`exo-wallet-upgrade-v2-${this.contractDetails.address}`, JSON.stringify(state));
     },
     getUpgradeState() {
       const state = window.localStorage.getItem(`exo-wallet-upgrade-v2-${this.contractDetails.address}`);

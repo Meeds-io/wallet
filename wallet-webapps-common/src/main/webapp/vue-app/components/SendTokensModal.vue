@@ -161,7 +161,7 @@ export default {
   methods: {
     prepareSendForm(receiver, receiverType, amount, notificationId) {
       if (!this.contractDetails) {
-        console.debug('prepareSendForm error - no accounts found');
+        console.error('prepareSendForm error - no accounts found');
         return;
       }
 

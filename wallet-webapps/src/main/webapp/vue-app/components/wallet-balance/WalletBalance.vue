@@ -58,37 +58,37 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-  import {getWalletAccount} from '../../WalletBalanceAPI.js'
-  export default {
-    data() {
-      return {
-        walletBalance: '',
-        walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`,
-        currencySymbol: '',
-        firstLoadingWalletBalance: true,
-      }
-    },
-    created() {
-      this.getRewardBalance()
-        .then(() => this.$root.$emit('application-loaded'));
-    },
-    methods: {
-      getRewardBalance() {
-        return getWalletAccount().then(data => {
-          this.walletBalance = Math.trunc(data.tokenBalance);
-          if (!this.currencySymbol) {
-            // Search settings in a sync way
-            return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
-              .then((resp) => resp && resp.ok && resp.json())
-              .then(settings => {
-                const contract = settings && settings.contractDetail;
-                this.currencySymbol = contract && contract.symbol;
-                return this.$nextTick();
-              });
-          }
-          return this.$nextTick();
-        });
-      }
+import {getWalletAccount} from '../../WalletBalanceAPI.js';
+export default {
+  data() {
+    return {
+      walletBalance: '',
+      walletUrl: `${ eXo.env.portal.context }/${ eXo.env.portal.portalName }/wallet`,
+      currencySymbol: '',
+      firstLoadingWalletBalance: true,
+    };
+  },
+  created() {
+    this.getRewardBalance()
+      .then(() => this.$root.$emit('application-loaded'));
+  },
+  methods: {
+    getRewardBalance() {
+      return getWalletAccount().then(data => {
+        this.walletBalance = Math.trunc(data.tokenBalance);
+        if (!this.currencySymbol) {
+          // Search settings in a sync way
+          return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
+            .then((resp) => resp && resp.ok && resp.json())
+            .then(settings => {
+              const contract = settings && settings.contractDetail;
+              this.currencySymbol = contract && contract.symbol;
+              return this.$nextTick();
+            });
+        }
+        return this.$nextTick();
+      });
     }
   }
+};
 </script>

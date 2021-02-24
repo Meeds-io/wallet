@@ -84,9 +84,9 @@ export default {
     retrieveList() {
       this.$refs.rewardsOverviewDrawer.startLoading();
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/reward/list?limit=${this.limit}`, {
-          method: 'GET',
-          credentials: 'include',
-        })
+        method: 'GET',
+        credentials: 'include',
+      })
         .then((resp) => resp && resp.ok && resp.json())
         .then(data => {
           if (data && data.length) {
