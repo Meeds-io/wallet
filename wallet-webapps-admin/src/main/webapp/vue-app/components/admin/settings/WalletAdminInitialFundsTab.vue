@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-card
-    class="text-center pr-3 pl-3 pt-2"
+    class="text-center pe-3 ps-3 pt-2"
     flat>
     <v-card-title class="subtitle-1">
       {{ $t('exoplatform.wallet.info.initialFundsIntroduction', {0: contractDetails && contractDetails.name}) }}

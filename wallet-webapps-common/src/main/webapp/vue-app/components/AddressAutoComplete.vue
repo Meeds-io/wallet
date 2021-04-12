@@ -60,11 +60,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="addressLoad === 'loading'"
             indeterminate
             color="white"
-            class="mr-2" />
+            class="me-2" />
           <v-icon
             v-else-if="item.enabled === false || item.deletedUser || item.disabledUser"
             :title="(item.disabledUser && $t('exoplatform.wallet.label.disabledUser')) || (item.deletedUser && $t('exoplatform.wallet.label.deletedIdentity')) || (item.enabled === false && $t('exoplatform.wallet.label.disabledWallet'))"
-            class="mr-2"
+            class="me-2"
             color="orange"
             size="15">
             warning
@@ -72,7 +72,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-icon
             v-else-if="addressLoad === 'error'"
             :title="$t('exoplatform.wallet.warning.invalidAddress')"
-            class="mr-2"
+            class="me-2"
             color="red"
             size="15">
             warning

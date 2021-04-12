@@ -54,7 +54,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   v-if="item.pending"
                   indeterminate
                   color="primary"
-                  class="mr-4" />
+                  class="me-4" />
                 <v-list-item-avatar v-else>
                   <v-icon :color="item.succeeded ? 'primary' : 'red'">
                     {{ item.adminIcon ? 'fa-cog' : item.isReceiver ? 'fa-arrow-down' : 'fa-arrow-up' }}
@@ -623,7 +623,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-list>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <v-list class="px-0 ml-2" dense>
+            <v-list class="px-0 ms-2" dense>
               <v-list-item v-if="!item.pending && !item.succeeded">
                 <v-list-item-content>
                   <div class="alert alert-warning ignore-vuetify-classes">
@@ -659,7 +659,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.issuer') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-end">
                   <profile-chip
                     :address="item.issuer.address"
                     :profile-id="item.issuer.id"
@@ -675,7 +675,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionLabel') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right paragraph">
+                <v-list-item-content class="align-end text-end paragraph">
                   <div class="wrap">
                     {{ item.label }}
                   </div>
@@ -686,7 +686,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right paragraph">
+                <v-list-item-content class="align-end text-end paragraph">
                   <div class="wrap">
                     {{ item.message }}
                   </div>
@@ -697,7 +697,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ item.contractAmountLabel }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-end">
                   <div class="no-wrap">
                     {{ toFixed(item.contractAmount) }} {{ item.contractSymbol }}
                   </div>
@@ -708,7 +708,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     {{ $t('exoplatform.wallet.label.transferredAmount') }}
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <div class="no-wrap">
                       {{ toFixed(item.value) }} {{ item.contractSymbol }}
                     </div>
@@ -720,7 +720,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     {{ $t('exoplatform.wallet.label.fiatAmount') }}
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <div class="no-wrap">
                       {{ toFixed(item.amountFiat) }} {{ fiatSymbol }}
                     </div>
@@ -730,7 +730,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     {{ $t('exoplatform.wallet.label.etherAmount') }}
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <div class="no-wrap">
                       {{ toFixed(item.value) }} ether
                     </div>
@@ -742,7 +742,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.fromAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right text-truncate">
+                <v-list-item-content class="align-end text-end text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.fromAddress}`"
@@ -757,7 +757,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.toAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right text-truncate">
+                <v-list-item-content class="align-end text-end text-truncate">
                   <a
                     v-if="addressEtherscanLink"
                     :href="`${addressEtherscanLink}${item.toAddress}`"
@@ -772,7 +772,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.contractName') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right">
+                <v-list-item-content class="align-end text-end">
                   <div class="no-wrap">
                     {{ item.contractName }}
                   </div>
@@ -783,7 +783,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.contractAddress') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right text-truncate">
+                <v-list-item-content class="align-end text-end text-truncate">
                   <a
                     v-if="tokenEtherscanLink"
                     :href="`${tokenEtherscanLink}${item.contractAddress}`"
@@ -798,12 +798,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionFee') }}
                 </v-list-item-content>
-                <v-list-item-content v-if="item.tokenFee" class="align-end text-right">
+                <v-list-item-content v-if="item.tokenFee" class="align-end text-end">
                   <div class="no-wrap">
                     {{ toFixed(item.tokenFee) }} {{ item.contractSymbol }}
                   </div>
                 </v-list-item-content>
-                <v-list-item-content v-else class="align-end text-right">
+                <v-list-item-content v-else class="align-end text-end">
                   <div class="no-wrap">
                     {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
                     <v-icon
@@ -820,7 +820,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionHash') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-right text-truncate">
+                <v-list-item-content class="align-end text-end text-truncate">
                   <a
                     v-if="transactionEtherscanLink"
                     :href="`${transactionEtherscanLink}${item.hash}`"
@@ -835,7 +835,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     Nonce
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <strong>{{ item.nonce }}</strong>
                   </v-list-item-content>
                 </v-list-item>
@@ -843,7 +843,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     {{ $t('exoplatform.wallet.label.sentDate') }}
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <strong>{{ item.sentDateFormatted }}</strong>
                   </v-list-item-content>
                 </v-list-item>
@@ -851,7 +851,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   <v-list-item-content>
                     {{ $t('exoplatform.wallet.label.sendingAttemptCount') }}
                   </v-list-item-content>
-                  <v-list-item-content class="align-end text-right">
+                  <v-list-item-content class="align-end text-end">
                     <strong>{{ item.sendingAttemptCount }}</strong>
                   </v-list-item-content>
                 </v-list-item>

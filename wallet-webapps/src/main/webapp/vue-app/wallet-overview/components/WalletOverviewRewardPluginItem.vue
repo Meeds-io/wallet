@@ -17,7 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <v-list-item v-if="pluginEarnedAmount" dense>
     <v-list-item-icon class="my-auto" />
-    <v-list-item-content class="align-end text-left">
+    <v-list-item-content class="align-end text-start">
       <v-list-item-subtitle>
         <span class="text-sub-title caption uiIcon" :class="iconClass"></span>
         <span class="text-sub-title caption">{{ plugin.points }} {{ pluginName }}</span>

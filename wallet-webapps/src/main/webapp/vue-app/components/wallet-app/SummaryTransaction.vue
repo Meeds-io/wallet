@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-card class="walletSummaryBalance elevation-1">
-    <v-card-title class="title subtitle-1 pb-1 pl-2 text-truncate">
+    <v-card-title class="title subtitle-1 pb-1 ps-2 text-truncate">
       {{ $t('exoplatform.wallet.label.lastTransaction') }}
     </v-card-title>
     <v-card-title class="lastTransactionBalance headline pt-0 pb-1">

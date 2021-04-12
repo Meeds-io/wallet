@@ -37,7 +37,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <executions>
           <execution>
             <id>install node and npm</id>
-            <phase>compile</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>install-node-and-npm</goal>
             </goals>
@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </execution>
           <execution>
             <id>npm config</id>
-            <phase>compile</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>npm</goal>
             </goals>
@@ -58,7 +58,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </execution>
           <execution>
             <id>npm install</id>
-            <phase>compile</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>npm</goal>
             </goals>
@@ -68,7 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </execution>
           <execution>
             <id>npm run build</id>
-            <phase>compile</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>npm</goal>
             </goals>
