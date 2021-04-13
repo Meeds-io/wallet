@@ -300,8 +300,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </span>
                 <v-btn
                   v-else
+                  :right="!$vuetify.rtl"
                   icon
-                  right
                   @click="$refs.disapproveAccountModal.preselectAutocomplete(props.item.id, props.item.type, props.item.address)">
                   <v-icon>
                     close
@@ -359,8 +359,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               </td>
               <td v-if="$refs.removeAdminModal">
                 <v-btn
+                  :right="!$vuetify.rtl"
                   icon
-                  right
                   @click="$refs.removeAdminModal.preselectAutocomplete(props.item.id, props.item.type, props.item.address)">
                   <v-icon>
                     close

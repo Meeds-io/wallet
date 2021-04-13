@@ -18,7 +18,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-flex id="walletSetup" class="text-center">
     <wallet-backup-modal
       ref="walletBackupModal"
-      class="mr-3"
+      class="me-3"
       display-complete-message
       no-button
       @backed-up="$emit('backed-up')" />

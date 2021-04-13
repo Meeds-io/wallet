@@ -21,7 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :title="$t('exoplatform.wallet.button.refreshWallet')"
       icon
       text
-      class="mr-0"
+      class="me-0"
       @click="$emit('refresh')">
       <v-icon size="20px">
         refresh
@@ -31,7 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       v-if="!isSpace || isSpaceAdministrator"
       id="walletAppMenuSettingsButton"
       :title="$t('exoplatform.wallet.button.security')"
-      class="mr-0 ml-0"
+      class="me-0 ms-0"
       icon
       text
       @click="$emit('modify-settings')">

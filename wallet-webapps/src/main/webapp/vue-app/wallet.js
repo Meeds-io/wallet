@@ -19,10 +19,7 @@ import WalletApp from './components/WalletApp.vue';
 Vue.use(Vuetify);
 Vue.use(WalletCommon);
 
-const vuetify = new Vuetify({
-  dark: true,
-  iconfont: 'mdi',
-});
+const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;

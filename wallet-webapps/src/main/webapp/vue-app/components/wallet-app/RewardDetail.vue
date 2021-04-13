@@ -18,7 +18,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-flex class="transactionsList">
     <div class="rewardDetailTop">
       <v-layout row>
-        <v-flex class="xs11 title text-left">
+        <v-flex class="xs11 title text-start">
           <v-icon color="purple" class="px-2">fa-trophy</v-icon>
           <span>
             {{ $t('exoplatform.wallet.label.myRewards') }}
@@ -121,7 +121,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-list>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <v-list class="px-0 ml-2" dense>
+            <v-list class="px-0 ms-2" dense>
               <v-list-item
                 v-for="(plugin, indexReward) in item.rewards"
                 :id="`plugin-${plugin.pluginId}`"
@@ -129,7 +129,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.rewardedFor', {0 : plugin.points, 1 : plugin.pluginId}) }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-left">
+                <v-list-item-content class="align-end text-start">
                   {{ walletUtils.toFixed(plugin.amount) }} {{ symbol }}
                 </v-list-item-content>
               </v-list-item>

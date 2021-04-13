@@ -32,7 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         small
         @click="editWorkExperiences">
         <i
-          class="uiIconInformation clickable primary--text my-auto pb-2 mr-1"
+          class="uiIconInformation clickable primary--text my-auto pb-2 me-1"
           @click="openDrawer"></i>
       </v-btn>
     </v-toolbar>
@@ -52,7 +52,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               {{ currencySymbol }}
             </v-icon>
             <div
-              class="text-color display-2 text-left font-weight-bold walletOverviewBalance">
+              class="text-color display-2 text-start font-weight-bold walletOverviewBalance">
               {{ rewardBalance }}
             </div>
           </template>

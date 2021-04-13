@@ -121,7 +121,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <button
             :disabled="disableSend"
             :loading="loading"
-            class="ignore-vuetify-classes btn btn-primary mr-1"
+            class="ignore-vuetify-classes btn btn-primary me-1"
             @click="send">
             {{ $t('exoplatform.wallet.button.send') }}
           </button> <button

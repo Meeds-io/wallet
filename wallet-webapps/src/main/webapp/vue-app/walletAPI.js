@@ -26,11 +26,8 @@ document.addEventListener('exo-wallet-init', () => {
     exoi18n.loadLanguageAsync(lang, url).then(i18n => {
       window.require(['SHARED/Web3', 'SHARED/walletCommon'], (LocalWeb3, WalletCommon) => {
         Vue.use(WalletCommon);
-        const vuetify = new Vuetify({
-          dark: true,
-          iconfont: 'mdi',
-          theme: { disable: true },
-        });
+        const vuetify = new Vuetify(Object.assign({}, eXo.env.portal.vuetifyPreset));
+        vuetify.theme ={ disable: true };
 
         window.LocalWeb3 = LocalWeb3;
 
