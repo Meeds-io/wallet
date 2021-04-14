@@ -31,19 +31,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
         <v-layout column class="white">
           <v-flex v-if="error && !loading" class="text-center">
-            <div class="alert alert-error text-left">
+            <div class="alert alert-error text-start">
               <i class="uiIconError"></i>{{ error }}
             </div>
           </v-flex>
           <v-flex v-if="settingWarnings && settingWarnings.length && !loading" class=" text-center">
-            <div class="alert alert-warning text-left">
+            <div class="alert alert-warning text-start">
               <i class="uiIconWarning"></i>
               <span><a href="javascript:void(0);" @click="selectedTab = 2">{{ $t('exoplatform.wallet.label.pleaseCheckRewardConfiguration') }}</a></span>
               <ul>
                 <li
                   v-for="warning in settingWarnings"
                   :key="warning"
-                  class="pl-2">
+                  class="ps-2">
                   - {{ warning }}
                 </li>
               </ul>

@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex id="walletSummary" class="elevation-0 mr-3">
+  <v-flex id="walletSummary" class="elevation-0 me-3">
     <template v-if="!isSpace || isSpaceAdministrator">
       <v-card-title
         v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
@@ -53,7 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-badge
           :title="$t('exoplatform.wallet.message.transactionInProgress')"
           color="red"
-          right>
+          :right="!$vuetify.rtl">
           <span slot="badge">
             {{ pendingTransactionsCount }}
           </span>
@@ -69,8 +69,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         v-if="contractDetails"
         fluid
         grid-list-md
-        pl-3
-        pr-0>
+        ps-3
+        pe-0>
         <v-layout
           col
           wrap
@@ -87,8 +87,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             offset-xs0
             md3
             xs6
-            pr-0
-            pl-0
+            pe-0
+            ps-0
             text-center>
             <summary-reward
               :wallet="wallet"
@@ -98,8 +98,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-flex>
           <v-flex
             :class="isSpace ? 'offset-md5 offset-xs0 md3 xs12': 'offset-md1 offset-xs0 md3 xs6'"
-            pr-0
-            pl-0
+            pe-0
+            ps-0
             text-center>
             <summary-transaction
               :contract-details="contractDetails"

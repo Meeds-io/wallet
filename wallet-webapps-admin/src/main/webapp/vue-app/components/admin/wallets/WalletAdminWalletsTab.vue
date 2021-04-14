@@ -112,7 +112,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-icon v-else size="36">fa-cog</v-icon>
               </v-avatar>
             </td>
-            <td class="clickable text-left" @click="openAccountDetail(props.item)">
+            <td class="clickable text-start" @click="openAccountDetail(props.item)">
               <profile-chip
                 :address="props.item.address"
                 :profile-id="props.item.id"
@@ -162,7 +162,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-progress-circular
                 v-if="props.item.loading"
                 color="primary"
-                class="mr-4"
+                class="me-4"
                 indeterminate
                 size="20" />
               <template v-else>
@@ -173,7 +173,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-progress-circular
                 v-if="props.item.loading"
                 color="primary"
-                class="mr-4"
+                class="me-4"
                 indeterminate
                 size="20" />
               <template v-else>
@@ -222,7 +222,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 v-if="props.item.pendingTransaction || props.item.loading"
                 :title="$t('exoplatform.wallet.message.transactionInProgress')"
                 color="primary"
-                class="mr-4"
+                class="me-4"
                 indeterminate
                 size="20" />
               <v-menu v-else offset-y>
@@ -307,9 +307,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-navigation-drawer
       id="accountDetailsDrawer"
       v-model="seeAccountDetails"
+      :right="!$vuetify.rtl"
       absolute
       temporary
-      right
       stateless
       width="700"
       max-width="100vw">
@@ -408,7 +408,7 @@ export default {
         },
         {
           text: this.$t('exoplatform.wallet.label.name'),
-          align: 'left',
+          align: 'start',
           sortable: true,
           value: 'name',
         },

@@ -17,7 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div>
     <span>{{ title || $t('exoplatform.wallet.label.transactionFee') }}</span>
-    <code v-if="estimatedFee" class="ml-2">{{ estimatedFee }}</code>
+    <code v-if="estimatedFee" class="ms-2">{{ estimatedFee }}</code>
     <v-slider
       v-if="slider"
       v-model="gasPrice"

@@ -107,7 +107,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :items-per-page="1000"
       :loading="loading"
       item-key="identityId"
-      class="elevation-1 mr-3 mb-2"
+      class="elevation-1 me-3 mb-2"
       hide-default-footer
       sortable>
       <template slot="item" slot-scope="props">
@@ -117,7 +117,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <img :src="props.item.wallet.avatar" onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
             </v-avatar>
           </td>
-          <td class="text-left">
+          <td class="text-start">
             <profile-chip
               :address="props.item.wallet.address"
               :profile-id="props.item.wallet.id"
@@ -134,7 +134,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :initialization-state="props.item.wallet.initializationState"
               display-no-address />
           </td>
-          <td class="text-left">
+          <td class="text-start">
             <ul v-if="props.item.teams">
               <li v-for="team in props.item.teams" :key="team.id">
                 <template v-if="team.disabled">
@@ -226,7 +226,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </strong>
           </td>
           <td colspan="2">
-            <strong class="ml-7">
+            <strong class="ms-7">
               {{ totalTokens }} {{ symbol }}
             </strong>
           </td>
@@ -239,7 +239,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-btn
         :loading="sendingRewards"
         :disabled="sendingRewardsDisabled"
-        class="btn btn-primary pl-2 pr-2"
+        class="btn btn-primary ps-2 pe-2"
         @click="sendRewards">
         {{ $t('exoplatform.wallet.button.sendRewards') }}
       </v-btn>
@@ -320,14 +320,14 @@ export default {
       return [
         {
           text: '',
-          align: 'right',
+          align: 'end',
           sortable: false,
           value: 'avatar',
           width: '36px',
         },
         {
           text: this.$t('exoplatform.wallet.label.name'),
-          align: 'left',
+          align: 'start',
           sortable: true,
           value: 'wallet.name',
         },

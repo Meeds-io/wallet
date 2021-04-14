@@ -17,7 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <v-card flat>
     <v-card-text>
-      <div class="text-left rewardWalletConfiguration">
+      <div class="text-start rewardWalletConfiguration">
         <span>
           {{ $t('exoplatform.wallet.label.periodicity') }}:
         </span>
@@ -53,7 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </h4>
                 </v-card-title>
                 <v-card-text class="pt-0 pb-0">
-                  <div class="text-left rewardWalletConfiguration">
+                  <div class="text-start rewardWalletConfiguration">
                     <span>
                       {{ $t('exoplatform.wallet.label.rewardThreshold') }}:
                     </span>
@@ -63,17 +63,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       name="threshold"
                       class="input-text-center" />
                   </div>
-                  <div v-if="pluginSetting.budgetType !== 'FIXED_PER_POINT'" class="text-left rewardWalletConfiguration">
+                  <div v-if="pluginSetting.budgetType !== 'FIXED_PER_POINT'" class="text-start rewardWalletConfiguration">
                     <v-checkbox
                       v-model="pluginSetting.usePools"
                       :disabled="!configurationEditable"
                       :label="$t('exoplatform.wallet.label.usePools')" />
                   </div>
-                  <div class="text-left mt-4">
+                  <div class="text-start mt-4">
                     <div>
                       {{ $t('exoplatform.wallet.label.rewardBudgetBy') }}:
                     </div>
-                    <v-flex class="ml-4">
+                    <v-flex class="ms-4">
                       <v-radio-group v-model="pluginSetting.budgetType">
                         <v-radio
                           :disabled="!configurationEditable"
@@ -142,7 +142,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </template>
       <v-btn
         v-else
-        class="btn btn-primary ml-2"
+        class="btn btn-primary ms-2"
         dark
         @click="configurationEditable = true">
         {{ $t('exoplatform.wallet.button.edit') }}

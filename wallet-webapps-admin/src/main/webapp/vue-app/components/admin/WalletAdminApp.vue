@@ -24,7 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-layout column>
         <v-flex>
           <v-card class="applicationToolbar mb-3" flat>
-            <v-flex class="pl-3 pr-3 pt-2 pb-2">
+            <v-flex class="ps-3 pe-3 pt-2 pb-2">
               <strong>{{ $t('exoplatform.wallet.title.walletAdministration') }}</strong>
             </v-flex>
           </v-card>

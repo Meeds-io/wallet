@@ -32,7 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-flex>
 
     <v-flex
-      class="headline my-auto text-center text-md-right"
+      class="headline my-auto text-center text-md-end"
       md5
       xs12>
       {{ $t('exoplatform.wallet.title.adminWalletFunds') }}
@@ -47,7 +47,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-progress-circular
           v-if="loadingBalances"
           color="primary"
-          class="mr-4"
+          class="me-4"
           indeterminate
           size="20" />
         <template v-else>
@@ -71,7 +71,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-progress-circular
           v-if="loadingBalances"
           color="primary"
-          class="mr-4"
+          class="me-4"
           indeterminate
           size="20" />
         <template v-else>
@@ -81,13 +81,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-flex>
 
     <v-flex
-      class="my-auto text-center text-md-left no-wrap"
+      class="my-auto text-center text-md-start no-wrap"
       md1
       xs12>
       <v-btn
         icon
         text
-        class="ml-4"
+        class="ms-4"
         @click="$emit('refresh-balance')">
         <v-icon color="grey">refresh</v-icon>
       </v-btn>

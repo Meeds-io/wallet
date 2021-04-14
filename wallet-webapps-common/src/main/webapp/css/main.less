@@ -22,7 +22,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   .v-menu__content {
     top: 86% !important;
-    left: 0px!important;
+    left: 0px ~'!important; /** orientation=lt */ ';
+    left: 0px ~'!important; /** orientation=rt */ ';
     position: absolute !important;
     width: 100%;
     z-index: 1050 !important;
@@ -57,8 +58,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   .rewardDetailSummary {
     max-width: 400px;
-    margin-left: auto;
-    margin-right: 28px;
+    margin-left: auto ~'; /** orientation=lt */ ';
+    margin-right: 28px ~'; /** orientation=lt */ ';
+    margin-right: auto ~'; /** orientation=rt */ ';
+    margin-left: 28px ~'; /** orientation=rt */ ';
   }
 
   #accountListContainer {
@@ -97,7 +100,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
       .rightIcon {
         position: absolute;
-        right: 0;
+        right: 0 ~'; /** orientation=lt */ ';
+        left: 0 ~'; /** orientation=rt */ ';
         top: 9px;
       }
     }
@@ -130,8 +134,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   .transactionDetailActions {
     box-sizing: border-box;
-    text-align: right;
-    margin-left: 5px;
+    text-align: end;
+    margin-left: 5px ~'; /** orientation=lt */ ';
+    margin-right: 5px ~'; /** orientation=rt */ ';
     align-items: flex-end;
     width: auto;
     overflow: visible;
@@ -149,14 +154,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   > #walletAppMenu {
     top: 40px!important;
-    right: 20px!important;
-    left: auto!important;
+    right: 20px ~'!important; /** orientation=lt */ ';
+    left: auto ~'!important; /** orientation=lt */ ';
+    left: 20px ~'!important; /** orientation=rt */ ';
+    right: auto ~'!important; /** orientation=rt */ ';
   }
 
   .walletAccountMenu {
     top: 40px!important;
-    right: 20px!important;
-    left: auto!important;
+    right: 20px ~'!important; /** orientation=lt */ ';
+    left: auto ~'!important; /** orientation=lt */ ';
+    left: 20px ~'!important; /** orientation=rt */ ';
+    right: auto ~'!important; /** orientation=rt */ ';
   }
 
   .createNewToken {
@@ -213,15 +222,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       left:-9999px;
     }
     .v-chip__content {
-      padding-left: 0;
-      padding-right: 18px;
+      padding-left: 0 ~'; /** orientation=lt */ ';
+      padding-right: 18px ~'; /** orientation=lt */ ';
+      padding-right: 0 ~'; /** orientation=rt */ ';
+      padding-left: 18px ~'; /** orientation=rt */ ';
       position: relative;
     }
 
     .walletAddressEdit {
       display: none;
       position: absolute;
-      right: 5px;
+      right: 5px ~'; /** orientation=lt */ ';
+      right: 5px ~'; /** orientation=rt */ ';
     }
     &:hover .walletAddressEdit {
       display: block;
@@ -233,11 +245,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     max-width: 100%;
 
     i {
-      margin-right: 0;
+      margin-right: 0 ~'; /** orientation=lt */ ';
+      margin-left: 0 ~'; /** orientation=rt */ ';
     }
 
     [class^="uiIcon"] {
-      margin-right: 15px;
+      margin-right: 15px ~'; /** orientation=lt */ ';
+      margin-left: 15px ~'; /** orientation=rt */ ';
     }
 
   }
@@ -310,7 +324,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     .etherTooLowWarning {
       top: -30px!important;
-      left: -30px!important;
+      left: -30px ~'!important; /** orientation=lt */ ';
+      right: -30px ~'!important; /** orientation=rt */ ';
       width: max-content;
       width: -moz-max-content;
     }
@@ -409,7 +424,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       .uiIconClose {
         position: absolute;
         top: -3px;
-        right: 8px;
+        right: 8px ~'; /** orientation=lt */ ';
+        left: 8px ~'; /** orientation=rt */ ';
       }
       > div {
         width: 100%;
@@ -449,7 +465,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 .contactAutoCompleteContent {
   top: 55px !important;
-  left: 0 !important;
+  left: 0  ~'!important; /** orientation=lt */ ';
+  right: 0  ~'!important; /** orientation=rt */ ';
   position: absolute;
   width: 100%;
   z-index: 1050 !important;
@@ -676,8 +693,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       position: fixed;
       height: 45px;
       bottom: 0;
-      left: 12px;
-      right: 0;
+      left: 12px ~'; /** orientation=lt */ ';
+      right: 0 ~'; /** orientation=lt */ ';
+      right: 12px ~'; /** orientation=rt */ ';
+      left: 0 ~'; /** orientation=rt */ ';
       background: white;
       box-sizing: border-box;
       padding: 5px 0 5px 0;

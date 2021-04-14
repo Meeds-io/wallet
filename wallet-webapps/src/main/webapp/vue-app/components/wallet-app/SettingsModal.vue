@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="selectedTab !== 'security'"
             ref="settingsTabs"
             v-model="selectedTab"
-            class="pl-3 pr-3">
+            class="ps-3 pe-3">
             <v-tabs-slider />
             <v-tab
               key="security"

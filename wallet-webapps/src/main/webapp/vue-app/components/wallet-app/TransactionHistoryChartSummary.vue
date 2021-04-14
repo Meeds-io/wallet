@@ -16,12 +16,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-layout
-    mr-3
-    ml-3
-    pr-1>
+    me-3
+    ms-3
+    pe-1>
     <v-flex
       md6
-      text-left
+      text-start
       pt-2
       class="periodicityLabel">
       <v-menu
@@ -32,7 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         class="dateSelector">
         <template v-slot:activator="{ on }">
           <v-chip color="primary" @click="openDatePicker">
-            <v-icon class="mr-1">event</v-icon>
+            <v-icon class="me-1">event</v-icon>
             {{ periodicityLabel }}
           </v-chip>
         </template>
@@ -49,7 +49,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           @update:picker-date="selectPeriod" />
       </v-menu>
     </v-flex>
-    <v-flex md6 text-right>
+    <v-flex md6 text-end>
       <v-btn-toggle v-model="periodicity" class="periodicityButtons elevation-1">
         <v-btn
           :disabled="periodicity === 'year'"

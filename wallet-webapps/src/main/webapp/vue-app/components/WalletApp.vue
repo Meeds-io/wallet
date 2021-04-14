@@ -38,7 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <div
                 v-if="displayWarnings"
                 id="etherTooLowWarningParent"
-                class="ml-2">
+                class="ms-2">
                 <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
                   warning
                 </v-icon>
@@ -103,12 +103,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-layout
                 row
                 wrap
-                class="ml-0 mr-0">
+                class="ms-0 me-0">
                 <v-flex :class="!walletReadonly && 'md8'" xs12>
                   <v-layout
                     row
                     wrap
-                    class="ml-0 mr-0 px-0">
+                    class="ms-0 me-0 px-0">
                     <v-flex xs12>
                       <wallet-summary
                         v-if="wallet && contractDetails"
@@ -165,8 +165,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <v-navigation-drawer
               id="accountDetailsDrawer"
               v-model="seeAccountDetails"
+              :right="!$vuetify.rtl"
               absolute
-              right
               stateless
               temporary
               width="700"

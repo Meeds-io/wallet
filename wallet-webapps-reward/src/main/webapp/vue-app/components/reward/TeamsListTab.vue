@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div
       v-show="!selectedTeam"
       id="addTeamButton"
-      class="text-left ml-3">
+      class="text-start ms-3">
       <v-btn
         :title="$t('exoplatform.wallet.button.addNewPool')"
         color="primary"
@@ -133,7 +133,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       </v-list-item-content>
                     </v-list-item>
                     <v-list-item>
-                      <v-flex class="align-start pr-1">
+                      <v-flex class="align-start pe-1">
                         <v-divider />
                       </v-flex>
                       <v-flex
@@ -142,7 +142,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           {{ periodDatesDisplay }}
                         </strong>
                       </v-flex>
-                      <v-flex class="align-end pl-1">
+                      <v-flex class="align-end ps-1">
                         <v-divider />
                       </v-flex>
                     </v-list-item>

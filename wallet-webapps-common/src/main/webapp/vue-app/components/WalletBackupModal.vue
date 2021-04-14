@@ -84,14 +84,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-spacer />
         <button
           v-if="walletPrivateKey"
-          class="ignore-vuetify-classes btn btn-primary mr-1"
+          class="ignore-vuetify-classes btn btn-primary me-1"
           @click="walletBackedUp">
           {{ $t('exoplatform.wallet.button.backedUp') }}!
         </button>
         <button
           v-if="!walletPrivateKey"
           :disabled="loading"
-          class="ignore-vuetify-classes btn btn-primary mr-1"
+          class="ignore-vuetify-classes btn btn-primary me-1"
           @click="showPrivateKey">
           {{ $t('exoplatform.wallet.button.displayPrivateKey') }}!
         </button>

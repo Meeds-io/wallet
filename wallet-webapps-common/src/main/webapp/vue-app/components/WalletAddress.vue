@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       v-if="allowCopy"
       id="copy"
       title="Copy address"
-      class="ml-0 mr-0 mb-0 mt-0"
+      class="ms-0 me-0 mb-0 mt-0"
       icon
       small
       @click="copyToClipboard">
@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :disabled="loading"
       name="addressLabel"
       placeholder="Label"
-      class="walletAddressLabelInput mr-2"
+      class="walletAddressLabelInput me-2"
       autofocus
       validate-on-blur
       @click="ignoreDefaultActions"
@@ -45,9 +45,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       v-else
       :href="addressEtherscanLink && `${addressEtherscanLink}${value}` || '#'"
       :title="addressEtherscanLink && $t('exoplatform.wallet.label.openOnEtherscan') || ''"
-      :class="!allowCopy && 'mr-4'"
+      :class="!allowCopy && 'me-4'"
       target="_blank"
-      class="walletAddressLabel text-truncate mr-2">
+      class="walletAddressLabel text-truncate me-2">
       <template v-if="displayLabel && labelDetail && labelDetail.label">
         {{ labelDetail.label }}
       </template>

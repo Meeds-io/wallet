@@ -191,7 +191,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <th colspan="2" class="text-center">
                   {{ $t('exoplatform.wallet.label.name') }}
                 </th>
-                <th class="text-right">
+                <th class="text-end">
                   <v-btn
                     v-if="!viewOnly"
                     :title="$t('exoplatform.wallet.button.deleteAll')"
@@ -206,7 +206,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </template>
             <template slot="item" slot-scope="props">
               <tr>
-                <td class="text-left">
+                <td class="text-start">
                   <v-avatar size="36px">
                     <img :src="props.item.avatar" onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
                   </v-avatar>
@@ -226,7 +226,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     :avatar="props.item.avatar"
                     display-no-address />
                 </td>
-                <td class="text-right">
+                <td class="text-end">
                   <v-btn
                     v-if="!viewOnly"
                     :title="$t('exoplatform.wallet.button.delete')"
@@ -248,7 +248,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-btn
         v-if="!viewOnly"
         :loading="loading"
-        class="btn btn-primary mr-1"
+        class="btn btn-primary me-1"
         dark
         @click="save">
         {{ $t('exoplatform.wallet.button.save') }}

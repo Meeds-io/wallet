@@ -17,13 +17,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div v-if="rewards && rewards.length">
     <v-list-item>
-      <v-list-item-content class="align-end text-left">
+      <v-list-item-content class="align-end text-start">
         <v-list-item-title :title="period">
           <i class="fa fa-trophy px-2 tertiary--text"></i>
           {{ periodShort }}
-          <i class="uiIconInformation text-sub-title my-auto ml-3"></i>
+          <i class="uiIconInformation text-sub-title my-auto ms-3"></i>
         </v-list-item-title>
-        <v-list-item-subtitle class="pl-10">
+        <v-list-item-subtitle class="ps-10">
           {{ $t('exoplatform.wallet.label.sentDate') }}: {{ sentDate }}
         </v-list-item-subtitle>
       </v-list-item-content>
