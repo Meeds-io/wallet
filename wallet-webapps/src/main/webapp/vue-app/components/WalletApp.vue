@@ -295,7 +295,7 @@ export default {
       return this.displayDisapprovedWallet || this.displayEtherBalanceTooLow;
     },
     displayDisapprovedWallet() {
-      return this.wallet && this.wallet.isInitialized && !this.wallet.isApproved
+      return this.wallet && this.wallet.isInitialized && !this.wallet.isApproved;
     },
     displayEtherBalanceTooLow() {
       return this.browserWalletExists
@@ -357,7 +357,7 @@ export default {
     this.$nextTick(() => {
       // Init application
       this.init()
-        .then((result, error) => {
+        .then(() => {
           if (this.$refs.walletSummaryActions) {
             this.$refs.walletSummaryActions.init(this.isReadOnly);
           }
@@ -368,7 +368,7 @@ export default {
           this.$forceUpdate();
         })
         .catch((error) => {
-          console.debug('An error occurred while on initialization', error);
+          console.error('An error occurred while on initialization', error);
           this.error = this.$t('exoplatform.wallet.warning.walletDisconnected');
         });
     });
@@ -438,7 +438,7 @@ export default {
           } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           } else {
-            console.debug('init method - error', e);
+            console.error('init method - error', e);
             this.error = error;
           }
         })
@@ -450,7 +450,7 @@ export default {
         });
     },
     walletUpdated(event) {
-      if(event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
+      if (event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
         this.addressRegistry.refreshWallet(this.wallet);
       }
     },
@@ -466,7 +466,7 @@ export default {
 
       this.$nextTick(() => {
         const thiss = this;
-        $('.v-overlay').on('click', (event) => {
+        $('.v-overlay').on('click', () => {
           thiss.back();
         });
       });
@@ -477,7 +477,7 @@ export default {
       this.selectedAccount = null;
     },
     handleError(error) {
-      if(error) {
+      if (error) {
         throw error;
       }
     },
@@ -509,10 +509,10 @@ export default {
 
       if (this.$refs.transactionHistoryChart) {
         this.transactionUtils.getTransactionsAmounts(this.walletAddress, this.periodicity, this.selectedDate)
-        .then((transactionsData) => {
-          this.transactionStatistics = transactionsData;
-        })
-        .catch(e => this.error = String(e));
+          .then((transactionsData) => {
+            this.transactionStatistics = transactionsData;
+          })
+          .catch(e => this.error = String(e));
       }
     },
   },

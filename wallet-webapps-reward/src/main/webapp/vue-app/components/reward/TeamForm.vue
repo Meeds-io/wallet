@@ -348,7 +348,7 @@ export default {
             this.isLoadingSpaceSuggestions = false;
           })
           .catch((e) => {
-            console.debug('searchSpaces method - error', e);
+            console.error  ('searchSpaces method - error', e);
             this.isLoadingSpaceSuggestions = false;
           });
       }
@@ -532,19 +532,19 @@ export default {
             if (addedTeam) {
               this.$emit('saved', addedTeam);
             } else {
-              console.debug('Error saving pool, response code is NOK');
+              console.error  ('Error saving pool, response code is NOK');
               this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
             }
           })
           .catch((e) => {
-            console.debug('Error saving pool', e);
+            console.error  ('Error saving pool', e);
             this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
           })
           .finally(() => {
             this.loading = false;
           });
       } catch (e) {
-        console.debug('Error saving pool', e);
+        console.error  ('Error saving pool', e);
         this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
         this.loading = false;
       }

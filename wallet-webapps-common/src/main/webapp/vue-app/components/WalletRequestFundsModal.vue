@@ -199,7 +199,7 @@ export default {
           this.loading = false;
         })
         .catch((e) => {
-          console.debug('requestFunds method - error', e);
+          console.error('requestFunds method - error', e);
           this.error = `this.$t('exoplatform.wallet.error.errorProceeding'): ${e}`;
           this.loading = false;
         });

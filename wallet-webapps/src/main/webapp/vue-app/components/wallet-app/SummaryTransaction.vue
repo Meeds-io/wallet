@@ -75,7 +75,7 @@ export default {
       loadingTransaction: false,
       lastTransaction: null,
       lastTransactionSent: null,
-    }
+    };
   },
   computed: {
     lastTransactionSign() {
@@ -126,5 +126,5 @@ export default {
         .finally(() => this.loadingTransaction = false);
     }
   }
-}
+};
 </script>

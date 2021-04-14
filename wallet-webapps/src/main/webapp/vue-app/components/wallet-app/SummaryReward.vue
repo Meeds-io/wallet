@@ -116,7 +116,7 @@ export default {
 
       this.$nextTick(() => {
         const thiss = this;
-        $('.v-overlay').on('click', (event) => {
+        $('.v-overlay').on('click', () => {
           thiss.back();
         });
       });
@@ -127,5 +127,5 @@ export default {
       this.selectedAccount = null;
     },
   }
-}
+};
 </script>

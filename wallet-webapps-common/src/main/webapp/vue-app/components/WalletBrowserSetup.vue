@@ -153,7 +153,7 @@ export default {
       const wallet = window.localWeb3.eth.accounts.wallet.create(1, entropy);
       const walletAddress = wallet && wallet[0] && wallet[0].address;
       if (!walletAddress) {
-        console.debug('saveBrowserWalletInstance method - error: no address in created wallet', wallet);
+        console.error('saveBrowserWalletInstance method - error: no address in created wallet', wallet);
         this.$emit('error', this.$t('exoplatform.wallet.error.errorCreatingWallet'));
         return;
       }
@@ -163,7 +163,7 @@ export default {
           this.loadingWalletBrowser = false;
         })
         .catch((e) => {
-          console.debug('saveBrowserWalletInstance method - error', e);
+          console.error('saveBrowserWalletInstance method - error', e);
           this.$emit('error', this.$t('exoplatform.wallet.error.errorSavingWallet'));
           this.loadingWalletBrowser = false;
         });

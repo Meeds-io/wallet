@@ -290,7 +290,7 @@ export default {
       this.gasEstimation = null;
       this.transactionLabel = '';
       this.transactionMessage = '';
-      this.settings = window.walletSettings || {network: {}}
+      this.settings = window.walletSettings || {network: {}};
       if (!this.gasPrice) {
         this.gasPrice = this.settings.network.normalGasPrice;
       }
@@ -300,7 +300,6 @@ export default {
     },
     preselectAutocomplete(id, type, address) {
       if ((!id || !type) && !address) {
-        console.debug('preselectAutocomplete - empty parameters', id, type, address);
         return;
       }
       this.dialog = true;
@@ -323,7 +322,7 @@ export default {
           this.gasEstimation = parseInt(estimatedGas * 1.1);
         })
         .catch((e) => {
-          console.debug('Error while estimating gas', e);
+          console.error('Error while estimating gas', e);
         });
     },
     send() {
@@ -392,7 +391,7 @@ export default {
           });
         })
         .catch((e) => {
-          console.debug('Error while sending admin transaction', e);
+          console.error('Error while sending admin transaction', e);
           this.error = this.walletUtils.truncateError(e);
         })
         .finally(() => {

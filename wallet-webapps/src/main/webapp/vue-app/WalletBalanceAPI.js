@@ -15,14 +15,14 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 export function getWalletAccount() {
-    return fetch(`/portal/rest/wallet/api/account/detailsById?id=${eXo.env.portal.userName}&type=user`, {
-        method: 'GET',
-        credentials: 'include',
-    }).then((resp) => {
-      if(resp && resp.ok) {
-        return resp.json();
-      } else {
-        throw new Error ('Error when getting wallet account');
-      }
-    })
+  return fetch(`/portal/rest/wallet/api/account/detailsById?id=${eXo.env.portal.userName}&type=user`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error ('Error when getting wallet account');
+    }
+  });
 }

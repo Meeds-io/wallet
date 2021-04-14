@@ -87,7 +87,7 @@ export default {
       const startDate = new Date(this.rewardItem.period.startDateInSeconds * 1000 + 86400000);
       const year = startDate.getFullYear();
 
-      switch(this.rewardItem.period.rewardPeriodType) {
+      switch (this.rewardItem.period.rewardPeriodType) {
       case 'WEEK':
       case 'week': {
         const weekNumber = this.getWeekNumber(startDate);
@@ -130,7 +130,7 @@ export default {
       return '';
     },
     period() {
-      return this.$t(`exoplatform.wallet.label.rewardedForPeriod`, {
+      return this.$t('exoplatform.wallet.label.rewardedForPeriod', {
         0: this.periodStartDate,
         1: this.periodEndDate,
       });

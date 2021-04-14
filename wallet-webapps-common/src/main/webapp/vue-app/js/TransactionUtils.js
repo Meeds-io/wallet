@@ -42,7 +42,7 @@ export function refreshTransactionDetail(hash) {
       Accept: 'application/json',
     },
   }).then(resp => {
-    if(resp && resp.ok) {
+    if (resp && resp.ok) {
       return resp.json();
     } else {
       throw new Error('Error while sending transaction');
@@ -50,7 +50,7 @@ export function refreshTransactionDetail(hash) {
   });
 }
 
-export function saveTransactionDetails(transationDetails, contractDetails) {
+export function saveTransactionDetails(transationDetails) {
   return fetch('/portal/rest/wallet/api/transaction/saveTransactionDetails', {
     method: 'POST',
     credentials: 'include',
@@ -60,7 +60,7 @@ export function saveTransactionDetails(transationDetails, contractDetails) {
     },
     body: JSON.stringify(transationDetails),
   }).then(resp => {
-    if(resp && resp.ok) {
+    if (resp && resp.ok) {
       return resp.json();
     } else {
       throw new Error('Error while sending transaction');

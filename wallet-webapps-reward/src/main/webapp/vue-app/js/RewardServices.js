@@ -80,7 +80,7 @@ export function sendRewards(periodDateInSeconds) {
   }).then((resp) => {
     if (!resp || !resp.ok) {
       try {
-        if(resp.status === 500) {
+        if (resp.status === 500) {
           return resp.json().then(errorResponse => {
             if (errorResponse && errorResponse.error && errorResponse.error.length) {
               throw new Error(errorResponse.error[0]);
@@ -89,7 +89,7 @@ export function sendRewards(periodDateInSeconds) {
             }
           });
         }
-      } catch(e) {
+      } catch (e) {
         // Ignore exception, not parsable to JSON
       }
       throw new Error('Error sending rewards');

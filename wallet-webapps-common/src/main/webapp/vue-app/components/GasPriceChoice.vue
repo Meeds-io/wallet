@@ -96,8 +96,8 @@ export default {
   computed: {
     normalChoiceLabel() {
       return window.walletSettings.useDynamicGasPrice ?
-          this.$t('exoplatform.wallet.label.transactionFeeDynamic'):
-             this.$t('exoplatform.wallet.label.transactionFeeNormal');
+        this.$t('exoplatform.wallet.label.transactionFeeDynamic'):
+        this.$t('exoplatform.wallet.label.transactionFeeNormal');
     },
   },
   watch: {
@@ -144,14 +144,14 @@ export default {
   methods: {
     getGasPrice() {
       switch (this.choice) {
-        case 1:
-          return window.walletSettings.network.minGasPrice;
-        case 2:
-          return window.walletSettings.network.normalGasPrice;
-        case 3:
-          return window.walletSettings.network.maxGasPrice;
-        default:
-          return 0;
+      case 1:
+        return window.walletSettings.network.minGasPrice;
+      case 2:
+        return window.walletSettings.network.normalGasPrice;
+      case 3:
+        return window.walletSettings.network.maxGasPrice;
+      default:
+        return 0;
       }
     }
   },

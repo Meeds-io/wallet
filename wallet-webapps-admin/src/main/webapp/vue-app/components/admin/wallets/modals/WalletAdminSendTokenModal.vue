@@ -168,9 +168,9 @@ export default {
       }).catch((error) => {
         this.error = String(error);
       })
-      .finally(() => {
-        this.loading = false;
-      });
+        .finally(() => {
+          this.loading = false;
+        });
     }
   },
 };

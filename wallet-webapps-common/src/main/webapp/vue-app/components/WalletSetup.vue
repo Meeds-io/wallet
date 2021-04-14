@@ -125,7 +125,7 @@ export default {
       return !this.loading && !this.isAdministration && this.isSpace && !this.isSpaceAdministrator && !this.walletAddress;
     },
     isSpaceAdministrator() {
-      return this.wallet && this.wallet.spaceAdministrator
+      return this.wallet && this.wallet.spaceAdministrator;
     },
     walletAddress() {
       return this.wallet && this.wallet.address;
@@ -160,7 +160,7 @@ export default {
       this.displayWalletSetup = !this.walletAddress && (!this.isSpace || this.isSpaceAdministrator);
 
       this.$nextTick(() => {
-        if(this.$refs.walletBrowserSetup) {
+        if (this.$refs.walletBrowserSetup) {
           this.$refs.walletBrowserSetup.init();
         }
       });

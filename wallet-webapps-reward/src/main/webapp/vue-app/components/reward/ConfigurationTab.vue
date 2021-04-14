@@ -187,7 +187,7 @@ export default {
   },
   computed: {
     selectedPeriodType() {
-      if(!this.settingsToSave || !this.settingsToSave.periodType) {
+      if (!this.settingsToSave || !this.settingsToSave.periodType) {
         return this.periods[0];
       }
       return this.periods.find(period => period.value === this.settingsToSave.periodType);
@@ -208,7 +208,7 @@ export default {
     },
     save() {
       const thiss = this;
-      if(this.settingsToSave.periodType) {
+      if (this.settingsToSave.periodType) {
         this.settingsToSave.periodType = this.settingsToSave.periodType.value;
       }
       this.loadingSettings = true;
@@ -220,11 +220,11 @@ export default {
               this.configurationEditable = false;
               return this.$emit('saved');
             } else {
-              throw new Error("Error saving settings");
+              throw new Error('Error saving settings');
             }
           })
           .catch((error) => {
-            console.debug("Error while saving 'reward settings'", error);
+            console.error('Error while saving \'reward settings\'', error);
             thiss.$emit('error', this.$t('exoplatform.wallet.error.errorSavingRewardSettings'));
           })
           .finally(() => {

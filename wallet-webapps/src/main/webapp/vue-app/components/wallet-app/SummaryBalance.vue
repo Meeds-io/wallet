@@ -49,5 +49,5 @@ export default {
       return (this.contractDetails && this.contractDetails.symbol) || '';
     },
   },
-}
+};
 </script>

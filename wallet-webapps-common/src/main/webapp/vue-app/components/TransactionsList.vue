@@ -1001,7 +1001,7 @@ export default {
         this.transactions = {};
         this.transactionsLimit = this.transactionsPerPage;
         this.init().catch((error) => {
-          console.debug('account field change event - error', error);
+          console.error('account field change event - error', error);
           this.loading = false;
           this.$emit('error', `${this.$t('exoplatform.wallet.error.accountLoadingError')}: ${error}`);
         });
@@ -1014,7 +1014,7 @@ export default {
     this.tokenEtherscanLink = getTokenEtherscanlink();
 
     this.init().catch((error) => {
-      console.debug('init method - error', error);
+      console.error('init method - error', error);
       this.loading = false;
       this.$emit('error', `${this.$t('exoplatform.wallet.error.accountInitializationError')}: ${error}`);
     });
@@ -1050,7 +1050,7 @@ export default {
           this.forceUpdateList();
         })
         .catch((e) => {
-          console.debug('loadRecentTransaction - method error', e);
+          console.error('loadRecentTransaction - method error', e);
 
           this.loading = false;
           this.$emit('error', `${e}`);
@@ -1077,7 +1077,7 @@ export default {
           });
         })
         .catch((e) => {
-          console.debug('loadTransactions - method error', e);
+          console.error('loadTransactions - method error', e);
           this.$emit('error', `${e}`);
         });
     },
@@ -1098,7 +1098,7 @@ export default {
         .finally(() => {
           this.$set(transactionDetail, 'refreshing', false);
           this.$forceUpdate();
-        })
+        });
     },
     forceUpdateList() {
       try {
@@ -1107,7 +1107,7 @@ export default {
         this.refreshIndex++;
         this.$forceUpdate();
       } catch (e) {
-        console.debug('forceUpdateList - method error', e);
+        console.error('forceUpdateList - method error', e);
       }
     },
     toFixed(args) {

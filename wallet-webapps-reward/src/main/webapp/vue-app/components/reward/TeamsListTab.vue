@@ -279,7 +279,7 @@ export default {
   }),
   computed: {
     poolsBudget() {
-      return this.walletRewards.reduce((sum, wallet) => sum + wallet.poolTokensToSend, 0)
+      return this.walletRewards.reduce((sum, wallet) => sum + wallet.poolTokensToSend, 0);
     },
     deletePoolMessage() {
       return this.teamToDelete && `Would you like to delete pool <strong>${this.teamToDelete.name}</strong>`;
@@ -306,7 +306,7 @@ export default {
       this.selectedTeam = null;
     },
     disableTeam(team, disable) {
-      if(team.id === 0) {
+      if (team.id === 0) {
         return;
       }
       const teamToSave = Object.assign({}, team);
@@ -319,7 +319,7 @@ export default {
           this.$emit('refresh-teams');
         })
         .catch((e) => {
-          console.debug('Error saving pool', e);
+          console.error  ('Error saving pool', e);
           this.error = this.$t('exoplatform.wallet.error.errorSavingPool');
         })
         .finally(() => {
@@ -328,7 +328,7 @@ export default {
     },
     removeTeam(id) {
       if (id < 1) {
-        console.error("Can't delete team with id", id);
+        console.error('Can\'t delete team with id', id);
       }
       removeRewardTeam(id)
         .then((status) => {
@@ -340,7 +340,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.debug('Error getting team with id', id, e);
+          console.error  ('Error getting team with id', id, e);
           this.error = this.$t('exoplatform.wallet.error.errorRemovingPool');
         });
     },

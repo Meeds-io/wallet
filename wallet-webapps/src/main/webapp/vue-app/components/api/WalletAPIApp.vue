@@ -58,8 +58,6 @@ export default {
         this.walletAddress = null;
         this.wallet = null;
 
-        console.debug("Wallet API application start loading");
-
         const settings = event && event.detail;
         if (!this.profileExtensionInstalled && settings && settings.contractDetail && settings.contractDetail.name) {
           this.registerExternalExtensions(this.$t('exoplatform.wallet.title.sendToken', {0: settings.contractDetail.name}));
@@ -67,8 +65,8 @@ export default {
         }
 
         let isSpace = false;
-        if(settings && settings.sender) {
-          if(settings.sender.type === 'space') {
+        if (settings && settings.sender) {
+          if (settings.sender.type === 'space') {
             isSpace = true;
             window.walletSpaceGroup = settings.sender.id;
           } else if (settings.sender.id !== eXo.env.portal.userName) {
@@ -81,7 +79,7 @@ export default {
             this.handleError(error);
             this.settings = window.walletSettings || {};
 
-            document.dispatchEvent(new CustomEvent('exo-wallet-settings-loaded', {detail : this.settings}));
+            document.dispatchEvent(new CustomEvent('exo-wallet-settings-loaded', {detail: this.settings}));
 
             if (!this.profileExtensionInstalled && this.settings && this.settings.contractDetail && this.settings.contractDetail.name) {
               this.registerExternalExtensions(this.$t('exoplatform.wallet.title.sendToken', {0: this.settings.contractDetail.name}));
@@ -109,7 +107,7 @@ export default {
             this.walletAddress = this.settings.wallet.address;
             this.wallet = this.settings.wallet;
 
-            if(!this.walletAddress) {
+            if (!this.walletAddress) {
               this.isReadOnly = true;
               throw new Error(this.$t('exoplatform.wallet.warning.walletNotConfigured'));
             } else if (!this.settings.browserWalletExists) {
@@ -121,20 +119,20 @@ export default {
             this.isReadOnly = this.settings.isReadOnly;
             this.principalContractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
 
-            if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
-              console.debug('Principal token seems inconsistent', this.principalContractDetails);
+            if (!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
+              console.error('Principal token seems inconsistent', this.principalContractDetails);
               this.isReadOnly = true;
               throw new Error(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
-            } else if(this.principalContractDetails.error) {
-              console.debug('Error retrieving principal contract details', this.principalContractDetails.error, this.principalContractDetails);
+            } else if (this.principalContractDetails.error) {
+              console.error('Error retrieving principal contract details', this.principalContractDetails.error, this.principalContractDetails);
               this.isReadOnly = true;
               throw new Error(this.$t('exoplatform.wallet.warning.networkConnectionFailure'));
-            } else if(!this.principalContractDetails.contract) {
-              console.debug('Principal account in wallet isn\'t a token contract', this.principalContractDetails);
+            } else if (!this.principalContractDetails.contract) {
+              console.error('Principal account in wallet isn\'t a token contract', this.principalContractDetails);
               this.isReadOnly = true;
               throw new Error(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
-            } else if(!this.principalContractDetails.contract.options || !this.principalContractDetails.contract.options.from) {
-              console.debug('Error retrieving sender address', this.principalContractDetails);
+            } else if (!this.principalContractDetails.contract.options || !this.principalContractDetails.contract.options.from) {
+              console.error('Error retrieving sender address', this.principalContractDetails);
               this.isReadOnly = true;
               throw new Error(this.$t('exoplatform.wallet.warning.walletInitializationFailure'));
             }
@@ -149,50 +147,49 @@ export default {
             } else if (error.indexOf(this.constants.ERROR_WALLET_DISCONNECTED) >= 0) {
               this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
             } else {
-              console.debug('init method - error', e);
+              console.error('init method - error', e);
               this.error = (e && e.message) || e;
             }
           })
           .finally(() => {
-            console.debug("Wallet API application finished loading");
             this.loading = false;
             const result = {
-              error : this.error,
-              needPassword : this.needPassword,
-              enabled : this.settings && this.settings.enabled,
-              symbol : this.principalContractDetails && this.principalContractDetails.symbol,
+              error: this.error,
+              needPassword: this.needPassword,
+              enabled: this.settings && this.settings.enabled,
+              symbol: this.principalContractDetails && this.principalContractDetails.symbol,
             };
-            document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : result}));
+            document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail: result}));
           });
-      } catch(e) {
-        console.debug('init method - error', e);
+      } catch (e) {
+        console.error('init method - error', e);
         this.loading = false;
-        document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail : {
-          error : (e && e.message) || e,
-          symbol : this.principalContractDetails && this.principalContractDetails.symbol,
+        document.dispatchEvent(new CustomEvent('exo-wallet-init-result', {detail: {
+          error: (e && e.message) || e,
+          symbol: this.principalContractDetails && this.principalContractDetails.symbol,
         }}));
       }
     },
     handleError(error) {
-      if(error) {
+      if (error) {
         throw error;
       }
     },
     sendTokens(event) {
       try {
-        if(!this.isWalletEnabled || this.isReadOnly) {
+        if (!this.isWalletEnabled || this.isReadOnly) {
           throw new Error(this.$t('exoplatform.wallet.warning.walletReadonly'));
-        } else if(!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
-          console.debug('Principal token seems inconsistent', this.principalContractDetails);
+        } else if (!this.principalContractDetails || !this.principalContractDetails.address || this.principalContractDetails.address.indexOf('0x') !== 0) {
+          console.error('Principal token seems inconsistent', this.principalContractDetails);
           throw new Error(this.$t('exoplatform.wallet.warning.noConfiguredToken'));
-        } else if(this.principalContractDetails.error || !this.principalContractDetails.contract || !this.principalContractDetails.contract.options || !this.principalContractDetails.contract.options.from) {
-          console.debug('Principal token seems inconsistent', this.principalContractDetails);
+        } else if (this.principalContractDetails.error || !this.principalContractDetails.contract || !this.principalContractDetails.contract.options || !this.principalContractDetails.contract.options.from) {
+          console.error('Principal token seems inconsistent', this.principalContractDetails);
           throw new Error(this.$t('exoplatform.wallet.warning.networkConnectionFailure'));
         }
 
-        if(this.error) {
+        if (this.error) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.error
+            detail: this.error
           }));
           return;
         }
@@ -200,7 +197,7 @@ export default {
         const sendTokensRequest = event && event.detail;
         if (!sendTokensRequest) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.emptyPaymentRequest')
+            detail: this.$t('exoplatform.wallet.warning.emptyPaymentRequest')
           }));
           return;
         }
@@ -222,27 +219,27 @@ export default {
         const gasPriceEther = window.localWeb3.utils.fromWei(String(Number(gasPrice) * Number(network.gasLimit)), 'ether').toString();
 
         if (this.wallet.etherBalance < gasPriceEther) {
-          console.debug(`User can't be charged for transaction fees using parametered gas price. Thus gas price will be computed from user ether balance`);
+          console.error('User can\'t be charged for transaction fees using parametered gas price. Thus gas price will be computed from user ether balance');
           gasPrice = parseInt(gasPrice * this.wallet.etherBalance / gasPriceEther);
         }
 
         if (!amount || Number.isNaN(parseFloat(amount)) || !Number.isFinite(amount) || amount <= 0) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
+            detail: this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
           }));
           return;
         }
 
         if (!receiver || !receiver.type || !receiver.id) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.emptyPaymentAmount')
+            detail: this.$t('exoplatform.wallet.warning.emptyPaymentAmount')
           }));
           return;
         }
   
         if (!this.storedPassword && (!password || !password.length)) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.emptyPassword')
+            detail: this.$t('exoplatform.wallet.warning.emptyPassword')
           }));
           return;
         }
@@ -251,20 +248,20 @@ export default {
           const unlocked = this.walletUtils.unlockBrowserWallet(this.storedPassword ? this.settings.userP : this.walletUtils.hashCode(password));
           if (!unlocked) {
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-              detail : this.$t('exoplatform.wallet.warning.wrongPassword')
+              detail: this.$t('exoplatform.wallet.warning.wrongPassword')
             }));
             return;
           }
-        } catch(e) {
+        } catch (e) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.wrongPassword')
+            detail: this.$t('exoplatform.wallet.warning.wrongPassword')
           }));
           return;
         }
   
         if (!this.wallet.tokenBalance || this.wallet.tokenBalance < amount) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-            detail : this.$t('exoplatform.wallet.warning.unsufficientFunds')
+            detail: this.$t('exoplatform.wallet.warning.unsufficientFunds')
           }));
           return;
         }
@@ -285,7 +282,7 @@ export default {
           .then((wallet) => {
             receiverWallet = wallet;
             approvedReceiver = receiverWallet && receiverWallet.isApproved;
-            if(!approvedReceiver) {
+            if (!approvedReceiver) {
               throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
             }
 
@@ -298,7 +295,7 @@ export default {
           .then((wallet) => {
             senderWallet = wallet;
             approvedSender = senderWallet && senderWallet.isApproved;
-            if(!approvedSender) {
+            if (!approvedSender) {
               throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
             }
 
@@ -308,11 +305,11 @@ export default {
               throw new Error(this.$t('exoplatform.wallet.warning.senderDoesntHaveWallet'));
             }
 
-            if(senderAddress.toLowerCase() !== this.walletAddress.toLowerCase()) {
+            if (senderAddress.toLowerCase() !== this.walletAddress.toLowerCase()) {
               throw new Error(this.$t('exoplatform.wallet.warning.incoherentSenderWallet'));
             }
 
-            if(senderAddress.toLowerCase() === receiverAddress.toLowerCase()) {
+            if (senderAddress.toLowerCase() === receiverAddress.toLowerCase()) {
               throw new Error(this.$t('exoplatform.wallet.warning.receiverMustBeDifferentFromSender'));
             }
           })
@@ -322,8 +319,8 @@ export default {
             gasPrice: gasPrice,
           }))
           .catch((e) => {
-            if(approvedReceiver && approvedSender) {
-              console.debug('Error estimating transaction fee', {
+            if (approvedReceiver && approvedSender) {
+              console.error('Error estimating transaction fee', {
                 from: senderAddress,
                 to: receiverAddress,
                 gas: defaultGas,
@@ -333,11 +330,11 @@ export default {
               }, e);
 
               document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                detail : this.$t('exoplatform.wallet.warning.errorSimulatingTransaction')
+                detail: this.$t('exoplatform.wallet.warning.errorSimulatingTransaction')
               }));
             } else {
               document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                detail : (e && e.message) || e,
+                detail: (e && e.message) || e,
               }));
             }
             return;
@@ -349,7 +346,7 @@ export default {
             }
             if (result > defaultGas) {
               document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-                detail : this.$t('exoplatform.wallet.warning.lowPaymentTransactionFeeError')
+                detail: this.$t('exoplatform.wallet.warning.lowPaymentTransactionFeeError')
               }));
               return;
             }
@@ -377,19 +374,19 @@ export default {
             }
             // The transaction has been hashed and is marked as pending in internal database
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-pending', {
-              detail : savedTransaction
+              detail: savedTransaction
             }));
             this.walletUtils.lockBrowserWallet();
           })
           .catch((error) => {
-            console.debug('sendTokens method - error', error);
+            console.error('sendTokens method - error', error);
             document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-              detail : (error && error.message) || error,
+              detail: (error && error.message) || error,
             }));
           });
-      } catch(e) {
+      } catch (e) {
         document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
-          detail : (e && e.message) || e,
+          detail: (e && e.message) || e,
         }));
       }
     },
@@ -402,7 +399,7 @@ export default {
         click: (profile) => {
           const type = profile.username ? 'user':'space';
           const name = profile.username ? profile.username : profile.prettyName;
-          window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet?receiver=${name}&receiver_type=${type}&principal=true`
+          window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet?receiver=${name}&receiver_type=${type}&principal=true`;
         },
       };
       extensionRegistry.registerExtension('profile-extension', 'action', profileExtensionAction);

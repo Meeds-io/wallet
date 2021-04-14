@@ -161,7 +161,7 @@ export default {
     document.addEventListener('exo.contract.modified', this.reloadContract);
     this.init()
       .then(() => {
-        this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink()
+        this.addressEtherscanLink = this.walletUtils.getAddressEtherscanlink();
       });
   },
   methods: {
@@ -187,7 +187,7 @@ export default {
         })
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
-            console.debug('Error connecting to network', error);
+            console.error('Error connecting to network', error);
             this.error = this.$t('exoplatform.wallet.warning.networkConnectionFailure');
           }
         })
@@ -201,7 +201,7 @@ export default {
         .then(() => this.$refs.walletsTab.init())
         .catch((error) => {
           if (String(error).indexOf(this.constants.ERROR_WALLET_NOT_CONFIGURED) < 0) {
-            console.debug(error);
+            console.error(error);
             if (!this.error) {
               this.error = String(error);
             }
@@ -210,7 +210,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.debug('init method - error', e);
+          console.error('init method - error', e);
           this.error = String(e);
         })
         .finally(() => {
@@ -219,9 +219,9 @@ export default {
         });
     },
     walletUpdated(event) {
-      if(event && event.detail && event.detail.string) {
+      if (event && event.detail && event.detail.string) {
         const updatedWalletAddress = event.detail.string.toLowerCase();
-        if(this.walletAddress === updatedWalletAddress) {
+        if (this.walletAddress === updatedWalletAddress) {
           this.refreshWallet(this.wallet);
         }
         const updatedWallet = this.wallets.find(wallet => wallet && wallet.address && wallet.address.toLowerCase() === updatedWalletAddress);
@@ -256,7 +256,7 @@ export default {
     },
     refreshWallet(wallet) {
       return this.addressRegistry.refreshWallet(wallet).then(() => {
-        wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance))
+        wallet.fiatBalance = wallet.fiatBalance || (wallet.etherBalance && this.walletUtils.etherToFiat(wallet.etherBalance));
       });
     },
     forceUpdate() {

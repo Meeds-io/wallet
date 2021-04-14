@@ -29,10 +29,10 @@ export default {
     return {
       incomeGradient: null,
       outcomeGradient: null,
-    }
+    };
   },
   watch: {
-    transactionStatistics(oldVal, newVal) {
+    transactionStatistics() {
       this.initializeChart();
     }
   },
@@ -41,14 +41,14 @@ export default {
       if (!this.transactionStatistics) {
         return;
       }
-      this.incomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
-      this.outcomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450)
+      this.incomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450);
+      this.outcomeGradient = this.$refs.canvas.getContext('2d').createLinearGradient(0, 0, 0, 450);
   
-      this.outcomeGradient.addColorStop(0, 'rgba(255, 0,0, 0.5)')
+      this.outcomeGradient.addColorStop(0, 'rgba(255, 0,0, 0.5)');
       this.outcomeGradient.addColorStop(0.5, 'rgba(255, 0, 0, 0.25)');
       this.outcomeGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
       
-      this.incomeGradient.addColorStop(0, 'rgba(0, 231, 255, 0.9)')
+      this.incomeGradient.addColorStop(0, 'rgba(0, 231, 255, 0.9)');
       this.incomeGradient.addColorStop(0.5, 'rgba(0, 231, 255, 0.25)');
       this.incomeGradient.addColorStop(1, 'rgba(0, 231, 255, 0)');
 
@@ -76,6 +76,6 @@ export default {
       }, {responsive: true, maintainAspectRatio: false});
     }
   }
-}
+};
 
 </script>
