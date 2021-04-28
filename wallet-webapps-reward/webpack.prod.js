@@ -25,7 +25,8 @@ const config = merge(webpackCommonConfig, {
   },
   output: {
     path: path.join(__dirname, 'target/wallet-reward/'),
-    filename: 'js/[name].bundle.js'
+    filename: 'js/[name].bundle.js',
+    libraryTarget: 'amd'
   },
   externals: {
     vue: 'Vue',
