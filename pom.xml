@@ -49,9 +49,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </scm>
   <properties>
     <!-- 3rd party libraries versions -->
-    <org.exoplatform.social.version>6.2.x-SNAPSHOT</org.exoplatform.social.version>
-    <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
-    <org.exoplatform.platform-ui.version>6.2.x-SNAPSHOT</org.exoplatform.platform-ui.version>
+    <org.exoplatform.social.version>6.2.0-M18</org.exoplatform.social.version>
+    <org.exoplatform.wallet.ert-contract.version>1.0.3</org.exoplatform.wallet.ert-contract.version>
+    <org.exoplatform.platform-ui.version>6.2.0-M18</org.exoplatform.platform-ui.version>
 
     <!-- Ethereum We3j for Java library -->
     <org.web3j.version>4.5.11</org.web3j.version>
