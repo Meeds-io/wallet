@@ -42,9 +42,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <module>wallet-packaging</module>
   </modules>
   <scm>
-    <connection>scm:git:git://github.com/exoplatform/wallet.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/exoplatform/wallet.git</developerConnection>
-    <url>https://github.com/exoplatform/wallet</url>
+    <connection>scm:git:git://github.com/meeds-io/wallet.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/meeds-io/wallet.git</developerConnection>
+    <url>https://github.com/meeds-io/wallet</url>
     <tag>HEAD</tag>
   </scm>
   <properties>
@@ -52,18 +52,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <org.exoplatform.social.version>6.2.x-SNAPSHOT</org.exoplatform.social.version>
     <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
     <org.exoplatform.platform-ui.version>6.2.x-SNAPSHOT</org.exoplatform.platform-ui.version>
-
-    <!-- Ethereum We3j for Java library -->
-    <org.web3j.version>4.5.11</org.web3j.version>
-
-    <!-- Used to generate default methods for POJO -->
-    <org.lombok.version>1.18.2</org.lombok.version>
-    <org.lombok.plugin.version>1.18.0.0</org.lombok.plugin.version>
-
-    <!-- **************************************** -->
-    <!-- Jenkins Settings -->
-    <jenkins.job.name>addon-wallet-master-ci</jenkins.job.name>
-    <!-- **************************************** -->
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -137,81 +125,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <version>${org.exoplatform.wallet.ert-contract.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>${org.lombok.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>core</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>utils</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>abi</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>rlp</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>crypto</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.web3j</groupId>
-        <artifactId>tuples</artifactId>
-        <version>${org.web3j.version}</version>
-        <scope>provided</scope>
-      </dependency>
-
     </dependencies>
   </dependencyManagement>
-  <build>
-    <pluginManagement>
-      <plugins>
-        <!-- Maven Plugin for JS and CSS bundling and Unit Test execution -->
-        <plugin>
-          <groupId>com.github.eirslett</groupId>
-          <artifactId>frontend-maven-plugin</artifactId>
-          <version>${com.github.eirslett.frontend.version}</version>
-        </plugin>
-        <!-- Maven Plugin for generating contracts JAVA sources -->
-        <plugin>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok-maven-plugin</artifactId>
-          <version>${org.lombok.plugin.version}</version>
-          <executions>
-            <execution>
-              <phase>generate-sources</phase>
-              <goals>
-                <goal>delombok</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>
