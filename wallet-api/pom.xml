@@ -66,25 +66,37 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <plugin>
         <groupId>com.jcabi</groupId>
         <artifactId>jcabi-maven-plugin</artifactId>
-        <!-- Workaround for bug https://github.com/jcabi/jcabi-aspects/issues/257 -->
-        <dependencies>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjtools</artifactId>
-                <version>1.9.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.aspectj</groupId>
-                <artifactId>aspectjweaver</artifactId>
-                <version>1.9.1</version>
-            </dependency>
-        </dependencies>
       </plugin>
+      <!-- FIXME: kept until maven-parent-pom:23-M07 is released -->
       <plugin>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok-maven-plugin</artifactId>
+        <version>1.18.0.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>src/main/java</sourceDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-delombok</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testDelombok</goal>
+            </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>src/test/java</sourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
-      <!-- we need to overide the enforcer rules here because lombok doesn't match it -->
+      <!-- FIXME: kept until maven-parent-pom:23-M07 is released -->
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>

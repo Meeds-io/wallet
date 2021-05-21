@@ -139,7 +139,7 @@ public interface WalletTransactionService {
 
   /**
    * @return {@link List} of {@link TransactionDetail} having
-   *         {@link TransactionDetail#getRawTransaction()} to send on blockchain
+   *         RawTransaction to send on blockchain
    */
   List<TransactionDetail> getTransactionsToSend();
 
