@@ -50,8 +50,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <properties>
     <!-- 3rd party libraries versions -->
     <org.exoplatform.social.version>6.2.x-rewards-SNAPSHOT</org.exoplatform.social.version>
-    <org.exoplatform.wallet.ert-contract.version>1.0.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
-    <org.exoplatform.platform-ui.version>6.2.x-SNAPSHOT</org.exoplatform.platform-ui.version>
+    <org.exoplatform.wallet.ert-contract.version>1.0.x-rewards-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
+    <org.exoplatform.platform-ui.version>6.2.x-rewards-SNAPSHOT</org.exoplatform.platform-ui.version>
   </properties>
   <dependencyManagement>
     <dependencies>
