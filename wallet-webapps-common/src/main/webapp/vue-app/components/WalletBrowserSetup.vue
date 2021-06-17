@@ -28,6 +28,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           @configured="$emit('configured')" />
       </template>
       <template v-else>
+        <v-row class="justify-center">
+          <div class="title px-4 py-4">{{ $t('exoplatform.wallet.label.createWalletInvitation') }}</div>
+          <div class="subtitle px-4 py-4">{{ $t('exoplatform.wallet.label.exoWalletDescription') }}</div>
+        </v-row>
         <v-form
           ref="form"
           @submit="
@@ -37,23 +41,34 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-text-field
             v-if="!loading"
             v-model="walletPassword"
-            :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
-            :type="walletPasswordShow ? 'text' : 'password'"
+            type="password"
             :disabled="loading || loadingWalletBrowser"
-            :label="$t('exoplatform.wallet.label.walletPassword')"
             :placeholder="$t('exoplatform.wallet.label.setWalletPasswordPlaceholder')"
             name="walletPassword"
             required
-            autocomplete="new-passord"
-            @click:append="walletPasswordShow = !walletPasswordShow" />
+            outlined
+            autocomplete="new-password" />
+          <v-text-field
+            v-if="!loading"
+            v-model="confirmWalletPassword"
+            :rules="[rules.passwordMatching]"
+            type="password"
+            :disabled="loading || loadingWalletBrowser"
+            :placeholder="$t('exoplatform.wallet.label.confirmWalletPasswordPlaceholder')"
+            name="confirmWalletPassword"
+            required
+            outlined
+            autocomplete="new-password" />
         </v-form>
-        <button
+        <v-btn
+          block
+          x-large
           :disabled="loadingWalletBrowser"
-          class="ignore-vuetify-classes btn btn-primary"
+          class="ignore-vuetify-classes btn btn-primary justify-center px-4 py-4 mt-4"
           @click="createWallet()">
           {{ $t('exoplatform.wallet.button.createNewWallet') }}
-        </button>
+        </v-btn>
       </template>
     </div>
   </v-flex>
@@ -109,10 +124,12 @@ export default {
   data() {
     return {
       walletPassword: null,
+      confirmWalletPassword: null,
       walletPasswordShow: null,
       loadingWalletBrowser: false,
       rules: {
         min: (v) => (v && v.length >= 8) || this.$t('exoplatform.wallet.warning.atLeast8Chars'),
+        passwordMatching: (v) => (v && v === this.walletPassword) || this.$t('exoplatform.wallet.warning.passwordNotMatching'),
       },
     };
   },
