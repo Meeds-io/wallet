@@ -184,7 +184,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     Mockito.when(tokenAdminService.reward(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
       @Override
       public TransactionDetail answer(InvocationOnMock invocation) throws Throwable {
-        TransactionDetail transactionDetail = invocation.getArgumentAt(0, TransactionDetail.class);
+        TransactionDetail transactionDetail = invocation.getArgument(0, TransactionDetail.class);
         transactionDetail.setHash(generateTransactionHash());
         transactionDetail.setPending(pendingTransactions);
         transactionDetail.setSucceeded(successTransactions);
