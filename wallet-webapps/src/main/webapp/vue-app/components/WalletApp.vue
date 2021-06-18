@@ -29,10 +29,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               color="white"
               flat
               dense>
-              <v-toolbar-title v-if="isSpace">
+              <v-toolbar-title v-if="isSpace" class="walletTitle">
                 {{ $t('exoplatform.wallet.title.spaceWallet') }}
               </v-toolbar-title>
-              <v-toolbar-title v-else>
+              <v-toolbar-title v-else class="walletTitle">
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
               <div
