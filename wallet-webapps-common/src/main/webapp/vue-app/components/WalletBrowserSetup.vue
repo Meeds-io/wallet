@@ -63,7 +63,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-form>
         <v-btn
           block
-          x-large
           :disabled="loadingWalletBrowser"
           class="ignore-vuetify-classes btn btn-primary justify-center px-4 py-4 mt-4"
           @click="createWallet()">
