@@ -304,9 +304,30 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   #walletBrowserSetup {
     padding: 5px;
-    width: 400px;
+    width: 35%;
     max-width: 100%;
     margin: auto;
+    .v-btn {
+      text-transform: none !important;
+      font-size: 16px;
+      height: 40px;
+    }
+    .v-input__slot {
+      border-color: rgba(0, 0, 0, 0.25) !important;
+      width: initial !important;
+      min-height: 40px;
+    }
+    .v-text-field__slot {
+      height: 40px;
+    }
+    .title {
+      font-weight: bold;
+      color: @darkGrey;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: @greyColorLighten1Default;
+    }
   }
 
   #walletMetamaskSetup {
@@ -682,6 +703,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     line-height: 62px;
     display: block;
   }
+}
+.walletTitle{
+  font-weight: bold;
 }
 
 /* Override uiPopup !important attributes */
