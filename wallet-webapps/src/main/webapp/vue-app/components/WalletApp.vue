@@ -113,7 +113,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       error = $event;
                     " />
                 </v-toolbar>
-                <v-flex :class="!walletReadonly">
+                <v-flex>
                   <v-layout
                     row
                     wrap
@@ -132,8 +132,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                         @error="error = $event" />
                     </v-flex>
                   </v-layout>
-                </v-flex>
-                <v-flex :class="!walletReadonly">
                   <v-layout
                     row
                     wrap
