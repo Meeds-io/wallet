@@ -73,23 +73,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         pe-0>
         <v-layout
           col
-          wrap
-          class="px-0">
+          wrap>
           <v-flex
-            md4
-            xs12
-            text-center>
+            text-center
+            class="summaryCard">
             <summary-balance :wallet="wallet" :contract-details="contractDetails" />
           </v-flex>
           <v-flex
             v-if="!isSpace"
-            offset-md1
-            offset-xs0
-            md3
-            xs6
-            pe-0
-            ps-0
-            text-center>
+            text-center
+            class="summaryCard">
             <summary-reward
               :wallet="wallet"
               :contract-details="contractDetails"
@@ -97,10 +90,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               @error="$emit('error', $event)" />
           </v-flex>
           <v-flex
-            :class="isSpace ? 'offset-md5 offset-xs0 md3 xs12': 'offset-md1 offset-xs0 md3 xs6'"
-            pe-0
-            ps-0
-            text-center>
+            v-if="!isSpace"
+            text-center
+            class="summaryCard">
+            <summary-estimation
+              :next-pay-estimation="nextPayEstimation"
+              :symbol="contractDetails.symbol"
+              @display-transactions="$emit('display-transactions', 'reward')"
+              @error="$emit('error', $event)" />
+          </v-flex>
+          <v-flex
+            v-if="!isSpace"
+            text-center
+            class="summaryCard">
+            <summary-pool
+              :actual-pool="actualPool"
+              :contract-details="contractDetails"
+              @display-transactions="$emit('display-transactions', 'reward')"
+              @error="$emit('error', $event)" />
+          </v-flex>
+          <v-spacer class="summarySpacer" />
+          <v-flex
+            text-center
+            class="transactionCard align-end">
             <summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
@@ -118,12 +130,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import SummaryBalance from './SummaryBalance.vue';
 import SummaryReward from './SummaryReward.vue';
 import SummaryTransaction from './SummaryTransaction.vue';
+import SummaryEstimation from './SummaryEstimation.vue';
+import SummaryPool from './SummaryPool.vue';
 
 export default {
   components: {
     SummaryBalance,
     SummaryReward,
     SummaryTransaction,
+    SummaryEstimation,
+    SummaryPool
   },
   props: {
     wallet: {
@@ -162,6 +178,7 @@ export default {
       updatePendingTransactionsIndex: 1,
       pendingTransactions: {},
       lastTransaction: null,
+      walletRewards: [],
     };
   },
   computed: {
@@ -171,6 +188,18 @@ export default {
     pendingTransactionsCount() {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },
+    futureWalletReward() {
+      return this.walletRewards && this.walletRewards.find(wr => wr.status !== 'success');
+    },
+    nextPayEstimation() {
+      return (this.futureWalletReward && this.futureWalletReward.tokensToSend) || 0;
+    },
+    actualPool() {
+      return (this.futureWalletReward && this.futureWalletReward.poolName) || '';
+    },
+  },
+  created() {
+    this.init();
   },
   methods: {
     requestAccessAuthorization() {
@@ -207,6 +236,30 @@ export default {
             this.updatePendingTransactionsIndex++;
           });
         });
+      });
+    },
+    init() {
+      this.listRewards()
+        .then(rewards => this.walletRewards = rewards)
+        .catch(e => this.error = String(e));
+    },
+    listRewards(limit) {
+      return fetch(`/portal/rest/wallet/api/reward/list?limit=${limit || 10}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }).then((resp) => {
+        if (resp && resp.ok) {
+          return resp.json();
+        } else {
+          throw new Error('Error listing rewards');
+        }
+      }).catch((error) => {
+        console.error(error);
+        this.error = this.$t('exoplatform.wallet.error.errorListingRewards');
       });
     },
   },

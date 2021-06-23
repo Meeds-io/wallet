@@ -35,67 +35,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-toolbar-title v-else class="walletTitle">
                 {{ $t('exoplatform.wallet.title.myWallet') }}
               </v-toolbar-title>
-              <div
-                v-if="displayWarnings"
-                id="etherTooLowWarningParent"
-                class="ms-2">
-                <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
-                  warning
-                </v-icon>
-                <v-icon
-                  v-if="displayDisapprovedWallet"
-                  slot="activator"
-                  :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
-                  color="orange">
-                  warning
-                </v-icon>
-              </div>
-
               <v-spacer />
-
-              <toolbar-menu
-                ref="walletAppMenu"
-                :is-space="isSpace"
-                :is-space-administrator="isSpaceAdministrator"
-                @refresh="init()"
-                @modify-settings="showSettingsModal = true" />
-
-              <settings-modal
-                ref="walletSettingsModal"
-                :is-space="isSpace"
-                :open="showSettingsModal"
-                :wallet="wallet"
-                :app-loading="loading"
-                :display-reset-option="displayWalletResetOption"
-                @close="showSettingsModal = false"
-                @settings-changed="init()" />
             </v-toolbar>
 
-            <v-toolbar
-              class="additionalToolbar"
-              color="white"
-              flat
-              dense>
-              <wallet-setup
-                ref="walletSetup"
-                :is-space="isSpace"
-                :wallet="wallet"
-                :initialization-state="initializationState"
-                :loading="loading"
-                @loading="loading = true"
-                @end-loading="loading = false"
-                @refresh="init()"
-                @error="
-                  loading = false;
-                  error = $event;
-                " />
-            </v-toolbar>
 
             <!-- Body -->
             <v-card
               v-if="displayAccountsList"
               id="walletAppBody"
-              flat>
+              flat
+              class="px-2">
               <div v-if="error && !loading" class="alert alert-error">
                 <i class="uiIconError"></i> {{ error }}
               </div>
@@ -104,12 +53,72 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 row
                 wrap
                 class="ms-0 me-0">
-                <v-flex :class="!walletReadonly && 'md8'" xs12>
+                <v-toolbar
+                  class="walletAppToolbar mb-3"
+                  color="white"
+                  flat
+                  dense>
+                  <div
+                    v-if="displayWarnings"
+                    id="etherTooLowWarningParent"
+                    class="ms-2">
+                    <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                      warning
+                    </v-icon>
+                    <v-icon
+                      v-if="displayDisapprovedWallet"
+                      slot="activator"
+                      :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
+                      color="orange">
+                      warning
+                    </v-icon>
+                  </div>
+
+                  <v-spacer />
+
+                  <toolbar-menu
+                    ref="walletAppMenu"
+                    :is-space="isSpace"
+                    :is-space-administrator="isSpaceAdministrator"
+                    @refresh="init()"
+                    @modify-settings="showSettingsModal = true" />
+
+                  <settings-modal
+                    ref="walletSettingsModal"
+                    :is-space="isSpace"
+                    :open="showSettingsModal"
+                    :wallet="wallet"
+                    :app-loading="loading"
+                    :display-reset-option="displayWalletResetOption"
+                    @close="showSettingsModal = false"
+                    @settings-changed="init()" />
+                </v-toolbar>
+
+                <v-toolbar
+                  class="additionalToolbar"
+                  color="white"
+                  flat
+                  dense>
+                  <wallet-setup
+                    ref="walletSetup"
+                    :is-space="isSpace"
+                    :wallet="wallet"
+                    :initialization-state="initializationState"
+                    :loading="loading"
+                    @loading="loading = true"
+                    @end-loading="loading = false"
+                    @refresh="init()"
+                    @error="
+                      loading = false;
+                      error = $event;
+                    " />
+                </v-toolbar>
+                <v-flex :class="!walletReadonly">
                   <v-layout
                     row
                     wrap
-                    class="ms-0 me-0 px-0">
-                    <v-flex xs12>
+                    class="ms-0 me-0 pr-0">
+                    <v-flex>
                       <wallet-summary
                         v-if="wallet && contractDetails"
                         ref="walletSummary"
@@ -122,41 +131,40 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                         @display-transactions="openAccountDetail"
                         @error="error = $event" />
                     </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex :class="!walletReadonly">
+                  <v-layout
+                    row
+                    wrap
+                    class="ms-0 me-0 pr-0">
                     <template v-if="initializationState !== 'DENIED'">
-                      <v-flex xs12>
-                        <transaction-history-chart-summary
-                          v-if="!loading"
-                          ref="chartPeriodicityButtons"
-                          :periodicity-label="periodicityLabel"
-                          @period-changed="periodChanged"
-                          @error="error = $event" />
-                      </v-flex>
-                      <v-flex xs12>
+                      <v-flex
+                        class="px-8 transactionChart">
                         <transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
                           :transaction-statistics="transactionStatistics" />
                       </v-flex>
                     </template>
+                    <v-spacer class="summarySpacer" />
+                    <v-flex
+                      v-if="!walletReadonly"
+                      mt-1
+                      class="summaryButtons justify-center">
+                      <summary-buttons
+                        v-if="walletAddress && !loading && contractDetails"
+                        ref="walletSummaryActions"
+                        :is-space="isSpace"
+                        :is-space-administrator="isSpaceAdministrator"
+                        :contract-details="contractDetails"
+                        :wallet="wallet"
+                        :is-read-only="isReadOnly"
+                        @display-transactions="openAccountDetail"
+                        @transaction-sent="newPendingTransaction"
+                        @error="error = $event" />
+                    </v-flex>
                   </v-layout>
-                </v-flex>
-                <v-flex
-                  v-if="!walletReadonly"
-                  md4
-                  xs12
-                  text-md-center
-                  mt-1>
-                  <summary-buttons
-                    v-if="walletAddress && !loading && contractDetails"
-                    ref="walletSummaryActions"
-                    :is-space="isSpace"
-                    :is-space-administrator="isSpaceAdministrator"
-                    :contract-details="contractDetails"
-                    :wallet="wallet"
-                    :is-read-only="isReadOnly"
-                    @display-transactions="openAccountDetail"
-                    @transaction-sent="newPendingTransaction"
-                    @error="error = $event" />
                 </v-flex>
               </v-layout>
             </v-card>
@@ -228,7 +236,6 @@ import WalletSummary from './wallet-app/Summary.vue';
 import SummaryButtons from './wallet-app/SummaryButtons.vue';
 import SettingsModal from './wallet-app/SettingsModal.vue';
 import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
-import TransactionHistoryChartSummary from './wallet-app/TransactionHistoryChartSummary.vue';
 
 export default {
   components: {
@@ -237,7 +244,6 @@ export default {
     SettingsModal,
     SummaryButtons,
     TransactionHistoryChart,
-    TransactionHistoryChartSummary,
   },
   props: {
     isSpace: {
@@ -271,7 +277,7 @@ export default {
       settings: null,
       error: null,
       transactionStatistics: null,
-      periodicity: 'month',
+      periodicity: 'year',
       selectedDate: new Date().toISOString().substr(0, 7),
     };
   },
