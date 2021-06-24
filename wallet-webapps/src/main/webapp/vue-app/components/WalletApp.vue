@@ -21,23 +21,31 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     class="VuetifyApp"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
-      <v-layout>
-        <v-flex>
-          <v-card flat class="transparent">
-            <v-toolbar
-              class="walletAppToolbar mb-3"
-              color="white"
-              flat
-              dense>
-              <v-toolbar-title v-if="isSpace" class="walletTitle">
-                {{ $t('exoplatform.wallet.title.spaceWallet') }}
-              </v-toolbar-title>
-              <v-toolbar-title v-else class="walletTitle">
-                {{ $t('exoplatform.wallet.title.myWallet') }}
-              </v-toolbar-title>
-              <v-spacer />
-            </v-toolbar>
+      <v-app class="mb-4 application-toolbar">
+        <v-tabs
+          v-model="tab"
+          slider-size="4">
+          <v-tab>{{ tabName }}</v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="tab" class="tabs-content">
+          <v-tab-item eager>
+            <div
+              v-if="displayWarnings"
+              id="etherTooLowWarningParent"
+              class="ms-2">
+              <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                warning
+              </v-icon>
+              <v-icon
+                v-if="displayDisapprovedWallet"
+                slot="activator"
+                :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
+                color="orange">
+                warning
+              </v-icon>
+            </div>
 
+            <v-spacer />
 
             <!-- Body -->
             <v-card
@@ -186,9 +194,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :selected-contract-method-name="selectedContractMethodName"
                 @back="back()" />
             </v-navigation-drawer>
-          </v-card>
-        </v-flex>
-      </v-layout>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-app>
       <div id="walletDialogsParent">
       </div>
     </main>
@@ -280,6 +288,9 @@ export default {
     };
   },
   computed: {
+    tabName() {
+      return this.isSpace ?  this.$t('exoplatform.wallet.title.spaceWallet')  :  this.$t('exoplatform.wallet.title.myWallet');
+    },
     appId() {
       return this.isSpace ? 'SpaceWalletApp' : 'WalletApp';
     },

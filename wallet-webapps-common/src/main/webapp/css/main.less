@@ -46,6 +46,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       display: none !important;
   }
 }
+.application-toolbar {
+    margin: 25px;
+    margin-bottom: 12px;
+    max-width: ~"calc(100% - 24px)" !important;
+
+    .tabs-content {
+      margin-top: 10px !important;
+    }
+
+    &.display-on-top {
+      position: relative;
+      z-index: 10;
+    }
+
+    .v-toolbar__title {
+      line-height: 37px;
+    }
+
+    .v-toolbar__content {
+      padding-right: 0 ~'; /** orientation=lt */ ';
+      padding-left: 0 ~'; /** orientation=rt */ ';
+    }
+  }
 
 #WalletApp, #SpaceWalletApp, #RewardApp, #WalletAdminApp, .walletDialog {
   background: transparent;
@@ -595,6 +618,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     max-height: 450px;
     padding: 10px 8px 10px 10px;
     box-sizing: border-box;
+    margin-left: 5% ;
 
     canvas {
      width: 100% !important;
