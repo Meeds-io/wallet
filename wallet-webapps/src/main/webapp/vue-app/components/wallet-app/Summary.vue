@@ -241,7 +241,9 @@ export default {
     init() {
       this.listRewards()
         .then(rewards => this.walletRewards = rewards)
-        .catch(e => this.error = String(e));
+        .catch(e => {
+          this.$emit('error', String(e));
+        });
     },
     listRewards(limit) {
       return fetch(`/portal/rest/wallet/api/reward/list?limit=${limit || 10}`, {
@@ -255,11 +257,10 @@ export default {
         if (resp && resp.ok) {
           return resp.json();
         } else {
-          throw new Error('Error listing rewards');
+          this.$emit('error', 'Error listing rewards');
         }
-      }).catch((error) => {
-        console.error(error);
-        this.error = this.$t('exoplatform.wallet.error.errorListingRewards');
+      }).catch(e => {
+        this.$emit('error', String(e));
       });
     },
   },
