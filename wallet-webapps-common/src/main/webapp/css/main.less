@@ -617,7 +617,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     max-height: 450px;
     padding: 10px 8px 10px 10px;
     box-sizing: border-box;
-    margin-left: 5% ;
+    margin-left: 5% ~'; /** orientation=lt */ ';
+    margin-right: 5% ~'; /** orientation=rt */ ';
 
     canvas {
      width: 100% !important;
@@ -782,6 +783,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
     .transactionCard {
       width: 100%;
+      margin-left: 1% ~'; /** orientation=lt */ ';
+      margin-right: 1% ~'; /** orientation=rt */ ';
     }
     .transactionChart {
       width: 100%;
@@ -789,13 +792,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .summaryButtons {
       width: 100%;
       .walletSummaryAction{
-        width: 50%
+        width: 50% ;
+        padding: 0 1% !important;
       }
       .walletSummaryBalance{
         display: flex;
         width: 100%;
         height: 40px;
-        margin-left : 1%;
+        margin-left: 1% ~'; /** orientation=lt */ ';
+        margin-right: 1% ~'; /** orientation=rt */ ';
       }
     }
   }
@@ -807,7 +812,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
     .transactionCard {
       width: 100%;
-      margin-left: 1%;
+      margin-left: 1% ~'; /** orientation=lt */ ';
+      margin-right: 1% ~'; /** orientation=rt */ ';
     }
     .transactionChart {
       width: 100%;
@@ -821,7 +827,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       .walletSummaryBalance{
         display: flex;
         width: 100%;
-        margin-left : 2px;
+        margin-right: 1% ~'; /** orientation=rt */ ';
+        margin-left: 1% ~'; /** orientation=lf */ ';
         flex-wrap: nowrap;
       }
     }
@@ -831,14 +838,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   #WalletApp {
     .summaryCard , .transactionCard {
       max-width: 17%;
-      margin-left: 2%;
+      margin-left: 2% ~'; /** orientation=lt */ ';
+      margin-right: 2% ~'; /** orientation=rt */ ';
     }
     .transactionChart {
       max-width: 70%;
     }
     .summaryButtons {
       max-width: 16%;
-      margin-right: 2.2%;
+      margin-left: 2.2% ~'; /** orientation=rt */ ';
+      margin-right: 2.2% ~'; /** orientation=lf */ ';
       .walletSummaryActions {
         margin-top: 30px;
       }
