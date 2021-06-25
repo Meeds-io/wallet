@@ -46,6 +46,28 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       display: none !important;
   }
 }
+.application-toolbar {
+    margin-bottom: 12px;
+    max-width: ~"calc(100% - 24px)" !important;
+
+    .tabs-content {
+      margin-top: 10px !important;
+    }
+
+    &.display-on-top {
+      position: relative;
+      z-index: 10;
+    }
+
+    .v-toolbar__title {
+      line-height: 37px;
+    }
+
+    .v-toolbar__content {
+      padding-right: 0 ~'; /** orientation=lt */ ';
+      padding-left: 0 ~'; /** orientation=rt */ ';
+    }
+  }
 
 #WalletApp, #SpaceWalletApp, #RewardApp, #WalletAdminApp, .walletDialog {
   background: transparent;
@@ -550,6 +572,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   .walletSummaryBalance {
     display: inline-block;
     width: 100%;
+    height: 100px;
     .title, .headline {
       color: #808080;
     }
@@ -562,14 +585,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
 
     .v-card__title {
-      white-space: nowrap;
-      flex-direction: column;
-      flex-wrap: nowrap;
       padding: 7px!important;
-
-      > * {
-        display: inline-block;
-      }
+      display: block;
     }
 
     .container {
@@ -579,12 +596,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .amount {
       line-height: 40px;
     }
+    .symbol{
+      color : @errorColor;
+    }
   }
   .walletSummaryActions {
     margin-top: 5px;
 
     .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
-      width: 98%;
+      width: 100%;
       box-sizing: border-box;
     }
     .walletSummaryAction {
@@ -593,10 +613,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   }
   .transactionHistoryChart {
     height: 450px;
-    width: 100%;
+    width: 95%;
     max-height: 450px;
     padding: 10px 8px 10px 10px;
     box-sizing: border-box;
+    margin-left: 5% ~'; /** orientation=lt */ ';
+    margin-right: 5% ~'; /** orientation=rt */ ';
 
     canvas {
      width: 100% !important;
@@ -712,21 +734,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 @media (max-width : 959px) {
   #WalletApp, #SpaceWalletApp {
     margin-bottom: 55px;
-
-    .walletSummaryActions {
-      position: fixed;
-      height: 45px;
-      bottom: 0;
-      left: 12px ~'; /** orientation=lt */ ';
-      right: 0 ~'; /** orientation=lt */ ';
-      right: 12px ~'; /** orientation=rt */ ';
-      left: 0 ~'; /** orientation=rt */ ';
-      background: white;
-      box-sizing: border-box;
-      padding: 5px 0 5px 0;
-      margin-bottom: 0px !important;
-      box-shadow: 0 3px 3px -4px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,0.14),0 0px 2px 0 rgba(0,0,0,0.12)!important;
-    }
   }
   #WalletAdminApp {
     .createNewToken {
@@ -765,5 +772,100 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .big-number {
       margin-top: 0;
     }
+  }
+}
+
+
+@media (max-width : @smallMobileWidth){
+  #WalletApp {
+    .summaryCard {
+      width: 100%;
+    }
+    .transactionCard {
+      width: 100%;
+      margin-left: 1% ~'; /** orientation=lt */ ';
+      margin-right: 1% ~'; /** orientation=rt */ ';
+    }
+    .transactionChart {
+      width: 100%;
+    }
+    .summaryButtons {
+      width: 100%;
+      .walletSummaryAction{
+        width: 50% ;
+        padding: 0 1% !important;
+      }
+      .walletSummaryBalance{
+        display: flex;
+        width: 100%;
+        height: 40px;
+        margin-left: 1% ~'; /** orientation=lt */ ';
+        margin-right: 1% ~'; /** orientation=rt */ ';
+      }
+    }
+  }
+}
+@media (min-width : @smallMobileWidth){
+  #WalletApp {
+    .summaryCard {
+      width: 50%;
+    }
+    .transactionCard {
+      width: 100%;
+      margin-left: 1% ~'; /** orientation=lt */ ';
+      margin-right: 1% ~'; /** orientation=rt */ ';
+    }
+    .transactionChart {
+      width: 100%;
+    }
+    .summaryButtons {
+      width: 100%;
+      .walletSummaryAction{
+        width: 50%;
+        padding: 0 1% !important;
+      }
+      .walletSummaryBalance{
+        display: flex;
+        width: 100%;
+        margin-right: 1% ~'; /** orientation=rt */ ';
+        margin-left: 1% ~'; /** orientation=lf */ ';
+        flex-wrap: nowrap;
+      }
+    }
+  }
+}
+@media (min-width : @minDesktop){
+  #WalletApp {
+    .summaryCard , .transactionCard {
+      max-width: 17%;
+      margin-left: 2% ~'; /** orientation=lt */ ';
+      margin-right: 2% ~'; /** orientation=rt */ ';
+    }
+    .transactionChart {
+      max-width: 70%;
+    }
+    .summaryButtons {
+      max-width: 16%;
+      margin-left: 2.2% ~'; /** orientation=rt */ ';
+      margin-right: 2.2% ~'; /** orientation=lf */ ';
+      .walletSummaryActions {
+        margin-top: 30px;
+      }
+      .walletSummaryAction{
+        width: 100% ;
+        padding: 0 1%;
+      }
+      .walletSummaryBalance{
+        display: inline-block;
+        width: 100%;
+      }
+    }
+    .walletSummaryBalance{
+      max-width: 100%;
+    }
+    .spacer.summarySpacer {
+      flex-grow: 15 !important;
+      width: 5%;
+     }
   }
 }
