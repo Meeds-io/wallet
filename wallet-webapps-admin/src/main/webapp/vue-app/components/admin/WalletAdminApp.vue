@@ -22,36 +22,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     flat>
     <main>
       <v-layout column>
-        <v-flex>
-          <v-card class="applicationToolbar mb-3" flat>
-            <v-flex class="ps-3 pe-3 pt-2 pb-2">
-              <strong>{{ $t('exoplatform.wallet.title.walletAdministration') }}</strong>
-            </v-flex>
-          </v-card>
-        </v-flex>
-        <v-flex class="white text-center" flat>
-          <div v-if="error && !loading" class="alert alert-error v-content">
-            <i class="uiIconError"></i>{{ error }}
-          </div>
-
-          <v-dialog
-            v-model="loading"
-            persistent
-            hide-overlay
-            width="300">
-            <v-card color="primary" dark>
-              <v-card-text>
-                {{ $t('exoplatform.wallet.label.loading') }} ...
-                <v-progress-linear
-                  indeterminate
-                  color="white"
-                  class="mb-0" />
-              </v-card-text>
-            </v-card>
-          </v-dialog>
-
-          <v-tabs v-model="selectedTab" grow>
-            <v-tabs-slider color="primary" />
+        <v-app class="mb-4 application-toolbar">
+          <v-tabs
+            v-model="selectedTab"
+            slider-size="4">
             <v-tab
               key="wallets"
               href="#wallets">
@@ -69,8 +43,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               {{ adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
             </v-tab>
           </v-tabs>
-
-          <v-tabs-items v-model="selectedTab">
+          <v-tabs-items v-model="selectedTab" class="tabs-content">
             <v-tab-item
               id="wallets"
               value="wallets"
@@ -116,7 +89,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 @pending-transaction="pendingTransaction" />
             </v-tab-item>
           </v-tabs-items>
-        </v-flex>
+        </v-app>
       </v-layout>
       <div id="walletDialogsParent"></div>
     </main>
