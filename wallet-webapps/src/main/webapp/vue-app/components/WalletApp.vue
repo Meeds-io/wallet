@@ -84,14 +84,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
                   <v-spacer />
 
-                  <toolbar-menu
+                  <perk-store-toolbar-menu
                     ref="walletAppMenu"
                     :is-space="isSpace"
                     :is-space-administrator="isSpaceAdministrator"
                     @refresh="init()"
                     @modify-settings="showSettingsModal = true" />
 
-                  <settings-modal
+                  <perk-store-settings-modal
                     ref="walletSettingsModal"
                     :is-space="isSpace"
                     :open="showSettingsModal"
@@ -127,7 +127,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     wrap
                     class="ms-0 me-0 pr-0">
                     <v-flex>
-                      <wallet-summary
+                      <perk-store-wallet-summary
                         v-if="wallet && contractDetails"
                         ref="walletSummary"
                         :wallet="wallet"
@@ -147,7 +147,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <template v-if="initializationState !== 'DENIED'">
                       <v-flex
                         class="px-8 transactionChart">
-                        <transaction-history-chart
+                        <perk-store-transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
                           :transaction-statistics="transactionStatistics" />
@@ -158,7 +158,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       v-if="!walletReadonly"
                       mt-1
                       class="summaryButtons justify-center">
-                      <summary-buttons
+                      <perk-store-summary-buttons
                         v-if="walletAddress && !loading && contractDetails"
                         ref="walletSummaryActions"
                         :is-space="isSpace"
@@ -237,20 +237,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import ToolbarMenu from './wallet-app/ToolbarMenu.vue';
-import WalletSummary from './wallet-app/Summary.vue';
-import SummaryButtons from './wallet-app/SummaryButtons.vue';
-import SettingsModal from './wallet-app/SettingsModal.vue';
-import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
-
 export default {
-  components: {
-    ToolbarMenu,
-    WalletSummary,
-    SettingsModal,
-    SummaryButtons,
-    TransactionHistoryChart,
-  },
   props: {
     isSpace: {
       type: Boolean,

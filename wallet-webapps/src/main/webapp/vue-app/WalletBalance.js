@@ -14,9 +14,6 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import WalletBalanceApp from './components/wallet-balance/WalletBalance.vue';
-Vue.component('wallet-balance-app', WalletBalanceApp);
-
 Vue.use(Vuetify);
 
 const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
@@ -36,7 +33,7 @@ export function init() {
     appElement.id = appId;
 
     new Vue({
-      template: `<wallet-balance-app id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
+      template: `<perk-store-wallet-balance-app id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
       i18n,
       vuetify,
     }).$mount(appElement);

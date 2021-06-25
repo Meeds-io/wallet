@@ -77,13 +77,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-flex
             text-center
             class="summaryCard">
-            <summary-balance :wallet="wallet" :contract-details="contractDetails" />
+            <perk-store-summary-balance :wallet="wallet" :contract-details="contractDetails" />
           </v-flex>
           <v-flex
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <summary-reward
+            <perk-store-summary-reward
               :wallet="wallet"
               :contract-details="contractDetails"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -93,7 +93,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <summary-estimation
+            <perk-store-summary-estimation
               :next-pay-estimation="nextPayEstimation"
               :symbol="contractDetails.symbol"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -103,7 +103,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <summary-pool
+            <perk-store-summary-pool
               :actual-pool="actualPool"
               :contract-details="contractDetails"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -113,7 +113,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-flex
             text-center
             class="transactionCard align-end">
-            <summary-transaction
+            <perk-store-summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
               :pending-transactions-count="pendingTransactionsCount"
@@ -127,20 +127,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SummaryBalance from './SummaryBalance.vue';
-import SummaryReward from './SummaryReward.vue';
-import SummaryTransaction from './SummaryTransaction.vue';
-import SummaryEstimation from './SummaryEstimation.vue';
-import SummaryPool from './SummaryPool.vue';
-
 export default {
-  components: {
-    SummaryBalance,
-    SummaryReward,
-    SummaryTransaction,
-    SummaryEstimation,
-    SummaryPool
-  },
   props: {
     wallet: {
       type: Object,
