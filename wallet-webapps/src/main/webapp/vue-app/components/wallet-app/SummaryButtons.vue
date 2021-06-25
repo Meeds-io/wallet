@@ -18,15 +18,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-layout
     row
     wrap
-    class="walletSummaryActions">
+    class="walletSummaryActions walletSummaryBalance align-end">
     <v-flex
-      md12
-      xs6
-      order-md1
-      order-xs2
-      offset-xs0
-      offset-md2
-      px-2
       class="walletSummaryAction">
       <send-tokens-modal
         ref="sendTokensModal"
@@ -37,13 +30,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         @error="$emit('error', $event)" />
     </v-flex>
     <v-flex
-      md12
-      xs6
-      order-md2
-      order-xs1
-      offset-xs0
-      offset-md2
-      px-2
       class="walletSummaryAction">
       <request-funds-modal
         ref="walletRequestFundsModal"

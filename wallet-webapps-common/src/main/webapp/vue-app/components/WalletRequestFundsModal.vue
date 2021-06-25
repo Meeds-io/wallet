@@ -28,8 +28,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         :disabled="disabledButton"
         class="btn white"
         v-on="on">
-        <v-icon>
-          reply
+        <v-icon class="mr-6">
+          mdi-cash-multiple
         </v-icon>
         {{ $t('exoplatform.wallet.button.request') }}
       </v-btn>
