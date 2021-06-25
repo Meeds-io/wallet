@@ -48,6 +48,27 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="wallets"
               value="wallets"
               eager>
+              <v-flex class="white text-center  mt-4" flat>
+                <div v-if="error && !loading" class="alert alert-error v-content">
+                  <i class="uiIconError"></i>{{ error }}
+                </div>
+
+                <v-dialog
+                  v-model="loading"
+                  persistent
+                  hide-overlay
+                  width="300">
+                  <v-card color="primary" dark>
+                    <v-card-text>
+                      {{ $t('exoplatform.wallet.label.loading') }} ...
+                      <v-progress-linear
+                        indeterminate
+                        color="white"
+                        class="mb-0" />
+                    </v-card-text>
+                  </v-card>
+                </v-dialog>
+              </v-flex>
               <wallets-tab
                 ref="walletsTab"
                 :wallet-address="walletAddress"
