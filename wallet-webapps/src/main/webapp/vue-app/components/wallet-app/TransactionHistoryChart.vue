@@ -73,7 +73,7 @@ export default {
             data: this.transactionStatistics.outcome,
           }
         ]
-      }, {responsive: true, maintainAspectRatio: false});
+      }, {responsive: true, maintainAspectRatio: false,legend: {display: false}});
     }
   }
 };
