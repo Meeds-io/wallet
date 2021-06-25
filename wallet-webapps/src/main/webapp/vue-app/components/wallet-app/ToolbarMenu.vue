@@ -17,17 +17,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div id="walletAppMenu">
     <v-btn
-      id="walletAppMenuRefreshButton"
-      :title="$t('exoplatform.wallet.button.refreshWallet')"
-      icon
-      text
-      class="me-0"
-      @click="$emit('refresh')">
-      <v-icon size="20px">
-        refresh
-      </v-icon>
-    </v-btn>
-    <v-btn
       v-if="!isSpace || isSpaceAdministrator"
       id="walletAppMenuSettingsButton"
       :title="$t('exoplatform.wallet.button.security')"
@@ -35,8 +24,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       icon
       text
       @click="$emit('modify-settings')">
-      <v-icon size="17px">
-        fa-lock
+      <v-icon size="30">
+        fa-cog
       </v-icon>
     </v-btn>
   </div>
