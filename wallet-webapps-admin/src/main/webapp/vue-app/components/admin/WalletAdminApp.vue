@@ -48,28 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="wallets"
               value="wallets"
               eager>
-              <v-flex class="white text-center  mt-4" flat>
-                <div v-if="error && !loading" class="alert alert-error v-content">
-                  <i class="uiIconError"></i>{{ error }}
-                </div>
-
-                <v-dialog
-                  v-model="loading"
-                  persistent
-                  hide-overlay
-                  width="300">
-                  <v-card color="primary" dark>
-                    <v-card-text>
-                      {{ $t('exoplatform.wallet.label.loading') }} ...
-                      <v-progress-linear
-                        indeterminate
-                        color="white"
-                        class="mb-0" />
-                    </v-card-text>
-                  </v-card>
-                </v-dialog>
-              </v-flex>
-              <wallets-tab
+              <perk-store-wallets-tab
                 ref="walletsTab"
                 :wallet-address="walletAddress"
                 :loading="loading"
@@ -84,7 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="funds"
               value="funds"
               eager>
-              <initial-funds-tab
+              <perk-store-initial-funds-tab
                 ref="fundsTab"
                 :loading="loading"
                 :settings="settings"
@@ -96,7 +75,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="contract"
               value="contract"
               eager>
-              <contract-tab
+              <perk-store-contract-tab
                 ref="contractDetail"
                 :wallet-address="walletAddress"
                 :user-wallet="wallet"
@@ -118,16 +97,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletsTab from './wallets/WalletAdminWalletsTab.vue';
-import InitialFundsTab from './settings/WalletAdminInitialFundsTab.vue';
-import ContractTab from './contracts/WalletAdminContractTab.vue';
-
 export default {
-  components: {
-    WalletsTab,
-    InitialFundsTab,
-    ContractTab,
-  },
   data() {
     return {
       loading: false,
