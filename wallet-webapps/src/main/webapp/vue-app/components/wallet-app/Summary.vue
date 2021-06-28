@@ -77,13 +77,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-flex
             text-center
             class="summaryCard">
-            <perk-store-summary-balance :wallet="wallet" :contract-details="contractDetails" />
+            <wallet-summary-balance :wallet="wallet" :contract-details="contractDetails" />
           </v-flex>
           <v-flex
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <perk-store-summary-reward
+            <wallet-summary-reward
               :wallet="wallet"
               :contract-details="contractDetails"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -93,7 +93,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <perk-store-summary-estimation
+            <wallet-summary-estimation
               :next-pay-estimation="nextPayEstimation"
               :symbol="contractDetails.symbol"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -103,7 +103,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             v-if="!isSpace"
             text-center
             class="summaryCard">
-            <perk-store-summary-pool
+            <wallet-summary-pool
               :actual-pool="actualPool"
               :contract-details="contractDetails"
               @display-transactions="$emit('display-transactions', 'reward')"
@@ -113,7 +113,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-flex
             text-center
             class="transactionCard align-end">
-            <perk-store-summary-transaction
+            <wallet-summary-transaction
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
               :pending-transactions-count="pendingTransactionsCount"

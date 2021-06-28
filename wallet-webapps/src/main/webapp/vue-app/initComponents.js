@@ -13,19 +13,19 @@ import TransactionHistoryChart from './components/wallet-app/TransactionHistoryC
 import WalletBalance from './components/wallet-balance/WalletBalance.vue';
 
 const components = {
-  'perk-store-reward-detail': RewardDetail,
-  'perk-store-settings-modal': SettingsModal,
-  'perk-store-settings-security-tab': SettingsSecurityTab,
-  'perk-store-wallet-summary': WalletSummary,
-  'perk-store-summary-balance': SummaryBalance,
-  'perk-store-summary-buttons': SummaryButtons,
-  'perk-store-summary-reward': SummaryReward,
-  'perk-store-summary-transaction': SummaryTransaction,
-  'perk-store-toolbar-menu': ToolbarMenu,
-  'perk-store-transaction-history-chart': TransactionHistoryChart,
-  'perk-store-wallet-balance': WalletBalance,
-  'perk-store-summary-estimation': SummaryEstimation,
-  'perk-store-summary-pool': SummaryPool
+  'wallet-reward-detail': RewardDetail,
+  'wallet-settings-modal': SettingsModal,
+  'wallet-settings-security-tab': SettingsSecurityTab,
+  'wallet-summary': WalletSummary,
+  'wallet-summary-balance': SummaryBalance,
+  'wallet-summary-buttons': SummaryButtons,
+  'wallet-summary-reward': SummaryReward,
+  'wallet-summary-transaction': SummaryTransaction,
+  'wallet-toolbar-menu': ToolbarMenu,
+  'wallet-transaction-history-chart': TransactionHistoryChart,
+  'wallet-balance': WalletBalance,
+  'wallet-summary-estimation': SummaryEstimation,
+  'wallet-summary-pool': SummaryPool
 };
 
 for (const key in components) {

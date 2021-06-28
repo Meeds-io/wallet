@@ -65,7 +65,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="security"
               value="security"
               eager>
-              <perk-store-settings-security-tab
+              <wallet-settings-security-tab
                 ref="securityTab"
                 :wallet="wallet"
                 :is-space="isSpace"

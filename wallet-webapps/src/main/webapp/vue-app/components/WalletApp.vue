@@ -84,14 +84,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
                   <v-spacer />
 
-                  <perk-store-toolbar-menu
+                  <wallet-toolbar-menu
                     ref="walletAppMenu"
                     :is-space="isSpace"
                     :is-space-administrator="isSpaceAdministrator"
                     @refresh="init()"
                     @modify-settings="showSettingsModal = true" />
 
-                  <perk-store-settings-modal
+                  <wallet-settings-modal
                     ref="walletSettingsModal"
                     :is-space="isSpace"
                     :open="showSettingsModal"
@@ -127,7 +127,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     wrap
                     class="ms-0 me-0 pr-0">
                     <v-flex>
-                      <perk-store-wallet-summary
+                      <wallet-summary
                         v-if="wallet && contractDetails"
                         ref="walletSummary"
                         :wallet="wallet"
@@ -147,7 +147,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <template v-if="initializationState !== 'DENIED'">
                       <v-flex
                         class="px-8 transactionChart">
-                        <perk-store-transaction-history-chart
+                        <wallet-transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
                           :transaction-statistics="transactionStatistics" />
@@ -158,7 +158,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       v-if="!walletReadonly"
                       mt-1
                       class="summaryButtons justify-center">
-                      <perk-store-summary-buttons
+                      <wallet-summary-buttons
                         v-if="walletAddress && !loading && contractDetails"
                         ref="walletSummaryActions"
                         :is-space="isSpace"

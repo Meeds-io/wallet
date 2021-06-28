@@ -35,7 +35,7 @@ export function init() {
     appElement.id = appId;
 
     new Vue({
-      template: `<perk-store-wallet-balance-app id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
+      template: `<wallet-balance-app id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
       i18n,
       vuetify,
     }).$mount(appElement);
