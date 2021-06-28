@@ -23,7 +23,6 @@ const components = {
   'perk-store-summary-transaction': SummaryTransaction,
   'perk-store-toolbar-menu': ToolbarMenu,
   'perk-store-transaction-history-chart': TransactionHistoryChart,
-  'perk-store-transaction-history-chart-summary': TransactionHistoryChartSummary,
   'perk-store-wallet-balance': WalletBalance,
   'perk-store-summary-estimation': SummaryEstimation,
   'perk-store-summary-pool': SummaryPool
