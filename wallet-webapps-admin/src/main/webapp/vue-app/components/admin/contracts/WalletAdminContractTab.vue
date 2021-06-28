@@ -37,7 +37,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         <v-flex v-if="adminLevel >= 4" id="accountDetailActions">
           <!-- Send ether -->
-          <perk-store-send-ether-modal
+          <wallet-send-ether-modal
             v-if="adminLevel >= 5"
             :account="walletAddress"
             :balance="contractDetails.balance"
@@ -49,7 +49,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- add/remove admin -->
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="addAdminModal"
             :contract-details="contractDetails"
@@ -98,8 +98,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </li>
               </ul>
             </div>
-          </perk-store-contract-admin-modal>
-          <perk-store-contract-admin-modal
+          </wallet-contract-admin-modal>
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="removeAdminModal"
             :contract-details="contractDetails"
@@ -113,7 +113,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- approve/disapprove account -->
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 4"
             ref="approveAccountModal"
             :contract-details="contractDetails"
@@ -125,7 +125,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 4"
             ref="disapproveAccountModal"
             :contract-details="contractDetails"
@@ -139,7 +139,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- pause/unpause contract -->
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
@@ -149,7 +149,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
@@ -161,7 +161,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- set sell price -->
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="setSellPriceModal"
             :contract-details="contractDetails"
@@ -175,7 +175,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <perk-store-contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && contractDetails.isOwner"
             ref="transferOwnership"
             :contract-details="contractDetails"
@@ -188,7 +188,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <perk-store-initialize-account-admin-modal
+          <wallet-initialize-account-admin-modal
             v-if="adminLevel >= 5"
             ref="initializeAccount"
             :contract-details="contractDetails"
@@ -198,7 +198,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <perk-store-upgrade-token-modal
+          <wallet-upgrade-token-modal
             v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"

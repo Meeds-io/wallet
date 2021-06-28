@@ -10,16 +10,16 @@ import AdminWallet from './components/admin/wallets/AdminWallet.vue';
 import WalletsTab from './components/admin/wallets/WalletAdminWalletsTab.vue';
 
 const components = {
-  'perk-store-contract-admin-modal': ContractAdminModal,
-  'perk-store-initialize-account-admin-modal': InitializeAccountAdminModal,
-  'perk-store-upgrade-token-modal': UpgradeTokenModal,
-  'perk-store-contract-tab': ContractTab,
-  'perk-store-initial-funds-tab': InitialFundsTab,
-  'perk-store-initialize-account-modal': InitializeAccountModal,
-  'perk-store-send-ether-modal': SendEtherModal,
-  'perk-store-admin-wallet': AdminWallet,
-  'perk-store-wallets-tab': WalletsTab,
-  'perk-store-send-token-modal': SendTokenModal,
+  'wallet-contract-admin-modal': ContractAdminModal,
+  'wallet-initialize-account-admin-modal': InitializeAccountAdminModal,
+  'wallet-upgrade-token-modal': UpgradeTokenModal,
+  'wallet-contract-tab': ContractTab,
+  'wallet-initial-funds-tab': InitialFundsTab,
+  'wallet-initialize-account-modal': InitializeAccountModal,
+  'wallet-send-ether-modal': SendEtherModal,
+  'wallet-admin-wallet': AdminWallet,
+  'wallet-wallets-tab': WalletsTab,
+  'wallet-send-token-modal': SendTokenModal,
 };
 for (const key in components) {
   Vue.component(key, components[key]);

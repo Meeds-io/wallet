@@ -31,7 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart1') }}</div>
       <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart2') }}</div>
     </div>
-    <perk-store-admin-wallet
+    <wallet-admin-wallet
       v-if="!loading"
       :admin-wallet="walletAdmin"
       :initial-token-amount="tokenAmount"
@@ -291,15 +291,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </v-btn>
     </v-flex>
 
-    <perk-store-initialize-account-modal
+    <wallet-initialize-account-modal
       ref="initAccountModal"
       @sent="walletPendingTransaction" />
 
-    <perk-store-send-token-modal
+    <wallet-send-token-modal
       ref="sendTokenModal"
       :contract-details="contractDetails"
       @sent="walletPendingTransaction" />
-    <perk-store-send-ether-modal
+    <wallet-send-ether-modal
       ref="sendEtherModal"
       @sent="walletPendingTransaction" />
 
