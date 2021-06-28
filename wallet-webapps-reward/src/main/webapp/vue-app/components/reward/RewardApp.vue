@@ -95,7 +95,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="SendRewards"
               value="SendRewards"
               eager>
-              <send-rewards-tab
+              <wallet-send-rewards-tab
                 ref="sendRewards"
                 :reward-report="rewardReport"
                 :admin-wallet="adminWallet"
@@ -111,7 +111,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="RewardPools"
               value="RewardPools"
               eager>
-              <teams-list-tab
+              <wallet-teams-list-tab
                 ref="rewardTeams"
                 :teams="teams"
                 :wallet-rewards="walletRewards"
@@ -126,7 +126,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="Configuration"
               value="Configuration"
               eager>
-              <configuration-tab
+              <wallet-configuration-tab
                 ref="configurationTab"
                 @saved="refreshRewardSettings"
                 @error="error = $event" />
@@ -141,18 +141,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SendRewardsTab from './SendRewardsTab.vue';
-import TeamsListTab from './TeamsListTab.vue';
-import ConfigurationTab from './ConfigurationTab.vue';
-
 import {getRewardTeams, getRewardSettings, computeRewards} from '../../js/RewardServices.js';
 
 export default {
-  components: {
-    SendRewardsTab,
-    TeamsListTab,
-    ConfigurationTab,
-  },
   data() {
     return {
       loading: false,
