@@ -41,6 +41,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       row
       wrap
       class="border-box-sizing mx-0">
+      <v-spacer />
       <v-flex
         md3
         offset-md1
@@ -56,19 +57,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-layout>
     <v-data-table
       :headers="walletTableHeaders"
-      :items="filteredWallets"
+      :items="wallets"
       :items-per-page="limit"
       :loading="loadingWallets">
       <template slot="item" slot-scope="props">
         <transition name="fade">
-          <tr v-show="props.item.displayedWallet">
+          <tr v-show="wallets">
             <td class="clickable" @click="openAccountDetail(props.item)">
-              <v-avatar size="36px">
+              <v-avatar size="29" class="mx-1">
                 <img
                   v-if="props.item.avatar"
                   :src="props.item.avatar"
                   onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
-                <v-icon v-else size="36">fa-cog</v-icon>
+                <v-icon v-else size="29">fa-cog</v-icon>
               </v-avatar>
               <profile-chip
                 :address="props.item.address"
@@ -302,9 +303,8 @@ export default {
       walletToProcess: null,
       etherAmount: null,
       tokenAmount: null,
-      limit: 10,
-      pageSize: 10,
-      walletTypes: ['user','space'],
+      limit: 5,
+      walletTypes: ['user','space','admin'],
       walletStatuses: ['disapproved'],
     };
   },
@@ -313,7 +313,7 @@ export default {
       return [
         {
           text: this.$t('exoplatform.wallet.label.name'),
-          align: 'start',
+          align: 'center',
           sortable: true,
           value: 'name',
         },
@@ -334,7 +334,7 @@ export default {
           value: 'etherBalance',
         },
         {
-          text: '',
+          text: 'exoplatform.wallet.label.actions',
           align: 'center',
           sortable: false,
           value: '',
@@ -390,26 +390,6 @@ export default {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
-    },
-    showLoadMore() {
-      return this.displayedWallets.length === this.limit;
-    },
-    displayedWallets() {
-      return this.wallets.filter(this.isDisplayWallet).slice(0, this.limit);
-    },
-    filteredWallets() {
-      if (this.displayedWallets && this.displayedWallets.length) {
-        const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
-        const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
-        // Set 'displayedWallet' attribute on wallets, used to know whether to retrieve
-        // wallet data from blockchain or not
-        this.wallets.forEach((wallet, index) => {
-          wallet.displayedWallet = index < limit && this.displayedWallets.filter(displayedWallet => displayedWallet.technicalId === wallet.technicalId) && true;
-        });
-        return this.displayedWallets.slice(0, limit);
-      } else {
-        return [];
-      }
     }
   },
   watch: {
