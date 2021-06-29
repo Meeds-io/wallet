@@ -42,46 +42,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       wrap
       class="border-box-sizing mx-0">
       <v-flex
-        md4
-        xs12
-        class="mt-2 border-box-sizing">
-        <v-btn-toggle
-          v-model="walletTypes"
-          class="walletFilterButtons"
-          mandatory
-          multiple
-          text>
-          <v-btn value="user">
-            {{ $t('exoplatform.wallet.label.users') }}
-          </v-btn>
-          <v-btn value="space">
-            {{ $t('exoplatform.wallet.label.spaces') }}
-          </v-btn>
-        </v-btn-toggle>
-      </v-flex>
-      <v-flex
-        md3
-        offset-md1
-        offset-xs0
-        xs12
-        class="mt-2 border-box-sizing">
-        <v-btn-toggle
-          v-model="walletStatuses"
-          class="walletFilterButtons"
-          multiple
-          text>
-          <v-btn value="disabled">
-            {{ $t('exoplatform.wallet.label.disabled') }}
-          </v-btn>
-          <v-btn value="disapproved">
-            {{ $t('exoplatform.wallet.label.disapproved') }}
-          </v-btn>
-          <v-btn value="deletedIdentity">
-            {{ $t('exoplatform.wallet.label.deleted') }}
-          </v-btn>
-        </v-btn-toggle>
-      </v-flex>
-      <v-flex
         md3
         offset-md1
         offset-xs0
@@ -97,9 +57,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-data-table
       :headers="walletTableHeaders"
       :items="filteredWallets"
-      :items-per-page="1000"
-      :loading="loadingWallets"
-      hide-default-footer>
+      :items-per-page="limit"
+      :loading="loadingWallets">
       <template slot="item" slot-scope="props">
         <transition name="fade">
           <tr v-show="props.item.displayedWallet">
@@ -111,8 +70,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
                 <v-icon v-else size="36">fa-cog</v-icon>
               </v-avatar>
-            </td>
-            <td class="clickable text-start" @click="openAccountDetail(props.item)">
               <profile-chip
                 :address="props.item.address"
                 :profile-id="props.item.id"
@@ -180,43 +137,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} eth
               </template>
             </td>
-            <td
-              v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1"
-              class="clickable"
-              @click="openAccountDetail(props.item)">
-              <template v-if="props.item.type === 'user' || props.item.type === 'space'">
-                <v-icon
-                  v-if="props.item.initializationState === 'NEW'"
-                  :title="$t('exoplatform.wallet.label.newWallet')"
-                  color="primary">
-                  fa-hands
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'MODIFIED'"
-                  :title="$t('exoplatform.wallet.label.modifiedWallet')"
-                  color="orange">
-                  fa-hands
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'DENIED'"
-                  :title="$t('exoplatform.wallet.label.deniedWallet')"
-                  color="orange">
-                  fa-times-circle
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'PENDING'"
-                  :title="$t('exoplatform.wallet.label.initializationInProgressForWallet')"
-                  color="primary">
-                  fa-dot-circle
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'INITIALIZED'"
-                  :title="$t('exoplatform.wallet.label.initializedWallet')"
-                  color="green">
-                  fa-check-circle
-                </v-icon>
-              </template>
-            </td>
             <td class="text-center">
               <v-progress-circular
                 v-if="props.item.pendingTransaction || props.item.loading"
@@ -281,15 +201,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </transition>
       </template>
     </v-data-table>
-    <v-flex v-if="showLoadMore" justify-center>
-      <v-btn
-        :loading="loading"
-        color="primary"
-        text
-        @click="limit += pageSize">
-        {{ $t('exoplatform.wallet.button.loadMore') }}
-      </v-btn>
-    </v-flex>
 
     <initialize-account-modal
       ref="initAccountModal"
@@ -393,19 +304,13 @@ export default {
       tokenAmount: null,
       limit: 10,
       pageSize: 10,
-      walletTypes: ['user'],
+      walletTypes: ['user','space'],
       walletStatuses: ['disapproved'],
     };
   },
   computed: {
     walletHeaders() {
       return [
-        {
-          text: '',
-          align: 'center',
-          sortable: false,
-          value: 'avatar',
-        },
         {
           text: this.$t('exoplatform.wallet.label.name'),
           align: 'start',
@@ -427,12 +332,6 @@ export default {
           text: this.$t('exoplatform.wallet.label.etherBalance'),
           align: 'center',
           value: 'etherBalance',
-        },
-        {
-          text: this.$t('exoplatform.wallet.label.initializationstatus'),
-          align: 'center',
-          sortable: true,
-          value: 'initializationState',
         },
         {
           text: '',
