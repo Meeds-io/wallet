@@ -21,51 +21,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     class="VuetifyApp"
     flat>
     <main v-if="isWalletEnabled" id="walletEnabledContent">
-      <v-app class="mb-4 application-toolbar">
-        <v-tabs
-          v-model="tab"
-          slider-size="4">
-          <v-tab>{{ tabName }}</v-tab>
-        </v-tabs>
-        <v-tabs-items v-model="tab" class="tabs-content">
-          <v-tab-item eager>
-            <div
-              v-if="displayWarnings"
-              id="etherTooLowWarningParent"
-              class="ms-2">
-              <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
-                warning
-              </v-icon>
-              <v-icon
-                v-if="displayDisapprovedWallet"
-                slot="activator"
-                :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
-                color="orange">
-                warning
-              </v-icon>
-            </div>
-
-            <v-spacer />
-
-            <!-- Body -->
-            <v-card
-              v-if="displayAccountsList"
-              id="walletAppBody"
-              flat
-              class="px-2">
-              <div v-if="error && !loading" class="alert alert-error">
-                <i class="uiIconError"></i> {{ error }}
-              </div>
-
-              <v-layout
-                row
-                wrap
-                class="ms-0 me-0">
+      <v-layout>
+        <v-flex>
+          <v-app class="mb-4 application-toolbar">
+            <v-tabs
+              v-model="tab"
+              slider-size="4">
+              <v-tab>{{ tabName }}</v-tab>
+            </v-tabs>
+            <v-tabs-items v-model="tab" class="tabs-content">
+              <v-tab-item eager>
                 <v-toolbar
-                  class="walletAppToolbar mb-3"
-                  color="white"
+                  class="walletAppToolbar"
                   flat
-                  dense>
+                  dense
+                  v-if="wallet && contractDetails">
                   <div
                     v-if="displayWarnings"
                     id="etherTooLowWarningParent"
@@ -101,12 +71,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     @close="showSettingsModal = false"
                     @settings-changed="init()" />
                 </v-toolbar>
-
-                <v-toolbar
-                  class="additionalToolbar"
-                  color="white"
-                  flat
-                  dense>
+                <v-flex class="my-8">
                   <wallet-setup
                     ref="walletSetup"
                     :is-space="isSpace"
@@ -120,8 +85,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       loading = false;
                       error = $event;
                     " />
-                </v-toolbar>
-                <v-flex>
+                </v-flex>
+                <v-flex v-if="wallet && contractDetails">
                   <v-layout
                     row
                     wrap
@@ -139,11 +104,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                         @display-transactions="openAccountDetail"
                         @error="error = $event" />
                     </v-flex>
-                  </v-layout>
-                  <v-layout
-                    row
-                    wrap
-                    class="ms-0 me-0 pr-0">
                     <template v-if="initializationState !== 'DENIED'">
                       <v-flex
                         class="px-8 transactionChart">
@@ -172,31 +132,30 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     </v-flex>
                   </v-layout>
                 </v-flex>
-              </v-layout>
-            </v-card>
-
-            <!-- The selected account detail -->
-            <v-navigation-drawer
-              id="accountDetailsDrawer"
-              v-model="seeAccountDetails"
-              :right="!$vuetify.rtl"
-              absolute
-              stateless
-              temporary
-              width="700"
-              max-width="100vw">
-              <account-detail
-                ref="accountDetail"
-                :fiat-symbol="fiatSymbol"
-                :wallet="wallet"
-                :contract-details="selectedAccount"
-                :selected-transaction-hash="selectedTransactionHash"
-                :selected-contract-method-name="selectedContractMethodName"
-                @back="back()" />
-            </v-navigation-drawer>
-          </v-tab-item>
-        </v-tabs-items>
-      </v-app>
+              </v-tab-item>
+            </v-tabs-items>
+          </v-app>
+        </v-flex>
+      </v-layout>
+      <!-- The selected account detail -->
+      <v-navigation-drawer
+        id="accountDetailsDrawer"
+        v-model="seeAccountDetails"
+        :right="!$vuetify.rtl"
+        absolute
+        stateless
+        temporary
+        width="700"
+        max-width="100vw">
+        <account-detail
+          ref="accountDetail"
+          :fiat-symbol="fiatSymbol"
+          :wallet="wallet"
+          :contract-details="selectedAccount"
+          :selected-transaction-hash="selectedTransactionHash"
+          :selected-contract-method-name="selectedContractMethodName"
+          @back="back()" />
+      </v-navigation-drawer>
       <div id="walletDialogsParent">
       </div>
     </main>
