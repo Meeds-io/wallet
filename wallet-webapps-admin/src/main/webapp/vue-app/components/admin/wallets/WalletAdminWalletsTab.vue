@@ -41,46 +41,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       row
       wrap
       class="border-box-sizing mx-0">
-      <v-flex
-        md4
-        xs12
-        class="mt-2 border-box-sizing">
-        <v-btn-toggle
-          v-model="walletTypes"
-          class="walletFilterButtons"
-          mandatory
-          multiple
-          text>
-          <v-btn value="user">
-            {{ $t('exoplatform.wallet.label.users') }}
-          </v-btn>
-          <v-btn value="space">
-            {{ $t('exoplatform.wallet.label.spaces') }}
-          </v-btn>
-        </v-btn-toggle>
-      </v-flex>
-      <v-flex
-        md3
-        offset-md1
-        offset-xs0
-        xs12
-        class="mt-2 border-box-sizing">
-        <v-btn-toggle
-          v-model="walletStatuses"
-          class="walletFilterButtons"
-          multiple
-          text>
-          <v-btn value="disabled">
-            {{ $t('exoplatform.wallet.label.disabled') }}
-          </v-btn>
-          <v-btn value="disapproved">
-            {{ $t('exoplatform.wallet.label.disapproved') }}
-          </v-btn>
-          <v-btn value="deletedIdentity">
-            {{ $t('exoplatform.wallet.label.deleted') }}
-          </v-btn>
-        </v-btn-toggle>
-      </v-flex>
+      <v-spacer />
       <v-flex
         md3
         offset-md1
@@ -96,23 +57,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-layout>
     <v-data-table
       :headers="walletTableHeaders"
-      :items="filteredWallets"
-      :items-per-page="1000"
-      :loading="loadingWallets"
-      hide-default-footer>
+      :items="wallets"
+      :items-per-page="limit"
+      :loading="loadingWallets">
       <template slot="item" slot-scope="props">
         <transition name="fade">
-          <tr v-show="props.item.displayedWallet">
+          <tr v-show="wallets">
             <td class="clickable" @click="openAccountDetail(props.item)">
-              <v-avatar size="36px">
+              <v-avatar size="29" class="mx-1">
                 <img
                   v-if="props.item.avatar"
                   :src="props.item.avatar"
                   onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
-                <v-icon v-else size="36">fa-cog</v-icon>
+                <v-icon v-else size="29">fa-cog</v-icon>
               </v-avatar>
-            </td>
-            <td class="clickable text-start" @click="openAccountDetail(props.item)">
               <profile-chip
                 :address="props.item.address"
                 :profile-id="props.item.id"
@@ -180,43 +138,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} eth
               </template>
             </td>
-            <td
-              v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1"
-              class="clickable"
-              @click="openAccountDetail(props.item)">
-              <template v-if="props.item.type === 'user' || props.item.type === 'space'">
-                <v-icon
-                  v-if="props.item.initializationState === 'NEW'"
-                  :title="$t('exoplatform.wallet.label.newWallet')"
-                  color="primary">
-                  fa-hands
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'MODIFIED'"
-                  :title="$t('exoplatform.wallet.label.modifiedWallet')"
-                  color="orange">
-                  fa-hands
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'DENIED'"
-                  :title="$t('exoplatform.wallet.label.deniedWallet')"
-                  color="orange">
-                  fa-times-circle
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'PENDING'"
-                  :title="$t('exoplatform.wallet.label.initializationInProgressForWallet')"
-                  color="primary">
-                  fa-dot-circle
-                </v-icon>
-                <v-icon
-                  v-else-if="props.item.initializationState === 'INITIALIZED'"
-                  :title="$t('exoplatform.wallet.label.initializedWallet')"
-                  color="green">
-                  fa-check-circle
-                </v-icon>
-              </template>
-            </td>
             <td class="text-center">
               <v-progress-circular
                 v-if="props.item.pendingTransaction || props.item.loading"
@@ -281,15 +202,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </transition>
       </template>
     </v-data-table>
-    <v-flex v-if="showLoadMore" justify-center>
-      <v-btn
-        :loading="loading"
-        color="primary"
-        text
-        @click="limit += pageSize">
-        {{ $t('exoplatform.wallet.button.loadMore') }}
-      </v-btn>
-    </v-flex>
 
     <initialize-account-modal
       ref="initAccountModal"
@@ -391,9 +303,8 @@ export default {
       walletToProcess: null,
       etherAmount: null,
       tokenAmount: null,
-      limit: 10,
-      pageSize: 10,
-      walletTypes: ['user'],
+      limit: 5,
+      walletTypes: ['user','space','admin'],
       walletStatuses: ['disapproved'],
     };
   },
@@ -401,14 +312,8 @@ export default {
     walletHeaders() {
       return [
         {
-          text: '',
-          align: 'center',
-          sortable: false,
-          value: 'avatar',
-        },
-        {
           text: this.$t('exoplatform.wallet.label.name'),
-          align: 'start',
+          align: 'center',
           sortable: true,
           value: 'name',
         },
@@ -429,13 +334,7 @@ export default {
           value: 'etherBalance',
         },
         {
-          text: this.$t('exoplatform.wallet.label.initializationstatus'),
-          align: 'center',
-          sortable: true,
-          value: 'initializationState',
-        },
-        {
-          text: '',
+          text: 'exoplatform.wallet.label.actions',
           align: 'center',
           sortable: false,
           value: '',
@@ -491,26 +390,6 @@ export default {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
-    },
-    showLoadMore() {
-      return this.displayedWallets.length === this.limit;
-    },
-    displayedWallets() {
-      return this.wallets.filter(this.isDisplayWallet).slice(0, this.limit);
-    },
-    filteredWallets() {
-      if (this.displayedWallets && this.displayedWallets.length) {
-        const lastElement = this.displayedWallets[this.displayedWallets.length - 1];
-        const limit = this.wallets.findIndex(wallet => wallet.technicalId === lastElement.technicalId) + 1;
-        // Set 'displayedWallet' attribute on wallets, used to know whether to retrieve
-        // wallet data from blockchain or not
-        this.wallets.forEach((wallet, index) => {
-          wallet.displayedWallet = index < limit && this.displayedWallets.filter(displayedWallet => displayedWallet.technicalId === wallet.technicalId) && true;
-        });
-        return this.displayedWallets.slice(0, limit);
-      } else {
-        return [];
-      }
     }
   },
   watch: {
