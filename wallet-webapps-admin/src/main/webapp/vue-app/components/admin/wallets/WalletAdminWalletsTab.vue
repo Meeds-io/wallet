@@ -454,7 +454,8 @@ export default {
         && (this.displayDeletedIdentities || !wallet.deletedUser)
         && (this.displayDisapprovedWallets || wallet.isApproved)
         && (!this.search
-            || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+            || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+            || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
     },
     refreshWallet(wallet, refreshOnBlockchain) {
       wallet.loading = true;
