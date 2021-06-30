@@ -17,81 +17,67 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <v-layout
     wrap
-    xs12
-    class="mt-4 mb-6">
-    <v-flex
-      class="headline mx-auto mb-7 text-center"
-      xs12>
-      <a
-        :href="requestFundsLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="no-wrap requestFundsLink">
-        {{ $t('exoplatform.wallet.button.requestFunds') }}
-      </a>
-    </v-flex>
-
-    <v-flex
-      class="headline my-auto text-center text-md-end"
-      md5
-      xs12>
-      {{ $t('exoplatform.wallet.title.adminWalletFunds') }}
-    </v-flex>
-
-    <v-flex
-      class="my-auto"
-      md2
-      xs6>
-      <div class="text-center no-wrap">{{ $t('exoplatform.wallet.label.tokenBalance', {0: tokenName}) }}</div>
-      <div class="text-center no-wrap">
-        <v-progress-circular
-          v-if="loadingBalances"
-          color="primary"
-          class="me-4"
-          indeterminate
-          size="20" />
-        <template v-else>
-          {{ tokenBalanceLabel }}
-          <v-icon
-            v-if="adminBalanceTooLow"
-            color="orange"
-            :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
-            warning
-          </v-icon>
-        </template>
-      </div>
-    </v-flex>
-
-    <v-flex
-      class="my-auto"
-      md2
-      xs6>
-      <div class="ma-auto no-wrap">{{ $t('exoplatform.wallet.label.etherBalance') }}</div>
-      <div class="ma-auto no-wrap">
-        <v-progress-circular
-          v-if="loadingBalances"
-          color="primary"
-          class="me-4"
-          indeterminate
-          size="20" />
-        <template v-else>
-          {{ etherBalanceLabel }}
-        </template>
-      </div>
-    </v-flex>
-
-    <v-flex
-      class="my-auto text-center text-md-start no-wrap"
-      md1
-      xs12>
+    class="mt-8 mb-6 adminWallet">
+    <div class="mx-4">
       <v-btn
-        icon
-        text
-        class="ms-4"
-        @click="$emit('refresh-balance')">
-        <v-icon color="grey">refresh</v-icon>
+        outlined
+        :href="requestFundsLink">
+        {{ $t('exoplatform.wallet.button.requestFunds') }}
       </v-btn>
-    </v-flex>
+    </div>
+    <div class="text-center no-wrap mx-4 title">
+      <span class="labels"> {{ tokenName }}: </span>
+      <v-progress-circular
+        v-if="loadingBalances"
+        color="primary"
+        class="me-4"
+        indeterminate
+        size="20" />
+      <template v-else>
+        <span class="symbol"> {{ tokenSymbol }} </span> {{ tokenBalance }}
+        <v-icon
+          v-if="adminBalanceTooLow"
+          color="orange"
+          :title="$t('exoplatform.wallet.label.adminBalanceTooLow')">
+          warning
+        </v-icon>
+      </template>
+    </div>
+    <v-divider
+      class="mx-4"
+      width="100"
+      vertical />
+    <div class="no-wrap mx-4 title">
+      <span class="labels"> {{ $t('exoplatform.wallet.label.ethers') }}: </span>
+      <v-progress-circular
+        v-if="loadingBalances"
+        color="primary"
+        class="me-4"
+        indeterminate
+        size="20" />
+      <template v-else>
+        {{ etherBalanceLabel }}
+      </template>
+    </div>
+    <v-dialog
+      v-model="dialog"
+      width="500">
+      <template v-slot:activator="{ on, attrs }">
+        <a
+          target="_blank"
+          v-bind="attrs"
+          v-on="on"
+          class="no-wrap mx-5 title ethereumAddress">{{ $t('exoplatform.wallet.label.ethereumAddress') }}</a>
+      </template>
+      <v-card>
+        <v-card-title class="text-h4 grey lighten-2">
+          {{ $t('exoplatform.wallet.label.ethereumAddress') }}
+        </v-card-title>
+        <v-card-text class="mt-4">
+          {{ adminWalletAddress }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 
@@ -118,6 +104,11 @@ export default {
       },
     },
   },
+  data () {
+    return {
+      dialog: false,
+    };
+  },
   computed: {
     adminBalance() {
       return (this.adminWallet && this.walletUtils.toFixed(this.adminWallet.tokenBalance)) || 0;
@@ -143,14 +134,11 @@ export default {
     tokenBalance() {
       return (this.adminWallet && this.adminWallet.tokenBalance) || 0;
     },
-    tokenBalanceLabel() {
-      return `${this.walletUtils.toFixed(this.tokenBalance)} ${this.tokenSymbol}`;
-    },
     etherBalance() {
       return (this.adminWallet && this.adminWallet.etherBalance) || 0;
     },
     etherBalanceLabel() {
-      return `${this.walletUtils.toFixed(this.etherBalance)} eth`;
+      return `${this.walletUtils.toFixed(this.etherBalance)} E`;
     },
   },
 };

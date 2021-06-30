@@ -596,10 +596,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .amount {
       line-height: 40px;
     }
-    .symbol{
-      color : @errorColor;
-    }
   }
+
   .walletSummaryActions {
     margin-top: 5px;
 
@@ -726,10 +724,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     display: block;
   }
 }
-.walletTitle{
-  font-weight: bold;
-}
-
+  .walletTitle{
+    font-weight: bold;
+  }
+  .symbol{
+    color : @errorColor;
+  }
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {
   #WalletApp, #SpaceWalletApp {
@@ -749,6 +749,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 }
 .uiIconSendFunds:before {
   content: none !important
+}
+.adminWallet{
+  .v-btn {
+    text-transform: none !important;
+  }
+  .labels {
+    color: #808080;
+    font-weight: bold !important;
+  }
+  .ethereumAddress {
+    color: @primaryColor !important;
+  }
 }
 
 @media (min-width: 1201px) and (max-width: 1300px) {
