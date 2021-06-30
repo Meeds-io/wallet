@@ -44,25 +44,24 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-spacer />
       <v-flex
         md3
-        offset-md1
         offset-xs0
         xs12
-        class="mt-2 border-box-sizing">
+        class="mt-2 mx-4 border-box-sizing">
         <v-text-field
           v-model="search"
           :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
-          append-icon="search"
-          class="pt-0 mt-0" />
+          prepend-inner-icon="fa-filter"
+          class="pt-0 mt-0 walletTextField" />
       </v-flex>
     </v-layout>
     <v-data-table
       :headers="walletTableHeaders"
-      :items="wallets"
+      :items="displayedWallets"
       :items-per-page="limit"
       :loading="loadingWallets">
       <template slot="item" slot-scope="props">
         <transition name="fade">
-          <tr v-show="wallets">
+          <tr v-show="displayedWallets">
             <td class="clickable" @click="openAccountDetail(props.item)">
               <v-avatar size="29" class="mx-1">
                 <img
@@ -390,7 +389,10 @@ export default {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
-    }
+    },
+    displayedWallets() {
+      return this.wallets.filter(this.isDisplayWallet);
+    },
   },
   watch: {
     seeAccountDetails() {
@@ -452,7 +454,6 @@ export default {
         && (this.displayDeletedIdentities || !wallet.deletedUser)
         && (this.displayDisapprovedWallets || wallet.isApproved)
         && (!this.search
-            || wallet.initializationState.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
     },
