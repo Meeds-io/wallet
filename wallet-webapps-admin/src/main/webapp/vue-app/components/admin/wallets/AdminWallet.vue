@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       width="100"
       vertical />
     <div class="no-wrap mx-4 title">
-      <span class="labels"> {{ $t('exoplatform.wallet.label.etherBalance') }}: </span>
+      <span class="labels"> {{ $t('exoplatform.wallet.label.ethers') }}: </span>
       <v-progress-circular
         v-if="loadingBalances"
         color="primary"
