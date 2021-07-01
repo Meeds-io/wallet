@@ -218,6 +218,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </external-component-plugins>
 
   <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.addressAssociation.new</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.AutoTransactionListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
     <target-component>org.exoplatform.commons.api.persistence.DataInitializer</target-component>
     <component-plugin>
       <name>WalletRDBMSChangeLogsPlugin</name>
