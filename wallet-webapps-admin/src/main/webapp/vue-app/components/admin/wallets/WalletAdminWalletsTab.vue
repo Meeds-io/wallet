@@ -451,15 +451,15 @@ export default {
     filterWallet() {
       if (this.filterWallet === 'Disabled wallets by admin') {
         this.walletStatuses = ['disabledWallet'];
-        this.newsFilterLabel = this.$t(`exoplatform.wallet.label.disabledWalletsByAdmin`);
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledWalletsByAdmin');
       } else if (this.filterWallet === 'Wallets of disabled users'){
         this.walletStatuses = ['disabledUser'];
-        this.newsFilterLabel = this.$t(`exoplatform.wallet.label.disabledUsersWallets`);
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledUsersWallets');
       } else if (this.filterWallet === 'Rejected wallets') {
         this.walletStatuses = ['rejectedWallet'];
-        this.newsFilterLabel = this.$t(`exoplatform.wallet.label.rejectedWallets`);
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.rejectedWallets');
       } else {
-      this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
         this.walletStatuses = ['disapproved'];
       }
       this.showMenu = false;
