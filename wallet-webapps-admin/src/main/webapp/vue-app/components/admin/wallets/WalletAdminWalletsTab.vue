@@ -69,13 +69,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-list-item-title class="filterLabel" @click="filterWallet ='all'">{{ $t('exoplatform.wallet.label.All') }}</v-list-item-title>
             </v-list-item>
             <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='Disabled wallets by admin'">{{ $t('exoplatform.wallet.label.disabledWalletsByAdmin') }}</v-list-item-title>
+              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledWallets'">{{ $t('exoplatform.wallet.label.disabledWalletsByAdmin') }}</v-list-item-title>
             </v-list-item>
             <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='Wallets of disabled users'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
+              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledUsersWallets'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
             </v-list-item>
             <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='Rejected wallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
+              <v-list-item-title class="filterLabel" @click="filterWallet ='RejectedWallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -449,13 +449,13 @@ export default {
       }
     },
     filterWallet() {
-      if (this.filterWallet === 'Disabled wallets by admin') {
+      if (this.filterWallet === 'DisabledWallets') {
         this.walletStatuses = ['disabledWallet'];
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledWalletsByAdmin');
-      } else if (this.filterWallet === 'Wallets of disabled users'){
+      } else if (this.filterWallet === 'DisabledUsersWallets'){
         this.walletStatuses = ['disabledUser'];
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledUsersWallets');
-      } else if (this.filterWallet === 'Rejected wallets') {
+      } else if (this.filterWallet === 'RejectedWallets') {
         this.walletStatuses = ['rejectedWallet'];
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.rejectedWallets');
       } else {
