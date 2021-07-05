@@ -40,18 +40,45 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-layout
       row
       wrap
-      class="border-box-sizing mx-0">
+      class="border-box-sizing mx-0 infoMenu ">
       <v-spacer />
       <v-flex
-        md3
-        offset-xs0
-        xs12
-        class="mt-2 mx-4 border-box-sizing">
+        class="mt-2 mx-4 border-box-sizing walletTextField">
         <v-text-field
           v-model="search"
           :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
           prepend-inner-icon="fa-filter"
-          class="pt-0 mt-0 walletTextField" />
+          class="pt-0 mt-0" />
+      </v-flex>
+      <v-flex
+        class="mt-2 mx-4 border-box-sizing dropDownFilter">
+        <v-menu
+          v-model="showMenu"
+          offset-y>
+          <template v-slot:activator="{ on }">
+            <button
+              class="btn"
+              v-on="on"
+              @blur="closeMenu">
+              {{ newsFilterLabel }}
+              <i class="uiIconMiniArrowDown uiIconLightGray"></i>
+            </button>
+          </template>
+          <v-list>
+            <v-list-item @mousedown="$event.preventDefault()">
+              <v-list-item-title class="filterLabel" @click="filterWallet ='all'">{{ $t('exoplatform.wallet.label.All') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @mousedown="$event.preventDefault()">
+              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledWallets'">{{ $t('exoplatform.wallet.label.disabledWalletsByAdmin') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @mousedown="$event.preventDefault()">
+              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledUsersWallets'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
+            </v-list-item>
+            <v-list-item @mousedown="$event.preventDefault()">
+              <v-list-item-title class="filterLabel" @click="filterWallet ='RejectedWallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-flex>
     </v-layout>
     <v-data-table
@@ -61,7 +88,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :loading="loadingWallets">
       <template slot="item" slot-scope="props">
         <transition name="fade">
-          <tr v-show="displayedWallets">
+          <tr v-show="wallets">
             <td class="clickable" @click="openAccountDetail(props.item)">
               <v-avatar size="29" class="mx-1">
                 <img
@@ -286,6 +313,9 @@ export default {
   data() {
     return {
       search: null,
+      newsFilterLabel: '',
+      filterWallet: '',
+      showMenu: false,
       loadingWallets: false,
       selectedTransactionHash: null,
       seeAccountDetails: false,
@@ -333,7 +363,7 @@ export default {
           value: 'etherBalance',
         },
         {
-          text: 'exoplatform.wallet.label.actions',
+          text: this.$t('exoplatform.wallet.label.actions'),
           align: 'center',
           sortable: false,
           value: '',
@@ -365,10 +395,13 @@ export default {
       return this.walletStatuses && this.walletStatuses.includes('disapproved');
     },
     displayDisabledWallets() {
-      return this.walletStatuses && this.walletStatuses.includes('disabled');
+      return this.walletStatuses && this.walletStatuses.includes('disabledWallet');
     },
-    displayDeletedIdentities() {
-      return this.walletStatuses && this.walletStatuses.includes('deletedIdentity');
+    displayDisabledUserWallets() {
+      return this.walletStatuses && this.walletStatuses.includes('disabledUser');
+    },
+    displayRejectedWallets() {
+      return this.walletStatuses && this.walletStatuses.includes('rejectedWallet');
     },
     etherAccountDetails() {
       return {
@@ -391,7 +424,15 @@ export default {
       return walletTableHeaders;
     },
     displayedWallets() {
-      return this.wallets.filter(this.isDisplayWallet);
+      if (this.displayDisabledWallets ) {
+        return this.wallets.filter(wallet => wallet.enabled === false);
+      } else if (this.displayDisabledUserWallets ) {
+        return this.wallets.filter(wallet => wallet.enabled === true && wallet.disabledUser === true);
+      } else if (this.displayRejectedWallets ) {
+        return this.wallets.filter(wallet =>  wallet.initializationState === 'DENIED');
+      } else {
+        return this.wallets.filter(this.isDisplayWallet);
+      }
     },
   },
   watch: {
@@ -407,6 +448,25 @@ export default {
         this.seeAccountDetailsPermanent = false;
       }
     },
+    filterWallet() {
+      if (this.filterWallet === 'DisabledWallets') {
+        this.walletStatuses = ['disabledWallet'];
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledWalletsByAdmin');
+      } else if (this.filterWallet === 'DisabledUsersWallets'){
+        this.walletStatuses = ['disabledUser'];
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledUsersWallets');
+      } else if (this.filterWallet === 'RejectedWallets') {
+        this.walletStatuses = ['rejectedWallet'];
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.rejectedWallets');
+      } else {
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
+        this.walletStatuses = ['disapproved'];
+      }
+      this.showMenu = false;
+    },
+  },
+  created() {
+    this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
   },
   methods: {
     init() {
@@ -451,8 +511,8 @@ export default {
         && (this.displaySpaces || wallet.type !== 'space')
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
-        && (this.displayDeletedIdentities || !wallet.deletedUser)
         && (this.displayDisapprovedWallets || wallet.isApproved)
+        && (this.displayRejectedWallets || wallet.initializationState !== 'DENIED')
         && (!this.search
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
@@ -568,7 +628,10 @@ export default {
       } else if (this.confirmAction === 'deny') {
         this.changeWalletInitializationStatus(this.walletToProcess, 'DENIED');
       }
-    }
+    },
+    closeMenu() {
+      this.showMenu = false;
+    },
   },
 };
 </script>
