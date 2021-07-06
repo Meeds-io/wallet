@@ -21,7 +21,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div class="mx-4">
       <v-btn
         outlined
-        :href="requestFundsLink">
+        :href="requestFundsLink"
+        target="_blank">
         {{ $t('exoplatform.wallet.button.requestFunds') }}
       </v-btn>
     </div>

@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         class="mt-2 mx-4 border-box-sizing walletTextField">
         <v-text-field
           v-model="search"
-          :label="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
+          :placeholder="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
           prepend-inner-icon="fa-filter"
           class="pt-0 mt-0" />
       </v-flex>
@@ -89,8 +89,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <template slot="item" slot-scope="props">
         <transition name="fade">
           <tr v-show="wallets">
-            <td class="clickable" @click="openAccountDetail(props.item)">
-              <v-avatar size="29" class="mx-1">
+            <td class="text-truncate">
+              <v-avatar
+                size="29"
+                class="mx-1 clickable"
+                @click="openAccountDetail(props.item)">
                 <img
                   v-if="props.item.avatar"
                   :src="props.item.avatar"
@@ -161,7 +164,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 indeterminate
                 size="20" />
               <template v-else>
-                {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} eth
+                {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} E
               </template>
             </td>
             <td class="text-center">
@@ -172,12 +175,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 class="me-4"
                 indeterminate
                 size="20" />
-              <v-menu v-else offset-y>
-                <template v-slot:activator="{ on }">
+              <v-menu
+                v-else
+                offset-y
+                :value="actionSelectedWallet === props.item">
+                <template
+                  v-slot:activator="{ on }">
                   <v-btn
                     icon
                     small
-                    v-on="on">
+                    v-on="on"
+                    class="actionsButton"
+                    @click="actionSelectedWallet = props.item"
+                    @blur="closeActionsMenu">
                     <v-icon size="20px">fa-ellipsis-v</v-icon>
                   </v-btn>
                 </template>
@@ -323,6 +333,7 @@ export default {
       selectedWalletAddress: null,
       selectedWallet: null,
       selectedWalletDetails: null,
+      actionSelectedWallet: {},
       informationTitle: null,
       informationMessage: null,
       hideConfirmActions: null,
@@ -631,6 +642,9 @@ export default {
     },
     closeMenu() {
       this.showMenu = false;
+    },
+    closeActionsMenu() {
+      this.actionSelectedWallet = {};
     },
   },
 };
