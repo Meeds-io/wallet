@@ -651,7 +651,7 @@ public class WalletUtils {
     wallet.setDeletedUser(identity.isDeleted());
     wallet.setType(walletType.getId());
     if (walletType.isUser() || walletType.isSpace()) {
-      wallet.setAvatar(LinkProvider.buildAvatarURL(identity.getProviderId(), identity.getRemoteId()));
+      wallet.setAvatar(identity.getProfile().getAvatarUrl());
     }
     if (walletType.isUser()) {
       wallet.setName(identity.getProfile().getFullName());

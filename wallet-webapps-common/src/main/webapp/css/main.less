@@ -753,13 +753,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 .adminWallet{
   .v-btn {
     text-transform: none !important;
+    border-color: rgba(0, 0, 0, 0.25) !important;
   }
   .labels {
-    color: #808080;
+    color:  rgba(0, 0, 0, 0.25);
     font-weight: bold !important;
+    font-size :16px;
   }
   .ethereumAddress {
     color: @primaryColor !important;
+    font-size :16px !important;
   }
 }
 .infoMenu{
@@ -777,6 +780,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       width: 95%;
     }
   }
+}
+#WalletAdminApp{
+ .actionsButton{
+    color: rgba(0, 0, 0, 0.25) !important;
+ }
 }
 @media (min-width: 1201px) and (max-width: 1300px) {
   #walletBalancePortlet {
