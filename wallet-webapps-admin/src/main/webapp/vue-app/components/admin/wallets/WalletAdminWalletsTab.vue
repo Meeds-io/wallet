@@ -37,50 +37,45 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :initial-token-amount="tokenAmount"
       :contract-details="contractDetails"
       @refresh-balance="refreshWallet(walletAdmin, true)" />
-    <v-layout
-      row
-      wrap
-      class="border-box-sizing mx-0 infoMenu ">
+    <v-toolbar
+      color="transparent"
+      flat
+      class="border-box-sizing mx-0 infoMenu">
       <v-spacer />
-      <v-flex
-        class="mt-2 mx-4 border-box-sizing walletTextField">
-        <v-text-field
-          v-model="search"
-          :placeholder="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
-          prepend-inner-icon="fa-filter"
-          class="pt-0 mt-0" />
-      </v-flex>
-      <v-flex
-        class="mt-2 mx-4 border-box-sizing dropDownFilter">
-        <v-menu
-          v-model="showMenu"
-          offset-y>
-          <template v-slot:activator="{ on }">
-            <button
-              class="btn"
-              v-on="on"
-              @blur="closeMenu">
-              {{ newsFilterLabel }}
-              <i class="uiIconMiniArrowDown uiIconLightGray"></i>
-            </button>
-          </template>
-          <v-list>
-            <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='all'">{{ $t('exoplatform.wallet.label.All') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledWallets'">{{ $t('exoplatform.wallet.label.disabledWalletsByAdmin') }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledUsersWallets'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
-            </v-list-item>
-            <v-list-item @mousedown="$event.preventDefault()">
-              <v-list-item-title class="filterLabel" @click="filterWallet ='RejectedWallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-flex>
-    </v-layout>
+      <v-text-field
+        v-model="search"
+        :placeholder="$t('exoplatform.wallet.label.searchInWalletPlaceholder')"
+        prepend-inner-icon="fa-filter"
+        class="pt-0 border-box-sizing walletTextField text-truncate mb-n4" />
+      <v-menu
+        v-model="showMenu"
+        offset-y
+        class="border-box-sizing dropDownFilter">
+        <template v-slot:activator="{ on }">
+          <button
+            class="btn mx-4"
+            v-on="on"
+            @blur="closeMenu">
+            {{ newsFilterLabel }}
+            <i class="uiIconMiniArrowDown uiIconLightGray"></i>
+          </button>
+        </template>
+        <v-list>
+          <v-list-item @mousedown="$event.preventDefault()">
+            <v-list-item-title class="filterLabel" @click="filterWallet ='all'">{{ $t('exoplatform.wallet.label.All') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item @mousedown="$event.preventDefault()">
+            <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledWallets'">{{ $t('exoplatform.wallet.label.disabledWalletsByAdmin') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item @mousedown="$event.preventDefault()">
+            <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledUsersWallets'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
+          </v-list-item>
+          <v-list-item @mousedown="$event.preventDefault()">
+            <v-list-item-title class="filterLabel" @click="filterWallet ='RejectedWallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-toolbar>
     <v-data-table
       :headers="walletTableHeaders"
       :items="displayedWallets"
@@ -414,6 +409,9 @@ export default {
     displayRejectedWallets() {
       return this.walletStatuses && this.walletStatuses.includes('rejectedWallet');
     },
+    displayAllWallets() {
+      return this.walletStatuses && this.walletStatuses.includes('all');
+    },
     etherAccountDetails() {
       return {
         title: 'ether',
@@ -435,15 +433,7 @@ export default {
       return walletTableHeaders;
     },
     displayedWallets() {
-      if (this.displayDisabledWallets ) {
-        return this.wallets.filter(wallet => wallet.enabled === false);
-      } else if (this.displayDisabledUserWallets ) {
-        return this.wallets.filter(wallet => wallet.enabled === true && wallet.disabledUser === true);
-      } else if (this.displayRejectedWallets ) {
-        return this.wallets.filter(wallet =>  wallet.initializationState === 'DENIED');
-      } else {
-        return this.wallets.filter(this.isDisplayWallet);
-      }
+      return this.wallets.filter(this.isDisplayWallet);
     },
   },
   watch: {
@@ -471,7 +461,7 @@ export default {
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.rejectedWallets');
       } else {
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
-        this.walletStatuses = ['disapproved'];
+        this.walletStatuses = ['all'];
       }
       this.showMenu = false;
     },
@@ -517,16 +507,52 @@ export default {
       return (sortA > sortB && 1) || (sortA < sortB && (-1)) || 0; // NOSONAR
     },
     isDisplayWallet(wallet) {
-      return wallet && wallet.address
+      if (this.displayDisabledWallets ) {
+        return wallet && wallet.address
+          && (this.displayUsers || wallet.type !== 'user')
+          && (this.displaySpaces || wallet.type !== 'space')
+          && (this.displayAdmin || wallet.type !== 'admin')
+          && (this.displayDisabledWallets && (!wallet.enabled && !wallet.disabledUser))
+          && (!this.search
+            || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+            || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+      } else if (this.displayDisabledUserWallets ) {
+        return wallet && wallet.address
+            && (this.displayUsers || wallet.type !== 'user')
+            && (this.displaySpaces || wallet.type !== 'space')
+            && (this.displayAdmin || wallet.type !== 'admin')
+            && (this.displayDisabledUserWallets && wallet.disabledUser)
+            && (!this.search
+              || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+              || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+      } else if (this.displayRejectedWallets ) {
+        return wallet && wallet.address
+            && (this.displayUsers || wallet.type !== 'user')
+            && (this.displaySpaces || wallet.type !== 'space')
+            && (this.displayAdmin || wallet.type !== 'admin')
+            && (this.displayRejectedWallets && wallet.initializationState === 'DENIED')
+            && (!this.search
+              || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+              || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+      } else if (this.displayAllWallets ) {
+        return wallet && wallet.address
+        && (!this.search
+            || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
+            || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+      } else {
+        return wallet && wallet.address
         && (this.displayUsers || wallet.type !== 'user')
         && (this.displaySpaces || wallet.type !== 'space')
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
         && (this.displayDisapprovedWallets || wallet.isApproved)
         && (this.displayRejectedWallets || wallet.initializationState !== 'DENIED')
+        && (this.displayDisabledUserWallets || !wallet.disabledUser)
         && (!this.search
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
+      }
+
     },
     refreshWallet(wallet, refreshOnBlockchain) {
       wallet.loading = true;
