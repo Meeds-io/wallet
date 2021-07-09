@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         indeterminate
         size="20" />
       <template v-else>
-        <span class="symbol"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
+        <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
         <v-icon
           v-if="adminBalanceTooLow"
           color="orange"
