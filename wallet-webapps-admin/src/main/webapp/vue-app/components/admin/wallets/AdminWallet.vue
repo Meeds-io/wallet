@@ -68,10 +68,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           target="_blank"
           v-bind="attrs"
           v-on="on"
-          class="no-wrap mx-5 title ethereumAddress">{{ $t('exoplatform.wallet.label.ethereumAddress') }}</a>
+          class="no-wrap mx-5 title">
+          <span class="ethereumAddress"> {{ $t('exoplatform.wallet.label.ethereumAddress') }}</span></a>
       </template>
       <v-card>
-        <v-card-title class="text-h4 grey lighten-2">
+        <v-card-title class="ethereumAddressTitle grey lighten-2">
           {{ $t('exoplatform.wallet.label.ethereumAddress') }}
         </v-card-title>
         <v-card-text class="mt-4">
