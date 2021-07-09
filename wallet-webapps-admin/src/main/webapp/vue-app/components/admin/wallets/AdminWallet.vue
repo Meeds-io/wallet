@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         indeterminate
         size="20" />
       <template v-else>
-        <span class="symbol"> {{ tokenSymbol }} </span> {{ tokenBalance }}
+        <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
         <v-icon
           v-if="adminBalanceTooLow"
           color="orange"
@@ -57,7 +57,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         indeterminate
         size="20" />
       <template v-else>
-        {{ etherBalanceLabel }}
+        <span class="fundsLabels"> {{ etherBalanceLabel }} </span>
       </template>
     </div>
     <v-dialog
@@ -68,10 +68,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           target="_blank"
           v-bind="attrs"
           v-on="on"
-          class="no-wrap mx-5 title ethereumAddress">{{ $t('exoplatform.wallet.label.ethereumAddress') }}</a>
+          class="no-wrap mx-5 title">
+          <span class="ethereumAddress"> {{ $t('exoplatform.wallet.label.ethereumAddress') }}</span></a>
       </template>
       <v-card>
-        <v-card-title class="text-h4 grey lighten-2">
+        <v-card-title class="ethereumAddressTitle grey lighten-2">
           {{ $t('exoplatform.wallet.label.ethereumAddress') }}
         </v-card-title>
         <v-card-text class="mt-4">
