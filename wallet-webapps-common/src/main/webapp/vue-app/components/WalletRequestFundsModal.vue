@@ -26,12 +26,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template v-slot:activator="{ on }">
       <v-btn
         :disabled="disabledButton"
-        class="btn white"
+        class="btn"
+        color="primary"
         v-on="on">
         <v-icon class="mr-6">
           mdi-cash-multiple
         </v-icon>
-        {{ $t('exoplatform.wallet.button.request') }}
+        {{ $t('exoplatform.wallet.button.requestFunds') }}
       </v-btn>
     </template>
     <v-card class="elevation-12">

@@ -17,14 +17,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div id="walletAppMenu">
     <v-btn
-      v-if="!isSpace || isSpaceAdministrator"
       id="walletAppMenuSettingsButton"
       :title="$t('exoplatform.wallet.button.security')"
       class="me-0 ms-0"
       icon
       text
       @click="$emit('modify-settings')">
-      <v-icon size="30">
+      <v-icon size="26">
         fa-cog
       </v-icon>
     </v-btn>
