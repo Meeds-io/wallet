@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     ref="walletSummaryActions"
     :right="!$vuetify.rtl">
     <template slot="title">
-      <span class="mx-2"> {{ $t('exoplatform.perkstore.label.filterOrders') }} </span>
+      <span class="mx-2"> {{ $t('exoplatform.wallet.label.exchanges') }} </span>
     </template>
     <template slot="content">
       <v-layout

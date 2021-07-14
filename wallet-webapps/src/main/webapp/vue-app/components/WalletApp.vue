@@ -31,47 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-tabs>
             <v-tabs-items v-model="tab" class="tabs-content">
               <v-tab-item eager>
-                <v-toolbar
-                  class="walletAppToolbar"
-                  flat
-                  dense
-                  v-if="wallet && contractDetails">
-                  <div
-                    v-if="displayWarnings"
-                    id="etherTooLowWarningParent"
-                    class="ms-2">
-                    <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
-                      warning
-                    </v-icon>
-                    <v-icon
-                      v-if="displayDisapprovedWallet"
-                      slot="activator"
-                      :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
-                      color="orange">
-                      warning
-                    </v-icon>
-                  </div>
-
-                  <v-spacer />
-
-                  <toolbar-menu
-                    ref="walletAppMenu"
-                    :is-space="isSpace"
-                    :is-space-administrator="isSpaceAdministrator"
-                    @refresh="init()"
-                    @modify-settings="showSettingsModal = true" />
-
-                  <settings-modal
-                    ref="walletSettingsModal"
-                    :is-space="isSpace"
-                    :open="showSettingsModal"
-                    :wallet="wallet"
-                    :app-loading="loading"
-                    :display-reset-option="displayWalletResetOption"
-                    @close="showSettingsModal = false"
-                    @settings-changed="init()" />
-                </v-toolbar>
-                <v-flex class="my-8">
+                <v-flex>
                   <wallet-setup
                     ref="walletSetup"
                     :is-space="isSpace"
@@ -91,45 +51,33 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     row
                     wrap
                     class="ms-0 me-0 pr-0">
-                    <v-flex>
-                      <wallet-summary
-                        v-if="wallet && contractDetails"
-                        ref="walletSummary"
-                        :wallet="wallet"
-                        :is-space="isSpace"
-                        :is-space-administrator="isSpaceAdministrator"
-                        :initialization-state="initializationState"
-                        :contract-details="contractDetails"
-                        @refresh="init()"
-                        @display-transactions="openAccountDetail"
-                        @error="error = $event" />
-                    </v-flex>
+                    <wallet-summary
+                      v-if="wallet && contractDetails"
+                      ref="walletSummary"
+                      :wallet="wallet"
+                      :is-space="isSpace"
+                      :is-space-administrator="isSpaceAdministrator"
+                      :initialization-state="initializationState"
+                      :contract-details="contractDetails"
+                      @refresh="init()"
+                      @display-transactions="openAccountDetail"
+                      @error="error = $event" />
                     <template v-if="initializationState !== 'DENIED'">
-                      <v-flex
-                        class="px-8 transactionChart">
+                      <v-flex class="chartHistory WalletChart mt-6">
+                        <transaction-history-chart-summary
+                          v-if="!loading"
+                          ref="chartPeriodicityButtons"
+                          :periodicity-label="periodicityLabel"
+                          @period-changed="periodChanged"
+                          @error="error = $event" />
+                      </v-flex>
+                      <v-flex class="WalletChart mb-6">
                         <transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
                           :transaction-statistics="transactionStatistics" />
                       </v-flex>
                     </template>
-                    <v-spacer class="summarySpacer" />
-                    <v-flex
-                      v-if="!walletReadonly"
-                      mt-1
-                      class="summaryButtons justify-center">
-                      <summary-buttons
-                        v-if="walletAddress && !loading && contractDetails"
-                        ref="walletSummaryActions"
-                        :is-space="isSpace"
-                        :is-space-administrator="isSpaceAdministrator"
-                        :contract-details="contractDetails"
-                        :wallet="wallet"
-                        :is-read-only="isReadOnly"
-                        @display-transactions="openAccountDetail"
-                        @transaction-sent="newPendingTransaction"
-                        @error="error = $event" />
-                    </v-flex>
                   </v-layout>
                 </v-flex>
               </v-tab-item>
@@ -196,19 +144,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import ToolbarMenu from './wallet-app/ToolbarMenu.vue';
 import WalletSummary from './wallet-app/Summary.vue';
-import SummaryButtons from './wallet-app/SummaryButtons.vue';
-import SettingsModal from './wallet-app/SettingsModal.vue';
 import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
+import TransactionHistoryChartSummary from './wallet-app/TransactionHistoryChartSummary.vue';
 
 export default {
   components: {
-    ToolbarMenu,
     WalletSummary,
-    SettingsModal,
-    SummaryButtons,
     TransactionHistoryChart,
+    TransactionHistoryChartSummary,
   },
   props: {
     isSpace: {

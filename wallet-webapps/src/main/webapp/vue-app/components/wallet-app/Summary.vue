@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex id="walletSummary" class="elevation-0 me-3 ">
+  <v-flex id="walletSummary" class="elevation-0 me-3">
     <template v-if="!isSpace || isSpaceAdministrator">
       <v-card-title
         v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
@@ -44,8 +44,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </v-card-title>
     </template>
 
-    <template v-if="initializationState !== 'DENIED'">
-    </template>
     <template>
       <v-container
         fluid
@@ -54,7 +52,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         pe-0>
         <v-layout
           wrap
-          color="transparent">
+          color="transparent"
+          class="WalletSummary">
           <v-flex class="summaryCard">
             <div class="border-box-sizing" v-if="walletAddress && contractDetails">
               <button class="btn ignore-vuetify-classes me-1" @click="openExchangeDrawer">  {{ $t('exoplatform.wallet.label.exchanges') }} </button>
@@ -190,16 +189,12 @@ export default {
       },
     },
     displayWarnings: {
-      type: Object,
-      default: function() {
-        return null;
-      },
+      type: Boolean,
+      default: false,
     },
     displayDisapprovedWallet: {
-      type: Object,
-      default: function() {
-        return null;
-      },
+      type: Boolean,
+      default: false,
     },
   },
   data() {
