@@ -15,22 +15,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex
-    text-center>
-    <v-card class="walletSummaryBalance headline elevation-3 pa-1 mt-1">
-      <v-card-title class="title subtitle-1 pb-1 text-truncate">
-        {{ $t('exoplatform.wallet.label.currentBalance') }}
-      </v-card-title>
-      <v-card-title class="rewardBalance headline pt-0 pb-1">
-        <v-container fluid>
-          <v-layout row>
-            <v-flex grow class="amount">
-              <span class="symbol"> {{ contractDetails.symbol }} </span>  {{ balance }}
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-card-title>
-    </v-card>
+  <v-flex>
+    <div class="summaryBalanceLabels">
+      <span class="balance"> {{ $t('exoplatform.wallet.label.balance') }} : </span>
+      <span class="symbol"> {{ contractDetails.symbol }} </span>  {{ balance }}
+    </div>
   </v-flex>
 </template>
 
