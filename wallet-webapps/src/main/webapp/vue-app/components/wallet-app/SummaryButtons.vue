@@ -15,29 +15,38 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-layout
-    row
-    wrap
-    class="walletSummaryActions walletSummaryBalance align-end">
-    <v-flex
-      class="walletSummaryAction">
-      <send-tokens-modal
-        ref="sendTokensModal"
-        :wallet="wallet"
-        :is-read-only="isReadOnly"
-        :contract-details="contractDetails"
-        @sent="$emit('transaction-sent', $event)"
-        @error="$emit('error', $event)" />
-    </v-flex>
-    <v-flex
-      class="walletSummaryAction">
-      <request-funds-modal
-        ref="walletRequestFundsModal"
-        :disabled-button="isDisapproved"
-        :wallet-address="walletAddress"
-        :contract-details="contractDetails" />
-    </v-flex>
-  </v-layout>
+  <exo-drawer
+    ref="walletSummaryActions"
+    :right="!$vuetify.rtl">
+    <template slot="title">
+      <span class="mx-2"> {{ $t('exoplatform.perkstore.label.filterOrders') }} </span>
+    </template>
+    <template slot="content">
+      <v-layout
+        row
+        wrap
+        class="walletSummaryActions walletSummaryBalance align-end">
+        <v-flex
+          class="walletSummaryAction">
+          <send-tokens-modal
+            ref="sendTokensModal"
+            :wallet="wallet"
+            :is-read-only="isReadOnly"
+            :contract-details="contractDetails"
+            @sent="$emit('transaction-sent', $event)"
+            @error="$emit('error', $event)" />
+        </v-flex>
+        <v-flex
+          class="walletSummaryAction">
+          <request-funds-modal
+            ref="walletRequestFundsModal"
+            :disabled-button="isDisapproved"
+            :wallet-address="walletAddress"
+            :contract-details="contractDetails" />
+        </v-flex>
+      </v-layout>
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
@@ -87,6 +96,9 @@ export default {
           this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
         }
       }
+    },
+    open() {
+      this.$refs.walletSummaryActions.open();
     },
   },
 };

@@ -15,29 +15,12 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-card class="walletSummaryBalance headline elevation-3  pa-1 mt-2">
-    <v-card-title class="title subtitle-1 text-truncate pb-1" @click="displayTransactionList">
+  <div
+    class="border-box-sizing clickable addProduct">
+    <button class="btn ignore-vuetify-classes" @click="displayTransactionList">
       {{ $t('exoplatform.wallet.label.lastTransaction') }}
-    </v-card-title>
-    <v-card-title class="lastTransactionBalance headline" @click="displayTransactionList">
-      <template v-if="loadingTransaction">
-        <v-progress-circular
-          color="primary"
-          class="mb-2"
-          indeterminate />
-      </template>
-      <v-container
-        v-else
-        fluid
-        grid-list-sm>
-        <v-layout row>
-          <v-flex grow class="amount">
-            <span class="symbol"> {{ contractDetails.symbol }} </span> {{ lastTransaction && walletUtils.toFixed(lastTransaction.contractAmount) }}
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-card-title>
-  </v-card>
+    </button>
+  </div>
 </template>
 
 <script>

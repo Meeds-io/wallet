@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex id="walletSummary" class="elevation-0 me-3">
+  <v-flex id="walletSummary" class="elevation-0 me-3 ">
     <template v-if="!isSpace || isSpaceAdministrator">
       <v-card-title
         v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
@@ -45,80 +45,95 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </template>
 
     <template v-if="initializationState !== 'DENIED'">
-      <v-card-title
-        v-if="pendingTransactionsCount"
-        primary-title
-        class="pb-0">
-        <v-spacer />
-        <v-badge
-          :title="$t('exoplatform.wallet.message.transactionInProgress')"
-          color="red"
-          :right="!$vuetify.rtl">
-          <span slot="badge">
-            {{ pendingTransactionsCount }}
-          </span>
-          <v-progress-circular
-            color="primary"
-            indeterminate
-            size="20" />
-        </v-badge>
-        <v-spacer />
-      </v-card-title>
-  
+    </template>
+    <template>
       <v-container
-        v-if="contractDetails"
         fluid
         grid-list-md
         ps-3
         pe-0>
         <v-layout
-          col
-          wrap>
-          <v-flex
-            text-center
-            class="summaryCard">
-            <summary-balance :wallet="wallet" :contract-details="contractDetails" />
-          </v-flex>
-          <v-flex
-            v-if="!isSpace"
-            text-center
-            class="summaryCard">
-            <summary-reward
+          wrap
+          color="transparent">
+          <v-flex class="summaryCard">
+            <div class="border-box-sizing" v-if="walletAddress && contractDetails">
+              <button class="btn ignore-vuetify-classes me-1" @click="openExchangeDrawer">  {{ $t('exoplatform.wallet.label.exchanges') }} </button>
+            </div>
+            <summary-buttons
+              ref="walletSummaryActions"
+              :is-space="isSpace"
+              :is-space-administrator="isSpaceAdministrator"
+              :contract-details="contractDetails"
               :wallet="wallet"
-              :contract-details="contractDetails"
-              @display-transactions="$emit('display-transactions', 'reward')"
-              @error="$emit('error', $event)" />
+              :is-read-only="isReadOnly"
+              @display-transactions="openAccountDetail"
+              @transaction-sent="newPendingTransaction"
+              @error="error = $event" />
           </v-flex>
-          <v-flex
-            v-if="!isSpace"
-            text-center
-            class="summaryCard">
-            <summary-estimation
-              :next-pay-estimation="nextPayEstimation"
-              :symbol="contractDetails.symbol"
-              @display-transactions="$emit('display-transactions', 'reward')"
-              @error="$emit('error', $event)" />
-          </v-flex>
-          <v-flex
-            v-if="!isSpace"
-            text-center
-            class="summaryCard">
-            <summary-pool
-              :actual-pool="actualPool"
-              :contract-details="contractDetails"
-              @display-transactions="$emit('display-transactions', 'reward')"
-              @error="$emit('error', $event)" />
-          </v-flex>
-          <v-spacer class="summarySpacer" />
-          <v-flex
-            text-center
-            class="transactionCard align-end">
+          <v-flex class="summaryCard">
             <summary-transaction
+              v-if="walletAddress && contractDetails"
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
               :pending-transactions-count="pendingTransactionsCount"
               @display-transactions="$emit('display-transactions')"
               @error="$emit('error', $event)" />
+          </v-flex>
+          <v-flex class="summaryBalance">
+            <summary-balance
+              class="mt-2"
+              v-if="walletAddress && !loading && contractDetails"
+              :wallet="wallet"
+              :contract-details="contractDetails" />
+          </v-flex>
+          <v-flex class="fixedItems no-wrap">
+            <div
+              v-if="pendingTransactionsCount"
+              primary-title
+              class="pb-0 mx-4 mt-2">
+              <v-badge
+                :title="$t('exoplatform.wallet.message.transactionInProgress')"
+                color="red"
+                :right="!$vuetify.rtl">
+                <span slot="badge">
+                  {{ pendingTransactionsCount }}
+                </span>
+                <v-progress-circular
+                  color="primary"
+                  indeterminate
+                  size="20" />
+              </v-badge>
+            </div>
+            <div
+              v-if="displayWarnings"
+              id="etherTooLowWarningParent"
+              class="ms-2 mt-2">
+              <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
+                warning
+              </v-icon>
+              <v-icon
+                v-if="displayDisapprovedWallet"
+                slot="activator"
+                :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
+                color="orange">
+                warning
+              </v-icon>
+            </div>
+            <toolbar-menu
+              ref="walletAppMenu"
+              :is-space="isSpace"
+              :is-space-administrator="isSpaceAdministrator"
+              @refresh="init()"
+              @modify-settings="showSettingsModal = true" />
+            <settings-modal
+              ref="walletSettingsModal"
+              :is-space="isSpace"
+              :open="showSettingsModal"
+              :wallet="wallet"
+              :app-loading="loading"
+              :display-reset-option="displayWalletResetOption"
+              @close="showSettingsModal = false"
+              @settings-changed="init()" />
           </v-flex>
         </v-layout>
       </v-container>
@@ -128,18 +143,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 <script>
 import SummaryBalance from './SummaryBalance.vue';
-import SummaryReward from './SummaryReward.vue';
 import SummaryTransaction from './SummaryTransaction.vue';
-import SummaryEstimation from './SummaryEstimation.vue';
-import SummaryPool from './SummaryPool.vue';
+import SummaryButtons from './SummaryButtons.vue';
+import ToolbarMenu from './ToolbarMenu.vue';
+import SettingsModal from './SettingsModal.vue';
+
 
 export default {
   components: {
+    SettingsModal,
     SummaryBalance,
-    SummaryReward,
     SummaryTransaction,
-    SummaryEstimation,
-    SummaryPool
+    SummaryButtons,
+    ToolbarMenu,
+
   },
   props: {
     wallet: {
@@ -172,6 +189,18 @@ export default {
         return null;
       },
     },
+    displayWarnings: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+    displayDisapprovedWallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
   },
   data() {
     return {
@@ -179,6 +208,7 @@ export default {
       pendingTransactions: {},
       lastTransaction: null,
       walletRewards: [],
+      showSettingsModal: false,
     };
   },
   computed: {
@@ -188,14 +218,8 @@ export default {
     pendingTransactionsCount() {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },
-    futureWalletReward() {
-      return this.walletRewards && this.walletRewards.find(wr => wr.status !== 'success');
-    },
-    nextPayEstimation() {
-      return (this.futureWalletReward && this.futureWalletReward.tokensToSend) || 0;
-    },
-    actualPool() {
-      return (this.futureWalletReward && this.futureWalletReward.poolName) || '';
+    walletReadonly() {
+      return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
     },
   },
   created() {
@@ -238,30 +262,8 @@ export default {
         });
       });
     },
-    init() {
-      this.listRewards()
-        .then(rewards => this.walletRewards = rewards)
-        .catch(e => {
-          this.$emit('error', String(e));
-        });
-    },
-    listRewards(limit) {
-      return fetch(`/portal/rest/wallet/api/reward/list?limit=${limit || 10}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }).then((resp) => {
-        if (resp && resp.ok) {
-          return resp.json();
-        } else {
-          this.$emit('error', 'Error listing rewards');
-        }
-      }).catch(e => {
-        this.$emit('error', String(e));
-      });
+    openExchangeDrawer() {
+      this.$refs.walletSummaryActions.open();
     },
   },
 };
