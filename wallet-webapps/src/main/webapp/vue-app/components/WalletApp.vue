@@ -32,27 +32,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <v-tabs-items v-model="tab" class="tabs-content">
               <v-tab-item eager>
                 <v-flex>
-                  <wallet-setup
-                    ref="walletSetup"
-                    :is-space="isSpace"
-                    :wallet="wallet"
-                    :initialization-state="initializationState"
-                    :loading="loading"
-                    @loading="loading = true"
-                    @end-loading="loading = false"
-                    @refresh="init()"
-                    @error="
-                      loading = false;
-                      error = $event;
-                    " />
-                </v-flex>
-                <v-flex v-if="wallet && contractDetails">
                   <v-layout
                     row
                     wrap
                     class="ms-0 me-0 pr-0">
                     <wallet-summary
-                      v-if="wallet && contractDetails"
                       ref="walletSummary"
                       :wallet="wallet"
                       :is-space="isSpace"
@@ -62,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       @refresh="init()"
                       @display-transactions="openAccountDetail"
                       @error="error = $event" />
-                    <template v-if="initializationState !== 'DENIED'">
+                    <template v-if="wallet && contractDetails && initializationState !== 'DENIED'">
                       <v-flex class="chartHistory WalletChart mt-6">
                         <transaction-history-chart-summary
                           v-if="!loading"
@@ -71,7 +55,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           @period-changed="periodChanged"
                           @error="error = $event" />
                       </v-flex>
-                      <v-flex class="WalletChart mb-6">
+                      <v-flex class="WalletChart mb-4">
                         <transaction-history-chart
                           ref="transactionHistoryChart"
                           class="transactionHistoryChart"
@@ -79,6 +63,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       </v-flex>
                     </template>
                   </v-layout>
+                  <v-flex class="my-8">
+                    <wallet-setup
+                      ref="walletSetup"
+                      :is-space="isSpace"
+                      :wallet="wallet"
+                      :initialization-state="initializationState"
+                      :loading="loading"
+                      @loading="loading = true"
+                      @end-loading="loading = false"
+                      @refresh="init()"
+                      @error="
+                        loading = false;
+                        error = $event;
+                      " />
+                  </v-flex>
                 </v-flex>
               </v-tab-item>
             </v-tabs-items>
