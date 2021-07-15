@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-layout
         row
         wrap
-        class="walletSummaryActions walletSummaryBalance align-end">
+        class="walletSummaryActions walletSummaryBalance">
         <v-flex
           class="walletSummaryAction">
           <send-tokens-modal
@@ -38,6 +38,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
         <v-flex
           class="walletSummaryAction">
+          <v-btn
+            :disabled="isDisapproved"
+            class="btn"
+            color="primary"
+            block
+            @click="openRequestFundsModal">
+            <v-icon class="mr-6">
+              mdi-cash-multiple
+            </v-icon>
+            {{ $t('exoplatform.wallet.button.requestFunds') }}
+          </v-btn>
           <request-funds-modal
             ref="walletRequestFundsModal"
             :disabled-button="isDisapproved"
@@ -99,6 +110,9 @@ export default {
     },
     open() {
       this.$refs.walletSummaryActions.open();
+    },
+    openRequestFundsModal() {
+      this.$refs.walletRequestFundsModal.open();
     },
   },
 };
