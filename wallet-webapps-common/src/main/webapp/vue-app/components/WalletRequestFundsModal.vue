@@ -15,35 +15,14 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-dialog
-    v-model="dialog"
-    content-class="uiPopup with-overflow walletDialog"
-    class="walletRequestFundsModal"
-    width="500px"
-    max-width="100vw"
-    draggable="true"
-    @keydown.esc="dialog = false">
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :disabled="disabledButton"
-        class="btn"
-        color="primary"
-        v-on="on">
-        <v-icon class="mr-6">
-          mdi-cash-multiple
-        </v-icon>
-        {{ $t('exoplatform.wallet.button.requestFunds') }}
-      </v-btn>
+  <exo-drawer
+    ref="sendTokensForm"
+    :right="!$vuetify.rtl">
+    <template slot="title">
+      <span> <i class="uiIcon uiArrowBAckIcon mr-2 mt-2" @click="close"></i> {{ $t('exoplatform.wallet.label.exchanges') }} </span>
     </template>
-    <v-card class="elevation-12">
-      <div class="ignore-vuetify-classes popupHeader ClearFix">
-        <a
-          class="uiIconClose pull-right"
-          aria-hidden="true"
-          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
-            {{ $t('exoplatform.wallet.button.requestFunds') }}
-          </span>
-      </div> <div v-if="error && !loading" class="alert alert-error v-content">
+    <template slot="content" class="walletRequestFundsModal">
+      <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
       </div>
       <v-card-text>
@@ -85,23 +64,24 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             no-resize />
         </v-form>
       </v-card-text>
-      <v-card-actions>
+    </template>
+    <template slot="footer">
+      <div class="VuetifyApp flex d-flex">
         <v-spacer />
+        <button
+          class="ignore-vuetify-classes btn mx-1"
+          @click="dialog = false">
+          {{ $t('exoplatform.wallet.button.close') }}
+        </button>
         <button
           :disabled="disabled"
           class="ignore-vuetify-classes btn btn-primary"
           @click="requestFunds">
           {{ $t('exoplatform.wallet.button.sendRequest') }}
         </button>
-        <button
-          class="ignore-vuetify-classes btn ms-2"
-          @click="dialog = false">
-          {{ $t('exoplatform.wallet.button.close') }}
-        </button>
-        <v-spacer />
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </div>
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
@@ -204,6 +184,12 @@ export default {
           this.error = `this.$t('exoplatform.wallet.error.errorProceeding'): ${e}`;
           this.loading = false;
         });
+    },
+    open() {
+      this.$refs.sendTokensForm.open();
+    },
+    close() {
+      this.$refs.sendTokensForm.close();
     },
   },
 };

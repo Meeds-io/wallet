@@ -80,7 +80,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-flex>
           <v-flex class="summaryBalance">
             <summary-balance
-              class="mt-2"
+              class="mt-1"
               v-if="walletAddress && !loading && contractDetails"
               :wallet="wallet"
               :contract-details="contractDetails" />
@@ -216,9 +216,6 @@ export default {
     walletReadonly() {
       return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
     },
-  },
-  created() {
-    this.init();
   },
   methods: {
     requestAccessAuthorization() {
