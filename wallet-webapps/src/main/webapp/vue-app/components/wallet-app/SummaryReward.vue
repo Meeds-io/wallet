@@ -15,52 +15,28 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-card class="walletSummaryBalance elevation-1">
-    <v-card-title class="title subtitle-1 pb-1 text-truncate">
-      {{ $t('exoplatform.wallet.label.totalWalletRewards') }}
-    </v-card-title>
-    <v-card-title class="rewardBalance headline pt-0 pb-1">
-      <v-container fluid>
-        <v-layout row>
-          <v-flex grow class="amount">
-            {{ walletUtils.toFixed(rewardBalance) }} {{ contractDetails.symbol }}
-          </v-flex>
-          <v-flex shrink>
-            <v-btn
-              icon
-              small
-              @click="displayRewards">
-              <v-icon color="primary">fa-search-plus</v-icon>
-            </v-btn>
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-card-title>
-    <v-navigation-drawer
-      id="rewardDetailsDrawer"
-      v-model="seeRewardDetails"
-      :right="!$vuetify.rtl"
-      absolute
-      stateless
-      temporary
-      width="700"
-      max-width="100vw">
-      <reward-detail
-        ref="RewardDetail"
-        :wallet="wallet"
-        :contract-details="contractDetails"
-        @back="back()" />
-    </v-navigation-drawer>
-  </v-card>
+  <v-flex
+    text-center
+    class="summaryRewardCard">
+    <v-card class="walletSummaryBalance headline pb-1 elevation-3 pa-1 ma-1">
+      <v-card-title class="title subtitle-1 pb-1 text-truncate">
+        {{ $t('exoplatform.wallet.label.totalWalletRewards') }}
+      </v-card-title>
+      <v-card-title class="rewardBalance headline pt-0 pb-1">
+        <v-container fluid>
+          <v-layout row>
+            <v-flex grow class="amount">
+              <span class="symbol"> {{ contractDetails.symbol }} </span>  {{ walletUtils.toFixed(rewardBalance) }}
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-card-title>
+    </v-card>
+  </v-flex>
 </template>
 
 <script>
-import RewardDetail from './RewardDetail.vue'; 
-
 export default {
-  components: {
-    RewardDetail,
-  },
   props: {
     wallet: {
       type: Object,
@@ -84,7 +60,7 @@ export default {
   computed: {
     rewardBalance() {
       return (this.wallet && this.wallet.rewardBalance) || 0;
-    }
+    },
   },
   watch: {
     seeRewardDetails() {
@@ -109,6 +85,7 @@ export default {
         thiss.back();
       }
     });
+    this.init();
   },
   methods: {
     displayRewards() {
