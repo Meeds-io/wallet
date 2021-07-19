@@ -43,6 +43,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :is-space-administrator="isSpaceAdministrator"
                       :initialization-state="initializationState"
                       :contract-details="contractDetails"
+                      :fiat-symbol="fiatSymbol"
+                      :selected-transaction-hash="selectedTransactionHash"
+                      :selected-contract-method-name="selectedContractMethodName"
                       @refresh="init()"
                       @display-transactions="openAccountDetail"
                       @error="error = $event" />
@@ -85,24 +88,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
       </v-layout>
       <!-- The selected account detail -->
-      <v-navigation-drawer
-        id="accountDetailsDrawer"
-        v-model="seeAccountDetails"
-        :right="!$vuetify.rtl"
-        absolute
-        stateless
-        temporary
-        width="700"
-        max-width="100vw">
-        <account-detail
-          ref="accountDetail"
-          :fiat-symbol="fiatSymbol"
-          :wallet="wallet"
-          :contract-details="selectedAccount"
-          :selected-transaction-hash="selectedTransactionHash"
-          :selected-contract-method-name="selectedContractMethodName"
-          @back="back()" />
-      </v-navigation-drawer>
+      <account-detail
+        ref="accountDetail"
+        :fiat-symbol="fiatSymbol"
+        :wallet="wallet"
+        :contract-details="selectedAccount"
+        :selected-transaction-hash="selectedTransactionHash"
+        :selected-contract-method-name="selectedContractMethodName"
+        @back="back()" />
       <div id="walletDialogsParent">
       </div>
     </main>

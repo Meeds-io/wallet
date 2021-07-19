@@ -247,26 +247,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       @sent="walletPendingTransaction" />
 
     <!-- The selected account detail -->
-    <v-navigation-drawer
-      id="accountDetailsDrawer"
-      v-model="seeAccountDetails"
-      :right="!$vuetify.rtl"
-      absolute
-      temporary
-      stateless
-      width="700"
-      max-width="100vw">
-      <account-detail
-        ref="accountDetail"
-        :fiat-symbol="fiatSymbol"
-        :wallet="selectedWallet"
-        :contract-details="selectedWalletDetails"
-        :selected-transaction-hash="selectedTransactionHash"
-        is-read-only
-        is-display-only
-        is-administration
-        @back="back()" />
-    </v-navigation-drawer>
+    <account-detail
+      ref="accountDetail"
+      :fiat-symbol="fiatSymbol"
+      :wallet="selectedWallet"
+      :contract-details="selectedWalletDetails"
+      :selected-transaction-hash="selectedTransactionHash"
+      is-read-only
+      is-display-only
+      is-administration
+      @back="back()" />
   </v-flex>
 </template>
 
@@ -578,7 +568,7 @@ export default {
         details: wallet,
       };
       this.seeAccountDetails = true;
-
+      this.$refs.accountDetail.open();
       this.$nextTick(() => {
         const thiss = this;
         $('.v-overlay')
