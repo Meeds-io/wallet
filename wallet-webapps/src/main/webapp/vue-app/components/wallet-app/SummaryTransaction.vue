@@ -19,6 +19,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <button class="btn ignore-vuetify-classes" @click="displayTransactionList">
       {{ $t('exoplatform.wallet.label.lastTransaction') }}
     </button>
+    <account-detail
+      ref="accountDetail"
+      :fiat-symbol="fiatSymbol"
+      :wallet="wallet"
+      :contract-details="contractDetails"
+      :selected-transaction-hash="selectedTransactionHash"
+      :selected-contract-method-name="selectedContractMethodName"
+      @back="back()" />
   </div>
 </template>
 
@@ -41,6 +49,30 @@ export default {
       type: Number,
       default: function() {
         return 0;
+      },
+    },
+    wallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
+    fiatSymbol: {
+      type: String,
+      default: function() {
+        return '$';
+      },
+    },
+    selectedTransactionHash: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
+    selectedContractMethodName: {
+      type: String,
+      default: function() {
+        return null;
       },
     },
   },
@@ -82,7 +114,7 @@ export default {
   },
   methods: {
     displayTransactionList() {
-      this.$emit('display-transactions');
+      this.$refs.accountDetail.open();
     },
     refreshLastTransaction() {
       if (!this.contractDetails || !this.contractDetails.address || !this.walletAddress) {
