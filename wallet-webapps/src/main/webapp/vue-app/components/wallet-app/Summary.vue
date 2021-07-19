@@ -47,14 +47,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template>
       <v-container
         fluid
-        grid-list-md
         ps-3
-        pe-0>
+        pe-0
+        class="mt-3 px-1 py-1">
         <v-layout
           wrap
           color="transparent"
           class="WalletSummary">
-          <v-flex class="summaryCard">
+          <v-flex class="summaryCard mr-3">
             <div class="border-box-sizing" v-if="walletAddress && contractDetails">
               <button class="btn ignore-vuetify-classes me-1" @click="openExchangeDrawer">  {{ $t('exoplatform.wallet.label.exchanges') }} </button>
             </div>
@@ -74,13 +74,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               v-if="walletAddress && contractDetails"
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
+              :fiat-symbol="fiatSymbol"
+              :wallet="wallet"
+              :selected-transaction-hash="selectedTransactionHash"
+              :selected-contract-method-name="selectedContractMethodName"
               :pending-transactions-count="pendingTransactionsCount"
               @display-transactions="$emit('display-transactions')"
               @error="$emit('error', $event)" />
           </v-flex>
           <v-flex class="summaryBalance">
             <summary-balance
-              class="mt-1"
+              class="mt-1 mx-3 px-1 py-1"
               v-if="walletAddress && !loading && contractDetails"
               :wallet="wallet"
               :contract-details="contractDetails" />
@@ -195,6 +199,24 @@ export default {
     displayDisapprovedWallet: {
       type: Boolean,
       default: false,
+    },
+    fiatSymbol: {
+      type: String,
+      default: function() {
+        return '$';
+      },
+    },
+    selectedTransactionHash: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
+    selectedContractMethodName: {
+      type: String,
+      default: function() {
+        return null;
+      },
     },
   },
   data() {

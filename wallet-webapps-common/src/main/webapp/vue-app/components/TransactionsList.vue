@@ -859,10 +859,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-list>
           </v-expansion-panel-content>
         </v-expansion-panel>
-        <div v-if="!limitReached">
+        <div v-if="!limitReached" class="loadMoreTransaction">
           <v-btn
             :loading="loading"
             color="primary"
+            block
+            class="mt-3"
             text
             @click="transactionsLimit += transactionsPerPage">
             {{ $t('exoplatform.wallet.button.loadMore') }}

@@ -15,63 +15,49 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex
-    v-if="contractDetails && contractDetails.icon"
-    id="accountDetail"
-    class="text-center white layout column">
-    <div class="rewardDetailTop">
-      <v-layout row class="ma-0">
-        <v-flex class="xs11 title text-start">
-          <span v-if="wallet" class="ps-4">
-            <template v-if="isAdministration">
-              {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
-              <profile-chip
-                ref="profileChip"
-                :profile-technical-id="wallet.technicalId"
-                :profile-id="wallet.id"
-                :profile-type="wallet.type"
-                :space-id="wallet.spaceId"
-                :avatar="wallet.avatar"
-                :display-name="wallet.name"
-                :address="wallet.address" />
-            </template>
-            <template v-else-if="selectedContractMethodName === 'reward'">
-              {{ $t('exoplatform.wallet.label.rewardTransactionsList') }}
-            </template>
-            <template v-else>
-              {{ $t('exoplatform.wallet.label.transactionsList') }}
-            </template>
-          </span>
-          <span v-else class="ps-4">
-            {{ contractDetails.title }}
-          </span>
-        </v-flex>
-        <v-flex class="xs1">
-          <v-btn
-            icon
-            class="rightIcon"
-            @click="$emit('back')">
-            <v-icon>
-              close
-            </v-icon>
-          </v-btn>
-        </v-flex>
-      </v-layout>
-    </div>
-
-    <transactions-list
-      id="transactionsList"
-      ref="transactionsList"
-      :wallet="wallet"
-      :contract-details="contractDetails"
-      :fiat-symbol="fiatSymbol"
-      :administration="isAdministration"
-      :selected-transaction-hash="selectedTransactionHash"
-      :selected-contract-method-name="selectedContractMethodName"
-      :display-full-transaction="isAdministration"
-      :error="error"
-      @error="error = $event" />
-  </v-flex>
+  <exo-drawer
+    ref="accountDetail"
+    :right="!$vuetify.rtl">
+    <template slot="title">
+      <span v-if="wallet" class="ps-4">
+        <template v-if="isAdministration">
+          {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
+          <profile-chip
+            ref="profileChip"
+            :profile-technical-id="wallet.technicalId"
+            :profile-id="wallet.id"
+            :profile-type="wallet.type"
+            :space-id="wallet.spaceId"
+            :avatar="wallet.avatar"
+            :display-name="wallet.name"
+            :address="wallet.address" />
+        </template>
+        <template v-else-if="selectedContractMethodName === 'reward'">
+          {{ $t('exoplatform.wallet.label.rewardTransactionsList') }}
+        </template>
+        <template v-else>
+          {{ $t('exoplatform.wallet.label.lastTransaction') }}
+        </template>
+      </span>
+      <span v-else class="ps-4">
+        {{ contractDetails.title }}
+      </span>
+    </template>
+    <template slot="content">
+      <transactions-list
+        id="transactionsList"
+        ref="transactionsList"
+        :wallet="wallet"
+        :contract-details="contractDetails"
+        :fiat-symbol="fiatSymbol"
+        :administration="isAdministration"
+        :selected-transaction-hash="selectedTransactionHash"
+        :selected-contract-method-name="selectedContractMethodName"
+        :display-full-transaction="isAdministration"
+        :error="error"
+        @error="error = $event" />
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
@@ -131,5 +117,10 @@ export default {
       this.error = null;
     },
   },
+  methods: {
+    open(){
+      this.$refs.accountDetail.open();
+    }
+  }
 };
 </script>
