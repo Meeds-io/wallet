@@ -106,9 +106,6 @@ export default {
     initialFunds() {
       this.reloadInitialFunds();
     },
-    requestMessage() {
-      this.reloadInitialFunds();
-    },
   },
   methods: {
     reloadInitialFunds() {
