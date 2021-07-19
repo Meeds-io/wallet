@@ -297,6 +297,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   .v-text-field .v-label--active {
     top: 0;
+    color : @black;
+    font-size : 20px !important;
   }
 
   .buttomNavigation {
@@ -577,7 +579,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     display: inline-block;
     width: 100%;
     height: 100px;
-    margin: 0 1%;
+    margin: 5%;
     .title, .headline {
       color:  @textMediumColor;
     }
@@ -606,8 +608,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   .walletSummaryActions {
     margin-top: 5%;
 
-    .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
-      width: 100%;
+    .walletSummaryAction, .v-dialog__container, .v-dialog__activator {
+      width: 90%;
       box-sizing: border-box;
     }
     .walletSummaryAction {
@@ -736,8 +738,30 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   .balance{
     color: @textMediumColor;
   }
+  .gasPrice{
+    .symbol {
+      color : @errorColor;
+      font-weight: bold ;
+      font-size:16px;
+    }
+    .transactionFee {
+      color : @black;
+      font-size:16px;
+    }
+  }
   .summaryBalanceLabels{
     font-size: 16px;
+  }
+  .uiArrowBAckIcon {
+    cursor: pointer;
+    color: @btnDisableColor!important;
+    margin-left: -4px;
+    &:before {
+      content: "\e913";
+      font-family: "PLF-FONT-ICONS" !important;
+      font-style: normal;
+      font-size: 22px;
+    }
   }
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {

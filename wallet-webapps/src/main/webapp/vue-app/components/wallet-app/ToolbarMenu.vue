@@ -23,7 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       icon
       text
       @click="$emit('modify-settings')">
-      <v-icon size="26">
+      <v-icon size="24">
         fa-cog
       </v-icon>
     </v-btn>
