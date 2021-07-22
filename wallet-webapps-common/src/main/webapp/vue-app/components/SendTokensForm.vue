@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     ref="sendTokensForm"
     :right="!$vuetify.rtl">
     <template slot="title">
-      <div><i class="uiIcon uiArrowBAckIcon mt-0" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.label.exchanges') }} </span></div>
+      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.sendfunds') }} </span></div>
     </template>
     <template slot="content">
       <v-card id="sendTokenForm" flat>
@@ -43,25 +43,35 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :input-label="$t('exoplatform.wallet.label.recipient')"
               :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
               :ignore-current-user="!isSpace"
-              autofocus
+              autofocus="true"
               required
               validate-on-blur
               @item-selected="
                 recipient = $event.address;
                 $emit('receiver-selected', $event);
               " />
-
+            <p class="amountLabel mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
+            <gas-price-choice
+              :wallet="wallet"
+              :estimated-fee="transactionFeeString"
+              :slider="!!transaction"
+              :min-gas-price="transaction && transaction.gasPrice"
+              @changed="gasPrice = $event" />
             <v-text-field
               v-model.number="amount"
+              ref="amount"
               :disabled="loading || transaction"
-              :label="$t('exoplatform.wallet.label.amount')"
               :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
+              type="number"
               name="amount"
               required
+              validate-on-blur
+              class="mt-n4"
               @input="$emit('amount-selected', amount)" />
 
             <v-text-field
               v-if="!storedPassword"
+              ref="walletPassword"
               v-model="walletPassword"
               :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
               :type="walletPasswordShow ? 'text' : 'password'"
@@ -71,14 +81,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
               required
-              autocomplete="current-passord"
+              validate-on-blur
+              autocomplete="current-password"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-            <gas-price-choice
-              :wallet="wallet"
-              :estimated-fee="transactionFeeString"
-              :slider="!!transaction"
-              :min-gas-price="transaction && transaction.gasPrice"
-              @changed="gasPrice = $event" />
+
             <v-text-field
               v-model="transactionLabel"
               :disabled="loading || transaction"
@@ -138,7 +144,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <script>
 import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
-import GasPriceChoice from './GasPriceChoice.vue';
 
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
@@ -147,7 +152,6 @@ import {searchWalletByAddress} from '../js/AddressRegistry.js';
 export default {
   components: {
     QrCodeModal,
-    GasPriceChoice,
     AddressAutoComplete,
   },
   props: {
@@ -243,18 +247,6 @@ export default {
     },
   },
   watch: {
-    dialog() {
-      if (!this.dialog) {
-        this.recipient = null;
-        this.amount = null;
-        this.notificationId = null;
-        this.warning = null;
-        this.error = null;
-        this.walletPassword = '';
-        this.walletPasswordShow = false;
-        this.error = null;
-      }
-    },
     contractDetails() {
       if (this.contractDetails && this.contractDetails.isPaused) {
         this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
@@ -321,6 +313,21 @@ export default {
           this.$refs.autocomplete.focus();
         }
       });
+      if (this.$refs.walletPassword) {
+        this.$refs.walletPassword.blur();
+      }
+      if (this.$refs.amount) {
+        this.$refs.amount.blur();
+      }
+      this.recipient = null;
+      this.amount = null;
+      this.notificationId = null;
+      this.warning = null;
+      this.error = null;
+      this.transactionLabel = '';
+      this.walletPassword = '';
+      this.walletPasswordShow = false;
+      this.error = null;
       this.loading = false;
       this.disabledRecipient = !!this.transaction;
       this.showQRCodeModal = false;
@@ -493,6 +500,7 @@ export default {
         .finally(() => {
           this.loading = false;
           lockBrowserWallet();
+          this.close();
         });
     },
     checkErrors() {

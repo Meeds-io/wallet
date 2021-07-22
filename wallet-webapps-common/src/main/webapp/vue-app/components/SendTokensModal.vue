@@ -90,7 +90,6 @@ export default {
   },
   data() {
     return {
-      dialog: false,
       firstPendingTransaction: false,
     };
   },
@@ -143,7 +142,6 @@ export default {
           });
         });
       } else if (receiver) {
-        this.dialog = true;
         return this.$nextTick(() => {
           if (receiver) {
             receiverType = receiverType || 'user';
@@ -154,12 +152,12 @@ export default {
           }
         });
       } else {
-        this.dialog = true;
         this.$refs.sendTokensForm.init();
       }
     },
     openSendTokenDrawer(){
       this.$refs.sendTokensForm.open();
+      this.$refs.sendTokensForm.init();
     }
   },
 };
