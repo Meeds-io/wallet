@@ -22,7 +22,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.sendfunds') }} </span></div>
     </template>
     <template slot="content">
-      <v-card id="sendTokenForm" flat>
+      <v-card
+        id="sendTokenForm"
+        flat
+        class="mt-6">
         <v-card-text class="pt-0">
           <div v-if="error && !loading" class="alert alert-error v-content">
             <i class="uiIconError"></i>{{ error }}
