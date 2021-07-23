@@ -58,10 +58,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           @period-changed="periodChanged"
                           @error="error = $event" />
                       </v-flex>
-                      <v-flex class="WalletChart mb-4">
+                      <v-flex class="WalletChart transactionHistoryChart mb-4">
                         <transaction-history-chart
                           ref="transactionHistoryChart"
-                          class="transactionHistoryChart"
+                          :class="periodicity"
                           :transaction-statistics="transactionStatistics" />
                       </v-flex>
                     </template>
