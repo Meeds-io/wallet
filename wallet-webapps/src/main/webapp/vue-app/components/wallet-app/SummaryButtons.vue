@@ -113,6 +113,7 @@ export default {
     },
     openRequestFundsModal() {
       this.$refs.walletRequestFundsModal.open();
+      this.$refs.walletRequestFundsModal.init();
     },
   },
 };

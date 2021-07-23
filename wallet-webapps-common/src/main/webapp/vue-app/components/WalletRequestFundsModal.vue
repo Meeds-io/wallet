@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     ref="sendTokensForm"
     :right="!$vuetify.rtl">
     <template slot="title">
-      <span> <i class="uiIcon uiArrowBAckIcon mr-2 mt-2" @click="close"></i> {{ $t('exoplatform.wallet.label.exchanges') }} </span>
+      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.requestFunds') }} </span></div>
     </template>
     <template slot="content" class="walletRequestFundsModal">
       <div v-if="error && !loading" class="alert alert-error v-content">
@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <address-auto-complete
             ref="autocomplete"
             :disabled="loading"
-            :autofocus="dialog"
+            autofocus
             :input-label="$t('exoplatform.wallet.label.recipient')"
             :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
             required
@@ -70,7 +70,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-spacer />
         <button
           class="ignore-vuetify-classes btn mx-1"
-          @click="dialog = false">
+          @click="close">
           {{ $t('exoplatform.wallet.button.close') }}
         </button>
         <button
@@ -118,7 +118,6 @@ export default {
       error: null,
       requestMessage: '',
       loading: false,
-      dialog: false,
       amoutRules: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField'), (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || this.$t('exoplatform.wallet.warning.invalidAmount')],
     };
   },
@@ -127,19 +126,19 @@ export default {
       return !this.walletAddress || this.loading || !this.recipient || !this.amount;
     },
   },
-  watch: {
-    dialog() {
-      if (this.dialog) {
-        this.requestMessage = '';
-        this.recipient = null;
-        this.amount = null;
-        if (this.$refs && this.$refs.autocomplete) {
-          this.$refs.autocomplete.clear();
-        }
-      }
-    },
+  created () {
+    this.init();
   },
   methods: {
+    init(){
+      this.requestMessage = '';
+      this.recipient = null;
+      this.amount = null;
+      if (this.$refs && this.$refs.autocomplete) {
+        this.$refs.autocomplete.clear();
+        this.$refs.autocomplete.focus();
+      }
+    },
     requestFunds() {
       if (!this.$refs.form.validate()) {
         return;
@@ -173,7 +172,7 @@ export default {
       })
         .then((resp) => {
           if (resp && resp.ok) {
-            this.dialog = false;
+            this.close();
           } else {
             this.error = this.$t('exoplatform.wallet.error.errorRequestingFunds');
           }
