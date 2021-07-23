@@ -15,9 +15,9 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <div class="gasPrice my-4">
+  <div class="gasPrice">
     <span class="transactionFee">{{ title || $t('exoplatform.wallet.label.transactionFee') }}</span>
-    <span v-if="estimatedFee" class="ms-4 symbol">{{ estimatedFee }}</span>
+    <span v-if="estimatedFee" class="symbol">{{ estimatedFee }}</span>
   </div>
 </template>
 <script>
