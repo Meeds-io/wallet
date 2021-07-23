@@ -45,7 +45,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :class="item.selected && 'blue lighten-5'"
               two-line
               ripple
-              class="px-2 py-0">
+              class="px-2 py-0 transactions">
               <v-list-item
                 :key="item.hash"
                 class="transactionDetailItem autoHeight"
@@ -72,7 +72,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       display-label />
                   </v-list-item-title>
   
-                  <v-list-item-title v-else-if="item.type === 'ether'">
+                  <v-list-item-title v-else-if="item.type === 'ether'" class="text-truncated">
                     <profile-chip
                       v-if="displayFullTransaction && item.isReceiver"
                       :address="item.toAddress"
@@ -623,7 +623,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-list>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <v-list class="px-0 ms-2" dense>
+            <v-list class="px-0" dense>
               <v-list-item v-if="!item.pending && !item.succeeded">
                 <v-list-item-content>
                   <div class="alert alert-warning ignore-vuetify-classes">
@@ -675,10 +675,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionLabel') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-end paragraph">
-                  <div class="wrap">
-                    {{ item.label }}
-                  </div>
+                <v-list-item-content class="align-end text-end paragraph text-truncate">
+                  {{ item.label }}
                 </v-list-item-content>
               </v-list-item>
   
@@ -686,10 +684,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-end paragraph">
-                  <div class="wrap">
-                    {{ item.message }}
-                  </div>
+                <v-list-item-content class="align-end text-end paragraph text-truncate">
+                  {{ item.message }}
                 </v-list-item-content>
               </v-list-item>
   

@@ -17,6 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <exo-drawer
     ref="accountDetail"
+    allow-expand
     :right="!$vuetify.rtl">
     <template slot="title">
       <span v-if="wallet" class="ps-4">
@@ -47,6 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <transactions-list
         id="transactionsList"
         ref="transactionsList"
+        class="lastTransactionsList"
         :wallet="wallet"
         :contract-details="contractDetails"
         :fiat-symbol="fiatSymbol"
