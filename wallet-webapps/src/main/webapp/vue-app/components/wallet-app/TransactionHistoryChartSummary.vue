@@ -81,12 +81,8 @@ export default {
   data() {
     return {
       selectDateMenu: false,
-      id: `DatePicker${parseInt(Math.random() * 10000)
-          .toString()
-          .toString()}`,
-      menuId: `DatePickerMenu${parseInt(Math.random() * 10000)
-          .toString()
-          .toString()}`,
+      id: `DatePicker${parseInt(Math.random() * 10000)}`,
+      menuId: `DatePickerMenu${parseInt(Math.random() * 10000)}`,
       selectedPickerDate: new Date().toISOString().substr(0, 7),
       selectedDate: null,
       lang: 'en',
