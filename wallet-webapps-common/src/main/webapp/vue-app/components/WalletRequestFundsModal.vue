@@ -15,34 +15,14 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-dialog
-    v-model="dialog"
-    content-class="uiPopup with-overflow walletDialog"
-    class="walletRequestFundsModal"
-    width="500px"
-    max-width="100vw"
-    draggable="true"
-    @keydown.esc="dialog = false">
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :disabled="disabledButton"
-        class="btn white"
-        v-on="on">
-        <v-icon class="mr-6">
-          mdi-cash-multiple
-        </v-icon>
-        {{ $t('exoplatform.wallet.button.request') }}
-      </v-btn>
+  <exo-drawer
+    ref="sendTokensForm"
+    :right="!$vuetify.rtl">
+    <template slot="title">
+      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.requestFunds') }} </span></div>
     </template>
-    <v-card class="elevation-12">
-      <div class="ignore-vuetify-classes popupHeader ClearFix">
-        <a
-          class="uiIconClose pull-right"
-          aria-hidden="true"
-          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
-            {{ $t('exoplatform.wallet.button.requestFunds') }}
-          </span>
-      </div> <div v-if="error && !loading" class="alert alert-error v-content">
+    <template slot="content" class="walletRequestFundsModal">
+      <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
       </div>
       <v-card-text>
@@ -55,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <address-auto-complete
             ref="autocomplete"
             :disabled="loading"
-            :autofocus="dialog"
+            autofocus
             :input-label="$t('exoplatform.wallet.label.recipient')"
             :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
             required
@@ -84,23 +64,24 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             no-resize />
         </v-form>
       </v-card-text>
-      <v-card-actions>
+    </template>
+    <template slot="footer">
+      <div class="VuetifyApp flex d-flex">
         <v-spacer />
+        <button
+          class="ignore-vuetify-classes btn mx-1"
+          @click="close">
+          {{ $t('exoplatform.wallet.button.close') }}
+        </button>
         <button
           :disabled="disabled"
           class="ignore-vuetify-classes btn btn-primary"
           @click="requestFunds">
           {{ $t('exoplatform.wallet.button.sendRequest') }}
         </button>
-        <button
-          class="ignore-vuetify-classes btn ms-2"
-          @click="dialog = false">
-          {{ $t('exoplatform.wallet.button.close') }}
-        </button>
-        <v-spacer />
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </div>
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
@@ -137,7 +118,6 @@ export default {
       error: null,
       requestMessage: '',
       loading: false,
-      dialog: false,
       amoutRules: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField'), (v) => (!isNaN(parseFloat(v)) && isFinite(v) && v > 0) || this.$t('exoplatform.wallet.warning.invalidAmount')],
     };
   },
@@ -146,19 +126,19 @@ export default {
       return !this.walletAddress || this.loading || !this.recipient || !this.amount;
     },
   },
-  watch: {
-    dialog() {
-      if (this.dialog) {
-        this.requestMessage = '';
-        this.recipient = null;
-        this.amount = null;
-        if (this.$refs && this.$refs.autocomplete) {
-          this.$refs.autocomplete.clear();
-        }
-      }
-    },
+  created () {
+    this.init();
   },
   methods: {
+    init(){
+      this.requestMessage = '';
+      this.recipient = null;
+      this.amount = null;
+      if (this.$refs && this.$refs.autocomplete) {
+        this.$refs.autocomplete.clear();
+        this.$refs.autocomplete.focus();
+      }
+    },
     requestFunds() {
       if (!this.$refs.form.validate()) {
         return;
@@ -192,7 +172,7 @@ export default {
       })
         .then((resp) => {
           if (resp && resp.ok) {
-            this.dialog = false;
+            this.close();
           } else {
             this.error = this.$t('exoplatform.wallet.error.errorRequestingFunds');
           }
@@ -203,6 +183,12 @@ export default {
           this.error = `this.$t('exoplatform.wallet.error.errorProceeding'): ${e}`;
           this.loading = false;
         });
+    },
+    open() {
+      this.$refs.sendTokensForm.open();
+    },
+    close() {
+      this.$refs.sendTokensForm.close();
     },
   },
 };

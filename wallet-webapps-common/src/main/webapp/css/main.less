@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 }
 .application-toolbar {
     margin-bottom: 12px;
-    max-width: ~"calc(100% - 24px)" !important;
+    max-width: 100% !important;
 
     .tabs-content {
       margin-top: 10px !important;
@@ -129,7 +129,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
     .transactionDetailItem, .transactionDetailContent {
       height: auto;
-      padding: 4px 0;
+      padding:0 !important;
     }
     .transactionDetailItem > .v-list__tile {
       height: auto;
@@ -167,6 +167,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     div {
       width: auto;
+      margin-top: 12px;
     }
   }
 
@@ -263,8 +264,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   }
   .alert{
     line-height: 29px;
-    display: inline-block;
     max-width: 100%;
+    text-align: center;
 
     i {
       margin-right: 0 ~'; /** orientation=lt */ ';
@@ -292,11 +293,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   #requestMessage {
     height: auto;
-    margin: 0;
+    margin-top: 10px;
   }
 
   .v-text-field .v-label--active {
-    top: 0;
+    top: -8px;
+    color : @black;
+    font-size : 20px !important;
+    height: 26px;
+    line-height: 26px;
   }
 
   .buttomNavigation {
@@ -411,14 +416,30 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .v-expansion-panel-content {
       box-sizing: border-box;
     }
-
+    .v-expansion-panel-content__wrap {
+      padding : 0 !important;
+    }
     .v-list {
-      max-width: ~"calc(100vw - 30px)";
+      max-width:100%;
       display: block;
+      .v-list-item__content {
+        display: list-item;
+      }
+    }
+    .transactions{
+      width:94% ;
     }
 
     .v-bottom-nav .v-btn .v-btn__content span {
       padding: 0 10px;
+    }
+
+    .loadMoreTransaction {
+      position: fixed;
+      bottom: 0;
+      background : @white;
+      width: 97%;
+      height: 60px
     }
   }
 
@@ -566,15 +587,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 }
 
 #WalletApp, #SpaceWalletApp {
+  .chartHistory{
+    margin: 0 7.5%;
+  }
   .periodicityLabel {
     text-transform: capitalize;
+    margin: 0 -1%;
   }
   .walletSummaryBalance {
     display: inline-block;
     width: 100%;
     height: 100px;
+    margin: 4%;
     .title, .headline {
-      color: #808080;
+      color:  @textMediumColor;
     }
     .tokenBalance {
       color: @tertiaryColor;
@@ -596,13 +622,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     .amount {
       line-height: 40px;
     }
+    .btn {
+      text-transform: capitalize;
+    }
   }
 
   .walletSummaryActions {
-    margin-top: 5px;
+    margin-top: 5%;
 
-    .walletSummaryAction, .v-dialog__container, .v-dialog__activator, button {
-      width: 100%;
+    .walletSummaryAction, .v-dialog__container, .v-dialog__activator {
+      width: 90%;
       box-sizing: border-box;
     }
     .walletSummaryAction {
@@ -611,15 +640,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   }
   .transactionHistoryChart {
     height: 450px;
-    width: 95%;
+    width: 90%;
     max-height: 450px;
     padding: 10px 8px 10px 10px;
     box-sizing: border-box;
-    margin-left: 5% ~'; /** orientation=lt */ ';
-    margin-right: 5% ~'; /** orientation=rt */ ';
-
+    margin: 0 5%;
+  }
+  .year {
     canvas {
-     width: 100% !important;
+      width: 99.5% !important;
+      max-height: 480px !important;
+    }
+  }
+  .month {
+    canvas {
+      width: 98% !important;
+      height: 460px !important;
+      max-height: 460px !important;
     }
   }
   #rewardDetailsDrawer {
@@ -730,6 +767,36 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   .symbol{
     color : @errorColor;
   }
+  .balance{
+    color: @textMediumColor;
+  }
+  .gasPrice{
+    .symbol {
+      color : @errorColor;
+      font-weight: bold ;
+    }
+    .transactionFee {
+      color : @textMediumColor;
+    }
+  }
+  .amountLabel{
+    color : @black;
+  }
+  .summaryBalanceLabels{
+    font-size: 16px;
+  }
+  .uiArrowBAckIcon {
+    cursor: pointer;
+    color: @btnDisableColor!important;
+    margin-left: -4px;
+    top: 4px;
+    &:before {
+      content: "\e913";
+      font-family: "PLF-FONT-ICONS" !important;
+      font-style: normal;
+      font-size: 22px;
+    }
+  }
 /* Override uiPopup !important attributes */
 @media (max-width : 959px) {
   #WalletApp, #SpaceWalletApp {
@@ -822,94 +889,52 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @media (max-width : @smallMobileWidth){
   #WalletApp {
-    .summaryCard {
+    .fixedItems {
+      position: absolute;
+      right: 0 ~'!important; /** orientation=lt */ ';
+      left: 0 ~'!important; /** orientation=rt */ ';
+      box-sizing: border-box;
+    }
+    .summaryCard , .summaryBalance {
       width: 100%;
     }
-    .transactionCard {
-      width: 100%;
-      margin-left: 1% ~'; /** orientation=lt */ ';
-      margin-right: 1% ~'; /** orientation=rt */ ';
-    }
-    .transactionChart {
-      width: 100%;
-    }
-    .summaryButtons {
-      width: 100%;
-      .walletSummaryAction{
-        width: 50% ;
-        padding: 0 1% !important;
-      }
-      .walletSummaryBalance{
-        display: flex;
-        width: 100%;
-        height: 40px;
-        margin-left: 1% ~'; /** orientation=lt */ ';
-        margin-right: 1% ~'; /** orientation=rt */ ';
-      }
-    }
-  }
-}
-@media (min-width : @smallMobileWidth){
-  #WalletApp {
-    .summaryCard {
-      width: 50%;
-    }
-    .transactionCard {
-      width: 100%;
-      margin-left: 1% ~'; /** orientation=lt */ ';
-      margin-right: 1% ~'; /** orientation=rt */ ';
-    }
-    .transactionChart {
-      width: 100%;
-    }
-    .summaryButtons {
-      width: 100%;
-      .walletSummaryAction{
-        width: 50%;
-        padding: 0 1% !important;
-      }
-      .walletSummaryBalance{
-        display: flex;
-        width: 100%;
-        margin-right: 1% ~'; /** orientation=rt */ ';
-        margin-left: 1% ~'; /** orientation=lf */ ';
-        flex-wrap: nowrap;
-      }
-    }
-  }
-}
-@media (min-width : @minDesktop){
-  #WalletApp {
-    .summaryCard , .transactionCard {
-      max-width: 17%;
-      margin-left: 2% ~'; /** orientation=lt */ ';
-      margin-right: 2% ~'; /** orientation=rt */ ';
-    }
-    .transactionChart {
-      max-width: 70%;
-    }
-    .summaryButtons {
-      max-width: 16%;
-      margin-left: 2.2% ~'; /** orientation=rt */ ';
-      margin-right: 2.2% ~'; /** orientation=lf */ ';
-      .walletSummaryActions {
-        margin-top: 30px;
-      }
-      .walletSummaryAction{
-        width: 100% ;
-        padding: 0 1%;
-      }
-      .walletSummaryBalance{
-        display: inline-block;
-        width: 100%;
-      }
-    }
-    .walletSummaryBalance{
+    .WalletChart , .WalletSummary{
       max-width: 100%;
     }
-    .spacer.summarySpacer {
-      flex-grow: 15 !important;
-      width: 5%;
-     }
+  }
+}
+@media (min-width : @smallMobileWidth) and (max-width : @minTabletWidth) {
+  #WalletApp {
+    .fixedItems {
+      position: absolute;
+      right: 0 ~'!important; /** orientation=lt */ ';
+      left: 0 ~'!important; /** orientation=rt */ ';
+      box-sizing: border-box;
+    }
+    .summaryCard {
+      max-width: max-content;
+    }
+    .summaryBalance {
+      width: 100%;
+    }
+    .WalletChart , .WalletSummary{
+      max-width: 100%;
+    }
+  }
+}
+@media (min-width : @minTabletWidth){
+  #WalletApp {
+    .fixedItems {
+      position: absolute;
+      right: 0 ~'!important; /** orientation=lt */ ';
+      left: 0 ~'!important; /** orientation=rt */ ';
+      box-sizing: border-box;
+    }
+    .summaryCard , .summaryBalance {
+      max-width: max-content;
+    }
+    .WalletChart , .WalletSummary{
+      width: 100%;
+    }
   }
 }

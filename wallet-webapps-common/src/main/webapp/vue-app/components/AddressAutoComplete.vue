@@ -37,7 +37,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       chips
       cache-items
       dense
-      flat>
+      flat
+      @click.stop>
       <template slot="no-data">
         <v-list-item>
           <v-list-item-title v-if="noDataLabel">
@@ -129,7 +130,7 @@ export default {
     autofocus: {
       type: Boolean,
       default: function() {
-        return false;
+        return true;
       },
     },
     noAddress: {
@@ -314,6 +315,7 @@ export default {
       this.isLoadingSuggestions = false;
       this.addressLoad = '';
       this.error = null;
+      this.$refs.selectAutoComplete.blur();
     },
     canAddItem(item) {
       return !item || !item.id || this.ignoreItems.indexOf(item.id) < 0;

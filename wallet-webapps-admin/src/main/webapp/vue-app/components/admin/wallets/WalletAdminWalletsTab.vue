@@ -188,41 +188,41 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </template>
                 <v-list flat class="pt-0 pb-0">
                   <template>
-                    <v-list-item @click="refreshWallet(props.item, true)">
-                      <v-list-item-title>{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-item-title>
+                    <v-list-item @mousedown="$event.preventDefault()">
+                      <v-list-item-title @click="refreshWallet(props.item, true)">{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-item-title>
                     </v-list-item>
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
                         <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
-                          <v-list-item :disabled="adminNotHavingEnoughToken" @click="openAcceptInitializationModal(props.item)">
-                            <v-list-item-title>{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
+                          <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
+                            <v-list-item-title @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
-                          <v-list-item v-if="props.item.initializationState !== 'DENIED'" @click="openDenyInitializationModal(props.item)">
-                            <v-list-item-title>{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
+                          <v-list-item v-if="props.item.initializationState !== 'DENIED'" @mousedown="$event.preventDefault()">
+                            <v-list-item-title @click="openDenyInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
                         <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
-                          <v-list-item :disabled="adminNotHavingEnoughEther" @click="openSendEtherModal(props.item)">
-                            <v-list-item-title>{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
+                          <v-list-item :disabled="adminNotHavingEnoughEther" @mousedown="$event.preventDefault()">
+                            <v-list-item-title @click="openSendEtherModal(props.item)">{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
                         <v-list-item
                           v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0"
                           :disabled="adminNotHavingEnoughToken"
-                          @click="openSendTokenModal(props.item)">
-                          <v-list-item-title>{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
+                          @mousedown="$event.preventDefault()">
+                          <v-list-item-title @click="openSendTokenModal(props.item)">{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
                         </v-list-item>
                         <v-divider />
                       </template>
 
-                      <v-list-item v-if="props.item.enabled" @click="openDisableWalletModal(props.item)">
-                        <v-list-item-title>{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-item-title>
+                      <v-list-item v-if="props.item.enabled" @mousedown="$event.preventDefault()">
+                        <v-list-item-title @click="openDisableWalletModal(props.item)">{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-item-title>
                       </v-list-item>
-                      <v-list-item v-else-if="!props.item.disabledUser && !props.item.deletedUser" @click="enableWallet(props.item, true)">
-                        <v-list-item-title>{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-item-title>
+                      <v-list-item v-else-if="!props.item.disabledUser && !props.item.deletedUser" @mousedown="$event.preventDefault()">
+                        <v-list-item-title @click="enableWallet(props.item, true)">{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-item-title>
                       </v-list-item>
                     </template>
                   </template>
@@ -247,26 +247,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       @sent="walletPendingTransaction" />
 
     <!-- The selected account detail -->
-    <v-navigation-drawer
-      id="accountDetailsDrawer"
-      v-model="seeAccountDetails"
-      :right="!$vuetify.rtl"
-      absolute
-      temporary
-      stateless
-      width="700"
-      max-width="100vw">
-      <account-detail
-        ref="accountDetail"
-        :fiat-symbol="fiatSymbol"
-        :wallet="selectedWallet"
-        :contract-details="selectedWalletDetails"
-        :selected-transaction-hash="selectedTransactionHash"
-        is-read-only
-        is-display-only
-        is-administration
-        @back="back()" />
-    </v-navigation-drawer>
+    <account-detail
+      ref="accountDetail"
+      :fiat-symbol="fiatSymbol"
+      :wallet="selectedWallet"
+      :contract-details="selectedWalletDetails"
+      :selected-transaction-hash="selectedTransactionHash"
+      is-read-only
+      is-display-only
+      is-administration
+      @back="back()" />
   </v-flex>
 </template>
 
@@ -578,7 +568,7 @@ export default {
         details: wallet,
       };
       this.seeAccountDetails = true;
-
+      this.$refs.accountDetail.open();
       this.$nextTick(() => {
         const thiss = this;
         $('.v-overlay')

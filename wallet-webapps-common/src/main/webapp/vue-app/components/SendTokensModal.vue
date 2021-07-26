@@ -15,55 +15,36 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-dialog
-    id="sendTokensModal"
-    v-model="dialog"
-    :disabled="disabled"
-    content-class="uiPopup with-overflow walletDialog"
-    width="600px"
-    max-width="100vw"
-    persistent
-    @keydown.esc="dialog = false">
-    <template v-slot:activator="{ on }">
-      <v-btn
-        v-if="canBoostTransaction"
-        v-show="showBoostButton"
-        color="primary"
-        text
-        v-on="on">
-        {{ $t('exoplatform.wallet.button.boost') }}
-      </v-btn>
-      <v-btn
-        v-else-if="!transaction"
-        :disabled="isReadOnly"
-        class="btn btn-primary"
-        v-on="on">
-        <v-icon color="white" class="mr-8">
-          mdi-cash-refund
-        </v-icon>
-        {{ $t('exoplatform.wallet.button.send') }}
-      </v-btn>
-    </template>
-    <v-card class="elevation-12">
-      <div class="ignore-vuetify-classes popupHeader ClearFix">
-        <a
-          class="uiIconClose pull-right"
-          aria-hidden="true"
-          @click="dialog = false"></a> <span class="ignore-vuetify-classes PopupTitle popupTitle">
-            {{ $t('exoplatform.wallet.button.sendfunds') }}
-          </span>
-      </div>
-      <send-tokens-form
-        ref="sendTokensForm"
-        :wallet="wallet"
-        :transaction="transaction"
-        :contract-details="contractDetails"
-        @sent="$emit('sent', $event, contractDetails)"
-        @close="dialog = false"
-        @error="$emit('error', $event)" />
-    </v-card>
-  </v-dialog>
+  <div>
+    <v-btn
+      v-if="canBoostTransaction"
+      v-show="showBoostButton"
+      color="primary"
+      block
+      text>
+      {{ $t('exoplatform.wallet.button.boost') }}
+    </v-btn>
+    <v-btn
+      v-else
+      :disabled="isReadOnly"
+      class="btn btn-primary"
+      block
+      @click="openSendTokenDrawer">
+      <v-icon color="white" class="mr-8">
+        mdi-cash-refund
+      </v-icon>
+      {{ $t('exoplatform.wallet.button.sendfunds') }}
+    </v-btn>
+    <send-tokens-form
+      ref="sendTokensForm"
+      :wallet="wallet"
+      :transaction="transaction"
+      :contract-details="contractDetails"
+      @sent="$emit('sent', $event, contractDetails)"
+      @error="$emit('error', $event)" />
+  </div>
 </template>
+
 
 <script>
 import SendTokensForm from './SendTokensForm.vue';
@@ -109,7 +90,6 @@ export default {
   },
   data() {
     return {
-      dialog: false,
       firstPendingTransaction: false,
     };
   },
@@ -128,23 +108,6 @@ export default {
     },
     disabled() {
       return this.isReadOnly || (this.wallet && !this.wallet.isApproved) || !this.tokenBalance || this.tokenBalance === 0 || (typeof this.tokenBalance === 'string' && (!this.tokenBalance.length || this.tokenBalance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
-    },
-  },
-  watch: {
-    open() {
-      this.dialog = this.open;
-    },
-    dialog() {
-      if (this.dialog) {
-        this.$nextTick().then(() => {
-          if (this.transaction && this.transaction.fromWallet) {
-            this.prepareSendForm(this.transaction.toWallet.id, this.transaction.toWallet.type, this.transaction.contractAmount);
-          }
-          this.$refs.sendTokensForm.init();
-        });
-      } else {
-        this.$emit('close');
-      }
     },
   },
   created() {
@@ -179,7 +142,6 @@ export default {
           });
         });
       } else if (receiver) {
-        this.dialog = true;
         return this.$nextTick(() => {
           if (receiver) {
             receiverType = receiverType || 'user';
@@ -190,10 +152,13 @@ export default {
           }
         });
       } else {
-        this.dialog = true;
         this.$refs.sendTokensForm.init();
       }
     },
+    openSendTokenDrawer(){
+      this.$refs.sendTokensForm.open();
+      this.$refs.sendTokensForm.init();
+    }
   },
 };
 </script>

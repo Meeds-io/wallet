@@ -15,121 +15,138 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-card id="sendTokenForm" flat>
-    <v-card-text class="pt-0">
-      <div v-if="error && !loading" class="alert alert-error v-content">
-        <i class="uiIconError"></i>{{ error }}
-      </div> <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
-        <i class="uiIconWarning"></i>{{ warning }}
-      </div> <div v-if="!error && !warning && information && information.length" class="alert alert-info v-content">
-        <i class="uiIconInfo"></i>{{ information }}
+  <exo-drawer
+    ref="sendTokensForm"
+    :right="!$vuetify.rtl">
+    <template slot="title">
+      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.sendfunds') }} </span></div>
+    </template>
+    <template slot="content">
+      <v-card
+        id="sendTokenForm"
+        flat
+        class="mt-6">
+        <v-card-text class="pt-0">
+          <div v-if="error && !loading" class="alert alert-error v-content">
+            <i class="uiIconError"></i>{{ error }}
+          </div> <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
+            <i class="uiIconWarning"></i>{{ warning }}
+          </div> <div v-if="!error && !warning && information && information.length" class="alert alert-info v-content">
+            <i class="uiIconInfo"></i>{{ information }}
+          </div>
+          <v-form
+            ref="form"
+            @submit="
+              $event.preventDefault();
+              $event.stopPropagation();
+            ">
+            <address-auto-complete
+              ref="autocomplete"
+              :disabled="loading || disabledRecipient"
+              :input-label="$t('exoplatform.wallet.label.recipient')"
+              :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
+              :ignore-current-user="!isSpace"
+              autofocus="true"
+              required
+              validate-on-blur
+              @item-selected="
+                recipient = $event.address;
+                $emit('receiver-selected', $event);
+              " />
+            <p class="amountLabel mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
+            <gas-price-choice
+              :wallet="wallet"
+              :estimated-fee="transactionFeeString"
+              :slider="!!transaction"
+              :min-gas-price="transaction && transaction.gasPrice"
+              @changed="gasPrice = $event" />
+            <v-text-field
+              v-model.number="amount"
+              ref="amount"
+              :disabled="loading || transaction"
+              :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
+              type="number"
+              name="amount"
+              required
+              validate-on-blur
+              class="mt-n4"
+              @input="$emit('amount-selected', amount)" />
+
+            <v-text-field
+              v-if="!storedPassword"
+              ref="walletPassword"
+              v-model="walletPassword"
+              :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="walletPasswordShow ? 'text' : 'password'"
+              :disabled="loading"
+              :rules="mandatoryRule"
+              :label="$t('exoplatform.wallet.label.walletPassword')"
+              :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
+              name="walletPassword"
+              required
+              validate-on-blur
+              autocomplete="current-password"
+              @click:append="walletPasswordShow = !walletPasswordShow" />
+
+            <v-text-field
+              v-model="transactionLabel"
+              :disabled="loading || transaction"
+              :label="$t('exoplatform.wallet.label.transactionLabel')"
+              :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
+              type="text"
+              name="transactionLabel" />
+            <v-textarea
+              v-model="transactionMessage"
+              :disabled="loading || transaction"
+              :label="$t('exoplatform.wallet.label.transactionMessage')"
+              :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
+              name="tokenTransactionMessage"
+              flat
+              no-resize />
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </template>
+    <template slot="footer">
+      <div class="VuetifyApp flex d-flex">
+        <v-spacer />
+        <button
+          :disabled="disabled"
+          class="ignore-vuetify-classes btn mx-1"
+          color="secondary"
+          @click="showQRCodeModal = true">
+          {{ $t('exoplatform.wallet.button.qrCode') }}
+        </button>
+        <button
+          :disabled="disabled"
+          :loading="loading"
+          class="ignore-vuetify-classes btn btn-primary"
+          @click="sendTokens">
+          {{ $t('exoplatform.wallet.button.send') }}
+        </button>
+        <qr-code-modal
+          ref="qrCodeModal"
+          :to="recipient"
+          :from="walletAddress"
+          :amount="0"
+          :is-contract="true"
+          :args-names="['_to', '_value']"
+          :args-types="['address', 'uint256']"
+          :args-values="[recipient, amount]"
+          :open="showQRCodeModal"
+          :function-payable="false"
+          :title="$t('exoplatform.wallet.title.sendTokenQRCode')"
+          :information="$t('exoplatform.wallet.message.sendTokenQRCodeMessage')"
+          function-name="transfer"
+          @close="showQRCodeModal = false" />
       </div>
-      <v-form
-        ref="form"
-        @submit="
-          $event.preventDefault();
-          $event.stopPropagation();
-        ">
-        <address-auto-complete
-          ref="autocomplete"
-          :disabled="loading || disabledRecipient"
-          :input-label="$t('exoplatform.wallet.label.recipient')"
-          :input-placeholder="$t('exoplatform.wallet.label.recipientPlaceholder')"
-          :ignore-current-user="!isSpace"
-          autofocus
-          required
-          validate-on-blur
-          @item-selected="
-            recipient = $event.address;
-            $emit('receiver-selected', $event);
-          " />
-
-        <v-text-field
-          v-model.number="amount"
-          :disabled="loading || transaction"
-          :label="$t('exoplatform.wallet.label.amount')"
-          :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
-          name="amount"
-          required
-          @input="$emit('amount-selected', amount)" />
-
-        <v-text-field
-          v-if="!storedPassword"
-          v-model="walletPassword"
-          :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="walletPasswordShow ? 'text' : 'password'"
-          :disabled="loading"
-          :rules="mandatoryRule"
-          :label="$t('exoplatform.wallet.label.walletPassword')"
-          :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
-          name="walletPassword"
-          required
-          autocomplete="current-passord"
-          @click:append="walletPasswordShow = !walletPasswordShow" />
-        <gas-price-choice
-          :wallet="wallet"
-          :estimated-fee="transactionFeeString"
-          :slider="!!transaction"
-          :min-gas-price="transaction && transaction.gasPrice"
-          @changed="gasPrice = $event" />
-        <v-text-field
-          v-model="transactionLabel"
-          :disabled="loading || transaction"
-          :label="$t('exoplatform.wallet.label.transactionLabel')"
-          :placeholder="$t('exoplatform.wallet.label.transactionLabelPlaceholder')"
-          type="text"
-          name="transactionLabel" />
-        <v-textarea
-          v-model="transactionMessage"
-          :disabled="loading || transaction"
-          :label="$t('exoplatform.wallet.label.transactionMessage')"
-          :placeholder="$t('exoplatform.wallet.label.transactionMessagePlaceholder')"
-          name="tokenTransactionMessage"
-          rows="3"
-          flat
-          no-resize />
-      </v-form>
-      <qr-code-modal
-        ref="qrCodeModal"
-        :to="recipient"
-        :from="walletAddress"
-        :amount="0"
-        :is-contract="true"
-        :args-names="['_to', '_value']"
-        :args-types="['address', 'uint256']"
-        :args-values="[recipient, amount]"
-        :open="showQRCodeModal"
-        :function-payable="false"
-        :title="$t('exoplatform.wallet.title.sendTokenQRCode')"
-        :information="$t('exoplatform.wallet.message.sendTokenQRCodeMessage')"
-        function-name="transfer"
-        @close="showQRCodeModal = false" />
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <button
-        :disabled="disabled"
-        :loading="loading"
-        class="ignore-vuetify-classes btn btn-primary me-1"
-        @click="sendTokens">
-        {{ $t('exoplatform.wallet.button.send') }}
-      </button>
-      <button
-        :disabled="disabled"
-        class="ignore-vuetify-classes btn"
-        color="secondary"
-        @click="showQRCodeModal = true">
-        {{ $t('exoplatform.wallet.button.qrCode') }}
-      </button>
-      <v-spacer />
-    </v-card-actions>
-  </v-card>
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
 import AddressAutoComplete from './AddressAutoComplete.vue';
 import QrCodeModal from './QRCodeModal.vue';
-import GasPriceChoice from './GasPriceChoice.vue';
 
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
@@ -138,7 +155,6 @@ import {searchWalletByAddress} from '../js/AddressRegistry.js';
 export default {
   components: {
     QrCodeModal,
-    GasPriceChoice,
     AddressAutoComplete,
   },
   props: {
@@ -234,18 +250,6 @@ export default {
     },
   },
   watch: {
-    dialog() {
-      if (!this.dialog) {
-        this.recipient = null;
-        this.amount = null;
-        this.notificationId = null;
-        this.warning = null;
-        this.error = null;
-        this.walletPassword = '';
-        this.walletPasswordShow = false;
-        this.error = null;
-      }
-    },
     contractDetails() {
       if (this.contractDetails && this.contractDetails.isPaused) {
         this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
@@ -301,6 +305,9 @@ export default {
       }
     },
   },
+  created () {
+    this.init();
+  },
   methods: {
     init() {
       this.$nextTick(() => {
@@ -309,6 +316,21 @@ export default {
           this.$refs.autocomplete.focus();
         }
       });
+      if (this.$refs.walletPassword) {
+        this.$refs.walletPassword.blur();
+      }
+      if (this.$refs.amount) {
+        this.$refs.amount.blur();
+      }
+      this.recipient = null;
+      this.amount = null;
+      this.notificationId = null;
+      this.warning = null;
+      this.error = null;
+      this.transactionLabel = '';
+      this.walletPassword = '';
+      this.walletPasswordShow = false;
+      this.error = null;
       this.loading = false;
       this.disabledRecipient = !!this.transaction;
       this.showQRCodeModal = false;
@@ -481,6 +503,7 @@ export default {
         .finally(() => {
           this.loading = false;
           lockBrowserWallet();
+          this.close();
         });
     },
     checkErrors() {
@@ -504,6 +527,12 @@ export default {
         return;
       }
     },
+    open(){
+      this.$refs.sendTokensForm.open();
+    },
+    close(){
+      this.$refs.sendTokensForm.close();
+    }
   },
 };
 </script>
