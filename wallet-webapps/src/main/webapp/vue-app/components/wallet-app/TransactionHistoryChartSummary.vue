@@ -20,13 +20,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-flex
       text-start
       pt-2
+      :id="id"
       class="periodicityLabel">
       <v-menu
         ref="selectDateMenu"
         v-model="selectDateMenu"
+        :content-class="menuId"
         transition="scale-transition"
         offset-y
-        class="dateSelector">
+        class="dateSelector"
+        attach>
         <template v-slot:activator="{ on }">
           <v-chip color="primary" v-on="on">
             <v-icon class="me-1">event</v-icon>
@@ -78,11 +81,32 @@ export default {
   data() {
     return {
       selectDateMenu: false,
+      id: `DatePicker${parseInt(Math.random() * 10000)
+          .toString()
+          .toString()}`,
+      menuId: `DatePickerMenu${parseInt(Math.random() * 10000)
+          .toString()
+          .toString()}`,
       selectedPickerDate: new Date().toISOString().substr(0, 7),
       selectedDate: null,
       lang: 'en',
       periodicity: 'month',
     };
+  },
+  mounted() {
+    // Force to close other DatePicker menus when opening a new one
+    $('.periodicityLabel span').on('click', (e) => {
+      if (e.target && !$(e.target).parents(`#${this.id}`).length) {
+        this.selectDateMenu = false;
+      }
+    });
+
+    // Force to close DatePickers when clicking outside
+    $(document).on('click', (e) => {
+      if (e.target && !$(e.target).parents(`.${this.menuId}`).length) {
+        this.selectDateMenu = false;
+      }
+    });
   },
   computed: {
     maxDate() {
