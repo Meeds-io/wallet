@@ -279,6 +279,9 @@ export default {
     openExchangeDrawer() {
       this.$refs.walletSummaryActions.open();
     },
+    prepareSendForm() {
+      this.$refs.walletSummaryActions.init();
+    },
   },
 };
 </script>
