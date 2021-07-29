@@ -32,7 +32,10 @@ $( document ).ready(function() {
     }
   }
 
-  return fetch(`/portal/rest/wallet/api/settings`, {credentials: 'include'})
+  return fetch(`/portal/rest/wallet/api/settings`, {
+    method: 'GET',
+    credentials: 'include',
+  })
     .then(resp =>  {
       if (resp && resp.ok) {
         return resp.json();
