@@ -44,6 +44,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <name>portlet-view-dispatched-file-path</name>
       <value>/walletLink.html</value>
     </init-param>
+    <init-param>
+      <name>preload.resource.rest</name>
+      <value><![CDATA[/portal/rest/wallet/api/settings]]></value>
+    </init-param>
     <expiration-cache>-1</expiration-cache>
     <cache-scope>PUBLIC</cache-scope>
     <supports>
@@ -62,6 +66,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
       <value>/wallet.html</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.bundles</name>
+      <value>locale.addon.Wallet</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.rest</name>
+      <value><![CDATA[/portal/rest/wallet/api/settings?spaceId=&administration=]]></value>
     </init-param>
     <expiration-cache>-1</expiration-cache>
     <cache-scope>PUBLIC</cache-scope>
@@ -83,6 +95,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <name>portlet-view-dispatched-file-path</name>
       <value>/spaceWallet.html</value>
     </init-param>
+    <init-param>
+      <name>preload.resource.bundles</name>
+      <value>locale.addon.Wallet</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.rest</name>
+      <value><![CDATA[/portal/rest/wallet/api/settings?spaceId={spaceId}&administration=]]></value>
+    </init-param>
     <expiration-cache>-1</expiration-cache>
     <cache-scope>PUBLIC</cache-scope>
     <supports>
@@ -102,6 +122,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/walletOverview.jsp</value>
     </init-param>
     <init-param>
+      <name>preload.resource.bundles</name>
+      <value>locale.addon.Wallet</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.rest</name>
+      <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
+    </init-param>
+    <init-param>
       <description>List of profiles that can be used to enable this portlet</description>
       <name>exo.profiles</name>
       <value>wallet</value>
@@ -119,6 +147,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
       <value>/walletBalance.jsp</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.bundles</name>
+      <value>locale.addon.Wallet</value>
+    </init-param>
+    <init-param>
+      <name>preload.resource.rest</name>
+      <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
     </init-param>
     <init-param>
       <description>List of profiles that can be used to enable this portlet</description>
