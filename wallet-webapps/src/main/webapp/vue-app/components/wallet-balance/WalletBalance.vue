@@ -78,7 +78,10 @@ export default {
         this.walletBalance = Math.trunc(data.tokenBalance);
         if (!this.currencySymbol) {
           // Search settings in a sync way
-          return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`)
+          return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/settings`, {
+            method: 'GET',
+            credentials: 'include',
+          })
             .then((resp) => resp && resp.ok && resp.json())
             .then(settings => {
               const contract = settings && settings.contractDetail;
