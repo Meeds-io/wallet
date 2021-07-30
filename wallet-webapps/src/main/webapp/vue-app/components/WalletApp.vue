@@ -268,10 +268,8 @@ export default {
       // Init application
       this.init()
         .then(() => {
-          if (this.$refs.walletSummaryActions) {
-            this.$refs.walletSummaryActions.init(this.isReadOnly);
-          }
-          if (this.$refs && this.$refs.walletSummary) {
+          if (this.$refs.walletSummary) {
+            this.$refs.walletSummary.prepareSendForm();
             this.$refs.walletSummary.loadPendingTransactions();
           }
           this.checkOpenTransaction();
