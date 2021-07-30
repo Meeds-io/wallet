@@ -130,8 +130,8 @@ export default {
 
       if (receiver && notificationId) {
         receiverType = receiverType || 'user';
-        checkFundRequestStatus(notificationId).then((sent) => {
-          this.dialog = !sent;
+        checkFundRequestStatus(notificationId).then(() => {
+          this.openSendTokenDrawer();
           return this.$nextTick(() => {
             if (receiver) {
               this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
