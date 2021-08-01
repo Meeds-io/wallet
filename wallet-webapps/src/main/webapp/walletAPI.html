@@ -16,6 +16,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <div id="WalletAPIApp">
   <script>
-    require(['PORTLET/wallet/WalletAPI'], app => app.init())
+    eXo.env.portal.addOnLoadCallback(() => {
+      require(['PORTLET/wallet/WalletAPI'], app => app.init())
+    });
   </script>
 </div>
