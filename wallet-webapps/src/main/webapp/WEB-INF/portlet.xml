@@ -45,7 +45,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/walletLink.html</value>
     </init-param>
     <init-param>
-      <name>preload.resource.rest</name>
+      <name>prefetch.resources</name>
+      <value>true</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.rest</name>
       <value><![CDATA[/portal/rest/wallet/api/settings]]></value>
     </init-param>
     <expiration-cache>-1</expiration-cache>
@@ -68,11 +72,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/wallet.html</value>
     </init-param>
     <init-param>
-      <name>preload.resource.bundles</name>
+      <name>prefetch.resources</name>
+      <value>true</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.bundles</name>
       <value>locale.addon.Wallet</value>
     </init-param>
     <init-param>
-      <name>preload.resource.rest</name>
+      <name>prefetch.resource.rest</name>
       <value><![CDATA[/portal/rest/wallet/api/settings?spaceId=&administration=]]></value>
     </init-param>
     <expiration-cache>-1</expiration-cache>
@@ -96,11 +104,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/spaceWallet.html</value>
     </init-param>
     <init-param>
-      <name>preload.resource.bundles</name>
+      <name>prefetch.resources</name>
+      <value>true</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.bundles</name>
       <value>locale.addon.Wallet</value>
     </init-param>
     <init-param>
-      <name>preload.resource.rest</name>
+      <name>prefetch.resource.rest</name>
       <value><![CDATA[/portal/rest/wallet/api/settings?spaceId={spaceId}&administration=]]></value>
     </init-param>
     <expiration-cache>-1</expiration-cache>
@@ -122,11 +134,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/walletOverview.jsp</value>
     </init-param>
     <init-param>
-      <name>preload.resource.bundles</name>
+      <name>prefetch.resources</name>
+      <value>true</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.bundles</name>
       <value>locale.addon.Wallet</value>
     </init-param>
     <init-param>
-      <name>preload.resource.rest</name>
+      <name>prefetch.resource.rest</name>
       <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
     </init-param>
     <init-param>
@@ -149,11 +165,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/walletBalance.jsp</value>
     </init-param>
     <init-param>
-      <name>preload.resource.bundles</name>
+      <name>prefetch.resources</name>
+      <value>true</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.bundles</name>
       <value>locale.addon.Wallet</value>
     </init-param>
     <init-param>
-      <name>preload.resource.rest</name>
+      <name>prefetch.resource.rest</name>
       <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
     </init-param>
     <init-param>
