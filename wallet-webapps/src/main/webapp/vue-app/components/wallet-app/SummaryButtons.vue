@@ -104,7 +104,10 @@ export default {
           if (this.isReadOnly || isReadOnly) {
             throw new Error(this.$t('exoplatform.wallet.warning.walletReadonly'));
           }
-          this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
+          this.open();
+          this.$nextTick(() => {
+            this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
+          });
         }
       }
     },

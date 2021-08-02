@@ -173,7 +173,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-menu
                 v-else
                 offset-y
-                :value="actionSelectedWallet === props.item">
+                :value="actionSelectedWallet === props.item"
+                attach>
                 <template
                   v-slot:activator="{ on }">
                   <v-btn
@@ -189,23 +190,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list flat class="pt-0 pb-0">
                   <template>
                     <v-list-item @mousedown="$event.preventDefault()">
-                      <v-list-item-title @click="refreshWallet(props.item, true)">{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-item-title>
+                      <v-list-item-title class="options" @click="refreshWallet(props.item, true)">{{ $t('exoplatform.wallet.button.refreshWallet') }}</v-list-item-title>
                     </v-list-item>
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
                         <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                           <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
-                            <v-list-item-title @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
+                            <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
                           <v-list-item v-if="props.item.initializationState !== 'DENIED'" @mousedown="$event.preventDefault()">
-                            <v-list-item-title @click="openDenyInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
+                            <v-list-item-title class="options" @click="openDenyInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
                         <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
                           <v-list-item :disabled="adminNotHavingEnoughEther" @mousedown="$event.preventDefault()">
-                            <v-list-item-title @click="openSendEtherModal(props.item)">{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
+                            <v-list-item-title class="options" @click="openSendEtherModal(props.item)">{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
@@ -213,16 +214,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0"
                           :disabled="adminNotHavingEnoughToken"
                           @mousedown="$event.preventDefault()">
-                          <v-list-item-title @click="openSendTokenModal(props.item)">{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
+                          <v-list-item-title class="options" @click="openSendTokenModal(props.item)">{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
                         </v-list-item>
                         <v-divider />
                       </template>
 
                       <v-list-item v-if="props.item.enabled" @mousedown="$event.preventDefault()">
-                        <v-list-item-title @click="openDisableWalletModal(props.item)">{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-item-title>
+                        <v-list-item-title class="options" @click="openDisableWalletModal(props.item)">{{ $t('exoplatform.wallet.button.disableWallet') }}</v-list-item-title>
                       </v-list-item>
                       <v-list-item v-else-if="!props.item.disabledUser && !props.item.deletedUser" @mousedown="$event.preventDefault()">
-                        <v-list-item-title @click="enableWallet(props.item, true)">{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-item-title>
+                        <v-list-item-title class="options" @click="enableWallet(props.item, true)">{{ $t('exoplatform.wallet.button.enableWallet') }}</v-list-item-title>
                       </v-list-item>
                     </template>
                   </template>
