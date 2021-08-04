@@ -52,6 +52,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <org.exoplatform.social.version>6.3.x-SNAPSHOT</org.exoplatform.social.version>
     <org.exoplatform.wallet.ert-contract.version>1.1.x-SNAPSHOT</org.exoplatform.wallet.ert-contract.version>
     <org.exoplatform.platform-ui.version>6.3.x-SNAPSHOT</org.exoplatform.platform-ui.version>
+    
+    <!-- Sonar properties -->
+    <sonar.organization>meeds-io</sonar.organization>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -127,4 +130,34 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     </dependencies>
   </dependencyManagement>
+  
+   <!-- This profile is used to allow github action to build branches. The github action is used for sonar analysis -->
+   <profiles>
+      <profile>
+         <id>project-repositories</id>
+         <activation>
+            <property>
+               <name>!skip-project-repositories</name>
+            </property>
+         </activation>
+         <repositories>
+            <repository>
+               <snapshots>
+                  <enabled>true</enabled>
+               </snapshots>
+               <id>repository.exoplatform.org</id>
+               <url>https://repository.exoplatform.org/public</url>
+            </repository>
+         </repositories>
+         <pluginRepositories>
+            <pluginRepository>
+               <snapshots>
+                  <enabled>true</enabled>
+               </snapshots>
+               <id>repository.exoplatform.org</id>
+               <url>https://repository.exoplatform.org/public</url>
+            </pluginRepository>
+         </pluginRepositories>
+      </profile>
+   </profiles>
 </project>
