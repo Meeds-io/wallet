@@ -131,19 +131,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
-      <value>/walletOverview.jsp</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resources</name>
-      <value>true</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resource.bundles</name>
-      <value>locale.addon.Wallet</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resource.rest</name>
-      <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
+      <value>/WEB-INF/jsp/walletOverview.jsp</value>
     </init-param>
     <init-param>
       <description>List of profiles that can be used to enable this portlet</description>
@@ -162,27 +150,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
-      <value>/walletBalance.jsp</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resources</name>
-      <value>true</value>
-    </init-param>
-    <init-param>
-      <name>use-js-manager</name>
-      <value>true</value>
-    </init-param>
-    <init-param>
-      <name>js-manager-jsModule</name>
-      <value>SHARED/walletBalanceBundle</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resource.bundles</name>
-      <value>locale.addon.Wallet</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resource.rest</name>
-      <value><![CDATA[/portal/rest/wallet/api/settings,/portal/rest/wallet/api/account/detailsById?id={username}&type=user]]></value>
+      <value>/WEB-INF/jsp/walletBalance.jsp</value>
     </init-param>
     <init-param>
       <description>List of profiles that can be used to enable this portlet</description>
