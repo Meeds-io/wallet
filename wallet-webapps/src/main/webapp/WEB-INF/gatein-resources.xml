@@ -235,30 +235,4 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </module>
   </portlet>
 
-  <portlet>
-    <name>WalletBalance</name>
-    <module>
-      <depends>
-        <module>walletBalanceBundle</module>
-      </depends>
-    </module>
-  </portlet>
-
-  <module>
-    <name>walletBalanceBundle</name>
-    <script>
-      <minify>false</minify>
-      <path>/js/walletBalance.bundle.js</path>
-    </script>
-    <depends>
-      <module>vue</module>
-    </depends>
-    <depends>
-      <module>vuetify</module>
-    </depends>
-    <depends>
-      <module>eXoVueI18n</module>
-    </depends>
-  </module>
-
 </gatein-resources>
