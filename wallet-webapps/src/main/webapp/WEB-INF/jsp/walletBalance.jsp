@@ -10,9 +10,8 @@
 <%@ page import="org.exoplatform.wallet.model.settings.GlobalSettings"%>
 <%@ page import="org.exoplatform.wallet.model.ContractDetail"%>
 <%@ page import="org.exoplatform.wallet.model.Wallet"%>
+<%@ page import="org.exoplatform.wallet.model.WalletType"%>
 <%
-  String profileOwnerId = Utils.getOwnerIdentityId();
-
   String title = "Wallet";
   try {
     title = ExoContainerContext.getService(ResourceBundleService.class).getResourceBundle("locale.addon.Wallet", request.getLocale()).getString("exoplatform.wallet.title.walletBalanceTitle");
@@ -21,9 +20,10 @@
   }
   GlobalSettings globalSettings = ExoContainerContext.getService(WalletService.class).getSettings();
   String symbol = globalSettings == null || globalSettings.getContractDetail() == null ? "" : globalSettings.getContractDetail().getSymbol();
-  Wallet wallet = ExoContainerContext.getService(WalletAccountService.class).getWalletByIdentityId(Long.parseLong(profileOwnerId));
-  double balance = wallet == null || wallet.getTokenBalance() == null ? 0d : wallet.getTokenBalance();
-  String balanceFixed = BigDecimal.valueOf(balance).setScale(2, RoundingMode.DOWN).toString().replace(".00", "");
+  Wallet wallet = ExoContainerContext.getService(WalletAccountService.class).getWalletByTypeAndId(WalletType.USER.getId(), request.getRemoteUser(), request.getRemoteUser());
+  double balance = (wallet == null || wallet.getTokenBalance() == null) ? 0d : wallet.getTokenBalance();
+  String balanceFixed = balance > 100 ? String.valueOf((int) balance)
+                                        : String.valueOf(balance).replaceFirst("\\.([0-9][1-9]?)([0-9]*)", ".$1").replaceFirst("\\.0$", "");
 %>
 <div class="VuetifyApp">
   <div data-app="true"
