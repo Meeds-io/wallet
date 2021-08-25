@@ -48,8 +48,8 @@ public class RewardSuccessTemplateProvider extends TemplateProvider {
     this.templateBuilders.put(PLUGIN_KEY, builder);
 
     setWebTemplatePath("war:/conf/wallet/templates/notification/web/RewardSuccessWebPlugin.gtmpl");
-    setMailTemplatePath("war:/conf/wallet/templates/notification/mail/RewardSuccessWebPlugin.gtmpl");
-    setPushTemplatePath("war:/conf/wallet/templates/notification/push/RewardSuccessWebPlugin.gtmpl");
+    setMailTemplatePath("war:/conf/wallet/templates/notification/mail/RewardSuccessMailPlugin.gtmpl");
+    setPushTemplatePath("war:/conf/wallet/templates/notification/push/RewardSuccessPushPlugin.gtmpl");
   }
 
   @Override
