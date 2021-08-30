@@ -21,12 +21,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <i class="uiIconError"></i> {{ error }}
       </div>
     </v-card-text>
-    <v-card-text
-      class="text-center"
-      data-app>
+    <v-flex
+      :id="id"
+      class="datePickerComponent text-center">
       <v-menu
         ref="selectedDateMenu"
         v-model="selectedDateMenu"
+        :content-class="menuId"
+        :close-on-content-click="false"
         transition="scale-transition"
         offset-y
         class="dateSelector">
@@ -46,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           class="border-box-sizing"
           @input="selectedDateMenu = false" />
       </v-menu>
-    </v-card-text>
+    </v-flex>
     <v-container
       fluid
       grid-list-md
@@ -305,6 +307,8 @@ export default {
   data() {
     return {
       search: '',
+      id: `DatePicker${Date.now()}`,
+      menuId: `DatePickerMenu${Date.now()}`,
       currentTimeInSeconds: Date.now() / 1000,
       displayDisabledUsers: false,
       selectedDate: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
@@ -433,6 +437,18 @@ export default {
         return 0;
       }
     },
+  },
+  mounted() {
+    $('.datePickerComponent input').on('click', (e) => {
+      if (e.target && !$(e.target).parents(`#${this.id}`).length) {
+        this.selectedDateMenu = false;
+      }
+    });
+    $(document).on('click', (e) => {
+      if (e.target && !$(e.target).parents(`.${this.menuId}`).length) {
+        this.selectedDateMenu = false;
+      }
+    });
   },
   watch: {
     selectedWallet() {
