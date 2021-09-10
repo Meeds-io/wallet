@@ -179,12 +179,6 @@ export default {
   computed: {
     labels() {
       return {
-        CancelRequest: this.$t('exoplatform.wallet.label.profile.CancelRequest'),
-        Confirm: this.$t('exoplatform.wallet.label.profile.Confirm'),
-        Connect: this.$t('exoplatform.wallet.label.profile.Connect'),
-        Ignore: this.$t('exoplatform.wallet.label.profile.Ignore'),
-        RemoveConnection: this.$t('exoplatform.wallet.label.profile.RemoveConnection'),
-        StatusTitle: this.$t('exoplatform.wallet.label.profile.StatusTitle'),
         join: this.$t('exoplatform.wallet.label.profile.join'),
         leave: this.$t('exoplatform.wallet.label.profile.leave'),
         members: this.$t('exoplatform.wallet.label.profile.members'),
