@@ -177,13 +177,6 @@ export default {
     };
   },
   computed: {
-    labels() {
-      return {
-        join: this.$t('exoplatform.wallet.label.profile.join'),
-        leave: this.$t('exoplatform.wallet.label.profile.leave'),
-        members: this.$t('exoplatform.wallet.label.profile.members'),
-      };
-    },
     url() {
       if (!this.profileType || this.profileType === 'user') {
         return `${eXo.env.portal.context}/${eXo.env.portal.portalName}/profile/${this.profileId}`;
@@ -220,7 +213,6 @@ export default {
             membershipRestUrl: '/portal/rest/v1/social/spacesMemberships?space={0}&returnSize=true',
             defaultAvatarUrl: this.avatar ? this.avatar : `/portal/rest/v1/social/spaces/${this.profileId}/avatar`,
             deleteMembershipRestUrl: '/portal/rest/v1/social/spacesMemberships/{0}:{1}:{2}',
-            labels: this.labels,
             content: false,
             keepAlive: true,
             defaultPosition: this.tiptipPosition || 'left_bottom',
@@ -232,7 +224,6 @@ export default {
           $(`#${this.id}`).userPopup({
             restURL: '/portal/rest/social/people/getPeopleInfo/{0}.json',
             userId: this.profileId,
-            labels: this.labels,
             content: false,
             keepAlive: true,
             defaultPosition: this.tiptipPosition || 'left_bottom',
