@@ -118,16 +118,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletsTab from './wallets/WalletAdminWalletsTab.vue';
-import InitialFundsTab from './settings/WalletAdminInitialFundsTab.vue';
-import ContractTab from './contracts/WalletAdminContractTab.vue';
-
 export default {
-  components: {
-    WalletsTab,
-    InitialFundsTab,
-    ContractTab,
-  },
   data() {
     return {
       loading: false,
