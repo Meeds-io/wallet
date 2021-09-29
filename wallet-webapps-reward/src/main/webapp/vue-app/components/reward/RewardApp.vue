@@ -141,18 +141,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SendRewardsTab from './SendRewardsTab.vue';
-import TeamsListTab from './TeamsListTab.vue';
-import ConfigurationTab from './ConfigurationTab.vue';
 
 import {getRewardTeams, getRewardSettings, computeRewards} from '../../js/RewardServices.js';
 
 export default {
-  components: {
-    SendRewardsTab,
-    TeamsListTab,
-    ConfigurationTab,
-  },
   data() {
     return {
       loading: false,

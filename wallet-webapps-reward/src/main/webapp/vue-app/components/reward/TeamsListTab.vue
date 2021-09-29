@@ -238,14 +238,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import AddTeamForm from './TeamForm.vue';
 
 import {saveRewardTeam, removeRewardTeam} from '../../js/RewardServices.js';
 
 export default {
-  components: {
-    AddTeamForm,
-  },
   props: {
     teams: {
       type: Array,
