@@ -262,18 +262,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
-import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
-import SendTokenModal from './modals/WalletAdminSendTokenModal.vue';
-import AdminWallet from './AdminWallet.vue';
-
 export default {
-  components: {
-    InitializeAccountModal,
-    SendEtherModal,
-    SendTokenModal,
-    AdminWallet,
-  },
   props: {
     loading: {
       type: Boolean,

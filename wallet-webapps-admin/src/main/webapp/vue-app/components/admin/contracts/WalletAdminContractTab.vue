@@ -188,7 +188,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <initialize-account-modal
+          <initialize-modal
             v-if="adminLevel >= 5"
             ref="initializeAccount"
             :contract-details="contractDetails"
@@ -376,16 +376,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
-import InitializeAccountModal from './modals/WalletAdminInitializeModal.vue';
-import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
-
 export default {
-  components: {
-    ContractAdminModal,
-    InitializeAccountModal,
-    UpgradeTokenModal,
-  },
   props: {
     walletAddress: {
       type: String,
