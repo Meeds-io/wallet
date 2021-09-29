@@ -24,7 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :ok-label="$t('exoplatform.wallet.button.delete')"
       cancel-label="Cancel"
       @ok="removeTeam(teamToDelete.id)" />
-    <add-team-form
+    <wallet-reward-add-team-form
       v-show="selectedTeam"
       ref="teamModal"
       :team="selectedTeam"

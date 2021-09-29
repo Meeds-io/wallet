@@ -5,11 +5,11 @@ import TeamForm from './components/reward/TeamForm.vue';
 import TeamsListTab from './components/reward/TeamsListTab.vue';
 
 const components = {
-  'reward-detail-modal': RewardDetailModal,
-  'configuration-tab': ConfigurationTab,
-  'send-rewards-tab': SendRewardsTab,
-  'add-team-form': TeamForm,
-  'teams-list-tab': TeamsListTab,
+  'wallet-reward-reward-detail-modal': RewardDetailModal,
+  'wallet-reward-configuration-tab': ConfigurationTab,
+  'wallet-reward-send-rewards-tab': SendRewardsTab,
+  'wallet-reward-add-team-form': TeamForm,
+  'wallet-reward-teams-list-tab': TeamsListTab,
 };
 
 for (const key in components) {
