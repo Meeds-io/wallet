@@ -20,7 +20,6 @@ const components = {
   'wallet-send-token-modal': WalletAdminSendTokenModal,
   'wallet-admin-wallet': AdminWallet,
   'wallet-tab': WalletAdminWalletsTab,
-
 };
 
 for (const key in components) {
