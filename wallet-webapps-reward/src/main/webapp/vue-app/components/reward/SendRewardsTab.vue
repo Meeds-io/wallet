@@ -248,7 +248,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-spacer />
     </v-card-actions>
 
-    <reward-detail-modal
+    <wallet-reward-reward-detail-modal
       ref="rewardDetails"
       :wallet="selectedWallet"
       :period="periodDatesDisplay"
@@ -258,14 +258,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import RewardDetailModal from './modal/RewardDetailModal.vue';
 
 import {getRewardDates, sendRewards} from '../../js/RewardServices.js';
 
 export default {
-  components: {
-    RewardDetailModal,
-  },
   props: {
     rewardReport: {
       type: Object,
