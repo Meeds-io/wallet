@@ -129,12 +129,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SettingsSecurityTab from './SettingsSecurityTab.vue';
-
 export default {
-  components: {
-    SettingsSecurityTab,
-  },
   props: {
     title: {
       type: String,

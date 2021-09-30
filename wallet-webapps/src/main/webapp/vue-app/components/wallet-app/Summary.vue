@@ -145,22 +145,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SummaryBalance from './SummaryBalance.vue';
-import SummaryTransaction from './SummaryTransaction.vue';
-import SummaryButtons from './SummaryButtons.vue';
-import ToolbarMenu from './ToolbarMenu.vue';
-import SettingsModal from './SettingsModal.vue';
-
 
 export default {
-  components: {
-    SettingsModal,
-    SummaryBalance,
-    SummaryTransaction,
-    SummaryButtons,
-    ToolbarMenu,
-
-  },
   props: {
     wallet: {
       type: Object,

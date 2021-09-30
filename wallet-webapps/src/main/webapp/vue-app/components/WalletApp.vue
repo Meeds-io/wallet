@@ -136,16 +136,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletSummary from './wallet-app/Summary.vue';
-import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
-import TransactionHistoryChartSummary from './wallet-app/TransactionHistoryChartSummary.vue';
-
 export default {
-  components: {
-    WalletSummary,
-    TransactionHistoryChart,
-    TransactionHistoryChartSummary,
-  },
   props: {
     isSpace: {
       type: Boolean,
