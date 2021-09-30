@@ -9,15 +9,15 @@ import TransactionHistoryChart from './components/wallet-app/TransactionHistoryC
 import TransactionHistoryChartSummary from './components/wallet-app/TransactionHistoryChartSummary.vue';
 
 const components = {
-  'settings-modal': SettingsModal,
-  'settings-security-tab': SettingsSecurityTab,
-  'wallet-summary': Summary,
-  'summary-balance': SummaryBalance,
-  'summary-buttons': SummaryButtons,
-  'summary-transaction': SummaryTransaction,
-  'toolbar-menu': ToolbarMenu,
-  'transaction-history-chart': TransactionHistoryChart,
-  'transaction-history-chart-summary': TransactionHistoryChartSummary,
+  'wallet-reward-settings-modal': SettingsModal,
+  'wallet-reward-settings-security-tab': SettingsSecurityTab,
+  'wallet-reward-summary': Summary,
+  'wallet-reward-summary-balance': SummaryBalance,
+  'wallet-reward-summary-buttons': SummaryButtons,
+  'wallet-reward-summary-transaction': SummaryTransaction,
+  'wallet-reward-toolbar-menu': ToolbarMenu,
+  'wallet-reward-transaction-history-chart': TransactionHistoryChart,
+  'wallet-reward-transaction-history-chart-summary': TransactionHistoryChartSummary,
 };
 
 for (const key in components) {

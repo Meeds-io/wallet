@@ -58,7 +58,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <div class="border-box-sizing" v-if="walletAddress && contractDetails">
               <button class="btn ignore-vuetify-classes me-1" @click="openExchangeDrawer">  {{ $t('exoplatform.wallet.label.exchanges') }} </button>
             </div>
-            <summary-buttons
+            <wallet-reward-summary-buttons
               ref="walletSummaryActions"
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
@@ -70,7 +70,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               @error="error = $event" />
           </v-flex>
           <v-flex class="summaryCard">
-            <summary-transaction
+            <wallet-reward-summary-transaction
               v-if="walletAddress && contractDetails"
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
@@ -83,7 +83,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               @error="$emit('error', $event)" />
           </v-flex>
           <v-flex class="summaryBalance">
-            <summary-balance
+            <wallet-reward-summary-balance
               class="mt-1 mx-3 px-1 py-1"
               v-if="walletAddress && !loading && contractDetails"
               :wallet="wallet"
@@ -122,13 +122,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 warning
               </v-icon>
             </div>
-            <toolbar-menu
+            <wallet-reward-toolbar-menu
               ref="walletAppMenu"
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
               @refresh="init()"
               @modify-settings="showSettingsModal = true" />
-            <settings-modal
+            <wallet-reward-settings-modal
               ref="walletSettingsModal"
               :is-space="isSpace"
               :open="showSettingsModal"
