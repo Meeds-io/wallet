@@ -47,27 +47,31 @@ const WalletCommon = {
     Vue.prototype.walletUtils = walletUtils;
     Vue.prototype.tokenUtils = tokenUtils;
     Vue.prototype.transactionUtils = transactionUtils;
-
-    Vue.component('account-detail', AccountDetail);
-    Vue.component('address-auto-complete', AddressAutoComplete);
-    Vue.component('confirm-dialog', ConfirmDialog);
-    Vue.component('gas-price-choice', GasPriceChoice);
-    Vue.component('information-bubble', InformationBubble);
-    Vue.component('warning-bubble', WarningBubble);
-    Vue.component('profile-chip', ProfileChip);
-    Vue.component('qr-code', QRCode);
-    Vue.component('qr-code-modal', QRCodeModal);
-    Vue.component('send-tokens-form', SendTokensForm);
-    Vue.component('send-tokens-modal', SendTokensModal);
-    Vue.component('transactions-list', TransactionsList);
-    Vue.component('backup-modal', BackupModal);
-    Vue.component('browser-setup', BrowserSetup);
-    Vue.component('import-key-modal', ImportKeyModal);
-    Vue.component('reset-modal', ResetModal);
-    Vue.component('request-funds-modal', RequestFundsModal);
-    Vue.component('wallet-address', WalletAddress);
-    Vue.component('wallet-setup', WalletSetup);
   },
 };
+const components = {
+  'account-detail': AccountDetail,
+  'address-auto-complete': AddressAutoComplete,
+  'confirm-dialog': ConfirmDialog,
+  'gas-price-choice': GasPriceChoice,
+  'information-bubble': InformationBubble,
+  'warning-bubble': WarningBubble,
+  'profile-chip': ProfileChip,
+  'qr-code': QRCode,
+  'qr-code-modal': QRCodeModal,
+  'send-tokens-form': SendTokensForm,
+  'send-tokens-modal': SendTokensModal,
+  'transactions-list': TransactionsList,
+  'backup-modal': BackupModal,
+  'browser-setup': BrowserSetup,
+  'import-key-modal': ImportKeyModal,
+  'reset-modal': ResetModal,
+  'request-funds-modal': RequestFundsModal,
+  'wallet-address': WalletAddress,
+  'wallet-setup': WalletSetup,
+};
 
+for (const key in components) {
+  Vue.component(key, components[key]);
+}
 window.WalletCommon = WalletCommon;

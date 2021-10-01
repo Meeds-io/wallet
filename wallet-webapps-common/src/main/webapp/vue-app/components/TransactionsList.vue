@@ -877,19 +877,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletAddress from './WalletAddress.vue';
-import ProfileChip from './ProfileChip.vue';
-import SendTokensModal from './SendTokensModal.vue';
-
 import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
 import {loadTransactions, refreshTransactionDetail} from '../js/TransactionUtils.js';
 
 export default {
-  components: {
-    ProfileChip,
-    WalletAddress,
-    SendTokensModal,
-  },
   props: {
     wallet: {
       type: Object,

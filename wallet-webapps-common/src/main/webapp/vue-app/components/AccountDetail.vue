@@ -63,14 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import TransactionsList from './TransactionsList.vue';
-import ProfileChip from './ProfileChip.vue';
-
 export default {
-  components: {
-    TransactionsList,
-    ProfileChip,
-  },
   props: {
     wallet: {
       type: Object,

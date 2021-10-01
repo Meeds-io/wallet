@@ -145,18 +145,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import AddressAutoComplete from './AddressAutoComplete.vue';
-import QrCodeModal from './QRCodeModal.vue';
-
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
 import {searchWalletByAddress} from '../js/AddressRegistry.js';
 
 export default {
-  components: {
-    QrCodeModal,
-    AddressAutoComplete,
-  },
   props: {
     wallet: {
       type: Object,

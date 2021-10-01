@@ -64,14 +64,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletBrowserSetup from './WalletBrowserSetup.vue';
-import WalletBackupModal from './WalletBackupModal.vue';
-
 export default {
-  components: {
-    WalletBrowserSetup,
-    WalletBackupModal,
-  },
   props: {
     isSpace: {
       type: Boolean,

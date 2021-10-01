@@ -47,15 +47,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 <script>
-import SendTokensForm from './SendTokensForm.vue';
-
 import {checkFundRequestStatus} from '../js/WalletUtils.js';
 import {getTransactionCount} from '../js/TokenUtils.js';
 
 export default {
-  components: {
-    SendTokensForm,
-  },
   props: {
     wallet: {
       type: Object,
