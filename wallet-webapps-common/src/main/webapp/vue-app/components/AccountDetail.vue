@@ -41,7 +41,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </template>
       </span>
       <span v-else class="ps-4">
-        {{ contractDetails.title }}
+        {{ contractTitle }}
       </span>
     </template>
     <template slot="content">
@@ -111,6 +111,11 @@ export default {
     contractDetails() {
       this.error = null;
     },
+  },
+  computed: {
+    contractTitle(){
+      return this.contractDetails && this.contractDetails.title;
+    }
   },
   methods: {
     open(){
