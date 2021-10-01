@@ -61,7 +61,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               $event.preventDefault();
               $event.stopPropagation();
             ">
-            <address-auto-complete
+            <wallet-reward-address-auto-complete
               ref="autocomplete"
               :disabled="loading || disabledRecipient"
               :input-label="$t('exoplatform.wallet.label.recipient')"
@@ -104,7 +104,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               required
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-            <gas-price-choice
+            <wallet-reward-gas-price-choice
               :wallet="wallet"
               :estimated-fee="transactionFeeString"
               @changed="gasPrice = $event" />

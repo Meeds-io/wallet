@@ -21,7 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       id="walletBrowserSetup"
       class="mt-3 mb-3">
       <template v-if="walletAddress">
-        <wallet-import-key-modal
+        <wallet-reward-import-key-modal
           ref="walletImportKeyModal"
           :is-space="isSpace"
           :wallet-address="walletAddress"

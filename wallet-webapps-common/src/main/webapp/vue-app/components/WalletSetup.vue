@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex id="walletSetup" class="text-center">
-    <wallet-backup-modal
+    <wallet-reward-backup-modal
       ref="walletBackupModal"
       class="me-3"
       display-complete-message
@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div v-if="displayWalletNotExistingYet" class="alert alert-info">
       <i class="uiIconInfo"></i> {{ $t('exoplatform.wallet.info.spaceWalletNotCreatedYet') }}
     </div>
-    <wallet-browser-setup
+    <wallet-reward-browser-setup
       v-if="displayWalletSetup"
       ref="walletBrowserSetup"
       :is-space="isSpace"

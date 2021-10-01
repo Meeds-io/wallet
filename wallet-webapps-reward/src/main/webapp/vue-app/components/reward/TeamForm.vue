@@ -120,7 +120,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-autocomplete>
         </v-flex>
 
-        <address-auto-complete
+        <wallet-reward-address-auto-complete
           v-if="!viewOnly"
           ref="managerAutocomplete"
           :input-label="$t('exoplatform.wallet.label.poolManager')"
@@ -160,7 +160,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
 
         <v-flex xs12>
-          <address-auto-complete
+          <wallet-reward-address-auto-complete
             v-if="!viewOnly"
             ref="memberAutocomplete"
             :ignore-items="members"
@@ -212,7 +212,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-avatar>
                 </td>
                 <td class="text-center">
-                  <profile-chip
+                  <wallet-reward-profile-chip
                     :address="props.item.address"
                     :profile-id="props.item.id"
                     :profile-technical-id="props.item.technicalId"

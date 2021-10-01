@@ -23,7 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <span v-if="wallet" class="ps-4">
         <template v-if="isAdministration">
           {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
-          <profile-chip
+          <wallet-reward-profile-chip
             ref="profileChip"
             :profile-technical-id="wallet.technicalId"
             :profile-id="wallet.id"
@@ -45,7 +45,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </span>
     </template>
     <template slot="content">
-      <transactions-list
+      <wallet-reward-transactions-list
         id="transactionsList"
         ref="transactionsList"
         class="lastTransactionsList"
