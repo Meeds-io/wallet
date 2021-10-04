@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex flat>
-    <confirm-dialog
+    <wallet-reward-confirm-dialog
       ref="informationModal"
       :loading="loading"
       :title="informationTitle"
@@ -95,7 +95,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   onerror="this.src = '/eXoSkin/skin/images/system/SpaceAvtDefault.png'">
                 <v-icon v-else size="29">fa-cog</v-icon>
               </v-avatar>
-              <profile-chip
+              <wallet-reward-profile-chip
                 :address="props.item.address"
                 :profile-id="props.item.id"
                 :profile-technical-id="props.item.technicalId"
@@ -248,7 +248,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       @sent="walletPendingTransaction" />
 
     <!-- The selected account detail -->
-    <account-detail
+    <wallet-reward-account-detail
       ref="accountDetail"
       :fiat-symbol="fiatSymbol"
       :wallet="selectedWallet"

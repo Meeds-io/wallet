@@ -78,17 +78,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               eager>
               <div>
                 <div>
-                  <qr-code
+                  <wallet-reward-qr-code
                     ref="qrCode"
                     :to="walletAddress"
                     :title="$t('exoplatform.wallet.title.addressQRCode')"
                     :information="$t('exoplatform.wallet.info.addressQRCode')" />
                   <div class="text-center">
-                    <wallet-address :value="walletAddress" :allow-edit="false" />
+                    <wallet-reward-wallet-address :value="walletAddress" :allow-edit="false" />
                   </div>
                 </div>
                 <div v-if="browserWalletExists" class="text-center pt-3">
-                  <backup-modal
+                  <wallet-reward-backup-modal
                     ref="walletBackupModal"
                     :display-complete-message="false"
                     @backed-up="
@@ -97,7 +97,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     " />
                 </div>
                 <div class="text-center pt-3">
-                  <import-key-modal
+                  <wallet-reward-import-key-modal
                     ref="walletImportKeyModal"
                     :is-space="isSpace"
                     :wallet-address="walletAddress"

@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <information-bubble>
+  <wallet-reward-information-bubble>
     <template slot="content">
       <slot name="bubble-content"></slot>
     </template>
@@ -26,16 +26,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       class="mt-0 mb-2">
       <v-icon small color="orange">fa-exclamation-circle</v-icon>
     </v-btn>
-  </information-bubble>
+  </wallet-reward-information-bubble>
 </template>
 
 <script>
-import InformationBubble from './InformationBubble.vue';
-
 export default {
-  components: {
-    InformationBubble,
-  },
   props: {
     content: {
       type: String,

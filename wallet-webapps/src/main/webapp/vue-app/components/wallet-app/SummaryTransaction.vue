@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <button class="btn ignore-vuetify-classes" @click="displayTransactionList">
       {{ $t('exoplatform.wallet.label.lastTransaction') }}
     </button>
-    <account-detail
+    <wallet-reward-account-detail
       ref="accountDetail"
       :fiat-symbol="fiatSymbol"
       :wallet="wallet"
