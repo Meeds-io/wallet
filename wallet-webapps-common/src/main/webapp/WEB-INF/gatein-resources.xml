@@ -101,4 +101,42 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </script>
   </module>
 
+  <portlet>
+    <name>WalletSettings</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletSettings.bundle.js</path>
+      </script>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>commonVueComponents</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>fetchPolyfill</module>
+      </depends>
+      <depends>
+        <module>customEventPolyfill</module>
+      </depends>
+      <depends>
+        <module>iePolyfills</module>
+      </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
+    </module>
+  </portlet>
+
 </gatein-resources>

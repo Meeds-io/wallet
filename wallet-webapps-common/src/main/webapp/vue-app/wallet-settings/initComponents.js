@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meeds project (https://meeds.io/).
- * Copyright (C) 2020 Meeds Association
+ * Copyright (C) 2021 Meeds Association
  * contact@meeds.io
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -14,26 +14,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-const path = require('path');
-const merge = require('webpack-merge');
-const webpackCommonConfig = require('./webpack.common.js');
+import WalletSettings from './components/WalletSettings.vue';
 
-const config = merge(webpackCommonConfig, {
-  mode: 'production',
-  entry: {
-    walletCommon: './src/main/webapp/vue-app/walletCommon.js',
-    walletSettings: './src/main/webapp/vue-app/wallet-settings/main.js',
-  },
-  output: {
-    path: path.join(__dirname, 'target/wallet-common/'),
-    filename: 'js/[name].bundle.js'
-  },
-  externals: {
-    vue: 'Vue',
-    vuetify: 'Vuetify',
-    jquery: '$',
-    web3: 'Web3'
-  }
-});
+const components = {
+  'wallet-settings': WalletSettings,
+};
 
-module.exports = config;
+for (const key in components) {
+  Vue.component(key, components[key]);
+}
