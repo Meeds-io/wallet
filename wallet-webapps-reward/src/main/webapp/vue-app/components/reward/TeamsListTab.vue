@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex flat transparent>
-    <confirm-dialog
+    <wallet-reward-confirm-dialog
       ref="deleteTeamConfirm"
       :loading="loading"
       :message="deletePoolMessage"

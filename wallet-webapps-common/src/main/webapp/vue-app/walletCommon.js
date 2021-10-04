@@ -47,27 +47,31 @@ const WalletCommon = {
     Vue.prototype.walletUtils = walletUtils;
     Vue.prototype.tokenUtils = tokenUtils;
     Vue.prototype.transactionUtils = transactionUtils;
-
-    Vue.component('account-detail', AccountDetail);
-    Vue.component('address-auto-complete', AddressAutoComplete);
-    Vue.component('confirm-dialog', ConfirmDialog);
-    Vue.component('gas-price-choice', GasPriceChoice);
-    Vue.component('information-bubble', InformationBubble);
-    Vue.component('warning-bubble', WarningBubble);
-    Vue.component('profile-chip', ProfileChip);
-    Vue.component('qr-code', QRCode);
-    Vue.component('qr-code-modal', QRCodeModal);
-    Vue.component('send-tokens-form', SendTokensForm);
-    Vue.component('send-tokens-modal', SendTokensModal);
-    Vue.component('transactions-list', TransactionsList);
-    Vue.component('backup-modal', BackupModal);
-    Vue.component('browser-setup', BrowserSetup);
-    Vue.component('import-key-modal', ImportKeyModal);
-    Vue.component('reset-modal', ResetModal);
-    Vue.component('request-funds-modal', RequestFundsModal);
-    Vue.component('wallet-address', WalletAddress);
-    Vue.component('wallet-setup', WalletSetup);
   },
 };
+const components = {
+  'wallet-reward-account-detail': AccountDetail,
+  'wallet-reward-address-auto-complete': AddressAutoComplete,
+  'wallet-reward-confirm-dialog': ConfirmDialog,
+  'wallet-reward-gas-price-choice': GasPriceChoice,
+  'wallet-reward-information-bubble': InformationBubble,
+  'wallet-reward-warning-bubble': WarningBubble,
+  'wallet-reward-profile-chip': ProfileChip,
+  'wallet-reward-qr-code': QRCode,
+  'wallet-reward-qr-code-modal': QRCodeModal,
+  'wallet-reward-send-tokens-form': SendTokensForm,
+  'wallet-reward-send-tokens-modal': SendTokensModal,
+  'wallet-reward-transactions-list': TransactionsList,
+  'wallet-reward-backup-modal': BackupModal,
+  'wallet-reward-browser-setup': BrowserSetup,
+  'wallet-reward-import-key-modal': ImportKeyModal,
+  'wallet-reward-reset-modal': ResetModal,
+  'wallet-reward-request-funds-modal': RequestFundsModal,
+  'wallet-reward-address': WalletAddress,
+  'wallet-reward-setup': WalletSetup,
+};
 
+for (const key in components) {
+  Vue.component(key, components[key]);
+}
 window.WalletCommon = WalletCommon;
