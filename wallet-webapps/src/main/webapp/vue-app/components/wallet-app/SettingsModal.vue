@@ -65,7 +65,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="security"
               value="security"
               eager>
-              <settings-security-tab
+              <wallet-reward-settings-security-tab
                 ref="securityTab"
                 :wallet="wallet"
                 :is-space="isSpace"
@@ -129,12 +129,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import SettingsSecurityTab from './SettingsSecurityTab.vue';
-
 export default {
-  components: {
-    SettingsSecurityTab,
-  },
   props: {
     title: {
       type: String,

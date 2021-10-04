@@ -19,12 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletApp from './WalletApp.vue';
-
 export default {
-  components: {
-    WalletApp,
-  },
   created() {
     window.walletSpaceGroup = eXo.env.portal.spaceGroup;
   },
