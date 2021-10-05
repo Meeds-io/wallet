@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
         <init-param>
             <name>portlet-view-dispatched-file-path</name>
-            <value>/walletSettings.html</value>
+            <value>/html/walletSettings.html</value>
         </init-param>
         <init-param>
             <description>portlet of wallet settings</description>
