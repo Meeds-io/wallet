@@ -15,9 +15,19 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import WalletSettings from './components/WalletSettings.vue';
+import WalletSettingsDetails from './components/WalletSettingsDetails.vue';
+
+Vue.prototype.$applicationLoaded = function() {
+  this.$root.$emit('application-loaded');
+  document.dispatchEvent(new CustomEvent('vue-app-loading-end', {detail: {
+    appName: this.appName,
+    time: Date.now(),
+  }}));
+};
 
 const components = {
   'wallet-settings': WalletSettings,
+  'wallet-settings-details': WalletSettingsDetails,
 };
 
 for (const key in components) {

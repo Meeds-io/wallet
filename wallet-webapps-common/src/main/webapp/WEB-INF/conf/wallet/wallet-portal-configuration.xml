@@ -10,7 +10,7 @@
             <init-params>
                 <value-param>
                     <name>priority</name>
-                    <value>1</value>
+                    <value>4</value>
                 </value-param>
                 <value-param>
                     <name>containerName</name>
