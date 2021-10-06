@@ -69,7 +69,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-card>
                 </v-dialog>
               </v-flex>
-              <wallets-tab
+              <wallet-wallets-tab
                 ref="walletsTab"
                 :wallet-address="walletAddress"
                 :loading="loading"
@@ -84,7 +84,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="funds"
               value="funds"
               eager>
-              <initial-funds-tab
+              <wallet-initial-funds-tab
                 ref="fundsTab"
                 :loading="loading"
                 :settings="settings"
@@ -96,7 +96,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               id="contract"
               value="contract"
               eager>
-              <contract-tab
+              <wallet-contract-tab
                 ref="contractDetail"
                 :wallet-address="walletAddress"
                 :user-wallet="wallet"

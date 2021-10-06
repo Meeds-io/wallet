@@ -10,16 +10,16 @@ import AdminWallet from './components/admin/wallets/AdminWallet.vue';
 import WalletAdminWalletsTab from './components/admin/wallets/WalletAdminWalletsTab.vue';
 
 const components = {
-  'contract-admin-modal': WalletAdminOperationModal,
-  'initialize-modal': WalletAdminInitializeModal,
-  'upgrade-token-modal': WalletAdminUpgradeTokenModal,
-  'contract-tab': WalletAdminContractTab,
-  'initial-funds-tab': WalletAdminInitialFundsTab,
-  'initialize-account-modal': WalletAdminInitializeAccountModal,
-  'send-ether-modal': WalletAdminSendEtherModal,
-  'send-token-modal': WalletAdminSendTokenModal,
-  'admin-wallet': AdminWallet,
-  'wallets-tab': WalletAdminWalletsTab,
+  'wallet-contract-admin-modal': WalletAdminOperationModal,
+  'wallet-initialize-modal': WalletAdminInitializeModal,
+  'wallet-upgrade-token-modal': WalletAdminUpgradeTokenModal,
+  'wallet-contract-tab': WalletAdminContractTab,
+  'wallet-initial-funds-tab': WalletAdminInitialFundsTab,
+  'wallet-initialize-account-modal': WalletAdminInitializeAccountModal,
+  'wallet-send-ether-modal': WalletAdminSendEtherModal,
+  'wallet-send-token-modal': WalletAdminSendTokenModal,
+  'wallet-admin-wallet': AdminWallet,
+  'wallet-wallets-tab': WalletAdminWalletsTab,
 
 };
 
