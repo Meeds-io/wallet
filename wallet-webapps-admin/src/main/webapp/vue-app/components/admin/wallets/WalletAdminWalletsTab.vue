@@ -31,7 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart1') }}</div>
       <div>{{ $t('exoplatform.wallet.warning.adminWalletNotInitializedPart2') }}</div>
     </div>
-    <admin-wallet
+    <wallet-admin-wallet
       v-if="!loading"
       :admin-wallet="walletAdmin"
       :initial-token-amount="tokenAmount"
@@ -235,15 +235,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </template>
     </v-data-table>
 
-    <initialize-account-modal
+    <wallet-initialize-account-modal
       ref="initAccountModal"
       @sent="walletPendingTransaction" />
 
-    <send-token-modal
+    <wallet-send-token-modal
       ref="sendTokenModal"
       :contract-details="contractDetails"
       @sent="walletPendingTransaction" />
-    <send-ether-modal
+    <wallet-send-ether-modal
       ref="sendEtherModal"
       @sent="walletPendingTransaction" />
 
@@ -262,18 +262,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import InitializeAccountModal from './modals/WalletAdminInitializeAccountModal.vue';
-import SendEtherModal from './modals/WalletAdminSendEtherModal.vue';
-import SendTokenModal from './modals/WalletAdminSendTokenModal.vue';
-import AdminWallet from './AdminWallet.vue';
-
 export default {
-  components: {
-    InitializeAccountModal,
-    SendEtherModal,
-    SendTokenModal,
-    AdminWallet,
-  },
   props: {
     loading: {
       type: Boolean,

@@ -37,7 +37,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         <v-flex v-if="adminLevel >= 4" id="accountDetailActions">
           <!-- Send ether -->
-          <send-ether-modal
+          <wallet-send-ether-modal
             v-if="adminLevel >= 5"
             :account="walletAddress"
             :balance="contractDetails.balance"
@@ -49,7 +49,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- add/remove admin -->
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="addAdminModal"
             :contract-details="contractDetails"
@@ -98,8 +98,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </li>
               </ul>
             </div>
-          </contract-admin-modal>
-          <contract-admin-modal
+          </wallet-contract-admin-modal>
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="removeAdminModal"
             :contract-details="contractDetails"
@@ -113,7 +113,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- approve/disapprove account -->
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 4"
             ref="approveAccountModal"
             :contract-details="contractDetails"
@@ -125,7 +125,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 4"
             ref="disapproveAccountModal"
             :contract-details="contractDetails"
@@ -139,7 +139,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- pause/unpause contract -->
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
             ref="pauseModal"
             :contract-details="contractDetails"
@@ -149,7 +149,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
             ref="unPauseModal"
             :contract-details="contractDetails"
@@ -161,7 +161,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <!-- set sell price -->
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="adminLevel >= 5"
             ref="setSellPriceModal"
             :contract-details="contractDetails"
@@ -175,7 +175,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <contract-admin-modal
+          <wallet-contract-admin-modal
             v-if="contractDetails && contractDetails.isOwner"
             ref="transferOwnership"
             :contract-details="contractDetails"
@@ -188,7 +188,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <initialize-account-modal
+          <wallet-initialize-modal
             v-if="adminLevel >= 5"
             ref="initializeAccount"
             :contract-details="contractDetails"
@@ -198,7 +198,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @success="successTransaction"
             @error="transactionError" />
 
-          <upgrade-token-modal
+          <wallet-upgrade-token-modal
             v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
             ref="upgrade"
             :contract-details="contractDetails"
@@ -376,16 +376,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import ContractAdminModal from '../common/WalletAdminOperationModal.vue';
-import InitializeAccountModal from './modals/WalletAdminInitializeModal.vue';
-import UpgradeTokenModal from './modals/WalletAdminUpgradeTokenModal.vue';
-
 export default {
-  components: {
-    ContractAdminModal,
-    InitializeAccountModal,
-    UpgradeTokenModal,
-  },
   props: {
     walletAddress: {
       type: String,
