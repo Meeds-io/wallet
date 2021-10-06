@@ -27,6 +27,8 @@ if (extensionRegistry) {
 }
 
 Vue.use(Vuetify);
+Vue.use(WalletCommon);
+
 const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
