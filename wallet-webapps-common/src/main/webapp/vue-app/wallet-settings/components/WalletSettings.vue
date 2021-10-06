@@ -49,7 +49,10 @@ export default {
       const urlPath = document.location.pathname;
       const settingsApplication = urlPath.split('settings/')[1] ? urlPath.split('settings/')[1] : null;
       if (settingsApplication === 'wallet') {
-        this.openDetail();
+        document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
+        this.displayDetails = true;
+        const from = this.getQueryParam('from');
+        window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=${from}`);
       }
     }, 300);
   },
@@ -60,12 +63,21 @@ export default {
     openDetail() {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
       this.displayDetails = true;
-      window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet`);
+      window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=settings`);
     },
     closeDetail() {
+      if (this.getQueryParam('from') === 'settings') {
+        window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+      } else if (this.getQueryParam('from') === 'application') {
+        window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
+      }
       document.dispatchEvent(new CustomEvent('showSettingsApps'));
       this.displayDetails = false;
-      window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+    },
+    getQueryParam(paramName) {
+      const uri = window.location.search.substring(1);
+      const params = new URLSearchParams(uri);
+      return params.get(paramName);
     },
   },
 };

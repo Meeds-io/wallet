@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       class="me-0 ms-0"
       icon
       text
-      @click="$emit('modify-settings')">
+      @click="openSettings()">
       <v-icon size="24">
         fa-cog
       </v-icon>
@@ -46,5 +46,10 @@ export default {
       },
     },
   },
+  methods: {
+    openSettings() {
+      return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=application`;
+    }
+  }
 };
 </script>
