@@ -15,7 +15,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import WalletAdminApp from './components/admin/WalletAdminApp.vue';
-
+import './initComponents.js';
 Vue.use(Vuetify);
 Vue.use(WalletCommon);
 
