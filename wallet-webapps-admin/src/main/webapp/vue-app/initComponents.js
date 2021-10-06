@@ -19,7 +19,7 @@ const components = {
   'wallet-send-ether-modal': WalletAdminSendEtherModal,
   'wallet-send-token-modal': WalletAdminSendTokenModal,
   'wallet-admin-wallet': AdminWallet,
-  'wallet-wallets-tab': WalletAdminWalletsTab,
+  'wallet-tab': WalletAdminWalletsTab,
 
 };
 
