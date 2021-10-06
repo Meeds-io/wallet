@@ -34,9 +34,7 @@
 <script>
 export default {
   data: () => ({
-    id: `Wallet${parseInt(Math.random() * 10000)
-      .toString()
-      .toString()}`,
+    id: `Wallet${parseInt(Math.random() * 10000)}`,
     displayed: true,
     displayDetails: false,
   }),
@@ -53,7 +51,7 @@ export default {
       if (settingsApplication === 'wallet') {
         this.openDetail();
       }
-    }, 250);
+    }, 300);
   },
   mounted() {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
