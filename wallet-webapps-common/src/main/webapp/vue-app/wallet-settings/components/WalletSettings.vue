@@ -3,6 +3,7 @@
     <template v-if="displayed">
       <wallet-settings-details
         v-if="displayDetails"
+        :wallet="wallet"
         @back="closeDetail" />
       <v-card
         v-else
@@ -37,8 +38,10 @@ export default {
     id: `Wallet${parseInt(Math.random() * 10000)}`,
     displayed: true,
     displayDetails: false,
+    wallet: null,
   }),
   created() {
+    this.wallet = window.walletSettings && window.walletSettings.wallet || null;
     document.addEventListener('hideSettingsApps', (event) => {
       if (event && event.detail && this.id !== event.detail) {
         this.displayed = false;
@@ -52,6 +55,9 @@ export default {
         document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
         this.displayDetails = true;
         const from = this.getQueryParam('from');
+        const id = this.getQueryParam('id');
+        const type = this.getQueryParam('type');
+        this.getWallet(id,type);
         window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=${from}`);
       }
     }, 300);
@@ -63,6 +69,7 @@ export default {
     openDetail() {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
       this.displayDetails = true;
+      this.getWallet();
       window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=settings`);
     },
     closeDetail() {
@@ -78,6 +85,17 @@ export default {
       const uri = window.location.search.substring(1);
       const params = new URLSearchParams(uri);
       return params.get(paramName);
+    },
+    getWallet(id,type) {
+      if (!id){
+        id = eXo.env.portal.userName ;
+        type ='user';
+      }
+      return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${id}&type=${type}`)
+        .then((resp) => resp && resp.ok && resp.json())
+        .then(wallet => {
+          this.wallet = wallet;
+        });
     },
   },
 };

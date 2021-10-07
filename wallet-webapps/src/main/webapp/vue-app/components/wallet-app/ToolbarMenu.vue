@@ -45,10 +45,16 @@ export default {
         return false;
       },
     },
+    wallet: {
+      type: Object,
+      default: function() {
+        return null;
+      },
+    },
   },
   methods: {
     openSettings() {
-      return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=application`;
+      return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=application&id=${this.wallet.id}&type=${this.wallet.type}`;
     }
   }
 };
