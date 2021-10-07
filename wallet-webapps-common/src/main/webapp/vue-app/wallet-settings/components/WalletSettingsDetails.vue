@@ -80,9 +80,7 @@ export default {
     },
   },
   data: () => ({
-    id: `Wallet${parseInt(Math.random() * 10000)
-      .toString()
-      .toString()}`,
+    id:`WalletSettingsDetails${parseInt(Math.random() * 10000)}`,
     displayed: true,
     displayManagePasswordDetails: false,
   }),
