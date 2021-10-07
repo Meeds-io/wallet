@@ -36,7 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     row
                     wrap
                     class="ms-0 me-0 pr-0">
-                    <wallet-summary
+                    <wallet-reward-summary
                       ref="walletSummary"
                       :wallet="wallet"
                       :is-space="isSpace"
@@ -51,7 +51,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       @error="error = $event" />
                     <template v-if="wallet && contractDetails && initializationState !== 'DENIED'">
                       <v-flex class="chartHistory WalletChart mt-6">
-                        <transaction-history-chart-summary
+                        <wallet-reward-transaction-history-chart-summary
                           v-if="!loading"
                           ref="chartPeriodicityButtons"
                           :periodicity-label="periodicityLabel"
@@ -59,7 +59,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           @error="error = $event" />
                       </v-flex>
                       <v-flex class="WalletChart transactionHistoryChart mb-4">
-                        <transaction-history-chart
+                        <wallet-reward-transaction-history-chart
                           ref="transactionHistoryChart"
                           :class="periodicity"
                           :transaction-statistics="transactionStatistics" />
@@ -136,16 +136,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletSummary from './wallet-app/Summary.vue';
-import TransactionHistoryChart from './wallet-app/TransactionHistoryChart.vue';
-import TransactionHistoryChartSummary from './wallet-app/TransactionHistoryChartSummary.vue';
-
 export default {
-  components: {
-    WalletSummary,
-    TransactionHistoryChart,
-    TransactionHistoryChartSummary,
-  },
   props: {
     isSpace: {
       type: Boolean,

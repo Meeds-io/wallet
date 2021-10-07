@@ -15,6 +15,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import WalletAPIApp from './components/api/WalletAPIApp.vue';
+import './initComponents.js';
 
 Vue.use(Vuetify);
 
