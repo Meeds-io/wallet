@@ -120,7 +120,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-avatar>
           </td>
           <td class="text-start">
-            <profile-chip
+            <wallet-reward-profile-chip
               :address="props.item.wallet.address"
               :profile-id="props.item.wallet.id"
               :profile-technical-id="props.item.wallet.technicalId"

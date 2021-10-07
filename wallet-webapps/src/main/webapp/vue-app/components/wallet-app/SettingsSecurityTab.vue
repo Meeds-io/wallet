@@ -29,7 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-icon>
         </h4>
         <h5>{{ $t('exoplatform.wallet.message.securityPasswordManagement') }}</h5>
-        <reset-modal
+        <wallet-reward-reset-modal
           ref="walletResetModal"
           :wallet="wallet"
           :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
@@ -62,7 +62,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </div>
     </v-card-title>
 
-    <confirm-dialog
+    <wallet-reward-confirm-dialog
       ref="confirmDialog"
       :loading="loading"
       :message="confirmMessage"

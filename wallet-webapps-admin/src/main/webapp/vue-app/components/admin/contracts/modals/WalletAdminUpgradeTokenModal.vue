@@ -84,7 +84,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               required
               autocomplete="current-passord"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-            <gas-price-choice
+            <wallet-reward-gas-price-choice
               :wallet="wallet"
               :estimated-fee="`${walletUtils.toFixed(transactionFeeFiat)} ${fiatSymbol}`"
               @changed="gasPrice = $event" />

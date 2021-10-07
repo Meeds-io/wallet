@@ -40,7 +40,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               $event.preventDefault();
               $event.stopPropagation();
             ">
-            <address-auto-complete
+            <wallet-reward-address-auto-complete
               ref="autocomplete"
               :disabled="loading || disabledRecipient"
               :input-label="$t('exoplatform.wallet.label.recipient')"
@@ -54,7 +54,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 $emit('receiver-selected', $event);
               " />
             <p class="amountLabel mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
-            <gas-price-choice
+            <wallet-reward-gas-price-choice
               :wallet="wallet"
               :estimated-fee="transactionFeeString"
               :slider="!!transaction"
@@ -124,7 +124,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           @click="sendTokens">
           {{ $t('exoplatform.wallet.button.send') }}
         </button>
-        <qr-code-modal
+        <wallet-reward-qr-code-modal
           ref="qrCodeModal"
           :to="recipient"
           :from="walletAddress"
@@ -145,18 +145,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import AddressAutoComplete from './AddressAutoComplete.vue';
-import QrCodeModal from './QRCodeModal.vue';
-
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
 import {searchWalletByAddress} from '../js/AddressRegistry.js';
 
 export default {
-  components: {
-    QrCodeModal,
-    AddressAutoComplete,
-  },
   props: {
     wallet: {
       type: Object,

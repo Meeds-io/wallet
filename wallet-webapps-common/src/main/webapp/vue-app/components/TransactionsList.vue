@@ -66,14 +66,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.createdContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.type === 'ether'" class="text-truncated">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction && item.isReceiver"
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
@@ -82,7 +82,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :profile-type="item.toType"
                       :display-name="item.toDisplayName"
                       :avatar="item.toAvatar" />
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-else-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -99,7 +99,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       {{ (item.pending || item.succeeded) ? $t('exoplatform.wallet.label.sentTo') : $t('exoplatform.wallet.label.errorSentTo') }}
                     </span>
   
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="item.isReceiver"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -109,7 +109,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :display-name="item.fromDisplayName"
                       :avatar="item.fromAvatar" />
   
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-else
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
@@ -124,7 +124,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.sentTo') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -135,7 +135,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.by') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.byAddress"
                       :profile-id="item.byUsername"
                       :profile-technical-id="item.byTechnicalId"
@@ -146,7 +146,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.onBehalfOf') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
                       :profile-technical-id="item.fromTechnicalId"
@@ -157,7 +157,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="(item.contractMethodName === 'transfer' || item.contractMethodName === 'approve')">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction && item.isReceiver"
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
@@ -166,7 +166,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :profile-type="item.toType"
                       :display-name="item.toDisplayName"
                       :avatar="item.toAvatar" />
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-else-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -189,7 +189,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       {{ $t('exoplatform.wallet.label.delegatedTo') }}
                     </span>
   
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="item.isReceiver"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -198,7 +198,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :profile-type="item.fromType"
                       :display-name="item.fromDisplayName"
                       :avatar="item.fromAvatar" />
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-else
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
@@ -210,7 +210,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'addAdmin'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -222,7 +222,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.added') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -233,14 +233,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.asAdministratorOnContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'removeAdmin'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -252,7 +252,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.removed') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -263,13 +263,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.asAdministratorFromContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
                   <v-list-item-title v-else-if="item.contractMethodName === 'transferOwnership'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -281,7 +281,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.transferredOwnershipTo') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -292,14 +292,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.onContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'approveAccount'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -311,7 +311,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.approved') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -322,14 +322,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.accountOnContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'disapproveAccount'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -341,7 +341,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.disapproved') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -352,14 +352,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.accountOnContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'pause'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -371,14 +371,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.pausedContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'unPause'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -390,14 +390,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.unPausedContract') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'setSellPrice'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -412,7 +412,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'upgradeData'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -427,7 +427,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'upgradeImplementation'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -442,7 +442,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'transformToVested'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -454,7 +454,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.vestedTokensTo') }}
                     </span>
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       :address="item.toAddress"
                       :profile-id="item.toUsername"
                       :profile-technical-id="item.toTechnicalId"
@@ -474,7 +474,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       </template>
                     </template>
                     <template v-else>
-                      <profile-chip
+                      <wallet-reward-profile-chip
                         v-if="displayFullTransaction"
                         :address="item.fromAddress"
                         :profile-id="item.fromUsername"
@@ -486,7 +486,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       <span>
                         {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
                       </span>
-                      <profile-chip
+                      <wallet-reward-profile-chip
                         :address="item.toAddress"
                         :profile-id="item.toUsername"
                         :profile-technical-id="item.toTechnicalId"
@@ -502,7 +502,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       {{ $t('exoplatform.wallet.label.YouWasRewarded') }}
                     </template>
                     <template v-else>
-                      <profile-chip
+                      <wallet-reward-profile-chip
                         v-if="displayFullTransaction"
                         :address="item.fromAddress"
                         :profile-id="item.fromUsername"
@@ -514,7 +514,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       <span>
                         {{ $t('exoplatform.wallet.label.rewarded') }}
                       </span>
-                      <profile-chip
+                      <wallet-reward-profile-chip
                         :address="item.toAddress"
                         :profile-id="item.toUsername"
                         :profile-technical-id="item.toTechnicalId"
@@ -526,7 +526,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.contractMethodName === 'depositFunds'">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -541,7 +541,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.value && Number(item.value) && item.amountFiat">
-                    <profile-chip
+                    <wallet-reward-profile-chip
                       v-if="displayFullTransaction"
                       :address="item.fromAddress"
                       :profile-id="item.fromUsername"
@@ -559,7 +559,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span>
                       {{ $t('exoplatform.wallet.label.contractTransaction') }}
                     </span>
-                    <wallet-address
+                    <wallet-reward-wallet-address
                       :value="item.contractAddress"
                       :name="item.contractName"
                       display-label />
@@ -635,7 +635,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
               <v-list-item v-if="item.pending && item.contractAddress && item.sentTimestamp">
                 <v-list-item-content>
-                  <send-tokens-modal
+                  <wallet-reward-send-tokens-modal
                     ref="boostTransactionModal"
                     :wallet="wallet"
                     :transaction="item"
@@ -660,7 +660,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   {{ $t('exoplatform.wallet.label.issuer') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-end">
-                  <profile-chip
+                  <wallet-reward-profile-chip
                     :address="item.issuer.address"
                     :profile-id="item.issuer.id"
                     :profile-technical-id="item.issuer.technicalId"
@@ -877,19 +877,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import WalletAddress from './WalletAddress.vue';
-import ProfileChip from './ProfileChip.vue';
-import SendTokensModal from './SendTokensModal.vue';
-
 import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
 import {loadTransactions, refreshTransactionDetail} from '../js/TransactionUtils.js';
 
 export default {
-  components: {
-    ProfileChip,
-    WalletAddress,
-    SendTokensModal,
-  },
   props: {
     wallet: {
       type: Object,
