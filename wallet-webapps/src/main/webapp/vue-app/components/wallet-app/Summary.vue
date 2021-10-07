@@ -126,6 +126,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               ref="walletAppMenu"
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
+              :wallet="wallet"
               @refresh="init()"
               @modify-settings="showSettingsModal = true" />
             <wallet-reward-settings-modal

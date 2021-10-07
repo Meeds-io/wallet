@@ -130,7 +130,7 @@ export default {
         options.from = this.from;
       }
 
-      if ((window.walletSettings.network.gasLimit && this.isContract) || this.amount > 0) {
+      if ((window.walletSettings.network && window.walletSettings.network.gasLimit && this.isContract) || this.amount > 0) {
         options.gas = window.walletSettings.network.gasLimit;
       }
 
