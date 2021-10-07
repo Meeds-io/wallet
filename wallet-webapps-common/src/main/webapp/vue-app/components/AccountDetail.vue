@@ -23,7 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <span v-if="wallet" class="ps-4">
         <template v-if="isAdministration">
           {{ $t('exoplatform.wallet.label.transactionsOfWallet') }}:
-          <profile-chip
+          <wallet-reward-profile-chip
             ref="profileChip"
             :profile-technical-id="wallet.technicalId"
             :profile-id="wallet.id"
@@ -41,11 +41,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </template>
       </span>
       <span v-else class="ps-4">
-        {{ contractDetails.title }}
+        {{ contractTitle }}
       </span>
     </template>
     <template slot="content">
-      <transactions-list
+      <wallet-reward-transactions-list
         id="transactionsList"
         ref="transactionsList"
         class="lastTransactionsList"
@@ -63,14 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import TransactionsList from './TransactionsList.vue';
-import ProfileChip from './ProfileChip.vue';
-
 export default {
-  components: {
-    TransactionsList,
-    ProfileChip,
-  },
   props: {
     wallet: {
       type: Object,
@@ -118,6 +111,11 @@ export default {
     contractDetails() {
       this.error = null;
     },
+  },
+  computed: {
+    contractTitle(){
+      return this.contractDetails && this.contractDetails.title;
+    }
   },
   methods: {
     open(){

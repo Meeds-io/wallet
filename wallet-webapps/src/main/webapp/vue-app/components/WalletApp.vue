@@ -67,7 +67,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     </template>
                   </v-layout>
                   <v-flex class="my-8">
-                    <wallet-setup
+                    <wallet-reward-setup
                       ref="walletSetup"
                       :is-space="isSpace"
                       :wallet="wallet"
@@ -88,7 +88,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
       </v-layout>
       <!-- The selected account detail -->
-      <account-detail
+      <wallet-reward-account-detail
         ref="accountDetail"
         :fiat-symbol="fiatSymbol"
         :wallet="wallet"

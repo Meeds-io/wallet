@@ -58,19 +58,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disabledWallet') }})
     </span>
   </code>
-  <wallet-address
+  <wallet-reward-wallet-address
     v-else
     :value="address"
     display-label />
 </template>
 
 <script>
-import WalletAddress from './WalletAddress.vue';
-
 export default {
-  components: {
-    WalletAddress,
-  },
   props: {
     profileId: {
       type: String,

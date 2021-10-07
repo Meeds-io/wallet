@@ -32,7 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             $event.preventDefault();
             $event.stopPropagation();
           ">
-          <address-auto-complete
+          <wallet-reward-address-auto-complete
             ref="autocomplete"
             :disabled="loading"
             autofocus
@@ -85,12 +85,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import AddressAutoComplete from './AddressAutoComplete.vue';
-
 export default {
-  components: {
-    AddressAutoComplete,
-  },
   props: {
     walletAddress: {
       type: String,

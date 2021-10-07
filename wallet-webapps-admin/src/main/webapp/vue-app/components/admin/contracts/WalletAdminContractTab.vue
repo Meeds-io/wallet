@@ -31,7 +31,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <b>{{ contractDetails && contractDetails.name }}</b> {{ $t('exoplatform.wallet.label.sellPrice') }}: {{ contractDetails && contractDetails.sellPrice }} ether
           </h4>
           <h4 class="grey--text font-weight-light no-wrap">
-            {{ $t('exoplatform.wallet.label.owner') }}: <wallet-address :value="contractDetails.owner" display-label />
+            {{ $t('exoplatform.wallet.label.owner') }}: <wallet-reward-wallet-address :value="contractDetails.owner" display-label />
           </h4>
         </v-flex>
 
@@ -239,7 +239,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         eager>
         <v-layout column>
           <v-flex xs12>
-            <transactions-list
+            <wallet-reward-transactions-list
               id="transactionsList"
               ref="transactionsList"
               :contract-details="contractDetails"
@@ -282,7 +282,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-avatar>
               </td>
               <td>
-                <profile-chip
+                <wallet-reward-profile-chip
                   :address="props.item.address"
                   :profile-id="props.item.id"
                   :profile-technical-id="props.item.technicalId"
@@ -342,7 +342,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-avatar>
               </td>
               <td>
-                <profile-chip
+                <wallet-reward-profile-chip
                   :address="props.item.address"
                   :profile-id="props.item.id"
                   :profile-technical-id="props.item.technicalId"
