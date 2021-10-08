@@ -26,7 +26,6 @@ import QRCodeModal from './components/QRCodeModal.vue';
 import SendTokensForm from './components/SendTokensForm.vue';
 import SendTokensModal from './components/SendTokensModal.vue';
 import TransactionsList from './components/TransactionsList.vue';
-import BackupModal from './components/WalletBackupModal.vue';
 import BrowserSetup from './components/WalletBrowserSetup.vue';
 import ImportKeyModal from './components/WalletImportKeyModal.vue';
 import ResetModal from './components/WalletResetModal.vue';
@@ -62,7 +61,6 @@ const components = {
   'wallet-reward-send-tokens-form': SendTokensForm,
   'wallet-reward-send-tokens-modal': SendTokensModal,
   'wallet-reward-transactions-list': TransactionsList,
-  'wallet-reward-backup-modal': BackupModal,
   'wallet-reward-browser-setup': BrowserSetup,
   'wallet-reward-import-key-modal': ImportKeyModal,
   'wallet-reward-reset-modal': ResetModal,
