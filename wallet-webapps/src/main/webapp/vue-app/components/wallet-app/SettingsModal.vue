@@ -88,13 +88,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </div>
                 </div>
                 <div v-if="browserWalletExists" class="text-center pt-3">
-                  <wallet-reward-backup-modal
-                    ref="walletBackupModal"
-                    :display-complete-message="false"
-                    @backed-up="
-                      $emit('backed-up');
-                      refreshFromSettings();
-                    " />
                 </div>
                 <div class="text-center pt-3">
                   <wallet-reward-import-key-modal
