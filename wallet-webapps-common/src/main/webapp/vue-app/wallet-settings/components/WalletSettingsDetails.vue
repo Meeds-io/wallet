@@ -1,74 +1,86 @@
-<template v-if="displayed">
-  <v-card
-    class="ma-4 walletSetting"
-    flat>
-    <v-card-title>
-      <v-toolbar
-        class="border-box-sizing"
+<template>
+  <v-app>
+    <template v-if="displayed">
+      <v-card
+        v-if="!displayManagePasswordDetails"
+        class="ma-4 walletSetting"
         flat>
-        <v-btn
-          class="mx-1"
-          icon
-          height="36"
-          width="36"
-          @click="$emit('back')">
-          <v-icon size="20">
-            {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
-          </v-icon>
-        </v-btn>
-        <v-toolbar-title class="ps-0">
-          {{ $t('exoplatform.wallet.label.settings') }}
-        </v-toolbar-title>
-        <v-spacer />
-      </v-toolbar>
-    </v-card-title>
-    <v-card-subtitle class="mx-14 mn-5">
-      {{ $t('exoplatform.wallet.message.settingsDescription') }}
-    </v-card-subtitle>
+        <v-card-title>
+          <v-toolbar
+            class="border-box-sizing"
+            flat>
+            <v-btn
+              class="mx-1"
+              icon
+              height="36"
+              width="36"
+              @click="$emit('back')">
+              <v-icon size="20">
+                {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
+              </v-icon>
+            </v-btn>
+            <v-toolbar-title class="ps-0">
+              {{ $t('exoplatform.wallet.label.settings') }}
+            </v-toolbar-title>
+            <v-spacer />
+          </v-toolbar>
+        </v-card-title>
+        <v-card-subtitle class="mx-14 mn-5">
+          {{ $t('exoplatform.wallet.message.settingsDescription') }}
+        </v-card-subtitle>
 
-    <v-list class="mx-8">
-      <v-list-item>
-        <v-list-item-content>
-          <v-list-item-title class="title text-color">
-            {{ $t('exoplatform.wallet.label.settings') }}
-          </v-list-item-title>
-          <v-list-item-subtitle>
-            {{ $t('exoplatform.wallet.message.managePasswordDescription') }}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action>
-          <v-btn
-            small
-            icon
-            @click="openManagePasswordDetails">
-            <v-icon size="24" class="text-sub-title">
-              {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
-            </v-icon>
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
-      <v-divider />
-      <v-list-item class="manageKey">
-        <v-list-item-content>
-          <v-list-item-title class="title text-color">
-            {{ $t('exoplatform.wallet.label.ethereumAddress') }}
-          </v-list-item-title>
-          <v-list-item-subtitle>
-            {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
-          </v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action>
-          <wallet-reward-qr-code
-            ref="qrCode"
-            :to="wallet.address"
-            :title="$t('exoplatform.wallet.title.addressQRCode')" />
-          <wallet-reward-address :value="wallet.address" :allow-edit="false" />
-        </v-list-item-action>
-      </v-list-item>
-    </v-list>
-  </v-card>
+        <v-list class="mx-8">
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="title text-color">
+                {{ $t('exoplatform.wallet.label.mangePassword') }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ $t('exoplatform.wallet.message.managePasswordDescription') }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn
+                small
+                icon
+                @click="openManagePasswordDetails">
+                <v-icon size="24" class="text-sub-title">
+                  {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
+                </v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-divider />
+          <v-list-item class="manageKey">
+            <v-list-item-content>
+              <v-list-item-title class="title text-color">
+                {{ $t('exoplatform.wallet.label.ethereumAddress') }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <wallet-reward-qr-code
+                ref="qrCode"
+                :to="wallet.address"
+                :title="$t('exoplatform.wallet.title.addressQRCode')" />
+              <wallet-reward-address :value="wallet.address" :allow-edit="false" />
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+      </v-card>
+      <wallet-reward-reset-modal
+        v-if="displayManagePasswordDetails"
+        :wallet="wallet"
+        :is-space="isSpace"
+        :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
+        display-remember-me
+        class="d-flex"
+        @back="closeManagePasswordDetails" />
+    </template>
+  </v-app>
 </template>
-
 <script>
 export default {
   props: {
@@ -84,15 +96,17 @@ export default {
     displayed: true,
     displayManagePasswordDetails: false,
   }),
+  computed: {
+    isSpace(){
+      return this.wallet.spaceId !== 0;
+    }
+  },
   methods: {
     openManagePasswordDetails() {
-      document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
       this.displayManagePasswordDetails = true;
     },
     closeManagePasswordDetails() {
-      document.dispatchEvent(new CustomEvent('showSettingsApps'));
       this.displayManagePasswordDetails = false;
-      window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet`);
     },
   },
 };
