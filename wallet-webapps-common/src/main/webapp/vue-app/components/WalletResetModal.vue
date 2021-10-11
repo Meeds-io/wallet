@@ -89,7 +89,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </span>
         </template>
         <template slot="content">
-          <v-card-text>
+          <v-card-text class="walletManagePasswordDrawer">
             <div v-if="error" class="alert alert-error">
               <i class="uiIconError"></i> {{ error }}
             </div>
@@ -100,53 +100,51 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 $event.preventDefault();
                 $event.stopPropagation();
               ">
-              <v-text-field
-                v-model="walletPassword"
-                :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
-                :rules="[rules.min]"
-                :type="walletPasswordShow ? 'text' : 'password'"
-                :disabled="loading"
-                :label="rememberPasswordToChange ? $t('exoplatform.wallet.label.walletPassword') : $t('exoplatform.wallet.label.currentWalletPassword')"
-                :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
-                name="walletPassword"
-                autocomplete="current-passord"
-                autofocus
-                validate-on-blur
-                @click:append="walletPasswordShow = !walletPasswordShow" />
+              <div class="managePasswordLabels mb-5">
+                <v-text-field
+                  v-model="walletPassword"
+                  :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
+                  :rules="[rules.min]"
+                  :type="walletPasswordShow ? 'text' : 'password'"
+                  :disabled="loading"
+                  :label="rememberPasswordToChange ? $t('exoplatform.wallet.label.walletPassword') : $t('exoplatform.wallet.label.currentWalletPassword')"
+                  :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
+                  name="walletPassword"
+                  autocomplete="current-passord"
+                  autofocus
+                  validate-on-blur
+                  @click:append="walletPasswordShow = !walletPasswordShow" />
 
-              <v-text-field
-                v-if="!rememberPasswordToChange "
-                v-model="newWalletPassword"
-                :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
-                :rules="[rules.min]"
-                :type="newWalletPasswordShow ? 'text' : 'password'"
-                :disabled="loading"
-                :label="$t('exoplatform.wallet.label.newWalletPassword')"
-                :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
-                name="newWalletPassword"
-                counter
-                autocomplete="new-passord"
-                @click:append="newWalletPasswordShow = !newWalletPasswordShow" />
+                <v-text-field
+                  v-if="!rememberPasswordToChange "
+                  v-model="newWalletPassword"
+                  :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
+                  :rules="[rules.min]"
+                  :type="newWalletPasswordShow ? 'text' : 'password'"
+                  :disabled="loading"
+                  :label="$t('exoplatform.wallet.label.newWalletPassword')"
+                  :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
+                  name="newWalletPassword"
+                  autocomplete="new-passord"
+                  @click:append="newWalletPasswordShow = !newWalletPasswordShow" />
 
-              <v-text-field
-                v-if="!rememberPasswordToChange "
-                v-model="confirmNewWalletPassword"
-                :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
-                :rules="[rules.passwordMatching]"
-                :type="password"
-                :disabled="loading"
-                :label="$t('exoplatform.wallet.label.newWalletPassword')"
-                :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
-                name="confirmNewWalletPassword"
-                counter
-                autocomplete="new-passord"
-                @click:append="newWalletPasswordShow = !newWalletPasswordShow" />
-
+                <v-text-field
+                  v-if="!rememberPasswordToChange "
+                  v-model="confirmNewWalletPassword"
+                  :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
+                  :rules="[rules.passwordMatching]"
+                  :type="newWalletPasswordShow ? 'text' : 'password'"
+                  :disabled="loading"
+                  :label="$t('exoplatform.wallet.label.newWalletPasswordConfirm')"
+                  :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholderConfirm')"
+                  name="confirmNewWalletPassword"
+                  autocomplete="new-passord"
+                  @click:append="newWalletPasswordShow = !newWalletPasswordShow" />
+              </div>
               <v-switch
-                v-if="!rememberPasswordToChange"
                 v-model="rememberPassword"
-                :label="$t('exoplatform.wallet.label.rememberPasswordInBrowser')"
-                class="mt-1" />
+                :label="$t('exoplatform.wallet.message.rememberMyPassword')"
+                class="v-input--reverse mt-2" />
             </v-form>
           </v-card-text>
         </template>
@@ -220,7 +218,7 @@ export default {
       browserWalletDecrypted: false,
       rememberPasswordStored: false,
       rememberPasswordToChange: false,
-      rememberPassword: false,
+      rememberPassword: true,
       rules: {
         min: (v) => (v && v.length >= 8) || this.$t('exoplatform.wallet.warning.atLeast8Chars'),
         passwordMatching: (v) => (v && v === this.newWalletPassword) || this.$t('exoplatform.wallet.warning.passwordNotMatching'),
@@ -241,7 +239,7 @@ export default {
       this.walletPasswordShow = false;
       this.newWalletPassword = null;
       this.newWalletPasswordShow = false;
-      this.rememberPassword = false;
+      this.rememberPassword = true;
       this.rememberPasswordToChange = false;
       return this.walletUtils.initSettings(this.isSpace, true, true)
         .then(() => {
