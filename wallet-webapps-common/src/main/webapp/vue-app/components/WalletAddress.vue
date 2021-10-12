@@ -138,7 +138,7 @@ export default {
       if (!this.value) {
         return;
       }
-      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network.id);
+      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network && window.walletSettings.network.id);
 
       if (!window.walletSettings.userPreferences
           || !window.walletSettings.userPreferences.addresesLabels) {
