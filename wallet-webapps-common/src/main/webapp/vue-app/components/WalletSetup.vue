@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex id="walletSetup" class="text-center">
-        <div v-if="displayWalletCreationToolbar" class="alert alert-info">
+    <div v-if="displayWalletCreationToolbar" class="alert alert-info">
       <i class="uiIconInfo"></i> <span v-if="isSpace">
         {{ $t('exoplatform.wallet.warning.notPrivateKey') }}.
         <strong>
