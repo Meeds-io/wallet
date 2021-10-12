@@ -28,7 +28,7 @@ import SendTokensModal from './components/SendTokensModal.vue';
 import TransactionsList from './components/TransactionsList.vue';
 import BrowserSetup from './components/WalletBrowserSetup.vue';
 import ImportKeyModal from './components/WalletImportKeyModal.vue';
-import ResetModal from './components/WalletResetModal.vue';
+import WalletPasswordManagement from './components/WalletPasswordManagement.vue';
 import RequestFundsModal from './components/WalletRequestFundsModal.vue';
 import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
@@ -63,7 +63,7 @@ const components = {
   'wallet-reward-transactions-list': TransactionsList,
   'wallet-reward-browser-setup': BrowserSetup,
   'wallet-reward-import-key-modal': ImportKeyModal,
-  'wallet-reward-reset-modal': ResetModal,
+  'wallet-reward-password-management': WalletPasswordManagement,
   'wallet-reward-request-funds-modal': RequestFundsModal,
   'wallet-reward-address': WalletAddress,
   'wallet-reward-setup': WalletSetup,

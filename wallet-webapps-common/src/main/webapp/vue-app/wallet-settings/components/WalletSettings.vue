@@ -41,7 +41,6 @@ export default {
     wallet: null,
   }),
   created() {
-    this.wallet = window.walletSettings && window.walletSettings.wallet || null;
     document.addEventListener('hideSettingsApps', (event) => {
       if (event && event.detail && this.id !== event.detail) {
         this.displayed = false;

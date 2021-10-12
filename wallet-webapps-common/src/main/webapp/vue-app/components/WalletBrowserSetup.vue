@@ -168,7 +168,7 @@ export default {
         this.$emit('error', this.$t('exoplatform.wallet.error.errorCreatingWallet'));
         return;
       }
-      return saveBrowserWalletInstance(wallet[0], this.walletPassword, this.isSpace)
+      return saveBrowserWalletInstance(wallet[0], this.walletPassword, this.isSpace, true)
         .then(() => {
           this.$emit('configured');
           this.loadingWalletBrowser = false;
