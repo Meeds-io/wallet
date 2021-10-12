@@ -70,7 +70,7 @@
           </v-list-item>
         </v-list>
       </v-card>
-      <wallet-reward-reset-modal
+      <wallet-reward-password-management
         v-if="displayManagePasswordDetails"
         :wallet="wallet"
         :is-space="isSpace"
@@ -98,7 +98,7 @@ export default {
   }),
   computed: {
     isSpace(){
-      return this.wallet.spaceId !== 0;
+      return this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0;
     }
   },
   methods: {

@@ -197,9 +197,7 @@ export default {
     },
     isSpace: {
       type: Boolean,
-      default: function() {
-        return false;
-      },
+      default: false,
     },
   },
   data() {
