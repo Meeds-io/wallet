@@ -127,17 +127,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
               :wallet="wallet"
-              @refresh="init()"
-              @modify-settings="showSettingsModal = true" />
-            <wallet-reward-settings-modal
-              ref="walletSettingsModal"
-              :is-space="isSpace"
-              :open="showSettingsModal"
-              :wallet="wallet"
-              :app-loading="loading"
-              :display-reset-option="displayWalletResetOption"
-              @close="showSettingsModal = false"
-              @settings-changed="init()" />
+              @refresh="init()" />
           </v-flex>
         </v-layout>
       </v-container>
@@ -212,7 +202,6 @@ export default {
       pendingTransactions: {},
       lastTransaction: null,
       walletRewards: [],
-      showSettingsModal: false,
     };
   },
   computed: {
