@@ -171,9 +171,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import {unlockBrowserWallet, saveBrowserWallet, hashCode, rememberPassword} from '../js/WalletUtils.js';
-
-import {sendPrivateKeyToServer} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, saveBrowserWallet, hashCode, rememberPassword, sendPrivateKeyToServer} from '../js/WalletUtils.js';
 
 export default {
   props: {
