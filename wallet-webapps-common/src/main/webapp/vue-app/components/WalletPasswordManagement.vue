@@ -108,7 +108,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   :type="walletPasswordShow ? 'text' : 'password'"
                   :disabled="loading"
                   :label="rememberPasswordToChange ? $t('exoplatform.wallet.label.walletPassword') : $t('exoplatform.wallet.label.currentWalletPassword')"
-                  :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
+                  :placeholder="$t('exoplatform.wallet.label.walletExistingPasswordPlaceholder')"
                   name="walletPassword"
                   autocomplete="current-passord"
                   autofocus
@@ -155,13 +155,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :disabled="loading"
               class="ignore-vuetify-classes btn"
               @click="closeDrawer">
-              {{ $t('exoplatform.wallet.button.close') }}
+              {{ $t('exoplatform.wallet.button.cancel') }}
             </button>
             <button
               :disabled="loading"
               class="ignore-vuetify-classes btn btn-primary me-1 mx-1"
               @click="resetWallet()">
-              {{ $t('exoplatform.wallet.button.confirm') }}
+              {{ $t('exoplatform.wallet.button.save') }}
             </button>
           </div>
         </template>
