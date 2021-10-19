@@ -546,6 +546,30 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
+  public void managerPasswordChangeRequest(String address, String currentUser) throws IllegalAccessException {
+    if (address == null) {
+      throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
+    }
+    if (StringUtils.isBlank(currentUser)) {
+      throw new IllegalArgumentException("Modifier username is mandatory");
+    }
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
+    if (wallet == null) {
+      throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
+    }
+    if (isUserRewardingAdmin(currentUser)) {
+      WalletPasswordState oldPasswordState = WalletPasswordState.valueOf(wallet.getWalletPasswordState());
+      if(oldPasswordState == WalletPasswordState.ACCEPTED || oldPasswordState == WalletPasswordState.TOCHANGE) {
+        throw new IllegalAccessException("there is no request to change the password for this wallet");
+      }
+      if (oldPasswordState == WalletPasswordState.REQUESTED) {
+        wallet.setWalletPasswordState(WalletPasswordState.ACCEPTED.name());
+        accountStorage.saveWallet(wallet, false);
+      }
+    }
+  }
+
+  @Override
   public void setInitializationStatus(String address, WalletInitializationState initializationState) {
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
@@ -560,6 +584,30 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     }
     wallet.setInitializationState(initializationState.name());
     accountStorage.saveWallet(wallet, false);
+  }
+
+  @Override
+  public void requestPasswordChange(String address, String currentUser) throws IllegalAccessException {
+    if (address == null) {
+      throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
+    }
+    if (StringUtils.isBlank(currentUser)) {
+      throw new IllegalArgumentException("Modifier username is mandatory");
+    }
+    Wallet wallet = accountStorage.getWalletByAddress(address, getContractAddress());
+    if (wallet == null) {
+      throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
+    }
+    if (isWalletOwner(wallet, currentUser)) {
+      WalletPasswordState oldPasswordState = WalletPasswordState.valueOf(wallet.getWalletPasswordState());
+      if (oldPasswordState == WalletPasswordState.ACCEPTED || oldPasswordState == WalletPasswordState.REQUESTED) {
+        throw new IllegalAccessException("request already sent");
+      }
+      if (oldPasswordState == WalletPasswordState.TOCHANGE) {
+        wallet.setWalletPasswordState(WalletPasswordState.REQUESTED.name());
+        accountStorage.saveWallet(wallet, false);
+      }
+    }
   }
 
   @Override

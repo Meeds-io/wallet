@@ -75,6 +75,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               </v-btn>
             </v-list-item-action>
           </v-list-item>
+          <v-divider />
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="title text-color">
+                {{ $t('exoplatform.wallet.label.lostPassword') }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ $t('exoplatform.wallet.label.lostPasswordDescription') }}
+              </v-list-item-subtitle>
+              <v-list-item-subtitle>
+                <button
+                  class="ignore-vuetify-classes btn btn-primary me-1 mx-1 mt-4">
+                  {{ $t('exoplatform.wallet.btn.lostPassword') }}
+                </button>
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-card>
 

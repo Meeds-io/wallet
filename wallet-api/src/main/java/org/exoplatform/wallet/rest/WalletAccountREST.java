@@ -174,6 +174,29 @@ public class WalletAccountREST implements ResourceContainer {
     }
   }
 
+  @Path("setPasswordStatus")
+  @GET
+  @RolesAllowed("rewarding")
+  @ApiOperation(value = "Modify password status to ACCEPT", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+          @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+          @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+          @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+          @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
+  public Response managerPasswordChangeRequest(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
+    if (StringUtils.isBlank(address)) {
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+    try {
+      accountService.managerPasswordChangeRequest(address, getCurrentUserId());
+      return Response.ok().build();
+    } catch (Exception e) {
+      LOG.error("Can't set wallet password status", e);
+      return Response.serverError().build();
+    }
+  }
+
   @Path("requestAuthorization")
   @GET
   @ApiOperation(value = "Modify initialization status from DENIED to MODIFIED. This is used in case when a wallet has been denied access, in that case, a new authorization request can be done", httpMethod = "GET", response = Response.class, notes = "returns empty response")
@@ -194,6 +217,28 @@ public class WalletAccountREST implements ResourceContainer {
       return Response.ok().build();
     } catch (Exception e) {
       LOG.error("Can't request authorization for wallet {}", address, e);
+      return Response.serverError().build();
+    }
+  }
+
+  @Path("requestPasswordChange")
+  @GET
+  @ApiOperation(value = "Modify password status from TOCHANGE to REQUEST. This is used in case when a wallet password has lost, in that case, a new password request can be done", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+          @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+          @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+          @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+          @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
+  public Response requestPasswordChange(@ApiParam(value = "wallet address to change its status", required = true) @QueryParam("address") String address) {
+    if (StringUtils.isBlank(address)) {
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+    try {
+      accountService.requestPasswordChange(address, getCurrentUserId());
+      return Response.ok().build();
+    } catch (Exception e) {
+      LOG.error("Can't request password for wallet {}", address, e);
       return Response.serverError().build();
     }
   }

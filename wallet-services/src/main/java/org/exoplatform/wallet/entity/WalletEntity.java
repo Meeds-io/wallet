@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import javax.persistence.*;
 
+import org.exoplatform.wallet.model.WalletPasswordState;
 import org.hibernate.annotations.DynamicUpdate;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
@@ -58,6 +59,9 @@ public class WalletEntity implements Serializable {
 
   @Column(name = "INITIALIZATION_STATE")
   private WalletInitializationState               initializationState;
+
+  @Column(name = "WALLET_PASSWORD_STATE")
+  private WalletPasswordState WalletPasswordState;
 
   @OneToOne(fetch = FetchType.EAGER, mappedBy = "wallet", cascade = CascadeType.REMOVE)
   private WalletPrivateKeyEntity                  privateKey;
@@ -119,6 +123,14 @@ public class WalletEntity implements Serializable {
 
   public void setInitializationState(WalletInitializationState initializationState) {
     this.initializationState = initializationState;
+  }
+
+  public org.exoplatform.wallet.model.WalletPasswordState getWalletPasswordState() {
+    return WalletPasswordState;
+  }
+
+  public void setWalletPasswordState(org.exoplatform.wallet.model.WalletPasswordState walletPasswordState) {
+    WalletPasswordState = walletPasswordState;
   }
 
   public WalletPrivateKeyEntity getPrivateKey() {

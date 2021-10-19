@@ -321,6 +321,7 @@ public class WalletStorage {
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
+    wallet.setWalletPasswordState(walletEntity.getWalletPasswordState().name());
     wallet.setBackedUp(walletEntity.isBackedUp());
     if (walletEntity.getPrivateKey() == null) {
       WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
@@ -343,6 +344,7 @@ public class WalletStorage {
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
+    walletEntity.setWalletPasswordState(WalletPasswordState.valueOf(wallet.getWalletPasswordState()));
     return walletEntity;
   }
 

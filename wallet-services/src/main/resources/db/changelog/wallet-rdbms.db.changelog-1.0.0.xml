@@ -262,4 +262,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <dropUniqueConstraint tableName="ADDONS_WALLET_TRANSACTION" constraintName="UK_WALLET_TRANSACTION_HASH" />
   </changeSet>
 
+  <changeSet author="wallet" id="1.3.0-27">
+    <addColumn tableName="ADDONS_WALLET_ACCOUNT">
+      <column name="WALLET_PASSWORD_STATE" type="INT" defaultValueNumeric="2" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

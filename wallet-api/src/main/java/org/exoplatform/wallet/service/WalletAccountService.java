@@ -249,6 +249,18 @@ public interface WalletAccountService {
                                String currentUserId) throws IllegalAccessException;
 
   /**
+   * Manager Password Change Request
+   *
+   * @param address wallet address
+   *          {@link WalletPasswordState}
+   * @param currentUserId user changing wallet password status
+   * @throws IllegalAccessException if current user is not allowed to modify
+   *           wallet password status
+   */
+  void managerPasswordChangeRequest(String address,
+                               String currentUserId) throws IllegalAccessException;
+
+  /**
    * Change wallet initialization status
    * 
    * @param address wallet address
@@ -256,6 +268,14 @@ public interface WalletAccountService {
    *          {@link WalletInitializationState}
    */
   void setInitializationStatus(String address, WalletInitializationState initializationState);
+
+  /**
+   * Request password change
+   *
+   * @param address wallet address
+   *          {@link WalletPasswordState}
+   */
+  void requestPasswordChange(String address, String currentUser) throws IllegalAccessException;
 
   /**
    * Creates admin account wallet in server side
