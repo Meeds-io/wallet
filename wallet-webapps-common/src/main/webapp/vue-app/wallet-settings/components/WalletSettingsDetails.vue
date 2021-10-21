@@ -30,42 +30,62 @@
         </v-card-subtitle>
 
         <v-list class="mx-8">
-          <v-list-item>
+          <div v-if="wallet.address">
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title class="title text-color">
+                  {{ $t('exoplatform.wallet.label.mangePassword') }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ $t('exoplatform.wallet.message.managePasswordDescription') }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn
+                  small
+                  icon
+                  @click="openManagePasswordDetails">
+                  <v-icon size="24" class="text-sub-title">
+                    {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
+                  </v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+            <v-divider />
+            <v-list-item class="manageKey">
+              <v-list-item-content>
+                <v-list-item-title class="title text-color">
+                  {{ $t('exoplatform.wallet.label.ethereumAddress') }}
+                </v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <wallet-reward-qr-code
+                  ref="qrCode"
+                  :to="wallet.address"
+                  :title="$t('exoplatform.wallet.title.addressQRCode')" />
+                <wallet-reward-address :value="wallet.address" :allow-edit="false" />
+              </v-list-item-action>
+            </v-list-item>
+          </div>
+          <v-list-item v-if="!wallet.address" class="mx-5 my-3">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
-                {{ $t('exoplatform.wallet.label.mangePassword') }}
+                {{ $t('exoplatform.wallet.title.restoreWalletModal') }}
               </v-list-item-title>
               <v-list-item-subtitle>
-                {{ $t('exoplatform.wallet.message.managePasswordDescription') }}
+                {{ $t('exoplatform.wallet.message.importNewPrivateKeyMessage') }}
               </v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
               <v-btn
                 small
                 icon
-                @click="openManagePasswordDetails">
-                <v-icon size="24" class="text-sub-title">
-                  {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
-                </v-icon>
+                @click="openWalletImportKeyDrawer">
+                <i class="uiIconEdit uiIconLightBlue pb-2"></i>
               </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-          <v-divider />
-          <v-list-item class="manageKey">
-            <v-list-item-content>
-              <v-list-item-title class="title text-color">
-                {{ $t('exoplatform.wallet.label.ethereumAddress') }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <wallet-reward-qr-code
-                ref="qrCode"
-                :to="wallet.address"
-                :title="$t('exoplatform.wallet.title.addressQRCode')" />
-              <wallet-reward-address :value="wallet.address" :allow-edit="false" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -78,6 +98,11 @@
         display-remember-me
         class="d-flex"
         @back="closeManagePasswordDetails" />
+      <wallet-reward-import-key-drawer
+        ref="walletImportKey"
+        :is-space="isSpace"
+        :wallet-address="walletAddress"
+        @configured="$emit('settings-changed'); " />
     </template>
   </v-app>
 </template>
@@ -107,6 +132,9 @@ export default {
     },
     closeManagePasswordDetails() {
       this.displayManagePasswordDetails = false;
+    },
+    openWalletImportKeyDrawer() {
+      this.$refs.walletImportKey.open();
     },
   },
 };
