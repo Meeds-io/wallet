@@ -15,62 +15,26 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-dialog
-    v-model="dialog"
-    content-class="uiPopup with-overflow walletDialog"
-    class="walletImportKeyModal"
-    width="500px"
-    max-width="100vw"
-    hide-overlay
-    @keydown.esc="dialog = false">
-    <template v-slot:activator="{ on }">
-      <a href="javascript:void(0);" v-on="on">
-        {{ walletAddress ? $t('exoplatform.wallet.title.restoreWalletModal') : $t('exoplatform.wallet.title.restoreExistingWalletModal') }}
-      </a>
+  <exo-drawer
+    ref="walletImportKeyModal"
+    :right="!$vuetify.rtl"
+    @closed="close">
+    <template slot="title">
+      <span class="pb-2"> {{ $t('exoplatform.wallet.title.restoreWalletModal') }} </span>
     </template>
-    <v-card class="elevation-12">
-      <div class="ignore-vuetify-classes popupHeader ClearFix">
-        <a
-          class="uiIconClose pull-right"
-          aria-hidden="true"
-          @click="dialog = false"></a>
-        <span class="ignore-vuetify-classes PopupTitle popupTitle">
-          {{ $t('exoplatform.wallet.button.restoreWallet') }}
-        </span>
-      </div>
+    <template slot="content" class="walletRequestFundsModal">
       <v-card-text>
         <div v-if="error" class="alert alert-error v-content">
           <i class="uiIconError"></i>{{ error }}
         </div>
-        <v-card-title v-show="loading" class="pb-0">
-          <v-spacer />
-          <v-progress-circular
-            color="primary"
-            indeterminate
-            size="20" />
-          <v-spacer />
-        </v-card-title>
+
         <v-form
           ref="form"
           @submit="
             $event.preventDefault();
             $event.stopPropagation();
           ">
-          <label
-            v-if="walletAddress"
-            for="walletPrivateKey"
-            class="mb-3">
-            <span>
-              {{ $t('exoplatform.wallet.message.enterPrivateKeyMessage') }}:
-            </span>
-            <br>
-            <code>{{ walletAddress }}</code>
-          </label>
-          <label v-else for="walletPrivateKey">
-            {{ $t('exoplatform.wallet.message.importNewPrivateKeyMessage') }}:
-          </label>
           <v-text-field
-            v-if="dialog"
             v-model="walletPrivateKey"
             :append-icon="walletPrivateKeyShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.priv]"
@@ -92,29 +56,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             :label="$t('exoplatform.wallet.label.walletPassword')"
             :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
             name="walletPassword"
-            counter
             autocomplete="current-passord"
             @click:append="walletPasswordShow = !walletPasswordShow" />
         </v-form>
       </v-card-text>
-      <v-card-actions>
+    </template>
+    <template slot="footer">
+      <div class="d-flex mr-2">
         <v-spacer />
         <button
           :disabled="loading"
-          class="ignore-vuetify-classes btn btn-primary me-1"
+          class="ignore-vuetify-classes btn mx-1"
+          @click="close">
+          {{ $t('exoplatform.wallet.button.cancel') }}
+        </button>
+        <button
+          :disabled="loading"
+          class="ignore-vuetify-classes btn btn-primary"
           @click="importWallet">
           {{ $t('exoplatform.wallet.button.import') }}
         </button>
-        <button
-          :disabled="loading"
-          class="ignore-vuetify-classes btn"
-          @click="dialog = false">
-          {{ $t('exoplatform.wallet.button.close') }}
-        </button>
-        <v-spacer />
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </div>
+    </template>
+  </exo-drawer>
 </template>
 
 <script>
@@ -137,7 +101,6 @@ export default {
   },
   data() {
     return {
-      dialog: false,
       walletPrivateKey: '',
       walletPrivateKeyShow: false,
       error: null,
@@ -150,12 +113,10 @@ export default {
       },
     };
   },
-  watch: {
-    dialog() {
-      if (this.dialog) {
-        this.resetForm();
-      }
-    },
+  created() {
+    this.walletUtils.initSettings(this.isSpace, true, true)
+      .then(() => this.walletUtils.initWeb3(this.isSpace, true));
+    this.resetForm();
   },
   methods: {
     resetForm() {
@@ -183,10 +144,10 @@ export default {
           }
           const wallet = window.localWeb3.eth.accounts.wallet.add(thiss.walletPrivateKey);
           if (!thiss.walletAddress || wallet.address.toLowerCase() === thiss.walletAddress.toLowerCase()) {
-            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, false, true)
+            saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, true)
               .then(() => {
                 thiss.loading = false;
-                thiss.dialog = false;
+                thiss.close();
                 thiss.$nextTick(() => {
                   thiss.$emit('configured');
                 });
@@ -207,6 +168,12 @@ export default {
         }
       }, 200);
     },
+    open() {
+      this.$refs.walletImportKeyModal.open();
+    },
+    close() {
+      this.$refs.walletImportKeyModal.close();
+    }
   },
 };
 </script>
