@@ -4,7 +4,8 @@
       <wallet-settings-details
         v-if="displayDetails"
         :wallet="wallet"
-        @back="closeDetail" />
+        @back="closeDetail"
+        @settings-changed="openDetail" />
       <v-card
         v-else
         class="ma-4 border-radius"
