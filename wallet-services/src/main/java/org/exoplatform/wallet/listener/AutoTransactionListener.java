@@ -50,11 +50,19 @@ public class AutoTransactionListener extends Listener<Object, String> {
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(wallet.getAddress());
       transactionDetail.setContractAmount(tokenAmount);
-      transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = getWalletTokenAdminService().initialize(transactionDetail, wallet.getId());
-      LOG.info("wallet {} is initialized, the  transaction hash is {}", wallet.getId(), transactionDetail.getHash());
+      transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, wallet.getId());
+
+      // Send Ether
+      TransactionDetail etherTransactionDetail = new TransactionDetail();
+      etherTransactionDetail.setTo(wallet.getAddress());
+      etherTransactionDetail.setValue(etherAmount);
+      etherTransactionDetail.setLabel(transactionLabel);
+      etherTransactionDetail.setMessage(transactionMessage);
+      etherTransactionDetail = getWalletTokenAdminService().sendEther(etherTransactionDetail, wallet.getId());
+      LOG.info("wallet {} is initialized with Tokens, the Ether transaction hash is {}", wallet.getId(), transactionDetail.getHash());
+      LOG.info("wallet {} is initialized with Ethers, the Ether transaction hash is {}", wallet.getId(), etherTransactionDetail.getHash());
     } catch (Exception e) {
       LOG.error("Error initializing wallet {}", wallet.getId(), e);
     }

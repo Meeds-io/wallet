@@ -41,7 +41,7 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.wallet.contract.ERTTokenV2;
+import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
@@ -379,20 +379,15 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       }
 
       double contractAmount = transactionDetail.getContractAmount();
-      if (contractAmount > 0 && (StringUtils.equals(ERTTokenV2.FUNC_INITIALIZEACCOUNT, methodName)
-          || StringUtils.equals(ERTTokenV2.FUNC_TRANSFER, methodName) || StringUtils.equals(ERTTokenV2.FUNC_REWARD, methodName)
-          || StringUtils.equals(ERTTokenV2.FUNC_APPROVE, methodName)
-          || StringUtils.equals(ERTTokenV2.FUNC_TRANSFERFROM, methodName))) {
+      if (contractAmount > 0 && (StringUtils.equals(MeedsToken.FUNC_TRANSFER, methodName)
+          || StringUtils.equals(MeedsToken.FUNC_APPROVE, methodName)
+          || StringUtils.equals(MeedsToken.FUNC_TRANSFERFROM, methodName))) {
         parameters.put("amount_token", contractAmount);
       }
 
       double valueAmount = transactionDetail.getValue();
       if (valueAmount > 0) {
-        if (StringUtils.equals(ERTTokenV2.FUNC_REWARD, methodName)) {
-          parameters.put("amount_reward_token", valueAmount);
-        } else {
-          parameters.put("amount_ether", valueAmount);
-        }
+        parameters.put("amount_ether", valueAmount);
       }
       break;
     default:

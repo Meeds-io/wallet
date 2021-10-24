@@ -16,29 +16,25 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex
-    v-if="contractDetails && contractDetails.title"
+    v-if="contractDetails && contractDetails"
     id="accountDetail"
     class="text-center white layout column">
-    <v-card-title v-if="adminLevel >= 4" class="align-start accountDetailSummary">
+    <v-card-title v-if="adminLevel" class="align-start accountDetailSummary">
       <v-layout column>
         <v-flex
           id="accountDetailTitle"
           class="mt-3">
-          <h3 v-if="adminLevel >= 5 && contractDetails.fiatBalance" class="font-weight-light">
+          <h3 v-if="contractDetails.fiatBalance" class="font-weight-light">
             {{ contractDetails.name }} - {{ $t('exoplatform.wallet.label.version') }}: {{ contractDetails.contractType }} - {{ $t('exoplatform.wallet.label.balance') }}: {{ walletUtils.toFixed(contractDetails.fiatBalance) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.etherBalance) }} ether
           </h3>
-          <h4 v-if="adminLevel >= 5" class="grey--text font-weight-light">
-            <b>{{ contractDetails && contractDetails.name }}</b> {{ $t('exoplatform.wallet.label.sellPrice') }}: {{ contractDetails && contractDetails.sellPrice }} ether
-          </h4>
           <h4 class="grey--text font-weight-light no-wrap">
             {{ $t('exoplatform.wallet.label.owner') }}: <wallet-reward-wallet-address :value="contractDetails.owner" display-label />
           </h4>
         </v-flex>
 
-        <v-flex v-if="adminLevel >= 4" id="accountDetailActions">
+        <v-flex id="accountDetailActions">
           <!-- Send ether -->
           <wallet-send-ether-modal
-            v-if="adminLevel >= 5"
             :account="walletAddress"
             :balance="contractDetails.balance"
             :recipient="contractDetails.address"
@@ -46,133 +42,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             disabled-recipient
             @success="successSendingEther"
             @sent="newTransactionPending"
-            @error="transactionError" />
-
-          <!-- add/remove admin -->
-          <wallet-contract-admin-modal
-            v-if="adminLevel >= 5"
-            ref="addAdminModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.addAdmin')"
-            :autocomplete-label="$t('exoplatform.wallet.label.account')"
-            :autocomplete-placeholder="$t('exoplatform.wallet.label.addAdminPlaceholder')"
-            :input-label="$t('exoplatform.wallet.label.habilitationLevel')"
-            :input-placeholder="$t('exoplatform.wallet.label.habilitationLevelPlaceholder')"
-            method-name="addAdmin"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError">
-            <div class="alert alert-info">
-              <i class="uiIconInfo"></i>{{ $t('exoplatform.wallet.label.habilitationLevels') }}:
-              <ul>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.level') }} 1
-                  </strong>: {{ $t('exoplatform.wallet.message.level1Habilitation') }}
-                </li>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.level') }} 2
-                  </strong>: {{ $t('exoplatform.wallet.message.level2Habilitation') }}
-                </li>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.level') }} 3
-                  </strong>: {{ $t('exoplatform.wallet.message.level3Habilitation') }}
-                </li>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.level') }} 4
-                  </strong>: {{ $t('exoplatform.wallet.message.level4Habilitation') }}
-                </li>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.level') }} 5
-                  </strong>: {{ $t('exoplatform.wallet.message.level5Habilitation') }}
-                </li>
-                <li>
-                  <strong>
-                    {{ $t('exoplatform.wallet.label.owner') }}
-                  </strong>: {{ $t('exoplatform.wallet.message.ownerHabilitation') }}
-                </li>
-              </ul>
-            </div>
-          </wallet-contract-admin-modal>
-          <wallet-contract-admin-modal
-            v-if="adminLevel >= 5"
-            ref="removeAdminModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.removeAdmin')"
-            :autocomplete-label="$t('exoplatform.wallet.label.account')"
-            :autocomplete-placeholder="$t('exoplatform.wallet.label.removeAdminPlaceholder')"
-            method-name="removeAdmin"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-
-          <!-- approve/disapprove account -->
-          <wallet-contract-admin-modal
-            v-if="adminLevel >= 4"
-            ref="approveAccountModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.approveAccount')"
-            :autocomplete-label="$t('exoplatform.wallet.label.account')"
-            :autocomplete-placeholder="$t('exoplatform.wallet.label.approveAccountPlaceholder')"
-            method-name="approveAccount"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-          <wallet-contract-admin-modal
-            v-if="adminLevel >= 4"
-            ref="disapproveAccountModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.disapproveAccount')"
-            :autocomplete-label="$t('exoplatform.wallet.label.account')"
-            :autocomplete-placeholder="$t('exoplatform.wallet.label.disapproveAccountPlaceholder')"
-            method-name="disapproveAccount"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-
-          <!-- pause/unpause contract -->
-          <wallet-contract-admin-modal
-            v-if="contractDetails && !contractDetails.isPaused && adminLevel >= 5"
-            ref="pauseModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.pauseContract')"
-            method-name="pause"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-          <wallet-contract-admin-modal
-            v-if="contractDetails && contractDetails.isPaused && adminLevel >= 5"
-            ref="unPauseModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.unPauseContract')"
-            method-name="unPause"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-
-          <!-- set sell price -->
-          <wallet-contract-admin-modal
-            v-if="adminLevel >= 5"
-            ref="setSellPriceModal"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :title="$t('exoplatform.wallet.button.setSellPrice')"
-            :input-label="$t('exoplatform.wallet.label.sellPriceOfToken', {0: `${contractDetails && contractDetails.name}`})"
-            :input-placeholder="$t('exoplatform.wallet.label.sellPriceOfTokenInEther', {0: `${contractDetails && contractDetails.name}`})"
-            method-name="setSellPrice"
-            convert-wei
-            @sent="newTransactionPending"
-            @success="successTransaction"
             @error="transactionError" />
 
           <wallet-contract-admin-modal
@@ -189,21 +58,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             @error="transactionError" />
 
           <wallet-initialize-modal
-            v-if="adminLevel >= 5"
             ref="initializeAccount"
             :contract-details="contractDetails"
             :wallet="userWallet"
             method-name="transferOwnership"
-            @sent="newTransactionPending"
-            @success="successTransaction"
-            @error="transactionError" />
-
-          <wallet-upgrade-token-modal
-            v-if="contractDetails && contractDetails.isOwner && contractDetails.contractType > 0 && contractDetails.contractType < 3"
-            ref="upgrade"
-            :contract-details="contractDetails"
-            :wallet="userWallet"
-            :implementation-version="3"
             @sent="newTransactionPending"
             @success="successTransaction"
             @error="transactionError" />
@@ -212,21 +70,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-card-title>
 
     <v-tabs v-model="selectedTab" grow>
-      <v-tabs-slider v-if="adminLevel >= 4" color="primary" />
+      <v-tabs-slider color="primary" />
       <v-tab
-        v-if="adminLevel >= 4"
         key="transactions"
         href="#transactions">
         {{ $t('exoplatform.wallet.title.transactions') }}{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
       </v-tab>
       <v-tab
-        v-if="contractDetails.contractType > 0 && adminLevel >= 4"
+        v-if="contractDetails.contractType > 0"
         key="approvedAccounts"
         href="#approvedAccounts">
         {{ $t('exoplatform.wallet.title.approvedAccounts') }}
       </v-tab>
       <v-tab
-        v-if="contractDetails.contractType > 0 && adminLevel >= 5"
+        v-if="contractDetails.contractType > 0"
         key="adminAccounts"
         href="#adminAccounts">
         {{ $t('exoplatform.wallet.title.adminAccounts') }}
@@ -253,7 +110,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-layout>
       </v-tab-item>
       <v-tab-item
-        v-if="contractDetails && contractDetails.contractType > 0 && adminLevel >= 4"
+        v-if="contractDetails && contractDetails.contractType > 0"
         id="approvedAccounts"
         value="approvedAccounts"
         eager>
@@ -275,7 +132,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           hide-default-footer
           hide-default-header>
           <template slot="item" slot-scope="props">
-            <tr v-if="props.item.approved || props.item.adminLevel >= 1">
+            <tr>
               <td>
                 <v-avatar size="36px">
                   <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
@@ -295,11 +152,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   :avatar="props.item.avatar" />
               </td>
               <td v-if="$refs.disapproveAccountModal">
-                <span v-if="props.item.adminLevel >= 1">
-                  {{ $t('exoplatform.wallet.label.adminLevel') }}: {{ props.item.adminLevel }}
+                <span>
+                  {{ $t('exoplatform.wallet.label.adminLevel') }}:
                 </span>
                 <v-btn
-                  v-else
                   :right="!$vuetify.rtl"
                   icon
                   @click="$refs.disapproveAccountModal.preselectAutocomplete(props.item.id, props.item.type, props.item.address)">
@@ -313,7 +169,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-data-table>
       </v-tab-item>
       <v-tab-item
-        v-if="contractDetails.contractType > 0 && adminLevel >= 5"
+        v-if="contractDetails.contractType > 0"
         id="adminAccounts"
         value="adminAccounts"
         eager>
@@ -335,7 +191,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           hide-default-footer
           hide-default-header>
           <template slot="item" slot-scope="props">
-            <tr v-if="props.item.adminLevel >= 1">
+            <tr>
               <td>
                 <v-avatar size="36px">
                   <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
@@ -355,7 +211,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   :avatar="props.item.avatar" />
               </td>
               <td>
-                {{ $t('exoplatform.wallet.label.level') }} {{ props.item.adminLevel }}
+                {{ $t('exoplatform.wallet.label.level') }}
               </td>
               <td v-if="$refs.removeAdminModal">
                 <v-btn
@@ -397,7 +253,7 @@ export default {
       },
     },
     adminLevel: {
-      type: Number,
+      type: Boolean ,
       default: function() {
         return null;
       },
@@ -455,7 +311,7 @@ export default {
           this.$forceUpdate();
         });
     },
-    retrieveAccountDetails(wallet, ignoreApproved, ignoreAdmin) {
+    retrieveAccountDetails(wallet, ignoreApproved) {
       const promises = [];
       if (!ignoreApproved && !wallet.hasOwnProperty('approved')) {
         promises.push(
@@ -468,21 +324,6 @@ export default {
             .catch((e) => {
               console.error('Error getting approval of account', wallet.address, e);
               delete wallet['approved'];
-            })
-        );
-      }
-      if (!ignoreAdmin && !wallet.hasOwnProperty('adminLevel')) {
-        promises.push(
-          this.contractDetails.contract.methods
-            .getAdminLevel(wallet.address)
-            .call()
-            .then((level) => {
-              level = Number(level);
-              this.$set(wallet, 'adminLevel', level);
-            })
-            .catch((e) => {
-              console.error('Error getting admin level of account', wallet.address, e);
-              delete wallet['adminLevel'];
             })
         );
       }

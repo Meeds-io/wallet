@@ -40,7 +40,7 @@ import org.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.exoplatform.wallet.contract.ERTTokenV2;
+import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.log.ExoLogger;
@@ -82,7 +82,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private WalletTransactionService transactionService;
 
-  private ERTTokenV2               ertInstance;
+  private MeedsToken               ertInstance;
 
   private long                     networkId                               = 0;
 
@@ -221,36 +221,21 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public final boolean isApprovedAccount(String address) throws Exception {
-    if (StringUtils.isBlank(address)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    String contractAddress = checkContractAddress();
-    return (Boolean) executeReadOperation(contractAddress,
-                                          ERTTokenV2.FUNC_ISAPPROVEDACCOUNT,
-                                          address);
+    LOG.error(new Exception("Method to remove"));
+    return true; //TODO to remove
   }
 
   @Override
   public final int getAdminLevel(String address) throws Exception {
-    if (StringUtils.isBlank(address)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    String contractAddress = checkContractAddress();
-    BigInteger adminLevel = (BigInteger) executeReadOperation(contractAddress,
-                                                              ERTTokenV2.FUNC_GETADMINLEVEL,
-                                                              address);
-    return adminLevel == null ? 0 : adminLevel.intValue();
+    LOG.error(new Exception("Method to remove"));
+    return 0; //TODO to remove
   }
 
   @Override
-  public final boolean isInitializedAccount(String address) throws Exception {
-    if (StringUtils.isBlank(address)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    String contractAddress = checkContractAddress();
-    return (Boolean) executeReadOperation(contractAddress,
-                                          ERTTokenV2.FUNC_ISINITIALIZEDACCOUNT,
-                                          address);
+  public final boolean isInitializedAccount(Wallet wallet) throws Exception {
+    LOG.warn("Function isInitializedAccount to check");
+    //TODO to check logic
+    return (wallet.getEtherBalance() != null && wallet.getEtherBalance() > 0) ||(wallet.getTokenBalance() != null && wallet.getTokenBalance() > 0);
   }
 
   @Override
@@ -260,7 +245,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     String contractAddress = checkContractAddress();
     return (BigInteger) executeReadOperation(contractAddress,
-                                             ERTTokenV2.FUNC_BALANCEOF,
+                                             MeedsToken.FUNC_BALANCEOF,
                                              address);
   }
 
@@ -288,43 +273,19 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     setIssuer(transactionDetail, issuerUsername);
 
-    if (isInitializedAccount(receiverAddress)) {
+    //TODO this block is to reimplement
+/*    if (isInitializedAccount(transactionDetail.getToWallet())) {
       throw new IllegalStateException("Wallet {} is already initialized");
-    }
-    String adminWalletAddress = getAdminWalletAddress();
-    BigInteger tokenAmount = transactionDetail.getContractAmountDecimal(configuredContractDecimals);
-    BigInteger etherAmount = transactionDetail.getValueDecimal(ETHER_TO_WEI_DECIMALS);
-
-    BigInteger balanceOfAdmin = balanceOf(adminWalletAddress);
-    if (balanceOfAdmin == null || balanceOfAdmin.compareTo(tokenAmount) < 0) {
-      throw new IllegalStateException("Wallet admin hasn't enough tokens to initialize " + tokenAmount.longValue()
-          + " tokens to "
-          + receiverAddress);
-    }
-
-    if (getEtherBalanceOf(adminWalletAddress).compareTo(etherAmount) < 0) {
-      throw new IllegalStateException("Wallet admin hasn't enough ether to initialize " + etherAmount.longValue() + " WEI to "
-          + receiverAddress);
-    }
-
+    }*/
     if (StringUtils.isBlank(configuredContractAddress)) {
       throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
     }
 
-    Function initializeAccountFunction = getInitializeAccountFunctionCall(receiverAddress, tokenAmount);
-    generateRawTransaction(configuredContractAddress,
-                           initializeAccountFunction,
-                           etherAmount,
-                           transactionDetail);
-    transactionDetail.setNetworkId(this.networkId);
-    transactionDetail.setFrom(adminWalletAddress);
-    transactionDetail.setContractAddress(configuredContractAddress);
-    transactionDetail.setContractMethodName(ERTTokenV2.FUNC_INITIALIZEACCOUNT);
-    transactionDetail.setTimestamp(System.currentTimeMillis());
-    transactionDetail.setAdminOperation(false);
-    transactionDetail.setPending(true);
-
-    getTransactionService().saveTransactionDetail(transactionDetail, false);
+    // Send tokens
+    sendToken(transactionDetail, issuerUsername);
+    TransactionDetail etherTransaction = transactionDetail.clone();
+    // Send Ethers
+    sendEther(etherTransaction, issuerUsername);
     getAccountService().setInitializationStatus(receiverAddress, WalletInitializationState.PENDING);
 
     return transactionDetail;
@@ -389,13 +350,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     setIssuer(transactionDetail, issuerUsername);
 
-    if (!isApprovedAccount(receiverAddress)) {
-      String receiver = transactionDetail.getToWallet() == null
-          || StringUtils.isBlank(transactionDetail.getToWallet().getName()) ? receiverAddress
-                                                                            : transactionDetail.getToWallet().getName();
-      throw new IllegalStateException("Wallet receiver " + receiver + " is not approved yet, thus no transfer is allowed");
-    }
-
     if (StringUtils.isBlank(configuredContractAddress)) {
       throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
     }
@@ -409,7 +363,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setNetworkId(this.networkId);
     transactionDetail.setFrom(getAdminWalletAddress());
     transactionDetail.setContractAddress(configuredContractAddress);
-    transactionDetail.setContractMethodName(ERTTokenV2.FUNC_TRANSFER);
+    transactionDetail.setContractMethodName(MeedsToken.FUNC_TRANSFER);
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
@@ -420,54 +374,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public final TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
-    if (transactionDetail == null) {
-      throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
-    }
-    String receiverAddress = transactionDetail.getTo();
-    if (StringUtils.isBlank(receiverAddress)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-    if (transactionDetail.getContractAmount() < 0) {
-      throw new IllegalArgumentException("reward amount parameter has to be a positive");
-    }
-    if (transactionDetail.getValue() <= 0) {
-      throw new IllegalArgumentException("token amount parameter has to be a positive");
-    }
-
-    checkAdminWalletIsValid();
-
-    setIssuer(transactionDetail, issuerUsername);
-
-    if (!isApprovedAccount(receiverAddress)) {
-      String receiver = transactionDetail.getToWallet() == null
-          || StringUtils.isBlank(transactionDetail.getToWallet().getName()) ? receiverAddress
-                                                                            : transactionDetail.getToWallet().getName();
-      throw new IllegalStateException("Wallet receiver " + receiver + " is not approved yet, thus no transfer is allowed");
-    }
-
-    BigInteger tokenAmount = transactionDetail.getValueDecimal(configuredContractDecimals);
-    BigInteger rewardAmount = transactionDetail.getContractAmountDecimal(configuredContractDecimals);
-
-    if (StringUtils.isBlank(configuredContractAddress)) {
-      throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
-    }
-
-    Function rewardFunction = getRewardFunctionCall(receiverAddress, tokenAmount, rewardAmount);
-    generateRawTransaction(configuredContractAddress,
-                           rewardFunction,
-                           BigInteger.ZERO,
-                           transactionDetail);
-
-    transactionDetail.setNetworkId(this.networkId);
-    transactionDetail.setFrom(getAdminWalletAddress());
-    transactionDetail.setContractAddress(configuredContractAddress);
-    transactionDetail.setContractMethodName(ERTTokenV2.FUNC_REWARD);
-    transactionDetail.setTimestamp(System.currentTimeMillis());
-    transactionDetail.setAdminOperation(false);
-    transactionDetail.setPending(true);
-
-    getTransactionService().saveTransactionDetail(transactionDetail, false);
-    return transactionDetail;
+    LOG.error(new Exception("Method to remove"));
+    return null; //TODO to remove
   }
 
   @Override
@@ -493,67 +401,14 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     if (wallet.getTokenBalance() == null
         || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_REWARD)
-        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFORMTOVESTED)
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFER)
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFERFROM)
-        || walletModifications.contains(ERTTokenV2.FUNC_APPROVE)) {
+        || walletModifications.contains(MeedsToken.FUNC_TRANSFER)
+        || walletModifications.contains(MeedsToken.FUNC_TRANSFERFROM)
+        || walletModifications.contains(MeedsToken.FUNC_APPROVE)) {
       BigInteger walletTokenBalance =
                                     (BigInteger) executeReadOperation(configuredContractAddress,
-                                                                      ERTTokenV2.FUNC_BALANCEOF,
+                                                                      MeedsToken.FUNC_BALANCEOF,
                                                                       walletAddress);
       wallet.setTokenBalance(convertFromDecimals(walletTokenBalance, configuredContractDecimals));
-    }
-    if (wallet.getRewardBalance() == null
-        || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_REWARD)) {
-      BigInteger walletRewardBalance = (BigInteger) executeReadOperation(configuredContractAddress,
-                                                                         ERTTokenV2.FUNC_REWARDBALANCEOF,
-                                                                         walletAddress);
-      wallet.setRewardBalance(convertFromDecimals(walletRewardBalance, configuredContractDecimals));
-    }
-    if (wallet.getVestingBalance() == null
-        || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFORMTOVESTED)) {
-      BigInteger walletVestingBalance = (BigInteger) executeReadOperation(configuredContractAddress,
-                                                                          ERTTokenV2.FUNC_VESTINGBALANCEOF,
-                                                                          walletAddress);
-      wallet.setVestingBalance(convertFromDecimals(walletVestingBalance, configuredContractDecimals));
-    }
-    if (wallet.getAdminLevel() == null
-        || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFEROWNERSHIP)
-        || walletModifications.contains(ERTTokenV2.FUNC_REMOVEADMIN)
-        || walletModifications.contains(ERTTokenV2.FUNC_ADDADMIN)) {
-      BigInteger walletAdminLevel = (BigInteger) executeReadOperation(configuredContractAddress,
-                                                                      ERTTokenV2.FUNC_GETADMINLEVEL,
-                                                                      walletAddress);
-      wallet.setAdminLevel(walletAdminLevel.intValue());
-    }
-    if (wallet.getIsApproved() == null
-        || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)
-        || walletModifications.contains(ERTTokenV2.FUNC_ADDADMIN)
-        || walletModifications.contains(ERTTokenV2.FUNC_REMOVEADMIN)
-        || walletModifications.contains(ERTTokenV2.FUNC_APPROVEACCOUNT)
-        || walletModifications.contains(ERTTokenV2.FUNC_DISAPPROVEACCOUNT)
-        || walletModifications.contains(ERTTokenV2.FUNC_TRANSFEROWNERSHIP)) {
-      Boolean approved = (Boolean) executeReadOperation(configuredContractAddress,
-                                                        ERTTokenV2.FUNC_ISAPPROVEDACCOUNT,
-                                                        walletAddress);
-      wallet.setIsApproved(approved);
-    }
-
-    if (wallet.getIsApproved() != null && wallet.getIsApproved()) {
-      wallet.setIsInitialized(true);
-    } else if (wallet.getIsInitialized() == null
-        || walletModifications == null
-        || walletModifications.contains(ERTTokenV2.FUNC_INITIALIZEACCOUNT)) {
-      Boolean initialized = (Boolean) executeReadOperation(configuredContractAddress,
-                                                           ERTTokenV2.FUNC_ISINITIALIZEDACCOUNT,
-                                                           walletAddress);
-      wallet.setIsInitialized(initialized);
     }
   }
 
@@ -567,71 +422,40 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() <= 0) {
         contractDetail.setNetworkId(this.networkId);
       }
-      if (StringUtils.isEmpty(contractDetail.getContractType())
-          || StringUtils.equals(contractDetail.getContractType(), "0")
-          || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_UPGRADEIMPLEMENTATION)
-          || contractModifications.contains(ERTTokenV2.FUNC_UPGRADEDATA)
-          || contractModifications.contains(ERTTokenV2.FUNC_UPGRADEDATAANDIMPLEMENTATION)) {
-        BigInteger implementationVersion = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_VERSION);
-        if (implementationVersion == null || implementationVersion.intValue() < 1) {
-          return;
-        }
-        contractDetail.setContractType(implementationVersion.toString());
-      }
 
       if (contractDetail.getDecimals() == null || contractDetail.getDecimals() <= 0) {
-        BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_DECIMALS);
+        BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_DECIMALS);
         contractDetail.setDecimals(decimals.intValue());
       }
 
-      if (StringUtils.isEmpty(contractDetail.getName())
-          || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_SETNAME)) {
-        String name = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_NAME);
+      if (StringUtils.isEmpty(contractDetail.getName())) {
+        String name = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_NAME);
         contractDetail.setName(name);
       }
 
-      if (StringUtils.isEmpty(contractDetail.getSymbol())
-          || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_SETSYMBOL)) {
-        String symbol = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_SYMBOL);
+      if (StringUtils.isEmpty(contractDetail.getSymbol())) {
+        String symbol = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_SYMBOL);
         contractDetail.setSymbol(symbol);
       }
 
       if (StringUtils.isEmpty(contractDetail.getOwner())
           || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_TRANSFEROWNERSHIP)) {
-        String owner = (String) executeReadOperation(contractAddress, ERTTokenV2.FUNC_OWNER);
+          || contractModifications.contains(MeedsToken.FUNC_TRANSFEROWNERSHIP)) {
+        String owner = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_OWNER);
         contractDetail.setOwner(owner);
       }
 
-      if (StringUtils.isEmpty(contractDetail.getSellPrice())
-          || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_SETSELLPRICE)) {
-        BigInteger sellPrice = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_GETSELLPRICE);
-        contractDetail.setSellPrice(String.valueOf(convertFromDecimals(sellPrice, ETHER_TO_WEI_DECIMALS)));
-      }
-
       if (StringUtils.isEmpty(contractDetail.getTotalSupply())) {
-        BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, ERTTokenV2.FUNC_TOTALSUPPLY);
+        BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_TOTALSUPPLY);
         contractDetail.setTotalSupply(String.valueOf(convertFromDecimals(totalSupply, contractDetail.getDecimals())));
-      }
-
-      if (contractDetail.getIsPaused() == null
-          || contractModifications == null
-          || contractModifications.contains(ERTTokenV2.FUNC_PAUSE)
-          || contractModifications.contains(ERTTokenV2.FUNC_UNPAUSE)) {
-        Boolean isPaused = (Boolean) executeReadOperation(contractAddress, ERTTokenV2.FUNC_ISPAUSED);
-        contractDetail.setIsPaused(isPaused);
       }
 
       if (contractDetail.getEtherBalance() == null
           || contractModifications == null
           || contractModifications.contains(TOKEN_FUNC_DEPOSIT_FUNDS)
-          || contractModifications.contains(ERTTokenV2.FUNC_TRANSFER)
-          || contractModifications.contains(ERTTokenV2.FUNC_TRANSFERFROM)
-          || contractModifications.contains(ERTTokenV2.FUNC_APPROVE)) {
+          || contractModifications.contains(MeedsToken.FUNC_TRANSFER)
+          || contractModifications.contains(MeedsToken.FUNC_TRANSFERFROM)
+          || contractModifications.contains(MeedsToken.FUNC_APPROVE)) {
         BigInteger contractEtherBalance = getEtherBalanceOf(contractAddress);
         contractDetail.setEtherBalance(convertFromDecimals(contractEtherBalance, ETHER_TO_WEI_DECIMALS));
       }
@@ -646,7 +470,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   public Object executeReadOperation(final String contractAddress,
                                      final String methodName,
                                      final Object... arguments) throws Exception {
-    ERTTokenV2 contractInstance = getContractInstance(contractAddress);
+    MeedsToken contractInstance = getContractInstance(contractAddress);
     Method methodToInvoke = getMethod(methodName);
     if (methodToInvoke == null) {
       throw new IllegalStateException("Can't find method " + methodName + " in Token instance");
@@ -734,14 +558,14 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return BigInteger.valueOf(Long.max(blockchainNonce, storedNonce));
   }
 
-  private ERTTokenV2 getContractInstance(final String contractAddress) {
+  private MeedsToken getContractInstance(final String contractAddress) {
     // Retrieve cached contract instance
     if (this.ertInstance == null) {
       BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice());
       BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
       Web3j web3j = getClientConnector().getWeb3j();
 
-      this.ertInstance = ERTTokenV2.load(contractAddress,
+      this.ertInstance = MeedsToken.load(contractAddress,
                                          web3j,
                                          new ReadonlyTransactionManager(web3j, Address.DEFAULT.toString()),
                                          new StaticGasProvider(gasPrice, gasLimit));
@@ -770,10 +594,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     String adminAddress = getAdminWalletAddress();
     if (adminAddress == null) {
       throw new IllegalStateException("No admin wallet is set");
-    }
-    int adminLevel = getAdminLevel(adminAddress);
-    if (adminLevel < ADMIN_WALLET_MIN_LEVEL) {
-      throw new IllegalStateException("Admin wallet haven't enough privileges to manage wallets");
     }
   }
 
@@ -807,7 +627,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Method getMethod(String methodName) {
     Method methodToInvoke = null;
-    Method[] methods = ERTTokenV2.class.getDeclaredMethods();
+    Method[] methods = MeedsToken.class.getDeclaredMethods();
     for (Method method : methods) {
       if (StringUtils.equals(methodName, method.getName())) {
         methodToInvoke = method;
@@ -868,32 +688,11 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @SuppressWarnings("rawtypes")
-  private Function getInitializeAccountFunctionCall(String toAddress,
-                                                    BigInteger tokenAmount) {
-    return new Function(ERTTokenV2.FUNC_INITIALIZEACCOUNT,
-                        Arrays.<Type> asList(new Address(toAddress),
-                                             new Uint256(tokenAmount)),
-                        Collections.<TypeReference<?>> emptyList());
-  }
-
-  @SuppressWarnings("rawtypes")
   private Function getTransferFunctionCall(String toAddress,
                                            BigInteger tokenAmount) {
-    return new Function(ERTTokenV2.FUNC_TRANSFER,
+    return new Function(MeedsToken.FUNC_TRANSFER,
                         Arrays.<Type> asList(new Address(toAddress),
                                              new Uint256(tokenAmount)),
                         Collections.<TypeReference<?>> emptyList());
   }
-
-  @SuppressWarnings("rawtypes")
-  private Function getRewardFunctionCall(String toAddress,
-                                         BigInteger tokenAmount,
-                                         BigInteger rewardAmount) {
-    return new Function(ERTTokenV2.FUNC_REWARD,
-                        Arrays.<Type> asList(new Address(toAddress),
-                                             new Uint256(tokenAmount),
-                                             new Uint256(rewardAmount)),
-                        Collections.<TypeReference<?>> emptyList());
-  }
-
 }

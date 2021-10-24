@@ -40,7 +40,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               v-if="contractDetails"
               key="contract"
               href="#contract">
-              {{ adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
+              {{ adminLevel ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
             </v-tab>
           </v-tabs>
           <v-tabs-items v-model="selectedTab" class="tabs-content">
@@ -138,7 +138,7 @@ export default {
       return this.wallet && this.wallet.address && this.wallet.address.toLowerCase();
     },
     adminLevel() {
-      return this.wallet && this.wallet.adminLevel;
+      return this.contractDetails.administrator === eXo.env.portal.userName || true ;
     },
   },
   created() {

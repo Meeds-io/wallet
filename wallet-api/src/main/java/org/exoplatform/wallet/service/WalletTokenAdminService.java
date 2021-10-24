@@ -141,7 +141,7 @@ public interface WalletTokenAdminService {
    *         blockchain
    * @throws Exception
    */
-  boolean isInitializedAccount(String address) throws Exception;// NOSONAR
+  boolean isInitializedAccount(Wallet wallet) throws Exception;// NOSONAR
 
   /**
    * Get admin level of a wallet address from token (on blockchain)

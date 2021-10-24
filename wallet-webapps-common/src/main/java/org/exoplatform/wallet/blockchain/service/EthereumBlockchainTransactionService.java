@@ -16,7 +16,7 @@
  */
 package org.exoplatform.wallet.blockchain.service;
 
-import static org.exoplatform.wallet.contract.ERTTokenV2.*;
+import static org.exoplatform.wallet.contract.MeedsToken.*;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.wallet.contract.ERTTokenV2;
+import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
@@ -54,75 +54,25 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   private static final Log                 LOG                         =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
 
-  private static final String              TRANSFER_SIG                = EventEncoder.encode(ERTTokenV2.TRANSFER_EVENT);
+  private static final String              TRANSFER_SIG                = EventEncoder.encode(MeedsToken.TRANSFER_EVENT);
 
-  private static final String              APPROVAL_SIG                = EventEncoder.encode(ERTTokenV2.APPROVAL_EVENT);
-
-  private static final String              ADDED_ADMIN_METHOD_SIG      = EventEncoder.encode(ERTTokenV2.ADDEDADMIN_EVENT);
-
-  private static final String              REMOVED_ADMIN_SIG           = EventEncoder.encode(ERTTokenV2.REMOVEDADMIN_EVENT);
-
-  private static final String              APPROVED_ACCOUNT_SIG        =
-                                                                EventEncoder.encode(ERTTokenV2.APPROVEDACCOUNT_EVENT);
-
-  private static final String              DISAPPROVED_ACCOUNT_SIG     =
-                                                                   EventEncoder.encode(ERTTokenV2.DISAPPROVEDACCOUNT_EVENT);
-
-  private static final String              CONTRACT_PAUSED_SIG         =
-                                                               EventEncoder.encode(ERTTokenV2.CONTRACTPAUSED_EVENT);
-
-  private static final String              CONTRACT_UNPAUSED_SIG       =
-                                                                 EventEncoder.encode(ERTTokenV2.CONTRACTUNPAUSED_EVENT);
-
-  private static final String              DEPOSIT_RECEIVED_SIG        =
-                                                                EventEncoder.encode(ERTTokenV2.DEPOSITRECEIVED_EVENT);
-
-  private static final String              TOKEN_PRICE_CHANGED_SIG     =
-                                                                   EventEncoder.encode(ERTTokenV2.TOKENPRICECHANGED_EVENT);
+  private static final String              APPROVAL_SIG                = EventEncoder.encode(MeedsToken.APPROVAL_EVENT);
 
   private static final String              TRANSFER_OWNERSHIP_SIG      =
-                                                                  EventEncoder.encode(ERTTokenV2.TRANSFEROWNERSHIP_EVENT);
-
-  private static final String              ACCOUNT_INITIALIZATION_SIG  =
-                                                                      EventEncoder.encode(ERTTokenV2.INITIALIZATION_EVENT);
-
-  private static final String              ACCOUNT_REWARD_SIG          = EventEncoder.encode(ERTTokenV2.REWARD_EVENT);
-
-  private static final String              ACCOUNT_VESTED_SIG          = EventEncoder.encode(ERTTokenV2.VESTING_EVENT);
-
-  private static final String              TRANSFER_VESTING_SIG        =
-                                                                EventEncoder.encode(ERTTokenV2.VESTINGTRANSFER_EVENT);
-
-  private static final String              UPGRADED_SIG                = EventEncoder.encode(ERTTokenV2.UPGRADED_EVENT);
-
-  private static final String              DATA_UPGRADED_SIG           = EventEncoder.encode(ERTTokenV2.UPGRADEDDATA_EVENT);
-
-  private static final String              NOSUFFICIENTFUND_EVENT_HASH =
-                                                                       EventEncoder.encode(ERTTokenV2.NOSUFFICIENTFUND_EVENT);
-
-  private static final String              TRANSACTIONFEE_EVENT_HASH   =
-                                                                     EventEncoder.encode(ERTTokenV2.TRANSACTIONFEE_EVENT);
+                                                                  EventEncoder.encode(OWNERSHIPTRANSFERRED_EVENT);
+//
+//  private static final String              NOSUFFICIENTFUND_EVENT_HASH =
+//                                                                       EventEncoder.encode(MeedsToken.NOSUFFICIENTFUND_EVENT);
+//
+//  private static final String              TRANSACTIONFEE_EVENT_HASH   =
+//                                                                     EventEncoder.encode(MeedsToken.TRANSACTIONFEE_EVENT);
 
   private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
 
   static {
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, FUNC_TRANSFER);
     CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIG, FUNC_APPROVE);
-    CONTRACT_METHODS_BY_SIG.put(ADDED_ADMIN_METHOD_SIG, FUNC_ADDADMIN);
-    CONTRACT_METHODS_BY_SIG.put(REMOVED_ADMIN_SIG, FUNC_REMOVEADMIN);
-    CONTRACT_METHODS_BY_SIG.put(APPROVED_ACCOUNT_SIG, FUNC_APPROVEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(DISAPPROVED_ACCOUNT_SIG, FUNC_DISAPPROVEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(CONTRACT_PAUSED_SIG, FUNC_PAUSE);
-    CONTRACT_METHODS_BY_SIG.put(CONTRACT_UNPAUSED_SIG, FUNC_UNPAUSE);
-    CONTRACT_METHODS_BY_SIG.put(DEPOSIT_RECEIVED_SIG, TOKEN_FUNC_DEPOSIT_FUNDS);
-    CONTRACT_METHODS_BY_SIG.put(TOKEN_PRICE_CHANGED_SIG, FUNC_SETSELLPRICE);
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIG, FUNC_TRANSFEROWNERSHIP);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_INITIALIZATION_SIG, FUNC_INITIALIZEACCOUNT);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_REWARD_SIG, FUNC_REWARD);
-    CONTRACT_METHODS_BY_SIG.put(ACCOUNT_VESTED_SIG, FUNC_TRANSFORMTOVESTED);
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_VESTING_SIG, FUNC_TRANSFER);
-    CONTRACT_METHODS_BY_SIG.put(UPGRADED_SIG, FUNC_UPGRADEIMPLEMENTATION);
-    CONTRACT_METHODS_BY_SIG.put(DATA_UPGRADED_SIG, FUNC_UPGRADEDATA);
   }
 
   private EthereumClientConnector  ethereumClientConnector;
@@ -617,9 +567,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
 
     if (!transactionReceipt.isStatusOK()) {
-      if (StringUtils.equals(transactionDetail.getContractMethodName(), FUNC_INITIALIZEACCOUNT)) {
-        accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
-      }
       return;
     }
 
@@ -645,18 +592,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
         String topic = topics.get(0);
         LOG.debug("Treating transaction log {} with {} topics", hash, topics.size());
-
-        if (NOSUFFICIENTFUND_EVENT_HASH.equals(topic)) {
-          transactionDetail.setNoContractFunds(true);
-          continue;
-        } else if (TRANSACTIONFEE_EVENT_HASH.equals(topic)) {
-          EventValues parameters = Contract.staticExtractEventParameters(TRANSACTIONFEE_EVENT, log);
-          BigInteger tokenFee = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-          BigInteger etherFee = (BigInteger) parameters.getNonIndexedValues().get(2).getValue();
-          transactionDetail.setTokenFee(convertFromDecimals(tokenFee, contractDecimals));
-          transactionDetail.setEtherFee(convertFromDecimals(etherFee, ETHER_TO_WEI_DECIMALS));
-          continue;
-        }
 
         if (!transactionLogTreated) {
           String methodName = CONTRACT_METHODS_BY_SIG.get(topic);
@@ -689,135 +624,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
             transactionDetail.setContractAmountDecimal(amount, contractDecimals);
             transactionDetail.setAdminOperation(false);
-          } else if (StringUtils.equals(methodName, FUNC_APPROVEACCOUNT)) {
-            if (logsSize > 1) {
-              // Implicit acccount approval
-              continue;
-            }
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(APPROVEDACCOUNT_EVENT, log);
-            transactionDetail.setFrom(transactionReceipt.getFrom());
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_DISAPPROVEACCOUNT)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(DISAPPROVEDACCOUNT_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(transactionReceipt.getFrom());
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_ADDADMIN)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(ADDEDADMIN_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(transactionReceipt.getFrom());
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(1).getValue()).longValue());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_REMOVEADMIN)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(REMOVEDADMIN_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(transactionReceipt.getFrom());
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_UPGRADEDATA)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(UPGRADEDDATA_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_UPGRADEIMPLEMENTATION)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(UPGRADED_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-            transactionDetail.setTo(parameters.getNonIndexedValues().get(1).getValue().toString());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, TOKEN_FUNC_DEPOSIT_FUNDS)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(DEPOSITRECEIVED_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(parameters.getNonIndexedValues().get(0).getValue().toString());
-            BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-            transactionDetail.setValueDecimal(weiAmount, ETHER_TO_WEI_DECIMALS);
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_SETSELLPRICE)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(TOKENPRICECHANGED_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setContractAmount(((BigInteger) parameters.getNonIndexedValues().get(0).getValue()).longValue());
-            transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_TRANSFORMTOVESTED)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(VESTING_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setTo(parameters.getIndexedValues().get(0).getValue().toString());
-            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-            transactionDetail.setAdminOperation(true);
           } else if (StringUtils.equals(methodName, FUNC_TRANSFEROWNERSHIP)) {
             transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(TRANSFEROWNERSHIP_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(OWNERSHIPTRANSFERRED_EVENT, log);
             if (parameters == null) {
               continue;
             }
             transactionDetail.setTo(parameters.getNonIndexedValues().get(0).getValue().toString());
             transactionDetail.setAdminOperation(true);
-          } else if (StringUtils.equals(methodName, FUNC_INITIALIZEACCOUNT)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(INITIALIZATION_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-            BigInteger weiAmount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-            transactionDetail.setValueDecimal(weiAmount, ETHER_TO_WEI_DECIMALS);
-            transactionDetail.setAdminOperation(false);
-
-            if (transactionDetail.isSucceeded()) {
-              accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.INITIALIZED);
-            } else {
-              accountService.setInitializationStatus(transactionDetail.getTo(), WalletInitializationState.MODIFIED);
-            }
-          } else if (StringUtils.equals(methodName, FUNC_REWARD)) {
-            transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(REWARD_EVENT, log);
-            if (parameters == null) {
-              continue;
-            }
-            transactionDetail.setFrom(parameters.getIndexedValues().get(0).getValue().toString());
-            transactionDetail.setTo(parameters.getIndexedValues().get(1).getValue().toString());
-            // Transfered tokens amount
-            BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
-            transactionDetail.setValueDecimal(amount, contractDecimals);
-            // Reward amount
-            amount = (BigInteger) parameters.getNonIndexedValues().get(1).getValue();
-            transactionDetail.setContractAmountDecimal(amount, contractDecimals);
-            transactionDetail.setAdminOperation(false);
           } else if (!transactionLogTreated && (i + 1) == logsSize) {
             LOG.warn("Can't find contract method name of transaction {}", transactionDetail);
           }
@@ -831,7 +645,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                                                               WALLET_SCOPE,
                                                               LAST_BLOCK_NUMBER_KEY_NAME + networkId);
     if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
-      return Long.valueOf(lastBlockNumberValue.getValue().toString());
+      return Long.parseLong(lastBlockNumberValue.getValue().toString());
     }
     return 0;
   }

@@ -71,10 +71,18 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
       transactionDetail.setContractAmount(tokenAmount);
-      transactionDetail.setValue(etherAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
-      transactionDetail = getWalletTokenAdminService().initialize(transactionDetail, currentUserId);
+      transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, currentUserId);
+
+      // Send Ether
+      TransactionDetail etherTransactionDetail = new TransactionDetail();
+      etherTransactionDetail.setTo(receiver);
+      etherTransactionDetail.setValue(etherAmount);
+      etherTransactionDetail.setLabel(transactionLabel);
+      etherTransactionDetail.setMessage(transactionMessage);
+      etherTransactionDetail = getWalletTokenAdminService().sendEther(etherTransactionDetail, currentUserId);
+      LOG.info("Ether transaction hash {}", etherTransactionDetail.getHash());
       return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
     } catch (Exception e) {
       LOG.error("Error initializing wallet {}", receiver, e);
