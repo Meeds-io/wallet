@@ -86,8 +86,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               </v-list-item-subtitle>
               <v-list-item-subtitle>
                 <button
+                  :disabled="disableBtn"
+                  @click="acceptedChangePassword ? openDrawerPassword(): requestPassword()"
                   class="ignore-vuetify-classes btn btn-primary me-1 mx-1 mt-4">
-                  {{ $t('exoplatform.wallet.btn.lostPassword') }}
+                  {{ acceptedChangePassword ? $t('exoplatform.wallet.btn.reinitializePassword') : $t('exoplatform.wallet.btn.lostPassword') }}
                 </button>
               </v-list-item-subtitle>
             </v-list-item-content>
@@ -183,6 +185,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </div>
         </template>
       </exo-drawer>
+      <wallet-reset-password
+        ref="resetPasswordDrawer"
+        :remember-password="rememberPassword"
+        :has-key-on-server-side="hasKeyOnServerSide" />
     </template>
   </v-app>
 </template>
@@ -241,10 +247,20 @@ export default {
   computed: {
     backedUp () {
       return this.wallet && this.wallet.backedUp;
+    },
+    walletAddress() {
+      return this.wallet && this.wallet.address;
+    },
+    disableBtn() {
+      return this.wallet && this.wallet.walletPasswordState === 'REQUESTED';
+    },
+    acceptedChangePassword() {
+      return this.wallet && this.wallet.walletPasswordState === 'ACCEPTED' ;
     }
   },
   created() {
-    this.init();},
+    this.init();
+  },
   methods: {
     init() {
       this.error = null;
@@ -293,7 +309,7 @@ export default {
             if (thiss.rememberPasswordToChange) {
               rememberPassword(true, hashCode(thiss.walletPassword));
             } else {
-              saveBrowserWallet(thiss.newWalletPassword, null, null, thiss.rememberPassword);
+              saveBrowserWallet(thiss.newWalletPassword, null, null, thiss.rememberPassword, false);
               if (this.hasKeyOnServerSide) {
                 sendPrivateKeyToServer(null, this.walletPassword, this.newWalletPassword)
                   .then((result, error) => {
@@ -338,6 +354,22 @@ export default {
       this.$forceUpdate();
       this.$refs.ManagePasswordDrawer.close();
     },
+    openDrawerPassword() {
+      this.$refs.resetPasswordDrawer.openDrawer();
+    },
+    requestPassword () {
+      return fetch(`/portal/rest/wallet/api/account/requestPasswordChange?address=${this.walletAddress}`, {
+        credentials: 'include',
+      }).then((resp) => {
+        if (!resp || !resp.ok) {
+          throw new Error(this.$t('exoplatform.wallet.error.errorRequestingPassword'));
+        }
+        this.disableBtn = true;
+      })
+        .catch(e => {
+          throw new Error(this.$t('exoplatform.wallet.error.errorRequestingPassword'), e);
+        });
+    }
   },
 };
 </script>

@@ -99,6 +99,26 @@ export function retrievePrivateKeyFromServer(walletAddress) {
     });
 }
 
+export function getPrivateKeyFromServer(walletAddress) {
+  walletAddress = walletAddress || window.walletSettings.wallet.address;
+  if (!walletAddress) {
+    return Promise.reject(new Error('Can\'t find current wallet address'));
+  }
+
+  return fetch(`/portal/rest/wallet/api/account/getPrivateKey?address=${walletAddress}`, {credentials: 'include'})
+    .then((resp) => {
+      if (resp && resp.ok) {
+        return resp.text();
+      }
+    })
+    .then((privateKey) => {
+      if (!privateKey) {
+        throw new Error('No private key was found on server');
+      }
+      return privateKey;
+    });
+}
+
 export function gasToFiat(amount, gasPriceInEther) {
   if (window.walletSettings && window.walletSettings.fiatPrice && gasPriceInEther && amount) {
     return toFixed(gasPriceInEther * window.walletSettings.fiatPrice * amount);
@@ -232,7 +252,7 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
       });
   }
   return promise.then(() => {
-    saveBrowserWallet(password, null, address, rememberPasswordInBrowser);
+    saveBrowserWallet(password, null, address, rememberPasswordInBrowser, false);
     return sendPrivateKeyToServer(address, password);
   })
     .then(() => {
@@ -242,7 +262,7 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
     });
 }
 
-export function saveBrowserWallet(password, phrase, address, save) {
+export function saveBrowserWallet(password, phrase, address, save, lostPassword) {
   if (!phrase) {
     phrase = window.walletSettings.userPreferences.phrase;
   }
@@ -266,6 +286,22 @@ export function saveBrowserWallet(password, phrase, address, save) {
   // Create wallet with user password phrase and personal eXo Phrase generated
   // To avoid having the complete passphrase that allows to decrypt wallet in a
   // single location
+  if (lostPassword) {
+    let privateKey = '';
+    getPrivateKeyFromServer(address)
+        .then((key) => {
+          if (key) {
+            privateKey = key;
+          }
+        })
+        .catch((e) => {
+          console.error('Error retrieving wallet private key from server', e);
+        });
+
+    const account = window.localWeb3.eth.accounts.privateKeyToAccount(`0x${privateKey}`);
+    window.localWeb3.eth.accounts.wallet.add(account);
+    window.localWeb3.eth.defaultAccount = account.address;
+  }
   const saved = window.localWeb3.eth.accounts.wallet.save(password + phrase, address);
   if (!saved || !browserWalletExists(address)) {
     throw new Error('An unknown error occrred while saving new wallet');

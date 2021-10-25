@@ -196,6 +196,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
                         <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
+                          <v-list-item v-if="props.item.walletPasswordState === 'REQUESTED'" @mousedown="$event.preventDefault()">
+                            <v-list-item-title class="options" @click="acceptPasswordChange(props.item)">{{ $t('exoplatform.wallet.button.accept') }}</v-list-item-title>
+                          </v-list-item>
                           <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
@@ -595,6 +598,23 @@ export default {
     openAcceptInitializationModal(wallet) {
       this.walletToProcess = wallet;
       this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
+    },
+    acceptPasswordChange(wallet){
+      return fetch(`/portal/rest/wallet/api/account/setPasswordStatus?address=${wallet.address}`, {
+        credentials: 'include',
+      }).then((resp) => {
+        if (!resp || !resp.ok) {
+          throw new Error(this.$t('exoplatform.wallet.error.errorRequestingPassword'));
+        }
+        this.displayedWallets = this.displayedWallets.forEach(item => {
+          if (item.address === wallet.address) {
+            item.walletPasswordState = 'ACCEPTED';
+          }
+        });
+      })
+        .catch(e => {
+          throw new Error(this.$t('exoplatform.wallet.error.errorRequestingPassword'), e);
+        });
     },
     openSendTokenModal(wallet) {
       this.walletToProcess = wallet;

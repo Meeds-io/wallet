@@ -392,6 +392,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (isNew) {
       // New wallet created for user/space
       wallet.setInitializationState(WalletInitializationState.NEW.name());
+      wallet.setWalletPasswordState(WalletPasswordState.TOCHANGE.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
     } else {
