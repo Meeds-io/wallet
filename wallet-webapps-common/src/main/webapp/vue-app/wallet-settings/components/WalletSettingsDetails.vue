@@ -98,7 +98,7 @@
         display-remember-me
         class="d-flex"
         @back="closeManagePasswordDetails" />
-      <wallet-reward-import-key-modal
+      <wallet-reward-import-key-drawer
         ref="walletImportKey"
         :is-space="isSpace"
         :wallet-address="walletAddress"
