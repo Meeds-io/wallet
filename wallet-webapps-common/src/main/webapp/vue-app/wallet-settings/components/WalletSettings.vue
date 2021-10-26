@@ -49,16 +49,13 @@ export default {
     });
     document.addEventListener('showSettingsApps', () => this.displayed = true);
     setTimeout( () => {
-      const urlPath = document.location.pathname;
-      const settingsApplication = urlPath.split('settings/')[1] ? urlPath.split('settings/')[1] : null;
-      if (settingsApplication === 'wallet') {
-        document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
-        this.displayDetails = true;
-        const from = this.getQueryParam('from');
+      const from = this.getQueryParam('from');
+      if (from) {
         const id = this.getQueryParam('id');
         const type = this.getQueryParam('type');
         this.getWallet(id,type);
-        window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=${from}`);
+        window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+        document.location.hash = '#walletSettings';
       }
     }, 300);
   },
@@ -68,18 +65,13 @@ export default {
   methods: {
     openDetail() {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
-      this.displayDetails = true;
       this.getWallet();
-      window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=settings`);
+      this.displayDetails = true;
     },
     closeDetail() {
-      if (this.getQueryParam('from') === 'settings') {
-        window.history.pushState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
-      } else if (this.getQueryParam('from') === 'application') {
-        window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
-      }
       document.dispatchEvent(new CustomEvent('showSettingsApps'));
       this.displayDetails = false;
+      window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
     },
     getQueryParam(paramName) {
       const uri = window.location.search.substring(1);

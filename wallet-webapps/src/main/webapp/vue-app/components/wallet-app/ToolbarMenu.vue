@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     openSettings() {
-      return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings/wallet?from=application&id=${this.wallet.id}&type=${this.wallet.type}`;
+      return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings?from=walletApp&id=${this.wallet.id}&type=${this.wallet.type}`;
     }
   }
 };
