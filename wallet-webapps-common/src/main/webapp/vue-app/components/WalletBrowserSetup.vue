@@ -28,46 +28,60 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           @configured="$emit('configured')" />
       </template>
       <template v-else>
-        <v-row class="justify-center">
-          <div class="title px-4 py-4">{{ $t('exoplatform.wallet.label.createWalletInvitation') }}</div>
-          <div class="subtitle px-4 py-4">{{ $t('exoplatform.wallet.label.exoWalletDescription') }}</div>
+        <v-row no-gutters>
+          <v-col cols="12" sm="6">
+            <v-row>
+              <div class="title px-4 py-4 styleTitle">{{ $t('exoplatform.wallet.label.createWalletInvitation') }}</div>
+              <div class="d-flex flex-column pl-4">
+                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.description') }}</div>
+                <div class="subtitle px-4 py-4 styleTitle">{{ $t('exoplatform.wallet.label.createWalletInvitation.link') }} <a :href="urlPerkStore">{{ $t('exoplatform.wallet.label.createWalletInvitation.perkStore') }}</a></div>
+                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.secure') }}</div>
+                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.firstDescription') }}</div>
+                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.lastDescription') }}</div>
+              </div>
+            </v-row>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="walletSetup">
+              <v-form
+                ref="form"
+                @submit="
+                  $event.preventDefault();
+                  $event.stopPropagation();
+                ">
+                <v-text-field
+                  v-if="!loading"
+                  v-model="walletPassword"
+                  :rules="[rules.min]"
+                  type="password"
+                  :disabled="loading || loadingWalletBrowser"
+                  :placeholder="$t('exoplatform.wallet.label.setWalletPasswordPlaceholder')"
+                  name="walletPassword"
+                  required
+                  outlined
+                  autocomplete="new-password" />
+                <v-text-field
+                  v-if="!loading"
+                  v-model="confirmWalletPassword"
+                  :rules="[rules.passwordMatching]"
+                  type="password"
+                  :disabled="loading || loadingWalletBrowser"
+                  :placeholder="$t('exoplatform.wallet.label.confirmWalletPasswordPlaceholder')"
+                  name="confirmWalletPassword"
+                  required
+                  outlined
+                  autocomplete="new-password" />
+              </v-form>
+              <v-btn
+                block
+                :disabled="loadingWalletBrowser"
+                class="ignore-vuetify-classes btn btn-primary justify-center px-4 py-4 mt-4"
+                @click="createWallet()">
+                {{ $t('exoplatform.wallet.button.createNewWallet') }}
+              </v-btn>
+            </div>
+          </v-col>
         </v-row>
-        <v-form
-          ref="form"
-          @submit="
-            $event.preventDefault();
-            $event.stopPropagation();
-          ">
-          <v-text-field
-            v-if="!loading"
-            v-model="walletPassword"
-            :rules="[rules.min]"
-            type="password"
-            :disabled="loading || loadingWalletBrowser"
-            :placeholder="$t('exoplatform.wallet.label.setWalletPasswordPlaceholder')"
-            name="walletPassword"
-            required
-            outlined
-            autocomplete="new-password" />
-          <v-text-field
-            v-if="!loading"
-            v-model="confirmWalletPassword"
-            :rules="[rules.passwordMatching]"
-            type="password"
-            :disabled="loading || loadingWalletBrowser"
-            :placeholder="$t('exoplatform.wallet.label.confirmWalletPasswordPlaceholder')"
-            name="confirmWalletPassword"
-            required
-            outlined
-            autocomplete="new-password" />
-        </v-form>
-        <v-btn
-          block
-          :disabled="loadingWalletBrowser"
-          class="ignore-vuetify-classes btn btn-primary justify-center px-4 py-4 mt-4"
-          @click="createWallet()">
-          {{ $t('exoplatform.wallet.button.createNewWallet') }}
-        </v-btn>
       </template>
     </div>
   </v-flex>
@@ -118,6 +132,7 @@ export default {
   data() {
     return {
       walletPassword: null,
+      urlPerkStore: `${eXo.env.portal.context}/${eXo.env.portal.portalName}/perkstore`,
       confirmWalletPassword: null,
       walletPasswordShow: null,
       loadingWalletBrowser: false,
