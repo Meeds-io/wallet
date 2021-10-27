@@ -193,7 +193,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
-                        <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
+                        <template v-if="contractDetails && contractDetails.contractType && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                           <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
@@ -334,10 +334,10 @@ export default {
           text: this.$t('exoplatform.wallet.label.walletStatus'),
           align: 'center',
           sortable: false,
-          value: '',
+          value: 'isApproved',
         },
         {
-          text: this.$t('exoplatform.wallet.label.tokenBalance', {0: this.contractDetails && this.contractDetails.name || 'Unknown'}),
+          text: this.$t('exoplatform.wallet.label.tokenBalance', {0: this.contractDetails && this.contractDetails.name}),
           align: 'center',
           value: 'tokenBalance',
         },
@@ -364,7 +364,7 @@ export default {
       return this.walletAdmin && this.walletAdmin.etherBalance < this.etherAmount;
     },
     useWalletAdmin() {
-      return this.walletAdmin && this.walletAdmin.adminLevel && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
+      return this.walletAdmin && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
     },
     displayUsers() {
       return this.walletTypes && this.walletTypes.includes('user');
@@ -401,8 +401,6 @@ export default {
       const walletTableHeaders = this.walletHeaders.slice();
       if (!this.contractDetails) {
         walletTableHeaders.splice(4, 1);
-      }
-      if (!this.contractDetails || this.contractDetails.contractType < 2) {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
