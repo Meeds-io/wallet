@@ -10,6 +10,7 @@ import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.model.settings.InitialFundsSettings;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletAccountService;
@@ -53,6 +54,7 @@ public class AutoTransactionListener extends Listener<Object, String> {
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, wallet.getId());
+      LOG.info("wallet {} is initialized with Tokens, the transaction hash is {}", wallet.getId(), transactionDetail.getHash());
 
       // Send Ether
       TransactionDetail etherTransactionDetail = new TransactionDetail();
@@ -61,8 +63,10 @@ public class AutoTransactionListener extends Listener<Object, String> {
       etherTransactionDetail.setLabel(transactionLabel);
       etherTransactionDetail.setMessage(transactionMessage);
       etherTransactionDetail = getWalletTokenAdminService().sendEther(etherTransactionDetail, wallet.getId());
-      LOG.info("wallet {} is initialized with Tokens, the Ether transaction hash is {}", wallet.getId(), transactionDetail.getHash());
-      LOG.info("wallet {} is initialized with Ethers, the Ether transaction hash is {}", wallet.getId(), etherTransactionDetail.getHash());
+      LOG.info("wallet {} is initialized with Ethers, the transaction hash is {}", wallet.getId(), etherTransactionDetail.getHash());
+
+      // Set Wallet status to : Initialized
+      getWalletAccountService().setInitializationStatus(wallet.getAddress(), WalletInitializationState.INITIALIZED);
     } catch (Exception e) {
       LOG.error("Error initializing wallet {}", wallet.getId(), e);
     }
