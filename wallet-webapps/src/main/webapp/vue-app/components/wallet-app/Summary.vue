@@ -16,34 +16,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex id="walletSummary" class="elevation-0 me-3">
-    <template v-if="!isSpace || isSpaceAdministrator">
-      <v-card-title
-        v-if="initializationState === 'NEW' || initializationState === 'MODIFIED' || initializationState === 'PENDING'"
-        primary-title
-        class="pb-0">
-        <v-spacer />
-        <div class="alert alert-info">
-          <i class="uiIconInfo"></i>
-          {{ $t('exoplatform.wallet.info.pendingInitialization') }}
-        </div>
-        <v-spacer />
-      </v-card-title>
-      <v-card-title
-        v-else-if="initializationState === 'DENIED'"
-        primary-title
-        class="pb-0">
-        <v-spacer />
-        <div class="alert alert-info ignore-vuetify-classes">
-          <i class="uiIconInfo"></i>
-          {{ $t('exoplatform.wallet.info.initializationAccessDenied') }}
-          <button class="ignore-vuetify-classes btn" @click="requestAccessAuthorization()">
-            {{ $t('exoplatform.wallet.button.requestAuthorization') }}
-          </button>
-        </div>
-        <v-spacer />
-      </v-card-title>
-    </template>
-
     <template>
       <v-container
         fluid
@@ -114,13 +86,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <v-icon :title="$t('exoplatform.wallet.warning.noEnoughFunds')" color="orange">
                 warning
               </v-icon>
-              <v-icon
-                v-if="displayDisapprovedWallet"
-                slot="activator"
-                :title="$t('exoplatform.wallet.warning.yourWalletIsDisparroved')"
-                color="orange">
-                warning
-              </v-icon>
             </div>
             <wallet-reward-toolbar-menu
               ref="walletAppMenu"
@@ -170,10 +135,6 @@ export default {
       },
     },
     displayWarnings: {
-      type: Boolean,
-      default: false,
-    },
-    displayDisapprovedWallet: {
       type: Boolean,
       default: false,
     },

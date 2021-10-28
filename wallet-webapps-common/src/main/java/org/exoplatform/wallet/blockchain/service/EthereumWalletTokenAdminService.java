@@ -219,17 +219,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return adminWallet == null ? null : adminWallet.getAddress();
   }
 
-  @Override
-  public final boolean isApprovedAccount(String address) throws Exception {
-    LOG.error(new Exception("Method to remove"));
-    return true; //TODO to remove
-  }
-
-  @Override
-  public final int getAdminLevel(String address) throws Exception {
-    LOG.error(new Exception("Method to remove"));
-    return 0; //TODO to remove
-  }
 
   @Override
   public final boolean isInitializedAccount(Wallet wallet) throws Exception {

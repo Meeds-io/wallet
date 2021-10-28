@@ -76,18 +76,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         href="#transactions">
         {{ $t('exoplatform.wallet.title.transactions') }}{{ totalTransactionsCount ? ` (${totalTransactionsCount})` : '' }}
       </v-tab>
-      <v-tab
-        v-if="contractDetails.contractType > 0"
-        key="approvedAccounts"
-        href="#approvedAccounts">
-        {{ $t('exoplatform.wallet.title.approvedAccounts') }}
-      </v-tab>
-      <v-tab
-        v-if="contractDetails.contractType > 0"
-        key="adminAccounts"
-        href="#adminAccounts">
-        {{ $t('exoplatform.wallet.title.adminAccounts') }}
-      </v-tab>
     </v-tabs>
     <v-tabs-items v-model="selectedTab">
       <v-tab-item
@@ -108,124 +96,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               @error="error = $event" />
           </v-flex>
         </v-layout>
-      </v-tab-item>
-      <v-tab-item
-        v-if="contractDetails && contractDetails.contractType > 0"
-        id="approvedAccounts"
-        value="approvedAccounts"
-        eager>
-        <v-flex v-if="!loading" justify-center>
-          <v-btn
-            :loading="loadingApprovedWalletsFromContract"
-            color="primary"
-            text
-            @click="loadApprovedWalletsFromContract">
-            {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
-          </v-btn>
-        </v-flex>
-        <v-data-table
-          v-if="contractDetails"
-          :items="approvedWallets"
-          :items-per-page="1000"
-          :loading="loadingApprovedWalletsFromContract"
-          no-data-text=""
-          hide-default-footer
-          hide-default-header>
-          <template slot="item" slot-scope="props">
-            <tr>
-              <td>
-                <v-avatar size="36px">
-                  <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
-                </v-avatar>
-              </td>
-              <td>
-                <wallet-reward-profile-chip
-                  :address="props.item.address"
-                  :profile-id="props.item.id"
-                  :profile-technical-id="props.item.technicalId"
-                  :space-id="props.item.spaceId"
-                  :profile-type="props.item.type"
-                  :display-name="props.item.name"
-                  :enabled="props.item.enabled"
-                  :deleted-user="props.item.deletedUser"
-                  :disabled-user="props.item.disabledUser"
-                  :avatar="props.item.avatar" />
-              </td>
-              <td v-if="$refs.disapproveAccountModal">
-                <span>
-                  {{ $t('exoplatform.wallet.label.adminLevel') }}:
-                </span>
-                <v-btn
-                  :right="!$vuetify.rtl"
-                  icon
-                  @click="$refs.disapproveAccountModal.preselectAutocomplete(props.item.id, props.item.type, props.item.address)">
-                  <v-icon>
-                    close
-                  </v-icon>
-                </v-btn>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
-      </v-tab-item>
-      <v-tab-item
-        v-if="contractDetails.contractType > 0"
-        id="adminAccounts"
-        value="adminAccounts"
-        eager>
-        <v-flex v-if="!loading" justify-center>
-          <v-btn
-            :loading="loadingAdminWalletsFromContract"
-            color="primary"
-            text
-            @click="loadAdminWalletsFromContract">
-            {{ $t('exoplatform.wallet.button.loadFromBlockchain') }}
-          </v-btn>
-        </v-flex>
-        <v-data-table
-          v-if="contractDetails"
-          :items="adminWallets"
-          :items-per-page="1000"
-          :loading="loadingAdminWalletsFromContract"
-          no-data-text=""
-          hide-default-footer
-          hide-default-header>
-          <template slot="item" slot-scope="props">
-            <tr>
-              <td>
-                <v-avatar size="36px">
-                  <img :src="props.item.avatar ? props.item.avatar : '/eXoSkin/skin/images/system/UserAvtDefault.png'" onerror="this.src = '/eXoSkin/skin/images/system/UserAvtDefault.png'">
-                </v-avatar>
-              </td>
-              <td>
-                <wallet-reward-profile-chip
-                  :address="props.item.address"
-                  :profile-id="props.item.id"
-                  :profile-technical-id="props.item.technicalId"
-                  :space-id="props.item.spaceId"
-                  :profile-type="props.item.type"
-                  :display-name="props.item.name"
-                  :enabled="props.item.enabled"
-                  :deleted-user="props.item.deletedUser"
-                  :disabled-user="props.item.disabledUser"
-                  :avatar="props.item.avatar" />
-              </td>
-              <td>
-                {{ $t('exoplatform.wallet.label.level') }}
-              </td>
-              <td v-if="$refs.removeAdminModal">
-                <v-btn
-                  :right="!$vuetify.rtl"
-                  icon
-                  @click="$refs.removeAdminModal.preselectAutocomplete(props.item.id, props.item.type, props.item.address)">
-                  <v-icon>
-                    close
-                  </v-icon>
-                </v-btn>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
       </v-tab-item>
     </v-tabs-items>
   </v-flex>
@@ -281,12 +151,8 @@ export default {
     return {
       selectedTab: -1,
       totalTransactionsCount: 0,
-      approvedWallets: [],
       adminWallets: [],
       checkingPendingTransactions: false,
-      approvedWalletsLoadedFromContract: false,
-      loadingApprovedWalletsFromContract: false,
-      loadingAdminWalletsFromContract: false,
       error: null,
     };
   },
