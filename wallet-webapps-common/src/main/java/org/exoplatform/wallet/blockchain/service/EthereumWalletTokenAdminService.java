@@ -263,7 +263,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     if (isInitializedAccount(transactionDetail.getToWallet())) {
       throw new IllegalStateException("Wallet {} is already initialized");
     }
-    
+
     if (StringUtils.isBlank(configuredContractAddress)) {
       throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
     }
