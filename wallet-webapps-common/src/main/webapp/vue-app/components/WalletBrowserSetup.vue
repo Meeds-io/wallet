@@ -36,8 +36,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.description') }}</div>
                 <div class="subtitle px-4 py-4 styleTitle">{{ $t('exoplatform.wallet.label.createWalletInvitation.link') }} <a :href="`${eXo.env.portal.context}/${eXo.env.portal.portalName}/perkstore`">{{ $t('exoplatform.wallet.label.createWalletInvitation.perkStore') }}</a></div>
                 <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.secure') }}</div>
-                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.firstDescription') }}</div>
-                <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.lastDescription') }}</div>
+                <ol>
+                  <li class="subtitle walletInformation"><div class="px-4 py-4">{{ $t('exoplatform.wallet.label.createWalletInvitation.firstDescription') }}</div></li>
+                  <li class="subtitle walletInformation"><div class="px-4 py-4">{{ $t('exoplatform.wallet.label.createWalletInvitation.lastDescription') }}</div></li>
+                </ol>
               </div>
             </v-row>
           </v-col>
