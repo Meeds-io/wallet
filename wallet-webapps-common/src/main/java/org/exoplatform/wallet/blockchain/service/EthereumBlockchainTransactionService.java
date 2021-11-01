@@ -60,12 +60,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private static final String              TRANSFER_OWNERSHIP_SIG      =
                                                                   EventEncoder.encode(OWNERSHIPTRANSFERRED_EVENT);
-//
-//  private static final String              NOSUFFICIENTFUND_EVENT_HASH =
-//                                                                       EventEncoder.encode(MeedsToken.NOSUFFICIENTFUND_EVENT);
-//
-//  private static final String              TRANSACTIONFEE_EVENT_HASH   =
-//                                                                     EventEncoder.encode(MeedsToken.TRANSACTIONFEE_EVENT);
 
   private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
 

@@ -94,7 +94,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Integer                  configuredContractDecimals;
 
-  private String                   adminPrivateKey;
+  private final String             adminPrivateKey;
 
   public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector, String adminPrivateKey) {
     this.clientConnector = clientConnector;
@@ -222,9 +222,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public final boolean isInitializedAccount(Wallet wallet) throws Exception {
-    LOG.warn("Function isInitializedAccount to check");
-    //TODO to check logic
-    return (wallet.getEtherBalance() != null && wallet.getEtherBalance() > 0) ||(wallet.getTokenBalance() != null && wallet.getTokenBalance() > 0);
+    return (wallet.getIsInitialized() != null && wallet.getIsInitialized());
   }
 
   @Override
@@ -262,10 +260,10 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
     setIssuer(transactionDetail, issuerUsername);
 
-    //TODO this block is to reimplement
-/*    if (isInitializedAccount(transactionDetail.getToWallet())) {
+    if (isInitializedAccount(transactionDetail.getToWallet())) {
       throw new IllegalStateException("Wallet {} is already initialized");
-    }*/
+    }
+    
     if (StringUtils.isBlank(configuredContractAddress)) {
       throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
     }

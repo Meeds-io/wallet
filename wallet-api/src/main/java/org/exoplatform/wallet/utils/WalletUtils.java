@@ -650,7 +650,7 @@ public class WalletUtils {
     wallet.setDisabledUser(!identity.isEnable());
     wallet.setDeletedUser(identity.isDeleted());
     wallet.setType(walletType.getId());
-    wallet.setIsInitialized(Arrays.asList(WalletInitializationState.INITIALIZED.name(), WalletInitializationState.NEW.name(),
+    wallet.setIsInitialized(Arrays.asList(WalletInitializationState.INITIALIZED.name(),
             WalletInitializationState.MODIFIED.name()).contains(wallet.getInitializationState()));
     if (walletType.isUser() || walletType.isSpace()) {
       wallet.setAvatar(identity.getProfile().getAvatarUrl());
