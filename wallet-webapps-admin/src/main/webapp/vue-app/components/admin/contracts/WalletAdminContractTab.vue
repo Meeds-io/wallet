@@ -16,7 +16,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex
-    v-if="contractDetails && contractDetails"
+    v-if="contractDetails"
     id="accountDetail"
     class="text-center white layout column">
     <v-card-title class="align-start accountDetailSummary">
