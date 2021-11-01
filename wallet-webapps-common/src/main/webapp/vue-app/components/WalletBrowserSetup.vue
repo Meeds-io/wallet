@@ -134,6 +134,7 @@ export default {
   data() {
     return {
       walletPassword: null,
+      urlPerkStore: `${eXo.env.portal.context}/${eXo.env.portal.portalName}/perkstore`,
       confirmWalletPassword: null,
       walletPasswordShow: null,
       loadingWalletBrowser: false,

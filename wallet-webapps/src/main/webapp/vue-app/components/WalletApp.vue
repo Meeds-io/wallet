@@ -193,10 +193,7 @@ export default {
       return !this.loading && !this.error && this.walletAddress && this.browserWalletExists;
     },
     displayWarnings() {
-      return this.displayDisapprovedWallet || this.displayEtherBalanceTooLow;
-    },
-    displayDisapprovedWallet() {
-      return this.wallet && this.wallet.isInitialized && !this.wallet.isApproved;
+      return this.displayEtherBalanceTooLow;
     },
     displayEtherBalanceTooLow() {
       return this.browserWalletExists
@@ -319,7 +316,7 @@ export default {
         .then((result, error) => {
           this.handleError(error);
 
-          this.isReadOnly = this.settings.isReadOnly || !this.wallet || !this.wallet.isApproved;
+          this.isReadOnly = this.settings.isReadOnly || !this.wallet;
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
           this.fiatSymbol = this.settings.fiatSymbol || '$';

@@ -327,7 +327,7 @@ export default {
         if (recipient) {
           // Estimate gas
           this.contractDetails.contract.methods
-            .initializeAccount(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
+            .transfer(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
             .estimateGas({
               from: this.contractDetails.contract.options.from,
               gas: window.walletSettings.network.gasLimit,
@@ -349,10 +349,6 @@ export default {
       this.warning = null;
 
       if (!this.$refs.form.validate()) {
-        return;
-      }
-      if (this.contractDetails && this.contractDetails.isPaused) {
-        this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
         return;
       }
 
@@ -388,19 +384,18 @@ export default {
 
       const sender = this.contractDetails.contract.options.from;
       const receiver = this.recipient;
-      const initializeAccount =  this.contractDetails.contract.methods.initializeAccount;
+      const transfer =  this.contractDetails.contract.methods.transfer;
 
       this.etherAmount = this.etherAmount || 0;
 
       const transactionDetail = {
         from: sender.toLowerCase(),
         to: receiver,
-        value: this.etherAmount,
         gas: window.walletSettings.network.gasLimit,
         gasPrice: this.gasPrice,
         pending: true,
         contractAddress: this.contractDetails.address,
-        contractMethodName: 'initializeAccount',
+        contractMethodName: 'transfer',
         contractAmount: this.amount,
         label: this.transactionLabel,
         message: this.transactionMessage,
@@ -412,7 +407,7 @@ export default {
 
       this.error = null;
       this.loading = true;
-      return initializeAccount(this.recipient, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
+      return transfer(this.recipient, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
         .estimateGas({
           from: sender,
           gas: window.walletSettings.network.gasLimit,
@@ -428,7 +423,7 @@ export default {
             this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
             return;
           }
-          return this.tokenUtils.sendContractTransaction(transactionDetail, initializeAccount, [receiver, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
+          return this.tokenUtils.sendContractTransaction(transactionDetail, transfer, [receiver, this.walletUtils.convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
         })
         .then((savedTransaction, error) => {
           if (error) {
@@ -445,7 +440,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.error('Web3 contract.initializeAccount method - error', e);
+          console.error('Web3 contract.Transfer method - error', e);
           this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${this.walletUtils.truncateError(e)}`;
         })
         .finally(() => {
