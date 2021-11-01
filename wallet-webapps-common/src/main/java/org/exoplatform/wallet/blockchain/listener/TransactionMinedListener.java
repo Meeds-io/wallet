@@ -24,7 +24,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
-import org.exoplatform.wallet.contract.ERTTokenV2;
+import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.*;
 import org.exoplatform.wallet.model.Wallet;
@@ -95,25 +95,15 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
     String contractMethodName = transactionDetail.getContractMethodName();
     if (StringUtils.isBlank(contractMethodName)) {
       addWalletModificationState(transactionDetail.getToWallet(), ETHER_FUNC_SEND_FUNDS, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFER)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFERFROM)) {
+    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_TRANSFER)
+        || StringUtils.equals(contractMethodName, MeedsToken.FUNC_TRANSFERFROM)) {
       addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getByWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_APPROVE)) {
+    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_APPROVE)) {
       addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFEROWNERSHIP)) {
+    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_TRANSFEROWNERSHIP)) {
       addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_INITIALIZEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_REWARD)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), ERTTokenV2.FUNC_TRANSFER, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_ADDADMIN)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_REMOVEADMIN)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_APPROVEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_DISAPPROVEACCOUNT)
-        || StringUtils.equals(contractMethodName, ERTTokenV2.FUNC_TRANSFORMTOVESTED)) {
       addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
     }
   }

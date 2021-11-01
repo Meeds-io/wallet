@@ -180,7 +180,6 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
     Mockito.reset(tokenAdminService);
     Mockito.when(tokenAdminService.getAdminWalletAddress()).thenReturn("adminAddress");
-    Mockito.when(tokenAdminService.getAdminLevel(Mockito.eq("adminAddress"))).thenReturn(2);
     Mockito.when(tokenAdminService.reward(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
       @Override
       public TransactionDetail answer(InvocationOnMock invocation) throws Throwable {

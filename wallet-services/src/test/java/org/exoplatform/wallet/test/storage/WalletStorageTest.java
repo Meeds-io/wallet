@@ -333,11 +333,7 @@ public class WalletStorageTest extends BaseWalletTest {
     assertEquals(0, wallet.getEtherBalance(), 0);
 
     wallet.setTokenBalance(2d);
-    wallet.setVestingBalance(3d);
     wallet.setEtherBalance(4d);
-    wallet.setRewardBalance(5d);
-    wallet.setAdminLevel(1);
-    wallet.setIsApproved(true);
     wallet.setIsInitialized(true);
     walletStorage.saveWalletBlockchainState(wallet, contractAddress);
 
@@ -345,10 +341,6 @@ public class WalletStorageTest extends BaseWalletTest {
     walletStorage.retrieveWalletBlockchainState(storedWallet, contractAddress);
     assertEquals(wallet.getEtherBalance(), storedWallet.getEtherBalance(), 0);
     assertEquals(wallet.getTokenBalance(), storedWallet.getTokenBalance(), 0);
-    assertEquals(wallet.getVestingBalance(), storedWallet.getVestingBalance(), 0);
-    assertEquals(wallet.getRewardBalance(), storedWallet.getRewardBalance(), 0);
-    assertEquals(wallet.getAdminLevel(), storedWallet.getAdminLevel(), 0);
-    assertEquals(wallet.getIsApproved(), storedWallet.getIsApproved());
     assertEquals(wallet.getIsInitialized(), storedWallet.getIsInitialized());
 
     this.entitiesToClean.add(storedWallet);

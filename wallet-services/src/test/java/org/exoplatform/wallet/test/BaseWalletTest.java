@@ -489,7 +489,6 @@ public abstract class BaseWalletTest {
     contractDetail.setAddress(WalletUtils.getContractAddress());
     contractDetail.setContractType("3");
     contractDetail.setNetworkId(1l);
-    contractDetail.setSellPrice("0.002");
     walletService.setConfiguredContractDetail(contractDetail);
   }
 }

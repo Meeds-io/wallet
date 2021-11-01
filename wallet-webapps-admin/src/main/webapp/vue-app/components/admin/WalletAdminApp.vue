@@ -40,7 +40,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               v-if="contractDetails"
               key="contract"
               href="#contract">
-              {{ adminLevel >= 4 ? $t('exoplatform.wallet.title.contractTab') : $t('exoplatform.wallet.title.transactionHistoryTab') }}
+              {{ $t('exoplatform.wallet.title.contractTab') }}
             </v-tab>
           </v-tabs>
           <v-tabs-items v-model="selectedTab" class="tabs-content">
@@ -102,7 +102,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :user-wallet="wallet"
                 :wallets="wallets"
                 :contract-details="contractDetails"
-                :admin-level="adminLevel"
                 :fiat-symbol="fiatSymbol"
                 :address-etherscan-link="addressEtherscanLink"
                 @back="back()"
@@ -136,9 +135,6 @@ export default {
   computed: {
     walletAddress() {
       return this.wallet && this.wallet.address && this.wallet.address.toLowerCase();
-    },
-    adminLevel() {
-      return this.wallet && this.wallet.adminLevel;
     },
   },
   created() {

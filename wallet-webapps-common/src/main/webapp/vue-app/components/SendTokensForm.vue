@@ -193,7 +193,6 @@ export default {
       walletPasswordShow: false,
       recipient: null,
       notificationId: null,
-      isApprovedRecipient: true,
       disabledRecipient: false,
       canSendToken: true,
       amount: null,
@@ -257,7 +256,6 @@ export default {
         this.warning = null;
         this.information = null;
 
-        this.isApprovedRecipient = true;
         this.canSendToken = true;
       }
 
@@ -277,16 +275,6 @@ export default {
               if (!receiverWallet || !receiverWallet.address || !receiverWallet.id) {
                 this.canSendToken = true;
                 return;
-              }
-              this.isApprovedRecipient = receiverWallet.isApproved;
-              if (this.contractDetails && this.contractDetails.isPaused) {
-                this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
-                this.canSendToken = false;
-              } else if (!this.isApprovedRecipient) {
-                this.warning = this.$t('exoplatform.wallet.warning.recipientIsDisapproved');
-                this.canSendToken = false;
-              } else {
-                this.canSendToken = true;
               }
 
               // Async gas estimation if current address is owner of contract

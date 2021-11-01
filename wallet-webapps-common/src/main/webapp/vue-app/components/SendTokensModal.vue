@@ -99,10 +99,10 @@ export default {
       return this.canBoostTransaction && this.firstPendingTransaction;
     },
     canBoostTransaction() {
-      return this.transaction && this.wallet && this.wallet.isApproved && ((this.wallet.type === 'user' && this.wallet.id === eXo.env.portal.userName) || (this.wallet.type === 'space' && this.wallet.spaceAdministrator));
+      return this.transaction && this.wallet && ((this.wallet.type === 'user' && this.wallet.id === eXo.env.portal.userName) || (this.wallet.type === 'space' && this.wallet.spaceAdministrator));
     },
     disabled() {
-      return this.isReadOnly || (this.wallet && !this.wallet.isApproved) || !this.tokenBalance || this.tokenBalance === 0 || (typeof this.tokenBalance === 'string' && (!this.tokenBalance.length || this.tokenBalance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
+      return this.isReadOnly || this.wallet || !this.tokenBalance || this.tokenBalance === 0 || (typeof this.tokenBalance === 'string' && (!this.tokenBalance.length || this.tokenBalance.trim() === '0')) || !this.etherBalance || this.etherBalance === 0 || (typeof this.etherBalance === 'string' && (!this.etherBalance.length || this.etherBalance.trim() === '0'));
     },
   },
   created() {

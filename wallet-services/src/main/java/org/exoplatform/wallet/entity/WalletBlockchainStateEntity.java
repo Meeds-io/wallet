@@ -55,15 +55,6 @@ public class WalletBlockchainStateEntity implements Serializable {
   @Column(name = "REWARD_BALANCE", nullable = false)
   private double            rewardBalance;
 
-  @Column(name = "VESTING_BALANCE", nullable = false)
-  private double            vestingBalance;
-
-  @Column(name = "ADMIN_LEVEL", nullable = false)
-  private int               adminLevel;
-
-  @Column(name = "IS_APPROVED", nullable = false)
-  private boolean           isApproved;
-
   @Column(name = "IS_INITIALIZED", nullable = false)
   private boolean           isInitialized;
 
@@ -109,30 +100,6 @@ public class WalletBlockchainStateEntity implements Serializable {
 
   public void setRewardBalance(double rewardBalance) {
     this.rewardBalance = rewardBalance;
-  }
-
-  public double getVestingBalance() {
-    return vestingBalance;
-  }
-
-  public void setVestingBalance(double vestingBalance) {
-    this.vestingBalance = vestingBalance;
-  }
-
-  public int getAdminLevel() {
-    return adminLevel;
-  }
-
-  public void setAdminLevel(int adminLevel) {
-    this.adminLevel = adminLevel;
-  }
-
-  public boolean isApproved() {
-    return isApproved;
-  }
-
-  public void setApproved(boolean isApproved) {
-    this.isApproved = isApproved;
   }
 
   public boolean isInitialized() {
