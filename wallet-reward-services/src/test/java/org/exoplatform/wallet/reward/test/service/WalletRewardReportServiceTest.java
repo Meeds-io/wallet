@@ -332,13 +332,13 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       } catch (Exception e) {
         // Expected
       }
-      Mockito.verify(tokenAdminService, Mockito.times(0)).reward(Mockito.any(), Mockito.any());
+      Mockito.verify(tokenAdminService, Mockito.times(0)).sendToken(Mockito.any(), Mockito.any());
 
       // Admin having enough funds
       Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
-      Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
+      Mockito.verify(tokenAdminService, Mockito.times(60)).sendToken(Mockito.any(), Mockito.any());
 
       // Send reward for the second time for the same period
       resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
@@ -349,7 +349,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       } catch (Exception e) {
         // Expected, no rewards to send
       }
-      Mockito.verify(tokenAdminService, Mockito.times(0)).reward(Mockito.any(), Mockito.any());
+      Mockito.verify(tokenAdminService, Mockito.times(0)).sendToken(Mockito.any(), Mockito.any());
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
@@ -478,7 +478,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
-      Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
+      Mockito.verify(tokenAdminService, Mockito.times(60)).sendToken(Mockito.any(), Mockito.any());
 
       walletRewards = walletRewardService.listRewards("root3", 10);
       assertNotNull(walletRewards);
@@ -520,7 +520,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
     Mockito.reset(tokenAdminService);
     Mockito.when(tokenAdminService.getAdminWalletAddress()).thenReturn("adminAddress");
-    Mockito.when(tokenAdminService.reward(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
+    Mockito.when(tokenAdminService.sendToken(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
       @Override
       public TransactionDetail answer(InvocationOnMock invocation) throws Throwable {
         TransactionDetail transactionDetail = invocation.getArgument(0, TransactionDetail.class);

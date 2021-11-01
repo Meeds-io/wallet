@@ -142,7 +142,7 @@ public class WalletRewardReportService implements RewardReportService {
         transactionDetail.setLabel(transactionLabel);
         String transactionMessage = getTransactionMessage(walletReward, contractDetail, rewardPeriod);
         transactionDetail.setMessage(transactionMessage);
-        transactionDetail = getTokenAdminService().reward(transactionDetail, username);
+        transactionDetail = getTokenAdminService().sendToken(transactionDetail, username);
         walletReward.setTransaction(transactionDetail);
       } catch (Exception e) {
         LOG.warn("Error while sending reward transaction for user '{}'", walletReward.getWallet().getName(), e);

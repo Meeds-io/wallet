@@ -59,6 +59,7 @@ public class AutoTransactionListener extends Listener<Object, String> {
       // Send Ether
       TransactionDetail etherTransactionDetail = new TransactionDetail();
       etherTransactionDetail.setTo(wallet.getAddress());
+      transactionDetail.setContractAmount(0);
       etherTransactionDetail.setValue(etherAmount);
       etherTransactionDetail.setLabel(transactionLabel);
       etherTransactionDetail.setMessage(transactionMessage);
