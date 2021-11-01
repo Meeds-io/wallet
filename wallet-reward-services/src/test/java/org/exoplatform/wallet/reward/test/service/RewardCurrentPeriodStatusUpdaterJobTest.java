@@ -115,7 +115,6 @@ public class RewardCurrentPeriodStatusUpdaterJobTest extends BaseWalletRewardTes
     container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
     Mockito.reset(tokenAdminService);
     Mockito.when(tokenAdminService.getAdminWalletAddress()).thenReturn("adminAddress");
-    Mockito.when(tokenAdminService.getAdminLevel(Mockito.eq("adminAddress"))).thenReturn(2);
   }
 
 }

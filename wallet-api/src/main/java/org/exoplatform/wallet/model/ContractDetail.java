@@ -47,16 +47,10 @@ public class ContractDetail implements Serializable, Cloneable {
   private String            owner;
 
   @Exclude
-  private String            sellPrice;
-
-  @Exclude
   private String            totalSupply;
 
   @Exclude
   private String            contractType;
-
-  @Exclude
-  private Boolean           isPaused;
 
   @Exclude
   private Double            etherBalance;
