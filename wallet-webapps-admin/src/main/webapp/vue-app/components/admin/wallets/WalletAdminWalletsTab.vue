@@ -209,7 +209,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           <v-divider />
                         </template>
                         <v-list-item
-                          v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && tokenAmount > 0"
+                          v-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && tokenAmount > 0"
                           :disabled="adminNotHavingEnoughToken"
                           @mousedown="$event.preventDefault()">
                           <v-list-item-title class="options" @click="openSendTokenModal(props.item)">{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
