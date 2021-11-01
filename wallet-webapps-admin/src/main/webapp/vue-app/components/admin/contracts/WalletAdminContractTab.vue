@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     v-if="contractDetails && contractDetails"
     id="accountDetail"
     class="text-center white layout column">
-    <v-card-title v-if="adminLevel" class="align-start accountDetailSummary">
+    <v-card-title class="align-start accountDetailSummary">
       <v-layout column>
         <v-flex
           id="accountDetailTitle"
@@ -27,7 +27,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <h3 v-if="contractDetails.fiatBalance" class="font-weight-light">
             {{ contractDetails.name }} - {{ $t('exoplatform.wallet.label.version') }}: {{ contractDetails.contractType }} - {{ $t('exoplatform.wallet.label.balance') }}: {{ walletUtils.toFixed(contractDetails.fiatBalance) }} {{ fiatSymbol }} / {{ walletUtils.toFixed(contractDetails.etherBalance) }} ether
           </h3>
-          <h4 class="grey--text font-weight-light no-wrap">
+          <h4 v-if="contractDetails.owner" class="grey--text font-weight-light no-wrap">
             {{ $t('exoplatform.wallet.label.owner') }}: <wallet-reward-wallet-address :value="contractDetails.owner" display-label />
           </h4>
         </v-flex>
@@ -118,12 +118,6 @@ export default {
     },
     contractDetails: {
       type: Object,
-      default: function() {
-        return null;
-      },
-    },
-    adminLevel: {
-      type: Boolean ,
       default: function() {
         return null;
       },

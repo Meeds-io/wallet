@@ -212,10 +212,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <groupId>com.jcabi</groupId>
         <artifactId>jcabi-maven-plugin</artifactId>
         <!-- Workaround for bug https://github.com/jcabi/jcabi-aspects/issues/257 -->
-        <configuration>
-          <aspectDirectories>
-          </aspectDirectories>
-        </configuration>
         <dependencies>
           <dependency>
             <groupId>org.aspectj</groupId>
