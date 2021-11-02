@@ -58,6 +58,22 @@ public interface WalletTokenAdminService {
   String generateHash(String rawTransaction);
 
   /**
+   * Send rewarded token amounts (on blockchain) to a receiver wallet address
+   * using 'Admin' wallet. The amount sent could be different from rewarded
+   * amount. A label and a message are associated to the transaction. Those
+   * properties aren't sent on blockchain, but stored in database. The
+   * transaction issuer will be stored in transaction details stored internally
+   * in eXo server.
+   *
+   * @param transactionDetail
+   * @param issuerUsername
+   * @return {@link TransactionDetail} with the hash of the transaction sent in
+   *         blockchain
+   * @throws Exception
+   */
+  TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
+
+  /**
    * Initializes (on blockchain) a receiver wallet address using 'Admin' wallet
    * by using funds transmitted in transaction detail. The transaction issuer,
    * label and message will be stored in transaction details inside eXo server

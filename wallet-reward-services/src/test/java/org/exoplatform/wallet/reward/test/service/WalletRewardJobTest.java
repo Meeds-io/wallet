@@ -134,7 +134,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
-      Mockito.verify(tokenAdminService, Mockito.times(60)).sendToken(Mockito.any(), Mockito.any());
+      Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       List<RewardPeriod> rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
       assertNotNull(rewardPeriodsInProgress);
@@ -180,7 +180,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);
     Mockito.reset(tokenAdminService);
     Mockito.when(tokenAdminService.getAdminWalletAddress()).thenReturn("adminAddress");
-    Mockito.when(tokenAdminService.sendToken(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
+    Mockito.when(tokenAdminService.reward(Mockito.any(), Mockito.any())).thenAnswer(new Answer<TransactionDetail>() {
       @Override
       public TransactionDetail answer(InvocationOnMock invocation) throws Throwable {
         TransactionDetail transactionDetail = invocation.getArgument(0, TransactionDetail.class);

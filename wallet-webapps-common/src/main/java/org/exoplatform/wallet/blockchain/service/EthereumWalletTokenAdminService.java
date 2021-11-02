@@ -360,6 +360,11 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
+  public final TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
+    return sendToken(transactionDetail, issuerUsername);
+  }
+
+  @Override
   public void retrieveWalletInformationFromBlockchain(Wallet wallet,
                                                       ContractDetail contractDetail,
                                                       Set<String> walletModifications) throws Exception {
