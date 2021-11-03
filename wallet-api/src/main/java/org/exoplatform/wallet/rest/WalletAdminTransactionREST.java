@@ -114,17 +114,6 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     }
 
     try {
-      InitialFundsSettings initialFundsSettings = getWalletService().getInitialFundsSettings();
-      if (initialFundsSettings == null || initialFundsSettings.getEtherAmount() <= 0) {
-        throw new IllegalStateException("Can't send ether to wallet " + receiver
-            + " because no default ether amount is configured in settings: " + initialFundsSettings);
-      }
-      if (etherAmount > initialFundsSettings.getEtherAmount()) {
-        throw new IllegalStateException("Can't send ether to wallet " + receiver
-            + " because ether amount " + etherAmount + " is greater than configured initial fund ether amount: "
-            + initialFundsSettings.getEtherAmount());
-      }
-
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
       transactionDetail.setValue(etherAmount);
@@ -149,7 +138,8 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       @ApiResponse(code = 500, message = "Internal server error") })
   public Response sendToken(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
                             @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
-                            @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
+                            @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage,
+                            @ApiParam(value = "value of token to send to receiver", required = false) @FormParam("tokenAmount") double tokenAmount) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
@@ -157,15 +147,12 @@ public class WalletAdminTransactionREST implements ResourceContainer {
     }
 
     try {
-      InitialFundsSettings initialFundsSettings = getWalletService().getInitialFundsSettings();
-      if (initialFundsSettings == null || initialFundsSettings.getTokenAmount() <= 0) {
-        throw new IllegalStateException("Can't send tokens to wallet " + receiver
-            + " because no default token amount is configured in settings: " + initialFundsSettings);
+      if (tokenAmount <= 0) {
+        throw new IllegalStateException("Can't send tokens to wallet " + receiver + "because the value of token is not valid");
       }
-
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setTo(receiver);
-      transactionDetail.setContractAmount(initialFundsSettings.getTokenAmount());
+      transactionDetail.setContractAmount(tokenAmount);
       transactionDetail.setLabel(transactionLabel);
       transactionDetail.setMessage(transactionMessage);
       transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, currentUserId);
