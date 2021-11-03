@@ -36,12 +36,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               href="#funds">
               {{ $t('exoplatform.wallet.title.initialFundsTab') }}
             </v-tab>
-            <v-tab
-              v-if="contractDetails"
-              key="contract"
-              href="#contract">
-              {{ $t('exoplatform.wallet.title.contractTab') }}
-            </v-tab>
           </v-tabs>
           <v-tabs-items v-model="selectedTab" class="tabs-content">
             <v-tab-item
@@ -77,7 +71,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :refresh-index="refreshIndex"
                 :address-etherscan-link="addressEtherscanLink"
                 :contract-details="contractDetails"
-                @pending="$refs && $refs.contractDetail && $refs.contractDetail.refreshTransactionList()"
                 @wallets-loaded="wallets = $event" />
             </v-tab-item>
             <v-tab-item
@@ -90,23 +83,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :settings="settings"
                 :contract-details="contractDetails"
                 @saved="refreshSettings" />
-            </v-tab-item>
-            <v-tab-item
-              v-if="contractDetails"
-              id="contract"
-              value="contract"
-              eager>
-              <wallet-contract-tab
-                ref="contractDetail"
-                :wallet-address="walletAddress"
-                :user-wallet="wallet"
-                :wallets="wallets"
-                :contract-details="contractDetails"
-                :fiat-symbol="fiatSymbol"
-                :address-etherscan-link="addressEtherscanLink"
-                @back="back()"
-                @success="reloadContract"
-                @pending-transaction="pendingTransaction" />
             </v-tab-item>
           </v-tabs-items>
         </v-app>
@@ -148,7 +124,6 @@ export default {
   methods: {
     init() {
       this.loading = true;
-      this.showAddContractModal = false;
       this.forceUpdate();
       this.error = null;
 
