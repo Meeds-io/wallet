@@ -49,6 +49,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       @refresh="init()"
                       @display-transactions="openAccountDetail"
                       @error="error = $event" />
+                    <div class="my-8 walletRewardSetup">
+                      <wallet-reward-setup
+                        ref="walletSetup"
+                        :is-space="isSpace"
+                        :wallet="wallet"
+                        :initialization-state="initializationState"
+                        :loading="loading"
+                        @loading="loading = true"
+                        @end-loading="loading = false"
+                        @refresh="init()"
+                        @error="
+                          loading = false;
+                          error = $event;
+                        " />
+                    </div>
                     <template v-if="wallet && contractDetails && initializationState !== 'DENIED'">
                       <v-flex class="chartHistory WalletChart mt-6">
                         <wallet-reward-transaction-history-chart-summary
@@ -66,21 +81,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       </v-flex>
                     </template>
                   </v-layout>
-                  <v-flex class="my-8">
-                    <wallet-reward-setup
-                      ref="walletSetup"
-                      :is-space="isSpace"
-                      :wallet="wallet"
-                      :initialization-state="initializationState"
-                      :loading="loading"
-                      @loading="loading = true"
-                      @end-loading="loading = false"
-                      @refresh="init()"
-                      @error="
-                        loading = false;
-                        error = $event;
-                      " />
-                  </v-flex>
                 </v-flex>
               </v-tab-item>
             </v-tabs-items>
