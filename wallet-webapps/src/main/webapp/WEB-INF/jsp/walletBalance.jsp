@@ -11,17 +11,17 @@
 <%@ page import="org.exoplatform.wallet.model.ContractDetail"%>
 <%@ page import="org.exoplatform.wallet.model.Wallet"%>
 <%@ page import="org.exoplatform.wallet.model.WalletType"%>
-<%@ page import="org.exoplatform.portal.application.PortalRequestContext"%>
-<%@ page import="org.exoplatform.web.application.RequestContext"%>
-
+<%@ page import="org.exoplatform.social.core.service.LinkProvider"%>
 
 <%
   String title = "Wallet";
   String walletUrl = "";
 
   try {
-    PortalRequestContext requestContext = ((PortalRequestContext) RequestContext.getCurrentInstance());
-    walletUrl = "/portal/" + requestContext.getPortalOwner() + "/wallet";
+
+    String portalName  = ExoContainerContext.getService(LinkProvider.class).getPortalName("");
+    String portalOwner  = ExoContainerContext.getService(LinkProvider.class).getPortalOwner("");
+    walletUrl =  "/" + portalName + "/" + portalOwner + "/wallet";
     title = ExoContainerContext.getService(ResourceBundleService.class).getResourceBundle("locale.addon.Wallet", request.getLocale()).getString("exoplatform.wallet.title.walletBalanceTitle");
   } catch (Exception e) {
     // Expected, when the title isn't translated to user locale
