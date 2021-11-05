@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       display-complete-message
       no-button
       @backed-up="$emit('backed-up')" />
-    <div v-if="displayWalletCreationToolbar" class="alert alert-info">
+    <div v-if="displayWalletCreationToolbar" class="walletBackupDetailedWarning alert alert-info">
       <i class="uiIconInfo"></i> <span v-if="isSpace">
         {{ $t('exoplatform.wallet.warning.notPrivateKey') }}.
         <strong>
