@@ -79,8 +79,7 @@ public interface RewardReportService {
   List<WalletReward> listRewards(String currentUser, int limit);
 
   /**
-   * @param currentUser current user listing his rewards
-   * @param identityId
+   * @param currentUser the current user listing his rewards
    * @return a total rewards sent  for current person
    */
   double countRewards(String currentUser);

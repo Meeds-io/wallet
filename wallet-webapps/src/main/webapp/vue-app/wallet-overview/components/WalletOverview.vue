@@ -84,7 +84,7 @@ export default {
   created() {
     this.refresh();
     this.countRewards().then((resp) => {
-      this.countReward = parseFloat(resp.sumRewards);
+      this.countReward = resp.sumRewards;
     });
   },
   methods: {
