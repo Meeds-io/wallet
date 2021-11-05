@@ -127,4 +127,31 @@ public class RewardReportREST implements ResourceContainer {
     }
   }
 
+  @GET
+  @Path("countRewards")
+  @RolesAllowed("users")
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Return sum of rewards for current user", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return sum of rewards per user")
+  @ApiResponses(value = {
+          @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+          @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+          @ApiResponse(code = 500, message = "Internal server error") })
+  public Response countRewards() {
+    try {
+      Double sumRewards = rewardReportService.countRewards(WalletUtils.getCurrentUserId());
+      JSONObject result = new JSONObject();
+      result.put("sumRewards", sumRewards);
+      return Response.ok(result.toString()).build();
+    } catch (Exception e) {
+      LOG.error("Error getting sum of reward for current user", e);
+      JSONObject object = new JSONObject();
+      try {
+        object.append("error", e.getMessage());
+      } catch (JSONException e1) {
+        // Nothing to do
+      }
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+    }
+  }
+
 }

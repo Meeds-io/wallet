@@ -164,4 +164,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-12">
+    <createIndex tableName="ADDONS_WALLET_REWARD" indexName="IDX_ADDONS_WALLET_REWARD_01">
+      <column name="IDENTITY_ID" />
+      <column name="TOKENS_SENT" />
+    </createIndex>
+  </changeSet>
+
+
 </databaseChangeLog>

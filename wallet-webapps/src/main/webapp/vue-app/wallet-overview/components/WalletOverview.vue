@@ -46,14 +46,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <div class="justify-center d-flex flex-no-wrap">
           <template>
             <v-icon
-              v-if="currencySymbol"
               class="tertiary-color walletOverviewCurrencySymbol px-2"
               size="48">
-              {{ currencySymbol }}
+              Ɱ
             </v-icon>
             <div
               class="text-color display-2 text-start font-weight-bold walletOverviewBalance">
-              {{ rewardBalance }}
+              {{ countReward }}
             </div>
           </template>
         </div>
@@ -75,6 +74,7 @@ export default {
     currencyName: null,
     currencySymbol: null,
     rewardBalance: 0,
+    countReward: 0
   }),
   computed: {
     clickable() {
@@ -83,6 +83,9 @@ export default {
   },
   created() {
     this.refresh();
+    this.countRewards().then((resp) => {
+      this.countReward = parseFloat(resp.sumRewards);
+    });
   },
   methods: {
     openDrawer() {
@@ -119,6 +122,25 @@ export default {
         .finally(() => {
           this.$root.$emit('application-loaded');
         });
+    },
+    countRewards() {
+      return fetch('/portal/rest/wallet/api/reward/countRewards', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }).then((resp) => {
+        if (resp && resp.ok) {
+          return resp.json();
+        } else {
+          throw new Error('Error count rewards');
+        }
+      }).catch((error) => {
+        console.error(error);
+        this.error = this.$t('exoplatform.wallet.error.errorCountRewards');
+      });
     },
   },
 };
