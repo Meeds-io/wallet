@@ -33,7 +33,7 @@
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="title text-color">
-                {{ $t('exoplatform.wallet.label.mangePassword') }}
+                {{ $t('exoplatform.wallet.label.managePassword') }}
               </v-list-item-title>
               <v-list-item-subtitle>
                 {{ $t('exoplatform.wallet.message.managePasswordDescription') }}
