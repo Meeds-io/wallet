@@ -66,6 +66,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
+import { getCountRewards } from '../../WalletBalanceAPI.js';
+
 export default {
   data: () => ({
     owner: eXo.env.portal.profileOwner === eXo.env.portal.userName,
@@ -73,17 +75,16 @@ export default {
     title: null,
     currencyName: null,
     currencySymbol: null,
-    rewardBalance: 0,
     countReward: 0
   }),
   computed: {
     clickable() {
-      return this.owner && this.rewardBalance > 0;
+      return this.owner && this.countReward > 0;
     },
   },
   created() {
     this.refresh();
-    this.countRewards().then((resp) => {
+    getCountRewards().then((resp) => {
       this.countReward = resp.sumRewards;
     });
   },
@@ -96,9 +97,6 @@ export default {
     refresh() {
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
         .then((resp) => resp && resp.ok && resp.json())
-        .then(wallet => {
-          this.rewardBalance = parseInt(wallet && wallet.rewardBalance * 100 || 0) / 100;
-        })
         .then(() => {
           if (!this.currencyName) {
             // Search settings in a sync way
@@ -122,26 +120,7 @@ export default {
         .finally(() => {
           this.$root.$emit('application-loaded');
         });
-    },
-    countRewards() {
-      return fetch('/portal/rest/wallet/api/reward/countRewards', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }).then((resp) => {
-        if (resp && resp.ok) {
-          return resp.json();
-        } else {
-          throw new Error('Error count rewards');
-        }
-      }).catch((error) => {
-        console.error(error);
-        this.error = this.$t('exoplatform.wallet.error.errorCountRewards');
-      });
-    },
+    }
   },
 };
 </script>

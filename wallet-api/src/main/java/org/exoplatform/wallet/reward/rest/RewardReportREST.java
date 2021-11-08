@@ -20,8 +20,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -136,12 +135,18 @@ public class RewardReportREST implements ResourceContainer {
           @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
           @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
           @ApiResponse(code = 500, message = "Internal server error") })
-  public Response countRewards() {
+  public Response countRewards(@Context Request request) {
     try {
       Double sumRewards = rewardReportService.countRewards(WalletUtils.getCurrentUserId());
-      JSONObject result = new JSONObject();
-      result.put("sumRewards", sumRewards);
-      return Response.ok(result.toString()).build();
+      EntityTag eTag = new EntityTag(String.valueOf(sumRewards));
+      Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
+      if (builder == null) {
+        JSONObject result = new JSONObject();
+        result.put("sumRewards", sumRewards);
+        builder = Response.ok(result.toString(), MediaType.APPLICATION_JSON);
+        builder.tag(eTag);
+      }
+      return builder.build();
     } catch (Exception e) {
       LOG.error("Error getting sum of reward for current user", e);
       JSONObject object = new JSONObject();
