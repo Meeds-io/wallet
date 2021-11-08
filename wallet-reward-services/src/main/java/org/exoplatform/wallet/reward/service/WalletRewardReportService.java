@@ -214,6 +214,16 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public double countRewards(String currentUser) {
+    Identity identity = getIdentityByTypeAndId(WalletType.USER, currentUser);
+    if (identity == null) {
+      throw new IllegalArgumentException("can't get user");
+    } else {
+      return rewardReportStorage.countRewards(Long.parseLong(identity.getId()));
+    }
+  }
+
+  @Override
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardReportStorage.replaceRewardTransactions(oldHash, newHash);
   }

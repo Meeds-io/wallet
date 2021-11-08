@@ -30,6 +30,8 @@ import org.exoplatform.wallet.reward.entity.WalletRewardEntity;
 public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
   private static final Log LOG = ExoLogger.getLogger(RewardDAO.class);
 
+  private static final String IDENTITY_ID = "identityId";
+
   public List<WalletRewardEntity> findRewardsByPeriodId(long periodId) {
     TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardsByPeriodId",
                                                                                WalletRewardEntity.class);
@@ -40,18 +42,25 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
   public List<WalletRewardEntity> findRewardsByIdentityId(long identityId, int limit) {
     TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardsByIdentityId",
                                                                                WalletRewardEntity.class);
-    query.setParameter("identityId", identityId);
+    query.setParameter(IDENTITY_ID, identityId);
     if (limit > 0) {
       query.setMaxResults(limit);
     }
     return query.getResultList();
   }
 
+  public double countRewardsByIdentityId(long identityId) {
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("Reward.countRewardsByIdentityId",
+                                                                               Double.class);
+    query.setParameter(IDENTITY_ID, identityId);
+    return query.getSingleResult();
+  }
+
   public WalletRewardEntity findRewardByIdentityIdAndPeriodId(long identityId, long periodId) {
     TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardByIdentityIdAndPeriodId",
                                                                                WalletRewardEntity.class);
     query.setParameter("periodId", periodId);
-    query.setParameter("identityId", identityId);
+    query.setParameter(IDENTITY_ID, identityId);
     List<WalletRewardEntity> result = query.getResultList();
     if (result == null || result.isEmpty()) {
       return null;

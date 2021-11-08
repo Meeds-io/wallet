@@ -220,6 +220,12 @@ public class WalletRewardReportStorage implements RewardReportStorage {
   }
 
   @Override
+  public double countRewards(long identityId) {
+    double countRewardsByUser = rewardDAO.countRewardsByIdentityId(identityId);
+    return  Double.isNaN(countRewardsByUser) ? 0 : countRewardsByUser;
+  }
+
+  @Override
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardDAO.replaceRewardTransactions(oldHash, newHash);
   }

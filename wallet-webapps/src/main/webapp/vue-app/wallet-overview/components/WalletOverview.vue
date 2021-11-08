@@ -45,15 +45,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         @click="clickable && openDrawer()">
         <div class="justify-center d-flex flex-no-wrap">
           <template>
-            <v-icon
-              v-if="currencySymbol"
-              class="tertiary-color walletOverviewCurrencySymbol px-2"
-              size="48">
-              {{ currencySymbol }}
-            </v-icon>
+            <div class="tertiary-color display-2 text-start font-weight-bold walletOverviewBalance px-2">
+              {{ currencySymbol.substring(0,1) }}
+            </div>
             <div
               class="text-color display-2 text-start font-weight-bold walletOverviewBalance">
-              {{ rewardBalance }}
+              {{ countReward }}
             </div>
           </template>
         </div>
@@ -67,6 +64,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
+import { getCountRewards } from '../../WalletBalanceAPI.js';
+
 export default {
   data: () => ({
     owner: eXo.env.portal.profileOwner === eXo.env.portal.userName,
@@ -74,15 +73,18 @@ export default {
     title: null,
     currencyName: null,
     currencySymbol: null,
-    rewardBalance: 0,
+    countReward: 0
   }),
   computed: {
     clickable() {
-      return this.owner && this.rewardBalance > 0;
+      return this.owner && this.countReward > 0;
     },
   },
   created() {
     this.refresh();
+    getCountRewards().then((resp) => {
+      this.countReward = resp.sumRewards;
+    });
   },
   methods: {
     openDrawer() {
@@ -93,9 +95,6 @@ export default {
     refresh() {
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
         .then((resp) => resp && resp.ok && resp.json())
-        .then(wallet => {
-          this.rewardBalance = parseInt(wallet && wallet.rewardBalance * 100 || 0) / 100;
-        })
         .then(() => {
           if (!this.currencyName) {
             // Search settings in a sync way
@@ -119,7 +118,7 @@ export default {
         .finally(() => {
           this.$root.$emit('application-loaded');
         });
-    },
+    }
   },
 };
 </script>

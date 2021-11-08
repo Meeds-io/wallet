@@ -79,6 +79,12 @@ public interface RewardReportService {
   List<WalletReward> listRewards(String currentUser, int limit);
 
   /**
+   * @param currentUser the current user listing his rewards
+   * @return a total rewards sent  for current person
+   */
+  double countRewards(String currentUser);
+
+  /**
    * Replaces an old reward transaction hash to a new one, that had boosted the
    * first one
    * 

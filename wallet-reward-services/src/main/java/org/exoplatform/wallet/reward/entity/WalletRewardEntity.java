@@ -31,6 +31,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @NamedQueries({
     @NamedQuery(name = "Reward.findRewardsByPeriodId", query = "SELECT rw FROM Reward rw WHERE rw.period.id = :periodId"),
     @NamedQuery(name = "Reward.findRewardsByIdentityId", query = "SELECT rw FROM Reward rw JOIN rw.period WHERE rw.identityId = :identityId ORDER BY rw.period.startTime DESC, rw.period.endTime ASC"),
+    @NamedQuery(name = "Reward.countRewardsByIdentityId", query = "SELECT SUM(rw.tokensSent) FROM Reward rw WHERE rw.identityId = :identityId"),
     @NamedQuery(name = "Reward.findRewardByIdentityIdAndPeriodId", query = "SELECT rw FROM Reward rw WHERE rw.identityId = :identityId AND rw.period.id = :periodId"),
     @NamedQuery(name = "Reward.updateTransactionHash", query = "UPDATE Reward rw SET rw.transactionHash = :newHash WHERE rw.transactionHash = :oldHash"),
 })
