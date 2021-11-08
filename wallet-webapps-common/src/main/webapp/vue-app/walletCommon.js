@@ -33,6 +33,7 @@ import WalletPasswordManagement from './components/WalletPasswordManagement.vue'
 import RequestFundsModal from './components/WalletRequestFundsModal.vue';
 import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
+import BackupDrawer from './components/WalletBackupDrawer.vue';
 
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
@@ -69,6 +70,7 @@ const components = {
   'wallet-reward-request-funds-modal': RequestFundsModal,
   'wallet-reward-address': WalletAddress,
   'wallet-reward-setup': WalletSetup,
+  'wallet-reward-backup-drawer': BackupDrawer,
 };
 
 for (const key in components) {
