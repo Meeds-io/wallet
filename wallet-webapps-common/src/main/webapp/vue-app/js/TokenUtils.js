@@ -35,7 +35,6 @@ export function getContractDetails(walletAddress) {
     contractDetails.icon = 'fa-file-contract';
     contractDetails.title = contractDetails.name;
     contractDetails.isContract = true;
-    contractDetails.isOwner = contractDetails.owner === walletAddress && walletAddress.toLowerCase();
     contractDetails.fiatBalance = contractDetails.fiatBalance || (contractDetails.etherBalance && etherToFiat(contractDetails.etherBalance));
     if (!contractDetails.contract && walletAddress) {
       try {
