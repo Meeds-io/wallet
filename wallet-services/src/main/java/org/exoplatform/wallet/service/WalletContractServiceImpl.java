@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.json.JSONArray;
 import org.picocontainer.Startable;
 
@@ -46,6 +47,10 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
                                       ExoLogger.getLogger(WalletContractServiceImpl.class);
 
   private static final String     ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE = "address parameter is mandatory";
+
+  private static final String     SYMBOL_PROPERTY_NAME                   = "exo.wallet.blockchain.token.symbol";
+
+  private static final String     CRYPTOCURRENCY_PROPERTY_NAME           = "exo.wallet.blockchain.network.cryptocurrency";
 
   private ConfigurationManager    configurationManager;
 
@@ -120,6 +125,8 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
     }
 
     String contractDetailString = toJsonString(contractDetail);
+    setCustomTokenSymbol(contractDetail);
+    setNetworkCryptoCurrency(contractDetail);
     settingService.set(WALLET_CONTEXT,
                        WALLET_SCOPE,
                        StringUtils.lowerCase(contractAddress),
@@ -137,7 +144,10 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
     if (contractDetailValue != null && contractDetailValue.getValue() != null) {
       String value = contractDetailValue.getValue().toString();
       try {
-        return fromJsonString(value, ContractDetail.class);
+        ContractDetail contractDetail= fromJsonString(value, ContractDetail.class);
+        setCustomTokenSymbol(contractDetail);
+        setNetworkCryptoCurrency(contractDetail);
+        return contractDetail;
       } catch (Exception e) {
         LOG.debug("Remove old data stored in settings service for wallet with address '{}', having as value '{}'",
                   address,
@@ -149,6 +159,25 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
       }
     }
     return null;
+  }
+
+  private void setNetworkCryptoCurrency(ContractDetail contractDetail) {
+    String cryptocurrency = PropertyManager.getProperty(CRYPTOCURRENCY_PROPERTY_NAME);
+
+    if (StringUtils.isNotBlank(cryptocurrency)) {
+      contractDetail.setCryptocurrency(cryptocurrency);
+    }else {
+      contractDetail.setCryptocurrency("E");
+    }
+  }
+
+  private void setCustomTokenSymbol(ContractDetail contractDetail) {
+    String symbol = PropertyManager.getProperty(SYMBOL_PROPERTY_NAME);
+    if (StringUtils.isNotBlank(symbol)) {
+      contractDetail.setSymbol(symbol);
+    }else if (StringUtils.isNotBlank(contractDetail.getSymbol())) {
+      contractDetail.setSymbol(contractDetail.getSymbol().substring(0,1));
+    }
   }
 
   @Override
