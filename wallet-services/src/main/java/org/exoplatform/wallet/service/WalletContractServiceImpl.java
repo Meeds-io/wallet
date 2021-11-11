@@ -161,25 +161,6 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
     return null;
   }
 
-  private void setNetworkCryptoCurrency(ContractDetail contractDetail) {
-    String cryptocurrency = PropertyManager.getProperty(CRYPTOCURRENCY_PROPERTY_NAME);
-
-    if (StringUtils.isNotBlank(cryptocurrency)) {
-      contractDetail.setCryptocurrency(cryptocurrency);
-    }else {
-      contractDetail.setCryptocurrency("E");
-    }
-  }
-
-  private void setCustomTokenSymbol(ContractDetail contractDetail) {
-    String symbol = PropertyManager.getProperty(SYMBOL_PROPERTY_NAME);
-    if (StringUtils.isNotBlank(symbol)) {
-      contractDetail.setSymbol(symbol);
-    }else if (StringUtils.isNotBlank(contractDetail.getSymbol())) {
-      contractDetail.setSymbol(contractDetail.getSymbol().substring(0,1));
-    }
-  }
-
   @Override
   public void refreshContractDetail(Set<String> contractModifications) {
     GlobalSettings settings = getSettings();
@@ -237,6 +218,25 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
       listenerService = CommonsUtils.getService(ListenerService.class);
     }
     return listenerService;
+  }
+
+  private void setNetworkCryptoCurrency(ContractDetail contractDetail) {
+    String cryptocurrency = PropertyManager.getProperty(CRYPTOCURRENCY_PROPERTY_NAME);
+
+    if (StringUtils.isNotBlank(cryptocurrency)) {
+      contractDetail.setCryptocurrency(cryptocurrency);
+    }else {
+      contractDetail.setCryptocurrency("E");
+    }
+  }
+
+  private void setCustomTokenSymbol(ContractDetail contractDetail) {
+    String symbol = PropertyManager.getProperty(SYMBOL_PROPERTY_NAME);
+    if (StringUtils.isNotBlank(symbol)) {
+      contractDetail.setSymbol(symbol);
+    }else if (StringUtils.isNotBlank(contractDetail.getSymbol())) {
+      contractDetail.setSymbol(contractDetail.getSymbol().substring(0,1));
+    }
   }
 
 }
