@@ -25,7 +25,7 @@ Vue.prototype.$applicationLoaded = function() {
   }}));
 };
 
-const components = {
+export const components = {
   'wallet-settings': WalletSettings,
   'wallet-settings-details': WalletSettingsDetails,
 };
@@ -33,3 +33,4 @@ const components = {
 for (const key in components) {
   Vue.component(key, components[key]);
 }
+

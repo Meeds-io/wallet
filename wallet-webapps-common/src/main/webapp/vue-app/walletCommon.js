@@ -34,12 +34,13 @@ import RequestFundsModal from './components/WalletRequestFundsModal.vue';
 import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
 import BackupDrawer from './components/WalletBackupDrawer.vue';
-
+import WalletSettings from './wallet-settings/components/WalletSettings.vue';
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
 import * as tokenUtils from './js/TokenUtils.js';
 import * as transactionUtils from './js/TransactionUtils.js';
+import {registerExternalComponents} from './wallet-settings/extension.js';
 
 const WalletCommon = {
   install: (Vue) => {
@@ -71,9 +72,12 @@ const components = {
   'wallet-reward-address': WalletAddress,
   'wallet-reward-setup': WalletSetup,
   'wallet-reward-backup-drawer': BackupDrawer,
+  'wallet-settings': WalletSettings,
 };
 
 for (const key in components) {
   Vue.component(key, components[key]);
 }
 window.WalletCommon = WalletCommon;
+
+registerExternalComponents('space-wallet-setting', components['wallet-settings']);
