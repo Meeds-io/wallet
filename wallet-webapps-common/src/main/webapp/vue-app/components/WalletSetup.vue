@@ -16,6 +16,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex id="walletSetup" class="text-center">
+    <wallet-reward-backup-modal
+      ref="walletBackupModal"
+      class="me-3"
+      display-complete-message
+      no-button
+      @backed-up="$emit('backed-up')" />
     <div v-if="displayWalletCreationToolbar" class="alert alert-info">
       <i class="uiIconInfo"></i> <span v-if="isSpace">
         {{ $t('exoplatform.wallet.warning.notPrivateKey') }}.
@@ -119,10 +125,18 @@ export default {
     displayWalletCreationToolbar() {
       return !this.loading && this.walletAddress && !this.browserWalletExists && this.isReadOnly && (!this.isSpace || this.isSpaceAdministrator);
     },
+    displayWalletBackup() {
+      return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp;
+    },
   },
   watch: {
     refreshIndex() {
       this.init();
+    },
+    displayWalletBackup() {
+      if (this.displayWalletBackup && this.$refs && this.$refs.walletBackupModal) {
+        this.$refs.walletBackupModal.dialog = true;
+      }
     },
   },
   methods: {
