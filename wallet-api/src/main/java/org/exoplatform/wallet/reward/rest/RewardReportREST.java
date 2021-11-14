@@ -20,8 +20,7 @@ import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -117,6 +116,39 @@ public class RewardReportREST implements ResourceContainer {
       return Response.ok(rewards).build();
     } catch (Exception e) {
       LOG.error("Error getting list of reward for current user", e);
+      JSONObject object = new JSONObject();
+      try {
+        object.append("error", e.getMessage());
+      } catch (JSONException e1) {
+        // Nothing to do
+      }
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+    }
+  }
+
+  @GET
+  @Path("countRewards")
+  @RolesAllowed("users")
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Return sum of rewards for current user", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return sum of rewards per user")
+  @ApiResponses(value = {
+          @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+          @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+          @ApiResponse(code = 500, message = "Internal server error") })
+  public Response countRewards(@Context Request request) {
+    try {
+      Double sumRewards = rewardReportService.countRewards(WalletUtils.getCurrentUserId());
+      EntityTag eTag = new EntityTag(String.valueOf(sumRewards));
+      Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
+      if (builder == null) {
+        JSONObject result = new JSONObject();
+        result.put("sumRewards", sumRewards);
+        builder = Response.ok(result.toString(), MediaType.APPLICATION_JSON);
+        builder.tag(eTag);
+      }
+      return builder.build();
+    } catch (Exception e) {
+      LOG.error("Error getting sum of reward for current user", e);
       JSONObject object = new JSONObject();
       try {
         object.append("error", e.getMessage());
