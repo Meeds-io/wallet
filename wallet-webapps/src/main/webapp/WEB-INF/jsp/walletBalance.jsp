@@ -11,9 +11,17 @@
 <%@ page import="org.exoplatform.wallet.model.ContractDetail"%>
 <%@ page import="org.exoplatform.wallet.model.Wallet"%>
 <%@ page import="org.exoplatform.wallet.model.WalletType"%>
+<%@ page import="org.exoplatform.social.core.service.LinkProvider"%>
+
 <%
   String title = "Wallet";
+  String walletUrl = "";
+
   try {
+
+    String portalName  = ExoContainerContext.getService(LinkProvider.class).getPortalName("");
+    String portalOwner  = ExoContainerContext.getService(LinkProvider.class).getPortalOwner("");
+    walletUrl =  "/" + portalName + "/" + portalOwner + "/wallet";
     title = ExoContainerContext.getService(ResourceBundleService.class).getResourceBundle("locale.addon.Wallet", request.getLocale()).getString("exoplatform.wallet.title.walletBalanceTitle");
   } catch (Exception e) {
     // Expected, when the title isn't translated to user locale
@@ -45,8 +53,7 @@
                 <div class="flex d-flex xs12 justify-center">
                   <div class="v-card v-card--flat v-sheet theme--light">
                     <div class="v-card__text pa-2">
-                      <a href="/portal/dw/wallet"
-                        class="text-color display-1 font-weight-bold big-number">
+                      <a href="<%=walletUrl%>" class="text-color display-1 font-weight-bold big-number">
                         <%=balanceFixed%> <%=symbol%>
                       </a>
                     </div>
