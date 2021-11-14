@@ -195,7 +195,7 @@ export default {
 
       return this.transactionUtils.loadTransactions(
         this.walletAddress,
-        null,
+        this.contractDetails,
         this.pendingTransactions,
         true,
         100,
