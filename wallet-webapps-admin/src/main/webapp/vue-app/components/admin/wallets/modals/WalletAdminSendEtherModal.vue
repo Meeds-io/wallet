@@ -52,12 +52,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             ">
             <v-text-field
               v-if="dialog"
-              v-model="etherAmountLabel"
+              v-model="etherAmount"
               :autofocus="dialog"
               :label="$t('exoplatform.wallet.label.etherAmountPlaceholder')"
               :placeholder="$t('exoplatform.wallet.label.etherAmount')"
-              name="etherAmount"
-              disabled />
+              name="etherAmount" />
 
             <v-text-field
               v-if="dialog"
