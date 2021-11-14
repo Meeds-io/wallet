@@ -64,7 +64,7 @@ public interface WalletTokenAdminService {
    * properties aren't sent on blockchain, but stored in database. The
    * transaction issuer will be stored in transaction details stored internally
    * in eXo server.
-   * 
+   *
    * @param transactionDetail
    * @param issuerUsername
    * @return {@link TransactionDetail} with the hash of the transaction sent in
@@ -136,7 +136,7 @@ public interface WalletTokenAdminService {
   /**
    * Checks whether the wallet is initialized or not (on blockchain)
    * 
-   * @param address
+   * @param wallet
    * @return {@link TransactionDetail} with the hash of the transaction sent in
    *         blockchain
    * @throws Exception

@@ -274,9 +274,6 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     String transactionHash = rewardEntity.getTransactionHash();
     if (StringUtils.isNotBlank(transactionHash)) {
       TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
-      if (!StringUtils.equals(transactionDetail.getContractMethodName(), "reward")) {
-        LOG.warn("Transaction with hash {} is not a reward transaction, data seems not coherent", transactionHash);
-      }
       walletReward.setTransaction(transactionDetail);
     }
   }
