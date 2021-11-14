@@ -26,3 +26,23 @@ export function getWalletAccount() {
     }
   });
 }
+
+export  function getCountRewards() {
+  return fetch('/portal/rest/wallet/api/reward/countRewards', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }).then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error count rewards');
+    }
+  }).catch((error) => {
+    console.error(error);
+    this.error = this.$t('exoplatform.wallet.error.errorCountRewards');
+  });
+}
