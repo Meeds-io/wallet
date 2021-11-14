@@ -52,12 +52,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             ">
             <v-text-field
               v-if="dialog"
-              v-model="tokenAmountLabel"
+              v-model="tokenAmount"
               :autofocus="dialog"
               :label="$t('exoplatform.wallet.label.tokenAmount', {0: contractDetails && contractDetails.name})"
               :placeholder="$t('exoplatform.wallet.label.tokenAmountPlaceholder', {0: contractDetails && contractDetails.name})"
-              name="tokenAmount"
-              disabled />
+              name="tokenAmount" />
 
             <v-text-field
               v-if="dialog"
@@ -124,11 +123,6 @@ export default {
       error: null,
     };
   },
-  computed: {
-    tokenAmountLabel() {
-      return `${this.tokenAmount} ${this.contractDetails && this.contractDetails.symbol}`;
-    },
-  },
   methods: {
     open(wallet, initialFundsMessage, tokenAmount) {
       if (!wallet) {
@@ -155,6 +149,7 @@ export default {
           receiver: this.wallet.address,
           transactionLabel: this.transactionLabel,
           transactionMessage: this.transactionMessage,
+          tokenAmount: this.tokenAmount
         }),
       }).then((resp) => {
         if (resp && resp.ok) {
