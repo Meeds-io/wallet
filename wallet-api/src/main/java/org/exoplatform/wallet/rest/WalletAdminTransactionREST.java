@@ -56,7 +56,7 @@ public class WalletAdminTransactionREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response intializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+  public Response initializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
                                   @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
                                   @ApiParam(value = "token amount to send to wallet", required = false) @FormParam("tokenAmount") double tokenAmount,
                                   @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,

@@ -361,8 +361,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public final TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
-    LOG.error(new Exception("Method to remove"));
-    return null; //TODO to remove
+    return sendToken(transactionDetail, issuerUsername);
   }
 
   @Override
@@ -423,13 +422,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       if (StringUtils.isEmpty(contractDetail.getSymbol())) {
         String symbol = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_SYMBOL);
         contractDetail.setSymbol(symbol);
-      }
-
-      if (StringUtils.isEmpty(contractDetail.getOwner())
-          || contractModifications == null
-          || contractModifications.contains(MeedsToken.FUNC_TRANSFEROWNERSHIP)) {
-        String owner = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_OWNER);
-        contractDetail.setOwner(owner);
       }
 
       if (StringUtils.isEmpty(contractDetail.getTotalSupply())) {
@@ -532,7 +524,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
                                                              etherValueInWei);
     }
 
-    byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, adminCredentials);
+    byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, getNetworkId(), adminCredentials);
     String rawTransactionString = Numeric.toHexString(signedMessage);
     transactionDetail.setRawTransaction(rawTransactionString);
     transactionDetail.setHash(generateHash(rawTransactionString));
