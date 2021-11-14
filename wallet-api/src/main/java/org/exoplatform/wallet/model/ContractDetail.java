@@ -38,6 +38,9 @@ public class ContractDetail implements Serializable, Cloneable {
   private String            symbol;
 
   @Exclude
+  private String            cryptocurrency;
+
+  @Exclude
   private Integer           decimals;
 
   @Exclude

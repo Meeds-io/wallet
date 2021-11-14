@@ -157,7 +157,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 indeterminate
                 size="20" />
               <template v-else>
-                {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} E
+                {{ walletUtils.toFixed(props.item.etherBalance) || 0 }} {{ contractDetails.cryptocurrency }}
               </template>
             </td>
             <td class="text-center">
