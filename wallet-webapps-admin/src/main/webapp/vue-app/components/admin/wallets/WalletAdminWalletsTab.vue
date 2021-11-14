@@ -103,7 +103,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :profile-type="props.item.type"
                 :display-name="props.item.name"
                 :enabled="props.item.enabled"
-                :disapproved="!props.item.isApproved"
                 :deleted-user="props.item.deletedUser"
                 :disabled-user="props.item.disabledUser"
                 :avatar="props.item.avatar"
@@ -117,7 +116,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'DENIED'">{{ $t('exoplatform.wallet.label.rejectedWallet') }}</template>
-                <template v-else-if="!props.item.isApproved">{{ $t('exoplatform.wallet.label.disapprovedWallet') }}</template>
                 <template v-else>
                   <template v-if="Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount))">
                     <v-icon color="orange">
@@ -195,7 +193,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
-                        <template v-if="contractDetails && contractDetails.contractType && contractDetails.contractType > 1 && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
+                        <template v-if="contractDetails && contractDetails.contractType && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                           <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
                           </v-list-item>
@@ -204,14 +202,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           </v-list-item>
                           <v-divider />
                         </template>
-                        <template v-else-if="props.item.isApproved && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
+                        <template v-else-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
                           <v-list-item :disabled="adminNotHavingEnoughEther" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openSendEtherModal(props.item)">{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
                         <v-list-item
-                          v-if="contractDetails && !contractDetails.isPaused && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled && props.item.isApproved && tokenAmount > 0"
+                          v-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && tokenAmount > 0"
                           :disabled="adminNotHavingEnoughToken"
                           @mousedown="$event.preventDefault()">
                           <v-list-item-title class="options" @click="openSendTokenModal(props.item)">{{ $t('exoplatform.wallet.button.sendToken', {0: contractDetails && contractDetails.name}) }}</v-list-item-title>
@@ -320,7 +318,7 @@ export default {
       tokenAmount: null,
       limit: 5,
       walletTypes: ['user','space','admin'],
-      walletStatuses: ['disapproved'],
+      walletStatuses: ['Approved'],
     };
   },
   computed: {
@@ -366,7 +364,7 @@ export default {
       return this.walletAdmin && this.walletAdmin.etherBalance < this.etherAmount;
     },
     useWalletAdmin() {
-      return this.walletAdmin && this.walletAdmin.adminLevel >= 2 && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
+      return this.walletAdmin && this.walletAdmin.etherBalance && Number(this.walletAdmin.etherBalance) >= 0.002 && this.walletAdmin.tokenBalance && Number(this.walletAdmin.tokenBalance) >= 0.02;
     },
     displayUsers() {
       return this.walletTypes && this.walletTypes.includes('user');
@@ -376,9 +374,6 @@ export default {
     },
     displayAdmin() {
       return this.walletTypes && this.walletTypes.includes('admin');
-    },
-    displayDisapprovedWallets() {
-      return this.walletStatuses && this.walletStatuses.includes('disapproved');
     },
     displayDisabledWallets() {
       return this.walletStatuses && this.walletStatuses.includes('disabledWallet');
@@ -406,8 +401,6 @@ export default {
       const walletTableHeaders = this.walletHeaders.slice();
       if (!this.contractDetails) {
         walletTableHeaders.splice(4, 1);
-      }
-      if (!this.contractDetails || this.contractDetails.contractType < 2) {
         walletTableHeaders.splice(2, 1);
       }
       return walletTableHeaders;
@@ -525,8 +518,6 @@ export default {
         && (this.displaySpaces || wallet.type !== 'space')
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
-        && (this.displayDisapprovedWallets || wallet.isApproved)
-        && (this.displayRejectedWallets || wallet.initializationState !== 'DENIED')
         && (this.displayDisabledUserWallets || !wallet.disabledUser)
         && (!this.search
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0

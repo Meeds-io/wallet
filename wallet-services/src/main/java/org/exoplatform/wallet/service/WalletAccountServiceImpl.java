@@ -96,8 +96,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       Wallet adminWallet = getAdminWallet();
       retrieveWalletBlockchainState(adminWallet);
 
-      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled() && adminWallet.getAdminLevel() != null
-          && adminWallet.getAdminLevel() >= 2;
+      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
     } catch (Exception e) {
       LOG.error("Error starting service", e);
     } finally {
@@ -168,8 +167,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.INITIALIZED.name()) &&
             !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.PENDING.name()) &&
             !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.DENIED.name())
-            && wallet.getIsInitialized() != null && wallet.getIsInitialized() && wallet.getIsApproved() != null
-            && wallet.getIsApproved()) {
+            && wallet.getIsInitialized() != null && wallet.getIsInitialized()) {
           wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
           setInitializationStatus(wallet.getAddress(), WalletInitializationState.INITIALIZED);
         }
@@ -182,7 +180,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     // Checks if admin wallet was newly enabled from blockchain
     if (WalletType.isAdmin(wallet.getType())) {
-      this.adminAccountEnabled = wallet.isEnabled() && wallet.getAdminLevel() != null && wallet.getAdminLevel() >= 2;
+      this.adminAccountEnabled = wallet.isEnabled();
     }
   }
 

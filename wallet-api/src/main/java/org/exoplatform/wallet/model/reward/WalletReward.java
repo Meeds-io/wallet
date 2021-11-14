@@ -60,11 +60,8 @@ public class WalletReward implements Serializable {
     if (wallet == null) {
       throw new IllegalStateException("wallet isn\'t loaded");
     }
-    if (StringUtils.isNotBlank(wallet.getAddress()) && wallet.getIsApproved() == null) {
-      throw new IllegalStateException("wallet blockchain state isn\'t loaded");
-    }
     return wallet.isEnabled() && !wallet.isDeletedUser() && !wallet.isDisabledUser()
-        && StringUtils.isNotBlank(wallet.getAddress()) && wallet.getIsApproved();
+        && StringUtils.isNotBlank(wallet.getAddress());
   }
 
   public String getPoolName() {

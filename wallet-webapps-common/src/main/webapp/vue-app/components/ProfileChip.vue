@@ -25,9 +25,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template v-if="noStatus">
       {{ displayName }}
     </template>
-    <template v-else-if="disapproved">
-      <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disapproved') }})
-    </template>
     <template v-else-if="deletedUser">
       <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.deletedIdentity') }})
     </template>
@@ -128,12 +125,6 @@ export default {
       },
     },
     displayNoAddress: {
-      type: Boolean,
-      default: function() {
-        return false;
-      },
-    },
-    disapproved: {
       type: Boolean,
       default: function() {
         return false;

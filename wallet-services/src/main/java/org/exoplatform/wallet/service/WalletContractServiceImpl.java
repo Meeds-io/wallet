@@ -20,6 +20,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -184,7 +185,7 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
                                           .getClassLoader()
                                           .getResourceAsStream("org/exoplatform/wallet/contract/" + name + "."
                                               + extension)) {
-      return IOUtils.toString(abiInputStream);
+      return IOUtils.toString(abiInputStream, Charset.defaultCharset());
     }
   }
 

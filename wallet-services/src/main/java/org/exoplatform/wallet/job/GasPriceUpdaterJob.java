@@ -51,7 +51,7 @@ public class GasPriceUpdaterJob implements Job {
     try {
       // Refresh gas price only when admin wallet has been initialized
       Wallet adminWallet = getWalletAccountService().getAdminWallet();
-      if (adminWallet != null && adminWallet.getIsInitialized() != null && adminWallet.getIsInitialized().booleanValue()) {
+      if (adminWallet != null && adminWallet.getIsInitialized() != null && Boolean.TRUE.equals(adminWallet.getIsInitialized())) {
         long blockchainGasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
         getWalletService().setDynamicGasPrice(blockchainGasPrice);
       }
