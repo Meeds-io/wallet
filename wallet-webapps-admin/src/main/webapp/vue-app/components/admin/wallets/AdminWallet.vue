@@ -140,7 +140,7 @@ export default {
       return (this.adminWallet && this.adminWallet.etherBalance) || 0;
     },
     etherBalanceLabel() {
-      return `${this.walletUtils.toFixed(this.etherBalance)} E`;
+      return `${this.walletUtils.toFixed(this.etherBalance)} ${this.contractDetails.cryptocurrency}`;
     },
   },
 };

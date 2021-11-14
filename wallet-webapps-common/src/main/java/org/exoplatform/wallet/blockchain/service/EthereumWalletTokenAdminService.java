@@ -59,8 +59,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   private static final Log         LOG                                     =
                                        ExoLogger.getLogger(EthereumWalletTokenAdminService.class);
 
-  private static final int         ADMIN_WALLET_MIN_LEVEL                  = 2;
-
   private static final String      NO_CONFIGURED_CONTRACT_ADDRESS          = "No configured contract address";
 
   private static final String      TRANSACTION_DETAIL_IS_MANDATORY         = "Transaction detail is mandatory";
