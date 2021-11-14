@@ -265,25 +265,17 @@ public abstract class BaseWalletRewardTest {
     wallet.setAddress(ADDRESS + identityId);
     wallet.setPassPhrase(PHRASE);
     wallet.setEnabled(IS_ENABLED);
-    wallet.setIsApproved(true);
     wallet.setIsInitialized(true);
-    wallet.setAdminLevel(0);
     wallet.setEtherBalance(0d);
     wallet.setTokenBalance(0d);
-    wallet.setRewardBalance(0d);
-    wallet.setVestingBalance(0d);
     wallet.setInitializationState(INITIALIZATION_STATE);
     return wallet;
   }
 
   protected void updateWalletBlockchainState(Wallet wallet) {
-    wallet.setIsApproved(true);
     wallet.setIsInitialized(true);
-    wallet.setAdminLevel(0);
     wallet.setEtherBalance(0d);
     wallet.setTokenBalance(0d);
-    wallet.setRewardBalance(0d);
-    wallet.setVestingBalance(0d);
     wallet.setInitializationState(INITIALIZATION_STATE);
   }
 
@@ -330,7 +322,6 @@ public abstract class BaseWalletRewardTest {
     contractDetail.setAddress(WalletUtils.getContractAddress());
     contractDetail.setContractType("3");
     contractDetail.setNetworkId(1l);
-    contractDetail.setSellPrice("0.002");
     walletService.setConfiguredContractDetail(contractDetail);
   }
 }

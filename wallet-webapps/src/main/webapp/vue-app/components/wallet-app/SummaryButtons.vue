@@ -39,7 +39,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-flex
           class="walletSummaryAction">
           <v-btn
-            :disabled="isDisapproved"
             class="btn"
             color="primary"
             block
@@ -51,7 +50,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-btn>
           <wallet-reward-request-funds-modal
             ref="walletRequestFundsModal"
-            :disabled-button="isDisapproved"
             :wallet-address="walletAddress"
             :contract-details="contractDetails" />
         </v-flex>
@@ -85,9 +83,6 @@ export default {
   computed: {
     walletAddress() {
       return this.wallet && this.wallet.address;
-    },
-    isDisapproved() {
-      return !this.wallet || !this.wallet.isApproved;
     }
   },
   methods: {

@@ -98,12 +98,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value-param>
         <name>contract.abi.path</name>
         <description>Token Contract ABI path</description>
-        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/wallet/contract/ERTTokenV2.json}</value>
+        <value>${exo.wallet.contract.abi.path:jar:/org/exoplatform/wallet/contract/MeedsToken.json}</value>
       </value-param>
       <value-param>
         <name>contract.bin.path</name>
         <description>Token Contract BIN path</description>
-        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/wallet/contract/ERTTokenV2.bin}</value>
+        <value>${exo.wallet.contract.bin.path:jar:/org/exoplatform/wallet/contract/MeedsToken.bin}</value>
       </value-param>
     </init-params>
   </component>

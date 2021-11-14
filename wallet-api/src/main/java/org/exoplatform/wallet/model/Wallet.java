@@ -92,22 +92,6 @@ public class Wallet implements Serializable, Cloneable {
 
   @Exclude
   @ToString.Exclude
-  private Double            rewardBalance        = null;
-
-  @Exclude
-  @ToString.Exclude
-  private Double            vestingBalance       = null;
-
-  @Exclude
-  @ToString.Exclude
-  private Integer           adminLevel           = null;
-
-  @Exclude
-  @ToString.Exclude
-  private Boolean           isApproved           = null;
-
-  @Exclude
-  @ToString.Exclude
   private Boolean           isInitialized        = null;
 
   @Override

@@ -46,15 +46,15 @@ public class WalletRewardReportService implements RewardReportService {
 
   private static final Log        LOG = ExoLogger.getLogger(WalletRewardReportService.class);
 
-  private WalletAccountService    walletAccountService;
+  private final WalletAccountService    walletAccountService;
 
   private WalletTokenAdminService walletTokenAdminService;
 
-  private RewardSettingsService   rewardSettingsService;
+  private final RewardSettingsService   rewardSettingsService;
 
-  private RewardTeamService       rewardTeamService;
+  private final RewardTeamService       rewardTeamService;
 
-  private RewardReportStorage     rewardReportStorage;
+  private final RewardReportStorage     rewardReportStorage;
 
   public WalletRewardReportService(WalletAccountService walletAccountService,
                                    RewardSettingsService rewardSettingsService,
@@ -90,9 +90,6 @@ public class WalletRewardReportService implements RewardReportService {
     String adminWalletAddress = getTokenAdminService().getAdminWalletAddress();
     if (StringUtils.isBlank(adminWalletAddress)) {
       throw new IllegalStateException("No admin wallet is configured");
-    }
-    if (getTokenAdminService().getAdminLevel(adminWalletAddress) < 2) {
-      throw new IllegalStateException("Configured admin wallet is not configured as admin on token. It must be a Token admin with level 2 at least.");
     }
 
     Set<WalletReward> rewards = new HashSet<>(rewardReport.getRewards());
@@ -166,7 +163,7 @@ public class WalletRewardReportService implements RewardReportService {
       rewardReport.setPeriod(getRewardPeriod(periodDateInSeconds));
     }
 
-    // Only user wallets benifits from rewards
+    // Only user wallets benefits from rewards
     Set<Wallet> wallets = walletAccountService.listWallets()
                                               .stream()
                                               .filter(wallet -> WalletType.isUser(wallet.getType()))
@@ -233,7 +230,7 @@ public class WalletRewardReportService implements RewardReportService {
     RewardPeriod period = rewardReport.getPeriod();
     Set<WalletReward> walletRewards = retrieveWalletRewards(rewardReport, wallets);
     Set<WalletReward> enabledRewards = walletRewards.stream()
-                                                    .filter(wr -> wr.isEnabled())
+                                                    .filter(WalletReward::isEnabled)
                                                     .collect(Collectors.toSet());
     Set<WalletReward> enabledTeamRewards = enabledRewards.stream()
                                                          .filter(wr -> wr.getTeam() == null || !wr.getTeam().isDisabled())
