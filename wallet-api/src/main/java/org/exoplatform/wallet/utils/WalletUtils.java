@@ -388,7 +388,7 @@ public class WalletUtils {
 
   public static Identity getIdentityById(String identityId) {
     IdentityManager identityManager = CommonsUtils.getService(IdentityManager.class);
-    return identityManager.getIdentity(identityId, true);
+    return identityManager.getIdentity(identityId);
   }
 
   public static Identity getIdentityByTypeAndId(WalletType type, String remoteId) {
@@ -650,6 +650,8 @@ public class WalletUtils {
     wallet.setDisabledUser(!identity.isEnable());
     wallet.setDeletedUser(identity.isDeleted());
     wallet.setType(walletType.getId());
+    wallet.setIsInitialized(Arrays.asList(WalletInitializationState.INITIALIZED.name(),
+            WalletInitializationState.MODIFIED.name()).contains(wallet.getInitializationState()));
     if (walletType.isUser() || walletType.isSpace()) {
       wallet.setAvatar(identity.getProfile().getAvatarUrl());
     }

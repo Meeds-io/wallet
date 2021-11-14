@@ -205,6 +205,10 @@ public class WalletTransactionREST implements ResourceContainer {
                                   @ApiParam(value = "whether to include only pending or not", required = false) @QueryParam("pending") boolean onlyPending,
                                   @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
     String currentUserId = getCurrentUserId();
+    if(StringUtils.isBlank(address)) {
+      LOG.warn("Bad request sent to server with empty wallet address");
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
     try {
       List<TransactionDetail> transactionDetails = transactionService.getTransactions(address,
                                                                                       contractAddress,

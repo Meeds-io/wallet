@@ -36,11 +36,11 @@ import org.exoplatform.web.security.codec.CodecInitializer;
 public class WalletStorage {
   private static final Log         LOG = ExoLogger.getLogger(WalletStorage.class);
 
-  private WalletAccountDAO         walletAccountDAO;
+  private final WalletAccountDAO         walletAccountDAO;
 
-  private WalletPrivateKeyDAO      privateKeyDAO;
+  private final WalletPrivateKeyDAO      privateKeyDAO;
 
-  private WalletBlockchainStateDAO blockchainStateDAO;
+  private final WalletBlockchainStateDAO blockchainStateDAO;
 
   private AbstractCodec            codec;
 
@@ -93,11 +93,7 @@ public class WalletStorage {
     if (walletEntity == null) {
       return null;
     }
-    Wallet wallet = fromEntity(walletEntity);
-    if (StringUtils.isNotBlank(contractAddress)) {
-      retrieveWalletApprovalBlockchainState(wallet, contractAddress);
-    }
-    return wallet;
+    return fromEntity(walletEntity);
   }
 
   /**
@@ -110,11 +106,7 @@ public class WalletStorage {
     if (walletEntity == null) {
       return null;
     }
-    Wallet wallet = fromEntity(walletEntity);
-    if (StringUtils.isNotBlank(contractAddress)) {
-      retrieveWalletApprovalBlockchainState(wallet, contractAddress);
-    }
-    return wallet;
+    return fromEntity(walletEntity);
   }
 
   /**
@@ -137,10 +129,6 @@ public class WalletStorage {
     if (blockchainStateEntity != null) {
       wallet.setEtherBalance(blockchainStateEntity.getEtherBalance());
       wallet.setTokenBalance(blockchainStateEntity.getTokenBalance());
-      wallet.setRewardBalance(blockchainStateEntity.getRewardBalance());
-      wallet.setVestingBalance(blockchainStateEntity.getVestingBalance());
-      wallet.setAdminLevel(blockchainStateEntity.getAdminLevel());
-      wallet.setIsApproved(blockchainStateEntity.isApproved());
       wallet.setIsInitialized(blockchainStateEntity.isInitialized());
     }
   }
@@ -278,31 +266,11 @@ public class WalletStorage {
     blockchainStateEntity.setContractAddress(contractAddress);
     blockchainStateEntity.setEtherBalance(wallet.getEtherBalance() == null ? 0 : wallet.getEtherBalance());
     blockchainStateEntity.setTokenBalance(wallet.getTokenBalance() == null ? 0 : wallet.getTokenBalance());
-    blockchainStateEntity.setRewardBalance(wallet.getRewardBalance() == null ? 0 : wallet.getRewardBalance());
-    blockchainStateEntity.setVestingBalance(wallet.getVestingBalance() == null ? 0 : wallet.getVestingBalance());
-    blockchainStateEntity.setAdminLevel(wallet.getAdminLevel() == null ? 0 : wallet.getAdminLevel());
-    blockchainStateEntity.setApproved(wallet.getIsApproved() != null && wallet.getIsApproved());
     blockchainStateEntity.setInitialized(wallet.getIsInitialized() != null && wallet.getIsInitialized());
     if (isNew) {
       blockchainStateDAO.create(blockchainStateEntity);
     } else {
       blockchainStateDAO.update(blockchainStateEntity);
-    }
-  }
-
-  private void retrieveWalletApprovalBlockchainState(Wallet wallet, String contractAddress) {
-    if (wallet == null) {
-      throw new IllegalArgumentException("wallet is mandatory");
-    }
-
-    if (StringUtils.isBlank(contractAddress)) {
-      throw new IllegalArgumentException("contractAddress is mandatory");
-    }
-
-    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(wallet.getTechnicalId(),
-                                                                                                     contractAddress);
-    if (blockchainStateEntity != null) {
-      wallet.setIsApproved(blockchainStateEntity.isApproved());
     }
   }
 

@@ -271,8 +271,6 @@ export default {
         const contractAddress = this.principalContractDetails.address;
         const amountWithDecimals = this.walletUtils.convertTokenAmountToSend(amount, this.principalContractDetails.decimals);
 
-        let approvedSender = false;
-        let approvedReceiver = false;
         let receiverAddress = null;
         let senderAddress = null;
         let receiverWallet = null;
@@ -281,10 +279,6 @@ export default {
         return this.addressRegistry.searchWalletByTypeAndId(receiver.id, receiver.type)
           .then((wallet) => {
             receiverWallet = wallet;
-            approvedReceiver = receiverWallet && receiverWallet.isApproved;
-            if (!approvedReceiver) {
-              throw new Error(this.$t('exoplatform.wallet.warning.receiverNotApprovedByAdministrator'));
-            }
 
             receiverAddress = receiverWallet && receiverWallet.address;
             if (!receiverAddress || !receiverAddress.length) {
@@ -294,10 +288,6 @@ export default {
           .then(() => this.addressRegistry.searchWalletByTypeAndId(sender.id, sender.type))
           .then((wallet) => {
             senderWallet = wallet;
-            approvedSender = senderWallet && senderWallet.isApproved;
-            if (!approvedSender) {
-              throw new Error(this.$t('exoplatform.wallet.warning.senderNotApprovedByAdministrator'));
-            }
 
             senderAddress = senderWallet && senderWallet.address;
 
@@ -319,7 +309,7 @@ export default {
             gasPrice: gasPrice,
           }))
           .catch((e) => {
-            if (approvedReceiver && approvedSender) {
+            if (receiverWallet && senderWallet) {
               console.error('Error estimating transaction fee', {
                 from: senderAddress,
                 to: receiverAddress,

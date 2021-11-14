@@ -302,6 +302,12 @@ export function getAddressEtherscanlink() {
     return 'https://etherscan.io/address/';
   case 3:
     return 'https://ropsten.etherscan.io/address/';
+  case 5:
+    return 'https://goerli.etherscan.io/address/';
+  case 137:
+    return 'https://polygonscan.com/address/';
+  case 80001:
+    return 'https://mumbai.polygonscan.com/address/';
   default:
     return '#';
   }
@@ -313,6 +319,13 @@ export function getTokenEtherscanlink() {
     return 'https://etherscan.io/token/';
   case 3:
     return 'https://ropsten.etherscan.io/token/';
+  case 5:
+    return 'https://goerli.etherscan.io/token/';
+  case 137:
+    return 'https://polygonscan.com/token/';
+  case 80001:
+    return 'https://mumbai.polygonscan.com/token/';
+
   default:
     return '#';
   }
@@ -324,6 +337,12 @@ export function getTransactionEtherscanlink() {
     return 'https://etherscan.io/tx/';
   case 3:
     return 'https://ropsten.etherscan.io/tx/';
+  case 5:
+    return 'https://goerli.etherscan.io/tx/';
+  case 137:
+    return 'https://polygonscan.com/tx/';
+  case 80001:
+    return 'https://mumbai.polygonscan.com/tx/';
   default:
     return '#';
   }
