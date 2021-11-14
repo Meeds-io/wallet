@@ -24,10 +24,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </template>
     <template slot="content" class="walletRequestFundsModal">
       <v-card-text>
-        <div v-if="error" class="alert alert-error v-content">
-          <i class="uiIconError"></i>{{ error }}
+        <div
+          class="text-sub-title"
+          id="walletBackupDetailedWarning">
+          {{ $t('exoplatform.wallet.message.restoreWalletPart1') }}
+          <span v-if="walletAddress"> {{ $t('exoplatform.wallet.message.restoreWalletPart2',{0 : walletAddress}) }} <br> </span>
         </div>
-
         <v-form
           ref="form"
           @submit="
@@ -36,28 +38,37 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           ">
           <v-text-field
             v-model="walletPrivateKey"
-            :append-icon="walletPrivateKeyShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.priv]"
-            :type="walletPrivateKeyShow ? 'text' : 'password'"
+            :type="password"
             :disabled="loading"
             :label="$t('exoplatform.wallet.label.walletPrivateKey')"
             :placeholder="$t('exoplatform.wallet.label.walletPrivateKeyPlaceholder')"
             name="walletPrivateKey"
             autocomplete="off"
             autofocus
-            validate-on-blur
-            @click:append="walletPrivateKeyShow = !walletPrivateKeyShow" />
+            validate-on-blur />
           <v-text-field
             v-model="walletPassword"
             :append-icon="walletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
             :rules="[rules.min]"
             :type="walletPasswordShow ? 'text' : 'password'"
             :disabled="loading"
-            :label="$t('exoplatform.wallet.label.walletPassword')"
+            :label="$t('exoplatform.wallet.label.newWalletPassword')"
             :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
             name="walletPassword"
             autocomplete="current-passord"
             @click:append="walletPasswordShow = !walletPasswordShow" />
+          <v-text-field
+            v-model="confirmNewWalletPassword"
+            :append-icon="newWalletPasswordShow ? 'mdi-eye' : 'mdi-eye-off'"
+            :rules="[rules.passwordMatching]"
+            :type="newWalletPasswordShow ? 'text' : 'password'"
+            :disabled="loading"
+            :label="$t('exoplatform.wallet.label.newWalletPasswordConfirm')"
+            :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholderConfirm')"
+            name="confirmNewWalletPassword"
+            autocomplete="new-passord"
+            @click:append="newWalletPasswordShow = !newWalletPasswordShow" />
         </v-form>
       </v-card-text>
     </template>
@@ -103,13 +114,14 @@ export default {
     return {
       walletPrivateKey: '',
       walletPrivateKeyShow: false,
-      error: null,
       loading: false,
       walletPassword: null,
+      confirmNewWalletPassword: null,
       walletPasswordShow: false,
       rules: {
         min: (v) => (v && v.length >= 8) || 'At least 8 characters',
         priv: (v) => (v && (v.length === 66 || v.length === 64)) || 'Exactly 64 or 66 (with "0x") characters are required',
+        passwordMatching: (v) => (v && v === this.walletPassword) || this.$t('exoplatform.wallet.warning.passwordNotMatching'),
       },
     };
   },
@@ -147,6 +159,7 @@ export default {
             saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, true)
               .then(() => {
                 thiss.loading = false;
+                this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.success.walletImportedSuccessfully')});
                 thiss.close();
                 thiss.$nextTick(() => {
                   thiss.$emit('configured');
@@ -155,16 +168,16 @@ export default {
               .catch((e) => {
                 thiss.loading = false;
                 console.error('saveBrowserWalletInstance method - error', e);
-                thiss.error = 'Error processing new keys';
+                this.$root.$emit('show-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.errorProcessingNewKeys')});
               });
           } else {
             thiss.loading = false;
-            thiss.error = this.$t('exoplatform.wallet.error.wrongPrivateKey', {0: thiss.walletAddress});
+            this.$root.$emit('show-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.wrongPrivateKey', {0: thiss.walletAddress})});
           }
         } catch (e) {
           thiss.loading = false;
           console.error('Error importing private key', e);
-          thiss.error = this.$t('exoplatform.wallet.error.errorImportingPrivateKey');
+          this.$root.$emit('show-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.errorImportingPrivateKey')});
         }
       }, 200);
     },
@@ -173,6 +186,7 @@ export default {
     },
     close() {
       this.$refs.walletImportKeyModal.close();
+      this.resetForm();
     }
   },
 };
