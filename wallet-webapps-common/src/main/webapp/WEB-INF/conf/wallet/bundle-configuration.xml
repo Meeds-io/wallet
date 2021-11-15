@@ -36,12 +36,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <value>locale.addon.Wallet</value>
                 <value>locale.notification.WalletNotification</value>
                 <value>locale.navigation.group.platform.rewarding</value>
+                <value>locale.portlet.Portlets</value>
             </values-param>
             <values-param>
                 <name>init.resources</name>
                 <value>locale.addon.Wallet</value>
                 <value>locale.notification.WalletNotification</value>
                 <value>locale.navigation.group.platform.rewarding</value>
+                <value>locale.portlet.Portlets</value>
             </values-param>
         </init-params>
         </component-plugin>

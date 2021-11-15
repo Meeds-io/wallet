@@ -3,7 +3,7 @@
     <template v-if="displayed">
       <wallet-settings-details
         v-if="displayDetails"
-        :wallet="wallet"
+        :wallet-details="wallet"
         @back="closeDetail"
         @settings-changed="openDetail" />
       <v-card
