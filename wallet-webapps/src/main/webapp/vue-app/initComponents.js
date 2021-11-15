@@ -17,13 +17,13 @@ const components = {
   'wallet-reward-toolbar-menu': ToolbarMenu,
   'wallet-reward-transaction-history-chart': TransactionHistoryChart,
   'wallet-reward-transaction-history-chart-summary': TransactionHistoryChartSummary,
-
 };
 
 const externalComponentOptions = {
   name: 'space-wallet-setting',
   componentImpl: Vue.options.components['wallet-settings']
 };
+
 document.dispatchEvent(new CustomEvent('addExternalComponents', {'detail': externalComponentOptions}));
 
 for (const key in components) {
