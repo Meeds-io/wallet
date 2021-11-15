@@ -181,8 +181,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     left: auto ~'!important; /** orientation=lt */ ';
     left: 20px ~'!important; /** orientation=rt */ ';
     right: auto ~'!important; /** orientation=rt */ ';
-    float: right~'!important; /** orientation=lt */ ';
-    float: left~'!important; /** orientation=rt */ ';
+    float: right ~'!important; /** orientation=lt */ ';
+    float: left ~'!important; /** orientation=rt */ ';
   }
 
   .walletAccountMenu {
@@ -971,7 +971,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 @media (max-width : @smallMobileWidth){
-  #WalletApp {
+  #WalletApp, #SpaceWalletApp {
     .fixedItems {
       position: absolute;
       right: 0 ~'!important; /** orientation=lt */ ';
@@ -987,7 +987,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   }
 }
 @media (min-width : @smallMobileWidth) and (max-width : @minTabletWidth) {
-  #WalletApp {
+  #WalletApp, #SpaceWalletApp {
     .fixedItems {
       position: absolute;
       right: 0 ~'!important; /** orientation=lt */ ';
@@ -1006,7 +1006,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   }
 }
 @media (min-width : @minTabletWidth){
-  #WalletApp {
+  #WalletApp, #SpaceWalletApp {
     .fixedItems {
       position: absolute;
       right: 0 ~'!important; /** orientation=lt */ ';
