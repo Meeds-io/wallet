@@ -8,7 +8,7 @@
         @settings-changed="openDetail" />
       <v-card
         v-else
-        class="ma-4 border-radius"
+        class="ma-4 walletSettingsCard border-radius"
         flat>
         <v-list>
           <v-list-item>
@@ -92,8 +92,8 @@ export default {
     },
     getWallet(id,type) {
       if (!id){
-        id = eXo.env.portal.userName ;
-        type ='user';
+        id = eXo.env.portal.spaceName !== '' ? eXo.env.portal.spaceName : eXo.env.portal.userName ;
+        type = eXo.env.portal.spaceName !== '' ? 'space' : 'user';
       }
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${id}&type=${type}`)
         .then((resp) => resp && resp.ok && resp.json())

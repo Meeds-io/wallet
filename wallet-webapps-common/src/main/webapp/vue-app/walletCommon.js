@@ -34,13 +34,14 @@ import RequestFundsModal from './components/WalletRequestFundsModal.vue';
 import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
 import BackupDrawer from './components/WalletBackupDrawer.vue';
+import WalletSettingsDetails from './wallet-settings/components/WalletSettingsDetails.vue';
 import WalletSettings from './wallet-settings/components/WalletSettings.vue';
+
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
 import * as tokenUtils from './js/TokenUtils.js';
 import * as transactionUtils from './js/TransactionUtils.js';
-import {registerExternalComponents} from './wallet-settings/extension.js';
 
 const WalletCommon = {
   install: (Vue) => {
@@ -51,7 +52,7 @@ const WalletCommon = {
     Vue.prototype.transactionUtils = transactionUtils;
   },
 };
-const components = {
+export const components = {
   'wallet-reward-account-detail': AccountDetail,
   'wallet-reward-address-auto-complete': AddressAutoComplete,
   'wallet-reward-confirm-dialog': ConfirmDialog,
@@ -73,11 +74,10 @@ const components = {
   'wallet-reward-setup': WalletSetup,
   'wallet-reward-backup-drawer': BackupDrawer,
   'wallet-settings': WalletSettings,
+  'wallet-settings-details': WalletSettingsDetails,
 };
 
 for (const key in components) {
   Vue.component(key, components[key]);
 }
 window.WalletCommon = WalletCommon;
-
-registerExternalComponents('space-wallet-setting', components['wallet-settings']);
