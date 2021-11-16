@@ -62,14 +62,14 @@ export default {
         const id = this.getQueryParam('id');
         const type = this.getQueryParam('type');
         this.getWallet(id,type);
-        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWalletPageTitle'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
         document.location.hash = '#walletSettings';
       }
       if (this.from === 'space') {
         const id = this.getQueryParam('id');
         const type = this.getQueryParam('type');
         this.getWallet(id,type);
-        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWalletPageTitle'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
         document.location.hash = '#walletSettings';
       }
     }, 300);
@@ -91,10 +91,10 @@ export default {
     closeDetail() {
       document.dispatchEvent(new CustomEvent('showSettingsApps'));
       this.displayDetails = false;
-      if (this.from === 'space' || eXo.env.portal.spaceName !== ''){
-        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
+      if (this.from === 'space' || eXo.env.portal.spaceName){
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWalletPageTitle'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
       } else {
-        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWalletPageTitle'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
       }
     },
     getQueryParam(paramName) {
@@ -104,8 +104,8 @@ export default {
     },
     getWallet(id,type) {
       if (!id){
-        id = eXo.env.portal.spaceName !== '' ? eXo.env.portal.spaceName : eXo.env.portal.userName ;
-        type = eXo.env.portal.spaceName !== '' ? 'space' : 'user';
+        id = eXo.env.portal.spaceName ? eXo.env.portal.spaceName : eXo.env.portal.userName ;
+        type = eXo.env.portal.spaceName ? 'space' : 'user';
       }
       return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${id}&type=${type}`)
         .then((resp) => resp && resp.ok && resp.json())
