@@ -144,6 +144,10 @@ export default {
         return null;
       },
     },
+    isSpace: {
+      type: Boolean,
+      default: false
+    },
   },
   data: () => ({
     id: `WalletSettingsDetails${parseInt(Math.random() * 10000)}`,
@@ -156,9 +160,6 @@ export default {
   computed: {
     wallet () {
       return this.walletDetails;
-    },
-    isSpace(){
-      return this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0;
     }
   },
   created(){

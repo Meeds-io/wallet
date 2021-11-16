@@ -4,6 +4,7 @@
       <wallet-settings-details
         v-if="displayDetails"
         :wallet-details="wallet"
+        :is-space="isSpace"
         @back="closeDetail"
         @settings-changed="openDetail" />
       <v-card
@@ -42,6 +43,11 @@ export default {
     wallet: null,
     from: '',
   }),
+  computed: {
+    isSpace(){
+      return this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0;
+    }
+  },
   created() {
     document.addEventListener('hideSettingsApps', (event) => {
       if (event && event.detail && this.id !== event.detail) {
@@ -49,20 +55,21 @@ export default {
       }
     });
     document.addEventListener('showSettingsApps', () => this.displayed = true);
+    this.init();
     setTimeout( () => {
       this.from = this.getQueryParam('from');
       if (this.from === 'walletApp') {
         const id = this.getQueryParam('id');
         const type = this.getQueryParam('type');
         this.getWallet(id,type);
-        window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
         document.location.hash = '#walletSettings';
       }
       if (this.from === 'space') {
         const id = this.getQueryParam('id');
         const type = this.getQueryParam('type');
         this.getWallet(id,type);
-        window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
         document.location.hash = '#walletSettings';
       }
     }, 300);
@@ -71,18 +78,23 @@ export default {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
   },
   methods: {
+    init() {
+      this.walletUtils.initSettings(eXo.env.portal.spaceName !== '', true)
+        .then(() => this.walletUtils.initWeb3(this.isSpace, true));
+    },
     openDetail() {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', {detail: this.id}));
       this.getWallet();
       this.displayDetails = true;
+      this.init();
     },
     closeDetail() {
       document.dispatchEvent(new CustomEvent('showSettingsApps'));
       this.displayDetails = false;
-      if (this.from === 'space'){
-        window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings/settings`);
+      if (this.from === 'space' || eXo.env.portal.spaceName !== ''){
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings`);
       } else {
-        window.history.replaceState('wallet', 'My wallet', `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
+        window.history.replaceState('wallet', this.$t('exoplatform.wallet.title.myWallet'), `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings`);
       }
     },
     getQueryParam(paramName) {
