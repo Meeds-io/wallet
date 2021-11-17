@@ -24,7 +24,7 @@ const externalComponentOptions = {
   componentImpl: Vue.options.components['wallet-settings']
 };
 
-document.dispatchEvent(new CustomEvent('addExternalComponents', {'detail': externalComponentOptions}));
+document.dispatchEvent(new CustomEvent('addSpaceSettingsExternalComponents', {'detail': externalComponentOptions}));
 
 for (const key in components) {
   Vue.component(key, components[key]);
