@@ -3,7 +3,6 @@
     <template v-if="displayed">
       <v-card
         v-if="!displayManagePasswordDetails"
-        class="ma-4 walletSetting"
         flat>
         <v-card-title>
           <v-toolbar

@@ -5,11 +5,13 @@
         v-if="displayDetails"
         :wallet-details="wallet"
         :is-space="isSpace"
+        :class="walletSettingsClass"
         @back="closeDetail"
         @settings-changed="openDetail" />
       <v-card
         v-else
-        class="ma-4 walletSettingsCard border-radius"
+        class="border-radius"
+        :class="walletSettingsClass"
         flat>
         <v-list>
           <v-list-item>
@@ -46,6 +48,9 @@ export default {
   computed: {
     isSpace(){
       return this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0;
+    },
+    walletSettingsClass(){
+      return eXo.env.portal.spaceName ? '': 'ma-4' ;
     }
   },
   created() {
