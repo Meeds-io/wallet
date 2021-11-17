@@ -3,7 +3,6 @@
     <template v-if="displayed">
       <v-card
         v-if="!displayManagePasswordDetails"
-        class="ma-4 walletSetting"
         flat>
         <v-card-title>
           <v-toolbar
@@ -88,8 +87,8 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider v-if="wallet.address" />
-          <v-list-item class="manageKey" v-if="wallet.address">
+          <v-divider v-if="wallet && wallet.address" />
+          <v-list-item class="manageKey" v-if="wallet && wallet.address">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.label.ethereumAddress') }}
@@ -101,9 +100,9 @@
             <v-list-item-action>
               <wallet-reward-qr-code
                 ref="qrCode"
-                :to="wallet.address"
+                :to="wallet && wallet.address"
                 :title="$t('exoplatform.wallet.title.addressQRCode')" />
-              <wallet-reward-address :value="wallet.address" :allow-edit="false" />
+              <wallet-reward-address :value="wallet && wallet.address" :allow-edit="false" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -119,7 +118,7 @@
       <wallet-reward-import-key-drawer
         ref="walletImportKey"
         :is-space="isSpace"
-        :wallet-address="wallet.address"
+        :wallet-address="wallet && wallet.address"
         @configured="$emit('settings-changed'); " />
       <wallet-reward-backup-drawer
         ref="walletBackup"
@@ -138,11 +137,15 @@
 <script>
 export default {
   props: {
-    wallet: {
+    walletDetails: {
       type: Object,
       default: function() {
         return null;
       },
+    },
+    isSpace: {
+      type: Boolean,
+      default: false
     },
   },
   data: () => ({
@@ -154,8 +157,8 @@ export default {
     message: '',
   }),
   computed: {
-    isSpace(){
-      return this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0;
+    wallet () {
+      return this.walletDetails;
     }
   },
   created(){
