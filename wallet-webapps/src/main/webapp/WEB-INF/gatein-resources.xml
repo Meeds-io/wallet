@@ -76,6 +76,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <depends>
         <module>extensionRegistry</module>
       </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
     </module>
   </portlet>
 
@@ -133,6 +137,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <depends>
         <module>commons-cometd3</module>
         <as>cCometd</as>
+      </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
       </depends>
     </module>
   </portlet>
@@ -235,6 +243,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </depends>
       <depends>
         <module>extensionRegistry</module>
+      </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
       </depends>
     </module>
   </portlet>

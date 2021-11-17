@@ -29,6 +29,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <name>exo.profiles</name>
             <value>wallet</value>
         </init-param>
+        <init-param>
+            <name>prefetch.resource.bundles</name>
+            <value>locale.portlet.Portlets</value>
+        </init-param>
         <supports>
             <mime-type>text/html</mime-type>
         </supports>
