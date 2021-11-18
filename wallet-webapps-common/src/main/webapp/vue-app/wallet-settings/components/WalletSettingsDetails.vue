@@ -30,7 +30,7 @@
         </v-card-subtitle>
 
         <v-list class="mx-8">
-          <v-list-item>
+          <v-list-item v-if="wallet && wallet.address">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.label.managePassword') }}
@@ -50,8 +50,8 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider />
-          <v-list-item>
+          <v-divider v-if="wallet && wallet.address" />
+          <v-list-item v-if="wallet && wallet.address">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.title.backupWalletModal') }}
@@ -69,7 +69,7 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider />
+          <v-divider v-if="wallet && wallet.address" />
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="title text-color">
