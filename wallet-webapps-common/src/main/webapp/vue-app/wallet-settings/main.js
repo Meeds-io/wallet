@@ -32,7 +32,7 @@ Vue.use(WalletCommon);
 const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
-const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
+const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.portlet.Portlets-${lang}.json`;
 
 const appId = 'walletSettings';
 const cacheId = `${appId}_${eXo.env.portal.profileOwnerIdentityId}`;
