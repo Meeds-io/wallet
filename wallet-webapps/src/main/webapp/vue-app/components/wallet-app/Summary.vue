@@ -26,9 +26,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           wrap
           color="transparent"
           class="WalletSummary">
-          <v-flex class="summaryCard mr-3">
+          <v-flex class="summaryCard mr-3" v-if="!walletReadonly">
             <div class="border-box-sizing" v-if="walletAddress && contractDetails">
-              <button class="btn ignore-vuetify-classes me-1" @click="openExchangeDrawer">  {{ $t('exoplatform.wallet.label.exchanges') }} </button>
+              <button
+                class="btn ignore-vuetify-classes me-1"
+                @click="openExchangeDrawer">
+                {{ $t('exoplatform.wallet.label.exchanges') }}
+              </button>
             </div>
             <wallet-reward-summary-buttons
               ref="walletSummaryActions"
@@ -41,7 +45,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               @transaction-sent="newPendingTransaction"
               @error="error = $event" />
           </v-flex>
-          <v-flex class="summaryCard">
+          <v-flex class="summaryCard" v-if="!walletReadonly">
             <wallet-reward-summary-transaction
               v-if="walletAddress && contractDetails"
               :contract-details="contractDetails"
@@ -61,7 +65,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :wallet="wallet"
               :contract-details="contractDetails" />
           </v-flex>
-          <v-flex class="fixedItems no-wrap">
+          <v-flex class="fixedItems no-wrap" v-if="!walletReadonly">
             <div
               v-if="pendingTransactionsCount"
               primary-title
