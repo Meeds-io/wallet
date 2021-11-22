@@ -6,7 +6,7 @@ import SummaryTransaction from './components/wallet-app/SummaryTransaction.vue';
 import ToolbarMenu from './components/wallet-app/ToolbarMenu.vue';
 import TransactionHistoryChart from './components/wallet-app/TransactionHistoryChart.vue';
 import TransactionHistoryChartSummary from './components/wallet-app/TransactionHistoryChartSummary.vue';
-import {getSpaceApplications} from './utils.js';
+import {addSpaceSettings} from '../js/utils.js';
 
 Vue.use(WalletCommon);
 
@@ -21,18 +21,7 @@ const components = {
   'wallet-reward-transaction-history-chart-summary': TransactionHistoryChartSummary,
 };
 
-const externalComponentOptions = {
-  name: 'space-wallet-setting',
-  componentImpl: Vue.options.components['wallet-settings']
-};
-
-getSpaceApplications(eXo.env.portal.spaceId)
-  .then(applications => {
-    if (applications.find(app => app.id === 'SpaceWallet')){
-      document.dispatchEvent(new CustomEvent('addSpaceSettingsExternalComponents', {'detail': externalComponentOptions}));
-    }
-  });
-
+addSpaceSettings('space-wallet-setting', Vue.options.components['wallet-settings']);
 
 for (const key in components) {
   Vue.component(key, components[key]);
