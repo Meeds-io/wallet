@@ -38,6 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     class="ms-0 me-0 pr-0">
                     <wallet-reward-summary
                       ref="walletSummary"
+                      v-if="!walletReadonly"
                       :wallet="wallet"
                       :is-space="isSpace"
                       :is-space-administrator="isSpaceAdministrator"
