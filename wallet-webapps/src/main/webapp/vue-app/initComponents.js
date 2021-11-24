@@ -20,9 +20,7 @@ const components = {
   'wallet-reward-transaction-history-chart': TransactionHistoryChart,
   'wallet-reward-transaction-history-chart-summary': TransactionHistoryChartSummary,
 };
-
 addSpaceSettings('space-wallet-setting', Vue.options.components['wallet-settings']);
-
 for (const key in components) {
   Vue.component(key, components[key]);
 }
