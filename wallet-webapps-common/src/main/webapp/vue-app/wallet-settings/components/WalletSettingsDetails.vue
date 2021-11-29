@@ -161,7 +161,7 @@
         :ok-label="$t('exoplatform.wallet.button.confirm')"
         :cancel-label="$t('exoplatform.wallet.button.cancel')"
         width="400px"
-        @ok="changeWalletInitializationStatus" />
+        @ok="deleteWallet" />
     </template>
   </v-app>
 </template>
@@ -219,8 +219,8 @@ export default {
     openDeleteConfirmationModal() {
       this.$refs.informationModal.open();
     },
-    changeWalletInitializationStatus() {
-      return this.walletUtils.saveWalletInitializationStatus(this.walletDetails.address, 'DELETED')
+    deleteWallet() {
+      return this.walletUtils.deleteWallet(this.walletDetails.address)
         .then(() => {
           this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')});
           return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;

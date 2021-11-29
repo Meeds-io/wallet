@@ -573,6 +573,15 @@ export function saveWalletInitializationStatus(address, status) {
     }
   });
 }
+export function deleteWallet(address) {
+  return fetch(`/portal/rest/wallet/api/account/deleteWallet?address=${address}`, {
+    credentials: 'include',
+  }).then((resp) => {
+    if (!resp || !resp.ok) {
+      throw new Error('Error while deleting wallet');
+    }
+  });
+}
 
 function triggerTransactionMinedEvent(event) {
   return triggerTransactionMined(event && event.detail && event.detail.string);

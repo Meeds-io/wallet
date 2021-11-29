@@ -146,7 +146,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @Path("setInitializationStatus")
   @GET
-  @RolesAllowed("users")
+  @RolesAllowed("rewarding")
   @ApiOperation(value = "Modify initialization status of wallet", httpMethod = "GET", response = Response.class, notes = "returns empty response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
@@ -154,7 +154,7 @@ public class WalletAccountREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
       @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
   public Response setInitializationStatus(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
-                                          @ApiParam(value = "intialization status: new, modified, pending, initialized, denied or deleted", required = true) @QueryParam("status") String status) {
+                                          @ApiParam(value = "intialization status: new, modified, pending, initialized or denied", required = true) @QueryParam("status") String status) {
     if (StringUtils.isBlank(address)) {
       LOG.warn(EMPTY_ADDRESS_MESSAGE);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -165,11 +165,35 @@ public class WalletAccountREST implements ResourceContainer {
     }
     try {
       accountService.setInitializationStatus(address,
-                                             WalletState.valueOf(status.toUpperCase()),
+              WalletState.valueOf(status.toUpperCase()),
                                              getCurrentUserId());
       return Response.ok().build();
     } catch (Exception e) {
       LOG.error("Can't set wallet initialized status '{}'", status, e);
+      return Response.serverError().build();
+    }
+  }
+  @Path("deleteWallet")
+  @GET
+  @RolesAllowed("users")
+  @ApiOperation(value = "Modify initialization status of wallet to delete", httpMethod = "GET", response = Response.class, notes = "returns empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
+  public Response deleteWallet(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address) {
+    if (StringUtils.isBlank(address)) {
+      LOG.warn(EMPTY_ADDRESS_MESSAGE);
+      return Response.status(HTTPStatus.BAD_REQUEST).build();
+    }
+    try {
+      accountService.setInitializationStatus(address,
+                                             WalletState.DELETED,
+                                             getCurrentUserId());
+      return Response.ok().build();
+    } catch (Exception e) {
+      LOG.error("Can't set wallet status '{}'", WalletState.DELETED, e);
       return Response.serverError().build();
     }
   }
