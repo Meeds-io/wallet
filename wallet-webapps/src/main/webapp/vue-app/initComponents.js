@@ -29,5 +29,5 @@ const externalComponentOptions = {
   componentImpl: Vue.options.components['wallet-settings']
 };
 if (extensionRegistry) {
-  extensionRegistry.registerComponent('external-space', 'settings', externalComponentOptions);
+  extensionRegistry.registerComponent('external-apps-space-settings', 'space-settings', externalComponentOptions);
 }
