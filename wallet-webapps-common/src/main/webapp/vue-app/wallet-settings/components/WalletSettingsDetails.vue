@@ -155,10 +155,7 @@
         ref="informationModal"
         :loading="loading"
         :title="$t('exoplatform.wallet.title.deleteWalletConfirmationModal')"
-<<<<<<< Updated upstream
-=======
         title-class="deleteText"
->>>>>>> Stashed changes
         :message="$t('exoplatform.wallet.message.deleteWalletConfirmationModal')"
         :hide-default-footer="false"
         :ok-label="$t('exoplatform.wallet.button.confirm')"
