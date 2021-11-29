@@ -20,10 +20,10 @@ import static org.junit.Assert.*;
 
 import java.util.Set;
 
+import org.exoplatform.wallet.model.WalletState;
 import org.junit.Test;
 
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
@@ -72,7 +72,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     checkWalletContent(wallet, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_1, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
 
-    String newInitializationState = WalletInitializationState.DENIED.name();
+    String newInitializationState = WalletState.DENIED.name();
     wallet.setInitializationState(newInitializationState);
     wallet = walletStorage.saveWallet(wallet, false);
 

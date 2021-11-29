@@ -164,12 +164,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
                                                                        walletModifications);
         saveWalletBlockchainState(wallet, contractDetail.getAddress());
 
-        if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.INITIALIZED.name()) &&
-            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.PENDING.name()) &&
-            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletInitializationState.DENIED.name())
+        if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.INITIALIZED.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.PENDING.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.DENIED.name())
             && wallet.getIsInitialized() != null && wallet.getIsInitialized()) {
-          wallet.setInitializationState(WalletInitializationState.INITIALIZED.name());
-          setInitializationStatus(wallet.getAddress(), WalletInitializationState.INITIALIZED);
+          wallet.setInitializationState(WalletState.INITIALIZED.name());
+          setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
 
         getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
@@ -389,9 +389,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     checkCanSaveWallet(wallet, oldWallet, currentUser);
     if (isNew) {
       // New wallet created for user/space
-      wallet.setInitializationState(WalletInitializationState.NEW.name());
+      wallet.setInitializationState(WalletState.NEW.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
-      wallet.setInitializationState(WalletInitializationState.MODIFIED.name());
+      wallet.setInitializationState(WalletState.MODIFIED.name());
     } else {
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
@@ -501,7 +501,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   @ExoWalletStatistic(local = true, service = "wallet", operation = STATISTIC_OPERATION_INITIALIZATION)
   public void setInitializationStatus(String address,
-                                      WalletInitializationState initializationState,
+                                      WalletState initializationState,
                                       String currentUser) throws IllegalAccessException {
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
@@ -517,25 +517,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalStateException(CAN_T_FIND_WALLET_ASSOCIATED_TO_ADDRESS + address);
     }
 
-    if (!isUserRewardingAdmin(currentUser)) {
-      // The only authorized initialization transition allowed to a regular user
-      // is to request to initialize his wallet when it has been denied by an
-      // administrator
-      WalletInitializationState oldInitializationState = WalletInitializationState.valueOf(wallet.getInitializationState());
-      if (oldInitializationState != WalletInitializationState.DENIED
-          || initializationState != WalletInitializationState.MODIFIED
-          || !isWalletOwner(wallet, currentUser)) {
-        throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to change wallet status with address "
-            + address + " to " + initializationState.name());
-      }
-      if (oldInitializationState == WalletInitializationState.INITIALIZED) {
-        throw new IllegalAccessException("Wallet was already marked as initialized, thus the status for address " + address
-            + " can't change to status " + initializationState.name());
-      }
-    }
     wallet.setInitializationState(initializationState.name());
     accountStorage.saveWallet(wallet, false);
 
+    LOG.warn( currentUser + " changed its wallet status with address "
+            + address + " to " + initializationState.name());
     try {
       getListenerService().broadcast(WALLET_INITIALIZATION_MODIFICATION_EVENT, wallet, currentUser);
     } catch (Exception e) {
@@ -544,7 +530,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
-  public void setInitializationStatus(String address, WalletInitializationState initializationState) {
+  public void setInitializationStatus(String address, WalletState initializationState) {
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
     }
@@ -641,8 +627,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       } else {
         parameters.put("", wallet);
       }
-      WalletInitializationState initializationState = (WalletInitializationState) methodArgs[1];
-      if (initializationState == WalletInitializationState.DENIED) {
+      WalletState initializationState = (WalletState) methodArgs[1];
+      if (initializationState == WalletState.DENIED) {
         parameters.put(OPERATION, "reject");
       } else {
         LOG.debug("No statistic log is handeled for initialization state modification to {}", initializationState);

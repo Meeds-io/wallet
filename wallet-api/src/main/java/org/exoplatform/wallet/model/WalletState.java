@@ -16,10 +16,11 @@
  */
 package org.exoplatform.wallet.model;
 
-public enum WalletInitializationState {
+public enum WalletState {
   NEW,
   MODIFIED,
   PENDING,
   INITIALIZED,
-  DENIED
+  DENIED,
+  DELETED
 }

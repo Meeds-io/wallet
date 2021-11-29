@@ -212,7 +212,7 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
   const address = account['address'].toLowerCase();
 
   let promise = null;
-  if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address) {
+  if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.wallet.initializationState !== 'DELETED') {
     promise = Promise.resolve();
   } else {
     promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, true)
