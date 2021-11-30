@@ -89,7 +89,7 @@
             </v-list-item-action>
           </v-list-item>
           <v-divider v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'" />
-          <v-list-item class="deleteWallet">
+          <v-list-item class="deleteWallet" v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'">
             <v-list-item-content>
               <v-list-item-title class="title deleteText">
                 {{ $t('exoplatform.wallet.title.deleteWalletConfirmationModal') }}

@@ -18,7 +18,6 @@ package org.exoplatform.wallet.service;
 
 import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
-
 import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -538,7 +537,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if( initializationState == WalletState.DELETED){
       LOG.warn( currentUser + "changed its wallet status with address "
               + address + " to " + initializationState.name());
-    }
+      try {
+        getListenerService().broadcast(WALLET_DELETED_EVENT, wallet, currentUser);
+      } catch (Exception e) {
+        LOG.error("Error while braodcasting wallet {} state modification", wallet, currentUser);
+      }    }
     try {
       getListenerService().broadcast(WALLET_INITIALIZATION_MODIFICATION_EVENT, wallet, currentUser);
     } catch (Exception e) {

@@ -29,7 +29,7 @@
   GlobalSettings globalSettings = ExoContainerContext.getService(WalletService.class).getSettings();
   String symbol = globalSettings == null || globalSettings.getContractDetail() == null ? "" : globalSettings.getContractDetail().getSymbol();
   Wallet wallet = ExoContainerContext.getService(WalletAccountService.class).getWalletByTypeAndId(WalletType.USER.getId(), request.getRemoteUser(), request.getRemoteUser());
-  double balance = (wallet == null || wallet.getTokenBalance() == null) ? 0d : wallet.getTokenBalance();
+  double balance = (wallet == null || wallet.getTokenBalance() == null || wallet.getInitializationState() == "DELETED") ? 0d : wallet.getTokenBalance();
   String balanceFixed = balance > 100 ? String.valueOf((int) balance)
                                         : String.valueOf(balance).replaceFirst("\\.([0-9][1-9]?)([0-9]*)", ".$1").replaceFirst("\\.0$", "");
 %>

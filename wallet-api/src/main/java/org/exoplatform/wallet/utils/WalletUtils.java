@@ -162,6 +162,8 @@ public class WalletUtils {
 
   public static final String                          WALLET_DISABLED_EVENT                    = "exo.wallet.disabled";
 
+  public static final String                          WALLET_DELETED_EVENT                    = "exo.wallet.deleted";
+
   public static final String                          WALLET_INITIALIZATION_MODIFICATION_EVENT =
                                                                                                "exo.wallet.initialization.state";
 
