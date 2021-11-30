@@ -177,7 +177,7 @@ export default {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },
     walletReadonly() {
-      return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
+      return this.isSpace && !this.isSpaceAdministrator;
     },
   },
   methods: {
