@@ -64,7 +64,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           error = $event;
                         " />
                     </div>
-                    <template v-if="wallet && contractDetails && initializationState !== 'DENIED'">
+                    <template v-if="wallet && contractDetails">
                       <v-flex class="chartHistory WalletChart mt-6">
                         <wallet-reward-transaction-history-chart-summary
                           v-if="!loading"
@@ -181,7 +181,7 @@ export default {
       return this.isSpace ? 'SpaceWalletApp' : 'WalletApp';
     },
     walletReadonly() {
-      return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
+      return this.isSpace && !this.isSpaceAdministrator;
     },
     walletAddress() {
       return this.wallet && this.wallet.address;
