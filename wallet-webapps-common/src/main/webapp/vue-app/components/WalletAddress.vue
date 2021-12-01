@@ -42,7 +42,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       @keydown.esc="reset"
       @keyup.enter="save">
     <a
-      v-else
+      v-else-if="isLink"
       :href="addressEtherscanLink && `${addressEtherscanLink}${value}` || '#'"
       :title="addressEtherscanLink && $t('exoplatform.wallet.label.openOnEtherscan') || ''"
       :class="!allowCopy && 'me-4'"
@@ -58,6 +58,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         {{ value }}
       </template>
     </a>
+    <span v-else class="text-truncate"> {{ value }} </span>
+
     <v-slide-x-reverse-transition v-if="allowEdit && displayLabel" mode="out-in">
       <v-icon
         id="walletAddressEdit"
@@ -110,6 +112,12 @@ export default {
         return true;
       },
     },
+    isLink: {
+      type: Boolean,
+      default: function() {
+        return true;
+      },
+    },
     displayLabel: {
       type: Boolean,
       default: function() {
@@ -138,8 +146,9 @@ export default {
       if (!this.value) {
         return;
       }
-      this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network && window.walletSettings.network.id);
-
+      if (this.isLink) {
+        this.addressEtherscanLink = getAddressEtherscanlink(window.walletSettings && window.walletSettings.network && window.walletSettings.network.id);
+      }
       if (!window.walletSettings.userPreferences
           || !window.walletSettings.userPreferences.addresesLabels) {
         this.labelDetail = {
