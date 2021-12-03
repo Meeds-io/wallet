@@ -30,7 +30,7 @@
         </v-card-subtitle>
 
         <v-list class="mx-8">
-          <v-list-item v-if="wallet && wallet.address">
+          <v-list-item v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.label.managePassword') }}
@@ -50,8 +50,8 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider v-if="wallet && wallet.address" />
-          <v-list-item v-if="wallet && wallet.address">
+          <v-divider v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'" />
+          <v-list-item v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.title.backupWalletModal') }}
@@ -69,7 +69,7 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider v-if="wallet && wallet.address" />
+          <v-divider v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'" />
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="title text-color">
@@ -88,8 +88,27 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider v-if="wallet && wallet.address" />
-          <v-list-item class="manageKey" v-if="wallet && wallet.address">
+          <v-divider v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'" />
+          <v-list-item class="deleteWallet" v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'">
+            <v-list-item-content>
+              <v-list-item-title class="title deleteText">
+                {{ $t('exoplatform.wallet.title.deleteWalletConfirmationModal') }}
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                {{ $t('exoplatform.wallet.message.deleteWallet') }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn
+                small
+                icon
+                @click="openDeleteConfirmationModal">
+                <i class="uiIconTrash uiIconLightBlue pb-2"></i>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-divider v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'" />
+          <v-list-item class="manageKey" v-if="wallet && wallet.address && wallet.initializationState !== 'DELETED'">
             <v-list-item-content>
               <v-list-item-title class="title text-color">
                 {{ $t('exoplatform.wallet.label.ethereumAddress') }}
@@ -132,6 +151,17 @@
         dismissible>
         {{ message }}
       </v-alert>
+      <wallet-reward-confirm-dialog
+        ref="informationModal"
+        :loading="loading"
+        :title="$t('exoplatform.wallet.title.deleteWalletConfirmationModal')"
+        title-class="deleteText"
+        :message="$t('exoplatform.wallet.message.deleteWalletConfirmationModal')"
+        :hide-default-footer="false"
+        :ok-label="$t('exoplatform.wallet.button.confirm')"
+        :cancel-label="$t('exoplatform.wallet.button.cancel')"
+        width="400px"
+        @ok="deleteWallet" />
     </template>
   </v-app>
 </template>
@@ -185,7 +215,19 @@ export default {
       this.type=message.type;
       this.alert = true;
       window.setTimeout(() => this.alert = false, 5000);
-    }
+    },
+    openDeleteConfirmationModal() {
+      this.$refs.informationModal.open();
+    },
+    deleteWallet() {
+      return this.walletUtils.deleteWallet(this.walletDetails.address)
+        .then(() => {
+          this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')});
+          return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
+        }).catch(e => {
+          this.$root.$emit('show-alert', {type: 'error',message: String(e)});
+        });
+    },
   },
 };
 </script>

@@ -64,7 +64,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           error = $event;
                         " />
                     </div>
-                    <template v-if="wallet && contractDetails">
+                    <template v-if="wallet && contractDetails && this.initializationState !== 'DELETED'">
                       <v-flex class="chartHistory WalletChart mt-6">
                         <wallet-reward-transaction-history-chart-summary
                           v-if="!loading"

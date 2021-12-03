@@ -271,7 +271,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     TransactionDetail etherTransaction = transactionDetail.clone();
     // Send Ethers
     sendEther(etherTransaction, issuerUsername);
-    getAccountService().setInitializationStatus(receiverAddress, WalletInitializationState.INITIALIZED);
+    getAccountService().setInitializationStatus(receiverAddress, WalletState.INITIALIZED);
 
     return transactionDetail;
   }
