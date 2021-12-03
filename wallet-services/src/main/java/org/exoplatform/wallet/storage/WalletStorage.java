@@ -307,7 +307,7 @@ public class WalletStorage {
     walletEntity.setId(wallet.getTechnicalId());
     walletEntity.setAddress(wallet.getAddress().toLowerCase());
     walletEntity.setEnabled(wallet.isEnabled());
-    walletEntity.setInitializationState(WalletInitializationState.valueOf(wallet.getInitializationState()));
+    walletEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));

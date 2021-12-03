@@ -16,8 +16,6 @@
  */
 package org.exoplatform.wallet.blockchain.servlet;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
-
 import java.io.IOException;
 import java.security.Provider;
 import java.security.Security;
@@ -44,9 +42,12 @@ import org.exoplatform.services.scheduler.JobSchedulerService;
 import org.exoplatform.wallet.blockchain.listener.*;
 import org.exoplatform.wallet.blockchain.service.*;
 import org.exoplatform.wallet.job.*;
+import org.exoplatform.wallet.listener.CancelTransactionListener;
 import org.exoplatform.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
 import org.exoplatform.wallet.service.*;
+
+import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 /**
  * A Servlet added to replace old bouncy castle provider loaded in parent class
@@ -143,6 +144,7 @@ public class ServiceLoaderServlet extends HttpServlet {
                                                                            web3jConnector));
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());
+      listernerService.addListener(WALLET_DELETED_EVENT, new CancelTransactionListener());
 
       // Start services after adding listeners
       tokenAdminService.start();

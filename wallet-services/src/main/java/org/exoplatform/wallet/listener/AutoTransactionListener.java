@@ -3,14 +3,13 @@ package org.exoplatform.wallet.listener;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.WalletInitializationState;
+import org.exoplatform.wallet.model.WalletState;
 import org.exoplatform.wallet.model.settings.InitialFundsSettings;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletAccountService;
@@ -66,7 +65,7 @@ public class AutoTransactionListener extends Listener<Object, String> {
       LOG.info("wallet {} is initialized with Ethers, the transaction hash is {}", wallet.getId(), etherTransactionDetail.getHash());
 
       // Set Wallet status to : Initialized
-      getWalletAccountService().setInitializationStatus(wallet.getAddress(), WalletInitializationState.INITIALIZED);
+      getWalletAccountService().setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
     } catch (Exception e) {
       LOG.error("Error initializing wallet {}", wallet.getId(), e);
     }
