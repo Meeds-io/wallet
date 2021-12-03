@@ -45,7 +45,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.ContractDetail;
-import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.*;
 

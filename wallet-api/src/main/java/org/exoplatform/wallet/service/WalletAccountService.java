@@ -239,13 +239,13 @@ public interface WalletAccountService {
    * 
    * @param address wallet address
    * @param initializationState wallet initialization status of type
-   *          {@link WalletInitializationState}
+   *          {@link WalletState}
    * @param currentUserId user changing wallet status
    * @throws IllegalAccessException if current user is not allowed to modify
    *           wallet initialization status
    */
   void setInitializationStatus(String address,
-                               WalletInitializationState initializationState,
+                               WalletState initializationState,
                                String currentUserId) throws IllegalAccessException;
 
   /**
@@ -253,9 +253,9 @@ public interface WalletAccountService {
    * 
    * @param address wallet address
    * @param initializationState wallet initialization status of type
-   *          {@link WalletInitializationState}
+   *          {@link WalletState}
    */
-  void setInitializationStatus(String address, WalletInitializationState initializationState);
+  void setInitializationStatus(String address, WalletState initializationState);
 
   /**
    * Creates admin account wallet in server side

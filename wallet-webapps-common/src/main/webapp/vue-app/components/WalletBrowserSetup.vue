@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       v-show="!loading"
       id="walletBrowserSetup"
       class="mt-3 mb-3">
-      <template v-if="walletAddress">
+      <template v-if="walletAddress && this.initializationState !== 'DELETED'">
         <wallet-reward-import-key-modal
           ref="walletImportKeyModal"
           :is-space="isSpace"
@@ -94,6 +94,12 @@ import {initEmptyWeb3Instance, saveBrowserWalletInstance} from '../js/WalletUtil
 
 export default {
   props: {
+    initializationState: {
+      type: String,
+      default: function() {
+        return null;
+      },
+    },
     isSpace: {
       type: Boolean,
       default: function() {
