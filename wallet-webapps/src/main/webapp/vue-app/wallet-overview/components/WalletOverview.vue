@@ -82,7 +82,7 @@ export default {
   },
   created() {
     this.refresh();
-    getCountRewards().then((resp) => {
+    getCountRewards(eXo.env.portal.profileOwner).then((resp) => {
       this.countReward = resp.sumRewards;
     });
   },
