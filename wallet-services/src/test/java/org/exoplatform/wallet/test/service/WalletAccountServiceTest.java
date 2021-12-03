@@ -584,14 +584,14 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER);
 
     try {
-      walletAccountService.setInitializationStatus(null, WalletInitializationState.NEW, CURRENT_USER);
+      walletAccountService.setInitializationStatus(null, WalletState.NEW, CURRENT_USER);
       fail("Wallet address is mandatory");
     } catch (Exception e) {
       // Expected, wallet address is mandatory
     }
 
     try {
-      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, "");
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW, "");
       fail("Username is mandatory");
     } catch (Exception e) {
       // Expected, username is mandatory
@@ -605,20 +605,20 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.setInitializationStatus("walletAdressUser", WalletInitializationState.NEW, CURRENT_USER);
+      walletAccountService.setInitializationStatus("walletAdressUser", WalletState.NEW, CURRENT_USER);
       fail("Can't find wallet associated to address");
     } catch (Exception e) {
       // Expected, Can't find wallet associated to address
     }
 
     try {
-      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, "root2");
+      walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW, "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected, user is not user rewarding admin
     }
 
-    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW, CURRENT_USER);
+    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW, CURRENT_USER);
     assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
     entitiesToClean.add(wallet);
   }
@@ -639,7 +639,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER);
 
     try {
-      walletAccountService.setInitializationStatus(null, WalletInitializationState.NEW);
+      walletAccountService.setInitializationStatus(null, WalletState.NEW);
       fail("Wallet address is mandatory");
     } catch (Exception e) {
       // Expected, wallet address is mandatory
@@ -652,7 +652,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
       // Expected, initializationState is mandatory
     }
 
-    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletInitializationState.NEW);
+    walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW);
     assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
     entitiesToClean.add(wallet);
   }

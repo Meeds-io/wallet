@@ -21,10 +21,10 @@ import java.util.Collection;
 
 import javax.persistence.*;
 
+import org.exoplatform.wallet.model.WalletState;
 import org.hibernate.annotations.DynamicUpdate;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
-import org.exoplatform.wallet.model.WalletInitializationState;
 import org.exoplatform.wallet.model.WalletType;
 
 @Entity(name = "Wallet")
@@ -57,7 +57,7 @@ public class WalletEntity implements Serializable {
   private boolean                                 isBackedUp;
 
   @Column(name = "INITIALIZATION_STATE")
-  private WalletInitializationState               initializationState;
+  private WalletState initializationState;
 
   @OneToOne(fetch = FetchType.EAGER, mappedBy = "wallet", cascade = CascadeType.REMOVE)
   private WalletPrivateKeyEntity                  privateKey;
@@ -113,11 +113,11 @@ public class WalletEntity implements Serializable {
     this.passPhrase = passPhrase;
   }
 
-  public WalletInitializationState getInitializationState() {
+  public WalletState getInitializationState() {
     return initializationState;
   }
 
-  public void setInitializationState(WalletInitializationState initializationState) {
+  public void setInitializationState(WalletState initializationState) {
     this.initializationState = initializationState;
   }
 

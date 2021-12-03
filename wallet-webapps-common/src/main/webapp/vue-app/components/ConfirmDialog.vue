@@ -28,7 +28,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           class="uiIconClose pull-right"
           aria-hidden="true"
           @click="close"></a>
-        <span class="ignore-vuetify-classes PopupTitle popupTitle">
+        <span class="ignore-vuetify-classes PopupTitle popupTitle" :class="titleClass">
           {{ title }}
         </span>
       </div>
@@ -69,6 +69,12 @@ export default {
       type: String,
       default: function() {
         return null;
+      },
+    },
+    titleClass: {
+      type: String,
+      default: function() {
+        return '';
       },
     },
     message: {

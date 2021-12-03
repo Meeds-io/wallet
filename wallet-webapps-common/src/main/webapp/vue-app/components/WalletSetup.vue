@@ -126,7 +126,7 @@ export default {
       return !this.loading && this.walletAddress && !this.browserWalletExists && this.isReadOnly && (!this.isSpace || this.isSpaceAdministrator);
     },
     displayWalletBackup() {
-      return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp;
+      return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp && this.initializationState !== 'DELETED';
     },
   },
   watch: {
@@ -149,7 +149,7 @@ export default {
       }
       this.isReadOnly = window.walletSettings.isReadOnly;
       this.browserWalletExists = window.walletSettings.browserWalletExists;
-      this.displayWalletSetup = !this.walletAddress && (!this.isSpace || this.isSpaceAdministrator);
+      this.displayWalletSetup = (!this.walletAddress && (!this.isSpace || this.isSpaceAdministrator)) || this.initializationState === 'DELETED';
 
       this.$nextTick(() => {
         if (this.$refs.walletBrowserSetup) {
