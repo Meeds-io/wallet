@@ -109,7 +109,7 @@ public class WalletServiceTest extends BaseWalletTest {
     walletService.saveInitialFundsSettings(initialFundsSettings);
 
     checkInitialFunds(tokenAmount, fundsHolder, fundsHolderType, walletService);
-
+gf
     tokenAmount = 50;
     initialFundsSettings.setTokenAmount(tokenAmount);
     walletService.saveInitialFundsSettings(initialFundsSettings);
