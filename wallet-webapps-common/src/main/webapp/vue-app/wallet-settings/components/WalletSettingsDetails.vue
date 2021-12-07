@@ -155,10 +155,10 @@
         ref="informationModal"
         :loading="loading"
         :title="$t('exoplatform.wallet.title.deleteWalletConfirmationModal')"
-        title-class="deleteText"
+        :title-class="deleteText"
         :message="$t('exoplatform.wallet.message.deleteWalletConfirmationModal')"
         :hide-default-footer="false"
-        :ok-label="$t('exoplatform.wallet.button.confirm')"
+        :ok-label="$t('exoplatform.wallet.button.deleteteConfirm')"
         :cancel-label="$t('exoplatform.wallet.button.cancel')"
         width="400px"
         @ok="deleteWallet" />
