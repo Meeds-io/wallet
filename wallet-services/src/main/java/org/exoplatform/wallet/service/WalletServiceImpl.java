@@ -21,6 +21,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 import java.math.BigInteger;
 
 import org.apache.commons.lang.StringUtils;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.picocontainer.Startable;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
@@ -68,6 +69,8 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   private long                         dynamicGasPrice;
 
+  private Double                       initialUserFunds;
+
   public WalletServiceImpl(WalletContractService contractService,
                            WalletAccountService accountService,
                            WalletWebSocketService webSocketService,
@@ -95,6 +98,15 @@ public class WalletServiceImpl implements WalletService, Startable {
     if (params.containsKey(NETWORK_WS_URL)) {
       String defaultNetworkWsURL = params.getValueParam(NETWORK_WS_URL).getValue();
       network.setWebsocketProviderURL(defaultNetworkWsURL);
+    }
+
+    if (params.containsKey(DEFAULT_INITIAL_USER_FUND)) {
+      String value = params.getValueParam(DEFAULT_INITIAL_USER_FUND).getValue();
+      try {
+        this.initialUserFunds = Double.parseDouble(value);
+      } catch (NumberFormatException nfe) {
+        // Do nothing
+      }
     }
 
     if (params.containsKey(GAS_LIMIT)) {
@@ -173,14 +185,11 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   @Override
   public InitialFundsSettings getInitialFundsSettings() {
-    SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT,
-                                                                        WALLET_SCOPE,
-                                                                        INITIAL_FUNDS_KEY_NAME);
+    SettingValue<?> initialFundsSettingsValue = getSettingService().get(WALLET_CONTEXT, WALLET_SCOPE, INITIAL_FUNDS_KEY_NAME);
 
     InitialFundsSettings initialFundsSettings = null;
     if (initialFundsSettingsValue != null && initialFundsSettingsValue.getValue() != null) {
-      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(),
-                                            InitialFundsSettings.class);
+      initialFundsSettings = fromJsonString(initialFundsSettingsValue.getValue().toString(), InitialFundsSettings.class);
     }
     return initialFundsSettings;
   }
@@ -316,8 +325,7 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
 
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
-    ctx.append(FUNDS_REQUEST_SENDER_DETAIL_PARAMETER,
-               accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser));
+    ctx.append(FUNDS_REQUEST_SENDER_DETAIL_PARAMETER, accountService.getWalletByTypeAndId(WalletType.USER.getId(), currentUser));
     ctx.append(SENDER_ACCOUNT_DETAIL_PARAMETER, requestSender);
     ctx.append(RECEIVER_ACCOUNT_DETAIL_PARAMETER, requestReceipient);
     ctx.append(FUNDS_REQUEST_PARAMETER, fundsRequest);
@@ -412,24 +420,28 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   private double computeInitialEtherFund() {
-    NetworkSettings network = this.configuredGlobalSettings.getNetwork();
-    long gasLimit = 200000L; // Default gas limit to use in contract transaction
-    long gasPrice = 20000000000L; // Default max gas price to use in contract
-                                  // transaction
-    if (network != null) {
-      if (network.getGasLimit() != null && network.getGasLimit() > 0) {
-        gasLimit = network.getGasLimit();
+    if(this.initialUserFunds != null){
+      return this.initialUserFunds;
+    } else {
+      NetworkSettings network = this.configuredGlobalSettings.getNetwork();
+      long gasLimit = 200000L; // Default gas limit to use in contract transaction
+      long gasPrice = 20000000000L; // Default max gas price to use in contract
+      // transaction
+      if (network != null) {
+        if (network.getGasLimit() != null && network.getGasLimit() > 0) {
+          gasLimit = network.getGasLimit();
+        }
+        if (network.getMaxGasPrice() != null && network.getMaxGasPrice() > 0) {
+          gasPrice = network.getMaxGasPrice();
+        }
       }
-      if (network.getMaxGasPrice() != null && network.getMaxGasPrice() > 0) {
-        gasPrice = network.getMaxGasPrice();
-      }
+      BigInteger etherAmountInWEI = new BigInteger(String.valueOf(gasLimit)).multiply(new BigInteger(String.valueOf(gasPrice)));
+      double etherInitialFund = convertFromDecimals(etherAmountInWEI, ETHER_TO_WEI_DECIMALS);
+      double etherAmountMaxDecimals = 3; // max decimals to use in ether initial
+      // funds
+      double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
+      return Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals;
     }
-    BigInteger etherAmountInWEI = new BigInteger(String.valueOf(gasLimit)).multiply(new BigInteger(String.valueOf(gasPrice)));
-    double etherInitialFund = convertFromDecimals(etherAmountInWEI, ETHER_TO_WEI_DECIMALS);
-    double etherAmountMaxDecimals = 3; // max decimals to use in ether initial
-                                       // funds
-    double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
-    return Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals;
   }
 
   private SettingService getSettingService() {
