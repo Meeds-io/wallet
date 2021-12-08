@@ -99,6 +99,8 @@ public class WalletUtils {
 
   public static final String                          TOKEN_ADDRESS                            = "tokenAddress";
 
+  public static final String                          DEFAULT_INITIAL_USER_FUND                = "defaultInitialFunds";
+
   public static final String                          USE_DYNAMIC_GAS_PRICE                    = "useDynamicGasPrice";
 
   public static final String                          GAS_LIMIT                                = "gasLimit";
@@ -149,14 +151,12 @@ public class WalletUtils {
 
   public static final String                          WALLET_MODIFIED_EVENT                    = "exo.wallet.modified";
 
-  public static final String                          CONTRACT_MODIFIED_EVENT                  =
-                                                                              "exo.wallet.contract.modified";
+  public static final String                          CONTRACT_MODIFIED_EVENT                  = "exo.wallet.contract.modified";
 
   public static final String                          TRANSACTION_MODIFIED_EVENT               =
                                                                                  "exo.wallet.transaction.modified";
 
-  public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     =
-                                                                                           "exo.wallet.transaction.sent";
+  public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     = "exo.wallet.transaction.sent";
 
   public static final String                          WALLET_ENABLED_EVENT                     = "exo.wallet.enabled";
 
@@ -189,11 +189,9 @@ public class WalletUtils {
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.wallet.addressAssociation.modification";
 
-  public static final String                          NEW_BLOCK_MINED_EVENT                    =
-                                                                            "exo.wallet.block.mined";
+  public static final String                          NEW_BLOCK_MINED_EVENT                    = "exo.wallet.block.mined";
 
-  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
-                                                                                    "exo.wallet.transaction.mined";
+  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            = "exo.wallet.transaction.mined";
 
   public static final String                          KNOWN_TRANSACTION_REPLACED_EVENT         =
                                                                                        "exo.wallet.transaction.replaced";
@@ -616,8 +614,7 @@ public class WalletUtils {
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
-    return spaceService.isSuperManager(accesssor)
-        || spaceService.isMember(space, accesssor)
+    return spaceService.isSuperManager(accesssor) || spaceService.isMember(space, accesssor)
         || spaceService.isManager(space, accesssor);
   }
 
@@ -652,8 +649,8 @@ public class WalletUtils {
     wallet.setDisabledUser(!identity.isEnable());
     wallet.setDeletedUser(identity.isDeleted());
     wallet.setType(walletType.getId());
-    wallet.setIsInitialized(Arrays.asList(WalletState.INITIALIZED.name(),
-            WalletState.MODIFIED.name()).contains(wallet.getInitializationState()));
+    wallet.setIsInitialized(Arrays.asList(WalletState.INITIALIZED.name(), WalletState.MODIFIED.name())
+                                  .contains(wallet.getInitializationState()));
     if (walletType.isUser() || walletType.isSpace()) {
       wallet.setAvatar(identity.getProfile().getAvatarUrl());
     }
