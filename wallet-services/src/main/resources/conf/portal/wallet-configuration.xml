@@ -133,6 +133,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <value>${exo.wallet.blockchain.token.address:0xc76987d43b77c45d51653b6eb110b9174acce8fb}</value>
       </value-param>
       <value-param>
+        <name>defaultInitialFunds</name>
+        <description>A parameter to add the default value for the Ether/Matic to send to each user</description>
+        <value>${exo.wallet.blockchain.defaultInitialCryptoCurrencyFunds}</value>
+      </value-param>
+      <value-param>
         <name>useDynamicGasPrice</name>
         <description>A parameter to make used gas price for all wallet based applications use dynamic gas price</description>
         <value>${exo.wallet.blockchain.useDynamicGasPrice:true}</value>
