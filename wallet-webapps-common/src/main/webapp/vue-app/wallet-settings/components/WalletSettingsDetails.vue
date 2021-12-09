@@ -148,6 +148,7 @@
       <v-alert
         v-model="alert"
         :type="type"
+        class="walletAlert"
         dismissible>
         {{ message }}
       </v-alert>
@@ -223,7 +224,11 @@ export default {
       return this.walletUtils.deleteWallet(this.walletDetails.address)
         .then(() => {
           this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')});
-          return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
+          if (this.wallet.type === 'user') {
+            return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
+          } else {
+            return window.location.href =  `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/SpaceWallet`;
+          }
         }).catch(e => {
           this.$root.$emit('show-alert', {type: 'error',message: String(e)});
         });
