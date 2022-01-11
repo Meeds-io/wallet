@@ -166,7 +166,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.INITIALIZED.name()) &&
             !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.PENDING.name()) &&
             !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.DENIED.name())
-            && wallet.getIsInitialized() != null && wallet.getIsInitialized()) {
+            && ((wallet.getIsInitialized() != null && wallet.getIsInitialized())
+                || (wallet.getEtherBalance() > 0 && wallet.getTokenBalance() > 0))) { // if wallet was sent cryptos & tokens from outside and its state is NEW, we set it to initialized
           wallet.setInitializationState(WalletState.INITIALIZED.name());
           setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
