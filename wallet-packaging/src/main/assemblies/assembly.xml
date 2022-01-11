@@ -26,7 +26,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <!-- WARs -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/webapps</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-common:war</include>
       </includes>
@@ -35,7 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/webapps</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps:war</include>
       </includes>
@@ -44,7 +44,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/webapps</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-admin:war</include>
       </includes>
@@ -53,7 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/webapps</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-webapps-reward:war</include>
       </includes>
@@ -63,7 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <!-- Libraries -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>org.exoplatform.wallet:ert-contract:jar</include>
       </includes>
@@ -72,7 +72,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-api:jar</include>
       </includes>
@@ -81,7 +81,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-services:jar</include>
       </includes>
@@ -90,7 +90,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependencySet>
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>${project.groupId}:wallet-reward-services:jar</include>
       </includes>
