@@ -176,6 +176,18 @@ public class TransactionStorage {
     List<TransactionEntity> transactionEntities = walletTransactionDAO.getTransactionsByNonce(networkId, fromAddress, nonce);
     return this.fromEntities(transactionEntities);
   }
+
+  /**
+   * Count the number of transactions for a given address that corresponds to a nonce
+   *
+   * @param networkId blockchain network id
+   * @param fromAddress transaction sender address
+   * @param nonce Nonce of the transaction
+   * @return {@link List} of {@link TransactionDetail}
+   */
+  public long countTransactionsByNonce(long networkId, String fromAddress, long nonce) {
+    return walletTransactionDAO.countTransactionsByNonce(networkId, fromAddress, nonce);
+  }
   
   /**
    * Retrieve a {@link TransactionDetail} identified by its blockchain hash

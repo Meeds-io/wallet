@@ -159,6 +159,15 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? Collections.emptyList() : resultList;
   }
+  public long countTransactionsByNonce(long networkId, String fromAddress, long nonce) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countTransactionsByNonce",
+                                                                              Long.class);
+    query.setParameter(NONCE_PARAM, nonce);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    Long result = query.getSingleResult();
+    return result == null ? 0 : result;
+  }
 
   public long getMaxUsedNonce(long networkId, String fromAddress) {
     TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.getMaxUsedNonce",

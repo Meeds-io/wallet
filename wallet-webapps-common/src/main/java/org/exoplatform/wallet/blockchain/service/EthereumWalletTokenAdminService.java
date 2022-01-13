@@ -363,6 +363,31 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
+  public void boostAdminTransactions() throws Exception {
+
+    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+    for (TransactionDetail transactionDetail : pendingTransactions) {
+      if (transactionDetail.getFrom().equals(getAdminWalletAddress())) {
+
+        //  && transactionDetail.getGasPrice() > getAdminGasPrice()) {
+        TransactionDetail boostedTransaction = transactionDetail.clone();
+        boostedTransaction.setId(0L);
+        boostedTransaction.setNonce(0L);
+        boostedTransaction.setBoost(true);
+        if (transactionDetail.getContractAmount() > 0) {
+          // Issuer is already set, we set it to null here
+          sendToken(boostedTransaction, null);
+        } else {
+          // Issuer is already set, we set it to null here
+          sendEther(boostedTransaction, null);
+        }
+        transactionDetail.setBoost(true);
+        getTransactionService().saveTransactionDetail(transactionDetail, false);
+      }
+    }
+  }
+
+  @Override
   public void retrieveWalletInformationFromBlockchain(Wallet wallet,
                                                       ContractDetail contractDetail,
                                                       Set<String> walletModifications) throws Exception {
@@ -502,20 +527,22 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     BigInteger gasPrice = BigInteger.valueOf(adminGasPrice);
     transactionDetail.setGasPrice(adminGasPrice);
     BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
-    BigInteger nonceToUse = getAdminNonce();
-    transactionDetail.setNonce(nonceToUse.longValue());
+    if(transactionDetail.getNonce() == 0) {
+      BigInteger nonceToUse = getAdminNonce();
+      transactionDetail.setNonce(nonceToUse.longValue());
+    }
 
     RawTransaction rawTransaction = null;
     if (function != null) {
       String transactionData = FunctionEncoder.encode(function);
-      rawTransaction = RawTransaction.createTransaction(nonceToUse,
+      rawTransaction = RawTransaction.createTransaction(BigInteger.valueOf(transactionDetail.getNonce()),
                                                         gasPrice,
                                                         gasLimit,
                                                         toAddress,
                                                         etherValueInWei,
                                                         transactionData);
     } else {
-      rawTransaction = RawTransaction.createEtherTransaction(nonceToUse,
+      rawTransaction = RawTransaction.createEtherTransaction(BigInteger.valueOf(transactionDetail.getNonce()),
                                                              gasPrice,
                                                              gasLimit,
                                                              toAddress,

@@ -56,7 +56,7 @@ public class GasPriceUpdaterJob implements Job {
         getWalletService().setDynamicGasPrice(blockchainGasPrice);
       }
     } catch (Exception e) {
-      LOG.error("Error while refrshing gas price", e);
+      LOG.error("Error while refreshing gas price", e);
     } finally {
       RequestLifeCycle.end();
       ExoContainerContext.setCurrentContainer(currentContainer);
