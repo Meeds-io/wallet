@@ -38,7 +38,7 @@ public class WalletBlockchainStateEntity implements Serializable {
   private static final long serialVersionUID = -7294965683405044055L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_STATE", sequenceName = "SEQ_WALLET_STATE")
+  @SequenceGenerator(name = "SEQ_WALLET_STATE", sequenceName = "SEQ_WALLET_STATE", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_STATE")
   @Column(name = "BLOCKCHAIN_STATE_ID")
   private Long              id;

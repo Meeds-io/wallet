@@ -32,7 +32,7 @@ public class AddressLabelEntity implements Serializable {
   private static final long serialVersionUID = -1622032986992776281L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_LABEL", sequenceName = "SEQ_WALLET_LABEL")
+  @SequenceGenerator(name = "SEQ_WALLET_LABEL", sequenceName = "SEQ_WALLET_LABEL", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_LABEL")
   @Column(name = "LABEL_ID")
   private Long              id;
