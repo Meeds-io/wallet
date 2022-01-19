@@ -30,7 +30,7 @@ public class RewardTeamMemberEntity implements Serializable {
   private static final long serialVersionUID = 2213798785625662208L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_GAM_TEAM_MEMBER_ID", sequenceName = "SEQ_WALLET_GAM_TEAM_MEMBER_ID")
+  @SequenceGenerator(name = "SEQ_WALLET_GAM_TEAM_MEMBER_ID", sequenceName = "SEQ_WALLET_GAM_TEAM_MEMBER_ID", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_GAM_TEAM_MEMBER_ID")
   @Column(name = "MEMBER_ID")
   private Long              id;
