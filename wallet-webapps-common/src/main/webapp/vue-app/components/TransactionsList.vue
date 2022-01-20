@@ -633,7 +633,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="item.pending && item.contractAddress && item.sentTimestamp">
+              <v-list-item v-if="item.contractAddress && item.sentTimestamp">
                 <v-list-item-content>
                   <wallet-reward-send-tokens-modal
                     ref="boostTransactionModal"
@@ -954,9 +954,6 @@ export default {
     },
     contractName() {
       return (this.contractDetails && this.contractDetails.name) || (this.settings && this.settings.contractDetail && this.settings.contractDetail.name);
-    },
-    userAdminLevel() {
-      return this.settings && this.settings.wallet && this.settings.wallet.adminLevel;
     },
     sortedTransactions() {
       // A trick to force update computed list

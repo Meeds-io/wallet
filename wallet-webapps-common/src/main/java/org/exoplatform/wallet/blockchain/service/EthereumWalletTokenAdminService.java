@@ -364,16 +364,23 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public void boostAdminTransactions() throws Exception {
-
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
     for (TransactionDetail transactionDetail : pendingTransactions) {
-      if (transactionDetail.getFrom().equals(getAdminWalletAddress())) {
-
-        //  && transactionDetail.getGasPrice() > getAdminGasPrice()) {
+      LOG.info("Transaction {} is pending", transactionDetail.getHash());
+      LOG.info("Number of Transaction with same nonce {}", getTransactionService().countTransactionsByNonce(transactionDetail));
+      LOG.info("gas price {} is higher than the one used to send TX {} : {}", getAdminGasPrice(), transactionDetail.getGasPrice(), getAdminGasPrice().doubleValue() > transactionDetail.getGasPrice());
+      if (transactionDetail.getFrom().equals(getAdminWalletAddress()) && // Is it an admin transaction ?
+          transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue() && // Current gas price is higher than the one used to send
+                                                                  // original transaction
+          getTransactionService().countTransactionsByNonce(transactionDetail) == 1) { // It should not have been already boosted
         TransactionDetail boostedTransaction = transactionDetail.clone();
         boostedTransaction.setId(0L);
-        boostedTransaction.setNonce(0L);
+        boostedTransaction.setNonce(transactionDetail.getNonce());
         boostedTransaction.setBoost(true);
+        boostedTransaction.setSentTimestamp(0);
+        boostedTransaction.setSendingAttemptCount(0);
+        boostedTransaction.setPending(true);
+        boostedTransaction.setSucceeded(false);
         if (transactionDetail.getContractAmount() > 0) {
           // Issuer is already set, we set it to null here
           sendToken(boostedTransaction, null);
@@ -381,8 +388,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
           // Issuer is already set, we set it to null here
           sendEther(boostedTransaction, null);
         }
-        transactionDetail.setBoost(true);
-        getTransactionService().saveTransactionDetail(transactionDetail, false);
       }
     }
   }

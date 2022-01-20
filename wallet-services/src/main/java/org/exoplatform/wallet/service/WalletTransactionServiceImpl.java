@@ -282,6 +282,10 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
   }
 
+  public long countTransactionsByNonce(TransactionDetail transactionDetail) {
+    return transactionStorage.countTransactionsByNonce(transactionDetail.getNetworkId(), transactionDetail.getFrom(), transactionDetail.getNonce());
+  }
+
   @Override
   public void cancelTransactionsWithSameNonce(TransactionDetail replacingTransaction) {
     List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(replacingTransaction.getNetworkId(),

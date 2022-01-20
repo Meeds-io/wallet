@@ -184,4 +184,11 @@ public interface WalletTransactionService {
    */
   public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
 
+  /**
+   * Count the number of transactions sent from the same Wallet and having same Nonce
+   *
+   * @param transactionDetail of type {@link TransactionDetail}
+   */
+  public long countTransactionsByNonce(TransactionDetail transactionDetail);
+
 }

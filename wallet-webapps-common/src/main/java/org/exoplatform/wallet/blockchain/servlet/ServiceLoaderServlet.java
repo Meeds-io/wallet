@@ -159,7 +159,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       //TODO add a property to activate this
       addBlockchainScheduledJob(BoostAdminTransactionJob.class,
                                 "Configuration for the Job that boost transaction sending to blockchain",
-                                "* 0/10 * * * ?");
+                                "* 0/5 * * * ?");
       addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
                                 "Configuration for pending transactions check on blockchain",
                                 "* 3/10 * * * ?");
