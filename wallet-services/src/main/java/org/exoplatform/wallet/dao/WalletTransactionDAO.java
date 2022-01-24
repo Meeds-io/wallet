@@ -150,6 +150,14 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
+  public TransactionEntity getPendingTransactionByHash(String hash) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactionByHash",
+                                                                              TransactionEntity.class);
+    query.setParameter(HASH_PARAM, StringUtils.lowerCase(hash));
+    List<TransactionEntity> resultList = query.getResultList();
+    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+  }
+
   public List<TransactionEntity> getTransactionsByNonce(long networkId, String fromAddress, long nonce) {
     TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getTransactionsByNonce",
                                                                               TransactionEntity.class);

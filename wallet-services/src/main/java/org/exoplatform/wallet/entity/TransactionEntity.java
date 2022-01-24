@@ -37,6 +37,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactions", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash"),
+    @NamedQuery(name = "WalletTransaction.getPendingTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash and tx.isPending=true order by tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getTransactionsByNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address"),
     @NamedQuery(name = "WalletTransaction.countTransactionsByNonce", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address"),
     @NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address"),

@@ -202,6 +202,18 @@ public class TransactionStorage {
   }
 
   /**
+   * Retrieve a {@link TransactionDetail} identified by its blockchain hash
+   *
+   * @param hash blockchain transaction hash
+   * @return {@link TransactionDetail}
+   */
+  public TransactionDetail getPendingTransactionByHash(String hash) {
+    hash = formatTransactionHash(hash);
+    TransactionEntity transactionEntity = walletTransactionDAO.getPendingTransactionByHash(hash);
+    return fromEntity(transactionEntity);
+  }
+
+  /**
    * @param networkId blockchain network id
    * @param fromAddress transaction sender address
    * @return count of pending transactions sent on a blockchain network for a

@@ -366,9 +366,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   public void boostAdminTransactions() throws Exception {
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
     for (TransactionDetail transactionDetail : pendingTransactions) {
-      LOG.info("Transaction {} is pending", transactionDetail.getHash());
-      LOG.info("Number of Transaction with same nonce {}", getTransactionService().countTransactionsByNonce(transactionDetail));
-      LOG.info("gas price {} is higher than the one used to send TX {} : {}", getAdminGasPrice(), transactionDetail.getGasPrice(), getAdminGasPrice().doubleValue() > transactionDetail.getGasPrice());
       if (transactionDetail.getFrom().equals(getAdminWalletAddress()) && // Is it an admin transaction ?
           transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue() && // Current gas price is higher than the one used to send
                                                                   // original transaction

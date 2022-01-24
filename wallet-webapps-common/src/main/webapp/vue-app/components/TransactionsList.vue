@@ -182,9 +182,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <span v-else-if="item.contractMethodName === 'transfer' && !item.isReceiver">
                       {{ $t('exoplatform.wallet.label.sentTo') }}
                     </span>
-                    <span v-else-if="item.contractMethodName === 'approve' && item.isReceiver">
-                      {{ $t('exoplatform.wallet.label.delegatedFrom') }}
-                    </span>
                     <span v-else>
                       {{ $t('exoplatform.wallet.label.delegatedTo') }}
                     </span>
@@ -207,337 +204,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :profile-type="item.toType"
                       :display-name="item.toDisplayName"
                       :avatar="item.toAvatar" />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'addAdmin'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.added') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.asAdministratorOnContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'removeAdmin'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.removed') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.asAdministratorFromContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-                  <v-list-item-title v-else-if="item.contractMethodName === 'transferOwnership'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.transferredOwnershipTo') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.onContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'approveAccount'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.approved') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.accountOnContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'disapproveAccount'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.disapproved') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.accountOnContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'pause'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.pausedContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'unPause'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.unPausedContract') }}
-                    </span>
-                    <wallet-reward-wallet-address
-                      :value="item.contractAddress"
-                      :name="item.contractName"
-                      display-label />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'setSellPrice'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.modifiedSellPrice') }}
-                    </span>
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'upgradeData'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.upgradedDataContract') }}
-                    </span>
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'upgradeImplementation'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.upgradedImplementationContract') }}
-                    </span>
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'transformToVested'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.vestedTokensTo') }}
-                    </span>
-                    <wallet-reward-profile-chip
-                      :address="item.toAddress"
-                      :profile-id="item.toUsername"
-                      :profile-technical-id="item.toTechnicalId"
-                      :space-id="item.toSpaceId"
-                      :profile-type="item.toType"
-                      :display-name="item.toDisplayName"
-                      :avatar="item.toAvatar" />
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'initializeAccount'">
-                    <template v-if="item.toAddress === walletAddress && !administration">
-                      <template v-if="isSpaceWallet">
-                        {{ $t('exoplatform.wallet.label.SpaceWalletWasInitialized') }}
-                      </template>
-                      <template v-else>
-                        {{ $t('exoplatform.wallet.label.YourWalletWasInitialized') }}
-                      </template>
-                    </template>
-                    <template v-else>
-                      <wallet-reward-profile-chip
-                        v-if="displayFullTransaction"
-                        :address="item.fromAddress"
-                        :profile-id="item.fromUsername"
-                        :profile-technical-id="item.fromTechnicalId"
-                        :space-id="item.fromSpaceId"
-                        :profile-type="item.fromType"
-                        :display-name="item.fromDisplayName"
-                        :avatar="item.fromAvatar" />
-                      <span>
-                        {{ $t('exoplatform.wallet.label.initializedWalletOf') }}
-                      </span>
-                      <wallet-reward-profile-chip
-                        :address="item.toAddress"
-                        :profile-id="item.toUsername"
-                        :profile-technical-id="item.toTechnicalId"
-                        :space-id="item.toSpaceId"
-                        :profile-type="item.toType"
-                        :display-name="item.toDisplayName"
-                        :avatar="item.toAvatar" />
-                    </template>
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'reward'">
-                    <template v-if="item.toAddress === walletAddress && !administration">
-                      {{ $t('exoplatform.wallet.label.YouWasRewarded') }}
-                    </template>
-                    <template v-else>
-                      <wallet-reward-profile-chip
-                        v-if="displayFullTransaction"
-                        :address="item.fromAddress"
-                        :profile-id="item.fromUsername"
-                        :profile-technical-id="item.fromTechnicalId"
-                        :space-id="item.fromSpaceId"
-                        :profile-type="item.fromType"
-                        :display-name="item.fromDisplayName"
-                        :avatar="item.fromAvatar" />
-                      <span>
-                        {{ $t('exoplatform.wallet.label.rewarded') }}
-                      </span>
-                      <wallet-reward-profile-chip
-                        :address="item.toAddress"
-                        :profile-id="item.toUsername"
-                        :profile-technical-id="item.toTechnicalId"
-                        :space-id="item.toSpaceId"
-                        :profile-type="item.toType"
-                        :display-name="item.toDisplayName"
-                        :avatar="item.toAvatar" />
-                    </template>
-                  </v-list-item-title>
-  
-                  <v-list-item-title v-else-if="item.contractMethodName === 'depositFunds'">
-                    <wallet-reward-profile-chip
-                      v-if="displayFullTransaction"
-                      :address="item.fromAddress"
-                      :profile-id="item.fromUsername"
-                      :profile-technical-id="item.fromTechnicalId"
-                      :space-id="item.fromSpaceId"
-                      :profile-type="item.fromType"
-                      :display-name="item.fromDisplayName"
-                      :avatar="item.fromAvatar" />
-                    <span>
-                      {{ $t('exoplatform.wallet.label.sentEtherToContract') }}
-                    </span>
                   </v-list-item-title>
   
                   <v-list-item-title v-else-if="item.value && Number(item.value) && item.amountFiat">
@@ -633,7 +299,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="item.contractAddress && item.sentTimestamp">
+              <v-list-item v-if="!item.boost && item.contractAddress && item.sentTimestamp">
                 <v-list-item-content>
                   <wallet-reward-send-tokens-modal
                     ref="boostTransactionModal"
@@ -651,6 +317,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     :loading="item.refreshing"
                     @click="refreshFromBlockchain(item)">
                     {{ $t('exoplatform.wallet.button.refresh') }}
+                  </v-btn>
+                </v-list-item-content>
+              </v-list-item>
+
+              <v-list-item v-if="administration && item.pending && !item.succeeded && item.refreshed && !item.boost">
+                <v-list-item-content>
+                  <v-btn
+                    class="btn ignore-vuetify-classes"
+                    :loading="item.resending"
+                    @click="resendToBlockchain(item)">
+                    {{ $t('exoplatform.wallet.button.resend') }}
                   </v-btn>
                 </v-list-item-content>
               </v-list-item>
@@ -699,18 +376,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </div>
                 </v-list-item-content>
               </v-list-item>
-              <template v-if="item.contractMethodName === 'reward'">
-                <v-list-item v-if="Number(item.value)">
-                  <v-list-item-content>
-                    {{ $t('exoplatform.wallet.label.transferredAmount') }}
-                  </v-list-item-content>
-                  <v-list-item-content class="align-end text-end">
-                    <div class="no-wrap">
-                      {{ toFixed(item.value) }} {{ item.contractSymbol }}
-                    </div>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
               <template v-else>
                 <v-list-item v-if="Number(item.amountFiat)">
                   <v-list-item-content>
@@ -878,7 +543,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 <script>
 import {watchTransactionStatus, getTransactionEtherscanlink, getAddressEtherscanlink, getTokenEtherscanlink, toFixed} from '../js/WalletUtils.js';
-import {loadTransactions, refreshTransactionDetail} from '../js/TransactionUtils.js';
+import {loadTransactions, refreshTransactionDetail, saveTransactionDetails} from '../js/TransactionUtils.js';
 
 export default {
   props: {
@@ -1083,6 +748,31 @@ export default {
         })
         .finally(() => {
           this.$set(transactionDetail, 'refreshing', false);
+          this.$forceUpdate();
+        });
+    },
+    resendToBlockchain(transactionDetail) {
+      if (!transactionDetail || !transactionDetail.hash) {
+        return;
+      }
+      this.$set(transactionDetail, 'resending', true);
+      this.$forceUpdate();
+      this.error = null;
+      this.warning = null;
+      transactionDetail.sendingAttemptCount=0;
+      transactionDetail.id=0;
+      transactionDetail.pending=true;
+      transactionDetail.sentTimestamp=0;
+      transactionDetail.boost=true;
+      saveTransactionDetails(transactionDetail)
+        .then(boostedTransactionDetail => {
+          if (boostedTransactionDetail) {
+            Object.assign(transactionDetail, boostedTransactionDetail);
+            this.$set(transactionDetail, 'boost', true);
+          }
+        })
+        .finally(() => {
+          this.$set(transactionDetail, 'resending', false);
           this.$forceUpdate();
         });
     },

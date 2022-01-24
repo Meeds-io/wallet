@@ -88,6 +88,13 @@ public interface WalletTransactionService {
 
   /**
    * @param hash transaction hash
+   * @return the transaction detail corresponding to the hash parameter,
+   *         retrieved from internal database
+   */
+  TransactionDetail getPendingTransactionByHash(String hash);
+
+  /**
+   * @param hash transaction hash
    * @param currentUser current username that is getting transaction details
    * @return the transaction detail corresponding to the hash parameter,
    *         retrieved from internal database

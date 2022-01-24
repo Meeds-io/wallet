@@ -247,7 +247,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     long maxAttemptsToSend = transactionService.getMaxAttemptsToSend();
 
     String transactionHash = transactionDetail.getHash();
-    long sentTimestamp = transactionDetail.getRawTransaction() == null ? transactionDetail.getTimestamp()
+    long sentTimestamp = transactionDetail.getRawTransaction() == null || transactionDetail.getSendingAttemptCount() == 0 ? transactionDetail.getTimestamp()
                                                                        : transactionDetail.getSentTimestamp();
     Duration duration = Duration.ofMillis(System.currentTimeMillis() - sentTimestamp);
 
@@ -282,11 +282,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           // wasn't sent successfully, thus it will be sent again
           LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, it will be resent again",
                    transactionHash,
-                   pendingTransactionMaxDays);
+                   duration.toDays());
 
           transactionDetail.setSentTimestamp(0);
           transactionService.saveTransactionDetail(transactionDetail, false);
           return;
+        } else {
+          // We need to cancel transaction in database, to make it possible to resend it
+          transactionDetail.setPending(false);
+          transactionDetail.setSucceeded(false);
         }
       } else {
         LOG.info("Transaction '{}' was FOUND on blockchain for more than '{}' days, so avoid marking it as failed",
@@ -376,7 +380,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                                                   boolean pendingTransactionFromDatabase) {
     if (transaction == null) {
       if (pendingTransactionFromDatabase) {
-        TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
+        TransactionDetail transactionDetail = transactionService.getPendingTransactionByHash(transactionHash);
         if (transactionDetail == null) {
           throw new IllegalStateException("Transaction with hash " + transactionHash
               + " wasn't found in internal database while it should have been retrieved from it.");
@@ -436,8 +440,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         || (transactionDetail.isSucceeded() != transactionReceipt.isStatusOK());
 
     if (pendingTransactionFromDatabase && !transactionDetail.isPending()) {
-      LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
-      return;
+      long transactionsWithSameNonce = transactionService.countTransactionsByNonce(transactionDetail);
+      if(transactionsWithSameNonce > 1) {
+        // Transaction was replaced by another one which was succeeded, let's mark the latter with canceled
+        transactionService.cancelTransactionsWithSameNonce(transactionDetail);
+      } else {
+        LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
+        return;
+      }
     }
 
     computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);

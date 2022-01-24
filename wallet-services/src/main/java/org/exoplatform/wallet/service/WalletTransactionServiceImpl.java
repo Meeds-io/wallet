@@ -274,6 +274,15 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
+  public TransactionDetail getPendingTransactionByHash(String hash) {
+    TransactionDetail transactionDetail = transactionStorage.getPendingTransactionByHash(hash);
+    if (transactionDetail != null) {
+      retrieveWalletsDetails(transactionDetail);
+    }
+    return transactionDetail;
+  }
+
+  @Override
   public void saveTransactionDetail(TransactionDetail transactionDetail,
                                     boolean broadcastMinedTransaction) {
     transactionStorage.saveTransactionDetail(transactionDetail);
@@ -295,8 +304,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       // Change status of other transactions having same nonce only when
       // none succeeded
       transactionsByNonce.forEach(replacedTransaction -> {
-        if (!replacedTransaction.isPending()
-            || StringUtils.equalsIgnoreCase(replacedTransaction.getHash(), replacingTransaction.getHash())) {
+        if (!replacedTransaction.isPending() && !replacingTransaction.isPending()) {
           return;
         }
         replacedTransaction.setPending(false);

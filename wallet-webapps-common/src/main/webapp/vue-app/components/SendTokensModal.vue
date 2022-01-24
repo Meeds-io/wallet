@@ -17,15 +17,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div>
     <v-btn
-      v-if="canBoostTransaction"
-      v-show="showBoostButton"
-      color="primary"
-      block
-      text>
-      {{ $t('exoplatform.wallet.button.boost') }}
-    </v-btn>
-    <v-btn
-      v-else
       :disabled="isReadOnly"
       class="btn btn-primary"
       block
