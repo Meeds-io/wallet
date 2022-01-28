@@ -29,6 +29,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -56,11 +57,13 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
  */
 public class ServiceLoaderServlet extends HttpServlet {
 
-  private static final long                     serialVersionUID = 4629318431709644350L;
+  private static final long                     serialVersionUID              = 4629318431709644350L;
 
-  private static final Log                      LOG              = ExoLogger.getLogger(ServiceLoaderServlet.class);
+  private static final Log                      LOG                           = ExoLogger.getLogger(ServiceLoaderServlet.class);
 
-  private static final ScheduledExecutorService executor         = Executors.newScheduledThreadPool(1);
+  private static final ScheduledExecutorService executor                      = Executors.newScheduledThreadPool(1);
+
+  private static final String                   ALLOW_BOOST_ADMIN_TRANSACTION = "exo.wallet.admin.transactions.boost";
 
   @Override
   public void init() throws ServletException {
@@ -156,13 +159,14 @@ public class ServiceLoaderServlet extends HttpServlet {
       addBlockchainScheduledJob(TransactionSenderJob.class,
                                 "Configuration for transaction sending to blockchain",
                                 "0/30 * * * * ?");
-      //TODO add a property to activate this
-      addBlockchainScheduledJob(BoostAdminTransactionJob.class,
-                                "Configuration for the Job that boost transaction sending to blockchain",
-                                "* 0/30 * * * ?");
+      if ("true".equalsIgnoreCase(PropertyManager.getProperty(ALLOW_BOOST_ADMIN_TRANSACTION))) {
+        addBlockchainScheduledJob(BoostAdminTransactionJob.class,
+                                  "Configuration for the Job that boost transaction sending to blockchain",
+                                  "0 30 7 * * ?");
+      }
       addBlockchainScheduledJob(PendingTransactionVerifierJob.class,
                                 "Configuration for pending transactions check on blockchain",
-                                "* 0/2 * * * ?");
+                                "0 15 7 * * ?");
 
       WalletService walletService = container.getComponentInstanceOfType(WalletService.class);
       if (walletService.isUseDynamicGasPrice()) {

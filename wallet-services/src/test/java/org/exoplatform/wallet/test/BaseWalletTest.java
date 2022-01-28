@@ -308,6 +308,7 @@ public abstract class BaseWalletTest {
                                                "message",
                                                true, // isSuccess
                                                i % 2 == 0, // isPending
+                                               i,
                                                i % 2 != 0, // isAdminOperation
                                                System.currentTimeMillis() + offsetTime);
       transactionEntities.add(tx);
@@ -328,6 +329,7 @@ public abstract class BaseWalletTest {
                                                 String message,
                                                 boolean isSuccess,
                                                 boolean isPending,
+                                                long nonce,
                                                 boolean isAdminOperation,
                                                 long createdDate) {
 
@@ -359,6 +361,7 @@ public abstract class BaseWalletTest {
     transactionEntity.setPending(isPending);
     transactionEntity.setAdminOperation(isAdminOperation);
     transactionEntity.setCreatedDate(createdDate);
+    transactionEntity.setNonce(nonce);
     transactionEntity = walletTransactionDAO.create(transactionEntity);
     entitiesToClean.add(transactionEntity);
     return transactionEntity;

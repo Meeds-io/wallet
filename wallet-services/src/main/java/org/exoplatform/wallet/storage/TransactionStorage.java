@@ -19,8 +19,7 @@ package org.exoplatform.wallet.storage;
 import static org.exoplatform.wallet.utils.WalletUtils.formatTransactionHash;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -118,6 +117,49 @@ public class TransactionStorage {
                                                        int limit,
                                                        boolean pending,
                                                        boolean administration) {
+    List<TransactionEntity> transactions = getWalletTransactions(networkId,
+            address,
+            contractAddress,
+            contractMethodName,
+            hash,
+            limit,
+            pending,
+            administration,
+            false);
+    boolean loadMore = transactions.size() < limit;
+    boolean limitNotReached = transactions.size() == limit;
+    if ((StringUtils.isNotBlank(hash) && limitNotReached
+            && transactions.stream().noneMatch(transaction -> StringUtils.equalsIgnoreCase(transaction.getHash(), hash)))) {
+      return getWalletTransactions(networkId,
+              address,
+              contractAddress,
+              contractMethodName,
+              hash,
+              limit * 2,
+              pending,
+              administration);
+    } else if((StringUtils.isBlank(hash)) && loadMore) {
+      return fromEntities(getWalletTransactions(networkId,
+       address,
+       contractAddress,
+       contractMethodName,
+       hash,
+       limit * 2,
+       pending,
+       administration,
+       false));
+    }
+    return fromEntities(transactions);
+  }
+  private List<TransactionEntity> getWalletTransactions(long networkId,
+                                                       String address,
+                                                       String contractAddress,
+                                                       String contractMethodName,
+                                                       String hash,
+                                                       int limit,
+                                                       boolean pending,
+                                                       boolean administration,
+                                                       boolean loadMore) {
 
     address = StringUtils.lowerCase(address);
     List<TransactionEntity> transactions = walletTransactionDAO.getWalletTransactions(networkId,
@@ -127,20 +169,15 @@ public class TransactionStorage {
                                                                                       limit,
                                                                                       pending,
                                                                                       administration);
-    boolean limitNotReached = transactions != null && transactions.size() == limit;
-    if (StringUtils.isNotBlank(hash) && limitNotReached
-        && transactions.stream().noneMatch(transaction -> StringUtils.equalsIgnoreCase(transaction.getHash(), hash))) {
-      return getWalletTransactions(networkId,
-                                   address,
-                                   contractAddress,
-                                   contractMethodName,
-                                   hash,
-                                   limit * 2,
-                                   pending,
-                                   administration);
+    // filter transactions having same Nonce and keep last ones
+    Map<Long, TransactionEntity> filterTransactions = new HashMap<>();
+    for(TransactionEntity transaction : transactions) {
+      TransactionEntity transactionDetail = filterTransactions.get(transaction.getNonce());
+      if(transactionDetail == null || (transaction.isSuccess() || (!transaction.isSuccess() && !transactionDetail.isSuccess() && transactionDetail.getSentDate() < transaction.getSentDate()))) {
+        filterTransactions.put(transaction.getNonce(), transaction);
+      }
     }
-    return fromEntities(transactions);
-
+    return new ArrayList<>(filterTransactions.values());
   }
 
   /**

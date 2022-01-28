@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.exoplatform.services.listener.ListenerService;
 import org.picocontainer.Startable;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -385,6 +386,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
           // Issuer is already set, we set it to null here
           sendEther(boostedTransaction, null);
         }
+        broadcastTransactionReplacedEvent(transactionDetail, boostedTransaction);
       }
     }
   }

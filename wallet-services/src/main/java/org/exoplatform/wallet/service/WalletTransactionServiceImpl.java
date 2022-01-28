@@ -291,6 +291,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
   }
 
+  @Override
   public long countTransactionsByNonce(TransactionDetail transactionDetail) {
     return transactionStorage.countTransactionsByNonce(transactionDetail.getNetworkId(), transactionDetail.getFrom(), transactionDetail.getNonce());
   }
@@ -492,72 +493,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
   }
 
-  private Map<String, Object> transactionToMap(TransactionDetail transactionDetail) {
-    Map<String, Object> transaction = new HashMap<>();
-    transaction.put("hash", transactionDetail.getHash());
-    transaction.put("from", transactionDetail.getFromWallet() == null ? 0 : transactionDetail.getFromWallet().getTechnicalId());
-    transaction.put("to", transactionDetail.getToWallet() == null ? 0 : transactionDetail.getToWallet().getTechnicalId());
-    transaction.put("contractAddress", transactionDetail.getContractAddress());
-    transaction.put("contractAmount", transactionDetail.getContractAmount());
-    transaction.put("contractMethodName", transactionDetail.getContractMethodName());
-    transaction.put("etherAmount", transactionDetail.getValue());
-    transaction.put("status", transactionDetail.isSucceeded());
-    transaction.put("issuerId", transactionDetail.getIssuerId());
-    return transaction;
-  }
 
-  private void broadcastTransactionReplacedEvent(TransactionDetail oldTransaction, TransactionDetail newTransaction) {
-    String oldHash = "";
-    String newHash = "";
-    try {
-      if (oldTransaction == null || newTransaction == null || oldTransaction.isPending() || newTransaction.isPending()) {
-        return;
-      }
-      oldHash = oldTransaction.getHash();
-      newHash = newTransaction.getHash();
-      if (oldTransaction.getContractAmount() != newTransaction.getContractAmount()) {
-        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same amount: {} != {}",
-                 oldHash,
-                 newHash,
-                 oldTransaction.getContractAmount(),
-                 newTransaction.getContractAmount());
-        return;
-      }
-      if (!StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
-        throw new IllegalStateException("Issuer of transaction replacement must be the same wallet address: "
-            + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
-      }
-      if (!StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
-        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target wallet: {} != {}",
-                 oldHash,
-                 newHash,
-                 oldTransaction.getTo(),
-                 newTransaction.getTo());
-        return;
-      }
-      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
-        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract: {} != {}",
-                 oldHash,
-                 newHash,
-                 oldTransaction.getContractAddress(),
-                 newTransaction.getContractAddress());
-        return;
-      }
-      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
-        LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract method: {} != {}",
-                 oldHash,
-                 newHash,
-                 oldTransaction.getContractMethodName(),
-                 newTransaction.getContractMethodName());
-        return;
-      }
-      Map<String, Object> transaction = transactionToMap(newTransaction);
-      transaction.put("oldHash", oldHash);
-      getListenerService().broadcast(KNOWN_TRANSACTION_REPLACED_EVENT, null, transaction);
-    } catch (Exception e) {
-      LOG.warn("Error while broadcasting transaction replaced event: from {} to {}", oldHash, newHash, e);
-    }
-  }
 
   private SpaceService getSpaceService() {
     if (spaceService == null) {

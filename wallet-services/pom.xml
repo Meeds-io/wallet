@@ -103,7 +103,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <systemPropertyVariables>
             <exo.properties.url>classpath:/conf/configuration.properties</exo.properties.url>
             <exo.profiles>hsqldb</exo.profiles>
-            <exo.files.storage.dir>target/files</exo.files.storage.dir>
+            <exo.files.storage.dir>${project.build.directory}/files</exo.files.storage.dir>
           </systemPropertyVariables>
         </configuration>
       </plugin>

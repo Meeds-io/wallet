@@ -201,6 +201,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
                       "message",
                       true, // isSuccess
                       true, // isPending
+                      1,
                       true, // isAdminOperation
                       System.currentTimeMillis());
 

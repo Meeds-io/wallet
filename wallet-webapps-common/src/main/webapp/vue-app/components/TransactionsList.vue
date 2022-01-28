@@ -299,7 +299,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="!item.boost && item.contractAddress && item.sentTimestamp">
+              <v-list-item v-if="item.pending && item.contractAddress && item.sentTimestamp && !item.boost">
                 <v-list-item-content>
                   <wallet-reward-send-tokens-modal
                     ref="boostTransactionModal"
@@ -310,7 +310,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="administration && !item.refreshed">
+              <v-list-item v-if="administration && !item.refreshed && item.pending && !item.succeeded">
                 <v-list-item-content>
                   <v-btn
                     class="btn ignore-vuetify-classes"
@@ -321,7 +321,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-list-item-content>
               </v-list-item>
 
-              <v-list-item v-if="administration && item.pending && !item.succeeded && item.refreshed && !item.boost">
+              <v-list-item v-if="!item.succeeded && !item.pending && !item.resent">
                 <v-list-item-content>
                   <v-btn
                     class="btn ignore-vuetify-classes"
@@ -773,6 +773,7 @@ export default {
         })
         .finally(() => {
           this.$set(transactionDetail, 'resending', false);
+          this.$set(transactionDetail, 'resent', true);
           this.$forceUpdate();
         });
     },
