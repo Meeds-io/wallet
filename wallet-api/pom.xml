@@ -24,6 +24,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </parent>
   <artifactId>wallet-api</artifactId>
   <name>eXo Add-on:: Wallet - API</name>
+  <properties>
+    <exo.test.coverage.ratio>0.03</exo.test.coverage.ratio>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.exoplatform.ws</groupId>
@@ -58,6 +61,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
