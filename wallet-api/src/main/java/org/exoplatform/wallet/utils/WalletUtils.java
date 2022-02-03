@@ -19,10 +19,10 @@ package org.exoplatform.wallet.utils;
 import static org.exoplatform.wallet.statistic.StatisticUtils.*;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.math.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -270,6 +270,12 @@ public class WalletUtils {
   public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
 
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
+
+  public static final DecimalFormat                   SIMPLIFIED_WALLET_BALANCE                = new DecimalFormat("#.##");
+
+  static {
+    SIMPLIFIED_WALLET_BALANCE.setRoundingMode(RoundingMode.DOWN);
+  }
 
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,
@@ -928,6 +934,10 @@ public class WalletUtils {
 
   public static final SpaceService getSpaceService() {
     return CommonsUtils.getService(SpaceService.class);
+  }
+
+  public static final String formatBalance(double balance) {
+    return SIMPLIFIED_WALLET_BALANCE.format(balance);
   }
 
 }
