@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.math.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -270,12 +269,6 @@ public class WalletUtils {
   public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
 
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
-
-  public static final DecimalFormat                   SIMPLIFIED_WALLET_BALANCE                = new DecimalFormat("#.##");
-
-  static {
-    SIMPLIFIED_WALLET_BALANCE.setRoundingMode(RoundingMode.DOWN);
-  }
 
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =
                                                                                             new ArgumentLiteral<>(Wallet.class,
@@ -936,8 +929,26 @@ public class WalletUtils {
     return CommonsUtils.getService(SpaceService.class);
   }
 
-  public static final String formatBalance(double balance) {
-    return SIMPLIFIED_WALLET_BALANCE.format(balance);
+  /**
+   * Format Wallet Balance amount in currency format, without currency symbol
+   * and switch user locale.
+   * 
+   * @param balance amount to format
+   * @param locale designated locale to display balance
+   * @param simplified if true, the fractions will be ignored when the balance
+   *          is greater than 100.
+   * @return formatted balance in user locale
+   */
+  public static final String formatBalance(double balance, Locale locale, boolean simplified) {
+    // Avoid to display fractions when the amount of balance is big
+    if (simplified && balance > 100) {
+      balance = Math.floor(balance);
+    }
+    NumberFormat decimalFormat = NumberFormat.getNumberInstance(locale);
+    decimalFormat.setMaximumFractionDigits(2);
+    decimalFormat.setMinimumFractionDigits(0);
+    decimalFormat.setRoundingMode(RoundingMode.FLOOR);
+    return decimalFormat.format(balance).trim();
   }
 
 }

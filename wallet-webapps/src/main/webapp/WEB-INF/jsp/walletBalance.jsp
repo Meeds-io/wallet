@@ -30,8 +30,7 @@
   String symbol = globalSettings == null || globalSettings.getContractDetail() == null ? "" : globalSettings.getContractDetail().getSymbol();
   Wallet wallet = ExoContainerContext.getService(WalletAccountService.class).getWalletByTypeAndId(WalletType.USER.getId(), request.getRemoteUser(), request.getRemoteUser());
   double balance = (wallet == null || wallet.getTokenBalance() == null || wallet.getInitializationState() == "DELETED") ? 0d : wallet.getTokenBalance();
-  String balanceFixed = balance > 100 ? String.valueOf((int) balance)
-                                        : WalletUtils.formatBalance(balance);
+  String balanceFixed = WalletUtils.formatBalance(balance, request.getLocale(), true);
 %>
 <div class="VuetifyApp">
   <div data-app="true"
