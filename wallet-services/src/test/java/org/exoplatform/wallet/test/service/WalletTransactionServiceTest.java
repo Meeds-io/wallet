@@ -18,9 +18,12 @@ package org.exoplatform.wallet.test.service;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.junit.Test;
 
 import org.exoplatform.services.listener.*;
@@ -243,6 +246,82 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     entitiesToClean.add(storedTransactionDetail);
   }
 
+ /**
+   * Test {@link WalletTransactionService#getPendingTransactionByHash(String)}
+   */
+  @Test
+  public void testGetPendingTransactionByHash() {
+    addCurrentUserWallet();
+
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  null,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, true);
+    TransactionDetail storedTransactionDetail = walletTransactionService.getPendingTransactionByHash(transactionDetail.getHash());
+    assertNotNull(storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetail);
+  }
+
+
+  /**
+   * Test {@link WalletTransactionService#countTransactionsByNonce(TransactionDetail)}
+   */
+  @Test
+  public void testCountTransactionsByNonce() {
+    addCurrentUserWallet();
+
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    TransactionDetail transactionDetail1 = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  null,
+                                                                  System.currentTimeMillis());
+    TransactionDetail transactionDetail2 = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  false,
+                                                                  null,
+                                                                  System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail1, true);
+    walletTransactionService.saveTransactionDetail(transactionDetail2, true);
+    long countOfTransactions = walletTransactionService.countTransactionsByNonce(transactionDetail1);
+    assertEquals(2, countOfTransactions);
+    entitiesToClean.add(transactionDetail1);
+    entitiesToClean.add(transactionDetail2);
+  }
+
   /**
    * Test {@link WalletTransactionService#getNonce(String, String)}
    */
@@ -294,6 +373,31 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     }
   }
 
+  /**
+   * Test {@link WalletTransactionService#getTransactionStatistics(String, String, String, Locale)} (String, String)}
+   */
+  @Test
+  public void testGetTransactionStatistics() {
+    String YEAR_PERIODICITY = "year";
+    String MONTH_PERIODICITY = "month";
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    try {
+      walletTransactionService.getTransactionStatistics(null, YEAR_PERIODICITY, "2022-01-14", Locale.ENGLISH);
+      fail("Address should not be empty!");
+    } catch (Exception e) {
+      // Expected
+    }
+    try {
+      walletTransactionService.getTransactionStatistics(WALLET_ADDRESS_1, null, "2022-01-14", Locale.ENGLISH);
+      fail("Periodicity should not be empty!");
+    } catch (Exception e) {
+      // Expected
+    }
+    TransactionStatistics transactionStatistics = walletTransactionService.getTransactionStatistics(WALLET_ADDRESS_1, YEAR_PERIODICITY, "2022-01-14", Locale.ENGLISH);
+    assertNotNull(transactionStatistics);
+    transactionStatistics = walletTransactionService.getTransactionStatistics(WALLET_ADDRESS_1, MONTH_PERIODICITY, "2022-01-14", Locale.ENGLISH);
+    assertNotNull(transactionStatistics);
+  }
   /**
    * Test {@link WalletTransactionService#getTransactionByHash(String, String)}
    */

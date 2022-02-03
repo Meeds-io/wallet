@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.exoplatform.services.listener.ListenerService;
 import org.picocontainer.Startable;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -363,6 +364,34 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
+  public void boostAdminTransactions() throws Exception {
+    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
+    for (TransactionDetail transactionDetail : pendingTransactions) {
+      if (transactionDetail.getFrom().equals(getAdminWalletAddress()) && // Is it an admin transaction ?
+          transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue() && // Current gas price is higher than the one used to send
+                                                                  // original transaction
+          getTransactionService().countTransactionsByNonce(transactionDetail) == 1) { // It should not have been already boosted
+        TransactionDetail boostedTransaction = transactionDetail.clone();
+        boostedTransaction.setId(0L);
+        boostedTransaction.setNonce(transactionDetail.getNonce());
+        boostedTransaction.setBoost(true);
+        boostedTransaction.setSentTimestamp(0);
+        boostedTransaction.setSendingAttemptCount(0);
+        boostedTransaction.setPending(true);
+        boostedTransaction.setSucceeded(false);
+        if (transactionDetail.getContractAmount() > 0) {
+          // Issuer is already set, we set it to null here
+          sendToken(boostedTransaction, null);
+        } else {
+          // Issuer is already set, we set it to null here
+          sendEther(boostedTransaction, null);
+        }
+        broadcastTransactionReplacedEvent(transactionDetail, boostedTransaction);
+      }
+    }
+  }
+
+  @Override
   public void retrieveWalletInformationFromBlockchain(Wallet wallet,
                                                       ContractDetail contractDetail,
                                                       Set<String> walletModifications) throws Exception {
@@ -502,20 +531,22 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     BigInteger gasPrice = BigInteger.valueOf(adminGasPrice);
     transactionDetail.setGasPrice(adminGasPrice);
     BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
-    BigInteger nonceToUse = getAdminNonce();
-    transactionDetail.setNonce(nonceToUse.longValue());
+    if(transactionDetail.getNonce() == 0) {
+      BigInteger nonceToUse = getAdminNonce();
+      transactionDetail.setNonce(nonceToUse.longValue());
+    }
 
     RawTransaction rawTransaction = null;
     if (function != null) {
       String transactionData = FunctionEncoder.encode(function);
-      rawTransaction = RawTransaction.createTransaction(nonceToUse,
+      rawTransaction = RawTransaction.createTransaction(BigInteger.valueOf(transactionDetail.getNonce()),
                                                         gasPrice,
                                                         gasLimit,
                                                         toAddress,
                                                         etherValueInWei,
                                                         transactionData);
     } else {
-      rawTransaction = RawTransaction.createEtherTransaction(nonceToUse,
+      rawTransaction = RawTransaction.createEtherTransaction(BigInteger.valueOf(transactionDetail.getNonce()),
                                                              gasPrice,
                                                              gasLimit,
                                                              toAddress,
