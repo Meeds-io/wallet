@@ -88,6 +88,13 @@ public interface WalletTransactionService {
 
   /**
    * @param hash transaction hash
+   * @return the transaction detail corresponding to the hash parameter,
+   *         retrieved from internal database
+   */
+  TransactionDetail getPendingTransactionByHash(String hash);
+
+  /**
+   * @param hash transaction hash
    * @param currentUser current username that is getting transaction details
    * @return the transaction detail corresponding to the hash parameter,
    *         retrieved from internal database
@@ -183,5 +190,12 @@ public interface WalletTransactionService {
    *          previous {@link TransactionDetail} having the same nonce
    */
   public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
+
+  /**
+   * Count the number of transactions sent from the same Wallet and having same Nonce
+   *
+   * @param transactionDetail of type {@link TransactionDetail}
+   */
+  public long countTransactionsByNonce(TransactionDetail transactionDetail);
 
 }

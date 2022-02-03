@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.exoplatform.wallet.utils.WalletUtils;
 import org.junit.Test;
 
 import org.exoplatform.wallet.dao.WalletTransactionDAO;
@@ -159,6 +160,109 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
   }
 
   /**
+   * Test get transactions by Nonce
+   */
+  @Test
+  public void testCountTransactionsByNonce() {
+    String hashOfTX = "hashTX";
+    createTransaction(hashOfTX,
+            null,
+            null,
+            0, // token amount
+            0, // ether amount
+            "from",
+            "to",
+            "by",
+            0,
+            "label",
+            "message",
+            true, // isSuccess
+            true, // isPending
+            1,
+            true, // isAdminOperation
+            System.currentTimeMillis());
+    createTransaction(hashOfTX,
+            null,
+            null,
+            0, // token amount
+            0, // ether amount
+            "from",
+            "to",
+            "by",
+            0,
+            "label",
+            "message",
+            true, // isSuccess
+            true, // isPending
+            1,
+            true, // isAdminOperation
+            System.currentTimeMillis());
+    WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
+    assertEquals(2,walletTransactionDAO.countTransactionsByNonce(WalletUtils.getNetworkId(),"from",1));
+
+  }
+
+  /**
+   * Test get pending transactions by hash
+   */
+  @Test
+  public void testGetPendingTransactionsByHash() {
+    String hashOfTX1 = "hashTX1";
+    String hashOfTX2 = "hashTX2";
+    String hashOfTX3 = "hashTX3";
+    createTransaction(hashOfTX1,
+            null,
+            null,
+            0, // token amount
+            0, // ether amount
+            "from",
+            "to",
+            "by",
+            0,
+            "label",
+            "message",
+            false, // isSuccess
+            true, // isPending
+            1,
+            true, // isAdminOperation
+            System.currentTimeMillis());
+    createTransaction(hashOfTX2,
+            null,
+            null,
+            0, // token amount
+            0, // ether amount
+            "from",
+            "to",
+            "by",
+            0,
+            "label",
+            "message",
+            false, // isSuccess
+            true, // isPending
+            1,
+            true, // isAdminOperation
+            System.currentTimeMillis());
+    createTransaction(hashOfTX3,
+            null,
+            null,
+            0, // token amount
+            0, // ether amount
+            "from",
+            "to",
+            "by",
+            0,
+            "label",
+            "message",
+            false, // isSuccess
+            true, // isPending
+            1,
+            true, // isAdminOperation
+            System.currentTimeMillis());
+    WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
+    assertNotNull(walletTransactionDAO.getPendingTransactionByHash(hashOfTX1));
+  }
+
+  /**
    * Test get list pending transactions
    */
   @Test
@@ -201,6 +305,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
                       "message",
                       true, // isSuccess
                       true, // isPending
+                      1,
                       true, // isAdminOperation
                       System.currentTimeMillis());
 
