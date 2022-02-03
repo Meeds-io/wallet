@@ -35,7 +35,7 @@ public class WalletPrivateKeyEntity implements Serializable {
   private static final long serialVersionUID = -7294965683405044055L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_KEY", sequenceName = "SEQ_WALLET_KEY")
+  @SequenceGenerator(name = "SEQ_WALLET_KEY", sequenceName = "SEQ_WALLET_KEY", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_KEY")
   @Column(name = "KEY_ID")
   private Long              id;

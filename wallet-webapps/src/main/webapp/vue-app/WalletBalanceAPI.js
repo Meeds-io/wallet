@@ -27,8 +27,8 @@ export function getWalletAccount() {
   });
 }
 
-export  function getCountRewards() {
-  return fetch('/portal/rest/wallet/api/reward/countRewards', {
+export  function getCountRewards(userId) {
+  return fetch(`/portal/rest/wallet/api/reward/countRewards?userId=${userId}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

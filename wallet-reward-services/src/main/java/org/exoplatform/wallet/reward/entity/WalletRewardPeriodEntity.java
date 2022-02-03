@@ -39,7 +39,7 @@ public class WalletRewardPeriodEntity implements Serializable {
   private static final long serialVersionUID = -6286934482105645678L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_REWARD_PERIOD_ID", sequenceName = "SEQ_WALLET_REWARD_PERIOD_ID")
+  @SequenceGenerator(name = "SEQ_WALLET_REWARD_PERIOD_ID", sequenceName = "SEQ_WALLET_REWARD_PERIOD_ID", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_REWARD_PERIOD_ID")
   @Column(name = "REWARD_PERIOD_ID")
   private Long              id;

@@ -71,7 +71,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <v-list-item-title class="filterLabel" @click="filterWallet ='DisabledUsersWallets'"> {{ $t('exoplatform.wallet.label.disabledUsersWallets') }}  </v-list-item-title>
           </v-list-item>
           <v-list-item @mousedown="$event.preventDefault()">
-            <v-list-item-title class="filterLabel" @click="filterWallet ='RejectedWallets'">{{ $t('exoplatform.wallet.label.rejectedWallets') }}</v-list-item-title>
+            <v-list-item-title class="filterLabel" @click="filterWallet ='DeletedWallets'"> {{ $t('exoplatform.wallet.label.deletedWallets') }}  </v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -115,7 +115,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <template v-else-if="props.item.disabledUser">{{ $t('exoplatform.wallet.label.disabledUser') }}</template>
                 <template v-else-if="!props.item.enabled">{{ $t('exoplatform.wallet.label.disabledWallet') }}</template>
                 <template v-else-if="props.item.initializationState === 'NEW'">{{ $t('exoplatform.wallet.label.newWallet') }}</template>
-                <template v-else-if="props.item.initializationState === 'DENIED'">{{ $t('exoplatform.wallet.label.rejectedWallet') }}</template>
+                <template v-else-if="props.item.initializationState === 'DELETED'">{{ $t('exoplatform.wallet.label.DeletedWallet') }}</template>
                 <template v-else>
                   <template v-if="Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount))">
                     <v-icon color="orange">
@@ -193,12 +193,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
-                        <template v-if="contractDetails && contractDetails.contractType && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED' || props.item.initializationState === 'DENIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
+                        <template v-if="contractDetails && contractDetails.contractType && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
                           <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
-                          </v-list-item>
-                          <v-list-item v-if="props.item.initializationState !== 'DENIED'" @mousedown="$event.preventDefault()">
-                            <v-list-item-title class="options" @click="openDenyInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.rejectWallet') }}</v-list-item-title>
                           </v-list-item>
                           <v-divider />
                         </template>
@@ -381,8 +378,8 @@ export default {
     displayDisabledUserWallets() {
       return this.walletStatuses && this.walletStatuses.includes('disabledUser');
     },
-    displayRejectedWallets() {
-      return this.walletStatuses && this.walletStatuses.includes('rejectedWallet');
+    displayDeletedWallets() {
+      return this.walletStatuses && this.walletStatuses.includes('deletedWallet');
     },
     displayAllWallets() {
       return this.walletStatuses && this.walletStatuses.includes('all');
@@ -429,9 +426,9 @@ export default {
       } else if (this.filterWallet === 'DisabledUsersWallets'){
         this.walletStatuses = ['disabledUser'];
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.disabledUsersWallets');
-      } else if (this.filterWallet === 'RejectedWallets') {
-        this.walletStatuses = ['rejectedWallet'];
-        this.newsFilterLabel = this.$t('exoplatform.wallet.label.rejectedWallets');
+      } else if (this.filterWallet === 'DeletedWallets'){
+        this.walletStatuses = ['deletedWallet'];
+        this.newsFilterLabel = this.$t('exoplatform.wallet.label.deletedWallets');
       } else {
         this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
         this.walletStatuses = ['all'];
@@ -498,12 +495,12 @@ export default {
             && (!this.search
               || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
               || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
-      } else if (this.displayRejectedWallets ) {
+      } else if (this.displayDeletedWallets ) {
         return wallet && wallet.address
             && (this.displayUsers || wallet.type !== 'user')
             && (this.displaySpaces || wallet.type !== 'space')
             && (this.displayAdmin || wallet.type !== 'admin')
-            && (this.displayRejectedWallets && wallet.initializationState === 'DENIED')
+            && (this.displayDeletedWallets && wallet.initializationState === 'DELETED')
             && (!this.search
               || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
               || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
@@ -519,6 +516,7 @@ export default {
         && (this.displayAdmin || wallet.type !== 'admin')
         && (this.displayDisabledWallets || (wallet.enabled && !wallet.disabledUser))
         && (this.displayDisabledUserWallets || !wallet.disabledUser)
+        && (wallet.initializationState !== 'DELETED')
         && (!this.search
             || wallet.name.toLowerCase().indexOf(this.search.toLowerCase()) >= 0
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
@@ -598,14 +596,6 @@ export default {
         this.$refs.sendEtherModal.open(wallet, null, etherAmount);
       }
     },
-    openDenyInitializationModal(wallet) {
-      this.walletToProcess = wallet;
-      this.informationTitle = this.$t('exoplatform.wallet.title.rejectWalletInitializationConfirmationModal');
-      this.informationMessage = this.$t('exoplatform.wallet.message.rejectWalletInitializationConfirmation', {0: wallet.type, 1: `<strong>${wallet.name}</strong>`});
-      this.hideConfirmActions = false;
-      this.confirmAction = 'deny';
-      this.$refs.informationModal.open();
-    },
     openDisableWalletModal(wallet) {
       this.walletToProcess = wallet;
       this.informationTitle = this.$t('exoplatform.wallet.title.disableWalletConfirmationModal');
@@ -633,8 +623,6 @@ export default {
     proceessAction() {
       if (this.confirmAction === 'disable') {
         this.enableWallet(this.walletToProcess, false);
-      } else if (this.confirmAction === 'deny') {
-        this.changeWalletInitializationStatus(this.walletToProcess, 'DENIED');
       }
     },
     closeMenu() {

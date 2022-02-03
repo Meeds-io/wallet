@@ -27,7 +27,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           color="transparent"
           class="WalletSummary">
           <v-flex class="summaryCard mr-3" v-if="!walletReadonly">
-            <div class="border-box-sizing" v-if="walletAddress && contractDetails">
+            <div class="border-box-sizing" v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'">
               <button
                 class="btn ignore-vuetify-classes me-1"
                 @click="openExchangeDrawer">
@@ -36,6 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </div>
             <wallet-reward-summary-buttons
               ref="walletSummaryActions"
+              v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'"
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
               :contract-details="contractDetails"
@@ -47,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-flex>
           <v-flex class="summaryCard" v-if="!walletReadonly">
             <wallet-reward-summary-transaction
-              v-if="walletAddress && contractDetails"
+              v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'"
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
               :fiat-symbol="fiatSymbol"
@@ -61,7 +62,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-flex class="summaryBalance">
             <wallet-reward-summary-balance
               class="mt-1 mx-3 px-1 py-1"
-              v-if="walletAddress && !loading && contractDetails"
+              v-if="walletAddress && !loading && contractDetails && this.initializationState !== 'DELETED'"
               :wallet="wallet"
               :contract-details="contractDetails" />
           </v-flex>
@@ -177,7 +178,7 @@ export default {
       return this.updatePendingTransactionsIndex && Object.keys(this.pendingTransactions).length;
     },
     walletReadonly() {
-      return this.initializationState === 'DENIED' || (this.isSpace && !this.isSpaceAdministrator);
+      return this.isSpace && !this.isSpaceAdministrator;
     },
   },
   methods: {

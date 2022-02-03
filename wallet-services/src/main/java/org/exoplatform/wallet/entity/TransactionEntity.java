@@ -48,7 +48,7 @@ public class TransactionEntity implements Serializable {
   private static final long serialVersionUID = 485850826850947238L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_TRANSACTION", sequenceName = "SEQ_WALLET_TRANSACTION")
+  @SequenceGenerator(name = "SEQ_WALLET_TRANSACTION", sequenceName = "SEQ_WALLET_TRANSACTION", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_TRANSACTION")
   @Column(name = "TRANSACTION_ID")
   private long              id;

@@ -130,14 +130,14 @@ public class RewardReportREST implements ResourceContainer {
   @Path("countRewards")
   @RolesAllowed("users")
   @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation(value = "Return sum of rewards for current user", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return sum of rewards per user")
+  @ApiOperation(value = "Return sum of rewards for user", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return sum of rewards per user")
   @ApiResponses(value = {
           @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
           @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
           @ApiResponse(code = 500, message = "Internal server error") })
-  public Response countRewards(@Context Request request) {
+  public Response countRewards(@Context Request request, @ApiParam(value = "user id", required = true) @QueryParam("userId") String userId ) {
     try {
-      Double sumRewards = rewardReportService.countRewards(WalletUtils.getCurrentUserId());
+      Double sumRewards = rewardReportService.countRewards(userId);
       EntityTag eTag = new EntityTag(String.valueOf(sumRewards));
       Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
       if (builder == null) {

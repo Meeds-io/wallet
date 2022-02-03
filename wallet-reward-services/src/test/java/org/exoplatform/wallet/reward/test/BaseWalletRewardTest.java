@@ -59,7 +59,7 @@ public abstract class BaseWalletRewardTest {
 
   protected static final String           PHRASE               = "passphrase";
 
-  protected static final String           INITIALIZATION_STATE = WalletInitializationState.INITIALIZED.name();
+  protected static final String           INITIALIZATION_STATE = WalletState.INITIALIZED.name();
 
   protected static final boolean          IS_ENABLED           = true;
 

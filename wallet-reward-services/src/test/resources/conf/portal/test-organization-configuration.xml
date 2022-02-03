@@ -122,32 +122,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </init-params>
   </component>
 
-  <!-- Init data -->
-  <external-component-plugins>
-    <target-component>org.exoplatform.services.database.HibernateService</target-component>
-    <component-plugin>
-      <name>add.hibernate.mapping</name>
-      <set-method>addPlugin</set-method>
-      <type>org.exoplatform.services.database.impl.AddHibernateMappingPlugin</type>
-      <init-params>
-        <values-param>
-          <name>hibernate.mapping</name>
-          <value>conf/mappings/HibernateRealm.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectCredentialBinaryValue.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectAttributeBinaryValue.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObject.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectCredential.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectCredentialType.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectAttribute.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectType.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectRelationship.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectRelationshipType.hbm.xml</value>
-          <value>conf/mappings/HibernateIdentityObjectRelationshipName.hbm.xml</value>
-        </values-param>
-      </init-params>
-    </component-plugin>
-  </external-component-plugins>
-
   <external-component-plugins>
     <target-component>org.exoplatform.services.naming.InitialContextInitializer</target-component>
     <component-plugin>

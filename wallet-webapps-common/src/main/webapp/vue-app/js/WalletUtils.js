@@ -212,7 +212,7 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
   const address = account['address'].toLowerCase();
 
   let promise = null;
-  if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address) {
+  if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.wallet.initializationState !== 'DELETED') {
     promise = Promise.resolve();
   } else {
     promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, true)
@@ -570,6 +570,15 @@ export function saveWalletInitializationStatus(address, status) {
   }).then((resp) => {
     if (!resp || !resp.ok) {
       throw new Error('Error while changing initialization status of wallet');
+    }
+  });
+}
+export function deleteWallet(address) {
+  return fetch(`/portal/rest/wallet/api/account/deleteWallet?address=${address}`, {
+    credentials: 'include',
+  }).then((resp) => {
+    if (!resp || !resp.ok) {
+      throw new Error('Error while deleting wallet');
     }
   });
 }

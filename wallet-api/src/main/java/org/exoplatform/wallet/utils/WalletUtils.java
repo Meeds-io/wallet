@@ -19,8 +19,7 @@ package org.exoplatform.wallet.utils;
 import static org.exoplatform.wallet.statistic.StatisticUtils.*;
 
 import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import java.math.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
@@ -99,6 +98,8 @@ public class WalletUtils {
 
   public static final String                          TOKEN_ADDRESS                            = "tokenAddress";
 
+  public static final String                          DEFAULT_INITIAL_USER_FUND                = "defaultInitialFunds";
+
   public static final String                          USE_DYNAMIC_GAS_PRICE                    = "useDynamicGasPrice";
 
   public static final String                          GAS_LIMIT                                = "gasLimit";
@@ -149,18 +150,18 @@ public class WalletUtils {
 
   public static final String                          WALLET_MODIFIED_EVENT                    = "exo.wallet.modified";
 
-  public static final String                          CONTRACT_MODIFIED_EVENT                  =
-                                                                              "exo.wallet.contract.modified";
+  public static final String                          CONTRACT_MODIFIED_EVENT                  = "exo.wallet.contract.modified";
 
   public static final String                          TRANSACTION_MODIFIED_EVENT               =
                                                                                  "exo.wallet.transaction.modified";
 
-  public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     =
-                                                                                           "exo.wallet.transaction.sent";
+  public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     = "exo.wallet.transaction.sent";
 
   public static final String                          WALLET_ENABLED_EVENT                     = "exo.wallet.enabled";
 
   public static final String                          WALLET_DISABLED_EVENT                    = "exo.wallet.disabled";
+
+  public static final String                          WALLET_DELETED_EVENT                    = "exo.wallet.deleted";
 
   public static final String                          WALLET_INITIALIZATION_MODIFICATION_EVENT =
                                                                                                "exo.wallet.initialization.state";
@@ -187,11 +188,9 @@ public class WalletUtils {
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.wallet.addressAssociation.modification";
 
-  public static final String                          NEW_BLOCK_MINED_EVENT                    =
-                                                                            "exo.wallet.block.mined";
+  public static final String                          NEW_BLOCK_MINED_EVENT                    = "exo.wallet.block.mined";
 
-  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            =
-                                                                                    "exo.wallet.transaction.mined";
+  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            = "exo.wallet.transaction.mined";
 
   public static final String                          KNOWN_TRANSACTION_REPLACED_EVENT         =
                                                                                        "exo.wallet.transaction.replaced";
@@ -614,8 +613,7 @@ public class WalletUtils {
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
-    return spaceService.isSuperManager(accesssor)
-        || spaceService.isMember(space, accesssor)
+    return spaceService.isSuperManager(accesssor) || spaceService.isMember(space, accesssor)
         || spaceService.isManager(space, accesssor);
   }
 
@@ -650,8 +648,8 @@ public class WalletUtils {
     wallet.setDisabledUser(!identity.isEnable());
     wallet.setDeletedUser(identity.isDeleted());
     wallet.setType(walletType.getId());
-    wallet.setIsInitialized(Arrays.asList(WalletInitializationState.INITIALIZED.name(),
-            WalletInitializationState.MODIFIED.name()).contains(wallet.getInitializationState()));
+    wallet.setIsInitialized(Arrays.asList(WalletState.INITIALIZED.name(), WalletState.MODIFIED.name())
+                                  .contains(wallet.getInitializationState()));
     if (walletType.isUser() || walletType.isSpace()) {
       wallet.setAvatar(identity.getProfile().getAvatarUrl());
     }
@@ -929,6 +927,28 @@ public class WalletUtils {
 
   public static final SpaceService getSpaceService() {
     return CommonsUtils.getService(SpaceService.class);
+  }
+
+  /**
+   * Format Wallet Balance amount in currency format, without currency symbol
+   * and switch user locale.
+   * 
+   * @param balance amount to format
+   * @param locale designated locale to display balance
+   * @param simplified if true, the fractions will be ignored when the balance
+   *          is greater than 100.
+   * @return formatted balance in user locale
+   */
+  public static final String formatBalance(double balance, Locale locale, boolean simplified) {
+    // Avoid to display fractions when the amount of balance is big
+    if (simplified && balance > 100) {
+      balance = Math.floor(balance);
+    }
+    NumberFormat decimalFormat = NumberFormat.getNumberInstance(locale);
+    decimalFormat.setMaximumFractionDigits(2);
+    decimalFormat.setMinimumFractionDigits(0);
+    decimalFormat.setRoundingMode(RoundingMode.FLOOR);
+    return decimalFormat.format(balance).trim();
   }
 
 }
