@@ -53,8 +53,9 @@
                 <div class="flex d-flex xs12 justify-center">
                   <div class="v-card v-card--flat v-sheet theme--light">
                     <div class="v-card__text pa-2">
-                      <a href="<%=walletUrl%>" class="text-color display-1 font-weight-bold big-number">
-                        <%=balanceFixed%> <%=symbol%>
+                      <a href="<%=walletUrl%>" title="<%=balanceFixed%> <%=symbol%>" class="d-flex flex-nowrap text-color display-1 font-weight-bold big-number">
+                        <span class="text-truncate me-1"><%=balanceFixed%></span>
+                        <span><%=symbol%></span>
                       </a>
                     </div>
                   </div>
