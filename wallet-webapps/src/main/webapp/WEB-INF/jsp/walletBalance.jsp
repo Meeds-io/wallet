@@ -12,13 +12,13 @@
 <%@ page import="org.exoplatform.wallet.model.Wallet"%>
 <%@ page import="org.exoplatform.wallet.model.WalletType"%>
 <%@ page import="org.exoplatform.social.core.service.LinkProvider"%>
+<%@ page import="org.exoplatform.wallet.utils.WalletUtils"%>
 
 <%
   String title = "Wallet";
   String walletUrl = "";
 
   try {
-
     String portalName  = ExoContainerContext.getService(LinkProvider.class).getPortalName("");
     String portalOwner  = ExoContainerContext.getService(LinkProvider.class).getPortalOwner("");
     walletUrl =  "/" + portalName + "/" + portalOwner + "/wallet";
@@ -31,7 +31,7 @@
   Wallet wallet = ExoContainerContext.getService(WalletAccountService.class).getWalletByTypeAndId(WalletType.USER.getId(), request.getRemoteUser(), request.getRemoteUser());
   double balance = (wallet == null || wallet.getTokenBalance() == null || wallet.getInitializationState() == "DELETED") ? 0d : wallet.getTokenBalance();
   String balanceFixed = balance > 100 ? String.valueOf((int) balance)
-                                        : String.valueOf(balance).replaceFirst("\\.([0-9][1-9]?)([0-9]*)", ".$1").replaceFirst("\\.0$", "");
+                                        : WalletUtils.formatBalance(balance);
 %>
 <div class="VuetifyApp">
   <div data-app="true"
@@ -53,8 +53,9 @@
                 <div class="flex d-flex xs12 justify-center">
                   <div class="v-card v-card--flat v-sheet theme--light">
                     <div class="v-card__text pa-2">
-                      <a href="<%=walletUrl%>" class="text-color display-1 font-weight-bold big-number">
-                        <%=balanceFixed%> <%=symbol%>
+                      <a href="<%=walletUrl%>" title="<%=balanceFixed%> <%=symbol%>" class="d-flex flex-nowrap text-color display-1 font-weight-bold big-number">
+                        <span class="text-truncate me-1"><%=balanceFixed%></span>
+                        <span><%=symbol%></span>
                       </a>
                     </div>
                   </div>
