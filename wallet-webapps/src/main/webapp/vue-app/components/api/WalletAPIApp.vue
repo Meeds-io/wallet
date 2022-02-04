@@ -382,8 +382,11 @@ export default {
     },
     registerExternalExtensions(title) {
       const profileExtensionAction = {
+        id: 'profile-meeds',
         title: title,
         icon: 'uiIconLightBlue mdi mdi-send material-icons',
+        icon2: 'Ɱ',
+        additionalClass: 'font-weight-bold error-color',
         order: 30,
         enabled: (profile) => profile.enabled && !profile.deleted,
         click: (profile) => {
