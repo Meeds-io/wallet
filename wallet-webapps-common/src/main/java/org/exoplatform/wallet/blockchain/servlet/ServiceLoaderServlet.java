@@ -133,6 +133,7 @@ public class ServiceLoaderServlet extends HttpServlet {
 
 /*      EthereumWalletTokenAdminService tokenAdminService = new EthereumWalletTokenAdminService(web3jConnector);
       container.registerComponentInstance(WalletTokenAdminService.class, tokenAdminService);*/
+/*
 
       ListenerService listernerService = CommonsUtils.getService(ListenerService.class);
 
@@ -153,6 +154,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       listernerService.addListener(WALLET_MODIFIED_EVENT, new WebSocketWalletListener());
       listernerService.addListener(CONTRACT_MODIFIED_EVENT, new WebSocketContractListener());
       listernerService.addListener(WALLET_DELETED_EVENT, new CancelTransactionListener());
+*/
 
       // Start services after adding listeners
       tokenAdminService.start();

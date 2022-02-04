@@ -247,6 +247,87 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </external-component-plugins>
 
   <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.block.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.BlockMinedListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.transaction.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.TransactionNotificationListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketTransactionListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedAndUpdatedListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.transaction.sent</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionSentToBlockchainListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketWalletListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.contract.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketContractListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.deleted</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.CancelTransactionListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
     <target-component>org.exoplatform.commons.api.persistence.DataInitializer</target-component>
     <component-plugin>
       <name>WalletRDBMSChangeLogsPlugin</name>
