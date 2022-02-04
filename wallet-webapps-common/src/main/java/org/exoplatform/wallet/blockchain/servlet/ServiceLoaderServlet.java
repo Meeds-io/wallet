@@ -156,9 +156,9 @@ public class ServiceLoaderServlet extends HttpServlet {
       listernerService.addListener(WALLET_DELETED_EVENT, new CancelTransactionListener());
 */
 
-      // Start services after adding listeners
+/*      // Start services after adding listeners
       tokenAdminService.start();
-      transactionDecoderService.start();
+      transactionDecoderService.start();*/
 
       addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
                                 "Add a job to verify if mined contract transactions are added in database",
