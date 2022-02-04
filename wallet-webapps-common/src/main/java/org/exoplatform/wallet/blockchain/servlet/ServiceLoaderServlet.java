@@ -99,6 +99,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       }
 
       // Replace old bouncy castle provider by the newer version
+/*
       ClassLoader webappClassLoader = getWebappClassLoader();
       Class<?> class1 = webappClassLoader.loadClass(BouncyCastleProvider.class.getName());
       Provider provider = (Provider) class1.newInstance();
@@ -107,11 +108,12 @@ public class ServiceLoaderServlet extends HttpServlet {
       provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
       LOG.info("BouncyCastleProvider class registered with version {}",
                provider.getVersion());
+*/
 
       // start connection to blockchain
-      EthereumClientConnector web3jConnector = new EthereumClientConnector();
-      container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
-      web3jConnector.start(true);
+//      EthereumClientConnector web3jConnector = new EthereumClientConnector();
+//      container.registerComponentInstance(EthereumClientConnector.class, web3jConnector);
+//      web3jConnector.start(true);
 
       // Blockchain transaction decoder
       SettingService settingService = container.getComponentInstanceOfType(SettingService.class);
