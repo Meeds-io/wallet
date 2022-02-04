@@ -75,6 +75,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </component>
 
   <component>
+    <key>org.exoplatform.wallet.service.WalletTokenAdminService</key>
+    <type>org.exoplatform.wallet.blockchain.service.EthereumWalletTokenAdminService</type>
+  </component>
+
+  <component>
     <key>org.exoplatform.wallet.service.WalletTransactionService</key>
     <type>org.exoplatform.wallet.service.WalletTransactionServiceImpl</type>
     <init-params>

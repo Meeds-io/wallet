@@ -93,16 +93,16 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Integer                  configuredContractDecimals;
 
-  private final String             adminPrivateKey;
+  private String             adminPrivateKey;
 
-  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector, String adminPrivateKey) {
+  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector) {
     this.clientConnector = clientConnector;
-    this.adminPrivateKey = adminPrivateKey;
   }
 
   @Override
   public void start() {
     try {
+      this.adminPrivateKey = System.getProperty("exo.wallet.admin.privateKey", null);
       this.configuredContractAddress = getContractAddress();
       this.websocketURL = getWebsocketURL();
       this.networkId = getNetworkId();
