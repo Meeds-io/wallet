@@ -116,15 +116,18 @@ public class ServiceLoaderServlet extends HttpServlet {
 //      web3jConnector.start(true);
 
       // Blockchain transaction decoder
+/*
       SettingService settingService = container.getComponentInstanceOfType(SettingService.class);
       WalletTransactionService walletTransactionService = container.getComponentInstanceOfType(WalletTransactionService.class);
       WalletAccountService walletAccountService = container.getComponentInstanceOfType(WalletAccountService.class);
+
       EthereumBlockchainTransactionService transactionDecoderService = new EthereumBlockchainTransactionService(settingService,
                                                                                                                 web3jConnector,
                                                                                                                 walletTransactionService,
                                                                                                                 walletAccountService);
       container.registerComponentInstance(BlockchainTransactionService.class,
                                           transactionDecoderService);
+ */
 
       // Instantiate service with current webapp classloader
       String adminPrivateKey = System.getProperty("exo.wallet.admin.privateKey", null);
