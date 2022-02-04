@@ -113,7 +113,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   @Override
   public void start() {
-    this.start(false);
+    this.start(true);
   }
 
   public void start(boolean blocking) {
