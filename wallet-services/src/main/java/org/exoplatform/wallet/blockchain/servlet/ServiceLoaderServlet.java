@@ -17,36 +17,24 @@
 package org.exoplatform.wallet.blockchain.servlet;
 
 import java.io.IOException;
-import java.security.Provider;
-import java.security.Security;
 import java.util.concurrent.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.PropertiesParam;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.scheduler.CronJob;
 import org.exoplatform.services.scheduler.JobSchedulerService;
-import org.exoplatform.wallet.blockchain.listener.*;
-import org.exoplatform.wallet.blockchain.service.*;
-import org.exoplatform.wallet.job.*;
-import org.exoplatform.wallet.listener.CancelTransactionListener;
-import org.exoplatform.wallet.listener.TransactionNotificationListener;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
-import org.exoplatform.wallet.service.*;
 
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
@@ -63,7 +51,6 @@ public class ServiceLoaderServlet extends HttpServlet {
 
   private static final ScheduledExecutorService executor                      = Executors.newScheduledThreadPool(1);
 
-  private static final String                   ALLOW_BOOST_ADMIN_TRANSACTION = "exo.wallet.admin.transactions.boost";
 
   @Override
   public void init() throws ServletException {
@@ -160,7 +147,7 @@ public class ServiceLoaderServlet extends HttpServlet {
       tokenAdminService.start();
       transactionDecoderService.start();*/
 
-      addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
+     /* addBlockchainScheduledJob(ContractTransactionVerifierJob.class,
                                 "Add a job to verify if mined contract transactions are added in database",
                                 "0 0/5 * ? * * *");
       addBlockchainScheduledJob(TransactionSenderJob.class,
@@ -180,7 +167,7 @@ public class ServiceLoaderServlet extends HttpServlet {
         addBlockchainScheduledJob(GasPriceUpdaterJob.class,
                                   "A job to update gas price from blockchain",
                                   "0 0/2 * * * ?");
-      }
+      }*/
 
       LOG.debug("Blockchain Service instances created");
     } catch (Throwable e) {

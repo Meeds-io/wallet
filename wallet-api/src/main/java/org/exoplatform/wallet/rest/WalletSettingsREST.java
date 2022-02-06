@@ -34,7 +34,7 @@ import org.exoplatform.wallet.service.WalletService;
 import io.swagger.annotations.*;
 
 @Path("/wallet/api/settings")
-@Api(value = "/wallet/api/settings", description = "Manages wallet module settings") // NOSONAR
+@Api(value = "/wallet/api/settings") // NOSONAR
 public class WalletSettingsREST implements ResourceContainer {
 
   private static final Log LOG = ExoLogger.getLogger(WalletSettingsREST.class);
