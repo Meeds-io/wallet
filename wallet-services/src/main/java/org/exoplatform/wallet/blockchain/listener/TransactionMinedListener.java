@@ -115,9 +115,7 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
       return;
     }
     String address = wallet.getAddress();
-    if (!walletsModifications.containsKey(address)) {
-      walletsModifications.put(address, new HashSet<>());
-    }
+    walletsModifications.computeIfAbsent(address, k -> walletsModifications.put(k, new HashSet<>()));
     walletsModifications.get(address).add(contractMethodName);
   }
 

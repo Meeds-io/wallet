@@ -16,7 +16,6 @@
  */
 package org.exoplatform.wallet.blockchain.service;
 
-import static org.exoplatform.wallet.contract.MeedsToken.*;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;

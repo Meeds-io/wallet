@@ -444,6 +444,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         Thread.sleep(5000);
       }
     } catch (Exception e) {
+      Thread.currentThread().interrupt();
       throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
     }
   }
