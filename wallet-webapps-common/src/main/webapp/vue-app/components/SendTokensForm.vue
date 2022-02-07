@@ -54,12 +54,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 $emit('receiver-selected', $event);
               " />
             <p class="amountLabel mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
-            <wallet-reward-gas-price-choice
-              :wallet="wallet"
-              :estimated-fee="transactionFeeString"
-              :slider="!!transaction"
-              :min-gas-price="transaction && transaction.gasPrice"
-              @changed="gasPrice = $event" />
             <v-text-field
               v-model.number="amount"
               ref="amount"
