@@ -385,7 +385,7 @@ export default {
         id: 'profile-meeds',
         title: title,
         icon: 'uiIconLightBlue mdi mdi-send material-icons',
-        icon2: 'Ɱ',
+        class: 'Ɱ',
         additionalClass: 'font-weight-bold error-color',
         order: 30,
         enabled: (profile) => profile.enabled && !profile.deleted,
