@@ -6,6 +6,7 @@ import SummaryTransaction from './components/wallet-app/SummaryTransaction.vue';
 import ToolbarMenu from './components/wallet-app/ToolbarMenu.vue';
 import TransactionHistoryChart from './components/wallet-app/TransactionHistoryChart.vue';
 import TransactionHistoryChartSummary from './components/wallet-app/TransactionHistoryChartSummary.vue';
+import PopoverWalletButton from './components/wallet-app/PopoverWalletButton.vue';
 
 Vue.use(WalletCommon);
 
@@ -18,6 +19,7 @@ const components = {
   'wallet-reward-toolbar-menu': ToolbarMenu,
   'wallet-reward-transaction-history-chart': TransactionHistoryChart,
   'wallet-reward-transaction-history-chart-summary': TransactionHistoryChartSummary,
+  'popover-wallet-button': PopoverWalletButton,
 };
 for (const key in components) {
   Vue.component(key, components[key]);
