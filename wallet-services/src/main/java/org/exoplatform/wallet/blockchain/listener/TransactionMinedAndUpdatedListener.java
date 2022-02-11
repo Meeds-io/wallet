@@ -1,7 +1,7 @@
 package org.exoplatform.wallet.blockchain.listener;
 
-import org.exoplatform.services.listener.*;
 import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
+import org.exoplatform.services.listener.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletTransactionService;
 
@@ -10,7 +10,7 @@ public class TransactionMinedAndUpdatedListener extends Listener<Object, Transac
 
   private WalletTransactionService walletTransactionService;
 
-  private EthereumClientConnector  web3jConnector;
+  private EthereumClientConnector web3jConnector;
 
   public TransactionMinedAndUpdatedListener(WalletTransactionService walletTransactionService,
                                             EthereumClientConnector web3jConnector) {

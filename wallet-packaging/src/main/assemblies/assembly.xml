@@ -97,5 +97,39 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>provided</scope>
       <outputFileNameMapping>wallet-reward-services.jar</outputFileNameMapping>
     </dependencySet>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>org.web3j:*:jar</include>
+        <include>com.github.jnr:jnr-unixsocket:jar</include>
+        <include>com.github.jnr:jnr-ffi:jar</include>
+        <include>com.github.jnr:jffi:jar</include>
+        <include>org.ow2.asm:asm:jar</include>
+        <include>org.ow2.asm:asm-commons:jar</include>
+        <include>org.ow2.asm:asm-analysis:jar</include>
+        <include>org.ow2.asm:asm-tree:jar</include>
+        <include>org.ow2.asm:asm-util:jar</include>
+        <include>com.github.jnr:jnr-a64asm:jar</include>
+        <include>com.github.jnr:jnr-x86asm:jar</include>
+        <include>com.github.jnr:jnr-constants:jar</include>
+        <include>com.github.jnr:jnr-enxio:jar</include>
+        <include>com.github.jnr:jnr-posix:jar</include>
+        <include>com.squareup.okhttp3:okhttp:jar</include>
+        <include>com.squareup.okio:okio:jar</include>
+        <include>org.jetbrains.kotlin:kotlin-stdlib-common:jar</include>
+        <include>org.jetbrains.kotlin:kotlin-stdlib:jar</include>
+        <include>org.jetbrains:annotations:jar</include>
+        <include>com.squareup.okhttp3:logging-interceptor:jar</include>
+        <include>org.jetbrains.kotlin:kotlin-stdlib-jdk8</include>
+        <include>io.reactivex.rxjava2:rxjava:jar</include>
+        <include>org.reactivestreams:reactive-streams:jar</include>
+        <include>org.java-websocket:Java-WebSocket:jar</include>
+        <include>com.fasterxml.jackson.core:jackson-databind:jar</include>
+        <include>com.fasterxml.jackson.core:jackson-annotations:jar</include>
+        <include>com.fasterxml.jackson.core:jackson-core:jar</include>
+      </includes>
+      <scope>provided</scope>
+    </dependencySet>
   </dependencySets>
 </assembly>
