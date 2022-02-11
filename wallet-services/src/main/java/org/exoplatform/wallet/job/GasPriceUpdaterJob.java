@@ -45,21 +45,23 @@ public class GasPriceUpdaterJob implements Job {
 
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
-    ExoContainer currentContainer = ExoContainerContext.getCurrentContainer();
-    ExoContainerContext.setCurrentContainer(container);
-    RequestLifeCycle.begin(this.container);
-    try {
-      // Refresh gas price only when admin wallet has been initialized
-      Wallet adminWallet = getWalletAccountService().getAdminWallet();
-      if (adminWallet != null && adminWallet.getIsInitialized() != null && Boolean.TRUE.equals(adminWallet.getIsInitialized())) {
-        long blockchainGasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
-        getWalletService().setDynamicGasPrice(blockchainGasPrice);
+    if (getWalletService().isUseDynamicGasPrice()) {
+      ExoContainer currentContainer = ExoContainerContext.getCurrentContainer();
+      ExoContainerContext.setCurrentContainer(container);
+      RequestLifeCycle.begin(this.container);
+      try {
+        // Refresh gas price only when admin wallet has been initialized
+        Wallet adminWallet = getWalletAccountService().getAdminWallet();
+        if (adminWallet != null && adminWallet.getIsInitialized() != null && Boolean.TRUE.equals(adminWallet.getIsInitialized())) {
+          long blockchainGasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
+          getWalletService().setDynamicGasPrice(blockchainGasPrice);
+        }
+      } catch (Exception e) {
+        LOG.error("Error while refreshing gas price", e);
+      } finally {
+        RequestLifeCycle.end();
+        ExoContainerContext.setCurrentContainer(currentContainer);
       }
-    } catch (Exception e) {
-      LOG.error("Error while refreshing gas price", e);
-    } finally {
-      RequestLifeCycle.end();
-      ExoContainerContext.setCurrentContainer(currentContainer);
     }
   }
 

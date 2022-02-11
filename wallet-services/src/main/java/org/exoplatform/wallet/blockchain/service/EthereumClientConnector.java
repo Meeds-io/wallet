@@ -113,7 +113,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   @Override
   public void start() {
-    this.start(false);
+    this.start(true);
   }
 
   public void start(boolean blocking) {
@@ -178,7 +178,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @param transactionHash transaction hash to retrieve
    * @return Web3j Transaction object
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_TRANSACTION)
   public Transaction getTransaction(String transactionHash) {
     EthTransaction ethTransaction;
     try {
@@ -201,7 +201,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @param transactionHash transaction hash to retrieve
    * @return Web3j Transaction receipt object
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION_RECEIPT)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_TRANSACTION_RECEIPT)
   public TransactionReceipt getTransactionReceipt(String transactionHash) {
     EthGetTransactionReceipt ethGetTransactionReceipt;
     try {
@@ -222,7 +222,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @return last mined block number from blockchain
    * @throws IOException when error sending transaction on blockchain
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_LAST_BLOCK_NUMBER)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_LAST_BLOCK_NUMBER)
   public long getLastestBlockNumber() throws IOException {
     BigInteger blockNumber = getWeb3j().ethBlockNumber().send().getBlockNumber();
     return blockNumber.longValue();
@@ -239,7 +239,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @throws IOException if an error happens while getting information from
    *           blockchain
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_FILTER_CONTRACT_TRANSACTIONS)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_FILTER_CONTRACT_TRANSACTIONS)
   public Set<String> getContractTransactions(String contractsAddress,
                                              long fromBlock,
                                              long toBlock) throws IOException {
@@ -272,7 +272,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @throws IOException if an error occurs while sending transaction to
    *           blockchain
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_SEND_TRANSACTION)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_SEND_TRANSACTION)
   public CompletableFuture<EthSendTransaction> sendTransactionToBlockchain(final TransactionDetail transactionDetail) throws IOException {
     return getWeb3j().ethSendRawTransaction(transactionDetail.getRawTransaction())
                      .sendAsync();
@@ -290,7 +290,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @return next transaction nonce
    * @throws IOException if an I/O problem happens when connecting to blockchain
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_TRANSACTION_COUNT)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_TRANSACTION_COUNT)
   public BigInteger getNonce(String walletAddress, DefaultBlockParameterName blockParameterName) throws IOException {
     if (blockParameterName == null) {
       blockParameterName = DefaultBlockParameterName.LATEST;
@@ -305,7 +305,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @throws IOException if an error occurs while sending transaction to
    *           blockchain
    */
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_GAS_PRICE)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_GAS_PRICE)
   public BigInteger getGasPrice() throws IOException {
     return getWeb3j().ethGasPrice()
                      .send()
@@ -444,6 +444,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         Thread.sleep(5000);
       }
     } catch (Exception e) {
+      Thread.currentThread().interrupt();
       throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
     }
   }
