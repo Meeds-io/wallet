@@ -25,13 +25,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <artifactId>wallet-services</artifactId>
   <name>eXo Add-on:: Wallet - Services</name>
   <properties>
-    <exo.test.coverage.ratio>0.57</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.37</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-api</artifactId>
       <scope>provided</scope>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.exoplatform.ws</groupId>
@@ -67,10 +68,87 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <artifactId>jsr311-api</artifactId>
       <scope>provided</scope>
     </dependency>
-    <!-- Test dependencies -->
     <dependency>
       <groupId>org.exoplatform.wallet</groupId>
       <artifactId>ert-contract</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>core</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>tuples</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>utils</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>abi</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>crypto</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.web3j</groupId>
+      <artifactId>rlp</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.web3j</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -88,6 +166,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <artifactId>hsqldb</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.exoplatform.addons.wallet</groupId>
+      <artifactId>wallet-api</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <finalName>wallet-services</finalName>
@@ -104,6 +186,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <exo.properties.url>classpath:/conf/configuration.properties</exo.properties.url>
             <exo.profiles>hsqldb</exo.profiles>
             <exo.files.storage.dir>${project.build.directory}/files</exo.files.storage.dir>
+            <exo.wallet.admin.privateKey>3b40ba6f0924ab5b8ed1f3ec46ef5c415bac58544e39dc0d1fb712beabf219c9</exo.wallet.admin.privateKey>
           </systemPropertyVariables>
         </configuration>
       </plugin>

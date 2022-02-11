@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file is part of the Meeds project (https://meeds.io/).
+Copyright (C) 2020 Meeds Association
+contact@meeds.io
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+-->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
+
+  <component>
+    <key>org.exoplatform.wallet.blockchain.service.EthereumClientConnector</key>
+    <type>org.exoplatform.wallet.blockchain.service.EthereumClientConnector</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.service.BlockchainTransactionService</key>
+    <type>org.exoplatform.wallet.blockchain.service.EthereumBlockchainTransactionService</type>
+  </component>
+
+  <component>
+    <key>org.exoplatform.wallet.service.WalletTokenAdminService</key>
+    <type>org.exoplatform.wallet.blockchain.service.EthereumWalletTokenAdminService</type>
+  </component>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.listener.ListenerService</target-component>
+    <component-plugin>
+      <name>exo.wallet.addressAssociation.new</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.AutoTransactionListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.block.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.BlockMinedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.TransactionNotificationListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketTransactionListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedAndUpdatedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.sent</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionSentToBlockchainListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketWalletListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.contract.modified</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.WebSocketContractListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.deleted</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.CancelTransactionListener</type>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Add a job to verify if mined contract transactions are added in database</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Add a job to verify if mined contract transactions are added in database</description>
+          <property name="jobName" value="ContractTransactionVerifierJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.job.ContractTransactionVerifierJob"/>
+          <property name="expression" value="${exo.wallet.ContractTransactionVerifierJob.expression:0 0/5 * ? * * *}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Configuration for transaction sending to blockchain</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for transaction sending to blockchain</description>
+          <property name="jobName" value="TransactionSenderJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.job.TransactionSenderJob"/>
+          <property name="expression" value="${exo.wallet.TransactionSenderJob.expression:0/30 * * * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Configuration for the Job that boost transaction sending to blockchain</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for the Job that boost transaction sending to blockchain</description>
+          <property name="jobName" value="BoostAdminTransactionJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.job.BoostAdminTransactionJob"/>
+          <property name="expression" value="${exo.wallet.BoostAdminTransactionJob.expression:0 30 7 * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>Configuration for pending transactions check on blockchain</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>Configuration for pending transactions check on blockchain</description>
+          <property name="jobName" value="PendingTransactionVerifierJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.job.PendingTransactionVerifierJob"/>
+          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0 15 7 * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+    <component-plugin>
+      <name>AddCronJob</name>
+      <set-method>addCronJob</set-method>
+      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <description>A job to update gas price from blockchain</description>
+      <init-params>
+        <properties-param>
+          <name>cronjob.info</name>
+          <description>A job to update gas price from blockchain</description>
+          <property name="jobName" value="GasPriceUpdaterJob"/>
+          <property name="groupName" value="Wallet"/>
+          <property name="job" value="org.exoplatform.wallet.job.GasPriceUpdaterJob"/>
+          <property name="expression" value="${exo.wallet.GasPriceUpdaterJob.expression:0 0/2 * * * ?}"/>
+        </properties-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+</configuration>
