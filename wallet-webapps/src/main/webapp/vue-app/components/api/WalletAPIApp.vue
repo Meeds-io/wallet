@@ -397,6 +397,13 @@ export default {
       };
       extensionRegistry.registerExtension('profile-extension', 'action', profileExtensionAction);
       document.dispatchEvent(new CustomEvent('profile-extension-updated', { detail: profileExtensionAction}));
+      
+      extensionRegistry.registerComponent('UserPopover', 'user-popover-action', {
+        id: 'wallet',
+        vueComponent: Vue.options.components['popover-wallet-button'],
+        rank: 20,
+      });
+
     },
   },
 };
