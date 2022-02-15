@@ -31,46 +31,60 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <dependency>
       <groupId>org.exoplatform.wallet</groupId>
       <artifactId>ert-contract</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-api</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-services</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-reward-services</artifactId>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-webapps-common</artifactId>
       <type>war</type>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-webapps</artifactId>
       <type>war</type>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-webapps-admin</artifactId>
       <type>war</type>
-      <scope>provided</scope>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -78,67 +92,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <artifactId>wallet-webapps-reward</artifactId>
       <type>war</type>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>core</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>tuples</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>utils</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>abi</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>crypto</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.web3j</groupId>
-      <artifactId>rlp</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.web3j</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
   </dependencies>

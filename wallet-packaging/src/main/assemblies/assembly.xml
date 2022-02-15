@@ -28,108 +28,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/webapps</outputDirectory>
       <includes>
-        <include>${project.groupId}:wallet-webapps-common:war</include>
+        <include>${project.groupId}:*:war</include>
       </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-common.war</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-webapps:war</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet.war</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-webapps-admin:war</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-admin.war</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/webapps</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-webapps-reward:war</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-reward.war</outputFileNameMapping>
+      <scope>compile</scope>
+      <outputFileNameMapping>${artifact.build.finalName}.${artifact.extension}</outputFileNameMapping>
     </dependencySet>
     <!-- Libraries -->
     <dependencySet>
       <useProjectArtifact>false</useProjectArtifact>
       <outputDirectory>/lib</outputDirectory>
       <includes>
-        <include>org.exoplatform.wallet:ert-contract:jar</include>
+        <include>*:*:jar</include>
       </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>ert-contract.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-api:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-api.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-services:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-services.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>${project.groupId}:wallet-reward-services:jar</include>
-      </includes>
-      <scope>provided</scope>
-      <outputFileNameMapping>wallet-reward-services.jar</outputFileNameMapping>
-    </dependencySet>
-    <dependencySet>
-      <useProjectArtifact>false</useProjectArtifact>
-      <outputDirectory>/lib</outputDirectory>
-      <includes>
-        <include>org.web3j:*:jar</include>
-        <include>com.github.jnr:jnr-unixsocket:jar</include>
-        <include>com.github.jnr:jnr-ffi:jar</include>
-        <include>com.github.jnr:jffi:jar</include>
-        <include>org.ow2.asm:asm:jar</include>
-        <include>org.ow2.asm:asm-commons:jar</include>
-        <include>org.ow2.asm:asm-analysis:jar</include>
-        <include>org.ow2.asm:asm-tree:jar</include>
-        <include>org.ow2.asm:asm-util:jar</include>
-        <include>com.github.jnr:jnr-a64asm:jar</include>
-        <include>com.github.jnr:jnr-x86asm:jar</include>
-        <include>com.github.jnr:jnr-constants:jar</include>
-        <include>com.github.jnr:jnr-enxio:jar</include>
-        <include>com.github.jnr:jnr-posix:jar</include>
-        <include>com.squareup.okhttp3:okhttp:jar</include>
-        <include>com.squareup.okio:okio:jar</include>
-        <include>org.jetbrains.kotlin:kotlin-stdlib-common:jar</include>
-        <include>org.jetbrains.kotlin:kotlin-stdlib:jar</include>
-        <include>org.jetbrains:annotations:jar</include>
-        <include>com.squareup.okhttp3:logging-interceptor:jar</include>
-        <include>org.jetbrains.kotlin:kotlin-stdlib-jdk8</include>
-        <include>io.reactivex.rxjava2:rxjava:jar</include>
-        <include>org.reactivestreams:reactive-streams:jar</include>
-        <include>org.java-websocket:Java-WebSocket:jar</include>
-        <include>com.fasterxml.jackson.core:jackson-databind:jar</include>
-        <include>com.fasterxml.jackson.core:jackson-annotations:jar</include>
-        <include>com.fasterxml.jackson.core:jackson-core:jar</include>
-      </includes>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
     </dependencySet>
   </dependencySets>
 </assembly>
