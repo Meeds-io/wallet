@@ -40,7 +40,7 @@
 export default {
   data: () => ({
     id: `Wallet${parseInt(Math.random() * 10000)}`,
-    displayed: true,
+    displayed: false,
     displayDetails: false,
     wallet: null,
     from: '',
@@ -54,6 +54,7 @@ export default {
     }
   },
   created() {
+    this.checkWalletInstalled();
     document.addEventListener('hideSettingsApps', (event) => {
       if (event && event.detail && this.id !== event.detail) {
         this.displayed = false;
@@ -78,11 +79,26 @@ export default {
         document.location.hash = '#walletSettings';
       }
     }, 300);
+    this.$root.$on('relaodSpaceApplications', this.checkWalletInstalled());
   },
   mounted() {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
   },
   methods: {
+    checkWalletInstalled() {
+      const spaceId = eXo.env.portal.spaceId;
+      const self = this;
+      this.$spaceService.getSpaceApplications(spaceId)
+        .then(applications => {
+          this.applications = applications;
+          this.applications.forEach( function (item, index) {
+            console.log(`loaded applications in ${index} is ${item.id}`);
+            if (item.id === 'SpaceWallet') {
+              self.displayed = true;
+            }
+          });
+        });
+    },
     init() {
       this.walletUtils.initSettings(eXo.env.portal.spaceName !== '', true)
         .then(() => this.walletUtils.initWeb3(this.isSpace, true));
