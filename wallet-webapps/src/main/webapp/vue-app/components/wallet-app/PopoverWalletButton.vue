@@ -6,12 +6,10 @@
         v-on="on">
         <v-btn
           :ripple="false"
-          x-small
           icon
           color="primary"
-          class="pa-2"
           @click="sendWallet($event)">
-          <v-icon class="font-weight-bold error-color pa-2 mt-n1">Ɱ</v-icon>
+          <v-icon size="18" class="font-weight-bold error-color pa-2 mt-n1">Ɱ</v-icon>
         </v-btn>
       </div>
     </template>
