@@ -382,11 +382,8 @@ export default {
     },
     registerExternalExtensions(title) {
       const profileExtensionAction = {
-        id: 'profile-meeds',
         title: title,
         icon: 'uiIconLightBlue mdi mdi-send material-icons',
-        class: 'Ɱ',
-        additionalClass: 'font-weight-bold error-color',
         order: 30,
         enabled: (profile) => profile.enabled && !profile.deleted,
         click: (profile) => {
@@ -397,13 +394,11 @@ export default {
       };
       extensionRegistry.registerExtension('profile-extension', 'action', profileExtensionAction);
       document.dispatchEvent(new CustomEvent('profile-extension-updated', { detail: profileExtensionAction}));
-      
       extensionRegistry.registerComponent('UserPopover', 'user-popover-action', {
         id: 'wallet',
         vueComponent: Vue.options.components['popover-wallet-button'],
         rank: 20,
       });
-
     },
   },
 };
