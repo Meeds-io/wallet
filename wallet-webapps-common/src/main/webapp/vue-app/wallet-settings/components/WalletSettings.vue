@@ -79,7 +79,7 @@ export default {
         document.location.hash = '#walletSettings';
       }
     }, 300);
-    this.$root.$on('relaodSpaceApplications', this.checkWalletInstalled());
+    document.addEventListener('reloadSpaceApplications', this.checkWalletInstalled());
   },
   mounted() {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
