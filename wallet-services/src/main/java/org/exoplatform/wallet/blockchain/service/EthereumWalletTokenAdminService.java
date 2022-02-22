@@ -24,6 +24,8 @@ import java.math.BigInteger;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.picocontainer.Startable;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -135,22 +137,29 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     } catch (Exception e) {
       LOG.warn("Error refreshing contract detail from blockchain with address {}", configuredContractAddress, e);
     }
+    RequestLifeCycle.begin(PortalContainer.getInstance());
+    try {
 
-    // Create admin wallet if not exists
-    Wallet wallet = getAccountService().getAdminWallet();
-    if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
-      if (StringUtils.isBlank(adminPrivateKey)) {
-        createAdminAccount();
-      } else {
-        try {
-          createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
-          LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
-        } catch (Exception e) {
+      // Create admin wallet if not exists
+      Wallet wallet = getAccountService().getAdminWallet();
+      if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
+        if (StringUtils.isBlank(adminPrivateKey)) {
           createAdminAccount();
+        } else {
+          try {
+            createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
+            LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
+          } catch (Exception e) {
+            createAdminAccount();
+          }
         }
+      } else {
+        LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
       }
-    } else {
-      LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
+    }catch (Exception e) {
+
+    } finally {
+      RequestLifeCycle.end();
     }
   }
 
