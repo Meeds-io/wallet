@@ -88,16 +88,17 @@ export default {
     checkWalletInstalled() {
       const spaceId = eXo.env.portal.spaceId;
       const self = this;
-      this.$spaceService.getSpaceApplications(spaceId)
-        .then(applications => {
-          this.applications = applications;
-          this.applications.forEach( function (item, index) {
-            console.log(`loaded applications in ${index} is ${item.id}`);
-            if (item.id === 'SpaceWallet') {
-              self.displayed = true;
-            }
+      if (spaceId) {
+        this.$spaceService.getSpaceApplications(spaceId)
+          .then(applications => {
+            this.applications = applications;
+            this.applications.forEach( function (item) {
+              if (item.id === 'SpaceWallet') {
+                self.displayed = true;
+              }
+            });
           });
-        });
+      }
     },
     init() {
       this.walletUtils.initSettings(eXo.env.portal.spaceName !== '', true)
