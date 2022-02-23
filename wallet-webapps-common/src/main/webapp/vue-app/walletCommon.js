@@ -81,3 +81,11 @@ for (const key in components) {
   Vue.component(key, components[key]);
 }
 window.WalletCommon = WalletCommon;
+
+if (extensionRegistry) {
+  extensionRegistry.registerComponent('SpaceSettings', 'space-settings-components', {
+    id: 'wallet-space-settings',
+    vueComponent: Vue.options.components['wallet-settings'],
+    rank: 10,
+  });
+}
