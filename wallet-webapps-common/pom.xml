@@ -40,54 +40,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <finalName>wallet-common</finalName>
     <plugins>
       <plugin>
-        <groupId>com.jcabi</groupId>
-        <artifactId>jcabi-maven-plugin</artifactId>
-        <!-- Workaround for bug https://github.com/jcabi/jcabi-aspects/issues/257 -->
-        <dependencies>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>1.9.1</version>
-          </dependency>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>1.9.1</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <org.aspectj.weaver.Dump.condition>abort</org.aspectj.weaver.Dump.condition>
-            <org.aspectj.weaver.Dump.exception>false</org.aspectj.weaver.Dump.exception>
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.exoplatform.wallet</groupId>
-                  <artifactId>ert-contract</artifactId>
-                  <overWrite>false</overWrite>
-                  <outputDirectory>${project.build.directory}/contracts</outputDirectory>
-                  <includes>**/*.bin,**/*.json</includes>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
           <execution>
             <id>platform-ui-src</id>
             <phase>generate-sources</phase>
