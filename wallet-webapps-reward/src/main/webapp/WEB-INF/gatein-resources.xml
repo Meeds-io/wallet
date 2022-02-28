@@ -59,12 +59,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <as>EthereumQRPlugin</as>
       </depends>
       <depends>
-        <module>userPopupPlugin</module>
-      </depends>
-      <depends>
-        <module>spacePopupPlugin</module>
-      </depends>
-      <depends>
         <module>commons-cometd3</module>
         <as>cCometd</as>
       </depends>
