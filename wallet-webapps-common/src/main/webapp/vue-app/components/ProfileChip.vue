@@ -70,25 +70,7 @@ export default {
         return null;
       },
     },
-    spaceId: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
-    profileTechnicalId: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
     profileType: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
-    avatar: {
       type: String,
       default: function() {
         return null;
@@ -101,12 +83,6 @@ export default {
       },
     },
     address: {
-      type: String,
-      default: function() {
-        return null;
-      },
-    },
-    tiptipPosition: {
       type: String,
       default: function() {
         return null;
@@ -170,53 +146,6 @@ export default {
         return `${eXo.env.portal.context}/g/:spaces:${this.profileId}/`;
       }
       return '#';
-    },
-  },
-  watch: {
-    profileId() {
-      if (this.profileId) {
-        // TODO disable tiptip because of high CPU usage using its code
-        this.initTiptip();
-      }
-    },
-  },
-  created() {
-    if (this.profileId && (this.profileType === 'user' || this.profileType === 'space')) {
-      // TODO disable tiptip because of high CPU usage using its code
-      this.initTiptip();
-    }
-  },
-  methods: {
-    initTiptip() {
-      if (this.profileType === 'space') {
-        this.$nextTick(() => {
-          $(`#${this.id}`).spacePopup({
-            userName: eXo.env.portal.userName,
-            spaceID: this.spaceId,
-            restURL: '/portal/rest/v1/social/spaces/{0}',
-            membersRestURL: '/portal/rest/v1/social/spaces/{0}/users?returnSize=true',
-            managerRestUrl: '/portal/rest/v1/social/spaces/{0}/users?role=manager&returnSize=true',
-            membershipRestUrl: '/portal/rest/v1/social/spacesMemberships?space={0}&returnSize=true',
-            defaultAvatarUrl: this.avatar ? this.avatar : `/portal/rest/v1/social/spaces/${this.profileId}/avatar`,
-            deleteMembershipRestUrl: '/portal/rest/v1/social/spacesMemberships/{0}:{1}:{2}',
-            content: false,
-            keepAlive: true,
-            defaultPosition: this.tiptipPosition || 'left_bottom',
-            maxWidth: '240px',
-          });
-        });
-      } else {
-        this.$nextTick(() => {
-          $(`#${this.id}`).userPopup({
-            restURL: '/portal/rest/social/people/getPeopleInfo/{0}.json',
-            userId: this.profileId,
-            content: false,
-            keepAlive: true,
-            defaultPosition: this.tiptipPosition || 'left_bottom',
-            maxWidth: '240px',
-          });
-        });
-      }
     },
   },
 };
