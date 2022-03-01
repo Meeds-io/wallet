@@ -24,12 +24,3 @@ const components = {
 for (const key in components) {
   Vue.component(key, components[key]);
 }
-
-const externalComponentOptions = {
-  appId: 'SpaceWallet',
-  name: 'space-wallet-setting',
-  componentImpl: Vue.options.components['wallet-settings']
-};
-if (extensionRegistry) {
-  extensionRegistry.registerComponent('external-apps-space-settings', 'space-settings', externalComponentOptions);
-}

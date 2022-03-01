@@ -59,7 +59,11 @@ export default {
         this.displayed = false;
       }
     });
-    document.addEventListener('showSettingsApps', () => this.displayed = true);
+    document.addEventListener('showSettingsApps', () => {
+      this.displayed = true;
+      this.checkWalletInstalled();
+    });
+    this.checkWalletInstalled();
     this.init();
     setTimeout( () => {
       this.from = this.getQueryParam('from');
@@ -83,6 +87,18 @@ export default {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
   },
   methods: {
+    checkWalletInstalled() {
+      if (eXo.env.portal.spaceId) {
+        this.displayed = false;
+        this.$spaceService.getSpaceApplications(eXo.env.portal.spaceId)
+          .then(applications => {
+            this.applications = applications;
+            this.displayed = this.applications.some( item => {
+              return item.id === 'SpaceWallet';
+            });
+          });
+      }
+    },
     init() {
       this.walletUtils.initSettings(eXo.env.portal.spaceName !== '', true)
         .then(() => this.walletUtils.initWeb3(this.isSpace, true));

@@ -16,7 +16,6 @@
  */
 package org.exoplatform.wallet.blockchain.service;
 
-import static org.exoplatform.wallet.contract.MeedsToken.*;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.io.IOException;
@@ -46,7 +45,9 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.*;
+
 
 public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
@@ -58,14 +59,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   private static final String              APPROVAL_SIG                = EventEncoder.encode(MeedsToken.APPROVAL_EVENT);
 
   private static final String              TRANSFER_OWNERSHIP_SIG      =
-                                                                  EventEncoder.encode(OWNERSHIPTRANSFERRED_EVENT);
+                                                                  EventEncoder.encode(MeedsToken.OWNERSHIPTRANSFERRED_EVENT);
 
   private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
 
   static {
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, FUNC_TRANSFER);
-    CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIG, FUNC_APPROVE);
-    CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIG, FUNC_TRANSFEROWNERSHIP);
+    CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, MeedsToken.FUNC_TRANSFER);
+    CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIG, MeedsToken.FUNC_APPROVE);
+    CONTRACT_METHODS_BY_SIG.put(TRANSFER_OWNERSHIP_SIG, MeedsToken.FUNC_TRANSFEROWNERSHIP);
   }
 
   private EthereumClientConnector  ethereumClientConnector;
@@ -603,8 +604,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             continue;
           }
           transactionDetail.setContractMethodName(methodName);
-          if (StringUtils.equals(methodName, FUNC_TRANSFER)) {
-            EventValues parameters = Contract.staticExtractEventParameters(TRANSFER_EVENT, log);
+          if (StringUtils.equals(methodName, MeedsToken.FUNC_TRANSFER)) {
+            EventValues parameters = Contract.staticExtractEventParameters(MeedsToken.TRANSFER_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -614,12 +615,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             transactionDetail.setContractAmountDecimal(amount, contractDecimals);
             if (!StringUtils.equals(transactionReceipt.getFrom(), transactionDetail.getFrom())) {
               transactionDetail.setBy(transactionReceipt.getFrom());
-              transactionDetail.setContractMethodName(FUNC_TRANSFERFROM);
+              transactionDetail.setContractMethodName(MeedsToken.FUNC_TRANSFERFROM);
             }
             transactionDetail.setAdminOperation(false);
-          } else if (StringUtils.equals(methodName, FUNC_APPROVE)) {
+          } else if (StringUtils.equals(methodName, MeedsToken.FUNC_APPROVE)) {
             transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(APPROVAL_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(MeedsToken.APPROVAL_EVENT, log);
             if (parameters == null) {
               continue;
             }
@@ -628,9 +629,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
             BigInteger amount = (BigInteger) parameters.getNonIndexedValues().get(0).getValue();
             transactionDetail.setContractAmountDecimal(amount, contractDecimals);
             transactionDetail.setAdminOperation(false);
-          } else if (StringUtils.equals(methodName, FUNC_TRANSFEROWNERSHIP)) {
+          } else if (StringUtils.equals(methodName, MeedsToken.FUNC_TRANSFEROWNERSHIP)) {
             transactionLogTreated = true;
-            EventValues parameters = Contract.staticExtractEventParameters(OWNERSHIPTRANSFERRED_EVENT, log);
+            EventValues parameters = Contract.staticExtractEventParameters(MeedsToken.OWNERSHIPTRANSFERRED_EVENT, log);
             if (parameters == null) {
               continue;
             }

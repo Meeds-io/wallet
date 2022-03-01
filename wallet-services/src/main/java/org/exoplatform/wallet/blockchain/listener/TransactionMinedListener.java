@@ -21,9 +21,9 @@ import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVEN
 
 import java.util.*;
 
+import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
 import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.*;
@@ -40,7 +40,7 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
 
   private WalletTransactionService walletTransactionService;
 
-  private EthereumClientConnector  web3jConnector;
+  private EthereumClientConnector web3jConnector;
 
   private ListenerService          listenerService;
 

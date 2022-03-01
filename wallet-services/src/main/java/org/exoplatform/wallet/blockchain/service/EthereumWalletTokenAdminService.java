@@ -24,7 +24,8 @@ import java.math.BigInteger;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.exoplatform.services.listener.ListenerService;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.picocontainer.Startable;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -51,10 +52,11 @@ import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.service.*;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.wallet.storage.WalletStorage;
+import org.exoplatform.wallet.service.*;
+
 
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable, ExoWalletStatisticService {
   private static final Log         LOG                                     =
@@ -93,16 +95,33 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Integer                  configuredContractDecimals;
 
-  private final String             adminPrivateKey;
+  private String             adminPrivateKey;
 
-  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector, String adminPrivateKey) {
+  public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector) {
     this.clientConnector = clientConnector;
-    this.adminPrivateKey = adminPrivateKey;
   }
 
   @Override
   public void start() {
     try {
+      GlobalSettings settings = getSettings();
+      if (settings == null) {
+        LOG.warn("No wallet settings are found");
+        return;
+      }
+
+      if (settings.getNetwork() == null || settings.getNetwork().getId() <= 0
+              || StringUtils.isBlank(settings.getNetwork().getProviderURL())
+              || StringUtils.isBlank(settings.getNetwork().getWebsocketProviderURL())) {
+        LOG.warn("No valid blockchain network settings are found: {}", settings.getNetwork());
+        return;
+      }
+
+      if (StringUtils.isBlank(settings.getContractAddress())) {
+        LOG.warn("No contract address is configured");
+        return;
+      }
+      this.adminPrivateKey = System.getProperty("exo.wallet.admin.privateKey", null);
       this.configuredContractAddress = getContractAddress();
       this.websocketURL = getWebsocketURL();
       this.networkId = getNetworkId();
@@ -118,22 +137,29 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     } catch (Exception e) {
       LOG.warn("Error refreshing contract detail from blockchain with address {}", configuredContractAddress, e);
     }
+    RequestLifeCycle.begin(PortalContainer.getInstance());
+    try {
 
-    // Create admin wallet if not exists
-    Wallet wallet = getAccountService().getAdminWallet();
-    if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
-      if (StringUtils.isBlank(adminPrivateKey)) {
-        createAdminAccount();
-      } else {
-        try {
-          createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
-          LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
-        } catch (Exception e) {
+      // Create admin wallet if not exists
+      Wallet wallet = getAccountService().getAdminWallet();
+      if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
+        if (StringUtils.isBlank(adminPrivateKey)) {
           createAdminAccount();
+        } else {
+          try {
+            createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
+            LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
+          } catch (Exception e) {
+            createAdminAccount();
+          }
         }
+      } else {
+        LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
       }
-    } else {
-      LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
+    }catch (Exception e) {
+
+    } finally {
+      RequestLifeCycle.end();
     }
   }
 
@@ -236,7 +262,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_GET_ETHER_BALANCE)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_ETHER_BALANCE)
   public final BigInteger getEtherBalanceOf(String address) throws Exception { // NOSONAR
     Web3j web3j = getClientConnector().getWeb3j();
     if (web3j == null) {
@@ -472,7 +498,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
   }
 
-  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_READ_FROM_TOKEN)
+  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_READ_FROM_TOKEN)
   public Object executeReadOperation(final String contractAddress,
                                      final String methodName,
                                      final Object... arguments) throws Exception {
