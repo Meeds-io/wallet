@@ -168,7 +168,6 @@
   </v-app>
 </template>
 <script>
-//import {initEmptyWeb3Instance} from '../../js/WalletUtils.js';
 export default {
   props: {
     walletDetails: {
@@ -243,6 +242,7 @@ export default {
       // if (window.ethereum) {
       //  window.localWeb3 = new Web3();
       //initEmptyWeb3Instance();
+      this.walletUtils.initEmptyWeb3Instance();
       window.localWeb3 = new LocalWeb3();
       window.ethereum.request({ method: 'eth_requestAccounts' });
       // } else if (window.localWeb3) {
