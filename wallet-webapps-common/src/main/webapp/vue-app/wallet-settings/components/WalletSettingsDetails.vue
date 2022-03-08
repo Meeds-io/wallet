@@ -27,6 +27,7 @@
         </v-card-title>
         <v-card-subtitle class="mx-14 mn-5">
           {{ $t('exoplatform.wallet.message.settingsDescription') }}
+          <v-btn @click="connectMetamask"> You don't have a metamask account yet?</v-btn>
         </v-card-subtitle>
 
         <v-list class="mx-8">
@@ -167,6 +168,7 @@
   </v-app>
 </template>
 <script>
+//import {initEmptyWeb3Instance} from '../../js/WalletUtils.js';
 export default {
   props: {
     walletDetails: {
@@ -233,6 +235,32 @@ export default {
           this.$root.$emit('show-alert', {type: 'error',message: String(e)});
         });
     },
+    connectMetamask(){
+      console.log(window.localWeb3, window.ethereum);
+      //if (window.ethereum) {
+      // window.localWeb3 = new Web3(window.ethereum);
+      //  }
+      // if (window.ethereum) {
+      //  window.localWeb3 = new Web3();
+      //initEmptyWeb3Instance();
+      window.localWeb3 = new LocalWeb3();
+      window.ethereum.request({ method: 'eth_requestAccounts' });
+      // } else if (window.localWeb3) {
+      // window.localWeb3 = new LocalWeb3(window.web3.currentProvider);
+      // } else {
+        
+      // DO NOTHING...
+      //}
+      // if (window.localWeb3) {
+      //   window.localWeb3 = new LocalWeb3(window.localWeb3);
+      //   //  window.localWeb3 = new localWeb3(window.localWeb3.currentProvider);
+      //   // const provider = window.localWeb3.providers.HttpProvider(window.walletSettings.network.providerURL);
+      //   // window.localWeb3 = new LocalWeb3(provider);
+      //   // console.log(window);
+      //   window.ethereum.request({ method: 'eth_requestAccounts' });
+      // //return true;
+      // } 
+    }
   },
 };
 </script>
