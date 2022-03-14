@@ -141,6 +141,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <script>
 import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
+import {saveTransactionDetails} from '../js/TransactionUtils.js';
 import {searchWalletByAddress} from '../js/AddressRegistry.js';
 
 export default {
@@ -357,7 +358,7 @@ export default {
         }
       }
     },
-    sendTokens() {
+    async sendTokens() {
       this.error = null;
       this.warning = null;
 
@@ -401,8 +402,8 @@ export default {
 
       const sender = this.contractDetails.contract.options.from;
       const receiver = this.recipient;
-      const transfer =  this.contractDetails.contract.methods.transfer;
-
+      const transferMeth =  this.contractDetails.contract.methods.transfer;
+      const addressMetaMask = await window.ethereum.request({ method: 'eth_accounts' });
       const transactionDetail = {
         from: sender.toLowerCase(),
         to: receiver,
@@ -423,7 +424,7 @@ export default {
 
       if (this.transaction) {
         Object.assign(transactionDetail, {
-          nonce: this.transaction.nonce,
+          //nonce: this.transaction.nonce,
           label: this.transaction.label || '',
           message: this.transaction.message || '',
           contractAmount: this.transaction.contractAmount,
@@ -431,55 +432,113 @@ export default {
           boost: true,
         });
       }
-
+  
       this.error = null;
       this.loading = true;
-      return transfer(transactionDetail.to, convertTokenAmountToSend(transactionDetail.contractAmount, this.contractDetails.decimals).toString())
-        .estimateGas({
-          from: transactionDetail.from,
-          gas: transactionDetail.gas,
-          gasPrice: transactionDetail.gasPrice,
+      if (addressMetaMask.length>=1){
+        console.log('here from matamask');
+        const transactionParameters = {
+          to: this.contractDetails.address,
+          from: addressMetaMask[0],
+          data: 
+         this.contractDetails.contract.methods.transfer(
+           receiver,
+           convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()
+         )
+           .encodeABI()
+        };
+        return window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [transactionParameters],
         })
-        .catch((e) => {
-          console.error('Error estimating necessary gas', e);
-          return 0;
-        })
-        .then((estimatedGas) => {
-          if (estimatedGas > window.walletSettings.network.gasLimit) {
-            this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
-            return;
-          }
-          return sendContractTransaction(transactionDetail, transfer, [receiver, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
-        })
-        .then((savedTransaction, error) => {
-          if (error) {
-            throw error;
-          }
-          if (savedTransaction) {
-            // The transaction has been hashed and will be sent
-            this.$emit(
-              'sent',
-              savedTransaction,
-              this.contractDetails
-            );
-
-            this.$emit('close');
-
-            if (this.notificationId) {
-              // Asynchronously mark notification as sent
-              markFundRequestAsSent(this.notificationId);
+          .then((txHash) =>{
+            console.log('txHash',txHash);
+            Object.assign(transactionDetail, {
+              hash: txHash
+            });
+            return saveTransactionDetails(transactionDetail);
+          })
+          .then((savedTransaction, error) => {
+            console.log('savedTransaction',savedTransaction);
+            if (error) {
+              throw error;
             }
-          }
-        })
-        .catch((e) => {
-          console.error('Web3 contract.transfer method - error', e);
-          this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
-        })
-        .finally(() => {
-          this.loading = false;
-          lockBrowserWallet();
-          this.close();
-        });
+            if (savedTransaction) {
+            // The transaction has been hashed and will be sent
+              this.$emit(
+                'sent',
+                savedTransaction,
+                this.contractDetails
+              );
+
+              this.$emit('close');
+
+              if (this.notificationId) {
+              // Asynchronously mark notification as sent
+                markFundRequestAsSent(this.notificationId);
+              }
+            }
+          })
+          .catch((e) => {
+            console.error('Web3 contract.transfer method - error', e);
+            this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+          })
+          .finally(() => {
+            this.loading = false;
+            lockBrowserWallet();
+            this.close();
+          });
+      } else {
+
+        console.log('here from exo');
+        
+        return transferMeth(transactionDetail.to, convertTokenAmountToSend(transactionDetail.contractAmount, this.contractDetails.decimals).toString())
+          .estimateGas({
+            from: transactionDetail.from,
+            gas: transactionDetail.gas,
+            gasPrice: transactionDetail.gasPrice,
+          })
+          .catch((e) => {
+            console.error('Error estimating necessary gas', e);
+            return 0;
+          })
+          .then((estimatedGas) => {
+            if (estimatedGas > window.walletSettings.network.gasLimit) {
+              this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
+              return;
+            }
+            return sendContractTransaction(transactionDetail, transferMeth, [receiver, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString()]);
+          })
+          .then((savedTransaction, error) => {
+            if (error) {
+              throw error;
+            }
+            if (savedTransaction) {
+            // The transaction has been hashed and will be sent
+              this.$emit(
+                'sent',
+                savedTransaction,
+                this.contractDetails
+              );
+
+              this.$emit('close');
+
+              if (this.notificationId) {
+              // Asynchronously mark notification as sent
+                markFundRequestAsSent(this.notificationId);
+              }
+            }
+          })
+          .catch((e) => {
+            console.error('Web3 contract.transfer method - error', e);
+            this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+          })
+          .finally(() => {
+            this.loading = false;
+            lockBrowserWallet();
+            this.close();
+          });
+      }
     },
     checkErrors() {
       this.error = null;
