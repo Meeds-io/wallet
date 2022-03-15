@@ -51,7 +51,13 @@ public class Wallet implements Serializable, Cloneable {
   private boolean           isEnabled;
 
   @Exclude
+  private boolean           isActive;
+
+  @Exclude
   private String            initializationState;
+
+  @Exclude
+  private String            provider;
 
   @Exclude
   private boolean           isDisabledUser;

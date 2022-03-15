@@ -18,10 +18,13 @@ package org.exoplatform.wallet.dao;
 
 import java.util.List;
 
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.entity.WalletEntity;
+import org.exoplatform.wallet.model.WalletType;
 
 public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
 
@@ -43,4 +46,29 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
+  public List<WalletEntity> findActiveWallets() {
+    TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findActiveWallets",
+            WalletEntity.class);
+    return query.getResultList();
+  }
+  public WalletEntity findByActiveStateAndIdentity(Long id, WalletType type, boolean isActive) {
+    TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByActiveStateAndIdentity",
+            WalletEntity.class);
+    query.setParameter("id", id);
+    query.setParameter("type", type);
+    query.setParameter("active", isActive);
+    try {
+      return query.getSingleResult();
+    } catch (NonUniqueResultException | NoResultException e) {
+      return null;
+    }
+  }
+
+  public List<WalletEntity> findUserWallets(Long id, WalletType type) {
+    TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByIdentity",
+            WalletEntity.class);
+    query.setParameter("id", id);
+    query.setParameter("type", type);
+    return query.getResultList();
+  }
 }

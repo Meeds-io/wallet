@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import javax.persistence.*;
 
+import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -33,6 +34,9 @@ import org.exoplatform.wallet.model.WalletType;
 @Table(name = "ADDONS_WALLET_ACCOUNT")
 @NamedQueries({
     @NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address"),
+    @NamedQuery(name = "Wallet.findActiveWallets", query = "SELECT w FROM Wallet w WHERE w.isActive = true"),
+    @NamedQuery(name = "Wallet.findByActiveStateAndIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type and w.isActive = :active"),
+    @NamedQuery(name = "Wallet.findByIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type"),
 })
 public class WalletEntity implements Serializable {
   private static final long                       serialVersionUID = -1622032986992776281L;
@@ -56,8 +60,14 @@ public class WalletEntity implements Serializable {
   @Column(name = "BACKED_UP", nullable = false)
   private boolean                                 isBackedUp;
 
+  @Column(name = "ACTIVE", nullable = false)
+  private boolean                                 isActive;
+
+  @Column(name = "PROVIDER")
+  private WalletProvider                          provider;
+  
   @Column(name = "INITIALIZATION_STATE")
-  private WalletState initializationState;
+  private WalletState                             initializationState;
 
   @OneToOne(fetch = FetchType.EAGER, mappedBy = "wallet", cascade = CascadeType.REMOVE)
   private WalletPrivateKeyEntity                  privateKey;
@@ -97,6 +107,14 @@ public class WalletEntity implements Serializable {
     this.isBackedUp = isBackedUp;
   }
 
+  public boolean isActive() {
+    return isActive;
+  }
+
+  public void setActive(boolean active) {
+    isActive = active;
+  }
+
   public WalletType getType() {
     return type;
   }
@@ -119,6 +137,14 @@ public class WalletEntity implements Serializable {
 
   public void setInitializationState(WalletState initializationState) {
     this.initializationState = initializationState;
+  }
+
+  public WalletProvider getProvider() {
+    return provider;
+  }
+
+  public void setProvider(WalletProvider provider) {
+    this.provider = provider;
   }
 
   public WalletPrivateKeyEntity getPrivateKey() {

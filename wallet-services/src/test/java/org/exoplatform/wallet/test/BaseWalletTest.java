@@ -76,10 +76,14 @@ public abstract class BaseWalletTest {
   protected static final String    PHRASE                   = "passphrase";
 
   protected static final String    INITIALIZATION_STATE     = WalletState.INITIALIZED.name();
+  
+  protected static final String    PROVIDER                 = WalletProvider.MEEDS_WALLET.name();
 
   protected static final String    TYPE                     = WalletType.SPACE.name();
 
   protected static final boolean   IS_ENABLED               = true;
+
+  protected static final boolean   IS_ACTIVE               = true;
 
   protected static final String    CURRENT_USER             = "root1";
 
@@ -449,7 +453,9 @@ public abstract class BaseWalletTest {
     wallet.setAddress(WALLET_ADDRESS_1);
     wallet.setPassPhrase(PHRASE);
     wallet.setEnabled(IS_ENABLED);
+    wallet.setActive(IS_ACTIVE);
     wallet.setInitializationState(INITIALIZATION_STATE);
+    wallet.setProvider(PROVIDER);
     return wallet;
   }
 

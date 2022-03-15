@@ -65,7 +65,7 @@ public class WalletStorage {
    * @return {@link Set} of {@link Wallet} details with associated addresses
    */
   public Set<Wallet> listWallets() {
-    List<WalletEntity> walletEntities = walletAccountDAO.findAll();
+    List<WalletEntity> walletEntities = walletAccountDAO.findActiveWallets();
     if (walletEntities == null || walletEntities.isEmpty()) {
       return Collections.emptySet();
     } else {
@@ -274,6 +274,52 @@ public class WalletStorage {
     }
   }
 
+  /**
+   * find active/inactive wallet by user
+   * @param identityId user identity ID
+   * @param isActive state of wallet : active or inactive
+   * @return Wallet or null
+   */
+  public Wallet findByUserAndActiveState(String identityId, boolean isActive) {
+    Long id = Long.valueOf(identityId);
+    WalletEntity walletEntity = walletAccountDAO.findByActiveStateAndIdentity(id, WalletType.USER, isActive);
+    if(walletEntity == null) {
+      return null;
+    }
+    return fromEntity(walletEntity);
+  }
+
+  /**
+   * Activate wallet from a given provider
+   * @param identityId User identity ID
+   * @param provider Provider name
+   * @return activated wallet
+   */
+  public Wallet activateWallet(String identityId, WalletProvider provider){
+    List<Wallet> userWallets = getUserWallets(identityId);
+    Wallet activatedWallet = null;
+    for(Wallet wallet : userWallets) {
+      if(provider.name().equals(wallet.getProvider())) {
+        wallet.setActive(true);
+        activatedWallet = saveWallet(wallet, false);
+      } else {
+        wallet.setActive(false);
+        saveWallet(wallet, false);
+      }
+    }
+    return activatedWallet;
+  }
+
+  public List<Wallet> getUserWallets(String identityId) {
+    Long id = Long.valueOf(identityId);
+    List<WalletEntity> walletEntities = walletAccountDAO.findUserWallets(id, WalletType.USER);
+    if(walletEntities == null || walletEntities.isEmpty()) {
+      return Collections.emptyList();
+    } else {
+      return walletEntities.stream().map(this::fromEntity).collect(Collectors.toList());
+    }
+  }
+
   private String decodeWalletKey(String content) {
     return this.codec.decode(content);
   }
@@ -288,7 +334,9 @@ public class WalletStorage {
     wallet.setAddress(walletEntity.getAddress());
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
+    wallet.setActive(walletEntity.isActive());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
+    wallet.setProvider(walletEntity.getProvider().name());
     wallet.setBackedUp(walletEntity.isBackedUp());
     if (walletEntity.getPrivateKey() == null) {
       WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
@@ -307,7 +355,9 @@ public class WalletStorage {
     walletEntity.setId(wallet.getTechnicalId());
     walletEntity.setAddress(wallet.getAddress().toLowerCase());
     walletEntity.setEnabled(wallet.isEnabled());
+    walletEntity.setActive(wallet.isActive());
     walletEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
+    walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));

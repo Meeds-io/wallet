@@ -185,6 +185,15 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = listWallets.iterator().next();
     checkWalletContent(wallet, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_1, PHRASE, INITIALIZATION_STATE, IS_ENABLED);
+
+    // set wallet inactive
+    wallet.setActive(false);
+    wallet = walletStorage.saveWallet(wallet, false);
+
+    listWallets = walletStorage.listWallets();
+    assertNotNull(listWallets);
+    assertEquals(0, listWallets.size());
+
   }
 
   /**
@@ -344,6 +353,37 @@ public class WalletStorageTest extends BaseWalletTest {
     assertEquals(wallet.getIsInitialized(), storedWallet.getIsInitialized());
 
     this.entitiesToClean.add(storedWallet);
+  }
+
+  @Test
+  public void testFindByActiveStateAndIdentity() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Wallet wallet = newWallet();
+    wallet = walletStorage.saveWallet(wallet, true);
+    entitiesToClean.add(wallet);
+
+    wallet = walletStorage.findByUserAndActiveState(String.valueOf(CURRENT_USER_IDENTITY_ID), true);
+    assertNotNull(wallet);
+
+    wallet.setActive(false);
+    wallet = walletStorage.saveWallet(wallet, false);
+
+    wallet = walletStorage.findByUserAndActiveState(String.valueOf(CURRENT_USER_IDENTITY_ID), true);
+    assertNull(wallet);
+
+    wallet = walletStorage.findByUserAndActiveState(String.valueOf(CURRENT_USER_IDENTITY_ID), false);
+    assertNotNull(wallet);
+  }
+
+  @Test
+  public void testGetUserWallets() {
+
+  }
+
+
+  public void testActivateWallet() {
+    //TODO
   }
 
   protected void checkWalletContent(Wallet wallet,
