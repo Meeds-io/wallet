@@ -276,4 +276,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
+  <changeSet id="1.3.0-29" author="wallet">
+    <addColumn tableName="ADDONS_WALLET_BLOCKCHAIN_STATE">
+      <column name="PROVIDER" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+    <addColumn tableName="ADDONS_WALLET_KEY">
+      <column name="PROVIDER" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+    <dropForeignKeyConstraint baseTableName="ADDONS_WALLET_KEY" constraintName="FK_WALLET_ACCOUNT_01" />
+    <dropForeignKeyConstraint baseTableName="ADDONS_WALLET_BLOCKCHAIN_STATE" constraintName="FK_WALLET_ACCOUNT_02" />
+    <dropPrimaryKey tableName="ADDONS_WALLET_ACCOUNT" />
+    <addPrimaryKey tableName="ADDONS_WALLET_ACCOUNT" columnNames="IDENTITY_ID, PROVIDER" />
+  </changeSet>
+
 </databaseChangeLog>

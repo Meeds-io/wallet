@@ -29,7 +29,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_KEY")
 @NamedQueries({
-    @NamedQuery(name = "WalletKey.findByWalletId", query = "SELECT wk FROM WalletKey wk WHERE wk.wallet.id = :walletId"),
+    @NamedQuery(name = "WalletKey.findByWalletId", query = "SELECT wk FROM WalletKey wk WHERE wk.wallet.id.identityId = :walletId and wk.wallet.id.provider = :provider"),
 })
 public class WalletPrivateKeyEntity implements Serializable {
   private static final long serialVersionUID = -7294965683405044055L;
@@ -44,7 +44,16 @@ public class WalletPrivateKeyEntity implements Serializable {
   private String            keyContent;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE })
-  @JoinColumn(name = "WALLET_ID")
+  @JoinColumns({
+          @JoinColumn(
+                  name = "WALLET_ID",
+                  referencedColumnName = "IDENTITY_ID"
+          ),
+          @JoinColumn(
+                  name = "PROVIDER",
+                  referencedColumnName = "PROVIDER"
+          )
+  })
   private WalletEntity      wallet;
 
   public Long getId() {

@@ -113,7 +113,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     wallet = walletStorage.saveWallet(wallet, true);
     assertNotNull(wallet);
-    walletStorage.removeWallet(CURRENT_USER_IDENTITY_ID);
+    walletStorage.removeWallet(CURRENT_USER_IDENTITY_ID, PROVIDER);
     Set<Wallet> listWallets = walletStorage.listWallets();
     assertNotNull(listWallets);
     assertEquals(0, listWallets.size());

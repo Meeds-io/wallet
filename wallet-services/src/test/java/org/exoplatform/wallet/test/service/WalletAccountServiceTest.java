@@ -428,7 +428,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
 
     try {
-      walletAccountService.removeWalletByAddress(null, CURRENT_USER);
+      walletAccountService.removeWalletByAddress(null, PROVIDER, CURRENT_USER);
       fail("Wallet address is mandatory");
     } catch (Exception e) {
       // Expected, wallet address is mandatory
@@ -440,20 +440,20 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     entitiesToClean.add(wallet);
 
     try {
-      walletAccountService.removeWalletByAddress("", CURRENT_USER);
+      walletAccountService.removeWalletByAddress("", PROVIDER, CURRENT_USER);
       fail("Wallet shouldn't be null");
     } catch (Exception e) {
       // Expected, wallet shouldn't be null
     }
 
     try {
-      walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, "root2");
+      walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, PROVIDER, "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected, user is not user rewarding admin
     }
 
-    walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, CURRENT_USER);
+    walletAccountService.removeWalletByAddress(WALLET_ADDRESS_1, PROVIDER, CURRENT_USER);
     Set<Wallet> wallets = walletAccountService.listWallets();
     assertEquals("Wallet list Should be empty", 0, wallets.size());
     entitiesToClean.remove(wallet);
@@ -481,35 +481,35 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     entitiesToClean.add(wallet);
 
     try {
-      walletAccountService.removeWalletByTypeAndId("", CURRENT_USER, CURRENT_USER);
+      walletAccountService.removeWalletByTypeAndId("", PROVIDER, CURRENT_USER, CURRENT_USER);
       fail("Wallet type is mandatory");
     } catch (Exception e) {
       // Expected, wallet type is mandatory
     }
 
     try {
-      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "", CURRENT_USER);
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), PROVIDER, "", CURRENT_USER);
       fail("Wallet remoteId is mandatory");
     } catch (Exception e) {
       // Expected, wallet remoteId is mandatory
     }
 
     try {
-      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "root2", "root2");
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), PROVIDER, "root2", "root2");
       fail("User is not user rewarding admin");
     } catch (Exception e) {
       // Expected,is not user rewarding admin
     }
 
     try {
-      walletAccountService.removeWalletByTypeAndId(wallet.getType(), "root3", CURRENT_USER);
+      walletAccountService.removeWalletByTypeAndId(wallet.getType(), PROVIDER, "root3", CURRENT_USER);
       fail("Can't find wallet with this remoteId");
     } catch (Exception e) {
       // Expected, can't find wallet with this remoteId
     }
 
     String type = wallet.getType();
-    walletAccountService.removeWalletByTypeAndId(type, CURRENT_USER, CURRENT_USER);
+    walletAccountService.removeWalletByTypeAndId(type, PROVIDER, CURRENT_USER, CURRENT_USER);
     Set<Wallet> wallets = walletAccountService.listWallets();
     assertEquals("Wallet list Should be empty", wallets.size(), 0);
   }

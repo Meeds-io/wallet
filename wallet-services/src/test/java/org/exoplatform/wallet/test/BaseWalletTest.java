@@ -162,8 +162,8 @@ public abstract class BaseWalletTest {
         try {
           if (entity instanceof WalletEntity) {
             WalletEntity wallet = (WalletEntity) entity;
-            if (wallet.getId() > 0) {
-              walletAccountDAO.delete(walletAccountDAO.find(wallet.getId()));
+            if (wallet.getId().getIdentityId() > 0) {
+              walletAccountDAO.delete(walletAccountDAO.findByIdentityIdAndProvider(wallet.getId().getIdentityId(), wallet.getId().getProvider()));
               iterator.remove();
             }
           } else if (entity instanceof WalletPrivateKeyEntity) {
@@ -203,10 +203,11 @@ public abstract class BaseWalletTest {
             Wallet wallet = (Wallet) entity;
             long walletId = wallet.getTechnicalId();
             if (walletId > 0) {
-              WalletEntity walletEntity = walletAccountDAO.find(walletId);
+              WalletEntity walletEntity = walletAccountDAO.
+              findByIdentityIdAndProvider(walletId, WalletProvider.valueOf(wallet.getProvider()));
               if (walletEntity != null) {
                 WalletBlockchainStateEntity blockchainStateEntity =
-                                                                  walletBlockchainStateDAO.findByWalletIdAndContract(walletId,
+                                                                  walletBlockchainStateDAO.findByWalletIdAndContract(walletEntity.getId(),
                                                                                                                      WalletUtils.getContractAddress());
                 if (blockchainStateEntity != null) {
                   walletBlockchainStateDAO.delete(blockchainStateEntity);

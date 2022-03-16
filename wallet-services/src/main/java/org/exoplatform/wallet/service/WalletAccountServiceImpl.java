@@ -383,7 +383,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     computeWalletIdentity(wallet);
 
-    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), getContractAddress());
+    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(),
+                                                            getContractAddress());
     boolean isNew = oldWallet == null;
 
     checkCanSaveWallet(wallet, oldWallet, currentUser);
@@ -423,7 +424,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
-  public void removeWalletByAddress(String address, String currentUser) throws IllegalAccessException {
+  public void removeWalletByAddress(String address, String provider, String currentUser) throws IllegalAccessException {
     if (address == null) {
       throw new IllegalArgumentException(ADDRESS_PARAMTER_IS_MANDATORY);
     }
@@ -436,11 +437,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
           + " of "
           + wallet.getType() + " " + wallet.getId());
     }
-    accountStorage.removeWallet(wallet.getTechnicalId());
+    accountStorage.removeWallet(wallet.getTechnicalId(), provider);
   }
 
   @Override
-  public void removeWalletByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException {
+  public void removeWalletByTypeAndId(String type, String provider, String remoteId, String currentUser) throws IllegalAccessException {
     if (StringUtils.isBlank(type)) {
       throw new IllegalArgumentException("wallet type parameter is mandatory");
     }
@@ -462,7 +463,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (wallet == null) {
       throw new IllegalStateException("Can't find wallet with type/id: " + type + "/" + remoteId);
     }
-    accountStorage.removeWallet(wallet.getTechnicalId());
+    accountStorage.removeWallet(wallet.getTechnicalId(), provider);
   }
 
   @Override

@@ -182,20 +182,22 @@ public interface WalletAccountService {
    * Remove User or Space wallet address association
    * 
    * @param address wallet address association to remove
+   * @param provider Wallet provider
    * @param currentUser current username removing wallet details
    * @throws IllegalAccessException if current user is not an administrator
    */
-  void removeWalletByAddress(String address, String currentUser) throws IllegalAccessException;
+  void removeWalletByAddress(String address, String provider, String currentUser) throws IllegalAccessException;
 
   /**
    * Remove wallet address association by type and remote id
    * 
    * @param type USER/SPACE/ADMIN, see {@link WalletType}
+   * @param provider the Wallet provider
    * @param remoteId username or space pretty name
    * @param currentUser current username saving wallet details
    * @throws IllegalAccessException
    */
-  void removeWalletByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException;
+  void removeWalletByTypeAndId(String type, String provider, String remoteId, String currentUser) throws IllegalAccessException;
 
   /**
    * Enable/Disable User or Space wallet

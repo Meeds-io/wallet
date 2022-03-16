@@ -24,6 +24,7 @@ import javax.persistence.TypedQuery;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.entity.WalletEntity;
+import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletType;
 
 public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
@@ -51,11 +52,10 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
             WalletEntity.class);
     return query.getResultList();
   }
-  public WalletEntity findByActiveStateAndIdentity(Long id, WalletType type, boolean isActive) {
+  public WalletEntity findByActiveStateAndIdentity(Long id, boolean isActive) {
     TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByActiveStateAndIdentity",
             WalletEntity.class);
     query.setParameter("id", id);
-    query.setParameter("type", type);
     query.setParameter("active", isActive);
     try {
       return query.getSingleResult();
@@ -70,5 +70,14 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
     query.setParameter("id", id);
     query.setParameter("type", type);
     return query.getResultList();
+  }
+
+  public WalletEntity findByIdentityIdAndProvider(Long identityId, WalletProvider provider) {
+    TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByIdentityAndProvider",
+            WalletEntity.class);
+    query.setParameter("id", identityId);
+    query.setParameter("type", WalletType.USER);
+    query.setParameter("provider", provider);
+    return query.getSingleResult();
   }
 }

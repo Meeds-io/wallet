@@ -23,6 +23,7 @@ import javax.persistence.TypedQuery;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.entity.WalletPrivateKeyEntity;
+import org.exoplatform.wallet.model.WalletProvider;
 
 public class WalletPrivateKeyDAO extends GenericDAOJPAImpl<WalletPrivateKeyEntity, Long> {
 
@@ -30,6 +31,7 @@ public class WalletPrivateKeyDAO extends GenericDAOJPAImpl<WalletPrivateKeyEntit
     TypedQuery<WalletPrivateKeyEntity> query = getEntityManager().createNamedQuery("WalletKey.findByWalletId",
                                                                                    WalletPrivateKeyEntity.class);
     query.setParameter("walletId", walletId);
+    query.setParameter("provider", WalletProvider.MEEDS_WALLET);
     try {
       return query.getSingleResult();
     } catch (NoResultException e) {

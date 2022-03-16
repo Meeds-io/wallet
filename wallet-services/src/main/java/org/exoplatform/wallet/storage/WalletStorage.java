@@ -84,12 +84,12 @@ public class WalletStorage {
   }
 
   /**
-   * @param identityId user/space technical identty id
+   * @param identityId user/space technical identity id
    * @param contractAddress contract address to use for wallet blockchain state
    * @return {@link Wallet} details for identity
    */
   public Wallet getWalletByIdentityId(long identityId, String contractAddress) {
-    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+    WalletEntity walletEntity = walletAccountDAO.findByActiveStateAndIdentity(identityId, true);
     if (walletEntity == null) {
       return null;
     }
@@ -123,8 +123,8 @@ public class WalletStorage {
     if (StringUtils.isBlank(contractAddress)) {
       throw new IllegalArgumentException("contractAddress is mandatory");
     }
-
-    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(wallet.getTechnicalId(),
+    WalletEntityKey key = new WalletEntityKey(wallet.getTechnicalId(), WalletProvider.valueOf(wallet.getProvider()));
+    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(key,
                                                                                                      contractAddress);
     if (blockchainStateEntity != null) {
       wallet.setEtherBalance(blockchainStateEntity.getEtherBalance());
@@ -149,14 +149,14 @@ public class WalletStorage {
   }
 
   /**
-   * Change wallet backup state
+   * Change wallet backup state, this is a feature for Meeds wallets only
    * 
    * @param identityId user/space technical identty id
    * @param backupState true if backedUp else false
    * @return modified {@link Wallet}
    */
   public Wallet saveWalletBackupState(long identityId, boolean backupState) {
-    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+    WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(identityId, WalletProvider.MEEDS_WALLET);
     walletEntity.setBackedUp(backupState);
     walletEntity = walletAccountDAO.update(walletEntity);
     return fromEntity(walletEntity);
@@ -168,8 +168,8 @@ public class WalletStorage {
    * @param identityId user/space technical identty id
    * @return removed {@link Wallet}
    */
-  public Wallet removeWallet(long identityId) {
-    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+  public Wallet removeWallet(long identityId, String provider) {
+    WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(identityId, WalletProvider.valueOf(provider));
     walletAccountDAO.delete(walletEntity);
     return fromEntity(walletEntity);
   }
@@ -214,7 +214,7 @@ public class WalletStorage {
     if (StringUtils.isBlank(content)) {
       throw new IllegalArgumentException("content is mandatory");
     }
-    WalletEntity walletEntity = walletAccountDAO.find(walletId);
+    WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(walletId, WalletProvider.MEEDS_WALLET);
     if (walletEntity == null) {
       throw new IllegalStateException("Wallet with id " + walletId + " wasn't found");
     }
@@ -253,11 +253,12 @@ public class WalletStorage {
     if (walletId <= 0) {
       throw new IllegalArgumentException("wallet ID is mandatory");
     }
-    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(walletId, contractAddress);
+    WalletEntityKey key = new WalletEntityKey(wallet.getTechnicalId(), WalletProvider.valueOf(wallet.getProvider()));
+    WalletBlockchainStateEntity blockchainStateEntity = blockchainStateDAO.findByWalletIdAndContract(key, contractAddress);
     boolean isNew = blockchainStateEntity == null;
     if (isNew) {
       blockchainStateEntity = new WalletBlockchainStateEntity();
-      WalletEntity walletEntity = walletAccountDAO.find(walletId);
+      WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(key.getIdentityId(), key.getProvider());
       if (walletEntity == null) {
         throw new IllegalStateException("Can't find wallet with id: " + walletId);
       }
@@ -282,7 +283,7 @@ public class WalletStorage {
    */
   public Wallet findByUserAndActiveState(String identityId, boolean isActive) {
     Long id = Long.valueOf(identityId);
-    WalletEntity walletEntity = walletAccountDAO.findByActiveStateAndIdentity(id, WalletType.USER, isActive);
+    WalletEntity walletEntity = walletAccountDAO.findByActiveStateAndIdentity(id, isActive);
     if(walletEntity == null) {
       return null;
     }
@@ -330,34 +331,34 @@ public class WalletStorage {
 
   private Wallet fromEntity(WalletEntity walletEntity) {
     Wallet wallet = new Wallet();
-    wallet.setTechnicalId(walletEntity.getId());
+    wallet.setTechnicalId(walletEntity.getId().getIdentityId());
     wallet.setAddress(walletEntity.getAddress());
     wallet.setPassPhrase(walletEntity.getPassPhrase());
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setActive(walletEntity.isActive());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
-    wallet.setProvider(walletEntity.getProvider().name());
+    wallet.setProvider(walletEntity.getId().getProvider().name());
     wallet.setBackedUp(walletEntity.isBackedUp());
     if (walletEntity.getPrivateKey() == null) {
-      WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
+      WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId().getIdentityId());
       wallet.setHasPrivateKey(privateKey != null);
     } else {
       wallet.setHasPrivateKey(true);
     }
 
-    Identity identity = getIdentityById(walletEntity.getId());
+    Identity identity = getIdentityById(walletEntity.getId().getIdentityId());
     computeWalletFromIdentity(wallet, identity);
     return wallet;
   }
 
   private WalletEntity toEntity(Wallet wallet) {
     WalletEntity walletEntity = new WalletEntity();
-    walletEntity.setId(wallet.getTechnicalId());
+    WalletEntityKey key = new WalletEntityKey(wallet.getTechnicalId(), WalletProvider.valueOf(wallet.getProvider()));
+    walletEntity.setId(key);
     walletEntity.setAddress(wallet.getAddress().toLowerCase());
     walletEntity.setEnabled(wallet.isEnabled());
     walletEntity.setActive(wallet.isActive());
     walletEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
-    walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));

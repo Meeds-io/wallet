@@ -35,15 +35,15 @@ import org.exoplatform.wallet.model.WalletType;
 @NamedQueries({
     @NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address"),
     @NamedQuery(name = "Wallet.findActiveWallets", query = "SELECT w FROM Wallet w WHERE w.isActive = true"),
-    @NamedQuery(name = "Wallet.findByActiveStateAndIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type and w.isActive = :active"),
+    @NamedQuery(name = "Wallet.findByActiveStateAndIdentity", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.isActive = :active"),
     @NamedQuery(name = "Wallet.findByIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type"),
+    @NamedQuery(name = "Wallet.findByIdentityAndProvider", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.type = :type and w.id.provider = :provider"),
 })
 public class WalletEntity implements Serializable {
   private static final long                       serialVersionUID = -1622032986992776281L;
 
-  @Id
-  @Column(name = "IDENTITY_ID")
-  private Long                                    id;
+  @EmbeddedId
+  private WalletEntityKey                          id;
 
   @Column(name = "IDENTITY_TYPE", nullable = false)
   private WalletType                              type;
@@ -62,9 +62,6 @@ public class WalletEntity implements Serializable {
 
   @Column(name = "ACTIVE", nullable = false)
   private boolean                                 isActive;
-
-  @Column(name = "PROVIDER")
-  private WalletProvider                          provider;
   
   @Column(name = "INITIALIZATION_STATE")
   private WalletState                             initializationState;
@@ -75,11 +72,11 @@ public class WalletEntity implements Serializable {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "wallet", cascade = CascadeType.REMOVE)
   private Collection<WalletBlockchainStateEntity> blockchainState;
 
-  public Long getId() {
+  public WalletEntityKey getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(WalletEntityKey id) {
     this.id = id;
   }
 
@@ -137,14 +134,6 @@ public class WalletEntity implements Serializable {
 
   public void setInitializationState(WalletState initializationState) {
     this.initializationState = initializationState;
-  }
-
-  public WalletProvider getProvider() {
-    return provider;
-  }
-
-  public void setProvider(WalletProvider provider) {
-    this.provider = provider;
   }
 
   public WalletPrivateKeyEntity getPrivateKey() {

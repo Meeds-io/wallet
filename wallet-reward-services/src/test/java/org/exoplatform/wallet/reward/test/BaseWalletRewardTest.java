@@ -180,7 +180,7 @@ public abstract class BaseWalletRewardTest {
           walletTransactionDAO.delete(transactionEntity);
         } else if (entity instanceof Wallet) {
           long walletId = ((Wallet) entity).getTechnicalId();
-          WalletEntity walletEntity = walletAccountDAO.find(walletId);
+          WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(walletId, WalletProvider.valueOf(((Wallet) entity).getProvider()));
           walletAccountDAO.delete(walletEntity);
 
           WalletPrivateKeyEntity walletPrivateKey = walletPrivateKeyDAO.find(walletId);

@@ -25,16 +25,17 @@ import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.entity.WalletBlockchainStateEntity;
+import org.exoplatform.wallet.entity.WalletEntityKey;
 
 public class WalletBlockchainStateDAO extends GenericDAOJPAImpl<WalletBlockchainStateEntity, Long> {
 
   private static final Log LOG = ExoLogger.getLogger(WalletBlockchainStateDAO.class);
 
-  public WalletBlockchainStateEntity findByWalletIdAndContract(long walletId, String contractAddress) {
+  public WalletBlockchainStateEntity findByWalletIdAndContract(WalletEntityKey key, String contractAddress) {
     TypedQuery<WalletBlockchainStateEntity> query =
                                                   getEntityManager().createNamedQuery("WalletBlockchainState.findByWalletIdAndContract",
                                                                                       WalletBlockchainStateEntity.class);
-    query.setParameter("walletId", walletId);
+    query.setParameter("walletId", key);
     query.setParameter("contractAddress", contractAddress);
     try {
       List<WalletBlockchainStateEntity> resultList = query.getResultList();
@@ -42,7 +43,7 @@ public class WalletBlockchainStateDAO extends GenericDAOJPAImpl<WalletBlockchain
         return null;
       } else {
         if (resultList.size() > 1) {
-          LOG.debug("Multiple WalletBlockchainStateEntity was found for wallet with id {}", walletId);
+          LOG.debug("Multiple WalletBlockchainStateEntity was found for wallet with id {}", key);
         }
         return resultList.get(0);
       }

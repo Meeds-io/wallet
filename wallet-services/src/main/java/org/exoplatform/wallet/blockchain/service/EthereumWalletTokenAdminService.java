@@ -232,7 +232,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     } catch (Exception e) {
       // Make sure to delete corresponding wallet when the private key isn't
       // saved
-      getAccountService().removeWalletByAddress(wallet.getAddress(), currentUser);
+      getAccountService().removeWalletByAddress(wallet.getAddress(), WalletProvider.MEEDS_WALLET.name(), currentUser);
     }
 
     return wallet;

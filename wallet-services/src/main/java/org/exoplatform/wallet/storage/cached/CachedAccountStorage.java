@@ -107,8 +107,8 @@ public class CachedAccountStorage extends WalletStorage {
   }
 
   @Override
-  public Wallet removeWallet(long identityId) {
-    Wallet wallet = super.removeWallet(identityId);
+  public Wallet removeWallet(long identityId, String provider) {
+    Wallet wallet = super.removeWallet(identityId, provider);
 
     // Remove cached wallet
     this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
