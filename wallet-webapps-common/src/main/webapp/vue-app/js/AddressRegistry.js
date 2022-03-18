@@ -36,7 +36,7 @@ export function searchWallets(filter) {
 /*
  * Return the address of a user or space
  */
-export function saveNewAddress(id, type, address) {
+export function saveNewAddress(id, type, address, provider) {
   address = address.toLowerCase();
   return fetch('/portal/rest/wallet/api/account/saveAddress', {
     method: 'POST',
@@ -50,6 +50,8 @@ export function saveNewAddress(id, type, address) {
       id: id,
       address: address,
       enabled: true,
+      provider: provider,
+      active: true
     }),
   });
 }

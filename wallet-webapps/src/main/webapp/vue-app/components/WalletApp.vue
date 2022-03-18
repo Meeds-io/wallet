@@ -1,26 +1,10 @@
-<!--
-This file is part of the Meeds project (https://meeds.io/).
-Copyright (C) 2020 Meeds Association
-contact@meeds.io
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 3 of the License, or (at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
--->
 <template>
   <v-app
     :id="appId"
     color="transaprent"
     class="VuetifyApp"
     flat>
-    <main v-if="isWalletEnabled" id="walletEnabledContent">
+    <main v-if="isWalletEnabled && isWalletActivated" id="walletEnabledContent">
       <v-layout>
         <v-flex>
           <v-app class="mb-4 application-toolbar">
@@ -118,6 +102,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
       </v-layout>
     </main>
+    <main v-else-if="isWalletActivated && !loading" id="walletUnactivatedContent">
+      <v-layout>
+        <v-flex>
+          <v-card-title class="transparent" flat>
+            <v-spacer />
+            <div class="alert alert-warning">
+              <i class="uiIconWarning"></i>
+              {{ $t('exoplatform.wallet.warning.walletUnactivated') }}
+            </div>
+            <v-spacer />
+          </v-card-title>
+        </v-flex>
+      </v-layout>
+    </main>
     <main v-else-if="!loading" id="walletDisabledContent">
       <v-layout>
         <v-flex>
@@ -148,6 +146,7 @@ export default {
   data() {
     return {
       isWalletEnabled: false,
+      isWalletActivated: true,
       isApplicationEnabled: true,
       loading: true,
       disabledYear: true,
@@ -283,6 +282,7 @@ export default {
           this.settings = window.walletSettings || {wallet: {}, network: {}};
           this.wallet = this.settings.wallet;
           this.isApplicationEnabled = this.settings.enabled;
+          this.isWalletActivated = this.wallet && this.wallet.active || this.isSpace; // space wallets are always active
 
           if (!this.settings.walletEnabled || !this.isApplicationEnabled) {
             this.isWalletEnabled = false;

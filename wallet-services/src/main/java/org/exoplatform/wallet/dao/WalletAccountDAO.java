@@ -76,7 +76,6 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
     TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByIdentityAndProvider",
             WalletEntity.class);
     query.setParameter("id", identityId);
-    query.setParameter("type", WalletType.USER);
     query.setParameter("provider", provider);
     return query.getSingleResult();
   }

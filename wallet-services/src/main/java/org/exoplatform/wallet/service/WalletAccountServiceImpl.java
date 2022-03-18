@@ -381,6 +381,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalArgumentException("Wallet address is empty, thus it can't be saved");
     }
 
+    if (StringUtils.isBlank(wallet.getProvider())) {
+      throw new IllegalArgumentException("Wallet provider is empty, thus it can't be saved");
+    }
+
     computeWalletIdentity(wallet);
 
     Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(),

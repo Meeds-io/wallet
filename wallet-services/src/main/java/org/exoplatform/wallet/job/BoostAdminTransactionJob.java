@@ -8,12 +8,10 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
-import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-@DisallowConcurrentExecution
 public class BoostAdminTransactionJob implements Job {
   private static final Log LOG = ExoLogger.getLogger(BoostAdminTransactionJob.class);
 

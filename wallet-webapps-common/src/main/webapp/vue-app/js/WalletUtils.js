@@ -147,7 +147,6 @@ export function initSettings(isSpace, useCometd, isAdministration) {
       window.walletSettings.contractDetail = {};
 
       window.walletSettings = $.extend(window.walletSettings, settings);
-      window.walletSettings = $.extend(window.walletSettings, settings);
       if (useCometd && !window.walletComedDInitialized) {
         window.walletComedDInitialized = true;
 
@@ -207,15 +206,16 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
   }
 }
 
-export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPasswordInBrowser, backedUp) {
+export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPasswordInBrowser, backedUp, provider) {
   const account = window.localWeb3.eth.accounts.wallet.add(wallet);
   const address = account['address'].toLowerCase();
 
   let promise = null;
+  provider = !provider ? 'MEEDS_WALLET' : provider;
   if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.wallet.initializationState !== 'DELETED') {
     promise = Promise.resolve();
   } else {
-    promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, true)
+    promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, provider)
       .then((resp, error) => {
         if (error) {
           throw error;

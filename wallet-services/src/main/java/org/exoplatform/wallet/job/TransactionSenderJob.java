@@ -25,7 +25,6 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 
-@DisallowConcurrentExecution
 public class TransactionSenderJob implements Job {
 
   private static final Log             LOG = ExoLogger.getLogger(TransactionSenderJob.class);

@@ -27,7 +27,6 @@ import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletAccountService;
 
-@DisallowConcurrentExecution
 public class ContractTransactionVerifierJob implements Job {
 
   private static final Log             LOG = ExoLogger.getLogger(ContractTransactionVerifierJob.class);

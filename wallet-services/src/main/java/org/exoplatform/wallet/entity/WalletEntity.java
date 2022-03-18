@@ -37,7 +37,7 @@ import org.exoplatform.wallet.model.WalletType;
     @NamedQuery(name = "Wallet.findActiveWallets", query = "SELECT w FROM Wallet w WHERE w.isActive = true"),
     @NamedQuery(name = "Wallet.findByActiveStateAndIdentity", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.isActive = :active"),
     @NamedQuery(name = "Wallet.findByIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type"),
-    @NamedQuery(name = "Wallet.findByIdentityAndProvider", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.type = :type and w.id.provider = :provider"),
+    @NamedQuery(name = "Wallet.findByIdentityAndProvider", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.id.provider = :provider"),
 })
 public class WalletEntity implements Serializable {
   private static final long                       serialVersionUID = -1622032986992776281L;

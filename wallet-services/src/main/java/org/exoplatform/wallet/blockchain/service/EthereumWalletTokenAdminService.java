@@ -224,6 +224,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     wallet.setType(WalletType.ADMIN.getId());
     wallet.setAddress("0x" + adminWallet.getAddress());
     wallet.setTechnicalId(identityId);
+    wallet.setProvider(WalletProvider.MEEDS_WALLET.name());
 
     getAccountService().saveWalletAddress(wallet, currentUser);
     try {
@@ -394,9 +395,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingTransactions();
     for (TransactionDetail transactionDetail : pendingTransactions) {
       if (transactionDetail.getFrom().equals(getAdminWalletAddress()) && // Is it an admin transaction ?
-          transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue() && // Current gas price is higher than the one used to send
-                                                                  // original transaction
-          getTransactionService().countTransactionsByNonce(transactionDetail) == 1) { // It should not have been already boosted
+          transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue() && // Current gas price is higher than the one used to send original transaction
+          getTransactionService().countTransactionsByNonce(transactionDetail) == 1 &&  // It should not have been already boosted
+          transactionDetail.getNonce() > 0) { // Nonce should not be equal to zero
         TransactionDetail boostedTransaction = transactionDetail.clone();
         boostedTransaction.setId(0L);
         boostedTransaction.setNonce(transactionDetail.getNonce());

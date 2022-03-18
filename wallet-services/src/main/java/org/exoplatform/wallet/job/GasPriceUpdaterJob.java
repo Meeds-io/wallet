@@ -26,7 +26,6 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.service.*;
 
-@DisallowConcurrentExecution
 public class GasPriceUpdaterJob implements Job {
 
   private static final Log             LOG = ExoLogger.getLogger(GasPriceUpdaterJob.class);
