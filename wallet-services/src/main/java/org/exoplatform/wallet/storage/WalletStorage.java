@@ -16,9 +16,6 @@
  */
 package org.exoplatform.wallet.storage;
 
-import static org.exoplatform.wallet.utils.WalletUtils.computeWalletFromIdentity;
-import static org.exoplatform.wallet.utils.WalletUtils.getIdentityById;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +29,8 @@ import org.exoplatform.wallet.entity.*;
 import org.exoplatform.wallet.model.*;
 import org.exoplatform.web.security.codec.AbstractCodec;
 import org.exoplatform.web.security.codec.CodecInitializer;
+
+import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 public class WalletStorage {
   private static final Log         LOG = ExoLogger.getLogger(WalletStorage.class);

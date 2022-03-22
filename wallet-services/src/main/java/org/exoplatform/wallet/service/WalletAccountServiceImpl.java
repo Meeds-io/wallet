@@ -22,6 +22,8 @@ import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
+import org.exoplatform.social.core.manager.IdentityManager;
 import org.picocontainer.Startable;
 
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -241,19 +243,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public Wallet getWalletByTypeAndIdAndProvider(String type, String remoteId, String currentUser, String provider) {
-    //Todo complete updating this function
-    Wallet wallet = getWalletByTypeAndId(type, remoteId);
-    if (wallet != null) {
-      if (WalletType.isSpace(wallet.getType())) {
-        wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), currentUser));
-        if (!wallet.isSpaceAdministrator()) {
-          hideWalletOwnerPrivateInformation(wallet);
-        }
-      } else if (!StringUtils.equals(wallet.getId(), currentUser)) {
-        hideWalletOwnerPrivateInformation(wallet);
-      }
-      retrieveWalletBlockchainState(wallet);
+    Identity identity = getIdentityByTypeAndId(WalletType.valueOf(type.toUpperCase()), currentUser);
+    if(identity == null) {
+      throw new IllegalArgumentException("identity do not exist");
     }
+    Wallet wallet = accountStorage.findByIdentityIdAndProvider(Long.valueOf(identity.getId()),WalletProvider.valueOf(provider));
+    hideWalletOwnerPrivateInformation(wallet);
+    retrieveWalletBlockchainState(wallet);
     return wallet;
   }
 
@@ -421,6 +417,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
     accountStorage.saveWallet(wallet, isNew);
+    Identity identity = getIdentityByTypeAndId(WalletType.getType(wallet.getType().toUpperCase()),wallet.getId());
+    accountStorage.activateWallet(Long.valueOf(identity.getId()),WalletProvider.valueOf(wallet.getProvider()));
 
     if (!isNew) {
       // Automatically Remove old private key when modifying address associated

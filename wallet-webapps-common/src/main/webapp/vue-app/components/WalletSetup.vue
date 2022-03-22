@@ -123,7 +123,7 @@ export default {
       return this.wallet && this.wallet.address;
     },
     displayWalletCreationToolbar() {
-      return !this.loading && this.walletAddress && !this.browserWalletExists && this.isReadOnly && (!this.isSpace || this.isSpaceAdministrator);
+      return this.wallet.provider !== 'METAMASK' && !this.loading && this.walletAddress && !this.browserWalletExists && this.isReadOnly && (!this.isSpace || this.isSpaceAdministrator);
     },
     displayWalletBackup() {
       return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp && this.initializationState !== 'DELETED';
