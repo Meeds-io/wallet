@@ -16,6 +16,7 @@
  */
 package org.exoplatform.wallet.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ public interface WalletAccountService {
   Wallet getWalletByIdentityId(long identityId);
 
   /**
-   * Retrieve wallet details by identity type and remoteId accessed by a user
+   * Retrieve active wallet details by identity type and remoteId accessed by a user
    * 
    * @param type 'user' or 'space'
    * @param remoteId username or space pretty name
@@ -57,6 +58,17 @@ public interface WalletAccountService {
    * @return {@link Wallet} wallet details identified by type and remote Id
    */
   Wallet getWalletByTypeAndId(String type, String remoteId, String currentUser);
+
+  /**
+   * Retrieve wallet details by identity type and remoteId accessed by a user
+   *
+   * @param type 'user' or 'space'
+   * @param remoteId username or space pretty name
+   * @param currentUser current username saving wallet private key
+   * @param provider Wallet provider
+   * @return {@link Wallet} wallet details identified by type and remote Id
+   */
+  Wallet getWalletByTypeAndIdAndProvider(String type, String remoteId, String currentUser, String provider);
 
   /**
    * Retrieve wallet details by identity type and remoteId
@@ -302,5 +314,14 @@ public interface WalletAccountService {
    * @return true if wallet admin is enabled on Token contract else return false
    */
   boolean isAdminAccountEnabled();
+
+  /**
+   * Get Wallets of user
+   * @param identityId user identity ID
+   * @return List of user wallets
+   */
+  default List<Wallet> getUserWallets(long identityId) {
+    throw new UnsupportedOperationException("Not yet Implemented !");
+  };
 
 }

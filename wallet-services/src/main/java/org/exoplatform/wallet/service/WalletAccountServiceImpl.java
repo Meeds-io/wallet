@@ -240,6 +240,24 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
+  public Wallet getWalletByTypeAndIdAndProvider(String type, String remoteId, String currentUser, String provider) {
+    //Todo complete updating this function
+    Wallet wallet = getWalletByTypeAndId(type, remoteId);
+    if (wallet != null) {
+      if (WalletType.isSpace(wallet.getType())) {
+        wallet.setSpaceAdministrator(isUserSpaceManager(wallet.getId(), currentUser));
+        if (!wallet.isSpaceAdministrator()) {
+          hideWalletOwnerPrivateInformation(wallet);
+        }
+      } else if (!StringUtils.equals(wallet.getId(), currentUser)) {
+        hideWalletOwnerPrivateInformation(wallet);
+      }
+      retrieveWalletBlockchainState(wallet);
+    }
+    return wallet;
+  }
+
+  @Override
   public Wallet getWalletByTypeAndId(String type, String remoteId) {
     if (StringUtils.isBlank(remoteId)) {
       throw new IllegalArgumentException("id parameter is mandatory");
@@ -387,8 +405,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     computeWalletIdentity(wallet);
 
-    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(),
-                                                            getContractAddress());
+    Wallet oldWallet = accountStorage.findByIdentityIdAndProvider(wallet.getTechnicalId(),
+                                                            WalletProvider.valueOf(wallet.getProvider()));
     boolean isNew = oldWallet == null;
 
     checkCanSaveWallet(wallet, oldWallet, currentUser);
@@ -707,6 +725,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     return adminAccountEnabled;
   }
 
+  @Override
+  public List<Wallet> getUserWallets(long identityId) {
+    return accountStorage.getUserWallets(identityId);
+  }
+
   private void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
     // 'rewarding' group members can change all wallets
     if (isUserRewardingAdmin(currentUser)) {
@@ -723,9 +746,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     Wallet walletByAddress =
                            accountStorage.getWalletByAddress(wallet.getAddress(), getContractAddress());
-    if (walletByAddress != null && walletByAddress.getId() != null && !walletByAddress.getId().equals(wallet.getId())) {
-      throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to assign address of wallet of "
-          + walletByAddress);
+    if (walletByAddress != null && walletByAddress.getId() != null && walletByAddress.getProvider().equals(wallet.getProvider())) {
+      throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to save address with same provider " + walletByAddress.getProvider());
     }
   }
 

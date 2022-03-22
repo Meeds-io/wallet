@@ -27,7 +27,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           color="transparent"
           class="WalletSummary">
           <v-flex class="summaryCard mr-3" v-if="!walletReadonly">
-            <div class="border-box-sizing" v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'">
+            <div class="border-box-sizing" v-if="walletEnabled">
               <button
                 class="btn ignore-vuetify-classes me-1"
                 @click="openExchangeDrawer">
@@ -36,7 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </div>
             <wallet-reward-summary-buttons
               ref="walletSummaryActions"
-              v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'"
+              v-if="walletEnabled"
               :is-space="isSpace"
               :is-space-administrator="isSpaceAdministrator"
               :contract-details="contractDetails"
@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </v-flex>
           <v-flex class="summaryCard" v-if="!walletReadonly">
             <wallet-reward-summary-transaction
-              v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'"
+              v-if="walletEnabled"
               :contract-details="contractDetails"
               :wallet-address="walletAddress"
               :fiat-symbol="fiatSymbol"
@@ -180,6 +180,9 @@ export default {
     walletReadonly() {
       return this.isSpace && !this.isSpaceAdministrator;
     },
+    walletEnabled() {
+      return this.walletAddress && this.contractDetails && this.initializationState !== 'DELETED';
+    },
   },
   methods: {
     requestAccessAuthorization() {
@@ -222,7 +225,9 @@ export default {
       this.$refs.walletSummaryActions.open();
     },
     prepareSendForm() {
-      this.$refs.walletSummaryActions.init();
+      if (this.walletEnabled){
+        this.$refs.walletSummaryActions.init();
+      }
     },
   },
 };

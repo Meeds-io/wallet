@@ -21,7 +21,6 @@ import java.util.Collection;
 
 import javax.persistence.*;
 
-import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -36,7 +35,7 @@ import org.exoplatform.wallet.model.WalletType;
     @NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address"),
     @NamedQuery(name = "Wallet.findActiveWallets", query = "SELECT w FROM Wallet w WHERE w.isActive = true"),
     @NamedQuery(name = "Wallet.findByActiveStateAndIdentity", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.isActive = :active"),
-    @NamedQuery(name = "Wallet.findByIdentity", query = "SELECT w FROM Wallet w WHERE w.id = :id and w.type = :type"),
+    @NamedQuery(name = "Wallet.findByIdentity", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.type = :type"),
     @NamedQuery(name = "Wallet.findByIdentityAndProvider", query = "SELECT w FROM Wallet w WHERE w.id.identityId = :id and w.id.provider = :provider"),
 })
 public class WalletEntity implements Serializable {

@@ -77,6 +77,7 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
             WalletEntity.class);
     query.setParameter("id", identityId);
     query.setParameter("provider", provider);
-    return query.getSingleResult();
+    List<WalletEntity> resultList = query.getResultList();
+    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 }

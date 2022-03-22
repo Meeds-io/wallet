@@ -290,13 +290,28 @@ public class WalletStorage {
     return fromEntity(walletEntity);
   }
 
+
+  /**
+   * find active/inactive wallet by user
+   * @param identityId user identity ID
+   * @param provider WalletProvider : Meeds wallet, Metamask etc ...
+   * @return Wallet or null
+   */
+  public Wallet findByIdentityIdAndProvider(long identityId, WalletProvider provider) {
+    WalletEntity walletEntity = walletAccountDAO.findByIdentityIdAndProvider(identityId, provider);
+    if(walletEntity == null) {
+      return null;
+    }
+    return fromEntity(walletEntity);
+  }
+
   /**
    * Activate wallet from a given provider
    * @param identityId User identity ID
    * @param provider Provider name
    * @return activated wallet
    */
-  public Wallet activateWallet(String identityId, WalletProvider provider){
+  public Wallet activateWallet(long identityId, WalletProvider provider){
     List<Wallet> userWallets = getUserWallets(identityId);
     Wallet activatedWallet = null;
     for(Wallet wallet : userWallets) {
@@ -311,9 +326,8 @@ public class WalletStorage {
     return activatedWallet;
   }
 
-  public List<Wallet> getUserWallets(String identityId) {
-    Long id = Long.valueOf(identityId);
-    List<WalletEntity> walletEntities = walletAccountDAO.findUserWallets(id, WalletType.USER);
+  public List<Wallet> getUserWallets(long identityId) {
+    List<WalletEntity> walletEntities = walletAccountDAO.findUserWallets(identityId, WalletType.USER);
     if(walletEntities == null || walletEntities.isEmpty()) {
       return Collections.emptyList();
     } else {

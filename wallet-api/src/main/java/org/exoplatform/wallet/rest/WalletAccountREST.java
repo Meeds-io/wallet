@@ -282,13 +282,15 @@ public class WalletAccountREST implements ResourceContainer {
               wallet.getId(),
               wallet.getAddress());
     try {
-      Wallet storedWallet = accountService.getWalletByTypeAndId(wallet.getType(), wallet.getId(), currentUserId);
+      //todo added wallet.getprovider as a new param to function getWalletByTypeAndId
+      Wallet storedWallet = accountService.getWalletByTypeAndIdAndProvider(wallet.getType(), wallet.getId(), currentUserId, wallet.getProvider());
       if (storedWallet == null || StringUtils.isBlank(storedWallet.getAddress())) {
         accountService.saveWalletAddress(wallet, currentUserId);
         return Response.ok(wallet.getPassPhrase()).build();
       } else {
         storedWallet.setAddress(wallet.getAddress());
         storedWallet.setBackedUp(false);
+        storedWallet.setActive(wallet.isActive());
         accountService.saveWalletAddress(storedWallet, currentUserId);
         return Response.ok(storedWallet.getPassPhrase()).build();
       }

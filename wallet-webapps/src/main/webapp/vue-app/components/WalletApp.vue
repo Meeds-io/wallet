@@ -4,7 +4,7 @@
     color="transaprent"
     class="VuetifyApp"
     flat>
-    <main v-if="isWalletEnabled && isWalletActivated" id="walletEnabledContent">
+    <main v-if="isWalletEnabled && !isWalletInactive" id="walletEnabledContent">
       <v-layout>
         <v-flex>
           <v-app class="mb-4 application-toolbar">
@@ -22,6 +22,7 @@
                     class="ms-0 me-0 pr-0">
                     <wallet-reward-summary
                       ref="walletSummary"
+                      v-if="wallet && contractDetails && this.initializationState !== 'DELETED'"
                       :wallet="wallet"
                       :is-space="isSpace"
                       :is-space-administrator="isSpaceAdministrator"
@@ -102,7 +103,7 @@
         </v-flex>
       </v-layout>
     </main>
-    <main v-else-if="isWalletActivated && !loading" id="walletUnactivatedContent">
+    <main v-else-if="isWalletInactive" id="walletInactiveContent">
       <v-layout>
         <v-flex>
           <v-card-title class="transparent" flat>
@@ -206,6 +207,9 @@ export default {
     },
     periodicityLabel() {
       return this.transactionStatistics && this.transactionStatistics.periodicityLabel;
+    },
+    isWalletInactive() {
+      return this.settings && this.settings.wallets && Object.keys(this.settings.wallets).length && !this.settings.wallet.active;
     },
   },
   watch: {

@@ -22,32 +22,38 @@ import org.exoplatform.wallet.utils.WalletUtils;
 import lombok.*;
 import lombok.EqualsAndHashCode.Exclude;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class UserSettings extends GlobalSettings {
 
-  private static final long serialVersionUID     = -1053053050527461491L;
+  private static final long   serialVersionUID     = -1053053050527461491L;
 
-  private Wallet            wallet               = null;
-
-  @Exclude
-  private WalletSettings    userPreferences;
+  private Wallet              wallet               = null;
 
   @Exclude
-  private boolean           walletEnabled        = true;
+  private WalletSettings      userPreferences;
 
   @Exclude
-  private boolean           isUseDynamicGasPrice = true;
+  private boolean             walletEnabled        = true;
 
   @Exclude
-  private String            cometdChannel        = WalletUtils.COMETD_CHANNEL;
+  private Map<String, Wallet> wallets              = new HashMap<>();
 
   @Exclude
-  private String            cometdToken;
+  private boolean             isUseDynamicGasPrice = true;
 
   @Exclude
-  private String            cometdContext;
+  private String              cometdChannel        = WalletUtils.COMETD_CHANNEL;
+
+  @Exclude
+  private String              cometdToken;
+
+  @Exclude
+  private String              cometdContext;
 
   public UserSettings(GlobalSettings globalSettings) {
     super(globalSettings);

@@ -19,6 +19,9 @@ package org.exoplatform.wallet.service;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.exoplatform.commons.utils.PropertyManager;
@@ -269,7 +272,15 @@ public class WalletServiceImpl implements WalletService, Startable {
         }
         accountService.retrieveWalletBlockchainState(wallet);
         userSettings.setWallet(wallet);
+
+        List<Wallet> userWallets = accountService.getUserWallets(wallet.getTechnicalId());
+        Map<String, Wallet> walletsMap = new HashMap<>();
+        for (Wallet userWallet : userWallets) {
+          walletsMap.put(userWallet.getProvider(), userWallet);
+        }
+        userSettings.setWallets(walletsMap);
       }
+
       walletSettings.setAddresesLabels(accountService.getAddressesLabelsVisibleBy(currentUser));
       if (isAdministration && isUserMemberOfGroupOrUser(currentUser, REWARDINGS_GROUP)) {
         userSettings.setInitialFunds(getInitialFundsSettings());
