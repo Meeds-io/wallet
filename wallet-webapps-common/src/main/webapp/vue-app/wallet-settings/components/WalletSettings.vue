@@ -20,6 +20,19 @@
                 {{ $t('exoplatform.wallet.label.settings') }}
               </v-list-item-title>
             </v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="text-color">
+                <div class="d-flex align-center">
+                  <img
+                    class="pr-2 pl-1"
+                    :src="`/wallet-common/images/meeds.svg`" 
+                    width="16">
+                  {{ $t('exoplatform.wallet.meedsChoice') }}
+                </div>
+              </v-list-item-title>
+            </v-list-item-content>
             <v-list-item-action>
               <v-btn
                 small
@@ -29,6 +42,31 @@
                   {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
                 </v-icon>
               </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="text-color" :class="!metaMask && 'addonNotInsta'">
+                <div class="d-flex align-center">
+                  <img
+                    class="pr-2 pl-1"
+                    :src="`/wallet-common/images/metamask.svg`"
+                    width="18">
+                  {{ $t('exoplatform.wallet.metaMaskChoice') }}
+                </div>
+              </v-list-item-title>
+              <v-list-item-subtitle
+                class="text-sub-title pl-1 my-3"
+                v-if="!metaMask">
+                {{ $t('exoplatform.wallet.metaMaskInstallation') }} &ensp;<a href="https://metamask.io/" target="_blank">{{ $t('exoplatform.wallet.metaMaskInstallationLink') }}</a>
+              </v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-switch
+                class="pl-n1"
+                :disabled="!metaMask"
+                @click="connectMetamask"
+                v-model="switch1" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -44,6 +82,9 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
+    switch1: false,
+    metaMask: false,
+    meedsWallet: true
   }),
   computed: {
     isSpace(){
@@ -65,6 +106,7 @@ export default {
     });
     this.checkWalletInstalled();
     this.init();
+    this.checkMetaMaskInstalled();
     setTimeout( () => {
       this.from = this.getQueryParam('from');
       if (this.from === 'walletApp') {
@@ -87,6 +129,9 @@ export default {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
   },
   methods: {
+    checkMetaMaskInstalled(){
+      if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask){this.metaMask= true;}
+    },
     checkWalletInstalled() {
       if (eXo.env.portal.spaceId) {
         this.displayed = false;
@@ -134,6 +179,9 @@ export default {
           this.wallet = wallet;
         });
     },
+    connectMetamask(){
+      console.log('here', this.metaMask);
+    }
   },
 };
 </script>
