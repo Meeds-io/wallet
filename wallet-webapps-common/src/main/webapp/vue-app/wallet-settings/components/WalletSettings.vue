@@ -27,7 +27,8 @@
                 <div class="d-flex align-center">
                   <img
                     class="pr-2 pl-1"
-                    :src="`/wallet-common/images/meeds.svg`" 
+                    :src="`/wallet-common/images/meeds.svg`"
+                    alt="Meeds" 
                     width="16">
                   {{ $t('exoplatform.wallet.meedsChoice') }}
                 </div>
@@ -51,6 +52,7 @@
                   <img
                     class="pr-2 pl-1"
                     :src="`/wallet-common/images/metamask.svg`"
+                    alt="Metamask"
                     width="18">
                   {{ $t('exoplatform.wallet.metaMaskChoice') }}
                 </div>
@@ -58,7 +60,7 @@
               <v-list-item-subtitle
                 class="text-sub-title pl-1 my-3"
                 v-if="!metaMask">
-                {{ $t('exoplatform.wallet.metaMaskInstallation') }} &ensp;<a href="https://metamask.io/" target="_blank">{{ $t('exoplatform.wallet.metaMaskInstallationLink') }}</a>
+                {{ $t('exoplatform.wallet.metaMaskInstallation') }} &ensp;<a href="https://metamask.io/" target="_blank" rel="noopener">{{ $t('exoplatform.wallet.metaMaskInstallationLink') }}</a>
               </v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
