@@ -47,7 +47,7 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-content>
-              <v-list-item-title class="text-color" :class="!metaMask && 'addonNotInsta'">
+              <v-list-item-title class="text-color " :class="!metaMask && 'addonNotInstalled'">
                 <div class="d-flex align-center">
                   <img
                     class="pr-2 pl-1"
@@ -60,7 +60,10 @@
               <v-list-item-subtitle
                 class="text-sub-title pl-1 my-3"
                 v-if="!metaMask">
-                {{ $t('exoplatform.wallet.metaMaskInstallation') }} &ensp;<a href="https://metamask.io/" target="_blank" rel="noopener">{{ $t('exoplatform.wallet.metaMaskInstallationLink') }}</a>
+                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.metaMaskInstallation') }}</span><a
+                  :href="linkMetamask"
+                  target="_blank"
+                  rel="noopener nofollow">{{ linkMetamask }}</a>
               </v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
@@ -68,7 +71,7 @@
                 class="pl-n1"
                 :disabled="!metaMask"
                 @click="connectMetamask"
-                v-model="switch1" />
+                v-model="switchToMetamask" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -84,9 +87,10 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    switch1: false,
+    switchToMetamask: false,
     metaMask: false,
-    meedsWallet: true
+    meedsWallet: true,
+    linkMetamask: 'https://metamask.io/'
   }),
   computed: {
     isSpace(){
