@@ -92,9 +92,7 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
       if (this.pushNotification) {
         messageInfo.subject("/");
       } else {
-        Object context = templateContext.remove("_ctx");
         messageInfo.subject(TemplateUtils.processSubject(templateContext));
-        templateContext.put("_ctx", context);
       }
       return messageInfo.body(body).end();
     } catch (Exception e) {

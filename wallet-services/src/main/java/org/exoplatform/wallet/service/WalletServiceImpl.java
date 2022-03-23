@@ -379,7 +379,7 @@ public class WalletServiceImpl implements WalletService, Startable {
         long gasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
         setDynamicGasPrice(gasPrice);
       } catch (Exception e) {
-        LOG.warn("Error retrieving gas price from blockchain. Return normal gas price setting", e);
+        LOG.debug("Error retrieving gas price from blockchain. Return normal gas price setting", e);
         return getSettings().getNetwork().getNormalGasPrice();
       }
     }
