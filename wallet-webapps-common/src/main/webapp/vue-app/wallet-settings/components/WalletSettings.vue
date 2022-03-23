@@ -70,8 +70,8 @@
               <v-switch
                 class="pl-n1"
                 :disabled="!metaMask"
-                @click="connectMetamask"
-                v-model="switchToMetamask" />
+                @click="connectToMetamask"
+                v-model="choiceWallet" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -87,9 +87,8 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    switchToMetamask: false,
+    choiceWallet: false,
     metaMask: false,
-    meedsWallet: true,
     linkMetamask: 'https://metamask.io/'
   }),
   computed: {
@@ -185,9 +184,45 @@ export default {
           this.wallet = wallet;
         });
     },
-    connectMetamask(){
-      console.log('here', this.metaMask);
-    }
+    saveWallet() {
+      const walletParams = {
+        provider: this.choiceWallet ? 'METAMASK': 'MEEDS_WALLET',
+        id: this.getQueryParam('id'),
+        type: this.getQueryParam('type'),
+        address: window.walletSettings.wallet
+      };
+      return fetch('portal/rest/wallet/api/account/saveAddress', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(walletParams),
+      })
+        .then((resp) => {
+          if (resp && resp.ok) {
+            return resp.text();
+          } else {
+            throw new Error('Error saving wallet');
+          }
+        })
+        .catch((e) => {
+          this.loading = false;
+          console.error('fetch save wallet - error', e);
+        });
+    },
+    connectToMetamask() {
+      if (this.choiceWallet){
+        return window.ethereum.request({
+          method: 'eth_requestAccounts'
+        })
+          .then((walletConnected)=>{
+          // this.saveWallet();
+            console.log('walletConnected', walletConnected[0]);
+          });
+      } 
+    },
   },
 };
 </script>
