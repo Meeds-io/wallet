@@ -18,8 +18,10 @@ package org.exoplatform.wallet.test.storage;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.Set;
 
+import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
 import org.junit.Test;
 
@@ -112,6 +114,7 @@ public class WalletStorageTest extends BaseWalletTest {
     Wallet wallet = newWallet();
 
     wallet = walletStorage.saveWallet(wallet, true);
+    this.entitiesToClean.add(wallet);
     assertNotNull(wallet);
     walletStorage.removeWallet(CURRENT_USER_IDENTITY_ID, PROVIDER);
     Set<Wallet> listWallets = walletStorage.listWallets();
@@ -378,12 +381,34 @@ public class WalletStorageTest extends BaseWalletTest {
 
   @Test
   public void testGetUserWallets() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    List<Wallet> userWallets = walletStorage.getUserWallets(CURRENT_USER_IDENTITY_ID);
+    assertEquals(0,userWallets.size());
 
+    Wallet meedsWallet = newWallet();
+    meedsWallet = walletStorage.saveWallet(meedsWallet, true);
+    entitiesToClean.add(meedsWallet);
+    userWallets = walletStorage.getUserWallets(CURRENT_USER_IDENTITY_ID);
+    assertEquals(1,userWallets.size());
   }
 
 
   public void testActivateWallet() {
-    //TODO
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    List<Wallet> userWallets = walletStorage.getUserWallets(CURRENT_USER_IDENTITY_ID);
+    assertEquals(0,userWallets.size());
+
+    Wallet wallet = newWallet();
+    walletStorage.saveWallet(wallet, true);
+    entitiesToClean.add(wallet);
+    assertEquals(true, wallet.isActive());
+    wallet.setActive(false);
+    walletStorage.saveWallet(wallet, true);
+
+    wallet = walletStorage.activateWallet(CURRENT_USER_IDENTITY_ID, WalletProvider.MEEDS_WALLET);
+
+    assertEquals(WalletProvider.MEEDS_WALLET, wallet.getProvider());
+    assertEquals(false, wallet.isActive());
   }
 
   protected void checkWalletContent(Wallet wallet,
