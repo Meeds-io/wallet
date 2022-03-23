@@ -16,17 +16,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <% String acceptURL = FUNDS_ACCEPT_URL + "&id=" + NOTIFICATION_ID; %>
 <table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height:20px;HelveticaNeue bold',arial,tahoma,serif;">
-    <tr>
-        <td align="center"  valign="middle" bgcolor="#ffffff" style="background-color: #ffffff;">
-            <table  cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="border:1px solid #d8d8d8;">
-                <tr>
-                    <td  height="45" valign="middle" style="margin:0;height:45px;font-weight:bold;vertical-align:middle;;background-color: #efefef;font-family:'HelveticaNeue bold',arial,tahoma,serif;color:#2f5e92;font-size:18px;text-align:center">
-                        <%=_ctx.appRes("UINotification.title.FundsRequestNotificationPlugin")%>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr><!--end header area-->
+    <%
+      _templateContext.put("header_title", _ctx.appRes("UINotification.title.FundsRequestNotificationPlugin"));
+      _ctx.include("war:/notification/templates/mail/NotificationHeader.gtmpl", _templateContext);
+    %>
     <tr>
         <td bgcolor="#ffffff" style="background-color: #ffffff;">
             <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="#ffffff" style="background-color: #ffffff; border:1px solid #d8d8d8;">
@@ -93,4 +86,5 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </table>            
         </td>
     </tr><!--end content area-->
+    <% _ctx.include("war:/notification/templates/mail/NotificationFooter.gtmpl", _templateContext);%>
 </table>

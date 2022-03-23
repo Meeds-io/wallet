@@ -347,7 +347,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       break;
     case OPERATION_GET_GAS_PRICE:
       BigInteger gasPriceInWei = (BigInteger) result;
-      parameters.put("ga_price_gwei", convertFromDecimals(BigInteger.valueOf(gasPriceInWei.longValue()), GWEI_TO_WEI_DECIMALS));
+      parameters.put("ga_price_gwei",
+                     convertFromDecimals(BigInteger.valueOf(gasPriceInWei == null ? 0 : gasPriceInWei.longValue()),
+                                         GWEI_TO_WEI_DECIMALS));
       break;
     case OPERATION_GET_LAST_BLOCK_NUMBER:
       parameters.put("last_block_number", result);
