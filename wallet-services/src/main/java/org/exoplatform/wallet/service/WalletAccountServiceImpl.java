@@ -22,8 +22,6 @@ import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.exoplatform.social.core.manager.IdentityManager;
 import org.picocontainer.Startable;
 
 import org.exoplatform.commons.utils.CommonsUtils;
