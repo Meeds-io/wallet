@@ -30,7 +30,7 @@
                     :src="`/wallet-common/images/meeds.svg`"
                     alt="Meeds" 
                     width="16">
-                  {{ $t('exoplatform.wallet.meedsChoice') }}
+                  {{ $t('exoplatform.wallet.settings.meedsWallet') }}
                 </div>
               </v-list-item-title>
             </v-list-item-content>
@@ -47,20 +47,20 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-content>
-              <v-list-item-title class="text-color " :class="!metaMask && 'addonNotInstalled'">
+              <v-list-item-title class="text-color " :class="!checkMetamask && 'addonNotInstalled'">
                 <div class="d-flex align-center">
                   <img
                     class="pr-2 pl-1"
                     :src="`/wallet-common/images/metamask.svg`"
                     alt="Metamask"
                     width="18">
-                  {{ $t('exoplatform.wallet.metaMaskChoice') }}
+                  {{ $t('exoplatform.wallet.settings.useMetamask') }}
                 </div>
               </v-list-item-title>
               <v-list-item-subtitle
                 class="text-sub-title pl-1 my-3"
-                v-if="!metaMask">
-                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.metaMaskInstallation') }}</span><a
+                v-if="!checkMetamask">
+                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
                   :href="linkMetamask"
                   target="_blank"
                   rel="noopener nofollow">{{ linkMetamask }}</a>
@@ -69,9 +69,9 @@
             <v-list-item-action>
               <v-switch
                 class="pl-n1"
-                :disabled="!metaMask"
+                :disabled="!checkMetamask"
                 @click="connectToMetamask"
-                v-model="choiceWallet" />
+                v-model="useMetamask" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -87,8 +87,7 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    choiceWallet: false,
-    metaMask: false,
+    useMetamask: false,
     linkMetamask: 'https://metamask.io/'
   }),
   computed: {
@@ -97,7 +96,11 @@ export default {
     },
     walletSettingsClass(){
       return eXo.env.portal.spaceName ? '': 'ma-4' ;
-    }
+    },
+    checkMetamask(){
+      return  window.ethereum && window.ethereum.isMetaMask;
+    },
+
   },
   created() {
     document.addEventListener('hideSettingsApps', (event) => {
@@ -111,7 +114,6 @@ export default {
     });
     this.checkWalletInstalled();
     this.init();
-    this.checkMetaMaskInstalled();
     setTimeout( () => {
       this.from = this.getQueryParam('from');
       if (this.from === 'walletApp') {
@@ -134,9 +136,6 @@ export default {
     this.$nextTick().then(() => this.$root.$applicationLoaded());
   },
   methods: {
-    checkMetaMaskInstalled(){
-      if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask){this.metaMask= true;}
-    },
     checkWalletInstalled() {
       if (eXo.env.portal.spaceId) {
         this.displayed = false;
@@ -184,42 +183,13 @@ export default {
           this.wallet = wallet;
         });
     },
-    saveWallet() {
-      const walletParams = {
-        provider: this.choiceWallet ? 'METAMASK': 'MEEDS_WALLET',
-        id: this.getQueryParam('id'),
-        type: this.getQueryParam('type'),
-        address: window.walletSettings.wallet
-      };
-      return fetch('portal/rest/wallet/api/account/saveAddress', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(walletParams),
-      })
-        .then((resp) => {
-          if (resp && resp.ok) {
-            return resp.text();
-          } else {
-            throw new Error('Error saving wallet');
-          }
-        })
-        .catch((e) => {
-          this.loading = false;
-          console.error('fetch save wallet - error', e);
-        });
-    },
     connectToMetamask() {
-      if (this.choiceWallet){
+      if (this.useMetamask){
         return window.ethereum.request({
           method: 'eth_requestAccounts'
         })
-          .then((walletConnected)=>{
-          // this.saveWallet();
-            console.log('walletConnected', walletConnected[0]);
+          .then(()=>{
+          // signature request to do
           });
       } 
     },
