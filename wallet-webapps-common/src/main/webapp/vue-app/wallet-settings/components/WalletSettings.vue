@@ -197,12 +197,21 @@ export default {
           this.wallet = wallet;
         });
     },
+    signMessage(address){
+      return window.ethereum.request({
+        method: 'personal_sign',
+        params: ['test message', address, ''],
+      }).then(signedMessage => {
+        console.log('signedMessage', signedMessage);
+      });
+    },
     connectToMetamask() {
       if (this.useMetamask){
         return window.ethereum.request({
           method: 'eth_requestAccounts'
         })
-          .then(()=>{
+          .then((connectedWallet)=>{
+            this.signMessage(connectedWallet[0]);
           // signature request to do
           });
       } 
