@@ -47,7 +47,7 @@
           </v-list-item>
           <v-list-item>
             <v-list-item-content>
-              <v-list-item-title class="text-color " :class="!checkMetamask && 'addonNotInstalled'">
+              <v-list-item-title class="text-color " :class="!isMetamaskInstalled && 'addonNotInstalled'">
                 <div class="d-flex align-center">
                   <img
                     class="pr-2 pl-1"
@@ -59,7 +59,7 @@
               </v-list-item-title>
               <v-list-item-subtitle
                 class="text-sub-title pl-1 my-3"
-                v-if="!checkMetamask">
+                v-if="!isMetamaskInstalled">
                 <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
                   :href="linkMetamask"
                   target="_blank"
@@ -69,7 +69,7 @@
             <v-list-item-action>
               <v-switch
                 class="pl-n1"
-                :disabled="!checkMetamask"
+                :disabled="!isMetamaskInstalled"
                 @click="connectToMetamask"
                 v-model="useMetamask" />
             </v-list-item-action>
@@ -97,7 +97,7 @@ export default {
     walletSettingsClass(){
       return eXo.env.portal.spaceName ? '': 'ma-4' ;
     },
-    checkMetamask(){
+    isMetamaskInstalled(){
       return  window.ethereum && window.ethereum.isMetaMask;
     },
 
