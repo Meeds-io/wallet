@@ -20,6 +20,20 @@
                 {{ $t('exoplatform.wallet.label.settings') }}
               </v-list-item-title>
             </v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="text-color">
+                <div class="d-flex align-center">
+                  <img
+                    class="pr-2 pl-1"
+                    :src="`/wallet-common/images/meeds.svg`"
+                    alt="Meeds" 
+                    width="16">
+                  {{ $t('exoplatform.wallet.settings.meedsWallet') }}
+                </div>
+              </v-list-item-title>
+            </v-list-item-content>
             <v-list-item-action>
               <v-btn
                 small
@@ -29,6 +43,35 @@
                   {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
                 </v-icon>
               </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="text-color " :class="!isMetamaskInstalled && 'addonNotInstalled'">
+                <div class="d-flex align-center">
+                  <img
+                    class="pr-2 pl-1"
+                    :src="`/wallet-common/images/metamask.svg`"
+                    alt="Metamask"
+                    width="18">
+                  {{ $t('exoplatform.wallet.settings.useMetamask') }}
+                </div>
+              </v-list-item-title>
+              <v-list-item-subtitle
+                class="text-sub-title pl-1 my-3"
+                v-if="!isMetamaskInstalled">
+                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
+                  :href="linkMetamask"
+                  target="_blank"
+                  rel="noopener nofollow">{{ linkMetamask }}</a>
+              </v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-switch
+                class="pl-n1"
+                :disabled="!isMetamaskInstalled"
+                @click="connectToMetamask"
+                v-model="useMetamask" />
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -44,6 +87,8 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
+    useMetamask: false,
+    linkMetamask: 'https://metamask.io/'
   }),
   computed: {
     isSpace(){
@@ -51,7 +96,11 @@ export default {
     },
     walletSettingsClass(){
       return eXo.env.portal.spaceName ? '': 'ma-4' ;
-    }
+    },
+    isMetamaskInstalled(){
+      return  window.ethereum && window.ethereum.isMetaMask;
+    },
+
   },
   created() {
     document.addEventListener('hideSettingsApps', (event) => {
@@ -133,6 +182,16 @@ export default {
         .then(wallet => {
           this.wallet = wallet;
         });
+    },
+    connectToMetamask() {
+      if (this.useMetamask){
+        return window.ethereum.request({
+          method: 'eth_requestAccounts'
+        })
+          .then(()=>{
+          // signature request to do
+          });
+      } 
     },
   },
 };
