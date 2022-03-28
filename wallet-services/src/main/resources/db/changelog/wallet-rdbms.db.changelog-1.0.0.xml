@@ -291,6 +291,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <constraints nullable="false" />
       </column>
       <column name="ENABLED" type="BOOLEAN"/>
+      <column name="BACKED_UP" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="INITIALIZATION_STATE" type="INT" defaultValueNumeric="0" />
       <column name="ACTIVE" type="BOOLEAN" defaultValueBoolean="true" />
       <column name="PROVIDER" type="INT" defaultValueNumeric="0" />
     </createTable>
