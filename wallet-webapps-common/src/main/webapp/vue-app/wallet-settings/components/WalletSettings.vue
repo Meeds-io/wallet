@@ -69,8 +69,7 @@
           <v-list-item class="mt-n2" v-if="!isMetamaskInstalled">
             <v-list-item-content>
               <v-list-item-subtitle
-                class="text-sub-title pl-1"
-                >
+                class="text-sub-title pl-1">
                 <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
                   :href="linkMetamask"
                   target="_blank"
