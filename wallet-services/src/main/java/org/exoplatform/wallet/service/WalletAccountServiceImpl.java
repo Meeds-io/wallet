@@ -396,9 +396,17 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
     wallet.setEnabled(isNew || oldWallet.isEnabled());
-    setWalletPassPhrase(wallet, oldWallet);
+    if(wallet.getProvider().equals(WalletProvider.MEEDS_WALLET.name())){
+      setWalletPassPhrase(wallet, oldWallet);
+    }
     accountStorage.saveWallet(wallet, isNew);
 
+    if (oldWallet != null) {
+      oldWallet.setActive(false);
+      Wallet oldBackUpWallet = accountStorage.getBackUpWalletByIdentityId(wallet.getTechnicalId());
+      Boolean isNewBackupWallet = oldBackUpWallet == null;
+      accountStorage.saveBackUpWallet(oldWallet, isNewBackupWallet);
+    }
     if (!isNew) {
       // Automatically Remove old private key when modifying address associated
       // to wallet

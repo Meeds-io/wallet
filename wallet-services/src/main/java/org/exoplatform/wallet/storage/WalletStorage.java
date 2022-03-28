@@ -38,6 +38,8 @@ public class WalletStorage {
 
   private final WalletAccountDAO         walletAccountDAO;
 
+  private final WalletAccountBackUpDAO         walletAccountBackUpDAO;
+
   private final WalletPrivateKeyDAO      privateKeyDAO;
 
   private final WalletBlockchainStateDAO blockchainStateDAO;
@@ -45,10 +47,11 @@ public class WalletStorage {
   private AbstractCodec            codec;
 
   public WalletStorage(WalletAccountDAO walletAccountDAO,
-                       WalletPrivateKeyDAO privateKeyDAO,
+                       WalletAccountBackUpDAO walletAccountBackUpDAO, WalletPrivateKeyDAO privateKeyDAO,
                        WalletBlockchainStateDAO blockchainStateDAO,
                        CodecInitializer codecInitializer) {
     this.walletAccountDAO = walletAccountDAO;
+    this.walletAccountBackUpDAO = walletAccountBackUpDAO;
     this.privateKeyDAO = privateKeyDAO;
     this.blockchainStateDAO = blockchainStateDAO;
 
@@ -282,6 +285,30 @@ public class WalletStorage {
     return this.codec.encode(content);
   }
 
+  /**
+   * @param wallet wallet details to backup
+   * @param isNew whether this is a new wallet association or not
+   * @return saved wallet entity
+   */
+  public Wallet saveBackUpWallet(Wallet wallet, boolean isNew) {
+    WalletBackUpEntity walletBackUpEntity = toBackUpEntity(wallet);
+    if (isNew) {
+      walletBackUpEntity = walletAccountBackUpDAO.create(walletBackUpEntity);
+    } else {
+      walletBackUpEntity = walletAccountBackUpDAO.update(walletBackUpEntity);
+    }
+    return fromBackUpEntity(walletBackUpEntity);
+  }
+
+  /**
+   * @param identityId user technical identty id
+   * @return {@link Wallet} details for identity
+   */
+  public Wallet getBackUpWalletByIdentityId(long identityId) {
+    WalletBackUpEntity walletBackUpEntity = walletAccountBackUpDAO.find(identityId);
+    return fromBackUpEntity(walletBackUpEntity);
+  }
+
   private Wallet fromEntity(WalletEntity walletEntity) {
     Wallet wallet = new Wallet();
     wallet.setTechnicalId(walletEntity.getId());
@@ -314,4 +341,39 @@ public class WalletStorage {
     return walletEntity;
   }
 
+  private WalletBackUpEntity toBackUpEntity(Wallet wallet) {
+    WalletBackUpEntity walletBackUpEntity = new WalletBackUpEntity();
+    walletBackUpEntity.setId(wallet.getTechnicalId());
+    walletBackUpEntity.setAddress(wallet.getAddress().toLowerCase());
+    walletBackUpEntity.setEnabled(wallet.isEnabled());
+    walletBackUpEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
+    walletBackUpEntity.setPassPhrase(wallet.getPassPhrase());
+    walletBackUpEntity.setBackedUp(wallet.isBackedUp());
+    walletBackUpEntity.setType(WalletType.getType(wallet.getType()));
+    walletBackUpEntity.setActive(wallet.isActive());
+    walletBackUpEntity.setWalletProvider(WalletProvider.valueOf(wallet.getProvider()));
+    return walletBackUpEntity;
+  }
+
+  private Wallet fromBackUpEntity(WalletBackUpEntity walletBackUpEntity) {
+    if (walletBackUpEntity == null) {
+      return null;
+    }
+    Wallet wallet = new Wallet();
+    wallet.setTechnicalId(walletBackUpEntity.getId());
+    wallet.setAddress(walletBackUpEntity.getAddress());
+    wallet.setPassPhrase(walletBackUpEntity.getPassPhrase());
+    wallet.setEnabled(walletBackUpEntity.isEnabled());
+    wallet.setInitializationState(walletBackUpEntity.getInitializationState().name());
+    wallet.setBackedUp(walletBackUpEntity.isBackedUp());
+    if (walletBackUpEntity.getPrivateKey() == null) {
+      WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletBackUpEntity.getId());
+      wallet.setHasPrivateKey(privateKey != null);
+    } else {
+      wallet.setHasPrivateKey(true);
+    }
+    wallet.setActive(walletBackUpEntity.isActive());
+    wallet.setProvider(walletBackUpEntity.getWalletProvider().name());
+    return  wallet;
+  }
 }

@@ -34,10 +34,11 @@ public class CachedAccountStorage extends WalletStorage {
 
   public CachedAccountStorage(CacheService cacheService,
                               WalletAccountDAO walletAccountDAO,
+                              WalletAccountBackUpDAO walletAccountBackUpDAO,
                               WalletPrivateKeyDAO privateKeyDAO,
                               WalletBlockchainStateDAO blockchainStateDAO,
                               CodecInitializer codecInitializer) {
-    super(walletAccountDAO, privateKeyDAO, blockchainStateDAO, codecInitializer);
+    super(walletAccountDAO, walletAccountBackUpDAO, privateKeyDAO, blockchainStateDAO, codecInitializer);
 
     ExoCache<WalletCacheKey, Wallet> walletCache = cacheService.getCacheInstance("wallet.account");
 
@@ -80,6 +81,15 @@ public class CachedAccountStorage extends WalletStorage {
 
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
+    wallet = super.saveWallet(wallet, isNew);
+    // Remove cached wallet
+    this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
+    this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
+
+    return wallet;
+  }
+  @Override
+  public Wallet saveBackUpWallet(Wallet wallet, boolean isNew) {
     String oldAddress = null;
     if (!isNew) {
       // Retrieve old wallet address

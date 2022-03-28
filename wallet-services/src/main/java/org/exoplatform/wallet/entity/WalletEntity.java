@@ -21,6 +21,7 @@ import java.util.Collection;
 
 import javax.persistence.*;
 
+import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -55,6 +56,13 @@ public class WalletEntity implements Serializable {
 
   @Column(name = "BACKED_UP", nullable = false)
   private boolean                                 isBackedUp;
+
+  @Column(name = "ACTIVE", nullable = false)
+  private boolean                                 isActive;
+
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "PROVIDER", nullable = false)
+  protected WalletProvider                        walletProvider;
 
   @Column(name = "INITIALIZATION_STATE")
   private WalletState initializationState;
@@ -137,4 +145,19 @@ public class WalletEntity implements Serializable {
     this.blockchainState = blockchainState;
   }
 
+  public boolean isActive() {
+    return isActive;
+  }
+
+  public void setActive(boolean active) {
+    isActive = active;
+  }
+
+  public WalletProvider getWalletProvider() {
+    return walletProvider;
+  }
+
+  public void setWalletProvider(WalletProvider walletProvider) {
+    this.walletProvider = walletProvider;
+  }
 }
