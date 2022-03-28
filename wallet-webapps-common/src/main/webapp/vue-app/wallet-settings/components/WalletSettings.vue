@@ -57,14 +57,6 @@
                   {{ $t('exoplatform.wallet.settings.useMetamask') }}
                 </div>
               </v-list-item-title>
-              <v-list-item-subtitle
-                class="text-sub-title pl-1 my-3"
-                v-if="!isMetamaskInstalled">
-                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
-                  :href="linkMetamask"
-                  target="_blank"
-                  rel="noopener nofollow">{{ linkMetamask }}</a>
-              </v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
               <v-switch
@@ -73,6 +65,18 @@
                 @click="connectToMetamask"
                 v-model="useMetamask" />
             </v-list-item-action>
+          </v-list-item>
+          <v-list-item class="mt-n2" v-if="!isMetamaskInstalled">
+            <v-list-item-content>
+              <v-list-item-subtitle
+                class="text-sub-title pl-1"
+                >
+                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
+                  :href="linkMetamask"
+                  target="_blank"
+                  rel="noopener nofollow">{{ linkMetamask }}</a>
+              </v-list-item-subtitle>
+            </v-list-item-content>
           </v-list-item>
         </v-list>
       </v-card>
