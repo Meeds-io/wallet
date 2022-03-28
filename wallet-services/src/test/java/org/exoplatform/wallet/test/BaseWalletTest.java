@@ -59,6 +59,11 @@ public abstract class BaseWalletTest {
 
   protected static final String    TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
 
+  protected static final String    PROVIDER                 = WalletProvider.MEEDS_WALLET.name();
+
+  protected static final boolean   IS_ACTIVE               = true;
+
+
   protected static final int       GAS_USED                 = 160000;
 
   protected static final double    GAS_PRICE                = 0.000000006d;
@@ -450,6 +455,8 @@ public abstract class BaseWalletTest {
     wallet.setPassPhrase(PHRASE);
     wallet.setEnabled(IS_ENABLED);
     wallet.setInitializationState(INITIALIZATION_STATE);
+    wallet.setActive(IS_ACTIVE);
+    wallet.setProvider(PROVIDER);
     return wallet;
   }
 
@@ -463,6 +470,8 @@ public abstract class BaseWalletTest {
     walletSpace.setInitializationState(INITIALIZATION_STATE);
     walletSpace.setSpaceAdministrator(IS_ENABLED);
     walletSpace.setType(TYPE);
+    walletSpace.setActive(IS_ACTIVE);
+    walletSpace.setProvider(PROVIDER);
     return walletSpace;
   }
 

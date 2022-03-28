@@ -83,6 +83,10 @@ public abstract class BaseWalletRewardTest {
 
   protected static final String           CUSTOM_PLUGIN_ID     = "custom";
 
+  protected static final String           PROVIDER             = WalletProvider.MEEDS_WALLET.name();
+
+  protected static final boolean          IS_ACTIVE            = true;
+  
   protected static final RewardPlugin     CUSTOM_REWARD_PLUGIN = new RewardPlugin() {
                                                                  @Override
                                                                  public String getName() {
@@ -269,6 +273,8 @@ public abstract class BaseWalletRewardTest {
     wallet.setEtherBalance(0d);
     wallet.setTokenBalance(0d);
     wallet.setInitializationState(INITIALIZATION_STATE);
+    wallet.setProvider(PROVIDER);
+    wallet.setActive(IS_ACTIVE);
     return wallet;
   }
 
