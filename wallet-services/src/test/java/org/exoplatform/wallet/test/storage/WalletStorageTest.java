@@ -363,16 +363,15 @@ public class WalletStorageTest extends BaseWalletTest {
     walletBackUp.setAddress(WALLET_ADDRESS_2);
     walletBackUp.setWalletId(wallet.getTechnicalId());
 
-    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp,true);
+    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp, true);
 
     assertNotNull(walletBackUp);
-    assertEquals(walletBackUp.getAddress(),WALLET_ADDRESS_2);
+    assertEquals(WALLET_ADDRESS_2, walletBackUp.getAddress());
 
     walletBackUp.setAddress(WALLET_ADDRESS_3);
-    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp,true);
-    assertEquals(walletBackUp.getAddress(),WALLET_ADDRESS_3);
+    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp, true);
+    assertEquals(WALLET_ADDRESS_3, walletBackUp.getAddress());
     this.entitiesToClean.add(walletBackUp);
-
   }
 
   @Test

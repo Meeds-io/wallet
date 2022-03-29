@@ -15,4 +15,12 @@ public class WalletBackUp implements Serializable, Cloneable {
 
   String address;
 
+  @Override
+  public WalletBackUp clone() { // NOSONAR
+    try {
+      return (WalletBackUp) super.clone();
+    } catch (CloneNotSupportedException e) {
+      return null; // NOSONAR
+    }
+  }
 }

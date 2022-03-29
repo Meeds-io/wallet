@@ -1,14 +1,10 @@
 package org.exoplatform.wallet.entity;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
-import org.exoplatform.wallet.model.WalletProvider;
-import org.exoplatform.wallet.model.WalletState;
-import org.exoplatform.wallet.model.WalletType;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collection;
 
 @Entity(name = "WalletBackUpEntity")
 @ExoEntity
