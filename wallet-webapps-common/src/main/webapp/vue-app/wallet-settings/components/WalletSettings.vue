@@ -70,10 +70,11 @@
             <v-list-item-content>
               <v-list-item-subtitle
                 class="text-sub-title pl-1">
-                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span><a
-                  :href="linkMetamask"
+                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span>
+                <a
+                  :href="metamaskInstallLink"
                   target="_blank"
-                  rel="noopener nofollow">{{ linkMetamask }}</a>
+                  rel="noopener nofollow">{{ metamaskInstallLink }}</a>
               </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
@@ -90,8 +91,7 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    useMetamask: false,
-    linkMetamask: 'https://metamask.io/'
+    useMetamask: false
   }),
   computed: {
     isSpace(){
@@ -103,6 +103,17 @@ export default {
     isMetamaskInstalled(){
       return  window.ethereum && window.ethereum.isMetaMask;
     },
+    isMobile() {
+      return this.$vuetify.breakpoint.smAndDown;
+    },
+    currentSiteLink() {
+      return `${window.location.host}${window.location.pathname}`;
+    },
+    metamaskInstallLink() {
+      return this.isMobile
+        && `https://metamask.app.link/dapp/${this.currentSiteLink}`
+        || 'https://metamask.io/';
+    }
 
   },
   created() {
