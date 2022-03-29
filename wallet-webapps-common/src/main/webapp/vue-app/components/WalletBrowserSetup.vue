@@ -140,6 +140,7 @@ export default {
   data() {
     return {
       walletPassword: null,
+      walletProvider: 'MEEDS_WALLET',
       urlPerkStore: `${eXo.env.portal.context}/${eXo.env.portal.portalName}/perkstore`,
       confirmWalletPassword: null,
       walletPasswordShow: null,
@@ -191,7 +192,8 @@ export default {
         this.$emit('error', this.$t('exoplatform.wallet.error.errorCreatingWallet'));
         return;
       }
-      return saveBrowserWalletInstance(wallet[0], this.walletPassword, this.isSpace, true)
+      const backedUp = this.walletProvider === 'MEEDS_WALLET';
+      return saveBrowserWalletInstance(wallet[0], this.walletPassword, this.isSpace, true, backedUp, this.walletProvider)
         .then(() => {
           this.$emit('configured');
           this.loadingWalletBrowser = false;

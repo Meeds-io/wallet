@@ -207,7 +207,7 @@ export function watchTransactionStatus(hash, transactionMinedcallback) {
   }
 }
 
-export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPasswordInBrowser, backedUp) {
+export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPasswordInBrowser, backedUp, provider) {
   const account = window.localWeb3.eth.accounts.wallet.add(wallet);
   const address = account['address'].toLowerCase();
 
@@ -215,7 +215,7 @@ export function saveBrowserWalletInstance(wallet, password, isSpace, rememberPas
   if (window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.wallet.initializationState !== 'DELETED') {
     promise = Promise.resolve();
   } else {
-    promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, true)
+    promise = saveNewAddress(isSpace ? window.walletSpaceGroup : eXo.env.portal.userName, isSpace ? 'space' : 'user', address, provider)
       .then((resp, error) => {
         if (error) {
           throw error;

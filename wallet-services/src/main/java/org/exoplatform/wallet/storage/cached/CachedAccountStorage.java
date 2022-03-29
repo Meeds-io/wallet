@@ -24,6 +24,7 @@ import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.wallet.dao.*;
 import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletBackUp;
 import org.exoplatform.wallet.model.WalletCacheKey;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.web.security.codec.CodecInitializer;
@@ -81,15 +82,6 @@ public class CachedAccountStorage extends WalletStorage {
 
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
-    wallet = super.saveWallet(wallet, isNew);
-    // Remove cached wallet
-    this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
-    this.walletFutureCache.remove(new WalletCacheKey(wallet.getTechnicalId()));
-
-    return wallet;
-  }
-  @Override
-  public Wallet saveBackUpWallet(Wallet wallet, boolean isNew) {
     String oldAddress = null;
     if (!isNew) {
       // Retrieve old wallet address
@@ -106,6 +98,17 @@ public class CachedAccountStorage extends WalletStorage {
     }
 
     return newWallet;
+  }
+
+  @Override
+  public WalletBackUp saveBackUpWallet(WalletBackUp walletBackUp, boolean isNew) {
+    walletBackUp = super.saveBackUpWallet(walletBackUp, isNew);
+
+    // Remove cached wallet
+    this.walletFutureCache.remove(new WalletCacheKey(walletBackUp.getAddress()));
+    this.walletFutureCache.remove(new WalletCacheKey(walletBackUp.getWalletId()));
+
+    return walletBackUp;
   }
 
   @Override

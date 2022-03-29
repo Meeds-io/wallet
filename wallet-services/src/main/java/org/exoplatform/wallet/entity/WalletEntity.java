@@ -57,8 +57,6 @@ public class WalletEntity implements Serializable {
   @Column(name = "BACKED_UP", nullable = false)
   private boolean                                 isBackedUp;
 
-  @Column(name = "ACTIVE", nullable = false)
-  private boolean                                 isActive;
 
   @Enumerated(EnumType.ORDINAL)
   @Column(name = "PROVIDER", nullable = false)
@@ -143,14 +141,6 @@ public class WalletEntity implements Serializable {
 
   public void setBlockchainState(Collection<WalletBlockchainStateEntity> blockchainState) {
     this.blockchainState = blockchainState;
-  }
-
-  public boolean isActive() {
-    return isActive;
-  }
-
-  public void setActive(boolean active) {
-    isActive = active;
   }
 
   public WalletProvider getWalletProvider() {

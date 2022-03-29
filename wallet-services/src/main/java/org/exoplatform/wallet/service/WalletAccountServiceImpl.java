@@ -396,17 +396,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
     wallet.setEnabled(isNew || oldWallet.isEnabled());
-    if(wallet.getProvider().equals(WalletProvider.MEEDS_WALLET.name())){
-      setWalletPassPhrase(wallet, oldWallet);
-    }
+    setWalletPassPhrase(wallet, oldWallet);
     accountStorage.saveWallet(wallet, isNew);
 
-    if (oldWallet != null) {
-      oldWallet.setActive(false);
-      Wallet oldBackUpWallet = accountStorage.getBackUpWalletByIdentityId(wallet.getTechnicalId());
-      Boolean isNewBackupWallet = oldBackUpWallet == null;
-      accountStorage.saveBackUpWallet(oldWallet, isNewBackupWallet);
-    }
     if (!isNew) {
       // Automatically Remove old private key when modifying address associated
       // to wallet
@@ -430,6 +422,47 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     return accountStorage.saveWallet(wallet, isNew);
   }
 
+  @Override
+  public Wallet switchWallet(Wallet wallet, String currentUser) throws IllegalAccessException, IllegalArgumentException {
+    if (wallet == null) {
+      throw new IllegalArgumentException("Wallet is mandatory");
+    }
+
+    if (StringUtils.isBlank(wallet.getAddress()) && !wallet.getProvider().equals(WalletProvider.MEEDS_WALLET.name())) {
+      throw new IllegalArgumentException("Wallet address is empty, thus it can't be saved");
+    }
+    computeWalletIdentity(wallet);
+    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), null);
+    Boolean isNewWallet = oldWallet == null;
+    checkCanSaveWallet(wallet, oldWallet, currentUser);
+
+    WalletBackUp walletBackUp = accountStorage.getBackUpWalletById(wallet.getTechnicalId());
+    Boolean isNewBackUp = walletBackUp == null;
+
+    if (wallet.getProvider().equals(WalletProvider.MEEDS_WALLET.name())) {
+      if (!isNewBackUp) {
+        wallet.setAddress(walletBackUp.getAddress());
+        accountStorage.removeBackUpWalletByIdentityId(walletBackUp);
+      }
+    } else {
+      if (isNewBackUp) {
+        walletBackUp = new WalletBackUp();
+      }
+      walletBackUp.setAddress(oldWallet.getAddress());
+      walletBackUp.setWalletId(oldWallet.getTechnicalId());
+      accountStorage.saveBackUpWallet(walletBackUp, isNewBackUp);
+    }
+
+    wallet.setInitializationState(WalletState.MODIFIED.name());
+
+    wallet.setEnabled(isNewWallet || oldWallet.isEnabled());
+    setWalletPassPhrase(wallet, oldWallet);
+    wallet = accountStorage.saveWallet(wallet, isNewWallet);
+    refreshWalletFromBlockchain(wallet, getContractDetail(), null);
+
+    return wallet;
+  }
+  
   @Override
   public void removeWalletByAddress(String address, String currentUser) throws IllegalAccessException {
     if (address == null) {

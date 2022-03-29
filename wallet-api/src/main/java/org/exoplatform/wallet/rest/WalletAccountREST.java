@@ -286,6 +286,9 @@ public class WalletAccountREST implements ResourceContainer {
       if (storedWallet == null || StringUtils.isBlank(storedWallet.getAddress())) {
         accountService.saveWalletAddress(wallet, currentUserId);
         return Response.ok(wallet.getPassPhrase()).build();
+      } else if (!storedWallet.getProvider().equals(wallet.getProvider())){
+        wallet = accountService.switchWallet(wallet, currentUserId);
+        return Response.ok(wallet.getPassPhrase()).build();
       } else {
         storedWallet.setAddress(wallet.getAddress());
         storedWallet.setBackedUp(false);

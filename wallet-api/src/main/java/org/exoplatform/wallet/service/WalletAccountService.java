@@ -28,7 +28,7 @@ public interface WalletAccountService {
 
   /**
    * Retrieves the list registered wallets
-   * 
+   *
    * @return list of associated wallets to users and spaces
    */
   Set<Wallet> listWallets();
@@ -177,6 +177,15 @@ public interface WalletAccountService {
    * @return save {@link Wallet}
    */
   Wallet saveWallet(Wallet wallet, boolean isNew);
+
+  /**
+   * Save wallet instance in internal database
+   *
+   * @param wallet
+   * @param currentUser current username saving wallet details
+   * @return save {@link Wallet}
+   */
+  Wallet switchWallet(Wallet wallet, String currentUser) throws IllegalAccessException, IllegalArgumentException;
 
   /**
    * Remove User or Space wallet address association

@@ -63,7 +63,6 @@ public class WalletBlockchainStateDAOTest extends BaseWalletTest {
     walletEntity.setPassPhrase("passphrase");
     walletEntity.setType(WalletType.USER);
     walletEntity.setWalletProvider(WalletProvider.valueOf(PROVIDER));
-    walletEntity.setActive(IS_ACTIVE);
     walletEntity = walletAccountDAO.create(walletEntity);
     entitiesToClean.add(walletEntity);
 
