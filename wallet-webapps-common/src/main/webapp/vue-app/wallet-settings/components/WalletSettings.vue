@@ -91,7 +91,8 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    useMetamask: false
+    useMetamask: false,
+    rawMessage:'test message'
   }),
   computed: {
     isSpace(){
@@ -197,11 +198,37 @@ export default {
           this.wallet = wallet;
         });
     },
+    saveWalletProvider(address, signedMessage) {
+      return fetch('/portal/rest/wallet/api/wallet/provider', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: $.param({
+          newAddress: address,
+          rawMessage: this.rawMessage,
+          signedMessage: signedMessage,
+        }),
+      })
+        .then((resp) => {
+          if (resp && resp.ok) {
+            return resp.text();
+          } else {
+            throw new Error('Error saving provider');
+          }
+        })
+        .catch((e) => {
+          console.error('fetch save provider - error', e);
+         // this.error = this.$t('exoplatform.wallet.warning.errorSavingSettings');
+        });
+    },
     signMessage(address){
       return window.ethereum.request({
         method: 'personal_sign',
-        params: ['test message', address, ''],
+        params: [this.rawMessage, address, ''],
       }).then(signedMessage => {
+        this.saveWalletProvider(address, signedMessage);
         console.log('signedMessage', signedMessage);
       });
     },
