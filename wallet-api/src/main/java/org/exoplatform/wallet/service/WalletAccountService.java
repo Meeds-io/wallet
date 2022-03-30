@@ -8,17 +8,18 @@
  * version 3 of the License, or (at your option) any later version.
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 package org.exoplatform.wallet.service;
 
 import java.util.Map;
 import java.util.Set;
 
+import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.model.*;
 
 /**
@@ -179,13 +180,24 @@ public interface WalletAccountService {
   Wallet saveWallet(Wallet wallet, boolean isNew);
 
   /**
-   * Save wallet instance in internal database
-   *
-   * @param wallet
-   * @param currentUser current username saving wallet details
-   * @return save {@link Wallet}
+   * Switches the provider of selected identity and changes the address
+   * 
+   * @param identityId {@link Identity} unique identifier
+   * @param provider new {@link WalletProvider}
+   * @param newAddress new address of {@link Wallet} of selected identity
+   * @param rawMessage Raw Message to sign by user to verify that it has the
+   *          private key
+   * @param signedMessage Signed message by user
    */
-  Wallet switchWallet(Wallet wallet, String currentUser) throws IllegalAccessException, IllegalArgumentException;
+  void switchWalletProvider(long identityId, WalletProvider provider, String newAddress, String rawMessage, String signedMessage);
+
+  /**
+   * Switches the selected identity to internal wallet signer and changes the
+   * address
+   * 
+   * @param identityId {@link Identity} unique identifier
+   */
+  void switchToInternalWallet(long identityId);
 
   /**
    * Remove User or Space wallet address association
@@ -221,7 +233,7 @@ public interface WalletAccountService {
    * @param wallet
    * @param currentUser
    * @return true if user is accessing his wallet or is accessing a space that
-   *         he manages wallet
+   *           he manages wallet
    */
   boolean isWalletOwner(Wallet wallet, String currentUser);
 

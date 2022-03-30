@@ -78,7 +78,7 @@ public class WalletAccountDAOTest extends BaseWalletTest {
     walletEntity.setAddress(address);
     walletEntity.setPassPhrase("passphrase");
     walletEntity.setType(WalletType.USER);
-    walletEntity.setWalletProvider(WalletProvider.valueOf(PROVIDER));
+    walletEntity.setProvider(WalletProvider.valueOf(PROVIDER));
     walletEntity = walletAccountDAO.create(walletEntity);
     entitiesToClean.add(walletEntity);
 

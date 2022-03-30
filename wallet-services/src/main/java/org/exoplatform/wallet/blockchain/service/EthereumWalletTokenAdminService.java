@@ -224,7 +224,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     wallet.setType(WalletType.ADMIN.getId());
     wallet.setAddress("0x" + adminWallet.getAddress());
     wallet.setTechnicalId(identityId);
-    wallet.setProvider(WalletProvider.MEEDS_WALLET.name());
+    wallet.setProvider(WalletProvider.INTERNAL_WALLET.name());
 
     getAccountService().saveWalletAddress(wallet, currentUser);
     try {

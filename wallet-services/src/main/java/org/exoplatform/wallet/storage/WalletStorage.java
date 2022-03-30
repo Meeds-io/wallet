@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -38,7 +39,7 @@ public class WalletStorage {
 
   private final WalletAccountDAO         walletAccountDAO;
 
-  private final WalletAccountBackUpDAO         walletAccountBackUpDAO;
+  private final WalletAccountBackupDAO         walletAccountBackupDAO;
 
   private final WalletPrivateKeyDAO      privateKeyDAO;
 
@@ -47,11 +48,11 @@ public class WalletStorage {
   private AbstractCodec            codec;
 
   public WalletStorage(WalletAccountDAO walletAccountDAO,
-                       WalletAccountBackUpDAO walletAccountBackUpDAO, WalletPrivateKeyDAO privateKeyDAO,
+                       WalletAccountBackupDAO walletAccountBackupDAO, WalletPrivateKeyDAO privateKeyDAO,
                        WalletBlockchainStateDAO blockchainStateDAO,
                        CodecInitializer codecInitializer) {
     this.walletAccountDAO = walletAccountDAO;
-    this.walletAccountBackUpDAO = walletAccountBackUpDAO;
+    this.walletAccountBackupDAO = walletAccountBackupDAO;
     this.privateKeyDAO = privateKeyDAO;
     this.blockchainStateDAO = blockchainStateDAO;
 
@@ -286,34 +287,61 @@ public class WalletStorage {
   }
 
   /**
-   * @param walletBackUp wallet details to backup
-   * @param isNew whether this is a new wallet association or not
-   * @return saved wallet entity
+   * Checks whether identity has a wallet Backup or not
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @return true if an internal wallet address is backed up, else return false
    */
-  public WalletBackUp saveBackUpWallet(WalletBackUp walletBackUp, boolean isNew) {
-    WalletBackUpEntity walletBackUpEntity = toBackUpEntity(walletBackUp);
-    if (isNew) {
-      walletBackUpEntity.setId(null);
-      walletBackUpEntity = walletAccountBackUpDAO.create(walletBackUpEntity);
-    } else {
-      walletBackUpEntity = walletAccountBackUpDAO.update(walletBackUpEntity);
-    }
-    return fromBackUpEntity(walletBackUpEntity);
+  public boolean hasWalletBackup(long walletId) {
+    return walletAccountBackupDAO.findByWalletId(walletId) != null;
   }
 
   /**
-   * @param walletId user technical identty id
-   * @return {@link WalletBackUp} details for identity
+   * Checks whether identity has a wallet or not
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @return true if wallet exists for selected identity
    */
-  public WalletBackUp getBackUpWalletById(long walletId) {
-    WalletBackUpEntity walletBackUpEntity = walletAccountBackUpDAO.findByWalletId(walletId);
-    return fromBackUpEntity(walletBackUpEntity);
-  }  /**
-   * @param walletBackUp to remove
+  public boolean hasWallet(long walletId) {
+    return walletAccountDAO.find(walletId) != null;
+  }
+
+  /**
+   * Switches {@link Wallet} to internal provider and transaction signer
+   * 
+   * @param walletId {@link Wallet} unique identifier
    */
-  public void removeBackUpWalletByIdentityId(WalletBackUp walletBackUp) {
-    WalletBackUpEntity walletBackUpEntity = toBackUpEntity(walletBackUp);
-    walletAccountBackUpDAO.delete(walletBackUpEntity);
+  @ExoTransactional
+  public void switchToInternalWallet(long walletId) {
+    WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(walletId);
+    String address = walletBackup.getAddress();
+
+    WalletEntity walletEntity = walletAccountDAO.find(walletId);
+    walletEntity.setAddress(address);
+    walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
+    walletAccountDAO.update(walletEntity);
+    walletAccountBackupDAO.delete(walletBackup);
+  }
+
+  /**
+   * Switches {@link Wallet} to a new wallet provider and transaction signer
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @param provider {@link WalletProvider} that must be different from Internal Wallet 
+   * @param newAddress Selected address provided from new Wallet Provider Tool
+   */
+  @ExoTransactional
+  public void switchToWalletProvider(long walletId, WalletProvider provider, String newAddress) {
+    WalletEntity walletEntity = walletAccountDAO.find(walletId);
+
+    WalletBackupEntity walletBackupEntity = new WalletBackupEntity();
+    walletBackupEntity.setAddress(walletEntity.getAddress());
+    walletBackupEntity.setWallet(walletEntity);
+    walletAccountBackupDAO.create(walletBackupEntity);
+
+    walletEntity.setAddress(newAddress);
+    walletEntity.setProvider(provider);
+    walletAccountDAO.update(walletEntity);
   }
 
   private Wallet fromEntity(WalletEntity walletEntity) {
@@ -324,7 +352,7 @@ public class WalletStorage {
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
     wallet.setBackedUp(walletEntity.isBackedUp());
-    wallet.setProvider(walletEntity.getWalletProvider().name());
+    wallet.setProvider(walletEntity.getProvider().name());
     if (walletEntity.getPrivateKey() == null) {
       WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
       wallet.setHasPrivateKey(privateKey != null);
@@ -346,29 +374,8 @@ public class WalletStorage {
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
-    walletEntity.setWalletProvider(WalletProvider.valueOf(wallet.getProvider()));
+    walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
     return walletEntity;
   }
 
-  private WalletBackUpEntity toBackUpEntity(WalletBackUp walletToBackUp) {
-    if (walletToBackUp == null) {
-      return null;
-    }
-    WalletBackUpEntity walletBackUpEntity = new WalletBackUpEntity();
-    walletBackUpEntity.setId(walletToBackUp.getId());
-    walletBackUpEntity.setAddress(walletToBackUp.getAddress().toLowerCase());
-    walletBackUpEntity.setWallet(toEntity(getWalletByIdentityId(walletToBackUp.getWalletId(), null)));
-    return walletBackUpEntity;
-  }
-
-  private WalletBackUp fromBackUpEntity(WalletBackUpEntity walletBackUpEntity) {
-    if (walletBackUpEntity == null) {
-      return null;
-    }
-    WalletBackUp walletBackUp = new WalletBackUp();
-    walletBackUp.setId(walletBackUpEntity.getId());
-    walletBackUp.setWalletId(walletBackUpEntity.getWallet().getId());
-    walletBackUp.setAddress(walletBackUpEntity.getAddress());
-    return walletBackUp;
-  }
 }

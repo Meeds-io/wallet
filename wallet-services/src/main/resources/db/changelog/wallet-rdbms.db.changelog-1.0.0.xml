@@ -275,23 +275,24 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
-  <changeSet author="wallet" id="1.3.0-29" dbms="hsqldb">
-    <createSequence sequenceName="SEQ_WALLET_BACKUP_ID" startValue="1" />
-  </changeSet>
-  <changeSet author="wallet" id="1.3.0-30" dbms="oracle,postgresql">
+  <changeSet author="wallet" id="1.3.0-29" dbms="hsqldb,oracle,postgresql">
     <createSequence sequenceName="SEQ_WALLET_BACKUP_ID" startValue="1" />
   </changeSet>
 
-  <changeSet author="wallet" id="1.3.0-31">
+  <changeSet author="wallet" id="1.3.0-30">
     <createTable tableName="ADDONS_WALLET_ACCOUNT_BACKUP">
-      <column name="ID" type="bigint" autoIncrement="${autoIncrement}" startWith="1">
-        <constraints primaryKey="true" nullable="false"/>
+      <column name="WALLET_BACKUP_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
+        <constraints primaryKey="true" nullable="false" primaryKeyName="PK_WALLET_ACCOUNT_BACKUP_ID" />
       </column>
       <column name="ADDRESS" type="VARCHAR(100)" >
         <constraints nullable="false" />
       </column>
       <column name="WALLET_ID" type="BIGINT">
-        <constraints foreignKeyName="PK_WALLET_BACKUP_IDENTITY_ID" references="ADDONS_WALLET_ACCOUNT(IDENTITY_ID)" />
+        <constraints
+          foreignKeyName="PK_WALLET_BACKUP_IDENTITY_ID"
+          references="ADDONS_WALLET_ACCOUNT(IDENTITY_ID)"
+          unique="true"
+          uniqueConstraintName="UK_WALLET_BACKUP_IDENTITY_ID" />
       </column>
     </createTable>
     <modifySql dbms="mysql">

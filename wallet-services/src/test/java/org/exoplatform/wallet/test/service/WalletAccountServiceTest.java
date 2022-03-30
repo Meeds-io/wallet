@@ -667,47 +667,4 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertNotNull(password);
   }
 
-  /**
-   * Test switch wallet
-   */
-  @Test
-  public void testSwitchWallet() {
-    WalletAccountService walletAccountService = getService(WalletAccountService.class);
-    WalletStorage walletStorage = getService(WalletStorage.class);
-
-    Wallet meedsWallet = newWallet();
-    Wallet metamaskWallet = newWallet();
-    metamaskWallet.setAddress(WALLET_ADDRESS_2);
-    metamaskWallet.setProvider(WalletProvider.METAMASK.name());
-
-    meedsWallet = walletAccountService.saveWallet(meedsWallet, true);
-
-    Wallet storedWallet = walletAccountService.getWalletByAddress(meedsWallet.getAddress());
-    assertNotNull(storedWallet);
-    assertEquals(storedWallet.getProvider(), WalletProvider.MEEDS_WALLET.name());
-    try {
-      walletAccountService.switchWallet(null, CURRENT_USER);
-      fail("wallet is mandatory");
-    } catch (IllegalArgumentException | IllegalAccessException e) {
-
-    }
-    try {
-      storedWallet = walletAccountService.switchWallet(metamaskWallet, CURRENT_USER);
-      assertNotNull(storedWallet);
-      assertEquals(storedWallet.getProvider(), WalletProvider.METAMASK.name());
-      assertEquals(storedWallet.getAddress(), metamaskWallet.getAddress());
-      WalletBackUp walletBackUp = walletStorage.getBackUpWalletById(storedWallet.getTechnicalId());
-      assertNotNull(walletBackUp);
-
-      meedsWallet.setAddress(null);
-      storedWallet = walletAccountService.switchWallet(meedsWallet, CURRENT_USER);
-      assertNotNull(storedWallet);
-      assertEquals(storedWallet.getProvider(), WalletProvider.MEEDS_WALLET.name());
-      assertEquals(storedWallet.getAddress(), WALLET_ADDRESS_1);
-      entitiesToClean.add(storedWallet);
-      walletBackUp = walletStorage.getBackUpWalletById(storedWallet.getTechnicalId());
-      assertNull(walletBackUp);
-    } catch (IllegalArgumentException | IllegalAccessException e) {
-    }
-  }
 }

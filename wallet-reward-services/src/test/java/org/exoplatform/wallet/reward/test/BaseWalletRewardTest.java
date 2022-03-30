@@ -83,7 +83,7 @@ public abstract class BaseWalletRewardTest {
 
   protected static final String           CUSTOM_PLUGIN_ID     = "custom";
 
-  protected static final String           PROVIDER             = WalletProvider.MEEDS_WALLET.name();
+  protected static final String           PROVIDER             = WalletProvider.INTERNAL_WALLET.name();
 
   protected static final RewardPlugin     CUSTOM_REWARD_PLUGIN = new RewardPlugin() {
                                                                  @Override

@@ -286,9 +286,6 @@ public class WalletAccountREST implements ResourceContainer {
       if (storedWallet == null || StringUtils.isBlank(storedWallet.getAddress())) {
         accountService.saveWalletAddress(wallet, currentUserId);
         return Response.ok(wallet.getPassPhrase()).build();
-      } else if (!storedWallet.getProvider().equals(wallet.getProvider())){
-        wallet = accountService.switchWallet(wallet, currentUserId);
-        return Response.ok(wallet.getPassPhrase()).build();
       } else {
         storedWallet.setAddress(wallet.getAddress());
         storedWallet.setBackedUp(false);
@@ -302,6 +299,57 @@ public class WalletAccountREST implements ResourceContainer {
       LOG.error("Unknown error occurred while saving address: User " + currentUserId + " attempts to save address of "
           + wallet.getType() + " '" + wallet.getId() + "' using address " + wallet.getAddress(), e);
       return Response.status(HTTPStatus.INTERNAL_ERROR).build();
+    }
+  }
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("provider")
+  @RolesAllowed("users")
+  @ApiOperation(value = "Switches user wallet provider", httpMethod = "POST", consumes = "application/json", response = Response.class, notes = "empty response")
+  @ApiResponses(value = {
+      @ApiResponse(code = HTTPStatus.NO_CONTENT, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
+      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+      @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
+  public Response saveWalletProvider(
+                                     @ApiParam(value = "New Wallet provider", required = true)
+                                     WalletProvider provider,
+                                     @ApiParam(value = "Selected Wallet Address of provider", required = false)
+                                     String newAddress,
+                                     @ApiParam(value = "Signed Raw message by external Wallet Provider", required = false)
+                                     String rawMessage,
+                                     @ApiParam(value = "Signed message by external Wallet Provider", required = false)
+                                     String signedMessage) {
+    if (provider == null) {
+      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty provider").build();
+    }
+
+    if (provider != WalletProvider.INTERNAL_WALLET) {
+      if (StringUtils.isBlank(newAddress)) {
+        return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty provider").build();
+      } else if (StringUtils.isBlank(rawMessage) || StringUtils.isBlank(signedMessage)) {
+        return Response.status(HTTPStatus.BAD_REQUEST)
+                       .entity("Must Sign a raw message to verify that user has the private key of selected address")
+                       .build();
+      }
+    }
+
+    long currentUserIdentityId = getCurrentUserIdentityId();
+    LOG.debug("User '{}' is saving new provider for his wallet", currentUserIdentityId);
+    try {
+      if (provider == WalletProvider.INTERNAL_WALLET) {
+        accountService.switchToInternalWallet(currentUserIdentityId);
+      } else {
+        accountService.switchWalletProvider(currentUserIdentityId, provider, newAddress, rawMessage, signedMessage);
+      }
+      return Response.noContent().build();
+    } catch (Exception e) {
+      LOG.warn("Unknown error occurred while switching identity '{}' wallet provider to '{}' ",
+               currentUserIdentityId,
+               provider,
+               e);
+      return Response.status(HTTPStatus.INTERNAL_ERROR).entity(e.getMessage()).build();
     }
   }
 

@@ -60,7 +60,7 @@ public class WalletEntity implements Serializable {
 
   @Enumerated(EnumType.ORDINAL)
   @Column(name = "PROVIDER", nullable = false)
-  protected WalletProvider                        walletProvider;
+  protected WalletProvider                        provider;
 
   @Column(name = "INITIALIZATION_STATE")
   private WalletState initializationState;
@@ -143,11 +143,11 @@ public class WalletEntity implements Serializable {
     this.blockchainState = blockchainState;
   }
 
-  public WalletProvider getWalletProvider() {
-    return walletProvider;
+  public WalletProvider getProvider() {
+    return provider;
   }
 
-  public void setWalletProvider(WalletProvider walletProvider) {
-    this.walletProvider = walletProvider;
+  public void setProvider(WalletProvider walletProvider) {
+    this.provider = walletProvider;
   }
 }

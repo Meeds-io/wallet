@@ -1,13 +1,13 @@
 package org.exoplatform.wallet.dao;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
-import org.exoplatform.wallet.entity.WalletBackUpEntity;
+import org.exoplatform.wallet.entity.WalletBackupEntity;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
-public class WalletAccountBackUpDAO extends GenericDAOJPAImpl<WalletBackUpEntity, Long> {
+public class WalletAccountBackupDAO extends GenericDAOJPAImpl<WalletBackupEntity, Long> {
 
   @Override
   public void deleteAll() {
@@ -15,13 +15,13 @@ public class WalletAccountBackUpDAO extends GenericDAOJPAImpl<WalletBackUpEntity
   }
 
   @Override
-  public void deleteAll(List<WalletBackUpEntity> entities) {
+  public void deleteAll(List<WalletBackupEntity> entities) {
     throw new UnsupportedOperationException();
   }
 
-  public WalletBackUpEntity findByWalletId(long walletId) {
-    TypedQuery<WalletBackUpEntity> query = getEntityManager().createNamedQuery("WalletBackUpEntity.findByWalletId",
-                                                                               WalletBackUpEntity.class);
+  public WalletBackupEntity findByWalletId(long walletId) {
+    TypedQuery<WalletBackupEntity> query = getEntityManager().createNamedQuery("WalletBackupEntity.findByWalletId",
+                                                                               WalletBackupEntity.class);
     query.setParameter("walletId", walletId);
     try {
       return query.getSingleResult();

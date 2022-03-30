@@ -1,8 +1,8 @@
 package org.exoplatform.wallet.test.dao;
 
-import org.exoplatform.wallet.dao.WalletAccountBackUpDAO;
+import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
 import org.exoplatform.wallet.dao.WalletAccountDAO;
-import org.exoplatform.wallet.entity.WalletBackUpEntity;
+import org.exoplatform.wallet.entity.WalletBackupEntity;
 import org.exoplatform.wallet.entity.WalletEntity;
 import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletType;
@@ -15,7 +15,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
 
-public class WalletAccountBackUpDAOTest extends BaseWalletTest {
+public class WalletAccountBackupDAOTest extends BaseWalletTest {
 
 
     /**
@@ -23,10 +23,10 @@ public class WalletAccountBackUpDAOTest extends BaseWalletTest {
      */
     @Test
     public void testServiceInstantiated() {
-        WalletAccountBackUpDAO walletAccountBackUpDAO = getService(WalletAccountBackUpDAO.class);
-        assertNotNull(walletAccountBackUpDAO);
+        WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
+        assertNotNull(walletAccountBackupDAO);
 
-        List<WalletBackUpEntity> allBackupWallets = walletAccountBackUpDAO.findAll();
+        List<WalletBackupEntity> allBackupWallets = walletAccountBackupDAO.findAll();
         assertNotNull("Returned wallets list shouldn't be null", allBackupWallets);
         assertEquals("Returned wallets should be empty", 0, allBackupWallets.size());
     }
@@ -36,16 +36,16 @@ public class WalletAccountBackUpDAOTest extends BaseWalletTest {
      */
     @Test
     public void testWalletMassiveDeletionDeny() {
-        WalletAccountBackUpDAO walletAccountBackUpDAO = getService(WalletAccountBackUpDAO.class);
+        WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
         try {
-            walletAccountBackUpDAO.deleteAll();
+            walletAccountBackupDAO.deleteAll();
             fail("Shouldn't be able to delete all wallets");
         } catch (UnsupportedOperationException e) {
             // Expected
         }
 
         try {
-            walletAccountBackUpDAO.deleteAll(Collections.emptyList());
+            walletAccountBackupDAO.deleteAll(Collections.emptyList());
             fail("Shouldn't be able to delete multiple wallets in single operation");
         } catch (UnsupportedOperationException e) {
             // Expected
@@ -57,7 +57,7 @@ public class WalletAccountBackUpDAOTest extends BaseWalletTest {
      */
     @Test
     public void testFindByWalletId() {
-      WalletAccountBackUpDAO walletAccountBackUpDAO = getService(WalletAccountBackUpDAO.class);
+      WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
       WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
       WalletEntity walletEntity = new WalletEntity();
 
@@ -66,22 +66,22 @@ public class WalletAccountBackUpDAOTest extends BaseWalletTest {
       walletEntity.setAddress(address);
       walletEntity.setPassPhrase("passphrase");
       walletEntity.setType(WalletType.USER);
-      walletEntity.setWalletProvider(WalletProvider.valueOf(PROVIDER));
+      walletEntity.setProvider(WalletProvider.valueOf(PROVIDER));
       walletEntity = walletAccountDAO.create(walletEntity);
       entitiesToClean.add(walletEntity);
 
-      WalletBackUpEntity walletBackUpEntity = new WalletBackUpEntity();
-      walletBackUpEntity.setId(null);
-      walletBackUpEntity.setWallet(walletEntity);
-      walletBackUpEntity.setAddress(WALLET_ADDRESS_1);
+      WalletBackupEntity walletBackupEntity = new WalletBackupEntity();
+      walletBackupEntity.setId(null);
+      walletBackupEntity.setWallet(walletEntity);
+      walletBackupEntity.setAddress(WALLET_ADDRESS_1);
 
-      walletBackUpEntity = walletAccountBackUpDAO.create(walletBackUpEntity);
-      entitiesToClean.add(walletBackUpEntity);
+      walletBackupEntity = walletAccountBackupDAO.create(walletBackupEntity);
+      entitiesToClean.add(walletBackupEntity);
 
-      WalletBackUpEntity savedBackupWallet = walletAccountBackUpDAO.findByWalletId(walletBackUpEntity.getWallet().getId());
+      WalletBackupEntity savedBackupWallet = walletAccountBackupDAO.findByWalletId(walletBackupEntity.getWallet().getId());
 
       assertNotNull(savedBackupWallet);
-      assertEquals(savedBackupWallet.getAddress(), walletBackUpEntity.getAddress());
+      assertEquals(savedBackupWallet.getAddress(), walletBackupEntity.getAddress());
     }
 
 }

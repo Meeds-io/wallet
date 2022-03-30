@@ -1,23 +1,23 @@
 package org.exoplatform.wallet.entity;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
-import org.hibernate.annotations.DynamicUpdate;
-
-import javax.persistence.*;
 import java.io.Serializable;
 
-@Entity(name = "WalletBackUpEntity")
+import javax.persistence.*;
+
+import org.exoplatform.commons.api.persistence.ExoEntity;
+
+@Entity(name = "WalletBackupEntity")
 @ExoEntity
-@DynamicUpdate
 @Table(name = "ADDONS_WALLET_ACCOUNT_BACKUP")
-@NamedQueries({
-    @NamedQuery(name = "WalletBackUpEntity.findByWalletId", query = "SELECT wb FROM WalletBackUpEntity wb WHERE wb.wallet.id = :walletId"), })
-public class WalletBackUpEntity implements Serializable {
+@NamedQuery(name = "WalletBackupEntity.findByWalletId", query = "SELECT wb FROM WalletBackupEntity wb WHERE wb.wallet.id = :walletId")
+public class WalletBackupEntity implements Serializable {
+
+  private static final long serialVersionUID = -8212394514591241477L;
 
   @Id
   @SequenceGenerator(name = "SEQ_WALLET_BACKUP_ID", sequenceName = "SEQ_WALLET_BACKUP_ID", allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_BACKUP_ID")
-  @Column(name = "ID")
+  @Column(name = "WALLET_BACKUP_ID")
 
   private Long         id;
 

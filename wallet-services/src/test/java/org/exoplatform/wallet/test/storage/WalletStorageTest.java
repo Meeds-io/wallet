@@ -20,12 +20,10 @@ import static org.junit.Assert.*;
 
 import java.util.Set;
 
-import org.exoplatform.wallet.entity.WalletBackUpEntity;
-import org.exoplatform.wallet.model.WalletBackUp;
-import org.exoplatform.wallet.model.WalletState;
 import org.junit.Test;
 
 import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletState;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
@@ -346,58 +344,6 @@ public class WalletStorageTest extends BaseWalletTest {
     assertEquals(wallet.getIsInitialized(), storedWallet.getIsInitialized());
 
     this.entitiesToClean.add(storedWallet);
-  }
-
-  @Test
-  public void testSaveBackUpWallet() {
-    WalletStorage walletStorage = getService(WalletStorage.class);
-
-    Wallet wallet = newWallet();
-
-    wallet = walletStorage.saveWallet(wallet, true);
-
-    assertNotNull(wallet);
-    this.entitiesToClean.add(wallet);
-
-    WalletBackUp walletBackUp = new WalletBackUp();
-    walletBackUp.setAddress(WALLET_ADDRESS_2);
-    walletBackUp.setWalletId(wallet.getTechnicalId());
-
-    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp, true);
-
-    assertNotNull(walletBackUp);
-    assertEquals(WALLET_ADDRESS_2, walletBackUp.getAddress());
-
-    walletBackUp.setAddress(WALLET_ADDRESS_3);
-    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp, true);
-    assertEquals(WALLET_ADDRESS_3, walletBackUp.getAddress());
-    this.entitiesToClean.add(walletBackUp);
-  }
-
-  @Test
-  public void testGetBackUpWalletById() {
-    WalletStorage walletStorage = getService(WalletStorage.class);
-
-    Wallet wallet = newWallet();
-
-    wallet = walletStorage.saveWallet(wallet, true);
-
-    assertNotNull(wallet);
-    this.entitiesToClean.add(wallet);
-
-    WalletBackUp walletBackUp = new WalletBackUp();
-    walletBackUp.setAddress(WALLET_ADDRESS_2);
-    walletBackUp.setWalletId(wallet.getTechnicalId());
-
-    walletBackUp = walletStorage.saveBackUpWallet(walletBackUp, true);
-    this.entitiesToClean.add(walletBackUp);
-
-    WalletBackUp storedWalletBackup = walletStorage.getBackUpWalletById(10L);
-    assertNull(storedWalletBackup);
-
-    storedWalletBackup = walletStorage.getBackUpWalletById(wallet.getTechnicalId());
-    assertNotNull(storedWalletBackup);
-    assertEquals(storedWalletBackup.getWalletId(), wallet.getTechnicalId());
   }
 
   protected void checkWalletContent(Wallet wallet,

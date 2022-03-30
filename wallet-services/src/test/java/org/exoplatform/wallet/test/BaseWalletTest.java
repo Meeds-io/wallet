@@ -59,7 +59,7 @@ public abstract class BaseWalletTest {
 
   protected static final String    TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
 
-  protected static final String    PROVIDER                 = WalletProvider.MEEDS_WALLET.name();
+  protected static final String    PROVIDER                 = WalletProvider.INTERNAL_WALLET.name();
 
   protected static final int       GAS_USED                 = 160000;
 
@@ -140,7 +140,7 @@ public abstract class BaseWalletTest {
   @After
   public void afterMethodTest() {
     WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
-    WalletAccountBackUpDAO walletAccountBackUpDAO = getService(WalletAccountBackUpDAO.class);
+    WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
     AddressLabelDAO addressLabelDAO = getService(AddressLabelDAO.class);
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletBlockchainStateDAO walletBlockchainStateDAO = getService(WalletBlockchainStateDAO.class);
@@ -159,25 +159,19 @@ public abstract class BaseWalletTest {
           continue;
         }
         try {
-           if (entity instanceof WalletBackUpEntity) {
-            WalletBackUpEntity walletBackUpEntity = (WalletBackUpEntity) entity;
-            if (walletBackUpEntity.getId() > 0) {
-              walletAccountBackUpDAO.delete(walletAccountBackUpDAO.find(walletBackUpEntity.getId()));
+           if (entity instanceof WalletBackupEntity) {
+            WalletBackupEntity walletBackupEntity = (WalletBackupEntity) entity;
+            if (walletBackupEntity.getId() > 0) {
+              walletAccountBackupDAO.delete(walletAccountBackupDAO.find(walletBackupEntity.getId()));
               iterator.remove();
             }
           }
-           if (entity instanceof WalletBackUp) {
-            WalletBackUp walletBackUp = (WalletBackUp) entity;
-            if (walletBackUp.getId() > 0) {
-              walletAccountBackUpDAO.delete(walletAccountBackUpDAO.find(walletBackUp.getId()));
-              iterator.remove();
-            }
-          } else if (entity instanceof WalletEntity) {
+          if (entity instanceof WalletEntity) {
             WalletEntity wallet = (WalletEntity) entity;
             if (wallet.getId() > 0) {
-              WalletBackUpEntity walletBackUp = walletAccountBackUpDAO.findByWalletId(wallet.getId());
-              if (walletBackUp != null) {
-                walletAccountBackUpDAO.delete(walletBackUp);
+              WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(wallet.getId());
+              if (walletBackup != null) {
+                walletAccountBackupDAO.delete(walletBackup);
               }
               walletAccountDAO.delete(walletAccountDAO.find(wallet.getId()));
               iterator.remove();
@@ -219,9 +213,9 @@ public abstract class BaseWalletTest {
             Wallet wallet = (Wallet) entity;
             long walletId = wallet.getTechnicalId();
             if (walletId > 0) {
-              WalletBackUpEntity walletBackUp = walletAccountBackUpDAO.findByWalletId(walletId);
-              if (walletBackUp != null) {
-                walletAccountBackUpDAO.delete(walletBackUp);
+              WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(walletId);
+              if (walletBackup != null) {
+                walletAccountBackupDAO.delete(walletBackup);
               }
               WalletEntity walletEntity = walletAccountDAO.find(walletId);
               if (walletEntity != null) {
@@ -245,7 +239,7 @@ public abstract class BaseWalletTest {
     }
 
     long walletCount = walletAccountDAO.count();
-    long walletBackupCount = walletAccountBackUpDAO.count();
+    long walletBackupCount = walletAccountBackupDAO.count();
     long walletPrivateKeyCount = walletPrivateKeyDAO.count();
     long walletAddressLabelsCount = addressLabelDAO.findAll().size();
     long walletTransactionsCount = walletTransactionDAO.count();
