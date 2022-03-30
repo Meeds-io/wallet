@@ -123,7 +123,7 @@ export default {
         priv: (v) => (v && (v.length === 66 || v.length === 64)) || 'Exactly 64 or 66 (with "0x") characters are required',
         passwordMatching: (v) => (v && v === this.walletPassword) || this.$t('exoplatform.wallet.warning.passwordNotMatching'),
       },
-      walletProvider: 'MEEDS_WALLET',
+      walletProvider: 'INTERNAL_WALLET',
     };
   },
   created() {
@@ -157,7 +157,7 @@ export default {
           }
           const wallet = window.localWeb3.eth.accounts.wallet.add(thiss.walletPrivateKey);
           if (!thiss.walletAddress || wallet.address.toLowerCase() === thiss.walletAddress.toLowerCase()) {
-            const backedUp = this.walletProvider === 'MEEDS_WALLET';
+            const backedUp = this.walletProvider === 'INTERNAL_WALLET';
             saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, backedUp, this.walletProvider)
               .then(() => {
                 thiss.loading = false;

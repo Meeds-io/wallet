@@ -247,3 +247,29 @@ function isOnlySpaceMembers() {
 function getAccessPermission() {
   return window.walletSettings.accessPermission;
 }
+
+
+export function saveNewProvider(provider, newAddress, rawMessage, signedMessage) {
+  const formData = new FormData();
+  formData.append('provider', provider);
+  formData.append('newAddress', newAddress);
+  formData.append('rawMessage', rawMessage);
+  formData.append('signedMessage', signedMessage);
+
+  return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/provider`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(formData).toString(),
+  }).then(resp => {
+    if (!resp || !resp.ok) {
+      return resp.text();
+    }
+  }).then(error => {
+    if (error) {
+      throw new Error(error);
+    }
+  });
+}

@@ -20,6 +20,10 @@ import static org.junit.Assert.*;
 
 import java.util.Set;
 
+import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
+import org.exoplatform.wallet.entity.WalletBackupEntity;
+import org.exoplatform.wallet.entity.WalletEntity;
+import org.exoplatform.wallet.model.WalletProvider;
 import org.junit.Test;
 
 import org.exoplatform.wallet.model.Wallet;
@@ -346,6 +350,106 @@ public class WalletStorageTest extends BaseWalletTest {
     this.entitiesToClean.add(storedWallet);
   }
 
+  /**
+   * Checks whether identity has a wallet or not
+   */
+  @Test
+  public void testHasWallet() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+
+    Boolean hasWallet = walletStorage.hasWallet(CURRENT_USER_IDENTITY_ID);
+    assertFalse(hasWallet);
+
+    Wallet wallet = newWallet();
+    wallet = walletStorage.saveWallet(wallet, true);
+    assertNotNull(wallet);
+    this.entitiesToClean.add(wallet);
+
+    hasWallet = walletStorage.hasWallet(CURRENT_USER_IDENTITY_ID);
+    assertTrue(hasWallet);
+  }
+
+  /**
+   * Checks whether identity has a walletBackup or not
+   */
+  @Test
+  public void testHasWalletBackup() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
+
+    Boolean hasBackupWallet = walletStorage.hasWalletBackup(CURRENT_USER_IDENTITY_ID);
+    assertFalse(hasBackupWallet);
+
+    Wallet wallet = newWallet();
+    wallet = walletStorage.saveWallet(wallet, true);
+    assertNotNull(wallet);
+    this.entitiesToClean.add(wallet);
+    WalletEntity walletEntity = new WalletEntity();
+    walletEntity.setId(wallet.getTechnicalId());
+    walletEntity.setAddress(wallet.getAddress());
+    walletEntity.setPassPhrase(wallet.getPassPhrase());
+    walletEntity.setEnabled(wallet.isEnabled());
+    walletEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
+    walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
+    WalletBackupEntity walletBackup = new WalletBackupEntity();
+    walletBackup.setAddress(wallet.getAddress());
+    walletBackup.setWallet(walletEntity);
+    walletBackup = walletAccountBackupDAO.create(walletBackup);
+    this.entitiesToClean.add(walletBackup);
+
+    hasBackupWallet = walletStorage.hasWalletBackup(CURRENT_USER_IDENTITY_ID);
+    assertTrue(hasBackupWallet);
+  }
+
+  @Test
+  public void testSwitchToWalletProvider() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
+
+    Wallet wallet = newWallet();
+    wallet = walletStorage.saveWallet(wallet, true);
+    assertNotNull(wallet);
+    walletStorage.switchToWalletProvider(wallet.getTechnicalId(), WalletProvider.METAMASK, WALLET_ADDRESS_2);
+
+    wallet = walletStorage.getWalletByAddress(WALLET_ADDRESS_2, null);
+    assertNotNull(wallet);
+    assertEquals(WALLET_ADDRESS_2, wallet.getAddress());
+
+    WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(wallet.getTechnicalId());
+    assertNotNull(walletBackup);
+    assertEquals(WALLET_ADDRESS_1, walletBackup.getAddress());
+
+    entitiesToClean.add(walletBackup);
+    entitiesToClean.add(wallet);
+  }
+
+  @Test
+  public void testSwitchToInternalWallet() {
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
+
+    Wallet wallet = newWallet();
+    wallet = walletStorage.saveWallet(wallet, true);
+    assertNotNull(wallet);
+    walletStorage.switchToWalletProvider(wallet.getTechnicalId(), WalletProvider.METAMASK, WALLET_ADDRESS_2);
+
+    wallet = walletStorage.getWalletByAddress(WALLET_ADDRESS_2, null);
+    assertNotNull(wallet);
+    assertEquals(WALLET_ADDRESS_2, wallet.getAddress());
+
+    WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(wallet.getTechnicalId());
+    assertNotNull(walletBackup);
+    assertEquals(WALLET_ADDRESS_1, walletBackup.getAddress());
+
+    walletStorage.switchToInternalWallet(wallet.getTechnicalId());
+    wallet = walletStorage.getWalletByAddress(WALLET_ADDRESS_1, null);
+
+    assertEquals(WalletProvider.INTERNAL_WALLET.name(), wallet.getProvider());
+    walletBackup = walletAccountBackupDAO.findByWalletId(wallet.getTechnicalId());
+    assertNull(walletBackup);
+
+    entitiesToClean.add(wallet);
+  }
   protected void checkWalletContent(Wallet wallet,
                                     long identityId,
                                     String address,

@@ -319,6 +319,7 @@ public class WalletStorage {
     WalletEntity walletEntity = walletAccountDAO.find(walletId);
     walletEntity.setAddress(address);
     walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
+    walletEntity.setInitializationState(WalletState.MODIFIED);
     walletAccountDAO.update(walletEntity);
     walletAccountBackupDAO.delete(walletBackup);
   }
@@ -341,6 +342,7 @@ public class WalletStorage {
 
     walletEntity.setAddress(newAddress);
     walletEntity.setProvider(provider);
+    walletEntity.setInitializationState(WalletState.MODIFIED);
     walletAccountDAO.update(walletEntity);
   }
 
