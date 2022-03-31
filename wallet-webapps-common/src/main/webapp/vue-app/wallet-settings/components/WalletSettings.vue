@@ -78,12 +78,21 @@
               </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
+           <v-list-item class="mt-n2" v-if="newAddress !== ''">
+            <v-list-item-content>
+              <v-list-item-subtitle
+                class="text-sub-title pl-1">
+                <span class="mr-3 useMetamask">{{ newAddress }}</span>
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-card>
     </template>
   </v-app>
 </template>
 <script>
+import {saveNewProvider} from '../../js/AddressRegistry.js';
 export default {
   data: () => ({
     id: `Wallet${parseInt(Math.random() * 10000)}`,
@@ -92,7 +101,8 @@ export default {
     wallet: null,
     from: '',
     useMetamask: false,
-    rawMessage:'test message'
+    rawMessage: 'test2 message',
+    newAddress: ''
   }),
   computed: {
     isSpace(){
@@ -198,29 +208,17 @@ export default {
           this.wallet = wallet;
         });
     },
-    saveWalletProvider(address, signedMessage) {
-      return fetch('/portal/rest/wallet/api/wallet/provider', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: $.param({
-          newAddress: address,
-          rawMessage: this.rawMessage,
-          signedMessage: signedMessage,
-        }),
-      })
-        .then((resp) => {
-          if (resp && resp.ok) {
-            return resp.text();
-          } else {
-            throw new Error('Error saving provider');
-          }
+    saveProvider(provider, address, rawMessage, signedMessage){
+      console.log('step1');
+      return saveNewProvider(provider, address, rawMessage, signedMessage)
+        .then(() => {
+          console.log('step2');
+          console.log(this.newAddress);
+          this.newAddress = address;
+          //console.log(address, this.newAddress);
         })
         .catch((e) => {
-          console.error('fetch save provider - error', e);
-         // this.error = this.$t('exoplatform.wallet.warning.errorSavingSettings');
+          console.error('save provider - error', e);
         });
     },
     signMessage(address){
@@ -228,7 +226,7 @@ export default {
         method: 'personal_sign',
         params: [this.rawMessage, address, ''],
       }).then(signedMessage => {
-        this.saveWalletProvider(address, signedMessage);
+        this.saveProvider('METAMASK', address, this.rawMessage, signedMessage);
         console.log('signedMessage', signedMessage);
       });
     },
@@ -239,7 +237,6 @@ export default {
         })
           .then((connectedWallet)=>{
             this.signMessage(connectedWallet[0]);
-          // signature request to do
           });
       } 
     },
