@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -38,6 +39,8 @@ public class WalletStorage {
 
   private final WalletAccountDAO         walletAccountDAO;
 
+  private final WalletAccountBackupDAO         walletAccountBackupDAO;
+
   private final WalletPrivateKeyDAO      privateKeyDAO;
 
   private final WalletBlockchainStateDAO blockchainStateDAO;
@@ -45,10 +48,11 @@ public class WalletStorage {
   private AbstractCodec            codec;
 
   public WalletStorage(WalletAccountDAO walletAccountDAO,
-                       WalletPrivateKeyDAO privateKeyDAO,
+                       WalletAccountBackupDAO walletAccountBackupDAO, WalletPrivateKeyDAO privateKeyDAO,
                        WalletBlockchainStateDAO blockchainStateDAO,
                        CodecInitializer codecInitializer) {
     this.walletAccountDAO = walletAccountDAO;
+    this.walletAccountBackupDAO = walletAccountBackupDAO;
     this.privateKeyDAO = privateKeyDAO;
     this.blockchainStateDAO = blockchainStateDAO;
 
@@ -282,6 +286,74 @@ public class WalletStorage {
     return this.codec.encode(content);
   }
 
+  /**
+   * Checks whether identity has a wallet Backup or not
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @return true if an internal wallet address is backed up, else return false
+   */
+  public boolean hasWalletBackup(long walletId) {
+    return walletAccountBackupDAO.findByWalletId(walletId) != null;
+  }
+
+  /**
+   * Checks whether identity has a wallet or not
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @return true if wallet exists for selected identity
+   */
+  public boolean hasWallet(long walletId) {
+    return walletAccountDAO.find(walletId) != null;
+  }
+
+  /**
+   * Switches {@link Wallet} to internal provider and transaction signer
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   */
+  @ExoTransactional
+  public void switchToInternalWallet(long walletId) {
+    WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(walletId);
+    String address = walletBackup.getAddress();
+
+    WalletEntity walletEntity = walletAccountDAO.find(walletId);
+    walletEntity.setAddress(address);
+    walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
+    walletEntity.setInitializationState(WalletState.MODIFIED);
+    walletAccountDAO.update(walletEntity);
+    walletAccountBackupDAO.delete(walletBackup);
+  }
+
+  /**
+   * Switches {@link Wallet} to a new wallet provider and transaction signer
+   * 
+   * @param walletId {@link Wallet} unique identifier
+   * @param provider {@link WalletProvider} that must be different from Internal Wallet 
+   * @param newAddress Selected address provided from new Wallet Provider Tool
+   */
+  @ExoTransactional
+  public void switchToWalletProvider(long walletId, WalletProvider provider, String newAddress) {
+    WalletEntity walletEntity = walletAccountDAO.find(walletId);
+    if (walletEntity.getProvider() == WalletProvider.INTERNAL_WALLET) {
+      WalletBackupEntity walletBackupEntity = walletAccountBackupDAO.findByWalletId(walletId);
+      boolean isNew = walletBackupEntity == null;
+      if (isNew) {
+        walletBackupEntity = new WalletBackupEntity();
+        walletBackupEntity.setWallet(walletEntity);
+      }
+      walletBackupEntity.setAddress(walletEntity.getAddress());
+      if (isNew) {
+        walletAccountBackupDAO.create(walletBackupEntity);
+      } else {
+        walletAccountBackupDAO.update(walletBackupEntity);
+      }
+    }
+
+    walletEntity.setAddress(newAddress);
+    walletEntity.setProvider(provider);
+    walletAccountDAO.update(walletEntity);
+  }
+
   private Wallet fromEntity(WalletEntity walletEntity) {
     Wallet wallet = new Wallet();
     wallet.setTechnicalId(walletEntity.getId());
@@ -290,6 +362,7 @@ public class WalletStorage {
     wallet.setEnabled(walletEntity.isEnabled());
     wallet.setInitializationState(walletEntity.getInitializationState().name());
     wallet.setBackedUp(walletEntity.isBackedUp());
+    wallet.setProvider(walletEntity.getProvider().name());
     if (walletEntity.getPrivateKey() == null) {
       WalletPrivateKeyEntity privateKey = privateKeyDAO.findByWalletId(walletEntity.getId());
       wallet.setHasPrivateKey(privateKey != null);
@@ -303,7 +376,13 @@ public class WalletStorage {
   }
 
   private WalletEntity toEntity(Wallet wallet) {
-    WalletEntity walletEntity = new WalletEntity();
+    WalletEntity walletEntity = null;
+    if (wallet.getTechnicalId() > 0) {
+      walletEntity = walletAccountDAO.find(wallet.getTechnicalId());
+    }
+    if (walletEntity == null) {
+      walletEntity = new WalletEntity();
+    }
     walletEntity.setId(wallet.getTechnicalId());
     walletEntity.setAddress(wallet.getAddress().toLowerCase());
     walletEntity.setEnabled(wallet.isEnabled());
@@ -311,6 +390,11 @@ public class WalletStorage {
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
+    if (wallet.getProvider() != null) {
+      walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
+    } else if (walletEntity.getProvider() == null) {
+      walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
+    }
     return walletEntity;
   }
 

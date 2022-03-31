@@ -18,11 +18,19 @@ package org.exoplatform.wallet.service;
 
 import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
 import static org.exoplatform.wallet.utils.WalletUtils.*;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.*;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
+import org.web3j.crypto.Keys;
+import org.web3j.crypto.Sign;
+import org.web3j.crypto.Sign.SignatureData;
+import org.web3j.utils.Numeric;
 
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainer;
@@ -390,8 +398,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (isNew) {
       // New wallet created for user/space
       wallet.setInitializationState(WalletState.NEW.name());
+      wallet.setProvider(WalletProvider.INTERNAL_WALLET.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       wallet.setInitializationState(WalletState.MODIFIED.name());
+      wallet.setProvider(oldWallet.getProvider());
     } else {
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
@@ -420,6 +430,65 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
     return accountStorage.saveWallet(wallet, isNew);
+  }
+
+  @Override
+  public void switchToInternalWallet(long identityId) {
+    Wallet wallet = getWalletByIdentityId(identityId);
+    if (wallet == null) {
+      throw new IllegalStateException("Identity with Id " + identityId + " doesn't have a wallet yet");
+    } else if (StringUtils.equalsIgnoreCase(WalletProvider.INTERNAL_WALLET.name(), wallet.getProvider())) {
+      throw new IllegalStateException("Identity with Id " + identityId + " already have internal wallet as provider");
+    }
+
+    if (accountStorage.hasWalletBackup(identityId)) {
+      accountStorage.switchToInternalWallet(identityId);
+    } else {
+      // No internal wallet created by user, so delete wallet information
+      accountStorage.removeWallet(identityId);
+    }
+  }
+
+  @Override
+  public void switchWalletProvider(long identityId,
+                                   WalletProvider provider,
+                                   String newAddress,
+                                   String rawMessage,
+                                   String signedMessage) {
+    if (provider == null) {
+      throw new IllegalArgumentException("provider is mandatory");
+    }
+    try {
+      boolean valid = validateSignedMessage(newAddress, rawMessage, signedMessage);
+      if (!valid) {
+        throw new IllegalStateException("Invalid Signed Message");
+      }
+    } catch (UnsupportedEncodingException | SignatureException e) {
+      throw new IllegalStateException("Invalid Signed Message", e);
+    }
+
+    Wallet wallet = null;
+    if (accountStorage.hasWallet(identityId)) {
+      accountStorage.switchToWalletProvider(identityId, provider, newAddress);
+
+      wallet = accountStorage.getWalletByAddress(newAddress, getContractAddress());
+    } else {
+      wallet = new Wallet();
+      wallet.setTechnicalId(identityId);
+      wallet.setAddress(newAddress);
+      wallet.setProvider(provider.name());
+      wallet.setEnabled(true);
+      computeWalletIdentity(wallet); // Set wallet Type
+      wallet = accountStorage.saveWallet(wallet, true);
+    }
+
+    refreshWalletFromBlockchain(wallet, getContractDetail(), null);
+
+    try {
+      getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
+    } catch (Exception e) {
+      LOG.error("Error while braodcasting wallet {} provider modification to {}", wallet);
+    }
   }
 
   @Override
@@ -768,6 +837,40 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private String generateSecurityPhrase() {
     return RandomStringUtils.random(20, SIMPLE_CHARS);
+  }
+  /**
+   * @param walletAddress wallet Address (wallet public key)
+   * @param rawMessage raw signed message
+   * @param signedMessage encrypted message
+   * @return true if the message has been decrypted successfully, else false
+   * @throws UnsupportedEncodingException when UTF-8 isn't recognized as
+   *           Encoding Charset
+   * @throws SignatureException when an error occurs while decrypting signed
+   *           message
+   */
+  private boolean validateSignedMessage(String walletAddress,
+                                        String rawMessage,
+                                        String signedMessage) throws UnsupportedEncodingException, SignatureException {
+    if (StringUtils.isBlank(walletAddress) || StringUtils.isBlank(rawMessage) || StringUtils.isBlank(signedMessage)) {
+      return false;
+    }
+
+    byte[] signatureBytes = Numeric.hexStringToByteArray(signedMessage);
+    byte[] r = Arrays.copyOfRange(signatureBytes, 0, 32);
+    byte[] s = Arrays.copyOfRange(signatureBytes, 32, 64);
+    byte v = signatureBytes[64];
+    if (v < 27) {
+      v += 27;
+    }
+
+    BigInteger publicKey = Sign.signedPrefixedMessageToKey(rawMessage.getBytes(), new SignatureData(v, r, s));
+    if (publicKey != null) {
+      String recoveredAddress = "0x" + Keys.getAddress(publicKey);
+      if (recoveredAddress.equalsIgnoreCase(walletAddress)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private WalletTokenAdminService getTokenAdminService() {
