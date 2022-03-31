@@ -24,6 +24,8 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.*;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
@@ -33,8 +35,7 @@ import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.ExoContainer;
-import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.*;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
@@ -68,7 +69,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private static final String     STATISTIC_OPERATION_DISABLE             = "disable";
 
-  private ExoContainer            container;
+  private PortalContainer         container;
 
   private WalletTokenAdminService tokenAdminService;
 
@@ -82,7 +83,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private boolean                 adminAccountEnabled;
 
-  public WalletAccountServiceImpl(ExoContainer container,
+  public WalletAccountServiceImpl(PortalContainer container,
                                   WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
                                   InitParams params) {
@@ -97,18 +98,24 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public void start() {
-    ExoContainerContext.setCurrentContainer(container);
-    RequestLifeCycle.begin(this.container);
-    try {
-      Wallet adminWallet = getAdminWallet();
-      retrieveWalletBlockchainState(adminWallet);
+    // Ensure to make initialization after starting all other services of Wallet
+    PortalContainer.addInitTask(container.getPortalContext(), new RootContainer.PortalContainerPostInitTask() {
+      @Override
+      public void execute(ServletContext context, PortalContainer portalContainer) {
+        ExoContainerContext.setCurrentContainer(container);
+        RequestLifeCycle.begin(container);
+        try {
+          Wallet adminWallet = getAdminWallet();
+          retrieveWalletBlockchainState(adminWallet);
 
-      this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
-    } catch (Exception e) {
-      LOG.error("Error starting service", e);
-    } finally {
-      RequestLifeCycle.end();
-    }
+          WalletAccountServiceImpl.this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
+        } catch (Exception e) {
+          LOG.error("Error starting service", e);
+        } finally {
+          RequestLifeCycle.end();
+        }
+      }
+    });
   }
 
   @Override
@@ -478,6 +485,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       wallet.setAddress(newAddress);
       wallet.setProvider(provider.name());
       wallet.setEnabled(true);
+      wallet.setInitializationState(WalletState.NEW.name());
+      wallet.setPassPhrase(StringUtils.EMPTY);
       computeWalletIdentity(wallet); // Set wallet Type
       wallet = accountStorage.saveWallet(wallet, true);
     }
@@ -590,17 +599,17 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       // The only authorized initialization transition allowed to a regular user
       // is to request to initialize his wallet when it has been denied by an
       // administrator or to delete his wallet
-        WalletState oldInitializationState = WalletState.valueOf(wallet.getInitializationState());
-        if (oldInitializationState != WalletState.DENIED
-                || initializationState != WalletState.MODIFIED
-                || !isWalletOwner(wallet, currentUser)) {
-          throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to change wallet status with address "
-                  + address + " to " + initializationState.name());
-        }
-        if (oldInitializationState == WalletState.INITIALIZED) {
-          throw new IllegalAccessException("Wallet was already marked as initialized, thus the status for address " + address
-                  + " can't change to status " + initializationState.name());
-        }
+      WalletState oldInitializationState = WalletState.valueOf(wallet.getInitializationState());
+      if (oldInitializationState != WalletState.DENIED
+          || initializationState != WalletState.MODIFIED
+          || !isWalletOwner(wallet, currentUser)) {
+        throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to change wallet status with address "
+            + address + " to " + initializationState.name());
+      }
+      if (oldInitializationState == WalletState.INITIALIZED) {
+        throw new IllegalAccessException("Wallet was already marked as initialized, thus the status for address " + address
+            + " can't change to status " + initializationState.name());
+      }
     }
     wallet.setInitializationState(initializationState.name());
     accountStorage.saveWallet(wallet, false);

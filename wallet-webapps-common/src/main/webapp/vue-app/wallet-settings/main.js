@@ -34,19 +34,15 @@ const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.portlet.Portlets-${lang}.json`;
 
-const appId = 'walletSettings';
-const cacheId = `${appId}_${eXo.env.portal.profileOwnerIdentityId}`;
+const appId = 'walletSettingsApp';
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    const appElement = document.createElement('div');
-    appElement.id = appId;
-
     // init Vue app when locale ressources are ready
-    new Vue({
-      template: `<wallet-settings id="${appId}" v-cacheable="{cacheId: '${cacheId}'}" />`,
+    Vue.createApp({
+      template: `<wallet-settings id="${appId}" />`,
       i18n,
       vuetify,
-    }).$mount(appElement);
+    }, `#${appId}`, 'Wallet Settings');
   });
 }

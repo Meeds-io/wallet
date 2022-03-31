@@ -263,9 +263,7 @@ export function saveNewProvider(provider, address, rawMessage, signedMessage) {
     },
     body: new URLSearchParams(formData).toString(),
   }).then(resp => {
-    if (resp && resp.ok) {
-      return resp.text();
-    } else {
+    if (!resp || !resp.ok) {
       throw new Error('Error saving new provider label');
     }
   });
