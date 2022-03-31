@@ -473,7 +473,6 @@ public abstract class BaseWalletTest {
     wallet.setPassPhrase(PHRASE);
     wallet.setEnabled(IS_ENABLED);
     wallet.setInitializationState(INITIALIZATION_STATE);
-    wallet.setProvider(PROVIDER);
     return wallet;
   }
 
@@ -487,7 +486,6 @@ public abstract class BaseWalletTest {
     walletSpace.setInitializationState(INITIALIZATION_STATE);
     walletSpace.setSpaceAdministrator(IS_ENABLED);
     walletSpace.setType(TYPE);
-    walletSpace.setProvider(PROVIDER);
     return walletSpace;
   }
 

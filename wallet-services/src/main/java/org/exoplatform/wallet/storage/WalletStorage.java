@@ -376,7 +376,11 @@ public class WalletStorage {
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
-    walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
+    if(wallet.getProvider() != null){
+      walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
+    } else {
+      walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
+    }
     return walletEntity;
   }
 

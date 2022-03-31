@@ -271,7 +271,6 @@ public abstract class BaseWalletRewardTest {
     wallet.setEtherBalance(0d);
     wallet.setTokenBalance(0d);
     wallet.setInitializationState(INITIALIZATION_STATE);
-    wallet.setProvider(PROVIDER);
     return wallet;
   }
 
