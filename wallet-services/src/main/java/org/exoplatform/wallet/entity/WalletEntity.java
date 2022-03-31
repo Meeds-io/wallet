@@ -32,9 +32,7 @@ import org.exoplatform.wallet.model.WalletType;
 @ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_ACCOUNT")
-@NamedQueries({
-    @NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address"),
-})
+@NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address")
 public class WalletEntity implements Serializable {
   private static final long                       serialVersionUID = -1622032986992776281L;
 
@@ -57,9 +55,8 @@ public class WalletEntity implements Serializable {
   @Column(name = "BACKED_UP", nullable = false)
   private boolean                                 isBackedUp;
 
-
   @Enumerated(EnumType.ORDINAL)
-  @Column(name = "PROVIDER", nullable = false)
+  @Column(name = "PROVIDER")
   protected WalletProvider                        provider;
 
   @Column(name = "INITIALIZATION_STATE")

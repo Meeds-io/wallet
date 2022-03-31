@@ -450,6 +450,7 @@ public class WalletStorageTest extends BaseWalletTest {
 
     entitiesToClean.add(wallet);
   }
+
   protected void checkWalletContent(Wallet wallet,
                                     long identityId,
                                     String address,

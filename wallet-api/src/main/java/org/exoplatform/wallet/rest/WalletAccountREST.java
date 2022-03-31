@@ -314,8 +314,8 @@ public class WalletAccountREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
   public Response saveWalletProvider(@ApiParam(value = "New Wallet provider", required = true)  @FormParam("provider")
                                      WalletProvider provider,
-                                     @ApiParam(value = "Selected Wallet Address of provider", required = false)  @FormParam("newAddress")
-                                     String newAddress,
+                                     @ApiParam(value = "Selected Wallet Address of provider", required = false)  @FormParam("address")
+                                     String address,
                                      @ApiParam(value = "Signed Raw message by external Wallet Provider", required = false)  @FormParam("rawMessage")
                                      String rawMessage,
                                      @ApiParam(value = "Signed message by external Wallet Provider", required = false)  @FormParam("signedMessage")
@@ -325,7 +325,7 @@ public class WalletAccountREST implements ResourceContainer {
     }
 
     if (provider != WalletProvider.INTERNAL_WALLET) {
-      if (StringUtils.isBlank(newAddress)) {
+      if (StringUtils.isBlank(address)) {
         return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty address").build();
       } else if (StringUtils.isBlank(rawMessage) || StringUtils.isBlank(signedMessage)) {
         return Response.status(HTTPStatus.BAD_REQUEST)
@@ -340,7 +340,7 @@ public class WalletAccountREST implements ResourceContainer {
       if (provider == WalletProvider.INTERNAL_WALLET) {
         accountService.switchToInternalWallet(currentUserIdentityId);
       } else {
-        accountService.switchWalletProvider(currentUserIdentityId, provider, newAddress, rawMessage, signedMessage);
+        accountService.switchWalletProvider(currentUserIdentityId, provider, address, rawMessage, signedMessage);
       }
       return Response.noContent().build();
     } catch (Exception e) {

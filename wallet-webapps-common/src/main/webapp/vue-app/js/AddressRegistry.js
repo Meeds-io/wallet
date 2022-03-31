@@ -36,7 +36,7 @@ export function searchWallets(filter) {
 /*
  * Return the address of a user or space
  */
-export function saveNewAddress(id, type, address, provider) {
+export function saveNewAddress(id, type, address) {
   address = address.toLowerCase();
   return fetch('/portal/rest/wallet/api/account/saveAddress', {
     method: 'POST',
@@ -50,7 +50,6 @@ export function saveNewAddress(id, type, address, provider) {
       id: id,
       address: address,
       enabled: true,
-      provider: provider,
     }),
   });
 }
@@ -249,15 +248,15 @@ function getAccessPermission() {
 }
 
 
-export function saveNewProvider(provider, newAddress, rawMessage, signedMessage) {
+export function saveNewProvider(provider, address, rawMessage, signedMessage) {
   const formData = new FormData();
+  formData.append('address', address);
   formData.append('provider', provider);
-  formData.append('newAddress', newAddress);
   formData.append('rawMessage', rawMessage);
   formData.append('signedMessage', signedMessage);
 
   return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/provider`, {
-    method: 'PATCH',
+    method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -265,11 +264,7 @@ export function saveNewProvider(provider, newAddress, rawMessage, signedMessage)
     body: new URLSearchParams(formData).toString(),
   }).then(resp => {
     if (!resp || !resp.ok) {
-      return resp.text();
-    }
-  }).then(error => {
-    if (error) {
-      throw new Error(error);
+      throw new Error('Error saving new Wallet provider');
     }
   });
 }

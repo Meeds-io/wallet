@@ -21,7 +21,6 @@ import static org.junit.Assert.*;
 import java.util.Collections;
 import java.util.List;
 
-import org.exoplatform.wallet.model.WalletProvider;
 import org.junit.Test;
 
 import org.exoplatform.wallet.dao.WalletAccountDAO;
@@ -78,7 +77,6 @@ public class WalletAccountDAOTest extends BaseWalletTest {
     walletEntity.setAddress(address);
     walletEntity.setPassPhrase("passphrase");
     walletEntity.setType(WalletType.USER);
-    walletEntity.setProvider(WalletProvider.valueOf(PROVIDER));
     walletEntity = walletAccountDAO.create(walletEntity);
     entitiesToClean.add(walletEntity);
 

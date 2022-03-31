@@ -334,15 +334,23 @@ public class WalletStorage {
   @ExoTransactional
   public void switchToWalletProvider(long walletId, WalletProvider provider, String newAddress) {
     WalletEntity walletEntity = walletAccountDAO.find(walletId);
-
-    WalletBackupEntity walletBackupEntity = new WalletBackupEntity();
-    walletBackupEntity.setAddress(walletEntity.getAddress());
-    walletBackupEntity.setWallet(walletEntity);
-    walletAccountBackupDAO.create(walletBackupEntity);
+    if (walletEntity.getProvider() == WalletProvider.INTERNAL_WALLET) {
+      WalletBackupEntity walletBackupEntity = walletAccountBackupDAO.findByWalletId(walletId);
+      boolean isNew = walletBackupEntity == null;
+      if (isNew) {
+        walletBackupEntity = new WalletBackupEntity();
+        walletBackupEntity.setWallet(walletEntity);
+      }
+      walletBackupEntity.setAddress(walletEntity.getAddress());
+      if (isNew) {
+        walletAccountBackupDAO.create(walletBackupEntity);
+      } else {
+        walletAccountBackupDAO.update(walletBackupEntity);
+      }
+    }
 
     walletEntity.setAddress(newAddress);
     walletEntity.setProvider(provider);
-    walletEntity.setInitializationState(WalletState.MODIFIED);
     walletAccountDAO.update(walletEntity);
   }
 
@@ -368,7 +376,13 @@ public class WalletStorage {
   }
 
   private WalletEntity toEntity(Wallet wallet) {
-    WalletEntity walletEntity = new WalletEntity();
+    WalletEntity walletEntity = null;
+    if (wallet.getTechnicalId() > 0) {
+      walletEntity = walletAccountDAO.find(wallet.getTechnicalId());
+    }
+    if (walletEntity == null) {
+      walletEntity = new WalletEntity();
+    }
     walletEntity.setId(wallet.getTechnicalId());
     walletEntity.setAddress(wallet.getAddress().toLowerCase());
     walletEntity.setEnabled(wallet.isEnabled());
@@ -376,9 +390,9 @@ public class WalletStorage {
     walletEntity.setPassPhrase(wallet.getPassPhrase());
     walletEntity.setBackedUp(wallet.isBackedUp());
     walletEntity.setType(WalletType.getType(wallet.getType()));
-    if(wallet.getProvider() != null){
+    if (wallet.getProvider() != null) {
       walletEntity.setProvider(WalletProvider.valueOf(wallet.getProvider()));
-    } else {
+    } else if (walletEntity.getProvider() == null) {
       walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
     }
     return walletEntity;

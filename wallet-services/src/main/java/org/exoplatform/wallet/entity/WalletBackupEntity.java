@@ -37,7 +37,7 @@ public class WalletBackupEntity implements Serializable {
 
   private Long         id;
 
-  @Column(name = "ADDRESS", unique = true, nullable = false)
+  @Column(name = "ADDRESS")
   private String       address;
 
   @OneToOne(fetch = FetchType.LAZY)
