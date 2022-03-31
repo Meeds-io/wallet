@@ -667,4 +667,93 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertNotNull(password);
   }
 
+  public void testSwitchWalletProvider() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+
+    String walletAddress = "0x927f51a2996Ff74d1C380F92DC9006b53A225CeF";
+    String rawMessage = "-2037692822791791745-3891968992033463560-1384458414145506416";
+    String signedMessage = "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
+
+    Wallet wallet = walletAccountService.saveWallet(newWallet(), true);
+    long technicalId = wallet.getTechnicalId();
+
+    assertThrows(IllegalStateException.class,
+                 () -> walletAccountService.switchWalletProvider(technicalId,
+                                                                 WalletProvider.METAMASK,
+                                                                 "",
+                                                                 rawMessage,
+                                                                 signedMessage));
+    assertThrows(IllegalStateException.class,
+                 () -> walletAccountService.switchWalletProvider(technicalId,
+                                                                 WalletProvider.METAMASK,
+                                                                 walletAddress,
+                                                                 "",
+                                                                 signedMessage));
+    assertThrows(IllegalStateException.class,
+                 () -> walletAccountService.switchWalletProvider(technicalId,
+                                                                 WalletProvider.METAMASK,
+                                                                 walletAddress,
+                                                                 rawMessage,
+                                                                 "signedMessage"));
+
+    walletAccountService.switchWalletProvider(wallet.getTechnicalId(),
+                                              WalletProvider.METAMASK,
+                                              walletAddress,
+                                              rawMessage,
+                                              signedMessage);
+
+    Wallet savedWallet = walletAccountService.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+
+    assertNotNull(savedWallet);
+    assertEquals(WalletProvider.METAMASK.name(), savedWallet.getProvider());
+    entitiesToClean.add(savedWallet);
+  }
+
+  @Test
+  public void testSwitchToInternalWallet() throws IllegalAccessException {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+
+    String internalWalletAddress = WALLET_ADDRESS_1;
+    String privateKeyContent = "content";
+    String walletAddress = "0x927f51a2996Ff74d1C380F92DC9006b53A225CeF";
+    String rawMessage = "-2037692822791791745-3891968992033463560-1384458414145506416";
+    String signedMessage = "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
+
+    Wallet wallet = newWallet();
+    wallet.setAddress(internalWalletAddress);
+    wallet.setBackedUp(true);
+    wallet.setInitializationState(WalletState.INITIALIZED.name());
+    wallet.setIsInitialized(true);
+
+    wallet = walletAccountService.saveWallet(wallet, true);
+    entitiesToClean.add(wallet);
+
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, privateKeyContent, CURRENT_USER);
+
+
+    walletAccountService.switchWalletProvider(wallet.getTechnicalId(),
+                                              WalletProvider.METAMASK,
+                                              walletAddress,
+                                              rawMessage,
+                                              signedMessage);
+
+    wallet = walletAccountService.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+
+    assertNotNull(wallet);
+    assertEquals(WalletProvider.METAMASK.name(), wallet.getProvider());
+    assertEquals(walletAddress, wallet.getAddress());
+    assertTrue(wallet.isBackedUp());
+    assertTrue(wallet.getIsInitialized());
+    assertEquals(WalletState.INITIALIZED.name(), wallet.getInitializationState());
+
+    walletAccountService.switchToInternalWallet(wallet.getTechnicalId());
+    wallet = walletAccountService.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
+    assertNotNull(wallet);
+    assertEquals(internalWalletAddress, wallet.getAddress());
+    assertEquals(WalletProvider.INTERNAL_WALLET.name(), wallet.getProvider());
+    assertTrue(wallet.isBackedUp());
+    assertTrue(wallet.getIsInitialized());
+    assertEquals(WalletState.MODIFIED.name(), wallet.getInitializationState());
+  }
+
 }
