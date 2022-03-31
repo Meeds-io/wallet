@@ -23,8 +23,7 @@ import org.exoplatform.commons.cache.future.Loader;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.wallet.dao.*;
-import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.WalletCacheKey;
+import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.web.security.codec.CodecInitializer;
 
@@ -34,10 +33,11 @@ public class CachedAccountStorage extends WalletStorage {
 
   public CachedAccountStorage(CacheService cacheService,
                               WalletAccountDAO walletAccountDAO,
+                              WalletAccountBackupDAO walletAccountBackupDAO,
                               WalletPrivateKeyDAO privateKeyDAO,
                               WalletBlockchainStateDAO blockchainStateDAO,
                               CodecInitializer codecInitializer) {
-    super(walletAccountDAO, privateKeyDAO, blockchainStateDAO, codecInitializer);
+    super(walletAccountDAO, walletAccountBackupDAO, privateKeyDAO, blockchainStateDAO, codecInitializer);
 
     ExoCache<WalletCacheKey, Wallet> walletCache = cacheService.getCacheInstance("wallet.account");
 
@@ -96,6 +96,30 @@ public class CachedAccountStorage extends WalletStorage {
     }
 
     return newWallet;
+  }
+
+  @Override
+  public void switchToInternalWallet(long walletId) {
+    super.switchToInternalWallet(walletId);
+
+    Wallet wallet = super.getWalletByIdentityId(walletId, null);
+    if (wallet != null) {
+      // Remove cached wallet for 'hasKeyOnServerSide' property
+      this.walletFutureCache.remove(new WalletCacheKey(walletId));
+      this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
+    }
+  }
+
+  @Override
+  public void switchToWalletProvider(long walletId, WalletProvider provider, String newAddress) {
+    super.switchToWalletProvider(walletId, provider, newAddress);
+
+    Wallet wallet = super.getWalletByIdentityId(walletId, null);
+    if (wallet != null) {
+      // Remove cached wallet for 'hasKeyOnServerSide' property
+      this.walletFutureCache.remove(new WalletCacheKey(walletId));
+      this.walletFutureCache.remove(new WalletCacheKey(wallet.getAddress()));
+    }
   }
 
   @Override

@@ -138,6 +138,7 @@ public abstract class BaseWalletTest {
   @After
   public void afterMethodTest() {
     WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
+    WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
     AddressLabelDAO addressLabelDAO = getService(AddressLabelDAO.class);
     WalletPrivateKeyDAO walletPrivateKeyDAO = getService(WalletPrivateKeyDAO.class);
     WalletBlockchainStateDAO walletBlockchainStateDAO = getService(WalletBlockchainStateDAO.class);
@@ -156,9 +157,20 @@ public abstract class BaseWalletTest {
           continue;
         }
         try {
+           if (entity instanceof WalletBackupEntity) {
+            WalletBackupEntity walletBackupEntity = (WalletBackupEntity) entity;
+            if (walletBackupEntity.getId() > 0) {
+              walletAccountBackupDAO.delete(walletAccountBackupDAO.find(walletBackupEntity.getId()));
+              iterator.remove();
+            }
+          }
           if (entity instanceof WalletEntity) {
             WalletEntity wallet = (WalletEntity) entity;
             if (wallet.getId() > 0) {
+              WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(wallet.getId());
+              if (walletBackup != null) {
+                walletAccountBackupDAO.delete(walletBackup);
+              }
               walletAccountDAO.delete(walletAccountDAO.find(wallet.getId()));
               iterator.remove();
             }
@@ -199,6 +211,10 @@ public abstract class BaseWalletTest {
             Wallet wallet = (Wallet) entity;
             long walletId = wallet.getTechnicalId();
             if (walletId > 0) {
+              WalletBackupEntity walletBackup = walletAccountBackupDAO.findByWalletId(walletId);
+              if (walletBackup != null) {
+                walletAccountBackupDAO.delete(walletBackup);
+              }
               WalletEntity walletEntity = walletAccountDAO.find(walletId);
               if (walletEntity != null) {
                 WalletBlockchainStateEntity blockchainStateEntity =
@@ -221,13 +237,15 @@ public abstract class BaseWalletTest {
     }
 
     long walletCount = walletAccountDAO.count();
+    long walletBackupCount = walletAccountBackupDAO.count();
     long walletPrivateKeyCount = walletPrivateKeyDAO.count();
     long walletAddressLabelsCount = addressLabelDAO.findAll().size();
     long walletTransactionsCount = walletTransactionDAO.count();
 
-    LOG.info("objects count: remaining entities to clean: {}, wallets = {}, private keys = {}, address labels = {}, transactions count = {}. Test method '{}#{}'",
+    LOG.info("objects count: remaining entities to clean: {}, wallets = {}, backupWallets = {}, private keys = {}, address labels = {}, transactions count = {}. Test method '{}#{}'",
              entitiesToClean,
              walletCount,
+             walletBackupCount,
              walletPrivateKeyCount,
              walletAddressLabelsCount,
              walletTransactionsCount,
@@ -237,6 +255,9 @@ public abstract class BaseWalletTest {
     assertEquals("The previous test didn't cleaned wallets entities correctly, should add entities to clean into 'entitiesToClean' list: ",
                  0,
                  walletCount);
+    assertEquals("The previous test didn't cleaned backupWallets entities correctly, should add entities to clean into 'entitiesToClean' list: ",
+                 0,
+            walletBackupCount);
     assertEquals("The previous test didn't cleaned wallet addresses labels correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
                  walletAddressLabelsCount);
