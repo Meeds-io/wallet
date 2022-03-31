@@ -17,6 +17,7 @@
 package org.exoplatform.wallet.utils;
 
 import static org.exoplatform.wallet.statistic.StatisticUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.getIdentityByTypeAndId;
 
 import java.io.ByteArrayInputStream;
 import java.math.*;
@@ -150,6 +151,8 @@ public class WalletUtils {
   public static final String                          PRINCIPAL_CONTRACT_ADMIN_NAME            = "Admin";
 
   public static final String                          WALLET_MODIFIED_EVENT                    = "exo.wallet.modified";
+
+  public static final String                          WALLET_PROVIDER_MODIFIED_EVENT           = "exo.wallet.provider.modified";
 
   public static final String                          CONTRACT_MODIFIED_EVENT                  = "exo.wallet.contract.modified";
 
@@ -324,6 +327,12 @@ public class WalletUtils {
       return ConversationState.getCurrent().getIdentity().getUserId();
     }
     return null;
+  }
+
+  public static final long getCurrentUserIdentityId() {
+    String username = getCurrentUserId();
+    Identity identity = getIdentityByTypeAndId(WalletType.USER, username);
+    return Long.parseLong(identity.getId());
   }
 
   public static List<String> getNotificationReceiversUsers(Wallet wallet, String excludedId) {
