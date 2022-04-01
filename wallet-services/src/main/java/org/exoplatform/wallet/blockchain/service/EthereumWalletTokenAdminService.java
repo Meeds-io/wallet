@@ -463,34 +463,21 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       }
 
       if (contractDetail.getDecimals() == null || contractDetail.getDecimals() <= 0) {
-        BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_DECIMALS);
-        contractDetail.setDecimals(decimals.intValue());
+        readContractDecimals(contractDetail, contractAddress);
       }
 
       if (StringUtils.isEmpty(contractDetail.getName())) {
-        String name = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_NAME);
-        contractDetail.setName(name);
+        readContractName(contractDetail, contractAddress);
       }
 
       if (StringUtils.isEmpty(contractDetail.getSymbol())) {
-        String symbol = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_SYMBOL);
-        contractDetail.setSymbol(symbol);
+        readContractSymbol(contractDetail, contractAddress);
       }
 
       if (StringUtils.isEmpty(contractDetail.getTotalSupply())) {
-        BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_TOTALSUPPLY);
-        contractDetail.setTotalSupply(String.valueOf(convertFromDecimals(totalSupply, contractDetail.getDecimals())));
+        readTotalSupply(contractDetail, contractAddress);
       }
 
-      if (contractDetail.getEtherBalance() == null
-          || contractModifications == null
-          || contractModifications.contains(TOKEN_FUNC_DEPOSIT_FUNDS)
-          || contractModifications.contains(MeedsToken.FUNC_TRANSFER)
-          || contractModifications.contains(MeedsToken.FUNC_TRANSFERFROM)
-          || contractModifications.contains(MeedsToken.FUNC_APPROVE)) {
-        BigInteger contractEtherBalance = getEtherBalanceOf(contractAddress);
-        contractDetail.setEtherBalance(convertFromDecimals(contractEtherBalance, ETHER_TO_WEI_DECIMALS));
-      }
       getContractService().saveContractDetail(contractDetail);
     } catch (Exception e) {
       throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress,
@@ -624,7 +611,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
   }
 
-  private final void checkAdminWalletIsValid() throws Exception {
+  private final void checkAdminWalletIsValid() {
     String adminAddress = getAdminWalletAddress();
     if (adminAddress == null) {
       throw new IllegalStateException("No admin wallet is set");
@@ -729,4 +716,41 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
                                              new Uint256(tokenAmount)),
                         Collections.<TypeReference<?>> emptyList());
   }
+
+  private void readContractName(ContractDetail contractDetail, String contractAddress) throws Exception {
+    try {
+      String name = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_NAME);
+      contractDetail.setName(name);
+    } catch (Exception e) {
+      LOG.warn("Error retrieving contract name", e);
+    }
+  }
+
+  private void readContractSymbol(ContractDetail contractDetail, String contractAddress) throws Exception {
+    try {
+      String symbol = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_SYMBOL);
+      contractDetail.setSymbol(symbol);
+    } catch (Exception e) {
+      LOG.warn("Error retrieving contract symbol", e);
+    }
+  }
+
+  private void readContractDecimals(ContractDetail contractDetail, String contractAddress) {
+    try {
+      BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_DECIMALS);
+      contractDetail.setDecimals(decimals.intValue());
+    } catch (Exception e) {
+      LOG.warn("Error retrieving contract decimals", e);
+    }
+  }
+
+  private void readTotalSupply(ContractDetail contractDetail, String contractAddress) throws Exception {
+    try {
+      BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_TOTALSUPPLY);
+      contractDetail.setTotalSupply(String.valueOf(convertFromDecimals(totalSupply, contractDetail.getDecimals())));
+    } catch (Exception e) {
+      LOG.warn("Error retrieving contract total supply", e);
+    }
+  }
+
 }

@@ -248,7 +248,7 @@ function getAccessPermission() {
 }
 
 
-export function saveNewProvider(provider, address, rawMessage, signedMessage) {
+export function switchProvider(provider, address, rawMessage, signedMessage) {
   const formData = new FormData();
   formData.append('address', address);
   formData.append('provider', provider);
@@ -264,7 +264,25 @@ export function saveNewProvider(provider, address, rawMessage, signedMessage) {
     body: new URLSearchParams(formData).toString(),
   }).then(resp => {
     if (!resp || !resp.ok) {
-      throw new Error('Error saving new Wallet provider');
+      throw new Error('Error saving new provider label');
+    }
+  });
+}
+
+export function switchInternalProvider() {
+  const formData = new FormData();
+  formData.append('provider', 'INTERNAL_WALLET');
+
+  return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/provider`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(formData).toString(),
+  }).then(resp => {
+    if (!resp || !resp.ok) {
+      throw new Error('Error saving new provider label');
     }
   });
 }

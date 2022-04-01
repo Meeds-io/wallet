@@ -22,7 +22,7 @@
             </v-list-item-content>
           </v-list-item>
           <v-list-item>
-            <v-list-item-content>
+            <v-list-item-content transition="fade-transition" :class="useMetamask && 'half-opacity'">
               <v-list-item-title class="text-color">
                 <div class="d-flex align-center">
                   <img
@@ -36,6 +36,7 @@
             </v-list-item-content>
             <v-list-item-action>
               <v-btn
+                :disabled="useMetamask"
                 small
                 icon
                 @click="openDetail">
@@ -46,24 +47,26 @@
             </v-list-item-action>
           </v-list-item>
           <v-list-item>
-            <v-list-item-content>
-              <v-list-item-title class="text-color " :class="!isMetamaskInstalled && 'addonNotInstalled'">
+            <v-list-item-content transition="fade-transition" :class="(!isMetamaskInstalled || !useMetamask) && 'half-opacity'">
+              <v-list-item-title class="text-color">
                 <div class="d-flex align-center">
                   <img
                     class="pr-2 pl-1"
                     :src="`/wallet-common/images/metamask.svg`"
                     alt="Metamask"
                     width="18">
+                  <span></span>
                   {{ $t('exoplatform.wallet.settings.useMetamask') }}
                 </div>
               </v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
               <v-switch
+                v-model="useMetamask"
+                :loading="savingMetamaskAddress"
+                :disabled="!isMetamaskInstalled || savingMetamaskAddress"
                 class="pl-n1"
-                :disabled="!isMetamaskInstalled"
-                @click="connectToMetamask"
-                v-model="useMetamask" />
+                @click="switchMetamask" />
             </v-list-item-action>
           </v-list-item>
           <v-list-item class="mt-n2" v-if="!isMetamaskInstalled">
@@ -78,12 +81,21 @@
               </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item class="mt-n2" v-if="metamaskAddress">
+            <v-list-item-content>
+              <v-list-item-subtitle
+                class="text-sub-title pl-1">
+                <span class="mr-3 useMetamask">{{ metamaskAddress }}</span>
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
       </v-card>
     </template>
   </v-app>
 </template>
 <script>
+import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
 export default {
   data: () => ({
     id: `Wallet${parseInt(Math.random() * 10000)}`,
@@ -91,7 +103,10 @@ export default {
     displayDetails: false,
     wallet: null,
     from: '',
-    useMetamask: false
+    useMetamask: false,
+    initialized: false,
+    savingMetamaskAddress: false,
+    metamaskAddress: null,
   }),
   computed: {
     isSpace(){
@@ -114,7 +129,6 @@ export default {
         && `https://metamask.app.link/dapp/${this.currentSiteLink}`
         || 'https://metamask.io/';
     }
-
   },
   created() {
     document.addEventListener('hideSettingsApps', (event) => {
@@ -145,9 +159,21 @@ export default {
         document.location.hash = '#walletSettings';
       }
     }, 300);
-  },
-  mounted() {
-    this.$nextTick().then(() => this.$root.$applicationLoaded());
+
+    if (window.walletSettings && window.walletSettings.wallet) {
+      this.useMetamask =  window.walletSettings.wallet && window.walletSettings.wallet.provider === 'METAMASK';
+      this.initialized = true;
+    } else {
+      this.walletUtils.initSettings(this.isSpace)
+        .then(() => {
+          this.useMetamask =  window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.provider === 'METAMASK';
+          if (this.useMetamask) {
+            this.metamaskAddress = window.walletSettings.wallet.address;
+          }
+          this.$nextTick().then(() => this.$root.$applicationLoaded());
+        })
+        .finally(() => this.initialized = true);
+    }
   },
   methods: {
     checkWalletInstalled() {
@@ -197,15 +223,54 @@ export default {
           this.wallet = wallet;
         });
     },
+    switchMetamask() {
+      if (this.useMetamask) {
+        this.connectToMetamask();
+      } else {
+        this.resetMetamask();
+      }
+    },
+    resetMetamask() {
+      this.savingMetamaskAddress = true;
+      return switchInternalProvider()
+        .then(() => this.metamaskAddress = null)
+        .catch(() => this.useMetamask = true)
+        .finally(() => this.savingMetamaskAddress = false);
+    },
     connectToMetamask() {
-      if (this.useMetamask){
-        return window.ethereum.request({
-          method: 'eth_requestAccounts'
+      if (this.useMetamask) {
+        this.savingMetamaskAddress = true;
+        return window.ethereum.request({ method: 'wallet_requestPermissions', 
+          params: [ { eth_accounts: {} } ] 
         })
-          .then(()=>{
-          // signature request to do
+          .then(() => this.retrieveAddress())
+          .then(() => this.signMessage())
+          .then(() => this.savingMetamaskAddress = false)
+          .catch(() => {
+            this.savingMetamaskAddress = false;
+            this.useMetamask = false;
+            this.metamaskAddress = null;
           });
-      } 
+      }
+    },
+    retrieveAddress() {
+      return window.ethereum.request({ method: 'eth_requestAccounts'
+      })
+        .then(retrievedAddress => {
+          this.metamaskAddress = retrievedAddress[0];          
+        });
+    },
+    signMessage() {
+      const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage');
+      return window.ethereum.request({
+        method: 'personal_sign',
+        params: [rawMessage, this.metamaskAddress, ''],
+      }).then(signedMessage => this.saveProvider('METAMASK', this.metamaskAddress, rawMessage, signedMessage));
+    },
+    saveProvider(provider, address, rawMessage, signedMessage){
+      this.savingMetamaskAddress = true;
+      return switchProvider(provider, address, rawMessage, signedMessage)
+        .then(() => this.metamaskAddress = address);
     },
   },
 };
