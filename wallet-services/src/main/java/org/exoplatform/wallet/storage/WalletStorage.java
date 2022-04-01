@@ -39,7 +39,7 @@ public class WalletStorage {
 
   private final WalletAccountDAO         walletAccountDAO;
 
-  private final WalletAccountBackupDAO         walletAccountBackupDAO;
+  private final WalletAccountBackupDAO   walletAccountBackupDAO;
 
   private final WalletPrivateKeyDAO      privateKeyDAO;
 
