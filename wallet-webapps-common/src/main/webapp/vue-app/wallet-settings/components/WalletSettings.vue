@@ -64,7 +64,7 @@
               <v-switch
                 v-model="useMetamask"
                 :loading="savingMetamaskAddress"
-                :disabled="!isMetamaskInstalled"
+                :disabled="!isMetamaskInstalled || savingMetamaskAddress"
                 class="pl-n1"
                 @click="switchMetamask" />
             </v-list-item-action>
@@ -95,7 +95,7 @@
   </v-app>
 </template>
 <script>
-import {saveNewProvider} from '../../js/AddressRegistry.js';
+import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
 export default {
   data: () => ({
     id: `Wallet${parseInt(Math.random() * 10000)}`,
@@ -231,16 +231,28 @@ export default {
       }
     },
     resetMetamask() {
-      this.metamaskAddress = null;
+      this.savingMetamaskAddress = true;
+      return switchInternalProvider()
+        .then(() => this.metamaskAddress = null)
+        .catch(() => this.useMetamask = true)
+        .finally(() => this.savingMetamaskAddress = false);
     },
     connectToMetamask() {
       if (this.useMetamask) {
+        this.savingMetamaskAddress = true;
         return window.ethereum.request({
           method: 'eth_requestAccounts'
-        }).then((connectedWallet) => this.signMessage(connectedWallet[0]));
-      } 
+        })
+          .then(connectedWallet => this.signMessage(connectedWallet[0]))
+          .then(() => this.savingMetamaskAddress = false)
+          .catch(() => {
+            this.savingMetamaskAddress = false;
+            this.useMetamask = false;
+            this.metamaskAddress = null;
+          });
+      }
     },
-    signMessage(address){
+    signMessage(address) {
       const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage');
       return window.ethereum.request({
         method: 'personal_sign',
@@ -249,13 +261,8 @@ export default {
     },
     saveProvider(provider, address, rawMessage, signedMessage){
       this.savingMetamaskAddress = true;
-      return saveNewProvider(provider, address, rawMessage, signedMessage)
-        .then(() => this.metamaskAddress = address)
-        .catch(() => {
-          this.useMetamask = false;
-          this.metamaskAddress = null;
-        })
-        .finally(() => this.savingMetamaskAddress = false);
+      return switchProvider(provider, address, rawMessage, signedMessage)
+        .then(() => this.metamaskAddress = address);
     },
   },
 };
