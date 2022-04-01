@@ -240,10 +240,11 @@ export default {
     connectToMetamask() {
       if (this.useMetamask) {
         this.savingMetamaskAddress = true;
-        return window.ethereum.request({
-          method: 'eth_requestAccounts'
+        return window.ethereum.request({ method: 'wallet_requestPermissions', 
+          params: [ { eth_accounts: {} } ] 
         })
-          .then(connectedWallet => this.signMessage(connectedWallet[0]))
+          .then(() => this.retrieveAddress())
+          .then(() => this.signMessage())
           .then(() => this.savingMetamaskAddress = false)
           .catch(() => {
             this.savingMetamaskAddress = false;
@@ -252,12 +253,19 @@ export default {
           });
       }
     },
-    signMessage(address) {
+    retrieveAddress() {
+      return window.ethereum.request({ method: 'eth_requestAccounts'
+      })
+        .then(retrievedAddress => {
+          this.metamaskAddress = retrievedAddress[0];          
+        });
+    },
+    signMessage() {
       const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage');
       return window.ethereum.request({
         method: 'personal_sign',
-        params: [rawMessage, address, ''],
-      }).then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
+        params: [rawMessage, this.metamaskAddress, ''],
+      }).then(signedMessage => this.saveProvider('METAMASK', this.metamaskAddress, rawMessage, signedMessage));
     },
     saveProvider(provider, address, rawMessage, signedMessage){
       this.savingMetamaskAddress = true;
