@@ -101,7 +101,7 @@ export default {
     wallet: null,
     from: '',
     useMetamask: false,
-    rawMessage: 'test2 message',
+    rawMessage: 'Signature request message',
     newAddress: ''
   }),
   computed: {
@@ -209,13 +209,9 @@ export default {
         });
     },
     saveProvider(provider, address, rawMessage, signedMessage){
-      console.log('step1');
       return saveNewProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
-          console.log('step2');
-          console.log(this.newAddress);
           this.newAddress = address;
-          //console.log(address, this.newAddress);
         })
         .catch((e) => {
           console.error('save provider - error', e);
@@ -224,10 +220,9 @@ export default {
     signMessage(address){
       return window.ethereum.request({
         method: 'personal_sign',
-        params: [this.rawMessage, address, ''],
+        params: [this.rawMessage, address],
       }).then(signedMessage => {
         this.saveProvider('METAMASK', address, this.rawMessage, signedMessage);
-        console.log('signedMessage', signedMessage);
       });
     },
     connectToMetamask() {
