@@ -46,49 +46,51 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-list-item>
-            <v-list-item-content transition="fade-transition" :class="(!isMetamaskInstalled || !useMetamask) && 'half-opacity'">
-              <v-list-item-title class="text-color">
-                <div class="d-flex align-center">
-                  <img
-                    class="pr-2 pl-1"
-                    :src="`/wallet-common/images/metamask.svg`"
-                    alt="Metamask"
-                    width="18">
-                  <span></span>
-                  {{ $t('exoplatform.wallet.settings.useMetamask') }}
-                </div>
-              </v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-switch
-                v-model="useMetamask"
-                :loading="savingMetamaskAddress"
-                :disabled="!isMetamaskInstalled || savingMetamaskAddress"
-                class="pl-n1"
-                @click="switchMetamask" />
-            </v-list-item-action>
-          </v-list-item>
-          <v-list-item class="mt-n2" v-if="!isMetamaskInstalled">
-            <v-list-item-content>
-              <v-list-item-subtitle
-                class="text-sub-title pl-1">
-                <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span>
-                <a
-                  :href="metamaskInstallLink"
-                  target="_blank"
-                  rel="noopener nofollow">{{ metamaskInstallLink }}</a>
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item class="mt-n2" v-if="metamaskAddress">
-            <v-list-item-content>
-              <v-list-item-subtitle
-                class="text-sub-title pl-1">
-                <span class="mr-3 useMetamask">{{ metamaskAddress }}</span>
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
+          <template v-if="metamaskFeatureEnabled">
+            <v-list-item>
+              <v-list-item-content transition="fade-transition" :class="(!isMetamaskInstalled || !useMetamask) && 'half-opacity'">
+                <v-list-item-title class="text-color">
+                  <div class="d-flex align-center">
+                    <img
+                      class="pr-2 pl-1"
+                      :src="`/wallet-common/images/metamask.svg`"
+                      alt="Metamask"
+                      width="18">
+                    <span></span>
+                    {{ $t('exoplatform.wallet.settings.useMetamask') }}
+                  </div>
+                </v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-switch
+                  v-model="useMetamask"
+                  :loading="savingMetamaskAddress"
+                  :disabled="!isMetamaskInstalled || savingMetamaskAddress"
+                  class="pl-n1"
+                  @click="switchMetamask" />
+              </v-list-item-action>
+            </v-list-item>
+            <v-list-item class="mt-n2" v-if="!isMetamaskInstalled">
+              <v-list-item-content>
+                <v-list-item-subtitle
+                  class="text-sub-title pl-1">
+                  <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span>
+                  <a
+                    :href="metamaskInstallLink"
+                    target="_blank"
+                    rel="noopener nofollow">{{ metamaskInstallLink }}</a>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item class="mt-n2" v-if="metamaskAddress">
+              <v-list-item-content>
+                <v-list-item-subtitle
+                  class="text-sub-title pl-1">
+                  <span class="mr-3 useMetamask">{{ metamaskAddress }}</span>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
         </v-list>
       </v-card>
     </template>
@@ -107,6 +109,7 @@ export default {
     initialized: false,
     savingMetamaskAddress: false,
     metamaskAddress: null,
+    metamaskFeatureEnabled: false,
   }),
   computed: {
     isSpace(){
@@ -162,11 +165,13 @@ export default {
 
     if (window.walletSettings && window.walletSettings.wallet) {
       this.useMetamask =  window.walletSettings.wallet && window.walletSettings.wallet.provider === 'METAMASK';
+      this.metamaskFeatureEnabled = window.walletSettings.metamaskEnabled;
       this.initialized = true;
     } else {
       this.walletUtils.initSettings(this.isSpace)
         .then(() => {
           this.useMetamask =  window.walletSettings && window.walletSettings.wallet && window.walletSettings.wallet.provider === 'METAMASK';
+          this.metamaskFeatureEnabled = window.walletSettings.metamaskEnabled;
           if (this.useMetamask) {
             this.metamaskAddress = window.walletSettings.wallet.address;
           }
