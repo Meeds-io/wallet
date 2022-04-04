@@ -1,6 +1,12 @@
 <template>
   <v-app>
     <template v-if="displayed">
+      <v-alert
+        v-model="alert"
+        :type="type"
+        dismissible>
+        {{ message }}
+      </v-alert>
       <wallet-settings-details
         v-if="displayDetails"
         :wallet-details="wallet"
@@ -85,10 +91,23 @@
             <v-list-item class="mt-n2" v-if="metamaskAddress">
               <v-list-item-content>
                 <v-list-item-subtitle
-                  class="text-sub-title pl-1">
-                  <span class="mr-3 useMetamask">{{ metamaskAddress }}</span>
+                  class="text-sub-title pl-5">
+                  <v-chip class="connectedWalletChip">  
+                    <span class="mr-3 useMetamask  walletText walletTitle">
+                      {{ metamaskAddress.substring(0,5)+"..."+metamaskAddress.substring(metamaskAddress.length-4,metamaskAddress.length) }}
+                    </span>
+                  </v-chip>
                 </v-list-item-subtitle>
               </v-list-item-content>
+              <v-list-item-action>
+                <v-btn
+                  small
+                  icon>
+                  <v-icon size="24" class="text-sub-title">
+                    {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
+                  </v-icon>
+                </v-btn>
+              </v-list-item-action>
             </v-list-item>
           </template>
         </v-list>
@@ -110,6 +129,9 @@ export default {
     savingMetamaskAddress: false,
     metamaskAddress: null,
     metamaskFeatureEnabled: false,
+    message: '',
+    alert: false,
+    type: '',
   }),
   computed: {
     isSpace(){
@@ -138,6 +160,9 @@ export default {
       if (event && event.detail && this.id !== event.detail) {
         this.displayed = false;
       }
+    });
+    this.$root.$on('show-alert', message => {
+      this.displayMessage(message);
     });
     document.addEventListener('showSettingsApps', () => {
       this.displayed = true;
@@ -275,8 +300,17 @@ export default {
     saveProvider(provider, address, rawMessage, signedMessage){
       this.savingMetamaskAddress = true;
       return switchProvider(provider, address, rawMessage, signedMessage)
-        .then(() => this.metamaskAddress = address);
+        .then(() => {
+          this.metamaskAddress = address;
+          this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')});
+        });
     },
+    displayMessage(message) {
+      this.message=message.message;
+      this.type=message.type;
+      this.alert = true;
+      window.setTimeout(() => this.alert = false, 5000);
+    }
   },
 };
 </script>
