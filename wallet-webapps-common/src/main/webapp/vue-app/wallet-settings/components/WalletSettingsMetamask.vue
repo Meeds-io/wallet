@@ -27,7 +27,7 @@
       <v-list-item-content>
         <v-list-item-subtitle
           class="text-sub-title pl-1">
-          <span class="mr-3 useMetamask">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span>
+          <span class="mr-3 text-light-color">{{ $t('exoplatform.wallet.settings.metamaskInstallation') }}</span>
           <a
             :href="metamaskInstallLink"
             target="_blank"
@@ -39,8 +39,8 @@
       <v-list-item-content>
         <v-list-item-subtitle
           class="text-sub-title pl-5">
-          <v-chip class="connectedWalletChip">  
-            <span class="mr-3 useMetamask  walletText walletTitle">
+          <v-chip class="grey-background">  
+            <span class="mr-3 dark-grey-color walletTitle">
               {{ walletAddress }}
             </span>
           </v-chip>
