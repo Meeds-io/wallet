@@ -1,5 +1,5 @@
-<template v-if="metamaskFeatureEnabled">
-  <v-app>
+<template>
+  <div>
     <v-list-item>
       <v-list-item-content transition="fade-transition" :class="(!isMetamaskInstalled || !useMetamask) && 'half-opacity'">
         <v-list-item-title class="text-color">
@@ -41,7 +41,7 @@
           class="text-sub-title pl-5">
           <v-chip class="grey-background">  
             <span class="mr-3 dark-grey-color walletTitle">
-              {{ walletAddress }}
+              {{ metamaskAddressPreview }}
             </span>
           </v-chip>
         </v-list-item-subtitle>
@@ -56,16 +56,12 @@
         </v-btn>
       </v-list-item-action>
     </v-list-item>
-  </v-app>
+  </div>
 </template>
 <script>
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
 export default {
   props: {
-    metamaskFeatureEnabled: {
-      type: Boolean,
-      default: false
-    },
     useMetamask: {
       type: Boolean,
       default: false
@@ -96,7 +92,7 @@ export default {
         && `https://metamask.app.link/dapp/${this.currentSiteLink}`
         || 'https://metamask.io/';
     },
-    walletAddress(){
+    metamaskAddressPreview(){
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
     }
   },
@@ -144,8 +140,7 @@ export default {
       }
     },
     retrieveAddress() {
-      return window.ethereum.request({ method: 'eth_requestAccounts'
-      })
+      return window.ethereum.request({ method: 'eth_requestAccounts' })
         .then(retrievedAddress => {
           return retrievedAddress[0];
         });
@@ -158,7 +153,6 @@ export default {
       }).then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
     },
     saveProvider(provider, address, rawMessage, signedMessage){
-      this.savingMetamaskAddress = true;
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
           this.$root.$emit('wallet-settings-metamask-address', address);

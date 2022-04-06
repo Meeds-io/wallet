@@ -47,7 +47,7 @@
             </v-list-item-action>
           </v-list-item>
           <wallet-settings-metamask
-            :metamask-feature-enabled="metamaskFeatureEnabled"
+            v-if="metamaskFeatureEnabled"
             :use-metamask="useMetamask"
             :metamask-address="metamaskAddress" />
         </v-list>
