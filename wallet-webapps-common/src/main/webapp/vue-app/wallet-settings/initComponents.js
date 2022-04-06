@@ -17,6 +17,7 @@
 import WalletSettings from './components/WalletSettings.vue';
 import WalletSettingsDetails from './components/WalletSettingsDetails.vue';
 import WalletSettingsAlert from './components/WalletSettingsAlert.vue';
+import WalletSettingsInternal from './components/WalletSettingsInternal.vue';
 import WalletSettingsMetamask from './components/WalletSettingsMetamask.vue';
 
 Vue.prototype.$applicationLoaded = function() {
@@ -31,7 +32,8 @@ const components = {
   'wallet-settings': WalletSettings,
   'wallet-settings-details': WalletSettingsDetails,
   'wallet-settings-alert': WalletSettingsAlert,
-  'wallet-settings-metamask': WalletSettingsMetamask
+  'wallet-settings-internal': WalletSettingsInternal,
+  'wallet-settings-metamask': WalletSettingsMetamask,
 };
 
 for (const key in components) {

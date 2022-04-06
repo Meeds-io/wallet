@@ -18,7 +18,7 @@
         <v-switch
           v-model="useMetamask"
           :loading="savingMetamaskAddress"
-          :disabled="!isMetamaskInstalled || savingMetamaskAddress"
+          :disabled="(!isMetamaskInstalled && !useMetamask) || savingMetamaskAddress"
           class="pl-n1"
           @click="switchMetamask" />
       </v-list-item-action>
@@ -35,7 +35,7 @@
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item class="mt-n2" v-if="metamaskAddress && isMetamaskInstalled">
+    <v-list-item class="mt-n2" v-if="metamaskAddress">
       <v-list-item-content>
         <v-list-item-subtitle
           class="text-sub-title pl-5">
@@ -62,24 +62,18 @@
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
 export default {
   props: {
-    useMetamask: {
-      type: Boolean,
-      default: false
-    },
-    metamaskAddress: {
-      type: String,
+    walletSettings: {
+      type: Object,
       default: null,
-    }
+    },
   },
   data: () => ({
-    displayAlert: false,
-    alertMessage: null,
-    alertType: null,
+    useMetamask: false,
     savingMetamaskAddress: false,
   }),
   computed: {
     isMetamaskInstalled(){
-      return  window.ethereum && window.ethereum.isMetaMask;
+      return window.ethereum && window.ethereum.isMetaMask;
     },
     isMobile() {
       return this.$vuetify.breakpoint.smAndDown;
@@ -87,21 +81,33 @@ export default {
     currentSiteLink() {
       return `${window.location.host}${window.location.pathname}`;
     },
+    disableSwitchButton() {
+      return (!this.isMetamaskInstalled && !this.useMetamask) || this.savingMetamaskAddress;
+    },
     metamaskInstallLink() {
       return this.isMobile
         && `https://metamask.app.link/dapp/${this.currentSiteLink}`
         || 'https://metamask.io/';
     },
+    metamaskAddress() {
+      return this.useMetamask && this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.address;
+    },
     metamaskAddressPreview(){
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
     }
   },
+  watch: {
+    walletSettings: {
+      immediate: true,
+      handler() {
+        this.useMetamask = this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.provider === 'METAMASK';
+        this.metamaskAddress = this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.address;
+      },
+    },
+  },
   created() {
-    this.$root.$on('show-alert', alert => {
-      this.alertMessage = alert.message;
-      this.alertType = alert.type;
-      this.displayAlert= true;
-      window.setTimeout(() => this.displayAlert = false, 5000); 
+    this.$root.$on('wallet-settings-provider-changing', provider => {
+      this.useMetamask = provider === 'METAMASK';
     });
   },
   methods: {
@@ -114,30 +120,38 @@ export default {
     },
     resetMetamask() {
       this.savingMetamaskAddress = true;
+      this.$root.$emit('wallet-settings-provider-changing', 'INTERNAL_WALLET');
       return switchInternalProvider()
-        .then(() =>{
-          this.$root.$emit('wallet-settings-metamask-address', null);
-          this.$root.$emit('wallet-settings-metamask-state', false);
+        .then(() => {
+          window.walletSettings.wallet.address = null;
+          window.walletSettings.wallet.provider = 'INTERNAL_WALLET';
+          this.$root.$emit('wallet-settings-provider-changed');
         })
-        .catch(() => this.$root.$emit('wallet-settings-metamask-state', true))
+        .catch(() => this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider))
         .finally(() => this.savingMetamaskAddress = false);
     },
     connectToMetamask() {
-      if (this.useMetamask) {
-        this.$root.$emit('wallet-settings-metamask-state', true);
-        this.savingMetamaskAddress = true;
-        return window.ethereum.request({ method: 'wallet_requestPermissions', 
-          params: [ { eth_accounts: {} } ] 
+      this.$root.$emit('wallet-settings-provider-changing', 'METAMASK');
+      this.savingMetamaskAddress = true;
+      let selectedAddress = null;
+      return window.ethereum.request({ method: 'wallet_requestPermissions', 
+        params: [ { eth_accounts: {} } ] 
+      })
+        .then(() => this.retrieveAddress())
+        .then((retrievedAddress) => {
+          selectedAddress = retrievedAddress;
+          return this.signMessage(retrievedAddress);
         })
-          .then(() => this.retrieveAddress())
-          .then((retrievedAddress) => this.signMessage(retrievedAddress))
-          .then(() => this.savingMetamaskAddress = false)
-          .catch(() => {
-            this.savingMetamaskAddress = false;
-            this.$root.$emit('wallet-settings-metamask-state', false);
-            this.$root.$emit('wallet-settings-metamask-address', null);
-          });
-      }
+        .then(() => {
+          window.walletSettings.wallet.address = selectedAddress;
+          window.walletSettings.wallet.provider = 'METAMASK';
+          this.$root.$emit('wallet-settings-provider-changed');
+          this.savingMetamaskAddress = false;
+        })
+        .catch(() => {
+          this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
+          this.savingMetamaskAddress = false;
+        });
     },
     retrieveAddress() {
       return window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -155,8 +169,13 @@ export default {
     saveProvider(provider, address, rawMessage, signedMessage){
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
-          this.$root.$emit('wallet-settings-metamask-address', address);
-          this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')});
+          window.walletSettings.wallet.address = address;
+          window.walletSettings.wallet.provider = 'METAMASK';
+
+          this.$root.$emit('show-alert', {
+            type: 'success',
+            message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')
+          });
         });
     }
   }
