@@ -1,69 +1,72 @@
 <template>
-  <v-app>
-    <template v-if="displayed">
-      <v-card
-        v-if="!displayManagePasswordDetails"
-        class="walletSetting"
-        flat>
-        <v-card-title>
-          <v-toolbar
-            class="border-box-sizing"
-            flat>
-            <v-btn
-              class="mx-1"
-              icon
-              height="36"
-              width="36"
-              @click="$emit('back')">
-              <v-icon size="20">
-                {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
-              </v-icon>
-            </v-btn>
-            <v-toolbar-title v-if="provider === 'INTERNAL_WALLET'" class="ps-0">
-              {{ $t('exoplatform.wallet.label.settings.internal') }}{{walletAddress}}
-            </v-toolbar-title>
-            <v-toolbar-title v-else-if="provider === 'METAMASK'" class="ps-0">
-              {{ $t('exoplatform.wallet.label.settings.metamask') }}
-            </v-toolbar-title>
-            <v-spacer />
-          </v-toolbar>
-        </v-card-title>
-        <v-card-subtitle class="mx-14 mn-5">
-          {{ $t('exoplatform.wallet.message.settingsDescription.internal') }}
-        </v-card-subtitle>
-
-        <v-list class="mx-8">
-          <wallet-settings-internal-details
-            v-if="provider === 'INTERNAL_WALLET'"
-            :is-space="isSpace"
-            :wallet-settings="walletSettings" />
-          <v-list-item class="manageKey" v-if="!isDeleted">
-            <v-list-item-content>
-              <v-list-item-title class="title text-color">
-                {{ $t('exoplatform.wallet.label.ethereumAddress') }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <wallet-reward-qr-code
-                ref="qrCode"
-                :to="walletAddress"
-                :title="$t('exoplatform.wallet.title.addressQRCode')" />
-              <wallet-reward-address :value="walletAddress" :allow-edit="false" />
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-      </v-card>
+  <v-card
+    v-if="displayed"
+    class="walletSetting"
+    flat>
+    <template v-if="!hideContent">
+      <v-card-title>
+        <v-toolbar class="border-box-sizing" flat>
+          <v-btn
+            class="mx-1"
+            icon
+            height="36"
+            width="36"
+            @click="$emit('back')">
+            <v-icon size="20">
+              {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
+            </v-icon>
+          </v-btn>
+          <v-toolbar-title class="ps-0">
+            {{ title }}
+          </v-toolbar-title>
+          <v-spacer />
+        </v-toolbar>
+      </v-card-title>
+      <v-card-subtitle class="mx-14">
+        {{ description }}
+      </v-card-subtitle>
     </template>
-  </v-app>
+
+    <v-list class="mx-8">
+      <wallet-settings-internal-details
+        v-if="isInternalWallet"
+        :is-space="isSpace"
+        :wallet-settings="walletSettings"
+        @close-details="hideContent = true"
+        @open-details="hideContent = false" />
+      <v-list-item v-if="!isDeleted && !hideContent" class="manageKey">
+        <v-list-item-content>
+          <v-list-item-title class="title text-color">
+            {{ $t('exoplatform.wallet.label.ethereumAddress') }}
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action v-if="walletAddress">
+          <wallet-reward-qr-code
+            ref="qrCode"
+            :to="walletAddress"
+            :title="$t('exoplatform.wallet.title.addressQRCode')" />
+          <wallet-reward-address :value="walletAddress" :allow-edit="false" />
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+  </v-card>
 </template>
 <script>
 export default {
   props: {
     walletSettings: {
       type: Object,
+      default: null,
+    },
+    title: {
+      type: String,
+      default: null,
+    },
+    description: {
+      type: String,
       default: null,
     },
     isSpace: {
@@ -74,15 +77,17 @@ export default {
   data: () => ({
     id: `WalletSettingsDetails${parseInt(Math.random() * 10000)}`,
     displayed: true,
-    displayManagePasswordDetails: false,
+    hideContent: false,
     alert: false,
     type: '',
     message: '',
-    provider: null
   }),
   computed: {
     wallet () {
       return this.walletSettings.wallet;
+    },
+    provider () {
+      return this.wallet && this.wallet.provider;
     },
     walletAddress() {
       return this.wallet && this.wallet.address;
@@ -93,13 +98,8 @@ export default {
     isDeleted() {
       return this.initializationState === 'DELETED';
     },
-  },
-  watch: {
-    walletSettings: {
-      immediate: true,
-      handler() {
-        this.provider = this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.provider;
-      },
+    isInternalWallet() {
+      return this.provider === 'INTERNAL_WALLET';
     },
   },
   created(){
@@ -108,12 +108,6 @@ export default {
     });
   },
   methods: {
-    openManagePasswordDetails() {
-      this.displayManagePasswordDetails = true;
-    },
-    closeManagePasswordDetails() {
-      this.displayManagePasswordDetails = false;
-    },
     openWalletImportKeyDrawer() {
       this.$refs.walletImportKey.open();
     },

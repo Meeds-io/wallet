@@ -1,6 +1,14 @@
 <template>
   <div>
-    <template v-if="!isDeleted">
+    <wallet-reward-password-management
+      v-if="displayManagePasswordDetails"
+      :wallet="wallet"
+      :is-space="isSpace"
+      :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
+      display-remember-me
+      class="d-flex"
+      @back="closeManagePasswordDetails" />
+    <template v-else-if="!isDeleted">
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title text-color">
@@ -80,14 +88,6 @@
       </v-list-item>
       <v-divider />
     </template>
-    <wallet-reward-password-management
-      v-if="displayManagePasswordDetails"
-      :wallet="wallet"
-      :is-space="isSpace"
-      :button-label="$t('exoplatform.wallet.button.resetWalletPassword')"
-      display-remember-me
-      class="d-flex"
-      @back="closeManagePasswordDetails" />
     <wallet-reward-import-key-drawer
       ref="walletImportKey"
       :is-space="isSpace"
@@ -163,9 +163,11 @@ export default {
   },
   methods: {
     openManagePasswordDetails() {
+      this.$emit('close-details');
       this.displayManagePasswordDetails = true;
     },
     closeManagePasswordDetails() {
+      this.$emit('open-details');
       this.displayManagePasswordDetails = false;
     },
     openWalletImportKeyDrawer() {
