@@ -2,7 +2,8 @@
   <v-app>
     <wallet-settings-details
       v-if="displayDetails"
-      :settings="walletSettings"
+      :wallet-settings="walletSettings"
+      :is-space="isSpace"
       :class="walletSettingsClass"
       @back="closeDetail" />
     <v-card
@@ -19,7 +20,10 @@
           </v-list-item-content>
         </v-list-item>
         <wallet-settings-internal :wallet-settings="walletSettings" @open-detail="openDetail" />
-        <wallet-settings-metamask v-if="metamaskFeatureEnabled" :wallet-settings="walletSettings" />
+        <wallet-settings-metamask
+          v-if="metamaskFeatureEnabled"
+          :wallet-settings="walletSettings"
+          @open-detail="openDetail" />
       </v-list>
     </v-card>
     <wallet-settings-alert />
@@ -58,7 +62,7 @@ export default {
     });
 
     this.$root.$on('wallet-settings-provider-changed', () => {
-      this.walletSettings = Object.assign({}, window.walletSettings);
+      this.walletSettings = JSON.parse(JSON.stringify(window.walletSettings));
     });
 
     if (this.isSpace) {

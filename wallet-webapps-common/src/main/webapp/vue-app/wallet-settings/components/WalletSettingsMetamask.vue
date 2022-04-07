@@ -49,7 +49,8 @@
       <v-list-item-action>
         <v-btn
           small
-          icon>
+          icon
+          @click="$emit('open-detail')">
           <v-icon size="24" class="text-sub-title">
             {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
           </v-icon>
