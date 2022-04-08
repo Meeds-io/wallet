@@ -51,7 +51,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         v-model="showMenu"
         offset-y
         class="border-box-sizing dropDownFilter">
-        <template v-slot:activator="{ on }">
+        <template #activator="{ on }">
           <button
             class="btn mx-4"
             v-on="on"
@@ -174,7 +174,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :value="actionSelectedWallet === props.item"
                 attach>
                 <template
-                  v-slot:activator="{ on }">
+                  #activator="{ on }">
                   <v-btn
                     icon
                     small

@@ -22,8 +22,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template slot="title">
       <span class="pb-2"> {{ $t('exoplatform.wallet.title.restoreWalletModal') }} </span>
     </template>
-    <template slot="content" class="walletRequestFundsModal">
-      <v-card-text>
+    <template slot="content">
+      <v-card-text class="walletRequestFundsModal">
         <div
           class="text-sub-title"
           id="walletBackupDetailedWarning">

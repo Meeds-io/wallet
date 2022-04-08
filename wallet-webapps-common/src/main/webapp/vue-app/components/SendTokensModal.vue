@@ -118,7 +118,7 @@ export default {
         receiverType = receiverType || 'user';
         checkFundRequestStatus(notificationId).then(() => {
           this.openSendTokenDrawer();
-          return this.$nextTick(() => {
+          return this.$nextTick().then(() => {
             if (receiver) {
               this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);
               this.$refs.sendTokensForm.disabledRecipient = true;
@@ -128,7 +128,7 @@ export default {
           });
         });
       } else if (receiver) {
-        return this.$nextTick(() => {
+        return this.$nextTick().then(() => {
           if (receiver) {
             receiverType = receiverType || 'user';
             this.$refs.sendTokensForm.$refs.autocomplete.selectItem(receiver, receiverType);

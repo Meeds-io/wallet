@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     width="300px"
     max-width="100vw"
     @keydown.esc="dialog = false">
-    <template v-slot:activator="{ on }">
+    <template #activator>
       <slot></slot>
     </template>
     <v-card class="elevation-12">

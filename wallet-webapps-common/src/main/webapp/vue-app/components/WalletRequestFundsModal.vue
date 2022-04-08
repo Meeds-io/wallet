@@ -21,11 +21,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template slot="title">
       <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.requestFunds') }} </span></div>
     </template>
-    <template slot="content" class="walletRequestFundsModal">
+    <template slot="content">
       <div v-if="error && !loading" class="alert alert-error v-content">
         <i class="uiIconError"></i>{{ error }}
       </div>
-      <v-card-text>
+      <v-card-text class="walletRequestFundsModal">
         <v-form
           ref="form"
           @submit="
