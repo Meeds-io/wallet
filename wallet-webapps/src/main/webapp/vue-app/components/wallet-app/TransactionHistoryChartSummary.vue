@@ -30,7 +30,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         offset-y
         class="dateSelector"
         attach>
-        <template v-slot:activator="{ on }">
+        <template #activator="{ on }">
           <v-chip color="primary" v-on="on">
             <v-icon class="me-1">event</v-icon>
             {{ periodicityLabel }}

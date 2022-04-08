@@ -88,7 +88,6 @@ export default {
       etherAmount: 0,
       tokenAmount: 0,
       requestMessage: null,
-      isLoadingSuggestions: false,
     };
   },
   computed: {

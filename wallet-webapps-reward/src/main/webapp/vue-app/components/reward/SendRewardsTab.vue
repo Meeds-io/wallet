@@ -32,9 +32,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         transition="scale-transition"
         offset-y
         class="dateSelector">
-        <template v-slot:activator="{ on }">
+        <template #activator="{ on }">
           <v-text-field
-            v-model="periodDatesDisplay"
+            :value="periodDatesDisplay"
             :label="$t('exoplatform.wallet.label.selectPeriodDate')"
             class="dateSelectorInput"
             prepend-icon="event"

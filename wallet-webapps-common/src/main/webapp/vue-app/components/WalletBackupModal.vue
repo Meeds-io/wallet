@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     max-width="100vw"
     hide-overlay
     @keydown.esc="dialog = false">
-    <template v-if="!noButton" v-slot:activator="{ on }">
+    <template v-if="!noButton" #activator="{ on }">
       <a href="javascript:void(0);" v-on="on">
         {{ $t('exoplatform.wallet.title.backupWalletModal') }}
       </a>

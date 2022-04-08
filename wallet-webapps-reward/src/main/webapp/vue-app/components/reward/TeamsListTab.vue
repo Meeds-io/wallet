@@ -64,7 +64,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         :items-per-page="1000"
         no-data-text=""
         hide-default-footer>
-        <template v-slot:default="props">
+        <template #default="props">
           <v-row>
             <v-col
               v-for="item in props.items"
@@ -269,7 +269,6 @@ export default {
     },
   },
   data: () => ({
-    teams: [],
     teamToDelete: null,
     selectedTeam: null,
   }),

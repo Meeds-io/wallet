@@ -63,7 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-dialog
       v-model="dialog"
       width="500">
-      <template v-slot:activator="{ on, attrs }">
+      <template #activator="{ on, attrs }">
         <a
           target="_blank"
           v-bind="attrs"
