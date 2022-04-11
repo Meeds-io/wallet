@@ -50,6 +50,7 @@
         <v-btn
           small
           icon
+          :disabled="savingMetamaskAddress"
           @click="openDetail">
           <v-icon size="24" class="text-sub-title">
             {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}

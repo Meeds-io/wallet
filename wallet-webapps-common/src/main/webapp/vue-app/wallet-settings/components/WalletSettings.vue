@@ -17,7 +17,7 @@
         <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="title text-color">
-              {{ $t('exoplatform.wallet.label.settings') }}
+              {{ $t('exoplatform.wallet.label.settings.internal') }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -25,7 +25,7 @@
           :wallet-settings="walletSettings"
           @open-detail="openDetail" />
         <wallet-settings-metamask
-          v-if="metamaskFeatureEnabled"
+          v-if="metamaskFeatureEnabled && !isSpace"
           :wallet-settings="walletSettings"
           @open-detail="openDetail" />
       </v-list>
