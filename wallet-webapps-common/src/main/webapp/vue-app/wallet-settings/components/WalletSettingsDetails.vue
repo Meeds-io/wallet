@@ -108,33 +108,11 @@ export default {
     });
   },
   methods: {
-    openWalletImportKeyDrawer() {
-      this.$refs.walletImportKey.open();
-    },
-    openWalletBackUpDrawer() {
-      this.$refs.walletBackup.open();
-    },
     displayMessage(message) {
       this.message=message.message;
       this.type=message.type;
       this.alert = true;
       window.setTimeout(() => this.alert = false, 5000);
-    },
-    openDeleteConfirmationModal() {
-      this.$refs.informationModal.open();
-    },
-    deleteWallet() {
-      return this.walletUtils.deleteWallet(this.walletSettings.wallet.address)
-        .then(() => {
-          this.$root.$emit('show-alert', {type: 'success',message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')});
-          if (this.wallet.type === 'user') {
-            return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
-          } else {
-            return window.location.href =  `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/SpaceWallet`;
-          }
-        }).catch(e => {
-          this.$root.$emit('show-alert', {type: 'error',message: String(e)});
-        });
     },
   },
 };
