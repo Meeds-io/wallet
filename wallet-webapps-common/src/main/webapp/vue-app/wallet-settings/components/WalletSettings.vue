@@ -2,7 +2,10 @@
   <v-app>
     <wallet-settings-details
       v-if="displayDetails"
-      :settings="walletSettings"
+      :wallet-settings="walletSettings"
+      :is-space="isSpace"
+      :title="detailsTitle"
+      :description="detailsDescription"
       :class="walletSettingsClass"
       @back="closeDetail" />
     <v-card
@@ -14,12 +17,17 @@
         <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="title text-color">
-              {{ $t('exoplatform.wallet.label.settings') }}
+              {{ $t('exoplatform.wallet.label.settings.internal') }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <wallet-settings-internal :wallet-settings="walletSettings" @open-detail="openDetail" />
-        <wallet-settings-metamask v-if="metamaskFeatureEnabled" :wallet-settings="walletSettings" />
+        <wallet-settings-internal
+          :wallet-settings="walletSettings"
+          @open-detail="openDetail" />
+        <wallet-settings-metamask
+          v-if="metamaskFeatureEnabled && !isSpace"
+          :wallet-settings="walletSettings"
+          @open-detail="openDetail" />
       </v-list>
     </v-card>
     <wallet-settings-alert />
@@ -57,8 +65,13 @@ export default {
       }
     });
 
-    this.$root.$on('wallet-settings-provider-changed', () => {
-      this.walletSettings = Object.assign({}, window.walletSettings);
+    this.$root.$on('wallet-settings-provider-changed', provider => {
+      if (provider === 'INTERNAL_WALLET') {
+        this.walletUtils.initSettings(this.isSpace)
+          .then(() => this.walletSettings = Object.assign({}, window.walletSettings));
+      } else {
+        this.walletSettings = Object.assign({}, window.walletSettings);
+      }
     });
 
     if (this.isSpace) {
@@ -68,6 +81,7 @@ export default {
     if (window.walletSettings && window.walletSettings.wallet) {
       this.walletSettings = Object.assign({}, window.walletSettings);
       this.walletUtils.initWeb3(this.isSpace, true);
+      this.$root.$applicationLoaded();
     } else {
       this.walletUtils.initSettings(this.isSpace)
         .then(() => {
@@ -88,8 +102,10 @@ export default {
           });
         });
     },
-    openDetail() {
+    openDetail(title, description) {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', { detail: this.id }));
+      this.detailsTitle = title;
+      this.detailsDescription = description;
       this.displayDetails = true;
     },
     closeDetail() {
