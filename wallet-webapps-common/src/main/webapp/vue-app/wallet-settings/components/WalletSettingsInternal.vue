@@ -17,7 +17,7 @@
         :disabled="!useInternalWallet"
         small
         icon
-        @click="$emit('open-detail')">
+        @click="openDetail">
         <v-icon size="24" class="text-sub-title">
           {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
         </v-icon>
@@ -48,6 +48,13 @@ export default {
     this.$root.$on('wallet-settings-provider-changing', provider => {
       this.useInternalWallet = !provider || provider === 'INTERNAL_WALLET' || false;
     });
+  },
+  methods: {
+    openDetail() {
+      this.$emit('open-detail',
+        this.$t('exoplatform.wallet.label.settings.internal'),
+        this.$t('exoplatform.wallet.message.settingsDescription.internal'));
+    },
   },
 };
 </script>

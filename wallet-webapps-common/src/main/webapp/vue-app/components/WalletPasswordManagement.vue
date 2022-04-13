@@ -18,12 +18,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-app>
     <template v-if="displayed">
       <v-card
-        class="ma-4 walletManagePassword"
+        class="walletManagePassword"
         flat>
-        <v-card-title>
-          <v-toolbar
-            class="border-box-sizing"
-            flat>
+        <v-card-title class="px-0">
+          <div class="d-flex flex-row border-box-sizing">
             <v-btn
               class="mx-1"
               icon
@@ -34,13 +32,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
               </v-icon>
             </v-btn>
-            <v-toolbar-title class="ps-0">
-              {{ $t('exoplatform.wallet.label.managePassword') }}
-            </v-toolbar-title>
-            <v-spacer />
-          </v-toolbar>
+            {{ $t('exoplatform.wallet.label.managePassword') }}
+          </div>
         </v-card-title>
-        <v-list class="mx-8 mt-n5">
+        <v-list class="mt-n5">
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="title text-color">
