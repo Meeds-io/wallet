@@ -64,7 +64,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               class="mt-1 mx-3 px-1 py-1"
               v-if="walletAddress && !loading && contractDetails && this.initializationState !== 'DELETED'"
               :wallet="wallet"
-              :contract-details="contractDetails" />
+              :contract-details="contractDetails"
+              @refresh="$emit('refresh')" />
           </v-flex>
           <v-flex class="fixedItems no-wrap" v-if="!walletReadonly">
             <div
