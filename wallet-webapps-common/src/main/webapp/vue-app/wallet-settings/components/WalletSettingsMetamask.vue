@@ -31,7 +31,7 @@
           <a
             :href="metamaskInstallLink"
             target="_blank"
-            rel="noopener nofollow">{{ metamaskInstallLink }}</a>
+            rel="noopener nofollow">{{ metamaskInstallLink }}</a>// NOSONAR
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
@@ -49,7 +49,9 @@
       <v-list-item-action>
         <v-btn
           small
-          icon>
+          icon
+          :disabled="savingMetamaskAddress"
+          @click="openDetail">
           <v-icon size="24" class="text-sub-title">
             {{ $vuetify.rtl && 'fa-caret-left' || 'fa-caret-right' }}
           </v-icon>
@@ -111,6 +113,11 @@ export default {
     });
   },
   methods: {
+    openDetail() {
+      this.$emit('open-detail',
+        this.$t('exoplatform.wallet.label.settings.metamask'),
+        this.$t('exoplatform.wallet.message.settingsDescription.metamask'));
+    },
     switchMetamask() {
       if (this.useMetamask) {
         this.connectToMetamask();
@@ -123,9 +130,8 @@ export default {
       this.$root.$emit('wallet-settings-provider-changing', 'INTERNAL_WALLET');
       return switchInternalProvider()
         .then(() => {
-          window.walletSettings.wallet.address = null;
           window.walletSettings.wallet.provider = 'INTERNAL_WALLET';
-          this.$root.$emit('wallet-settings-provider-changed');
+          this.$root.$emit('wallet-settings-provider-changed', 'INTERNAL_WALLET');
         })
         .catch(() => this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider))
         .finally(() => this.savingMetamaskAddress = false);
@@ -145,7 +151,7 @@ export default {
         .then(() => {
           window.walletSettings.wallet.address = selectedAddress;
           window.walletSettings.wallet.provider = 'METAMASK';
-          this.$root.$emit('wallet-settings-provider-changed');
+          this.$root.$emit('wallet-settings-provider-changed', 'METAMASK');
           this.savingMetamaskAddress = false;
         })
         .catch(() => {
