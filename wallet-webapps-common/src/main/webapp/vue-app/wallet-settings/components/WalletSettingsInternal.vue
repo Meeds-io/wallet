@@ -53,7 +53,8 @@ export default {
     openDetail() {
       this.$emit('open-detail',
         this.$t('exoplatform.wallet.label.settings.internal'),
-        this.$t('exoplatform.wallet.message.settingsDescription.internal'));
+        this.$t('exoplatform.wallet.message.settingsDescription.internal'),
+        this.$t('exoplatform.wallet.message.manageDigitalKey.internal'));
     },
   },
 };

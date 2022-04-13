@@ -44,7 +44,7 @@
             small
             icon
             @click="openWalletBackUpDrawer">
-            <v-icon class="uiIconEdit uiIconLightBlue pb-2" />
+            <i class="uiIconEdit uiIconLightBlue pb-2"></i>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -63,7 +63,7 @@
             small
             icon
             @click="openWalletImportKeyDrawer">
-            <v-icon class="uiIconEdit uiIconLightBlue pb-2" />
+            <i class="uiIconEdit uiIconLightBlue pb-2"></i>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -82,7 +82,7 @@
             small
             icon
             @click="openDeleteConfirmationModal">
-            <v-icon class="uiIconTrash uiIconLightBlue pb-2" />
+            <i class="uiIconTrash uiIconLightBlue pb-2"></i>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
