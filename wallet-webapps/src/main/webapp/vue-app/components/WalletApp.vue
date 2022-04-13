@@ -412,13 +412,13 @@ export default {
       }
     },
     refreshWallet() {
-      this.wallet.loading = true;
+      this.loading = true;
       return this.addressRegistry.refreshWallet(this.wallet, true)
         .then(() => {
-          this.wallet.fiatBalance = this.wallet.fiatBalance || (this.wallet.etherBalance && this.walletUtils.etherToFiat(this.wallet.etherBalance));
+          this.init();
         })
         .finally(() => {
-          this.wallet.loading = false;
+          this.loading = false;
         });
     }
   },

@@ -634,7 +634,7 @@ public class WalletAccountREST implements ResourceContainer {
 
   @GET
   @Path("refreshWalletFromBlockchain")
-  @RolesAllowed("rewarding")
+  @RolesAllowed("users")
   @ApiOperation(value = "force refresh wallet from blockchain", httpMethod = "GET", response = Response.class, notes = "returns no response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.NO_CONTENT, message = "Request fulfilled"),
