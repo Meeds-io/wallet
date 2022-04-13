@@ -19,6 +19,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div class="summaryBalanceLabels">
       <span class="balance"> {{ $t('exoplatform.wallet.label.balance') }} : </span>
       <span class="symbol"> {{ contractDetails.symbol }} </span>  {{ balance }}
+      <v-btn
+        id="walletAppMenuRefreshButton"
+        :title="$t('exoplatform.wallet.button.refreshWallet')"
+        icon
+        text
+        class="mr-0 me-0"
+        @click="$emit('refresh')">
+        <v-icon size="24" class="mb-1">
+          refresh
+        </v-icon>
+      </v-btn>
     </div>
   </v-flex>
 </template>
