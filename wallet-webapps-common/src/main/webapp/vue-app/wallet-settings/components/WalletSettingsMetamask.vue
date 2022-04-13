@@ -31,7 +31,7 @@
           <a
             :href="metamaskInstallLink"
             target="_blank"
-            rel="noopener nofollow">{{ metamaskInstallLink }}</a>
+            rel="noopener nofollow">{{ metamaskInstallLink }}</a>// NOSONAR
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
