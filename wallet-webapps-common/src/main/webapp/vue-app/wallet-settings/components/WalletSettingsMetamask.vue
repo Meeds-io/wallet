@@ -31,7 +31,7 @@
           <a
             :href="metamaskInstallLink"
             target="_blank"
-            rel="noopener nofollow">{{ metamaskInstallLink }}</a>// NOSONAR
+            rel="noopener nofollow">{{ metamaskInstallLink }}</a>
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
@@ -116,7 +116,8 @@ export default {
     openDetail() {
       this.$emit('open-detail',
         this.$t('exoplatform.wallet.label.settings.metamask'),
-        this.$t('exoplatform.wallet.message.settingsDescription.metamask'));
+        this.$t('exoplatform.wallet.message.settingsDescription.metamask'),
+        this.$t('exoplatform.wallet.message.manageDigitalKey.metamask'));
     },
     switchMetamask() {
       if (this.useMetamask) {
