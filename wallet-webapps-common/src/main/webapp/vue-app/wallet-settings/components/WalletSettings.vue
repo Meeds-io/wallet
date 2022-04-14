@@ -6,6 +6,7 @@
       :is-space="isSpace"
       :title="detailsTitle"
       :description="detailsDescription"
+      :message-digital-key="detailsmessageDigitalKey"
       :class="walletSettingsClass"
       @back="closeDetail" />
     <v-card
@@ -102,10 +103,11 @@ export default {
           });
         });
     },
-    openDetail(title, description) {
+    openDetail(title, description, messageDigitalKey) {
       document.dispatchEvent(new CustomEvent('hideSettingsApps', { detail: this.id }));
       this.detailsTitle = title;
       this.detailsDescription = description;
+      this.detailsmessageDigitalKey = messageDigitalKey;
       this.displayDetails = true;
     },
     closeDetail() {

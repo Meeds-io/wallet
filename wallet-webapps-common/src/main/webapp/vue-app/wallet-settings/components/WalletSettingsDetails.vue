@@ -40,7 +40,7 @@
             {{ $t('exoplatform.wallet.label.ethereumAddress') }}
           </v-list-item-title>
           <v-list-item-subtitle>
-            {{ $t('exoplatform.wallet.message.manageDigitalKey') }}
+            {{ messageDigitalKey }}
           </v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action v-if="walletAddress">
@@ -66,6 +66,10 @@ export default {
       default: null,
     },
     description: {
+      type: String,
+      default: null,
+    },
+    messageDigitalKey: {
       type: String,
       default: null,
     },
