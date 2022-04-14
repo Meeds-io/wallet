@@ -62,6 +62,7 @@
 </template>
 <script>
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
+import {getNewTransactionNonce, getTransactionCount} from '../../js/TokenUtils.js';
 export default {
   props: {
     walletSettings: {
@@ -96,7 +97,7 @@ export default {
     },
     metamaskAddressPreview(){
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
-    }
+    },
   },
   watch: {
     walletSettings: {
@@ -147,7 +148,8 @@ export default {
         .then(() => this.retrieveAddress())
         .then((retrievedAddress) => {
           selectedAddress = retrievedAddress;
-          return this.signMessage(retrievedAddress);
+          //return this.signMessage(retrievedAddress);
+          return this.getNonce(retrievedAddress);
         })
         .then(() => {
           window.walletSettings.wallet.address = selectedAddress;
@@ -166,8 +168,23 @@ export default {
           return retrievedAddress[0];
         });
     },
-    signMessage(address) {
-      const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage');
+    getNonce(retrievedAddress) {
+      if (this.walletSettings.wallet.backedUp){
+        console.log('re1', this.metamaskAddress);
+        getNewTransactionNonce(this.metamaskAddress)
+          .then(computedNonce =>  {console.log('computedNonce1', computedNonce);
+            return computedNonce;})
+          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      } else {
+        console.log('re2', this.metamaskAddress);
+        getTransactionCount(this.metamaskAddress)
+          .then(computedNonce => { console.log('computedNonce2', computedNonce);
+            return computedNonce;})
+          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      }
+    },
+    signMessage(address, nonce) {
+      const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: nonce});
       return window.ethereum.request({
         method: 'personal_sign',
         params: [rawMessage, address, ''],
