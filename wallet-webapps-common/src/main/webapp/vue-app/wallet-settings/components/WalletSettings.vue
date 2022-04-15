@@ -78,7 +78,7 @@ export default {
     if (this.isSpace) {
       this.checkWalletInstalled();
     }
-
+    
     if (window.walletSettings && window.walletSettings.wallet) {
       this.walletSettings = Object.assign({}, window.walletSettings);
       this.walletUtils.initWeb3(this.isSpace, true);

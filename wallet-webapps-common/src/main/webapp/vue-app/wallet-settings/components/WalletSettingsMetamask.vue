@@ -62,7 +62,7 @@
 </template>
 <script>
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
-import {getNewTransactionNonce, getTransactionCount} from '../../js/TokenUtils.js';
+import {getNewTransactionNonce} from '../../js/TokenUtils.js';
 export default {
   props: {
     walletSettings: {
@@ -148,8 +148,7 @@ export default {
         .then(() => this.retrieveAddress())
         .then((retrievedAddress) => {
           selectedAddress = retrievedAddress;
-          //return this.signMessage(retrievedAddress);
-          return this.getNonce(retrievedAddress);
+          return this.getComputedNonce(retrievedAddress);
         })
         .then(() => {
           window.walletSettings.wallet.address = selectedAddress;
@@ -168,23 +167,14 @@ export default {
           return retrievedAddress[0];
         });
     },
-    getNonce(retrievedAddress) {
-      if (this.walletSettings.wallet.backedUp){
-        console.log('re1', this.metamaskAddress);
-        getNewTransactionNonce(this.metamaskAddress)
-          .then(computedNonce =>  {console.log('computedNonce1', computedNonce);
-            return computedNonce;})
-          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      } else {
-        console.log('re2', this.metamaskAddress);
-        getTransactionCount(this.metamaskAddress)
-          .then(computedNonce => { console.log('computedNonce2', computedNonce);
-            return computedNonce;})
-          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      }
+    getComputedNonce(retrievedAddress) {
+      getNewTransactionNonce(retrievedAddress)
+        .then(computedNonce => {return computedNonce;})
+        .then((nonce)=> this.signMessage(retrievedAddress, nonce));
     },
     signMessage(address, nonce) {
-      const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: nonce});
+      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: nonce});
+      rawMessage = rawMessage.split(/\\n/g).join('\u000A');
       return window.ethereum.request({
         method: 'personal_sign',
         params: [rawMessage, address, ''],
@@ -201,7 +191,8 @@ export default {
             message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')
           });
         });
-    }
+    },
+   
   }
 };
 </script>
