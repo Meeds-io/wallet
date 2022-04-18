@@ -62,7 +62,7 @@
 </template>
 <script>
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
-import {getNewTransactionNonce} from '../../js/TokenUtils.js';
+import {getNewTransactionNonce, getTransactionCount} from '../../js/TokenUtils.js';
 export default {
   props: {
     walletSettings: {
@@ -98,6 +98,9 @@ export default {
     metamaskAddressPreview(){
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
     },
+    isEmptyPassphrase(){
+      return window.walletSettings.wallet.passPhrase === null;
+    }
   },
   watch: {
     walletSettings: {
@@ -154,7 +157,6 @@ export default {
           window.walletSettings.wallet.address = selectedAddress;
           window.walletSettings.wallet.provider = 'METAMASK';
           this.$root.$emit('wallet-settings-provider-changed', 'METAMASK');
-          this.savingMetamaskAddress = false;
         })
         .catch(() => {
           this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
@@ -168,9 +170,16 @@ export default {
         });
     },
     getComputedNonce(retrievedAddress) {
-      getNewTransactionNonce(retrievedAddress)
-        .then(computedNonce => {return computedNonce;})
-        .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      if (!this.isEmptyPassphrase){
+        getNewTransactionNonce(this.metamaskAddress)
+          .then(computedNonce => {return computedNonce;})
+          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      } else {
+        getTransactionCount(retrievedAddress)
+          .then(computedNonce => {return computedNonce;})
+          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      }
+      
     },
     signMessage(address, nonce) {
       let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: nonce});
@@ -178,11 +187,19 @@ export default {
       return window.ethereum.request({
         method: 'personal_sign',
         params: [rawMessage, address, ''],
-      }).then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
+      })
+        .then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage))
+        .catch(()=>{
+          this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
+          this.$root.$emit('wallet-settings-provider-changed', 'INTERNAL_WALLET');
+          this.savingMetamaskAddress = false;
+          this.useMetamask = false;
+        });
     },
     saveProvider(provider, address, rawMessage, signedMessage){
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
+          this.savingMetamaskAddress = false;
           window.walletSettings.wallet.address = address;
           window.walletSettings.wallet.provider = 'METAMASK';
 
