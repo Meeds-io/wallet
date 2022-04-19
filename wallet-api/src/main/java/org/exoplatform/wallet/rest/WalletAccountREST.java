@@ -21,7 +21,9 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -35,6 +37,7 @@ import org.exoplatform.wallet.model.*;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletService;
+import org.exoplatform.wallet.utils.WalletUtils;
 
 import io.swagger.annotations.*;
 
@@ -319,7 +322,8 @@ public class WalletAccountREST implements ResourceContainer {
                                      @ApiParam(value = "Signed Raw message by external Wallet Provider", required = false)  @FormParam("rawMessage")
                                      String rawMessage,
                                      @ApiParam(value = "Signed message by external Wallet Provider", required = false)  @FormParam("signedMessage")
-                                     String signedMessage) {
+                                     String signedMessage,
+                                     @Context HttpServletRequest request) {
     if (provider == null) {
       return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty provider").build();
     }
@@ -340,6 +344,10 @@ public class WalletAccountREST implements ResourceContainer {
       if (provider == WalletProvider.INTERNAL_WALLET) {
         accountService.switchToInternalWallet(currentUserIdentityId);
       } else {
+        String token = WalletUtils.getToken(request.getSession());
+        if (!StringUtils.contains(rawMessage, token)) {
+          return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with invalid signed message").build();
+        }
         accountService.switchWalletProvider(currentUserIdentityId, provider, address, rawMessage, signedMessage);
       }
       return Response.noContent().build();
