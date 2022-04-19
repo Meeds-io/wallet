@@ -62,7 +62,6 @@
 </template>
 <script>
 import {switchProvider, switchInternalProvider} from '../../js/AddressRegistry.js';
-import {getNewTransactionNonce, getTransactionCount} from '../../js/TokenUtils.js';
 export default {
   props: {
     walletSettings: {
@@ -100,6 +99,9 @@ export default {
     },
     isEmptyPassphrase(){
       return window.walletSettings.wallet.passPhrase === null;
+    },
+    generatedToken(){
+      return this.$parent.$data.generatedToken;
     }
   },
   watch: {
@@ -169,20 +171,22 @@ export default {
           return retrievedAddress[0];
         });
     },
-    getComputedNonce(retrievedAddress) {
-      if (!this.isEmptyPassphrase){
-        getNewTransactionNonce(this.metamaskAddress)
-          .then(computedNonce => {return computedNonce;})
-          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      } else {
-        getTransactionCount(retrievedAddress)
-          .then(computedNonce => {return computedNonce;})
-          .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      }
+    getComputedNonce() {
+      console.log('hetr');
+      console.log('tub',this.$parent.$data.generatedToken);
+      // if (!this.isEmptyPassphrase){
+      //   getNewTransactionNonce(this.metamaskAddress)
+      //     .then(computedNonce => {return computedNonce;})
+      //     .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      // } else {
+      //   getTransactionCount(retrievedAddress)
+      //     .then(computedNonce => {return computedNonce;})
+      //     .then((nonce)=> this.signMessage(retrievedAddress, nonce));
+      // }
       
     },
-    signMessage(address, nonce) {
-      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: nonce});
+    signMessage(address) {
+      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: this.$parent.$data.generatedToken});
       rawMessage = rawMessage.split(/\\n/g).join('\u000A');
       return window.ethereum.request({
         method: 'personal_sign',

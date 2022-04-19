@@ -18,7 +18,7 @@
         <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="title text-color">
-              {{ $t('exoplatform.wallet.label.settings.internal') }}
+              {{ $t('exoplatform.wallet.label.settings.internal') }}nhb
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
