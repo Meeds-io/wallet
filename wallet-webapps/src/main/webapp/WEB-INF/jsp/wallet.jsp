@@ -1,4 +1,5 @@
-<!--
+<%
+/*
 This file is part of the Meeds project (https://meeds.io/).
 Copyright (C) 2020 Meeds Association
 contact@meeds.io
@@ -13,11 +14,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
--->
+*/
+%>
+<%
+String generatedToken = org.exoplatform.wallet.utils.WalletUtils.generateToken(session);
+%>
 <div class="VuetifyApp">
   <div id="WalletApp">
     <script>
-      require(['PORTLET/wallet/Wallet'], app => app.init())
+      require(['PORTLET/wallet/Wallet'], app => app.init('<%=generatedToken%>'))
     </script>
   </div>
 </div>
