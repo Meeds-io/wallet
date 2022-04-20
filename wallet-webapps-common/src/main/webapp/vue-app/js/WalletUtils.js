@@ -608,7 +608,7 @@ function createLocalWeb3Instance(isSpace) {
   if (window.walletSettings && window.walletSettings.network && window.walletSettings.wallet && window.walletSettings.network.providerURL) {
     const provider = new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL);
     window.localWeb3 = new LocalWeb3(provider);
-    if (window.walletSettings.wallet?.address){
+    if (window.walletSettings.wallet?.address) {
       window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
     }
 

@@ -94,15 +94,12 @@ export default {
     metamaskAddress() {
       return this.useMetamask && this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.address;
     },
-    metamaskAddressPreview(){
+    metamaskAddressPreview() {
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
     },
-    isEmptyPassphrase(){
-      return window.walletSettings.wallet.passPhrase === null;
-    },
-    generatedToken(){
+    generatedToken() {
       return this.$root.generatedToken;
-    }
+    },
   },
   watch: {
     walletSettings: {
@@ -186,7 +183,7 @@ export default {
           this.useMetamask = false;
         });
     },
-    saveProvider(provider, address, rawMessage, signedMessage){
+    saveProvider(provider, address, rawMessage, signedMessage) {
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
           this.savingMetamaskAddress = false;
@@ -199,7 +196,6 @@ export default {
           });
         });
     },
-   
   }
 };
 </script>

@@ -18,7 +18,7 @@
         <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="title text-color">
-              {{ $t('exoplatform.wallet.label.settings.internal') }}nhb
+              {{ $t('exoplatform.wallet.label.settings.internal') }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -78,7 +78,7 @@ export default {
     if (this.isSpace) {
       this.checkWalletInstalled();
     }
-    
+
     if (window.walletSettings && window.walletSettings.wallet) {
       this.walletSettings = Object.assign({}, window.walletSettings);
       this.walletUtils.initWeb3(this.isSpace, true);
