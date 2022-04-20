@@ -26,6 +26,7 @@ import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.security.SecureRandom;
 
 import javax.servlet.http.HttpSession;
 
@@ -324,7 +325,7 @@ public class WalletUtils {
 
   public static final String                          LOGIN_MESSAGE_ATTRIBUTE_NAME             = "login_message";
 
-  public static final Random                          RANDOM                                   = new Random();
+  public static final SecureRandom                    SecureRandom                             = new SecureRandom();
 
   public static String                                blockchainUrlSuffix                      = null;                                 // NOSONAR
 
@@ -1041,7 +1042,7 @@ public class WalletUtils {
   public static String generateToken(HttpSession session) {
     String token = getToken(session);
     if (token == null) {
-      token = RANDOM.nextLong() + "-" + RANDOM.nextLong() + "-" + RANDOM.nextLong();
+      token = SecureRandom.nextLong() + "-" + SecureRandom.nextLong() + "-" + SecureRandom.nextLong();
       session.setAttribute(LOGIN_MESSAGE_ATTRIBUTE_NAME, token); // NOSONAR
     }
     return token;
