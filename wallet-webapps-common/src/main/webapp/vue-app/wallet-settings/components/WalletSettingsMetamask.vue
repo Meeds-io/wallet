@@ -156,6 +156,7 @@ export default {
           window.walletSettings.wallet.address = selectedAddress;
           window.walletSettings.wallet.provider = 'METAMASK';
           this.$root.$emit('wallet-settings-provider-changed', 'METAMASK');
+          this.savingMetamaskAddress = false;
         })
         .catch(() => {
           this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
@@ -175,18 +176,11 @@ export default {
         method: 'personal_sign',
         params: [rawMessage, address, ''],
       })
-        .then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage))
-        .catch(()=>{
-          this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
-          this.$root.$emit('wallet-settings-provider-changed', 'INTERNAL_WALLET');
-          this.savingMetamaskAddress = false;
-          this.useMetamask = false;
-        });
+        .then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
     },
     saveProvider(provider, address, rawMessage, signedMessage) {
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
-          this.savingMetamaskAddress = false;
           window.walletSettings.wallet.address = address;
           window.walletSettings.wallet.provider = 'METAMASK';
 

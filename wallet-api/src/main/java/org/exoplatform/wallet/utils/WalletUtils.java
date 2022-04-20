@@ -325,7 +325,7 @@ public class WalletUtils {
 
   public static final String                          LOGIN_MESSAGE_ATTRIBUTE_NAME             = "login_message";
 
-  public static final SecureRandom                    SecureRandom                             = new SecureRandom();
+  public static final Random                          Random                                   = new Random();
 
   public static String                                blockchainUrlSuffix                      = null;                                 // NOSONAR
 
@@ -1042,7 +1042,7 @@ public class WalletUtils {
   public static String generateToken(HttpSession session) {
     String token = getToken(session);
     if (token == null) {
-      token = SecureRandom.nextLong() + "-" + SecureRandom.nextLong() + "-" + SecureRandom.nextLong();
+      token = Random.nextLong() + "-" + Random.nextLong() + "-" + Random.nextLong();
       session.setAttribute(LOGIN_MESSAGE_ATTRIBUTE_NAME, token); // NOSONAR
     }
     return token;
