@@ -605,10 +605,12 @@ function isWalletUnlocked(address) {
 }
 
 function createLocalWeb3Instance(isSpace) {
-  if (window.walletSettings && window.walletSettings.network && window.walletSettings.wallet && window.walletSettings.wallet.address && window.walletSettings.network.providerURL) {
+  if (window.walletSettings && window.walletSettings.network && window.walletSettings.wallet && window.walletSettings.network.providerURL) {
     const provider = new LocalWeb3.providers.HttpProvider(window.walletSettings.network.providerURL);
     window.localWeb3 = new LocalWeb3(provider);
-    window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
+    if (window.walletSettings.wallet?.address) {
+      window.localWeb3.eth.defaultAccount = window.walletSettings.wallet.address.toLowerCase();
+    }
 
     if (isSpace && !window.walletSettings.wallet.spaceAdministrator) {
       window.walletSettings.isReadOnly = true;

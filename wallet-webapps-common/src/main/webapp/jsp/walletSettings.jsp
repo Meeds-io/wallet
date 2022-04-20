@@ -1,4 +1,10 @@
-<!--
+<%@ page import="javax.servlet.http.HttpServletRequest" %>
+<%@ page import="javax.servlet.http.HttpSession" %>
+<%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
+<%@ page import="org.exoplatform.web.application.RequestContext" %>
+<%@ page import="org.exoplatform.wallet.utils.WalletUtils" %>
+<%
+/*
 This file is part of the Meeds project (https://meeds.io/).
 Copyright (C) 2020 Meeds Association
 contact@meeds.io
@@ -13,13 +19,19 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
--->
+*/
+%>
+<%
+HttpServletRequest httpRequest = ((WebuiRequestContext) RequestContext.getCurrentInstance()).getRequest();
+HttpSession httpSession = httpRequest.getSession();
+String generatedToken = WalletUtils.generateToken(httpSession);
+%>
 <div class="VuetifyApp">
     <div data-app="true"
          class="v-application v-application--is-ltr"
          id="walletSettingsApp">
         <script type="text/javascript">
-            require(['PORTLET/wallet-common/WalletSettings'], app => app.init());
+            require(['PORTLET/wallet-common/WalletSettings'], app => app.init('<%=generatedToken%>'));
         </script>
     </div>
 </div>
