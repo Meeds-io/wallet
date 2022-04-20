@@ -94,9 +94,12 @@ export default {
     metamaskAddress() {
       return this.useMetamask && this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.address;
     },
-    metamaskAddressPreview(){
+    metamaskAddressPreview() {
       return this.metamaskAddress && `${this.metamaskAddress.substring(0,5)}...${this.metamaskAddress.substring(this.metamaskAddress.length-4,this.metamaskAddress.length)}`;
-    }
+    },
+    generatedToken() {
+      return this.$root.generatedToken;
+    },
   },
   watch: {
     walletSettings: {
@@ -167,13 +170,15 @@ export default {
         });
     },
     signMessage(address) {
-      const rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage');
+      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: this.generatedToken});
+      rawMessage = rawMessage.split(/\\n/g).join('\u000A');
       return window.ethereum.request({
         method: 'personal_sign',
         params: [rawMessage, address, ''],
-      }).then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
+      })
+        .then(signedMessage => this.saveProvider('METAMASK', address, rawMessage, signedMessage));
     },
-    saveProvider(provider, address, rawMessage, signedMessage){
+    saveProvider(provider, address, rawMessage, signedMessage) {
       return switchProvider(provider, address, rawMessage, signedMessage)
         .then(() => {
           window.walletSettings.wallet.address = address;
@@ -184,7 +189,7 @@ export default {
             message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')
           });
         });
-    }
+    },
   }
 };
 </script>
