@@ -101,7 +101,7 @@ export default {
       return window.walletSettings.wallet.passPhrase === null;
     },
     generatedToken(){
-      return this.$parent.$data.generatedToken;
+      return this.$root.generatedToken;
     }
   },
   watch: {
@@ -153,7 +153,7 @@ export default {
         .then(() => this.retrieveAddress())
         .then((retrievedAddress) => {
           selectedAddress = retrievedAddress;
-          return this.getComputedNonce(retrievedAddress);
+          return this.signMessage(retrievedAddress);
         })
         .then(() => {
           window.walletSettings.wallet.address = selectedAddress;
@@ -171,22 +171,8 @@ export default {
           return retrievedAddress[0];
         });
     },
-    getComputedNonce() {
-      console.log('hetr');
-      console.log('tub',this.$parent.$data.generatedToken);
-      // if (!this.isEmptyPassphrase){
-      //   getNewTransactionNonce(this.metamaskAddress)
-      //     .then(computedNonce => {return computedNonce;})
-      //     .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      // } else {
-      //   getTransactionCount(retrievedAddress)
-      //     .then(computedNonce => {return computedNonce;})
-      //     .then((nonce)=> this.signMessage(retrievedAddress, nonce));
-      // }
-      
-    },
     signMessage(address) {
-      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: this.$parent.$data.generatedToken});
+      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: this.generatedToken});
       rawMessage = rawMessage.split(/\\n/g).join('\u000A');
       return window.ethereum.request({
         method: 'personal_sign',

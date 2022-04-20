@@ -25,12 +25,9 @@ const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
 
-export function init(generatedToken) {
+export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
     new Vue({
-      data: () => ({
-        generatedToken,
-      }),
       render: (h) => h(WalletApp),
       i18n,
       vuetify,
