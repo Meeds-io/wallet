@@ -223,7 +223,7 @@ export default {
       this.$refs.walletSummaryActions.open();
     },
     prepareSendForm() {
-      this.$refs.walletSummaryActions.init();
+      this.$refs.walletSummaryActions?.init();
     },
   },
 };
