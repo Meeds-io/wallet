@@ -44,7 +44,7 @@ export default {
   }),
   computed: {
     isSpace() {
-      return eXo.env.portal.spaceId || (this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0);
+      return eXo.env.portal.spaceId !== '' || (this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0);
     },
     walletSettingsClass() {
       return eXo.env.portal.spaceName ? '': 'ma-4' ;

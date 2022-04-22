@@ -334,7 +334,7 @@ public class WalletStorage {
   @ExoTransactional
   public void switchToWalletProvider(long walletId, WalletProvider provider, String newAddress) {
     WalletEntity walletEntity = walletAccountDAO.find(walletId);
-    if (walletEntity.getProvider() == WalletProvider.INTERNAL_WALLET) {
+    if (walletEntity.getProvider() == WalletProvider.INTERNAL_WALLET && walletEntity.getInitializationState() != WalletState.DELETED) {
       WalletBackupEntity walletBackupEntity = walletAccountBackupDAO.findByWalletId(walletId);
       boolean isNew = walletBackupEntity == null;
       if (isNew) {
@@ -351,6 +351,9 @@ public class WalletStorage {
 
     walletEntity.setAddress(newAddress);
     walletEntity.setProvider(provider);
+    if(walletEntity.getInitializationState() == WalletState.DELETED){
+      walletEntity.setInitializationState(WalletState.MODIFIED);
+    }
     walletAccountDAO.update(walletEntity);
   }
 
