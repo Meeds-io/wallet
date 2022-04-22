@@ -120,7 +120,7 @@ export function initWeb3(isSpace) {
 }
 
 export function initSettings(isSpace, useCometd, isAdministration) {
-  const spaceId = (isSpace && window.walletSpaceGroup) || '';
+  const spaceId = (isSpace && eXo.env.portal.spaceId) || '';
   isAdministration = isAdministration || false;
 
   clearCache();

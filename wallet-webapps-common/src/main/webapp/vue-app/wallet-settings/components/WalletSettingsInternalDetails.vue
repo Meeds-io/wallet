@@ -8,8 +8,8 @@
       display-remember-me
       class="d-flex"
       @back="closeManagePasswordDetails" />
-    <template v-else-if="!isDeleted">
-      <v-list-item>
+    <template v-else>
+      <v-list-item v-if="!isDeleted && walletAddress">
         <v-list-item-content>
           <v-list-item-title class="title text-color">
             {{ $t('exoplatform.wallet.label.managePassword') }}
@@ -29,8 +29,8 @@
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-      <v-divider />
-      <v-list-item>
+      <v-divider v-if="!isDeleted && walletAddress" />
+      <v-list-item v-if="!isDeleted && walletAddress">
         <v-list-item-content>
           <v-list-item-title class="title text-color">
             {{ $t('exoplatform.wallet.title.backupWalletModal') }}
@@ -48,7 +48,7 @@
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-      <v-divider />
+      <v-divider v-if="!isDeleted && walletAddress" />
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title text-color">
@@ -67,8 +67,8 @@
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-      <v-divider />
-      <v-list-item class="deleteWallet">
+      <v-divider v-if="!isDeleted && walletAddress" />
+      <v-list-item class="deleteWallet" v-if="!isDeleted && walletAddress">
         <v-list-item-content>
           <v-list-item-title class="title deleteText">
             {{ $t('exoplatform.wallet.title.deleteWalletConfirmationModal') }}
@@ -86,7 +86,6 @@
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-      <v-divider />
     </template>
     <wallet-reward-import-key-drawer
       ref="walletImportKey"
@@ -98,13 +97,6 @@
       class="walletBackup"
       display-complete-message
       no-button />
-    <v-alert
-      v-model="alert"
-      :type="type"
-      class="walletAlert"
-      dismissible>
-      {{ message }}
-    </v-alert>
     <wallet-reward-confirm-dialog
       ref="informationModal"
       :loading="loading"
@@ -141,6 +133,9 @@ export default {
     wallet() {
       return this.walletSettings && this.walletSettings.wallet;
     },
+    walletAddress() {
+      return this.walletSettings && this.walletSettings.wallet && this.walletSettings.wallet.address;
+    },
     initializationState() {
       return this.wallet && this.wallet.address && this.wallet.initializationState ;
     },
@@ -156,11 +151,6 @@ export default {
       },
     },
   },
-  created(){
-    this.$root.$on('show-alert', message => {
-      this.displayMessage(message);
-    });
-  },
   methods: {
     openManagePasswordDetails() {
       this.$emit('close-details');
@@ -175,12 +165,6 @@ export default {
     },
     openWalletBackUpDrawer() {
       this.$refs.walletBackup.open();
-    },
-    displayMessage(message) {
-      this.message=message.message;
-      this.type=message.type;
-      this.alert = true;
-      window.setTimeout(() => this.alert = false, 5000);
     },
     openDeleteConfirmationModal() {
       this.$refs.informationModal.open();
