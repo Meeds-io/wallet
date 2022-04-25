@@ -351,6 +351,22 @@ export function getTransactionEtherscanlink() {
   }
 }
 
+export function getNetworkLink() {
+  switch (window.walletSettings.network.id) {
+  case 1:
+    return 'https://etherscan.io';
+  case 3:
+    return 'https://ropsten.etherscan.io';
+  case 5:
+    return 'https://goerli.etherscan.io';
+  case 80001:
+  case 137 :
+    return 'https://polygon.technology';
+  default:
+    return '#';
+  }
+}
+
 export function getCurrentBrowserWallet() {
   return window && window.localWeb3 && window.localWeb3.eth.accounts.wallet && window.walletSettings.wallet.address && window.localWeb3.eth.accounts.wallet[window.walletSettings.wallet.address];
 }
