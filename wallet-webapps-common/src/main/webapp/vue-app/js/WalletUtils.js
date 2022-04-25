@@ -156,7 +156,7 @@ export function initSettings(isSpace, useCometd, isAdministration) {
       }
     })
     .then(() => {
-      if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.wallet.address) {
+      if (window.walletSettings.userPreferences && window.walletSettings.userPreferences.hasKeyOnServerSide && window.walletSettings.wallet.address && window.walletSettings.wallet.provider === 'INTERNAL_WALLET') {
         return retrievePrivateKeyFromServer(window.walletSettings.wallet.address)
           .then((privateKey) => {
             if (!privateKey) {
@@ -169,13 +169,16 @@ export function initSettings(isSpace, useCometd, isAdministration) {
       }
     })
     .then(() => {
-      window.walletSettings.browserWalletExists = browserWalletExists(window.walletSettings.wallet.address);
-      const address = window.walletSettings.wallet.address;
-      if (address) {
-        window.walletSettings.userP = localStorage.getItem(`exo-wallet-${address}-userp`);
-        window.walletSettings.storedPassword = window.walletSettings.userP && window.walletSettings.userP.length > 0;
+      if ( window.walletSettings.wallet.provider === 'INTERNAL_WALLET' ){
+        window.walletSettings.browserWalletExists = browserWalletExists(window.walletSettings.wallet.address);
+        const address = window.walletSettings.wallet.address;
+        if (address) {
+          window.walletSettings.userP = localStorage.getItem(`exo-wallet-${address}-userp`);
+          window.walletSettings.storedPassword = window.walletSettings.userP && window.walletSettings.userP.length > 0;
+        }
+      } else {
+        window.walletSettings.browserWalletExists = true;
       }
-
       const accountId = getRemoteId(isSpace);
       if (isSpace && accountId) {
         return initSpaceAccount(accountId);
