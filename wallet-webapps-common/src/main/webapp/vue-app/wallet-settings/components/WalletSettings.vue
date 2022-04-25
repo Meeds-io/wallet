@@ -92,6 +92,12 @@ export default {
         .finally(() => this.$root.$applicationLoaded());
     }
   },
+    mounted(){
+    if (window.location.href.includes('/settings?from=walletApp&id') || window.location.href.includes('/settings?from=space&id')) {
+      window.location.hash='#walletSettingsApp';
+      return window.location.href;
+    }
+  },
   methods: {
     checkWalletInstalled() {
       this.displayed = false;
