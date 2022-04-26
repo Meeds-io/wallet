@@ -93,7 +93,7 @@ export default {
     }
   },
   mounted(){
-    if (window.location.href.includes('toWalletSetting')) {
+    if (window.location.href.includes('walletSetting')) {
       window.location.hash='#walletSettingsApp';
       return window.location.href;
     }
