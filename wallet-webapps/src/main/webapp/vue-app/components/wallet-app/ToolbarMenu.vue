@@ -55,7 +55,7 @@ export default {
   methods: {
     openSettings() {
       if (this.wallet.type === 'space'){
-        return window.location.href = `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings?toWalletSetting`;
+        return window.location.href = `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings?walletSetting`;
       } else {
         return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings?toWalletSetting`;
       }
