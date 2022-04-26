@@ -142,10 +142,6 @@ export default {
         .then(() => {
           window.walletSettings.wallet.provider = 'INTERNAL_WALLET';
           this.$root.$emit('wallet-settings-provider-changed', 'INTERNAL_WALLET');
-        })
-        .catch(() => this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider))
-        .finally(() => {
-          this.savingMetamaskAddress = false;
           if (this.isEmptyPassphrase || this.isDeleted) {
             if (this.walletSettings.wallet.type === 'user') {
               return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
@@ -153,6 +149,10 @@ export default {
               return window.location.href =  `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/SpaceWallet`;
             }
           }
+        })
+        .catch(() => this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider))
+        .finally(() => {
+          this.savingMetamaskAddress = false;
         });
     },
     connectToMetamask() {
