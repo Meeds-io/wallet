@@ -55,9 +55,9 @@ export default {
   methods: {
     openSettings() {
       if (this.wallet.type === 'space'){
-        return window.location.href = `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings?from=space&id=${this.wallet.id}&type=${this.wallet.type}`;
+        return window.location.href = `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/settings?toWalletSetting`;
       } else {
-        return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings?from=walletApp&id=${this.wallet.id}&type=${this.wallet.type}`;
+        return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/settings?toWalletSetting`;
       }
     }
   }
