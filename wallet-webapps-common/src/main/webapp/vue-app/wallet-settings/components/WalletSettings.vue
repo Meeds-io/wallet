@@ -92,7 +92,7 @@ export default {
         .finally(() => this.$root.$applicationLoaded());
     }
   },
-    mounted(){
+  mounted(){
     if (window.location.href.includes('toWalletSetting')) {
       window.location.hash='#walletSettingsApp';
       return window.location.href;
