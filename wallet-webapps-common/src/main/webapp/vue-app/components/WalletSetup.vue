@@ -126,7 +126,7 @@ export default {
       return this.wallet && this.wallet.provider === 'INTERNAL_WALLET' && !this.loading && this.walletAddress && !this.browserWalletExists && this.isReadOnly && (!this.isSpace || this.isSpaceAdministrator);
     },
     displayWalletBackup() {
-      return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp && this.initializationState !== 'DELETED';
+      return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp && this.initializationState !== 'DELETED' && (this.wallet && this.wallet.provider === 'INTERNAL_WALLET');
     },
     displayWalletBrowserSetup() {
       return this.displayWalletSetup && (this.wallet && !this.wallet.address ||  this.initializationState === 'DELETED');
