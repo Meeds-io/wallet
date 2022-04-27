@@ -171,13 +171,15 @@ public class TransactionStorage {
                                                                                       administration);
     // filter transactions having same Nonce and keep last ones
     Map<Long, TransactionEntity> filterTransactions = new HashMap<>();
+   List <TransactionEntity> filteredTransactions = new ArrayList<>();
     for(TransactionEntity transaction : transactions) {
       TransactionEntity transactionDetail = filterTransactions.get(transaction.getNonce());
       if(transactionDetail == null || (transaction.isSuccess() || (!transaction.isSuccess() && !transactionDetail.isSuccess() && transactionDetail.getSentDate() < transaction.getSentDate()))) {
         filterTransactions.put(transaction.getNonce(), transaction);
+        filteredTransactions.add(transaction);
       }
     }
-    return new ArrayList<>(filterTransactions.values());
+    return filteredTransactions;
   }
 
   /**

@@ -218,6 +218,7 @@ export default {
         setTimeout(() => {
           thiss.seeAccountDetailsPermanent = true;
         }, 200);
+        this.$refs.accountDetail.open();
       } else {
         $('body').removeClass('hide-scroll');
 
@@ -396,6 +397,7 @@ export default {
         );
         if (this.walletAddress && this.contractDetails && parameters && parameters.hash) {
           this.openAccountDetail(null, parameters.hash);
+          window.history.replaceState('', window.document.title, window.location.href.split('?')[0]);
         }
       }
     },
