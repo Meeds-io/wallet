@@ -82,9 +82,6 @@ public class WalletTransactionREST implements ResourceContainer {
     if (StringUtils.isNotBlank(transactionDetail.getRawTransaction())) {
       String transactionHash = getWalletTokenAdminService().generateHash(transactionDetail.getRawTransaction());
       transactionDetail.setHash(transactionHash);
-    } else if (StringUtils.isBlank(transactionDetail.getHash())) {
-      LOG.warn("Bad request sent to server with empty transaction hash");
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
     }
 
     try {
