@@ -34,7 +34,7 @@
         :wallet-settings="walletSettings"
         @close-details="hideContent = true"
         @open-details="hideContent = false" />
-      <v-list-item v-if="!isDeleted && !hideContent" class="manageKey">
+      <v-list-item v-if="!isDeleted && !hideContent && walletAddress" class="manageKey">
         <v-list-item-content>
           <v-list-item-title class="title text-color">
             {{ $t('exoplatform.wallet.label.ethereumAddress') }}
@@ -82,9 +82,6 @@ export default {
     id: `WalletSettingsDetails${parseInt(Math.random() * 10000)}`,
     displayed: true,
     hideContent: false,
-    alert: false,
-    type: '',
-    message: '',
   }),
   computed: {
     wallet () {
@@ -103,20 +100,7 @@ export default {
       return this.initializationState === 'DELETED';
     },
     isInternalWallet() {
-      return this.provider === 'INTERNAL_WALLET';
-    },
-  },
-  created(){
-    this.$root.$on('show-alert', message => {
-      this.displayMessage(message);
-    });
-  },
-  methods: {
-    displayMessage(message) {
-      this.message=message.message;
-      this.type=message.type;
-      this.alert = true;
-      window.setTimeout(() => this.alert = false, 5000);
+      return !this.provider || this.provider === 'INTERNAL_WALLET' ;
     },
   },
 };

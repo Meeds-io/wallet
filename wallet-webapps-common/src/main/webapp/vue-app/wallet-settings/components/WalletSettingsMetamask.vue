@@ -100,6 +100,12 @@ export default {
     generatedToken() {
       return this.$root.generatedToken;
     },
+    isEmptyPassphrase() {
+      return this.walletSettings.wallet.passPhrase === null;
+    },
+    isDeleted() {
+      return this.walletSettings.wallet.initializationState === 'DELETED';
+    }
   },
   watch: {
     walletSettings: {
@@ -136,9 +142,18 @@ export default {
         .then(() => {
           window.walletSettings.wallet.provider = 'INTERNAL_WALLET';
           this.$root.$emit('wallet-settings-provider-changed', 'INTERNAL_WALLET');
+          if (this.isEmptyPassphrase || this.isDeleted) {
+            if (this.walletSettings.wallet.type === 'user') {
+              return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
+            } else {
+              return window.location.href =  `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/SpaceWallet`;
+            }
+          }
         })
         .catch(() => this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider))
-        .finally(() => this.savingMetamaskAddress = false);
+        .finally(() => {
+          this.savingMetamaskAddress = false;
+        });
     },
     connectToMetamask() {
       this.$root.$emit('wallet-settings-provider-changing', 'METAMASK');
