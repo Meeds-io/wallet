@@ -174,7 +174,7 @@ public class TransactionStorage {
    List <TransactionEntity> filteredTransactions = new ArrayList<>();
     for(TransactionEntity transaction : transactions) {
       TransactionEntity transactionDetail = filterTransactions.get(transaction.getNonce());
-      if(transactionDetail == null || (transaction.isSuccess() || (!transaction.isSuccess() && !transactionDetail.isSuccess() && transactionDetail.getSentDate() < transaction.getSentDate()))) {
+      if(transactionDetail == null || !transactionDetail.getFromAddress().equals(transaction.getFromAddress()) && (transaction.isSuccess() || (!transaction.isSuccess() && !transactionDetail.isSuccess() && transactionDetail.getSentDate() < transaction.getSentDate()))) {
         filterTransactions.put(transaction.getNonce(), transaction);
         filteredTransactions.add(transaction);
       }
