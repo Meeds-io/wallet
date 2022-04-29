@@ -212,7 +212,7 @@ export default {
       return this.provider === 'INTERNAL_WALLET' ;
     },
     disabled() {
-      return !this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || this.isInternalWallet ? (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length)) : false;
+      return !this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length))) ;
     },
     transactionFeeString() {
       if (this.transactionFeeToken) {
