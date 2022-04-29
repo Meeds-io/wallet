@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-btn
       v-if="allowCopy"
       id="copy"
-      title="Copy address"
+      :title="$t('exoplatform.wallet.label.copyAddress')"
       class="ms-0 me-0 mb-0 mt-0"
       icon
       small
