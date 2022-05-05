@@ -199,6 +199,8 @@ export default {
       information: null,
       error: null,
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
+      isSameNetworkVersion: true,
+      isSameAddress: true,
     };
   },
   computed: {
@@ -212,7 +214,7 @@ export default {
       return this.provider === 'INTERNAL_WALLET' ;
     },
     disabled() {
-      return !this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length))) ;
+      return (!this.isSameAddress || !this.isSameNetworkVersion) || (!this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length))));
     },
     transactionFeeString() {
       if (this.transactionFeeToken) {
@@ -557,7 +559,17 @@ export default {
       }
     },
     open(){
+      if (window.walletSettings?.wallet?.provider !== 'INTERNAL_WALLET') {
+        this.isSameNetworkVersion = parseInt(window.ethereum?.networkVersion) === window.walletSettings?.network?.id;
+        this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
+      }
       this.$refs.sendTokensForm.open();
+      if (!this.isSameNetworkVersion){
+        this.$root.$emit('show-alert', {type: 'warning',message: `${this.$t('exoplatform.wallet.warn.networkVersion')}<br>${this.walletUtils.getNetworkLink()}`});
+      }
+      if (!this.isSameAddress){
+        this.$root.$emit('show-alert', {type: 'warning',message: this.$t('exoplatform.wallet.warn.selectedAddress')});
+      }
     },
     close(){
       this.$refs.sendTokensForm.close();

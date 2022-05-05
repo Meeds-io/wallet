@@ -40,6 +40,8 @@ import WalletSettingsInternal from './wallet-settings/components/WalletSettingsI
 import WalletSettingsInternalDetails from './wallet-settings/components/WalletSettingsInternalDetails.vue';
 import WalletSettingsMetamask from './wallet-settings/components/WalletSettingsMetamask.vue';
 import WalletSettings from './wallet-settings/components/WalletSettings.vue';
+import WalletAlert from './components/AlertWalletApp.vue';
+
 
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
@@ -83,6 +85,7 @@ export const components = {
   'wallet-settings-internal': WalletSettingsInternal,
   'wallet-settings-internal-details': WalletSettingsInternalDetails,
   'wallet-settings-metamask': WalletSettingsMetamask,
+  'wallet-app-alert': WalletAlert,
 
 
 };
