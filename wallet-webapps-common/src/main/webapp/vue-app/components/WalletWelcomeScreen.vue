@@ -117,7 +117,7 @@ export default {
         });
     },
     signMessage(address) {
-      let rawMessage = this.$t('exoplatform.wallet.metamask.welcomeMessage', {0: address, 1: this.generatedToken});
+      let rawMessage = this.$t('exoplatform.wallet.label.metamask.welcomeMessage', {0: address, 1: this.generatedToken});
       rawMessage = rawMessage.split(/\\n/g).join('\u000A');
       return window.ethereum.request({
         method: 'personal_sign',
