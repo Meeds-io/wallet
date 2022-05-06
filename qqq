@@ -1,0 +1,4297 @@
+[33mcommit 30f4b0ef63e862682c86c6c059e1814ec3090363[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/meedsv2[m[33m)[m
+Author: bourasom <obouras@exoplatform.com>
+Date:   Thu Feb 10 11:24:38 2022 +0100
+
+    TASK-54163: Create FB meedsv2 and update projects versions/dependencies
+
+[33mcommit 080503058b0a7afaa2a4da329354d6e020541e28[m[33m ([m[1;31morigin/develop[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Wed Apr 20 23:31:45 2022 +0100
+
+    Task 55459: Signature request form (#221)
+    
+    when switching to metamask, a signature request form is displayed. The signature message contains the welcome marketplace's message, the wallet address and the nonce.
+
+[33mcommit 8ddeb2f109ee8dc8801c4f3d7ab3a62856c11f7f[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Thu Apr 14 13:33:55 2022 +0100
+
+    Task-55114: fix test bugs when switching to wallet meeds (#218)
+    
+    As explained in test report, in wallet settings, a bad display of icon and text has been fixed
+
+[33mcommit 7b0c38dd5f668e16ee74e9a7956e4b9ebbbfe9c8[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Apr 13 12:43:02 2022 +0100
+
+    TASK-56104: fix bad display when creating a wallet (#217)
+
+[33mcommit 1f1095ffc07045bc997b4bc3c8c6a1d258db7428[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Wed Apr 13 09:41:13 2022 +0100
+
+    Task 55113: metamask account settings (#215)
+    
+    In wallet settings, the user connects to his metamask wallet. Once this is done, the user can access the metamask settings containing the QR code of the wallet.
+
+[33mcommit 59c330ebbae2aad07229bd4751ff53822c5584ea[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Wed Apr 6 11:44:17 2022 +0100
+
+    Task-55128: add metamask account integration (#212)
+    
+    Add wallet settings metamask
+
+[33mcommit 742b24aacbe806c7c66a7dcdb44ab176c0afa415[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Apr 4 09:21:19 2022 +0100
+
+    Add Wallet Metamask Feature Flag (#211)
+    
+    add a feature flag on the "Metamask integration" feature which should be by default hidden in the product
+
+[33mcommit 7abf224cba9857720165412587111d0a004bb03e[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Fri Apr 1 12:51:38 2022 +0100
+
+    Task 55127: Metamask activation option (#210)
+    
+    In wallet settings, a connected user wishes to turn on the use metamask switch. A pop-in metamask containing a list of accounts will be displayed. As soon as the user selects a wallet, a second pop-in is opened. This one contains the signature request.
+
+[33mcommit 0484bd974c243e8323ab2cc7a18ba07e6991c8be[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Thu Mar 31 13:26:32 2022 +0100
+
+    TASK-55642: Update entities & services to integrate Metamask  (#204)
+    
+    Update entities & services to integrate Metamask
+
+[33mcommit e783d9dae79fd8482fd01e3d08e334bcaa68e3cf[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Tue Mar 29 14:46:54 2022 +0100
+
+    Task-55107: Fix creation metamask account (#205)
+    
+    When opening the wallet settings, in the case of the uninstalled Metamask addon, the switch is aligned with the item list "Use Metamask" and the installation link. To solve this problem, another item list has been added, the "Use Metamask" option and the switch are combined in one item list and the Metamask installation link is in another item list.
+
+[33mcommit 9f707bd5db731259ae503c833724cbea8d78d911[m
+Author: MayTekayaa <100131287+MayTekayaa@users.noreply.github.com>
+Date:   Fri Mar 25 14:13:13 2022 +0100
+
+    Task 55107: create metamask account in case of an installed and uninstalled addon (#203)
+    
+    Connected user wants to turn on the toggle, in wallet settings, to use metamask. An addon verification is applied, if it is not installed, the user will be invited to add it. And once the installation is finished, the platform will connect to metamask to make the first connection to the wallet via selecting the user's account.
+
+[33mcommit b1f7ad1d427b1fbcf0c2d0f437acc2bfba66cd2f[m[33m ([m[1;32mdevelop[m[33m)[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Apr 20 16:59:16 2022 +0000
+
+    Merge Translations
+
+[33mcommit 1bf9ff8c1775f98b0785cb6c102084ee4e0c6962[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Apr 16 12:36:52 2022 +0100
+
+    TASK-56163: Update project version to 2.4.x-SNAPSHOT and dependencies
+
+[33mcommit 96f5e60a9f112d6d0aa7f8176b4b2e5aa1a475fa[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Apr 16 12:36:51 2022 +0100
+
+    TASK-56163: Update addons-parent-pom to 15-RC01
+
+[33mcommit 55a886647bdb72a169f8e78da2c49fecc85143ef[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Apr 13 09:36:13 2022 +0100
+
+    TASK-56127: Add refresh icon allowing to refresh the wallet balance (#216)
+    
+    Add refresh icon allowing to refresh the wallet balance
+    
+    TASK-56127: change roles allowed for refreshing wallet from blockchain (#219)
+
+[33mcommit d8b1cd78b96efa4b1fa9b2477b84acc102a8b3df[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri Apr 8 14:02:43 2022 +0100
+
+    TASK-55664 Upgrade ESLint version to use newer ECMAScript version (#214)
+    
+    Upgrade ESLint version to use new ECMAScript 2022
+
+[33mcommit 68b2e701325779a2f225291cbcf9a17e7ae2b511[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Apr 6 14:36:41 2022 +0100
+
+    TASK-55665 Define Administration Menu Add-on Categories and URIs (#213)
+    
+    This modification will use the new Administration Menu configuration extensibility to define menu item entries.
+
+[33mcommit 9d7723d098b60b345d2f27abf22da72b172d16b3[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Mar 23 17:53:38 2022 +0000
+
+    Merge Translations
+
+[33mcommit 2ca74c1e34815d470349e3b72b2be6959ed1288a[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Mar 23 17:48:22 2022 +0100
+
+    TASK-55499 Re-use centralized Header & Footer in Mail Notification Template (#201)
+
+[33mcommit 61ce924e8237d2ed6b8787e064305f4c3684ef23[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Mar 6 17:51:07 2022 +0000
+
+    Merge Translations
+
+[33mcommit 2daecdfb52c3212bb192beff7ae7089e4ff4d485[m
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Thu Mar 3 17:45:35 2022 +0100
+
+    Task-54919: Hide send meeds in user popover (#197)
+
+[33mcommit dee8043c5b6718fd86c2507d7128fb1abb6ff65a[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Mar 2 17:52:37 2022 +0000
+
+    Merge Translations
+
+[33mcommit 99484cf9f9eb26fb481f25c6f0a8fd92d5ff3ad1[m
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Tue Mar 1 15:47:39 2022 +0100
+
+    Task-44737: Add new user and space popover for wallet application (#191)
+
+[33mcommit 67829cc2d7132bd8200ec186c2717d73bdad3f30[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Wed Feb 23 10:07:51 2022 +0100
+
+    Task-54655 : Improve installing wallet in space settings (#193)
+    
+    The fix improves the way the wallet setting is displayed when installing or uninstalling the wallet application
+
+[33mcommit df14ad115472fb80b9d14d3011412b966741adcf[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Wed Feb 23 10:07:19 2022 +0100
+
+    Task-54654: Fix creation of admin wallet (#192)
+    
+    After latest refactoring work, admin wallet could no more be created automatically on a vanilla server.
+    the fix includes :
+    
+    A fix for creating admin wallet when the server starts
+    An improvement for the wallet addon packaging to remove duplicated jars
+
+[33mcommit f4708d3dec1d46b295294bcf32be198837be9ccb[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Fri Feb 11 15:50:20 2022 +0100
+
+    46212 : Refactor wallet admin webapp and move services (#185)
+    
+    This fix will move all services and their configuration from the webapp wallet-common to the wallet-services jar.
+    It will remove the Service loader servlet, and use kernel configuration to load services, listeners and jobs.
+
+[33mcommit 6208ef15803410a33b28264b67162fc8b0add39c[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Mon Feb 7 12:20:17 2022 +0100
+
+    53913: remove the usage of Gas Price chooser (#186)
+    
+    Currently, when sending transactions between users, they use the max Gas price.
+    This is caused by the existence of the component used to choose the gas price for transactions and which takes automatically the maximum gas price.
+    The fix will remove it from the form of sending tokens (it is already hidden inside the form) until we decide if functionally it is needed for users.
+
+[33mcommit da6a365203653dc18c0699935f9a48884a23d328[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Tue Feb 22 09:10:30 2022 +0100
+
+    SWF: Fix multiple Pull Request requested reviewer for eXo Tasks notifications
+
+[33mcommit b330b002efb83d92a16e95c726c76fe2a1b9ef0a[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Feb 20 17:55:29 2022 +0000
+
+    Merge Translations
+
+[33mcommit c23ef59d19c481230b3100536449c42dfe2c4503[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Feb 13 17:50:47 2022 +0000
+
+    Merge Translations
+
+[33mcommit 7950404fb7d36640f011129720efc8b6fb89cbda[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Feb 6 17:52:37 2022 +0000
+
+    Merge Translations
+
+[33mcommit 096491a507f9982fa7df39a63c2e66ee52cda234[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Feb 5 18:55:42 2022 +0100
+
+    SWF: Add emojis and creator mention for eXo Tasks notifications
+
+[33mcommit f3b4578d5d859ec81c94ead2133eceeb7db3370a[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Thu Feb 3 21:37:48 2022 +0100
+
+    Add condition if wallet is installed in space & clean code (#155) (#163)
+
+[33mcommit 5bdca40590b8078405b258c5bfa2005fec85ace1[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Thu Feb 3 21:04:03 2022 +0100
+
+    52945 : Boost admin transactions automatically and add resend tx feature (#180) (#184)
+    
+    When we have not enough Gas, transactions goes pending, and may be canceled with no way to force resend them. When gas prices increases quickly while we have set less maximum gas prices, transactions won't be mined and we can not boost them.
+    This fix will add :
+    
+    - A job that will boost automatically admin transactions based on the gas price detected from the blockchain without exceeding the maximum gas price already set
+    - A button to resend the transaction as is to fix the problem of transactions pending because of unavailable gas
+
+[33mcommit 29b4a1bf8a597b854cadc0149e154c1494558e60[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Feb 3 13:55:24 2022 +0100
+
+    Fix #181 Avoid using single instance of DecimalFormat (#183)
+    
+    Since DecimalFormat isn't thread safe, this fix will instantiate a new NumberFormat for each call. Additionally, this will take care of user locale for number formatting.
+
+[33mcommit 67e9d51a7f73b69483189c8a2254183383ae33a6[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Feb 3 10:38:32 2022 +0100
+
+    Fix #181 : Fix Displaying small amount of Meeds (#182)
+    
+    Prior to this change, small amounts are displayed with E (exponent). This commit will fix #181 will ensure to display the amount in a human readable format by using DecimalFormat Double formatter.
+
+[33mcommit e3ea5bf1816567a6472e63ad8cc11c3632907c33[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Jan 22 20:27:23 2022 +0100
+
+    SWF: Add request review for eXo Tasks notifications
+
+[33mcommit ba573c7f76274b23ae72ef63d47a7485c11dbbdf[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri Jan 21 15:08:44 2022 +0100
+
+    TASK-53347 Upgrade to Tomcat 9 (#179)
+    
+    Prior to this change, the slf4j-api jar was bundled in wallet-common while it's already shipped in Parent ClassLoader which causes an exception. This commit will change the scope of slf4j-api to avoid bundling it inside the WAR/WEB-INF/lib.
+
+[33mcommit 0826d09f9726c25e3c733846630513dee621b964[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jan 19 18:07:36 2022 +0000
+
+    Merge Translations
+
+[33mcommit 90006778c0629a55263289e328d2fd3dd7582e45[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Jan 19 11:23:48 2022 +0100
+
+    TASK-53062 Upgrade to Hibernate 5.6 (#178)
+    
+    * Upgrade to Hibernate 5.6
+    To make the upgrade to Hibernate 5.6, this commit will:
+    1/ Delete files org.hibernate.integrator.spi.Integrator that isn't used anymore for @ExoEntity definition injection
+    2/ Delete definition of persistence.xml that is already made in gatein-portal. For each Persistence Unit, we have to define this file only once
+    3/ Generate Sequences for hsqldb which wasn't mandatory in previous versions of Hibernate and ensure to manage Sequence allocation size correctly switch Liquibase Configured incrementation (Default = 1)
+    * Delete useless Hibernate configuration files
+
+[33mcommit 2b445b7412a54f28f83222935b820eb4c7e3a104[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Jan 19 10:42:54 2022 +0100
+
+    TASK-53284: Update addons-parent-pom to 15-M03
+
+[33mcommit c311c38f148f187596d205781b33544df2be2235[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Tue Jan 18 16:50:43 2022 +0100
+
+    Task-49792 : Remove log4j dependency from test and compile scopes to exclusively use the same logback logging framework as in runtime
+
+[33mcommit c95b4242e2d4fd24a93ce5687665b754da7cf045[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jan 12 17:55:30 2022 +0000
+
+    Merge Translations
+
+[33mcommit ce7ec4fe0ece3c2fbcb352c938da3e3e0d8168dd[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Tue Jan 11 18:27:28 2022 +0100
+
+    53063 :Fix admin wallet initialization state (#176)
+    
+    Admin wallet is created with the WalletState New, this state is never changed. Other wallet state is changed when they are sent tokens and gas fees. This prevents Gas price detector job from running and we can not get frequent gas price updates.
+    The fix changes the state of the Admin wallet once it has received Tokens & Gas fees. the fix also updates the packaging to put jars in Lib folder and wars in webapps folder
+
+[33mcommit e7eb5a3ee6b4d10b8dfbdbc7c024d06cf430f2c5[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Jan 9 17:57:37 2022 +0000
+
+    Merge Translations
+
+[33mcommit 485f0857f6c23a92f9704e0772fca255591150cf[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Mon Jan 3 09:23:59 2022 +0000
+
+    Merge Translations
+
+[33mcommit b53d5df1b8115efb4ec999c3a8b26b26e48cca18[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Dec 26 17:56:49 2021 +0000
+
+    Merge Translations
+
+[33mcommit 4ff00eba463c35fe9b9e11c89b648d1bfb790425[m
+Author: Houssem Ben Ali <benalihoussem@yandex.com>
+Date:   Thu Dec 23 13:39:48 2021 +0100
+
+    SWF: Specify base branch when merging PR for eXo Tasks notifications
+
+[33mcommit 227e77a723cc8835c323bce5939f22a519c84cbc[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Dec 19 17:56:05 2021 +0000
+
+    Merge Translations
+
+[33mcommit 9fb83df2e3461533635ea97d88e6baa290b213e9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Dec 16 14:55:30 2021 +0000
+
+    Merge Translations
+
+[33mcommit aeeb19ac9135a42258fd9d4fdb54d202cfa78aec[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Dec 15 17:59:34 2021 +0000
+
+    Merge Translations
+
+[33mcommit 3b670b39cd957bf5b3d61b7f1fcf878fe2fbfb7d[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Dec 10 20:55:02 2021 +0100
+
+    TASK-52116 : change the backup Status to false  when creating new wallet (#172)
+
+[33mcommit 3983063100cdea15019b7433c74820e33888c44b[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Dec 10 09:50:58 2021 +0100
+
+    TASK-52126: fixed space wallet redirection and bad UI for error alert (#171)
+
+[33mcommit 7fb51922acf537d59151eb4bea0a1282408c285e[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Wed Dec 8 16:17:14 2021 +0100
+
+    52007 : Set initial ether/matic amount with configuration (#168)
+    
+    This PR will allow setting the initial amount of Ether/Matic by configuration, we need just to add this property to exo.properties :
+    
+    **exo.wallet.blockchain.defaultInitialCryptoCurrencyFunds** : sets the initial amount of Ether/Matic to be sent when a new wallet is initiated. Default value is Null. The value of the initial funds will be calculated dynamically from the used Ethereum network
+
+[33mcommit 894ce5af29cb3c71bd121a46ff41ef281eea5dfc[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Tue Dec 7 17:22:14 2021 +0100
+
+    TASK-51765 : add deleted wallet filter and fix label (#170)
+
+[33mcommit c9de9d983fc903dadf01e64750983367602e4d7a[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Dec 3 18:05:07 2021 +0100
+
+    TASK_51745_51759_51764_51765 : Add the possibility to delete a wallet (#161)
+
+[33mcommit 7016791ad24d7da8c16110d1127bde608036b6f4[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Dec 3 13:05:04 2021 +0100
+
+    TASK-5139: fixed displaying erroneous value of rewards in user profile (#167)
+
+[33mcommit 924532701b34da02e16f7baa230eaf31cf39c7fd[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Tue Nov 30 16:40:35 2021 +0100
+
+    TASK-51789 : remove reject wallet option (#162)
+
+[33mcommit 63f7d53ebc10a251c43ea6be171c30a65a19a9fc[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Fri Nov 26 21:13:50 2021 +0100
+
+    Update the version of ERT contract dependency
+
+[33mcommit b8a3d5e92f64b01f297e0eaffe55b814c5333a5d[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Nov 26 09:35:48 2021 +0100
+
+    fix backup resource bundle (#159)
+
+[33mcommit 89b6b88d18b00674aecedecf963eaf99168e05d1[m
+Author: Houssem Ben Ali <benalihoussem@yandex.com>
+Date:   Tue Dec 14 12:52:42 2021 +0100
+
+    SWF: Add Pull Request workflow for eXo Tasks notifications
+
+[33mcommit 70495f4e0ec64286038ee796e303a737dd4aadb7[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Dec 12 17:57:08 2021 +0000
+
+    Merge Translations
+
+[33mcommit f1d0bb1b7bb7f5eb875680ef29a9eb40bd8852d3[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Dec 8 17:54:11 2021 +0000
+
+    Merge Translations
+
+[33mcommit c206c9bba90cfafd928df51d1d60d3d966104950[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Wed Dec 8 15:43:16 2021 +0100
+
+    Remove the link when the component wallet-address displays pk of wallet (#166) (#169)
+    
+    When displaying the pk of a wallet, the chip redirects to the transactions scan online site.
+    This fix will disable creating a link when we display the PK of the wallet.
+    
+    (cherry picked from commit 188c6a5313e4dc743bccbf5acd6d8c0adb470cbe)
+
+[33mcommit ffa654aaff372d7b4b79077d45c99857c98fccd8[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Dec 5 17:56:49 2021 +0000
+
+    Merge Translations
+
+[33mcommit c61d229f3aab62ba6c32b3a4e28c1e71cf883432[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Dec 1 17:55:11 2021 +0000
+
+    Merge Translations
+
+[33mcommit c9a8e92c471bd5acc1bacc19a30fececa0456765[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Nov 22 17:51:40 2021 +0100
+
+    TASK-51581 : fix balance should be displayed for space member (#156)
+
+[33mcommit 2a57bc20e902e26cdafe2d83772a8a9a233b6fc1[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Nov 22 12:01:45 2021 +0100
+
+    TASK-51581 : Space member can access to space settings through Wallet TAB (#154)
+
+[33mcommit ef63f31c2b6b6f5b032bd9b9ad649b2ce2edf17e[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 24 18:10:40 2021 +0000
+
+    Merge Translations
+
+[33mcommit 0372712ebd836c1841ab3f03f4d69c0352a85893[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 24 09:25:02 2021 +0000
+
+    Merge Translations
+
+[33mcommit bebd23f684ae0f6c7b3cb8e303e23a174c6264f2[m
+Author: bourasom <obouras@exoplatform.com>
+Date:   Tue Nov 23 12:14:46 2021 +0100
+
+    Update ert-contract to 1.3.x
+
+[33mcommit 7a2b370934a015e5a98a75a671bef1f10d36ed9a[m
+Author: mohamed <mrdidi@exoplatform.com>
+Date:   Mon Nov 22 10:24:32 2021 +0100
+
+    fix style in wallet settings
+
+[33mcommit 64be4dafd661abb2d1ceec5f44a9d08c2575f1fc[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Nov 19 17:38:14 2021 +0100
+
+    TASK-51257 : fix resource bundle (#152)
+
+[33mcommit 1b33c7eccee8477ad015bc97e9d4b28e8d185895[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Tue Nov 16 10:23:19 2021 +0100
+
+    Task 51266 : setting button on wallet  application view isn't on the right place (#148)
+
+[33mcommit c15972d7170bf4383477dfca56a4c732309aeae7[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Nov 19 11:15:57 2021 +0100
+
+    TASK-51490: displaying space wallet settings conditions (#151)
+
+[33mcommit 86d11c43cc957356c025530be70f971a0edd7016[m
+Author: mohamed <mrdidi@exoplatform.com>
+Date:   Fri Nov 19 09:52:27 2021 +0100
+
+    fix i18n in wallet settings
+
+[33mcommit 52383bf2937f349a43bb14d038369120e0f45647[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Thu Nov 18 12:39:43 2021 +0100
+
+    TASK-51491 : display wallet settings conditions (#150)
+
+[33mcommit 0236fef868352ff2c7b45d08a7d3a7e56fe1f994[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Nov 17 15:25:14 2021 +0100
+
+    TASK-51257 :  Redirect space wallet setting to the space's settings (#147)
+
+[33mcommit f7697b89490991bad5c24772474b30436d728f28[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task 50822 :Add the meeds symbol and cryptocurrency in exo.properties (#143)
+
+[33mcommit 0f038ac68d9f3c79df5c60300daf2711c63813e6[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    51217 : restore space wallet display (#146)
+    
+    Space wallet was missing due to a missing component declaration, this PR restores the declaration of the component
+
+[33mcommit 915b338867c94567e9efc36757ce936c23c85928[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task 51201: Fix welcome message in wallet (#145)
+
+[33mcommit 7f558c1ec2bb16880a2cf7ba07a9f4ac2fbd581c[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task 51139 : Error in wallet admin tab in the first connection with empty data (#144)
+
+[33mcommit 9687e6671f716abb636e02f0def8eb35280172e3[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    clean up duplication of wallet.properties in translations (#142)
+
+[33mcommit 4cbd00a3e8e26b000079d54b25e5993f3f3f7d65[m
+Author: mohamed <mrdidi@exoplatform.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    display 2 digits after the decimal point
+
+[33mcommit 472b7202f8d0735a4b85f3a90a2b778917b48756[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task 50783 : Improve the welcome message in wallet app(#141)
+
+[33mcommit 9b22a69ddbbab1f89edbf65bad1a4008aa59f1de[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task 50883 : Retrieve rewards count from user's profile (#140)
+
+[33mcommit 301143e86cd3df331b7c70224411dcd2eb5a282f[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    TASK-50882: remove send ether transaction from pending transactions (#139)
+
+[33mcommit e2ccb7343aa49c74149ed77c6afeae78cdffb99b[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    TASK-50881: fixed wallet widget redirection (#138)
+
+[33mcommit 37a9636cc56881de4c5a70a83bc750ee8083aaee[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    TASK-49334_49335 : Implement wallet backup and wallet restore (#136)
+
+[33mcommit 93c450ff659b741c046f323df22ee880ad043752[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    TASK-50782:Restore the popup inviting to save the private key (#137)
+
+[33mcommit a2df85aa3a1ed59ff087da6d71646e3afa2f6ebf[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task-50852 : Make the fields of send ether and tokens editable (#135)
+
+[33mcommit 7e0b295aeb81801fcfdc04aeaa0fbf8a1577bb94[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    50761 : Update services to use Polygon and activate rewarding feature (#133)
+    
+    This fix makes sure to  :
+     - fix the error only replay-protected (EIP-155) transactions allowed over RPC
+     - it reactivates the rewarding feature by replacing the old Contract based function reward with the Transfer function from ERC20 token
+
+[33mcommit c21c1c56ec6627e62664dee2e1c2c6ca28332554[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    Task-50821 : Remove 'Contract' tab from wallet administration view (#134)
+
+[33mcommit fbc2096a0a25dcd373a254713373f7858200b989[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Sun Nov 14 14:20:22 2021 +0100
+
+    50640 : Refactor wallet to use the new ERC20 contract
+    
+    * Update code to use an ERC-20 token
+    * Add a check for emptyness of  Wallet address
+    * Change wallet status to Initialized when wallet receives tokens
+    * Remove admin level from wallet admin
+    * remove unneeded redundant check
+    * Remove Paused attribute from check
+    * Remove comments and reimplement wallet.isinitialized flag
+    * Update version of ERT Contract in pom.xml
+
+[33mcommit 0bf7e3faabb81ef0a4d8a866b175cfc7fc2be2d8[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Nov 21 17:55:08 2021 +0000
+
+    Merge Translations
+
+[33mcommit 850606121fb86b0b84eeaec6444e4a518add67f9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 17 18:05:12 2021 +0000
+
+    Merge Translations
+
+[33mcommit 0c1770995199a06139afcad2fa2adf6a72a0df13[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Nov 14 18:00:16 2021 +0000
+
+    Merge Translations
+
+[33mcommit e88cb727fd0220d04803ea1ee274dd0189231bfc[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 10 18:01:54 2021 +0000
+
+    Merge Translations
+
+[33mcommit a10594b59ed1503f8c11f7d4ab0e8ebbf5d442d9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 10 11:12:03 2021 +0000
+
+    Merge Translations
+
+[33mcommit d83ba511f1740abbbea0ac5a3696d581ca7888a7[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Nov 7 17:50:29 2021 +0000
+
+    Merge Translations
+
+[33mcommit d1d351e3c7619106b753d129a343d1c77156decf[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Fri Nov 5 21:08:05 2021 +0100
+
+    Task-49860 : Re-font welcome message in wallet (#131)
+
+[33mcommit 897e09c4fbd73a0f6e8d14376f678e206ce01e89[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 3 17:55:44 2021 +0000
+
+    Merge Translations
+
+[33mcommit 5b046a4ba243890ebfb4179b361eaedfac154921[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Mon Nov 1 10:37:50 2021 +0100
+
+    TASK-50558 : Add an anchor on the wallet settings page (#129) (#132)
+
+[33mcommit 8040b236a3b623ee006985cb9bc27fde6e1bcef2[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 27 17:06:25 2021 +0000
+
+    Merge Translations
+
+[33mcommit 685c445ae522626773e33ba22854dd2fee5e30ed[m
+Author: GouadriaHanen <hgouadria@exoplatform.com>
+Date:   Thu Oct 21 10:00:10 2021 +0100
+
+    TASK-50364: restore wallet option
+
+[33mcommit 7d8cea7ead40672fc976a4b1849c1baba7c09a27[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Oct 13 17:27:16 2021 +0100
+
+    TASK-49245 : fix drawer labels (#122)
+
+[33mcommit ce75e8f45a1ab4f9365577671cf1f6eacff4310c[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Oct 13 17:26:50 2021 +0100
+
+    TASK-49923: Make the key stored on server by default (#121)
+
+[33mcommit 5da67fcc3510b28284ae528eb303baf800bf90a4[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Tue Oct 12 15:28:59 2021 +0100
+
+    TASK-49227 : manage my wallet password" (#119)
+
+[33mcommit bcbf350d127073d9c31acfe35d5e0f1546c499cb[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Tue Oct 12 14:38:44 2021 +0100
+
+    TASK-49331 : fixed copy Ethereum Address (#120)
+    
+    ".select()" cannot select a hidden element: by setting the width of an element to 0, it behaves like a hidden element.
+    fixed by changing the position of the element so that it is neither visible nor hidden.
+
+[33mcommit dc61f2293a4292bd7478f56378007f070023b13a[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Fri Oct 8 09:25:13 2021 +0100
+
+    Task 49862 : Remove message of saving the key (#118)
+
+[33mcommit 9775c77b1cb5795f18117a70df40b59651a5ecaf[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Thu Oct 7 14:05:47 2021 +0100
+
+    TASKS - 49227 ~ 49331 ~ 49849 : Add portlet of wallet settings (#112)
+
+[33mcommit e41bad1e8536120911a60f12ee9ef498f3b0012a[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Wed Sep 29 16:48:15 2021 +0100
+
+    Task-49561 : Refactoring wallet-webapps-admin (#108)
+
+[33mcommit 0d06697d09ba1093ddf61b411e42afbc3e1b3e4d[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Thu Oct 7 15:15:58 2021 +0100
+
+    Task-49663: Refactoring wallet-webapps-common (#111) (#115)
+
+[33mcommit b675c580aa1fd8c9784aab75f3f6d6cf89f82378[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Thu Oct 7 10:46:55 2021 +0100
+
+    TAsk-49632 : Refactoring wallet-webapps (#110) (#116)
+
+[33mcommit fb417767066cbbae96e40f969e4c6fa20e83906b[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Wed Oct 6 16:15:10 2021 +0100
+
+    TAsk-49597 : Refactoring wallet-webapps-reward (#114)
+
+[33mcommit d5d986ade559eb05a63c4d15e57387b44910ffb8[m
+Author: Mohamed El Hadi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Wed Oct 6 15:11:16 2021 +0100
+
+    Task-49561 : Refactoring wallet-webapps-admin (#113)
+
+[33mcommit 8bddebacfc8f9ca17c735f0a5a360d9a9cb6888d[m
+Author: mzorai <mzorai@exoplatform.com>
+Date:   Tue Sep 21 16:05:02 2021 +0100
+
+    Task-48208 : Errors during start about template config (#106)
+    
+    Before this fix, there is an error at startup about loading template DocumentActivity.gtpml :
+    
+    > WARN  | Failed to read template file: war:/conf/wallet/templates/notification/mail/RewardSuccessWebPlugin.gtmpl. An empty message will be used
+    
+    This is due to the path in configuration file which is not correct : the template name is RewardSuccessMailPlugin.gtmpl.
+    By treating this issue, I found that the problem is the same for push notification. I update it to
+    This change updates the path to use the correct one.
+
+[33mcommit d1ed4cd8e2bead602aee195b36f6e4dd35c69b62[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Tue Sep 14 11:47:32 2021 +0200
+
+    Task-48905 : Refactor UserPopup  and SpacePopup Labels
+    
+    Before this fix, space popup labels are duplicated in a lot of properties files
+    This fix modify everywhere spacePopup is called to not use duplicated labels.
+    Labels which are no more necessary are removed
+
+[33mcommit 8a7d29d2c3edb63e33da5c68b3d659ea2a24cf8e[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Sep 1 17:06:53 2021 +0000
+
+    Merge Translations
+
+[33mcommit d83714cbb082cad8e0b3101b4550cd18093645a7[m
+Author: mzorai <mzorai@exoplatform.com>
+Date:   Mon Aug 30 12:24:06 2021 +0100
+
+    Task-48160 : Can't close date picker when click outside or change page of send rewards page. (#102)
+    
+    Issue: The problem is when clicking outside after opening the date picker or changing the page on the rewards page, the date picker component is still displayed and does not disappear.
+    Solution: I have added an id for each component and a mounting method witch will control the date picker component for each click outside or changing page.
+
+[33mcommit 09f0242bfa3bb0db1f4be51037d612a1ef37a265[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Wed Aug 18 16:00:22 2021 +0200
+
+    Add coverage option in github sonar action (#99)
+
+[33mcommit f373ab39e965f9fea74e265c7fb7496c4d5f3741[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Aug 18 09:27:52 2021 +0100
+
+    TASK-47997: Update addons-parent-pom to 15-M02
+
+[33mcommit 7adb6f0a37ba0bb7adb20b15fab276ebc48276d6[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Aug 16 15:44:27 2021 +0100
+
+    TASK-47872 Fix Wallet Balance Display (#97)
+
+[33mcommit 6eaf4d63de215b2e07cc3c4ea2f6765745b7df43[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Aug 12 17:29:39 2021 +0100
+
+    TASK-47872 Enhance Wallet Balance Performances Display (#95)
+    
+    Prior to this change, the widget was initialized using Javascript which can lead to bad FrontEnd performances by multiplying the REST calls and JS execution to initialize Vue application. This change will make the application HTML built in Server side since it's a simple widget display
+
+[33mcommit 4a66941db5f2ec399d90005bca252a37f2a19993[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Aug 11 17:03:50 2021 +0000
+
+    Merge Translations
+
+[33mcommit fc851440fa8dca13bc488cef0ce293629ffc4645[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Wed Aug 4 17:29:21 2021 +0200
+
+    Sonar configuration (#93)
+
+[33mcommit 911ca78351bc8bb5e16a00afc98f9bc958daf967[m
+Author: Mohamed El Hedi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Mon Aug 2 18:41:20 2021 +0100
+
+    Task-45348 : Cannot close date picker by clicking outside or clicking on date button (i can only close it by clicking into the date picker) (#78) (#86)
+
+[33mcommit 71a63b85f453674deb2e3ec83cde5790e9d96ae1[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Aug 2 16:58:55 2021 +0100
+
+    TASK-47234 Defer loading of Javascript of widgets after Page Loading (#91)
+
+[33mcommit b8310b07c6c1ef7538a358e898e7bdc573f3e924[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sun Aug 1 22:58:02 2021 +0100
+
+    TASK-47234 Defer loading of cacheable widgets to load principal application in page first (#90)
+
+[33mcommit 2402d2412bf5d3cb06d43276b6d0a1eb0088cf53[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jul 30 18:12:41 2021 +0100
+
+    TASK-47710 : Open send funds drawer when accepting a funds request (#84)
+
+[33mcommit 0bdd66e3deaeab16a67189195de78d0722e32754[m
+Author: Mohamed El Hedi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Fri Jul 30 16:45:25 2021 +0100
+
+    Task-47062: No hand cursor is displayed when hover on actions popup (#77) (#88)
+
+[33mcommit f6d7c72c1b57a7d5c017cd23e9da8c4545ba236c[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri Jul 30 09:21:56 2021 +0100
+
+    TASK-47378: Update addons-parent-pom to 15-M01
+
+[33mcommit 5bdc7c00e270b554e8f4b892f30879a8d0626124[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Jul 29 17:45:51 2021 +0100
+
+    TASK-47234 Enhance Wallet Resource bundle retrieval and caching (#83)
+
+[33mcommit 3b370320bf977d9b8beab27e3951822202bcbb6a[m
+Author: Nader Sai <nsay@exoplatform.com>
+Date:   Thu Jul 29 15:38:22 2021 +0100
+
+    Task-45373: Fix Wallet application name and description are not displayed by their value in space settings interface (#45) (#82)
+
+[33mcommit 5553bb5c97c2ae1d53e494e286e4471fb04656f3[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Mon Jul 26 09:28:36 2021 +0000
+
+    Merge Translations
+
+[33mcommit e4abecd0590beeea9b031b0e7d48324c8d0ccaf2[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Jul 24 13:25:11 2021 +0100
+
+    TASK-47199: Update project version to 2.3.x-SNAPSHOT and dependencies
+
+[33mcommit 3b15a4f593f8152ebb45a038389c5529bead98e4[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sat Jul 24 13:25:10 2021 +0100
+
+    TASK-47024: Update addons-parent-pom to 14-RC01
+
+[33mcommit 13aa331d576f4be67617b3c99bb6f8344df8da10[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jul 23 16:59:52 2021 +0100
+
+    TASK-45348: fixW new wallet view (#75)
+
+[33mcommit 4ed6b6da0510eae61dbeea416428cc4767c31bd1[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jul 23 14:26:37 2021 +0100
+
+    TASK-46687 : fix transaction button (#74)
+
+[33mcommit 0e9a21350a38e59e58c01c9b17ee2413dc0918c7[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jul 23 14:26:24 2021 +0100
+
+    TASK-46686: fix exchange button (#73)
+
+[33mcommit 453ac86866bbdc42f8cae52a6edc519076f4abba[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Jul 19 15:13:44 2021 +0100
+
+    TASK-46687 : Transactions button (#72)
+
+[33mcommit e9f4e87e49bab693f218cbd5842e0437b4213a3b[m
+Author: Mohamed El Hedi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Mon Jul 19 12:19:29 2021 +0100
+
+    Task-46810 : Action buttons do not work in the wallet administration (#70)
+
+[33mcommit 845a5196fd05f3b48239087c5da94e2392c31a73[m
+Author: Mohamed El Hedi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Mon Jul 19 12:19:06 2021 +0100
+
+    Task 47014 : Default message to send with initial funds not saved(#71)
+
+[33mcommit 4353ea033d18358411a87f28596562d6797e149f[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Jul 19 10:02:27 2021 +0100
+
+    TASK-46686: Exchange button (#69)
+
+[33mcommit ddf5b591635f353c2dfee2a537e86d9415125f7f[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jul 14 16:46:42 2021 +0100
+
+    TASK-45348 : Wallet New view (#68)
+
+[33mcommit dc93251114717c550067003873273843d76e3a69[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jul 14 19:03:22 2021 +0000
+
+    Merge Translations
+
+[33mcommit 1dbf21a8b4466b2cc07a99cdc053c1ba9e2a2412[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jul 14 17:05:32 2021 +0000
+
+    Merge Translations
+
+[33mcommit 6e13d8102948ce278eab494f3029bc0c7ee27e1d[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jul 9 14:32:54 2021 +0100
+
+    TASK-46228: fix labels size (#65)
+
+[33mcommit eaa69d60b8447cc10edee31a248090aa70cd21f1[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jul 7 08:37:43 2021 +0100
+
+    TASK-46237: quick filter fixes (#64)
+
+[33mcommit 8c0f53b25e6dbe2941f4b8584d190840ea32cd5f[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Tue Jul 6 13:56:04 2021 +0100
+
+    TASK-46236 : wallet listing fixes (#63)
+
+[33mcommit 0fdd3b597a64e2f234b564e1accc54f7294e4a37[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Jul 5 11:52:19 2021 +0100
+
+    TASK-46237 : Wallet administration tab Quick filter (#61)
+
+[33mcommit 54a0d5a7693d6a3c521d2599167c274c7331203a[m
+Author: Mohamed El Hedi Rdid <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Thu Jul 1 15:55:35 2021 +0100
+
+    Task-45349 : Sending funds after create wallet (#59)
+
+[33mcommit 43134b9fded00dd2ecd9d4c2cf39cd352575b5f3[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jun 30 17:43:25 2021 +0100
+
+    TASK-46231 : Wallet administration tab Filter field (#60)
+
+[33mcommit 8cfabaed2327d971c78a63f89e18f94e6437854c[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jun 30 10:02:42 2021 +0100
+
+    TASK-46228: Wallet administration tab: Funds reserve info (#55)
+
+[33mcommit 607eea7a96599b8f24346360a216652e11838953[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jun 30 10:02:15 2021 +0100
+
+    TASK-46347:fixed wallet redirection when user wallet is not yet configured (#58)
+
+[33mcommit aba6f20e4839ae10c2b855adddfb6371cb2456c9[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Wed Jun 30 10:02:04 2021 +0100
+
+    TASK-46236 : Wallet administration tab: Wallets listing (#57)
+
+[33mcommit c1fc7e52e7ec43554fc2bfde3a621acc522294dc[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jun 25 20:43:52 2021 +0100
+
+    TASK-46227 :  First screen of wallet admin view (#52)
+
+[33mcommit 219666318f9a51ede6dff980a71115558e5959c8[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Fri Jun 25 11:56:17 2021 +0100
+
+    TASK-45348: Wallet view (#51)
+
+[33mcommit 9d30de89ca7856f6cf249b221b2fb1c3a98fba44[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Tue Jul 6 07:41:20 2021 +0000
+
+    Merge Translations
+
+[33mcommit 6826654f8f810c0d9bc86bd74836889e9cd6ddf6[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jun 30 17:12:00 2021 +0000
+
+    Merge Translations
+
+[33mcommit f4aaca1fb5db72ddbeeadcf69a710dd5974b8a9e[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Mon Jun 28 10:51:48 2021 +0100
+
+    TASK-46302: Update addons-parent-pom to 14-M15
+
+[33mcommit 0052336c61a48457844850f6a8c4480103f482d7[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri Jun 25 11:25:04 2021 +0100
+
+    TASK-46217: Update addons-parent-pom to 14-M14
+
+[33mcommit 88da567d944ad77e6dfabe5069e88d4fa51a4515[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Thu Jun 24 13:16:36 2021 +0200
+
+    Remove dependencies on (#50)
+    
+    - org.bouncycastle:bcprov-jdk15:1.45
+    - org.bouncycastle:bcmail-jdk15:1.45
+    - org.bouncycastle:bctsp-jdk15:1.45
+    In eXo, we do not need theses dependencies.
+    bcprov and bcmail are bring by tika-parsers dependency in version 1.67
+    bctsp is no more needed
+
+[33mcommit cc0df4ddb4d9403c075637a5ec9b5439dbcbcbb8[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jun 23 18:04:11 2021 +0000
+
+    Merge Translations
+
+[33mcommit 6de1c0b7c3b02277935c5e4d4dfc7a3e279796f7[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Jun 23 18:46:54 2021 +0100
+
+    Update ert-contract to 1.1.x-SNAPSHOT
+
+[33mcommit e6db153c0d3501f5610bfc7d4ae30bb8b2ce3f92[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Tue Jun 22 11:16:13 2021 +0100
+
+    TASK-46066: Update addons-parent-pom to 14-M13
+
+[33mcommit 47f03dc25e638ca9bdc04ca93de8440a06f64129[m
+Author: GouadriaHanen <49310007+GouadriaHanen@users.noreply.github.com>
+Date:   Mon Jun 21 09:48:32 2021 +0100
+
+    Wallet FT : Create wallet redirections & Wallet creation screen (#49)
+
+[33mcommit 728e43b6bd52855a2ba673d77298c6ac9bcdc59c[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sun Jun 20 08:51:31 2021 +0000
+
+    Merge Translations
+
+[33mcommit 407f0480a4e6c56743beefd50d07c38f3132581f[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri Jun 18 17:44:37 2021 +0100
+
+    TASK-45981: Update addons-parent-pom to 14-M12
+
+[33mcommit c0118f893f82aa212b8b821938e342dcadb9d534[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri Jun 18 17:06:42 2021 +0100
+
+    TASK-44775 Update Social API to delete WebUI exception class declared in Service layer (#48)
+
+[33mcommit c588b6cbe3963f5a55af31862d03f22d326de08b[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Thu Jun 17 15:10:58 2021 +0100
+
+    TASK-45876: Update addons-parent-pom to 14-M11
+
+[33mcommit 97603fc9cfe93fb39da481495230426b466610d8[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jun 16 18:09:26 2021 +0000
+
+    Merge Translations
+
+[33mcommit d11bd983144c57d34657154ab95693df28dcda36[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Tue Jun 15 10:12:47 2021 +0100
+
+    TASK-45689: Update addons-parent-pom to 14-M10
+
+[33mcommit f83a59eeb44a0c12124b0556149d6a0cdce6e3a0[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sun May 23 16:46:10 2021 +0100
+
+    TASK-44599: Update addons-parent-pom to 14-M09
+
+[33mcommit 7bc4d14b1cf8d51dc0acda3fe20fb55d807873ea[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri May 21 17:10:03 2021 +0100
+
+    TASK-26265 centralise third party libraries versions in maven-depmgt-pom (#43)
+
+[33mcommit 8cfe063ee96f2619a41182ade69996ebacd5d72d[m
+Author: bourasom <obouras@exoplatform.com>
+Date:   Fri May 21 15:27:24 2021 +0200
+
+    TASK-44549: Upgrade maven-parent-pom 14-M06 -> 14-M08
+
+[33mcommit 2f8b530ab820db4616189341d22dd96b816e4edd[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri May 7 14:58:33 2021 +0100
+
+    TASK-44234: Update addons-parent-pom to 14-M06
+
+[33mcommit 51466fba874e389c6317e25e08fa0ba458df668c[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri May 7 09:34:11 2021 +0100
+
+    Use eslint-config-meedsio 1.0.3
+
+[33mcommit be2438ac6ed330379d2ee3346926b09c28dca472[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue May 4 12:56:17 2021 +0100
+
+    TASK-44025 Reuse frontend, npm and nodejs versions from parent pom (#42)
+
+[33mcommit e87349bd0e4e56779bd8a4f609cb240662a7ed1d[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Tue May 4 12:11:35 2021 +0100
+
+    TASK-44030: Update addons-parent-pom to 14-M05
+
+[33mcommit f85457b94e7874f2adbfbd8e7c855c5c8a3358ce[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Apr 28 15:59:15 2021 +0100
+
+    TASK-43200 Improve user navigation UX
+
+[33mcommit 3cf38e4cc61d115e52572522fa85b2e29b01483b[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Apr 14 15:27:49 2021 +0100
+
+    TASK-40739 Format Vue applications using new Shared ESLint config (#37)
+
+[33mcommit fe0f49700f55fbfff9a054157cfa48812c824b82[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue Apr 13 10:33:37 2021 +0100
+
+    Implement RTL Style (#38)
+
+[33mcommit 2b5459d9ac26fbfad77dfb8db9f3c8cd3dcb8e88[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sun Mar 7 13:32:37 2021 +0100
+
+    TASK-41406: Update addons-parent-pom to 14-M04
+
+[33mcommit 0d43df7b7e464ac271da451ff764e8af04a4f5dd[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Fri Feb 26 14:51:28 2021 +0100
+
+    TASK-41094: Update addons-parent-pom to 14-M03
+
+[33mcommit 3ab54d37b3708f16cea4c472adb5f5c5d6890cc5[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Sun Jan 17 16:56:05 2021 +0100
+
+    TASK-39590: Update addons-parent-pom to 14-M02
+
+[33mcommit a71fc21dfcc55c221c5f06759cd8d3d0a72a8759[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Tue Dec 22 12:00:44 2020 +0100
+
+    TASK-38386: Update addons-parent-pom to 14-M01
+
+[33mcommit 22b7b8051c01c852f31c584f0ac6d80e50695014[m
+Author: Rdidmohamedelhadi <54801286+Rdidmohamedelhadi@users.noreply.github.com>
+Date:   Fri Dec 18 09:26:08 2020 +0100
+
+    QWIN-37648 : Add param override-mode to app-center-configuration.xml
+
+[33mcommit 21b894b0680ae6ba9fab05d919a4bbdb749847d3[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Dec 16 20:46:13 2020 +0100
+
+    TASK-37983: Update project to 2.2.x-SNAPSHOT
+
+[33mcommit afb8bf1e31aeb0b857f469d788a13b306772e7d2[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Dec 16 20:46:05 2020 +0100
+
+    TASK-37954: Update addons-parent-pom to 13-RC01
+
+[33mcommit 0cc994b2b5fa0066fd5a6ea44d81c6523e2f4cc3[m
+Author: Azmi TOUIL <42934070+AzmiTouil@users.noreply.github.com>
+Date:   Wed Dec 2 12:35:17 2020 +0100
+
+    Task-35609: Update external user profile page (#34)
+
+[33mcommit e9c777656042a383e8544d3b1f366a38a3fe948e[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Nov 26 09:17:55 2020 +0100
+
+    Fix Retrieving wallet state on blockchain (#33)
+    
+    Sometimes, the blockchain state of a wallet is stored twice in two different threads. Knowing that there is no RDBMS unicity constraints, the wallet state can be duplicated. This duplication can't lead to incoherence since it's just a sort of cache of information stored on blockchain. Thus, the last Blockchainstate will be used and updated only (By adding 'ORDER BY id DESC' in request).
+
+[33mcommit 8be358989f49b6a1f87f7df44809e9708d4282d0[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue Nov 24 15:37:10 2020 +0100
+
+    Fix User Tooltip wallet button link to current site (#32)
+
+[33mcommit 33fb8be640cbe8eecf275f1f946a86a6c67e740a[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Nov 2 08:01:49 2020 +0100
+
+    TASK-35860 Use Vue based applications Skeleton V2 (#31)
+    
+    See https://github.com/Meeds-io/gatein-portal/pull/90 for full description of this strategy.
+    In addition to that, the application has been reorganized to use same files pattern definition as other applications.
+
+[33mcommit 1fcc1c05d6e7cd446c7e2d8b3001ad6662636d4c[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Oct 22 10:24:39 2020 +0000
+
+    Merge Translations
+
+[33mcommit 617b4cdced853d9a5aa0878f523df920aebcea34[m
+Author: Uoc Nguyen <uocnb@users.noreply.github.com>
+Date:   Mon Oct 19 02:21:53 2020 +0700
+
+    Update license header for Meeds (#8)
+    
+    * Update license header for Meeds
+    
+    * Fix UT Build Failure
+    
+    Co-authored-by: Houssem Ben Ali <hbenali@exoplatform.com>
+
+[33mcommit 6173268465fc5318962933f93ff5894f423d5ea9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 7 15:48:50 2020 +0000
+
+    Merge Translations
+
+[33mcommit c253ea4b4922d57b1937c06db0624fa15a4309d8[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Sep 3 07:39:21 2020 +0000
+
+    Merge Translations
+
+[33mcommit d700343cc7c3fc25484dea1b6367b83a1af7063f[m
+Author: Houssem Ben Ali <hbenali@exoplatform.com>
+Date:   Wed Sep 2 21:00:01 2020 +0200
+
+    TASK-28034: Update addons-parent-pom to 13-M01
+
+[33mcommit e3859068c138017b0e987916e3f4dcb5e8f8c686[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sat Aug 29 19:34:05 2020 +0000
+
+    Merge Translations
+
+[33mcommit e3419cf75c1fd632ac8f40a438f52e03a0492fe4[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Wed Aug 26 12:56:25 2020 +0100
+
+    MAINT-27098 : fix missing navigation labels (#29)
+
+[33mcommit e60a41c94e51d79565d8f21a80520ded63eeb29f[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Sat Aug 22 14:47:15 2020 +0000
+
+    Merge Translations
+
+[33mcommit 9315bcbea02d80a48a61f5d147b2df9f5e82544c[m
+Author: Houssem <hbenali@exoplatform.com>
+Date:   Wed Aug 19 13:42:13 2020 +0200
+
+    Make Blockchain stats available only for debugging mode (#28)
+
+[33mcommit 2f749d8391ce0dd10bc5151822a229aa07edcfc7[m
+Author: Ali HAMDI <ahamdi@exoplatform.com>
+Date:   Thu Jul 30 10:17:58 2020 +0100
+
+    MAINT-27061 : Update missing labels for navigation (#26)
+    
+    Co-authored-by: Houssem B Ali <hbenali@exoplatform.com>
+
+[33mcommit bd503e643577ed0084259322963fbc2febe192c9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jul 29 19:01:53 2020 +0000
+
+    Merge Translations
+
+[33mcommit 98b5630ffbc6b22b75d08fd5d6ea64d2815f151c[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Jul 23 05:00:56 2020 +0100
+
+    Fix Gas Price computing when user has low ether balance (#24)
+    
+    1. When the user has a low ether balance comparing to recommended Transaction Fee (= Recommended Gas Price * Transaction Gas Limit), the used gas price fallback to minimum configured gasPrice. By doing this, the sent transaction can take a lot of time to mine. This change will compute maximum gasPrice that a user can send switch his/her ether balance to make sure that transaction get mined faster.
+    2. In addition to this change, some UI gliches has been fixed in rewards UI to fix Search field overflow and hide vertical scrollbar displayed on page.
+    3. Another modification is added to make sure that in certain conditions, the estimated retrieved gas is of type int instead of float by using parseInt.
+    4. Another change consists of dropping a unique constraint on Transaction Hash due to a problem with MySQL default indexes size that is limited to 64. Knowing that the transaction unicity is managed by Application service, this constraint is not needed anymore to make insertion queries faster and avoid indexing a String column
+
+[33mcommit edfaf5834daac42d29e238641cefef352864a801[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Fri Jul 10 06:51:01 2020 +0000
+
+    Merge Translations
+
+[33mcommit bd534eae50582cf413ac26c0207aeab428674761[m
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Mon Jul 6 15:17:28 2020 +0100
+
+    Remove btn class from popover funds icon (#22)
+
+[33mcommit 4a3ea36807f51b6dfdcb150a00a8b8c6de265e30[m
+Author: bourasom <obouras@exoplatform.com>
+Date:   Wed Jul 1 18:06:25 2020 +0200
+
+    ITOP-4722: Update project versions to 2.1.x-SNAPSHOT
+
+[33mcommit 82e6d73cbe2e5c2b0e2e3fd5ea895dbf4a91764d[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Jul 1 11:38:32 2020 +0000
+
+    Merge Translations
+
+[33mcommit 4098525d150ba1b6878b4f70e90c12b62c400302[m
+Author: bourasom <obouras@exoplatform.com>
+Date:   Wed Jul 1 13:01:12 2020 +0200
+
+    TASK-26260: Upgrade addons-parent-pom 12-M03 -> 12-RC01
+
+[33mcommit ee36e35a52148aca82dbccd4e0fd406fa3bfa495[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Tue Jun 30 15:34:57 2020 +0200
+
+    Add missing translation
+
+[33mcommit 77ff566f733f5e3097fc62cc96beb717b2201e8f[m
+Author: Moez Diha <mdiha@exoplatform.com>
+Date:   Mon Jun 29 13:15:55 2020 +0100
+
+    AppCenter: Default-Mobile-Option: Set Wallet isMobile default value to true.
+
+[33mcommit e07cc442ed9fa885c633b531860aefabca52bebd[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sun Jun 28 17:10:34 2020 +0100
+
+    Delete Transaction update after Transaction hash replacement
+
+[33mcommit a55121e41003bc5455472ff408f65e14817f0d46[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sun Jun 28 08:36:52 2020 +0100
+
+    Force update DB after replacing TX Hash with boosted one to avoid inconsistency
+
+[33mcommit aa7ac33f5ed78a81c08950a21a549627818d38cc[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 15:44:45 2020 +0100
+
+    Add Unit Test for Boost and Transaction replacement implementation
+
+[33mcommit 73acebd2a3fbf35dbd6db3df77bc693f0c5063d5[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 15:41:00 2020 +0100
+
+    Fire event of Transaction replacement in a sync way
+
+[33mcommit 09ae63add78bbc4817ee58d396bab4fb3f090c4a[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 13:37:53 2020 +0100
+
+    Allow to boost space wallet transaction
+
+[33mcommit b1d538dfb8e4b4547268d24683190c80d9d67e4d[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 13:06:13 2020 +0100
+
+    Delete fiat exchange computing knowing that external API endpoint has been deleted
+
+[33mcommit 851143d8c895eb3e8f5a3efa39ee14fe93d8f075[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 12:01:00 2020 +0100
+
+    Use dedicated file configuration for rewards tests
+
+[33mcommit ec676345ddba279f2d3c3fc080b72feea5809195[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 11:57:25 2020 +0100
+
+    Add additional checks for transaction replacement triggering
+
+[33mcommit 0ccd054d1fb663213c2e0d70a87ff0de3b0d2faf[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 11:39:00 2020 +0100
+
+    Avoid canceling Old Transaction before new one gets mined
+
+[33mcommit edea737d1ee9fcf25c8d9410a8eb9abc25773e3f[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 11:38:28 2020 +0100
+
+    Trigger Event when Transaction boosted and replaced old one
+
+[33mcommit 63459a8c355e9404b47f9f7828707be384a84812[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 11:37:35 2020 +0100
+
+    Change reward transaction hash when boosted
+
+[33mcommit 79bf7e4631e13739266a8aba95d3c7a03306cd0b[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 10:27:22 2020 +0100
+
+    Cancel other transactions with same nonce when one tx mined
+
+[33mcommit 01adc61879a384c155d5056ac1a65f3e74044255[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 08:41:00 2020 +0100
+
+    Mark pensing transaction as failed if it has a nonce less than last mined transaction nonce of the same address
+
+[33mcommit 21013e8faa1173b3493a6d8536f970a8ece4f28f[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 07:56:55 2020 +0100
+
+    Mark Transaction as error when Blockchain denies the sending transaction
+
+[33mcommit c34dcb87bd66ba5bc06048a7622f8c758d03151a[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 07:24:32 2020 +0100
+
+    Improve UI to allow boosting transactions sent
+
+[33mcommit 5c581c7d0cf05431c1de683b77a596cb0c7a75f8[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 07:24:09 2020 +0100
+
+    Implement Boosting transaction fee algorithm
+
+[33mcommit a59a15a277ca637e296afe9e774fb976dc90ac96[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Jun 27 07:23:35 2020 +0100
+
+    Improve API to allow boosting pending transaction by more transaction fee
+
+[33mcommit 55cfc1e117f3cf5bf2f27b913135dc16649d5d33[m
+Author: Romain Dénarié <romain.denarie@exoplatform.com>
+Date:   Wed Jun 24 08:02:29 2020 +0200
+
+    Update appcenter default configuration
+
+[33mcommit 1a30f916dda49f95e4f6e8b640f350737a1defe8[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed Jun 17 08:32:59 2020 +0100
+
+    Upgrade addons-parent-pom to 12-M03
+
+[33mcommit 5e3218ca51c467610235dc9ba5746a75d366ff20[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue Jun 16 15:27:31 2020 +0100
+
+    Upgrade web3j to 4.5.11
+
+[33mcommit b2bdf46987c663c9b12b25ddea67316c351d060e[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue Jun 16 16:25:14 2020 +0100
+
+    Change Infura endpoint URL to use a new project ID (#16)
+
+[33mcommit 653eba8a1b54b6298c0bf3bbb86f358508b4b4a6[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Jun 11 09:06:09 2020 +0000
+
+    Merge Translations
+
+[33mcommit 71663a9d1cc0bc0c1891dc77d0709883a0a3e074[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Jun 4 08:44:57 2020 +0100
+
+    Configure applications that are allowed to be added in spaces (#14)
+
+[33mcommit ec0b6702c86f2c8eaed5fc9c875acd72d32a0b48[m[33m ([m[1;31morigin/merge-space-params[m[33m)[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Tue May 12 10:16:02 2020 +0100
+
+    Enable wallet profile extension only when user is enabled (#13)
+
+[33mcommit f419dace6a0f77e070ad3e1b164f064ac1a01ab5[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu May 7 10:15:43 2020 +0100
+
+    Fix reward period detail display
+
+[33mcommit ade276e90b0a4ec737b8b8e35f73d124b29d3438[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Wed May 6 01:42:54 2020 +0100
+
+    Add label for space wallet navigation
+
+[33mcommit d4a7fd90032c9224754ce024954c14735098f7e4[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon May 4 22:58:53 2020 +0100
+
+    Allow to wrap request fund link on mobile
+
+[33mcommit e7ecf79c235b1fc832101c4f8a0a34c06899ba66[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon May 4 08:40:59 2020 +0100
+
+    Enhance calls to blockchain when admin wallet is not yet initialized (#10)
+
+[33mcommit 7b27da1b980f081732be493a253ea9402678db64[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sun May 3 18:30:01 2020 +0100
+
+    Avoid calling blockchain only when having pending transactions (#9)
+
+[33mcommit 5f61e7c14bcee335b727c11ac6911d963ebb78e7[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Apr 27 14:25:14 2020 +0100
+
+    Ad skeleton of Wallet overview application
+
+[33mcommit 6678b333fd22ab29321b50134e87598524f1a2c7[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Apr 25 22:54:27 2020 +0100
+
+    Change reward overview title
+
+[33mcommit 6a42341579832f09057630c2533f02107d2e641f[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Apr 25 11:13:16 2020 +0100
+
+    Enhance information button position
+
+[33mcommit edd7c7c48d66d177c4bae86163603581e16f02f4[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Sat Apr 25 07:56:44 2020 +0100
+
+    Enhance Wallet overview Drawer
+
+[33mcommit a165a1a43002067e049c3ad33a699c5b7db8430f[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri Apr 24 18:23:28 2020 +0100
+
+    Implement Reward Overview In Profile Page
+
+[33mcommit 83e2f4f7b658a2c999adf9ba87e47edc56af82e0[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Fri Apr 24 14:53:24 2020 +0100
+
+    Add Wallet Overview portlet in profile page
+
+[33mcommit 5bfb3a5b763a4382b2c90c3f90d733d24cf4cc9c[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Apr 23 09:45:52 2020 +0100
+
+    Enable wallet api even on profile of other people (#6)
+
+[33mcommit 2b382f1614d817dd779a1c28306faf2a7f0acf96[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Thu Apr 16 07:28:32 2020 +0100
+
+    Add profile page extension for wallet button display
+
+[33mcommit 1a2a6d925e02aa35f13a4f34e01bc3e655aaa5b9[m
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Thu Apr 16 12:16:36 2020 +0100
+
+    Add dynamic container and skeleton loader feature/meeds (#4)
+
+[33mcommit e8cde5b0bebcd19e451112fa5809a6ec25a452ad[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Apr 13 07:56:54 2020 +0100
+
+    Include session cookie in REST calls
+
+[33mcommit cbe8df2eeabe65cbe1884a0b86e4b396beac4c3e[m
+Author: Boubaker Khanfir <boubaker.khanfir@exoplatform.com>
+Date:   Mon Apr 13 07:52:40 2020 +0100
+
+    Allow to override portal pages layout using properties
+
+[33mcommit af44359f83dcc6df37ff7c3f05eef6b706120c8f[m
+Merge: 830a10d3 d1836284
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Thu Apr 2 14:07:18 2020 +0100
+
+    Merge Feature/meeds #2
+
+[33mcommit d18362847d70e22c7c7129a9aa1bd5d26d5e41fc[m
+Author: saraBoutej <sboutej@exoplatform.com>
+Date:   Thu Apr 2 13:18:48 2020 +0100
+
+    Edit walletUrl variable name
+
+[33mcommit 3638d75e87ae48ac587b2b51cacc73148da77b64[m
+Author: saraBoutej <sboutej@exoplatform.com>
+Date:   Thu Apr 2 11:10:32 2020 +0100
+
+    Add wallet lint in data section
+
+[33mcommit 286cc513c5056aae5d4c1fef05932eab0a548564[m
+Author: saraBoutej <sboutej@exoplatform.com>
+Date:   Thu Apr 2 10:35:37 2020 +0100
+
+    PR Review
+
+[33mcommit 7c11d0c85d9c156e4e85044ff9bacb23ac13737d[m
+Author: saraBoutej <sboutej@exoplatform.com>
+Date:   Mon Mar 30 20:10:39 2020 +0100
+
+    Add Wallet ballance stream page portlet
+
+[33mcommit 830a10d3f36f37f1dcf126ceec8295aa6f74ad73[m
+Author: Benjamin Mestrallet <benjamin.mestrallet@gmail.com>
+Date:   Fri Mar 27 14:43:28 2020 +0100
+
+    Update README.md
+
+[33mcommit 37c581840227ce35b4a03b29b07226b614e59317[m
+Merge: 378af0e3 143b5b55
+Author: Sara Boutej <40363501+SaraBoutej@users.noreply.github.com>
+Date:   Mon Mar 16 12:12:01 2020 +0100
+
+    Merge feature/meeds #57
+
+[33mcommit 143b5b55a77758dee737eac727e0c4761ae974eb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Mar 16 10:57:15 2020 +0100
+
+    Apply tertiary color on icons
+
+[33mcommit cfedfc95380767ff1776b6f9c715acaec5398a9f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Mar 14 13:15:26 2020 +0100
+
+    Delete user banner portlet
+
+[33mcommit 5a56deff581ca3bff6d25d6b8afdeabf4836f9de[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Mar 14 09:22:11 2020 +0100
+
+    Fix wallet style and fix used less variables
+
+[33mcommit abbeb7941b1ea4c2e00eba22b8fdb0e21a84179c[m
+Author: saraBoutej <git config --global user.email your_email@example.com>
+Date:   Thu Mar 12 15:35:16 2020 +0100
+
+    Edit arrow up icon color in transactions list drawer
+
+[33mcommit ce89d5434c8154cc6c96fc39afaed977d31885a6[m
+Author: saraBoutej <git config --global user.email your_email@example.com>
+Date:   Wed Mar 11 12:33:13 2020 +0100
+
+    Edit tokenBalance icons color
+
+[33mcommit e808d0b5a80ab40b2f886f15f4de8258c54aebda[m
+Author: saraBoutej <git config --global user.email your_email@example.com>
+Date:   Fri Mar 6 08:41:56 2020 +0100
+
+    Add color variables to wallet less file
+
+[33mcommit a93a5c9f8a46fc8d7c8fa40ee0aabdc90378192b[m
+Author: saraBoutej <git config --global user.email your_email@example.com>
+Date:   Thu Mar 5 11:32:17 2020 +0100
+
+    Add maven css plugins and remove npm less compiler
+
+[33mcommit 516e62448bdfdfad7cb18a0b2459a9e2ff97397c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Mar 13 10:44:16 2020 +0100
+
+    PLF-8737 Change addon packaging to add artifacts in root folder of zip
+
+[33mcommit 378af0e3e3d8532675df5dcc96c344a914590c9e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Mar 12 11:08:01 2020 +0100
+
+    PLF-8738 Move intranet administration menu configuration to legacy-intranet addon (#58)
+
+[33mcommit 11cdb5d15342fa1d9945255a3991bf3162dc734c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Mar 9 11:33:48 2020 +0100
+
+    PLF-8735 Install wallet application in app center by default (#56)
+
+[33mcommit ae883c04ed07702cc6a8caf66a08a9d7a94665f7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Mar 3 21:56:41 2020 +0100
+
+    PLF-8707 Upgrade to Vuetify 2.2.12 and fix some gliches
+    
+    Upgrade to Vuetify 2.2.12 and fix some gliches
+
+[33mcommit f57af11ff976969d058fb0462c38646ad17ec369[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Mar 3 14:01:54 2020 +0100
+
+    PLF-8694 Move wallet page definition to global site (#48)
+
+[33mcommit 090484fea85962482ada4bb80cd2dea081707d56[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Feb 28 08:35:51 2020 +0100
+
+    PLF-8701 optimize wallet transactions sending process (#54)
+
+[33mcommit cfc3fab32dbb93b0789bdc133d8dfa158a3720db[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Feb 27 12:24:09 2020 +0100
+
+    PLF-8724 Improve retrieved wallet settings in UI (#53)
+
+[33mcommit 77f5848a2e49ed698256fe675b98f356e9e5b802[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Feb 26 14:16:10 2020 +0100
+
+    PLF-8722 Allow to import admin wallet private key by system property (#51)
+
+[33mcommit 39b317ffc9d2c9b70ecbe885187d3899757cd97b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Feb 26 14:09:42 2020 +0100
+
+    PLF-8723 Fix wallet sent transactions count check (#52)
+
+[33mcommit 11d24462293fbc866f771631f199adc4153598ad[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Feb 25 14:06:27 2020 +0100
+
+    PLF-8721 Fix wallet drawer positions (#49)
+
+[33mcommit 9c0a14cf4e244b049f89780b18598d3a314ad1dc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Feb 19 14:55:06 2020 +0100
+
+    PLF-8714 Move Vuetify dialogs to generic parent in Page DOM (#47)
+
+[33mcommit 39f3d83a874f8c5908b1abc29df5250ccbf9f732[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Feb 11 09:21:07 2020 +0100
+
+    PLF-8706 Define Vuetify style as Global Portal Skin (#46)
+
+[33mcommit 8291e8a36d78cc1e3078de935504dcfe17f47549[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Feb 10 12:08:22 2020 +0100
+
+    PLF-8696 Delete Default skin definition (#45)
+
+[33mcommit c8c66fdfc5fe2f0e1138db1c68d94fdf2f948f25[m
+Merge: 6ffb3839 bd7b0e6f
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jan 30 12:37:59 2020 +0100
+
+    Merge feature lightweight
+
+[33mcommit bd7b0e6fde6338234c4e997eb79869d5cd9086c7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jan 7 21:06:35 2020 +0100
+
+    Add exclusion of old version of bouncycastle
+
+[33mcommit fd00ce09148f6f9efb1c2c71d190d43fa6233677[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Dec 23 10:56:02 2019 +0100
+
+    Enhance Menu administration configuration
+
+[33mcommit 19bf4f65b638159963c14c64b7ab864c37ee79bb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Dec 22 15:48:43 2019 +0100
+
+    Change site layout to use default one and make some improvements on pages and setup menu
+
+[33mcommit a49dc429267b63df9203883df2dd28fb3bcaa3cc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Dec 20 17:27:15 2019 +0100
+
+    Move User Menu portlet to social
+
+[33mcommit 9fdf8b5204d713f647a2ef44ed2d2afd83361466[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Dec 18 16:56:51 2019 +0100
+
+    Delete group.xml definition to inhirit it from sites extensions
+
+[33mcommit 8398f5cdf4f59689291fd0e4f64bd33a4c09eb66[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Dec 13 15:23:50 2019 +0100
+
+    Delete useless JCR filter
+
+[33mcommit fcda09cdbaf5983d30c84801d7da1b1d9095c8fe[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Dec 13 09:57:25 2019 +0100
+
+    Fix addon extension priority
+
+[33mcommit 8ee3a8270f7973591c84ae35f4e5e92512e20453[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Dec 12 17:28:57 2019 +0100
+
+    Add container profile when addon is installed
+
+[33mcommit 584ac4bfbe717c4dfd5218e8570f14eacb886325[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Dec 6 13:17:13 2019 +0100
+
+    Remove platform project dependency and change it to sub projects dependenciesz
+
+[33mcommit 5ff000cbc854e0a96ea5b30a78f2bad2d87e1330[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Nov 29 09:40:14 2019 +0100
+
+    Delete social core jpa artifact dependency
+
+[33mcommit 6ffb38392d7d35b5eb4b1fcc9d94b50b9050c065[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Tue Dec 10 10:36:12 2019 +0000
+
+    Merge Translations
+
+[33mcommit 506b01eaabfbf4f256ca029777f0874850c89994[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Nov 19 11:21:18 2019 +0100
+
+    PLF-8611 Fix blockchain metric operation name (#43)
+
+[33mcommit 5a33dceef9bd783f1383b87776186904b23ac63c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Nov 14 14:41:56 2019 +0100
+
+    PLF-8599 Reattempt to send transaction to blockchain when not sent several days after (#42)
+
+[33mcommit 584e8b8e12f15dd0ea2c19cd0a174d72c89961c4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Nov 7 04:59:47 2019 +0100
+
+    PLF-8578 Delete ability to select user by address when requesting funds (#41)
+
+[33mcommit 13aa498ca33245be8fdca89a2a565be846ff1980[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Nov 7 04:52:54 2019 +0100
+
+    PLF-8581 Initial cauri amount not updated on other cluster nodes (#40)
+
+[33mcommit f5eb0fffa3322aa85843cadc5fd502b3d68e683f[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 6 21:36:46 2019 +0000
+
+    Merge Translations
+
+[33mcommit 6494c0db79ad081330952b861e82f36dd7c16b7b[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Nov 6 16:50:19 2019 +0000
+
+    Merge Translations
+
+[33mcommit 3bcc74eb21b1bc6d96dac07a11e5355f21b4fd52[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Nov 5 15:20:12 2019 +0100
+
+    Fix used label when not enough ether to send transactions (#39)
+
+[33mcommit d2276e3383bab988ae6eececcfff5cd6ed9500e9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 30 16:44:44 2019 +0000
+
+    Merge Translations
+
+[33mcommit 7870b33f8fea3ff0c4507878d076cc37e0d05629[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 23 15:50:59 2019 +0000
+
+    Merge Translations
+
+[33mcommit f52552c46afc75158f60d4fb034215d507cacd12[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 23 11:59:56 2019 +0100
+
+    PLF-8550 Add refresh button for corporate wallet (#38)
+
+[33mcommit ed882b1f60fd85b399ac501ebcc1d44f00bb4a0f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Oct 22 11:23:23 2019 +0100
+
+    PLF-8547 Allow to send tokens from current user wallet in API (#37)
+
+[33mcommit a18a560b65b664233959637f2a8a93e7fa932562[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Oct 22 09:08:12 2019 +0100
+
+    PLF-8543 Fix refreshing wallet stats when period changes (#36)
+
+[33mcommit 58554deb91d1a3c9ed3fb43669bb12de5952ad74[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Oct 21 11:47:53 2019 +0100
+
+    PLF-8539 Unable to delete some pools (#35)
+
+[33mcommit 81af6b52766e0f6eb2ffd7e19e91f8beac81a61e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Oct 21 11:02:10 2019 +0100
+
+    PLF-8526 Avoid adding current user in autocomplete selection when not needed (#34)
+
+[33mcommit dde8e54fde6086399ba1214ee3ac23e895b39c96[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 16 15:40:33 2019 +0000
+
+    Merge Translations
+
+[33mcommit 38586e35c2cb61490a64737f1587c3854a5ff6e7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 16 12:18:51 2019 +0100
+
+    Add a way to refresh transaction from blockchain on admin UI
+
+[33mcommit 08128e79841c97bda8754dacd066a50cd6bb65b5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 16 12:09:44 2019 +0100
+
+    Fix saving same pool with same name case insensitive
+
+[33mcommit 72fc41062001d573153ccfd9458eb048f06057b2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 16 12:09:13 2019 +0100
+
+    Fix pool name search case insensitive
+
+[33mcommit 47f46eb50d69cf93f26b640155efc2caf981d347[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 16 09:42:57 2019 +0100
+
+    Organize Imports
+
+[33mcommit e21a9bdfa10cb97497870b59e5cf57310370a47b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Oct 14 12:36:02 2019 +0100
+
+    Rename package to remove addon from name (#32)
+
+[33mcommit a59d5ce969b6b8645cb61c344633e2a5d42e0b0c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Oct 12 10:45:07 2019 +0100
+
+    Fix retrieving the list of rewards from store (#31)
+
+[33mcommit b82a05d529d818f22a23271e70e2b3193d60abe2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Oct 11 08:32:13 2019 +0100
+
+    Enhance pending transactions verifications (#30)
+    
+    This will enable transactions statuses verification with Contract Logs listening
+
+[33mcommit 53a7631e1904c01eb59d6bebc98d67531ac7b530[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Oct 10 13:15:47 2019 +0000
+
+    Merge Translations
+
+[33mcommit fa0c863757119d99cf0aec4ae7c78c031f9ba5ee[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 9 21:20:45 2019 +0100
+
+    Fix pending transaction check to avoid redundancy check (#29)
+    
+    Some checks are added on Block mining event. This PR will move this check to make sure that this check (for transactions marked as pending in internal database) is handled by PendingTransactionVerifierJob process only.
+
+[33mcommit 63a91db0012f060cca0ac7251d1f5887fd54425d[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 9 15:52:29 2019 +0000
+
+    Merge Translations
+
+[33mcommit 508e04c7486bc0def38204cafffd35ef108d16e5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Oct 9 11:18:25 2019 +0100
+
+    PLF-8518 apply patch on web3.js library to fix firefox use cases (#28)
+    
+    Apply patch on web3.js to integrate fix of PR 3112 on repository (https://github.com/ethereum/web3.js/) (Release of 1.2.2 not yet done and is not yet announced)
+
+[33mcommit a94216a645613e51611e8f1579bf47829e561800[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Oct 8 14:47:29 2019 +0100
+
+    Fix conflict with Merge translation commit (#27)
+
+[33mcommit af587084507a477ec11ca89c751e67788eb8cdc6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Oct 4 18:27:39 2019 +0100
+
+    Introduce a job to verify pending transactions each day (#26)
+
+[33mcommit cec08c38346892056699afa4686ef3f263847775[m
+Author: Vincent Sellier <vsellier@exoplatform.com>
+Date:   Thu Oct 3 17:58:12 2019 +0200
+
+    SWF-4953: Upgrade addons-parent-pom 11-RC01 -> 12-M01
+
+[33mcommit 6ad2c3534546f23d6431fb95f8dbba6d3d6ccee3[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Oct 2 15:50:27 2019 +0000
+
+    Merge Translations
+
+[33mcommit b0ecc43dd5f693cf2ca1115d042cbbe2e9a88cf3[m
+Author: Vincent Sellier <vsellier@exoplatform.com>
+Date:   Fri Sep 27 23:34:41 2019 +0200
+
+    SWF-4944: Update project versions to 2.0.x-SNAPSHOT
+
+[33mcommit 1290624d07da31c9c18a237aaa9ac93f0e86970b[m
+Author: Vincent Sellier <vsellier@exoplatform.com>
+Date:   Fri Sep 27 18:01:51 2019 +0200
+
+    SWF-4943: Upgrade addons-parent-pom 10 -> 11-RC01
+
+[33mcommit fd4f978107a7f4c92ae50d7c6b932301e08b8a46[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 27 14:18:35 2019 +0100
+
+    Enable close button by default on request funds (#25)
+    
+    * Enable close button by default on request funds
+    
+    * Fix search in Rewards app
+
+[33mcommit 5dc91151ad3e729b53c8a4f237d600e5590f65d9[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Sep 25 16:45:42 2019 +0000
+
+    Merge Translations
+
+[33mcommit 009e6c61a38a5f8b8208ede7d72f77480d0037f0[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 25 13:33:54 2019 +0100
+
+    Enhance test class to delete useless variables (#24)
+
+[33mcommit 9dbf8b7915442bbc55cee0bf9fde658c8a9385a1[m
+Merge: dd6b4063 dc67fd09
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Sep 24 19:45:00 2019 +0100
+
+    Merge feature/rewards iteration 14
+
+[33mcommit dc67fd09bd2a27ffd9cbeb56a27db885336f17b3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Sep 24 19:24:48 2019 +0100
+
+    Log statistics about all contract transactions
+
+[33mcommit c3ecdac345b26996765dec341546f583dd1625ea[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 18:08:24 2019 +0100
+
+    Consider reward report to save when changing period setting
+
+[33mcommit 6f3fbd52f17328c7c81bc0512adbe968932b6352[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 17:20:26 2019 +0100
+
+    Fix gas price choice
+
+[33mcommit 7b952c67b4372da3dc7cefab79a29eba448876c0[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 16:21:46 2019 +0100
+
+    Save current period reward report even when it already exists
+
+[33mcommit 00b2eb47d812e62aa698c39c05a7354c062ab7bd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 16:07:16 2019 +0100
+
+    Delete additional line for transactions list
+
+[33mcommit 39f059c21208ee5fefbb326cf8e3118359fe4a75[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 15:44:36 2019 +0100
+
+    enhance My Rewards UI
+
+[33mcommit e8da6e9a35594b8362c16c664c5d06d133e43a3e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 14:53:45 2019 +0100
+
+    Change default label for dynamic gas price choice
+
+[33mcommit 8e620b35764326c755575922d8d1e9a32f615bc2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 14:20:54 2019 +0100
+
+    Save reward report for current period even when no tokens to send
+
+[33mcommit 24d474a7a7f345cd9199f49674ef1927ac83b24b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 13:28:42 2019 +0100
+
+    Adapt gas price to use to ether balance of user
+
+[33mcommit f54600a5b16b4e94200c5c1e297703536d138899[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 12:49:53 2019 +0100
+
+    Change space wallet sections layout display
+
+[33mcommit dbebf63e9ab614d03b9e791263dcb759db7cff09[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 12:45:00 2019 +0100
+
+    Change transaction label for when a space is initialized
+
+[33mcommit 0374709809097ca23ca912fb0c59c26d36043489[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 12:36:21 2019 +0100
+
+    Migrate MySQL columns to support emojis characters
+
+[33mcommit f40af59780e214cbf747f03ed9beaf7c5a471e5f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 10:54:03 2019 +0100
+
+    Avoid checking approval when initializing external wallet
+
+[33mcommit 1f97ee944adc86df987d4b43816bc1f763829943[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 05:42:23 2019 +0100
+
+    Add more metrics on mined transactions
+
+[33mcommit ed1dc1bf83133c6c7435a569444a7091958a5f9e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 05:30:17 2019 +0100
+
+    Avoid displaying js console error when known behavior
+
+[33mcommit 5c1d43127bdaa82b47945d6f0ac746832217c605[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 05:09:51 2019 +0100
+
+    Delete useless liquibase changelog
+
+[33mcommit 7a73fb2416f82c3b59576898c889b96ea287ab76[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 23 05:06:59 2019 +0100
+
+    Avoid undefined exception when wallet admin is not created
+
+[33mcommit 5292b2bd6ba1bfa600000d8d5e4167f0374326ea[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 22 14:30:25 2019 +0100
+
+    Hide reward section for spaces
+
+[33mcommit fa440738723f2411e1b3aa606feae0fcfc54fe84[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 22 14:22:15 2019 +0100
+
+    Enhance transactions list labels for user and space wallets
+
+[33mcommit ef6333b6145148149cbafd499a13a1182cac19c2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 22 14:02:44 2019 +0100
+
+    Fix normal gas price choice label
+
+[33mcommit c87178370dab9c37b9406b568c9ecf97548e6e26[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 22 13:19:18 2019 +0100
+
+    Add dynamic GAS Price option
+
+[33mcommit f37ebcd4c3172bbee0af0d302ac32f038e77ff0f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 21:37:57 2019 +0100
+
+    Fix label
+
+[33mcommit 3755823ab1d1da7f58f972bcfe76de39069912c3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 19:50:43 2019 +0100
+
+    Display wallet application status in main application
+
+[33mcommit 2c96bb12bc8c147cbe3a55bae100ec18082fd158[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 18:41:06 2019 +0100
+
+    Clean admin attribute from user settings
+
+[33mcommit 38d8b20ddc1bef1612bf2b748e1a69908bd219b4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 17:54:45 2019 +0100
+
+    Log more information about blockchain disconnection
+
+[33mcommit 9d0eed8c9f00c92d5e3811eedc7c86ecd20a4362[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 16:54:08 2019 +0100
+
+    Truncate text in transactions list for mobile view
+
+[33mcommit ab450fade0d2e46e480991c3ea49d5c9b5a915ba[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 16:49:04 2019 +0100
+
+    Add notification I18N keys
+
+[33mcommit de9301394ccd2da9457e7b3697701c1af1c9b388[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 16:26:08 2019 +0100
+
+    Fix reward report save for current period
+
+[33mcommit 50e49dc3d7962c3b81f014e641f12de0a1296b74[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 15:38:28 2019 +0100
+
+    fix transaction time sending
+
+[33mcommit 4c38e144e7ddf67049fe7e6c5d7209c634299bcd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 14:43:44 2019 +0100
+
+    Display expand icon for transactions and rewards list
+
+[33mcommit 681b2633d04bd0680fedf976de171ee017b8a6de[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 14:22:57 2019 +0100
+
+    Display warning when admin wallet not initialized
+
+[33mcommit 5c8d76cd4b5ffd6ce1fec1d787f4d062ad437f79[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 20 12:40:37 2019 +0100
+
+    Disable send funds when admin wallet not having enough funds
+
+[33mcommit 942081681d28729b0febb06186a107d96009e9c3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 20:53:03 2019 +0100
+
+    Disable first popup components when displaying second one
+
+[33mcommit 5c77ba4a16abb8c800486c4655c08cf167c4daf1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 17:45:55 2019 +0100
+
+    Fix start period dates
+
+[33mcommit dd6b4063ffa22cf14eefb475e04997f3ed78506a[m
+Merge: 98d34c48 0991999e
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 16:14:15 2019 +0100
+
+    Merge feature/rewards iteration 13
+
+[33mcommit 0991999e8f3df9423f20faf2185fb5882f95baf4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 12:12:56 2019 +0100
+
+    improve unit tests for rewards listing
+
+[33mcommit 056db69c406dfbba485bf7e57254fd286725af90[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 08:53:35 2019 +0100
+
+    Enhance wallet admin UI
+
+[33mcommit 0a48d8032213e8dc9554c057b09b4b03274358b6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 05:56:31 2019 +0100
+
+    Display admin balance too low in admin Wallet UI
+
+[33mcommit ba95af2697c945d4526022dfdbe6d1a91ef95275[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 05:41:16 2019 +0100
+
+    Display admin balance in Reward UI
+
+[33mcommit 0ff717f28420f142c41f02bffef2b76ff1e71980[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 19 05:03:36 2019 +0100
+
+    Fix second popin blocked by overlay in mobile
+
+[33mcommit cf24940958ef25503cae3f1d2c1d15afa442364d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 18 19:11:42 2019 +0100
+
+    Add unit tests for rewards listing
+
+[33mcommit 6a1e5c0fb7e95a966142142f88dcce9f5e3a9d3f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 18 19:11:21 2019 +0100
+
+    Disable Send rewards button for current period
+
+[33mcommit a3a53aac8931557b56c2645b22b4dce0cea8df82[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 18 18:21:28 2019 +0100
+
+    Enhance Reward listing UI in Wallet
+
+[33mcommit fa5145eec68ed7dee932645cf226fb80b69005a7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 18 15:16:03 2019 +0100
+
+    Refactor Reward admin UI
+
+[33mcommit afd012c47b2934c6a1aed0e864b46ae2892b7007[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 18 05:22:34 2019 +0100
+
+    Backend reward refactoring
+
+[33mcommit 3c0afd258664b0a726368307ee92847dc9dc894f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Sep 17 22:15:36 2019 +0100
+
+    Backend reward refactoring
+
+[33mcommit 2f4f7616d2d6c6170fefaeb3276b7ed2e2ab54ef[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 16 22:15:45 2019 +0100
+
+    Prepare Backend for new Wallet Reward UI
+
+[33mcommit 4ba516d7fc8eee704a5a210865994e4b9ed99960[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 16 09:02:47 2019 +0100
+
+    Display admin wallet in a dedicated section
+
+[33mcommit cb7d7fe1435de180e6aeda1848bdcecc1bbda9d2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 16 07:58:33 2019 +0100
+
+    Sort transactions to send in query instead of java
+
+[33mcommit 134bc37309c46398cdd6f805f41a8366048d7622[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 15 20:08:34 2019 +0100
+
+    Enhance blockchain calls by checking account approval from Server
+
+[33mcommit bef3290aa6313b8922e7ef7bfc9ba86f5d86f8bb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 15 10:23:36 2019 +0100
+
+    display nonce of transaction only in portlet administration
+
+[33mcommit b708f8cb9e226047b3d4d44822d091a6e3ce1f22[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 15 10:22:11 2019 +0100
+
+    Reset nonce of saved transaction when lost after sending on blockchain
+
+[33mcommit 919f96a6ecf64d4ccfbc4dae32be439009af4585[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 15 09:13:26 2019 +0100
+
+    Refine logs operations when listening
+
+[33mcommit 0bcf730ac4b77c9abd097bf555a60d26d698dfa8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Sep 15 06:07:06 2019 +0100
+
+    Add statistic log for getting block information
+
+[33mcommit 6a55ca3c63e34376723e28813293a92dd9bfadbe[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 14 17:03:20 2019 +0100
+
+    Avoid NPE when importing key usin link in main screen
+
+[33mcommit f36bfcce05c2ce4215fbc23af65c11e38a039e40[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 14 16:10:31 2019 +0100
+
+    Enhance contract reloading
+
+[33mcommit 9e4ff5949194c7a4ec09c38bda93c4fc3a4531c5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 14 15:17:10 2019 +0100
+
+    Change pending transactions check strategy to rely on blocks mining
+
+[33mcommit 72e998295315fade5e76f4b195b7536f489560ed[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 14 11:47:07 2019 +0100
+
+    Change transaction list retrieval strategy
+
+[33mcommit 86c9d56e74389c193a68ba7ee6a4cff1e840ae78[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 14 08:02:14 2019 +0100
+
+    Change admin operations to use eXo server as buffer to send transactions
+
+[33mcommit 02dd34bac6a9ddb88e6feb7f9d340b77e30ea839[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 13 23:05:28 2019 +0100
+
+    Fix sending ether via admin wallet
+
+[33mcommit f53c0816efa3bfbd8792e43bec35f8560f079b1d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 13 22:47:42 2019 +0100
+
+    Enhance code for parallel transaction sending for wallets
+
+[33mcommit 5d4c9b413fc33c9d481eda1d99efb5b7f3d9703a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 13 17:39:08 2019 +0100
+
+    Make transaction sending for users made through eXo Server
+
+[33mcommit 99d5bfcf186798df6f4d6300813d12e72202d792[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 15:21:14 2019 +0100
+
+    Fix Months order for Year statistics display
+
+[33mcommit ca39020224cf6ae75d429c194c2cc6138b9d5a66[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 14:28:30 2019 +0100
+
+    Delete useless variable
+
+[33mcommit 98d34c487d366e72ad957a004de01614572bf2ab[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Sep 18 15:38:59 2019 +0000
+
+    Merge Translations
+
+[33mcommit 9dd96f3ef7f34bb313b164a928182593a92356fa[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 16 18:33:48 2019 +0100
+
+    Fix wiki conflict with wallet (#21)
+
+[33mcommit 3d155b7a5c4424443abfd1df128dea4832eb7ff8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 17:35:34 2019 +0100
+
+    Fix build failure (#20)
+
+[33mcommit acda331f1fde62b36c47495a26ac84177ec7719e[m
+Merge: 85ec050a 401af82f
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 13:29:21 2019 +0100
+
+    Merge feature/rewards iteration 12
+
+[33mcommit 401af82f17e3ab7730f64843acb1eb2a31f6400e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 11:26:04 2019 +0100
+
+    Delete useless code about making dialogs draggable
+
+[33mcommit bc34764f4923849098f24e6d0686f7a0d56d925b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 12 06:58:50 2019 +0100
+
+    Verify nonce from eXo Server before sending transaction
+
+[33mcommit c5b3c5aa00e974088919720ff559e5bff4d42cec[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 11 19:52:41 2019 +0100
+
+    Add workaround for multiple transactions sent by a user
+
+[33mcommit e1459f0f1b592045018acfc9e9ff34602d670d88[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 11 06:06:46 2019 +0100
+
+    Fix sending transaction with Wallet API
+
+[33mcommit 9dccb8dbc82ed595ad16aa2c36e1ff7e44894d26[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Sep 10 18:47:38 2019 +0100
+
+    Make dialog of password modification close when click outside
+
+[33mcommit 2a7e5f0b3f9bc0fd6ed1dd7ec85de63373a0bfc7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Sep 10 12:48:37 2019 +0100
+
+    Enhance statistics date selection
+
+[33mcommit d2a0a1dd1516d2de4527d48c36c615e11819f927[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Sep 9 15:04:02 2019 +0100
+
+    Fix contract name display in administration
+
+[33mcommit a216c0817d1fdefad7bafcef1baef9ffde2b5f51[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Sep 7 14:39:16 2019 +0100
+
+    Send Reward notification when rewards payment is proceeded successfully
+
+[33mcommit bd335346fa363887e6253dd60929e3f4483f2495[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 6 16:03:26 2019 +0100
+
+    add date selection for funds statistics
+
+[33mcommit 351cfd1ed6b2314c0a94d17b95c5727cf278bde3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 6 12:05:07 2019 +0100
+
+    Fix change password popin display in mobile
+
+[33mcommit 35714db5f0595fe14fb913e4ce628ee842cf14ce[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Sep 6 08:56:17 2019 +0100
+
+    Change failed transaction details
+
+[33mcommit 1a6a6647001cac3700173a0e0ace4606f620fe43[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 18:49:56 2019 +0100
+
+    Format file
+
+[33mcommit 6fd76e8a68efe36824698be745e63a08c1a99170[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 13:16:49 2019 +0100
+
+    Disable buttons when wallet is disapproved
+
+[33mcommit 646dcb803b8e7235d3c73d8eb5e6c8a0c6881ca9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 12:14:18 2019 +0100
+
+    Fix request funds from space notification URL
+
+[33mcommit 3917e3e26f522c7df544b4bff98dbb38f37b5797[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 11:48:39 2019 +0100
+
+    Delete wallet password augeneration and fix wallet private key import
+
+[33mcommit 4a678e933885a806cdd047751fc36617efb43d02[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 10:25:25 2019 +0100
+
+    Improve displayed fixed amounts
+
+[33mcommit 6ee0f8e9847187fecf2d1fecd7350a5d638eaf73[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 08:10:05 2019 +0100
+
+    Fix space wallet creation form display
+
+[33mcommit 85ec050a7c1b1333eb48a1d67f3dccfdfbfe165e[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Sep 11 16:04:51 2019 +0000
+
+    Merge Translations
+
+[33mcommit fd652a77e71a8d414df3dd0513d9ac1244526d24[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Sep 5 18:37:41 2019 +0100
+
+    PLF-8438 Upgrade Vue and Vuetify (#18)
+
+[33mcommit ce242ed1800fe4c908fa65adeac8810933ce8dc4[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Sep 4 15:31:06 2019 +0000
+
+    Merge Translations
+
+[33mcommit 8a19bb9686eb5588782f71cb222515ead72a0438[m
+Merge: 74916852 5e35a6de
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 4 12:14:46 2019 +0100
+
+    Merge feature/rewards iteration 11
+
+[33mcommit 5e35a6de8678a44df8d9b544704ce42fcf887780[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 4 10:09:16 2019 +0100
+
+    Fix walletCommon formatting
+
+[33mcommit 85471e84aeb7bd3de7776cbfc70714dd2dd2ad36[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Sep 4 07:52:03 2019 +0100
+
+    Fix pending transaction consideration delay on mainnet using Infura
+
+[33mcommit 21d1a2753d542812fd4e6b43fd76b741f39cd91c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 17:09:04 2019 +0100
+
+    Change rejected wallet label
+
+[33mcommit 411ea3da34182ea32bc6112c3b1f465d914aded3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 17:02:49 2019 +0100
+
+    Display 0 instead of - for new wallets in Admin UI
+
+[33mcommit 3e1abb62dd4c1478a5c1be2e0fc5683d134ab648[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 16:59:03 2019 +0100
+
+    Delete ether notification
+
+[33mcommit 6b332346344b072df45eeafb459134e7510f189b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 16:40:52 2019 +0100
+
+    Allow to send tokens to current user
+
+[33mcommit 74caeb23db8ab8f8209e3819ead6c677ab910731[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 16:22:46 2019 +0100
+
+    Drop remaining files of old Task app
+
+[33mcommit a46b8580a8d2f6e195262427b9128c2bd10fac46[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 16:02:32 2019 +0100
+
+    Ad blockchain attributes in stats on blockchaintransaction send
+
+[33mcommit c1c0e503fb2753f265eb8fad1deb3059f8c43a50[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 15:52:42 2019 +0100
+
+    Enhance Web3j connection process to blockchain
+
+[33mcommit 7ad4279f0a87fd0e0908d05d8cbc7ea323f78cfc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 30 10:52:25 2019 +0100
+
+    Enhance logs to add blockchain properties in statistic logs
+
+[33mcommit b86b6990188112729fc256672a00ca57a49b7cad[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 29 18:12:07 2019 +0100
+
+    Fix sending notification on wallet
+
+[33mcommit 157c5b3476a388f79c5939822347118722b175f6[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Thu Aug 29 16:38:49 2019 +0100
+
+    Fix walletAdministration screen on web and mobile
+
+[33mcommit 3e83a7019e05864e9fe6e0e5739683baafe0542b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 29 17:32:04 2019 +0100
+
+    Fix notification and statistics sending
+
+[33mcommit d611c85385daa3e09c2b7d8f0763e5cf50acd646[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 29 15:13:05 2019 +0100
+
+    Avoid waiting on blockchain transaction receipt
+
+[33mcommit be75b2d26129efe92318bb486aa448a6cc0c1baa[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Thu Aug 29 14:32:22 2019 +0100
+
+    Change the icon when the wallet is initialized by initialized wallet
+
+[33mcommit 74916852ec3ab813f304eed77109ff51a9a9b48f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 29 10:27:15 2019 +0100
+
+    Add network URL in blockchain statistic logs (#15)
+
+[33mcommit 9bfba8456e24ab809c8a04658c02a53c36ae04ab[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Aug 28 17:32:07 2019 +0000
+
+    Merge Translations
+
+[33mcommit 161ddce4b946755e1d25a5db2c734e8590f32c2a[m
+Merge: d566e20b 5d2b3f5f
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 17:07:40 2019 +0100
+
+    Merge feature/rewards iteration 10
+
+[33mcommit 5d2b3f5f7790b547c4009097956a8d6be43742d1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 16:14:16 2019 +0100
+
+    Use constant for HTTP codes
+
+[33mcommit f4de3021ada5af55151407da3d5757b161fe7fa0[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 14:51:00 2019 +0100
+
+    Fix NPE when user is rewarded in 'No Pool users'
+
+[33mcommit 751cad7dc2dda27e9d22c919686fceedc0a91205[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 14:44:29 2019 +0100
+
+    Fix adding user in pool in Rewards
+
+[33mcommit bc862e29cd30db3fee986ed85a8dea6c3a86c6c4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 14:41:49 2019 +0100
+
+    Refresh initial funds settings after saving it
+
+[33mcommit 24630e74775dccb6ebdb84978fd5b0e27f20ce46[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 14:16:15 2019 +0100
+
+    Allow to refresh wallet from blockchain
+
+[33mcommit 7cd420885d3e09f612f2729724e3fac256b9be7d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 14:04:10 2019 +0100
+
+    Set wallet as initialized when it's approved and initialized on
+    blockchain
+
+[33mcommit 805bb8925efdacca472cb5313c038abf0fd00817[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 28 13:44:42 2019 +0100
+
+    Update Wallet Backup message
+
+[33mcommit 9ec8204a4f06cb0a031364ef9e6e8aa4d8d5905e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 27 16:43:25 2019 +0100
+
+    Add transaction verifier after mining
+
+[33mcommit b974e8120005715425b01d843ba93d08c4ba57a4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 15:28:25 2019 +0100
+
+    Fix account initialization statistics logging
+
+[33mcommit 2c20c513690d87b564d53fdfa15065deee141fc9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 13:09:37 2019 +0100
+
+    Fix wallet state update from blockchain when initialized
+
+[33mcommit 2648049e7cf784ee8281838286f692a7a52df62f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 13:04:41 2019 +0100
+
+    Send funds asynchronously on UI
+
+[33mcommit f12e54fe88786c7dfd6c6889aa19e208d6a51e3e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 12:20:19 2019 +0100
+
+    Fix refreshing wallet blockchain state from database
+
+[33mcommit 29f9fc5c7e4eef9070cf4684a5802ea46f2199a1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 11:34:34 2019 +0100
+
+    Set dialogs moveable
+
+[33mcommit 35fd208a7c215adbd929f5e529a8ec1db1750943[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 11:33:25 2019 +0100
+
+    Add duration_ms in all statistic logs
+
+[33mcommit 8bf59c784ec5d6328f1a5140292d2b0b2e8c3b44[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 26 11:30:23 2019 +0100
+
+    Rename initializeAccount to initialize_account in statistics logs
+
+[33mcommit fd2a785db22db42e86455525be195945d5c4fb13[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 15:20:55 2019 +0100
+
+    Optimize wallet information retrieval on transaction mining
+
+[33mcommit b07458ff35b9187f08c9151b7761ebfe9cc8de4c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 15:04:03 2019 +0100
+
+    Fix Wallet Account Statistics collection
+
+[33mcommit 01827d2c7f8f8b0522efe3e16468d55ab5eaa943[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 14:52:04 2019 +0100
+
+    Fix admin wallet creation on empty database
+
+[33mcommit 17685a1986995ebb625591061d7f02b147d9d5a5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 13:00:41 2019 +0100
+
+    Enhane logs when can't decode wallet private key
+
+[33mcommit 4baa477e320379e7f4131897f566532abcb69c4a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 07:09:59 2019 +0100
+
+    Apply SpotBugs recommendations
+
+[33mcommit b941ef7b19d4a72d38d6748b634a65314f78e8bf[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 07:05:21 2019 +0100
+
+    Delete useless listener
+
+[33mcommit 4a568080a29b3b6c6e7192b6959c09f4a51d39f1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 06:46:50 2019 +0100
+
+    Enhance log while computing statistic parameters
+
+[33mcommit 1b645cb4e29c0274ab07861f04159f2e44d32cbd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 22 16:59:48 2019 +0100
+
+    Delete useless annotation definition
+
+[33mcommit 10aad44c577f5646fa38ec9b447e84bc9ba68128[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 22 16:58:54 2019 +0100
+
+    Enhance statistics API to make it more generic
+
+[33mcommit 04d090b2947c088fab138aa5cb17bcce07bbe7cf[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 22 16:57:50 2019 +0100
+
+    Delete useless operations
+
+[33mcommit f25771762a342bbdc54b6fc316d655f88ed57c01[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 22 16:56:47 2019 +0100
+
+    Fix WalletAccountService Test implementation
+
+[33mcommit d566e20b3412cad2342dccdddf9d75bfac8f1ede[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 23 09:16:18 2019 +0100
+
+    PLF-8434: Revert "Migrate Web3js to version 1.2.1" (#14)
+    
+    An error is logged in console when opening a Wiki page:
+    
+    TypeError: _ is not a constructorbabelpolyfill--min.js:6:45723
+    [145]< http://localhost:8080/portal/scripts/5.3.0-M20/SHARED/babelpolyfill--min.js:6
+    s http://localhost:8080/portal/scripts/5.3.0-M20/SHARED/babelpolyfill--min.js:6
+    s http://localhost:8080/portal/scripts/5.3.0-M20/SHARED/babelpolyfill--min.js:6
+    
+    This is due to Wallet Addon version 1.0.0-M20 where babelpolyfill is added as dependency, see:
+    https://github.com/exoplatform/wallet/blob/develop/wallet-webapps-common/src/main/webapp/WEB-INF/gatein-resources.xml#L147
+    
+    The commit is reverted until a better solution for babelpolyfill integration is made.
+
+[33mcommit d47ba54265d495e49df109f956eb89902ae143e3[m
+Merge: 1c6e831e 06dc5f70
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 22 12:28:38 2019 +0100
+
+    Merge feature/rewards iteration 9
+
+[33mcommit 06dc5f70ebd631cac5660b69913c08ef2d6d05ad[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 21 17:46:18 2019 +0100
+
+    Fix warning when receiver is not approved
+
+[33mcommit 9628696a95fd098534a774e711df6e4c5a0eee64[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 21 17:31:30 2019 +0100
+
+    Add Unit test for transaction service
+
+[33mcommit 79417ea41a8a9d79934d4d8ecee49d37bbaf125b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 21 17:08:30 2019 +0100
+
+    Implement Blockchain statistic logs
+
+[33mcommit f8412b2fa2eb4498bd17cb3deddd6d0b24073ee5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 20 16:59:49 2019 +0100
+
+    Implement wallet and rewards statistics
+
+[33mcommit c16370fd74144f14fc1b81f48d79ff6d0df48a01[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 20 11:31:58 2019 +0100
+
+    Avoid sending request to blockchain on wallet UI display
+
+[33mcommit c400d6c658105579d78d198f0e03c366a8cb6e30[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 20 09:02:13 2019 +0100
+
+    Fix sort in tables
+
+[33mcommit ace569168455196a3c7e380583ce058599b955dc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 20 08:15:02 2019 +0100
+
+    Use DB data for Reward computing instead of Blockchain
+
+[33mcommit 5df2f98d09b2b0cbbc033551de904f2facd0030d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 20 08:14:14 2019 +0100
+
+    Refresh reward transaction statuses using websocket
+
+[33mcommit fad843bcfcd07c1628a1a889f2f6a52010f9751e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 16:58:11 2019 +0100
+
+    Fix Wallet API
+
+[33mcommit 07dde56c6959f5c70d809a7216e8165453e7e651[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 16:15:58 2019 +0100
+
+    Disable Web3js automatic receipt check
+
+[33mcommit abdfa1d6d2d6deb051ad37df03f8a148db090706[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 13:15:05 2019 +0100
+
+    Add used gas price to transactions sent by Admin
+
+[33mcommit 492be42ffde5046f01fbc1801805b3ef27f3bc7b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 12:15:28 2019 +0100
+
+    Avoid swallow exception
+
+[33mcommit bc232024459732e18e4b6267a4f542a57c13d1dd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 11:55:06 2019 +0100
+
+    Migrate Web3js to version 1.2.1
+
+[33mcommit 205129f81e9c6f109618d3e1ffbc7d9efc876a1b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 11:53:51 2019 +0100
+
+    fix update of transaction when no watching transaction yet
+
+[33mcommit 61fb66ee46c7302fe74c8fc7d4a9e8cf18f80e81[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 11:18:22 2019 +0100
+
+    Improve wallet fiat exchange rate retrieval
+
+[33mcommit 9594e088013f995d899bed8e56ad5e65fd80eec6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 10:51:03 2019 +0100
+
+    Fix error on Wallet admin init
+
+[33mcommit 1338c0437a5b0d5bca9dc5ff1b5024adc16dbfd9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 19 08:50:16 2019 +0100
+
+    Add UI update through Websocket messages
+
+[33mcommit 6c0aea65b83c7b90960ab3a89caf6e8dfa4468eb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 16 22:26:31 2019 +0100
+
+    Add Wallet entities update throught websocket channel
+
+[33mcommit 3f265a421c2f41560ffe083c52d73335dcc068eb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 16 18:36:42 2019 +0100
+
+    Optimize UI to avoid calling blockchain only when necessary
+
+[33mcommit e008f968c00eab2ea0a1657d8fa7bc17386d3195[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 15 17:43:57 2019 +0100
+
+    Implement backend to store blockchain states for Contract and Wallet
+
+[33mcommit 8199c4e68f3643bf66b838481012a59b65c7d217[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 14 19:02:10 2019 +0100
+
+    Blockchain requasts optimisation
+
+[33mcommit d8415a41d6c63b5685119ff9b769108bca7a9b75[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 14 16:52:54 2019 +0100
+
+    Fix avatar image sent when sending funds from admin
+
+[33mcommit 6c318caaaf89abbc8d0b040eb6267f7f45901828[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 14 14:58:12 2019 +0100
+
+    Move Vuetify common css in Platform bundle
+
+[33mcommit 0b741effd6c51668c8a7a6fb90b39afb872829ef[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 9 12:31:34 2019 +0100
+
+    Refresh rewards sent even when an error occurs
+
+[33mcommit 1c6e831e7fcd455b99e1234a1f30d4d8e7142841[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Wed Aug 21 16:24:40 2019 +0000
+
+    Merge Translations
+
+[33mcommit 34e34d0f07a683e0061acb5f10fb1687b96e56ed[m
+Merge: 8824c580 1b6a89eb
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Aug 14 15:25:16 2019 +0100
+
+    Merge feature/rewards iteration 8
+
+[33mcommit 1b6a89ebe3cfe0db0942030dfda1aa911c377357[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 9 11:12:31 2019 +0100
+
+    Review wallet administration actions display conditions
+
+[33mcommit ac1decc6fd4c2d60a3827151ebe1bfc5781965cc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 15:27:17 2019 +0100
+
+    Display Send ether or Token buttons in admin on specific conditions
+
+[33mcommit 3ef1c861f587e32e76d281ee941161f94c110dae[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 15:14:22 2019 +0100
+
+    Refresh list of transactions after refreshing blockchain status
+
+[33mcommit df1228eaf8a7df8b89abd11600ce8b7b9b80d2a5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 14:42:24 2019 +0100
+
+    Add button to refresh transactions list and refresh pending transactions from blockchain
+
+[33mcommit 8824c58081a70092ea6143272a023f46f7a2206f[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Fri Aug 9 07:29:26 2019 +0000
+
+    Merge Translations
+
+[33mcommit c63d3b2a7a435f6557a37a0824c83fcd0269f4c6[m
+Merge: 68402702 a98b897f
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 12:43:09 2019 +0100
+
+    Merge feature/rewards iteration 7
+
+[33mcommit a98b897f9467785ba08fceef7de270067bccfab9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 10:51:16 2019 +0100
+
+    Fix Sending parallel transactions with admin wallet
+
+[33mcommit de4dba96ec72e7a6af2d29bca5b0b5402eed78d1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 10:50:40 2019 +0100
+
+    Fix displayed dates for rewards period
+
+[33mcommit 8718441c45c0c3c1952c9ea534882fa752275124[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 07:57:40 2019 +0100
+
+    Add Blockchain annotation on blockchain init operation
+
+[33mcommit a32d319c629513896ca7cada9bfb29659fe96823[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 07:56:38 2019 +0100
+
+    Migrate Web3j to 4.2.0
+
+[33mcommit 442df3e0e36a72a740be9666873a3564d7926201[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 8 07:50:47 2019 +0100
+
+    Delete useless Webjs module from JS dependencies
+
+[33mcommit 2d5b23d84e13540b2aaf623487ea822c8ea2bcf8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 18:51:36 2019 +0100
+
+    Round reward amounts in transaction messages
+
+[33mcommit cdf59f81f8f3997462c65773dea5aa18aac261f5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 18:39:41 2019 +0100
+
+    Add I18N for Wallet Reward message
+
+[33mcommit 036d3a878c5245ea9c83ed1e8f85709cd2dc1552[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 16:40:35 2019 +0100
+
+    Fix transaction message and label save when mined
+
+[33mcommit 01bbe7a4a3d4b3b72dc1a3d4212cd6cc7a8ed47e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 15:22:52 2019 +0100
+
+    Allow to send remaining ether amount to wallets
+
+[33mcommit edfe8f5f7f2553a87f7a4d168438173d59ed0bcb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 15:13:05 2019 +0100
+
+    Add wallet admin button to filter deleted identities
+
+[33mcommit 1588344990546aac0c751c1a5c0cf5b2064a5f48[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 13:54:46 2019 +0100
+
+    Preselect recipient when using popover button
+
+[33mcommit 4367f599089535b26cdcbd1367ca9ec562b45127[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 13:33:52 2019 +0100
+
+    Avoid refreshing contract from blockchain when using Wallet API
+
+[33mcommit 2e4d46e664d7325d2df7215de1d0e5f80d652d61[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 12:34:27 2019 +0100
+
+    Review dusplicated pool member label
+
+[33mcommit 23bf72de88d67999240e1fff5d10bd11c7c738bc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 12:32:13 2019 +0100
+
+    Fix sending ether to contract
+
+[33mcommit f77e2b1861734d26af6b13d5fab01c995946cbd9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Aug 6 12:02:12 2019 +0100
+
+    display warning when adding duplicated pool member on member selection
+
+[33mcommit 4b1042a3a238d869b14db3b6e803871812ed8423[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 5 12:10:16 2019 +0100
+
+    Add Cancel button in Rewards configuration form
+
+[33mcommit 79ac31420bfb3c88acbf968c474af8baa8a7439f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Aug 5 11:56:45 2019 +0100
+
+    Display 25 pool members per page
+
+[33mcommit 984276f4e27f5231e28c3b3a13d43974d4167dd3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Aug 2 18:24:41 2019 +0100
+
+    Display backup popin on wallet creation
+
+[33mcommit 35fde2f7f3196aa26658eb7fe9230642351a0198[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 1 15:12:40 2019 +0100
+
+    allow sending token from admin wallet to users
+
+[33mcommit 7f88a718785d709d9ef0e36e3696fbc0529b58ec[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 1 12:37:19 2019 +0100
+
+    disable request funds button when no recipient and no selected amount
+
+[33mcommit 6840270291a53a541ebbd434dc84ea912ca1a56c[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Aug 8 09:41:50 2019 +0000
+
+    Merge Translations
+
+[33mcommit ae10222c2ed7a792d96a483a79c6ef01ab63dd8d[m
+Merge: da9fa685 00393808
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Aug 1 11:55:36 2019 +0100
+
+    Merge feature/rewards iteration 6
+
+[33mcommit 00393808731062395b7d27ef6fb267d34dc32d22[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 31 17:28:17 2019 +0100
+
+    display list of wallets in admin even when user wallet is not configured
+
+[33mcommit c636f42028c495978b869fc546a7d016926a1a3a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 31 15:21:04 2019 +0100
+
+    Add appropriate error message when pool name exists
+
+[33mcommit 2b63deeab4d816d4241f5b4289ea846127d5ca1b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 31 12:08:38 2019 +0100
+
+    Fix Security button tooltip label
+
+[33mcommit ed0d56b9f2ffed326b95a33475e64ad9ddb6943d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 31 12:06:56 2019 +0100
+
+    Avoid NPE when job started before container startup finishes
+
+[33mcommit e4729651cb8c5b685a93a38986decb26db65ec34[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jul 30 11:35:48 2019 +0100
+
+    Fix label keys in templates
+
+[33mcommit 82b2e2a2806b2fccb674b8c8e3b57742724ba0b9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jul 30 11:35:24 2019 +0100
+
+    Fix toFixed method that displays amounts
+
+[33mcommit 4e2c0332de25683c8d45f50671ca908ee33def4e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 29 16:33:35 2019 +0100
+
+    Disable send button when empty password
+
+[33mcommit 9702378c909ab08d71da73846a6a1eeff32e24c4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 29 16:20:33 2019 +0100
+
+    Fix nonce calculation for Admin transaction
+
+[33mcommit abf503ca15c7f3108340de9503e3ae589b38f4c8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 29 15:48:44 2019 +0100
+
+    Fix profile status label
+
+[33mcommit 8ab484b91a6719c1e4287fedc74e10b5f4b09884[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 29 08:52:16 2019 +0100
+
+    Fix permission check method
+
+[33mcommit 1c5e671227b59f9c402b338291f59b59bd398eea[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 24 20:00:57 2019 +0100
+
+    Delete useless notifications keys translations
+
+[33mcommit da9fa685feca0a968c32bf908bc2101030a59c20[m
+Author: exo-swf <exo-swf@exoplatform.com>
+Date:   Thu Aug 1 07:39:26 2019 +0000
+
+    Merge Translations
+
+[33mcommit 19169101aa71f84f8b9c7c82ee0aea132ec28158[m
+Merge: 6e833600 b0a400e1
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 22 16:19:36 2019 +0100
+
+    Merge feature/rewards iteration 5
+
+[33mcommit b0a400e151da8afb481a725f07fad856bdbe99e6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 22 15:40:23 2019 +0100
+
+    Fix Wallet Reward Services real ratio
+
+[33mcommit 9446770ff9ca07faf19b319bd90ae1b578d98e7c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 22 15:20:46 2019 +0100
+
+    Fix typo in I18N
+
+[33mcommit 7e0727405bd546f84a490b5fb8a29114149302a4[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Mon Jul 22 14:31:59 2019 +0100
+
+    update walletAcount and walletService test
+
+[33mcommit df03447dd17cf9fc2f576aaf67f29e7567b31f83[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jul 19 18:03:29 2019 +0100
+
+    Fix sending multiple transactions at the same time
+
+[33mcommit 9b4d81c36cf18be00ff2f3dfd9ff78cb8d3732b8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jul 19 17:59:19 2019 +0100
+
+    Add I18N for Wallet API
+
+[33mcommit 19b9ec71f34c30ca6540667a280c46f72538bacd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 18 17:47:47 2019 +0100
+
+    Fix translation properties
+
+[33mcommit ebd2ce5283d0c850318aa18a6bc1fa659f74e12a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 18 17:34:34 2019 +0100
+
+    Fix I18N for reward admin dates
+
+[33mcommit 6e833600c1d6cfe35ce2f2830ac6c762e42d5702[m
+Merge: b3604276 d080e204
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 18 12:02:37 2019 +0100
+
+    Merge feature/rewards iteration 4
+
+[33mcommit d080e204c48751337941d03c6d9b3b4c374ea3b5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 18 10:50:22 2019 +0100
+
+    Change LOG level to debug for some redundant operations
+
+[33mcommit e7b4beffdfddd316caaa85bff2015ef510856743[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 17 15:56:48 2019 +0100
+
+    Allow to send multiple transactions at the same time with admin wallet
+
+[33mcommit d1b08825e3b7526c49d9426d40f5af0734d1dfad[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 17 15:33:42 2019 +0100
+
+    Allow to change wallet status when refreshing using UI
+
+[33mcommit df2be79af639c1982b757b190dc203f5c46d7fa5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 17 15:32:05 2019 +0100
+
+    Enhance logging
+
+[33mcommit 6ac95f3e4a5620f0f95be8c5311b4036a32749bb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 17 14:24:32 2019 +0100
+
+    Fix glitches
+
+[33mcommit fd6ca1041dc63ae0fd6798bd7ba3d719244a84a1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 17 09:19:33 2019 +0100
+
+    Add I18N for Wallet Rewards UI
+
+[33mcommit ae8c73a29a3817bb28a4960028803d4f8ae23748[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jul 16 16:36:52 2019 +0100
+
+    Add I18N for Common components
+
+[33mcommit 4d386ee5a2c488d5cd0f3ae521fc68a6665598a1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 15 18:43:43 2019 +0100
+
+    Add I18N in administration UI
+
+[33mcommit e7b12b7bcf0a540770281d6c0a1e3e7c31229f98[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Mon Jul 15 16:31:26 2019 +0100
+
+    Add Test wallet services unit tests
+
+[33mcommit 8de3bec5c1f759738c55589a7d9667a303dd07f9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 15 16:25:06 2019 +0100
+
+    Add I18N of Wallet portlet
+
+[33mcommit ffbda58eaa971ce537d88b43b1dbaea6c2095815[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 15 14:21:20 2019 +0100
+
+    Move common JS files to commons module
+
+[33mcommit 24604acaa8900c7799cf8e8a949b211bd41ae3e0[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Fri Jul 12 16:39:14 2019 +0100
+
+    Add Test wallet services unit tests
+
+[33mcommit 2a5038ef83009e8bf7dca70c32cf3c8a40efd7d6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 11 19:04:57 2019 +0100
+
+    Add Wallet Reward Services unit tests
+
+[33mcommit b3604276cf998dc2365b41dd61cbdf688864664b[m
+Merge: c1fc17a4 88314237
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 19:07:16 2019 +0100
+
+    Merge iteration 3 for feature rewards
+
+[33mcommit 8831423731eaeac95f7ef657ce2ab388f0a9fc44[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 12:24:59 2019 +0100
+
+    Fix a test that randomly fails
+
+[33mcommit 3f580ec99e42a72c1856eed320d640980bd19668[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 12:12:58 2019 +0100
+
+    Avoid listing delete spaces wallet
+
+[33mcommit 7fd8ee4c9f401a6ac34fa66ef85bf6339c026b29[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 08:58:08 2019 +0100
+
+    Delete useless event listener broadcast
+
+[33mcommit 925703eb201565bf103cd6873d824828051f4968[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 07:06:08 2019 +0100
+
+    Enhance test to be time independant
+
+[33mcommit ad68936cf8ea1dfaf5e83303b6f335621afeaaa8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 07:05:38 2019 +0100
+
+    Move notification configuration to WAR
+
+[33mcommit 2638dc4c3cce3f7ef9601a94abdde0703004bac3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 06:39:58 2019 +0100
+
+    Fix NPE when space having wallet gets deleted
+
+[33mcommit fe870b22f29f025237dc8422678d39ff72e5ed00[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 10 06:35:06 2019 +0100
+
+    Move configurations definition from JAR to WAR
+
+[33mcommit 8da7813dc64ea559a1039a98f8a4ab5164874094[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jul 9 18:41:00 2019 +0100
+
+    Enhance Reward Plugin API
+
+[33mcommit 27a814a098e0e520b07f305beba887c5727d30c1[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Mon Jul 8 16:40:40 2019 +0100
+
+    Test wallet services and wallet account services
+
+[33mcommit 1c7fad8c87a8355943fc2978febc6845f101c71b[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Tue Jul 9 16:56:51 2019 +0100
+
+    Test wallet account services method
+
+[33mcommit a8bf3dfd62a3a5bfa9f36d5f21929cb0e70c91eb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 8 16:05:29 2019 +0100
+
+    Fix wallet list display when removing a space
+
+[33mcommit 7b07a6f11cae86ed0cf978a52336f42ddb6ec1e3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 8 15:45:44 2019 +0100
+
+    Move cache configuration in extension
+
+[33mcommit 49d66c294486c4c1c604b9b51291830b849d035d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 8 12:10:07 2019 +0100
+
+    Delete 'Token' word from UI
+
+[33mcommit 37ce4b72168450d9785b28fb6a5a69f6f768ece9[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Mon Jul 8 16:40:40 2019 +0100
+
+    Test wallet services and wallet account services
+
+[33mcommit c1fc17a42becfcdbc2f351f6a64ffbaa6a4bae47[m
+Merge: 7e3cd002 a5427018
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jul 5 12:15:39 2019 +0100
+
+    Merge iteration 2 for feature rewards
+
+[33mcommit a5427018bb1d8369fc9c7c9201235d8aad78a546[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jul 5 07:29:32 2019 +0100
+
+    Add additional tests on transaction storage
+
+[33mcommit 551fb3a8c21aa4c4086d5533b1c7beaeced43ae9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 4 19:24:27 2019 +0100
+
+    Add test for storage services
+
+[33mcommit 851c9957953695e1358a6015ea42002cfddf2e65[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 4 14:33:17 2019 +0100
+
+    Enhance Send Ether and Token forms
+
+[33mcommit bd96a278d037e164b035ac7d9383238977e3c856[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jul 4 12:11:46 2019 +0100
+
+    Refactor code to move Web3j dependency into WAR, because of PLF-8123
+
+[33mcommit 9c8428ba2f9876273de2f2c9ebc4e6052c4cf34b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jul 3 20:01:27 2019 +0100
+
+    Add storage tests
+
+[33mcommit 8d2def4bb26f63f9b30ea878b6930fd74a23fac6[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Tue Jul 2 19:51:12 2019 +0100
+
+    Test save initial funds settings method
+
+[33mcommit 7e33221bfe64980439ba40f6b5bfa5d861f0c835[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jul 2 08:57:57 2019 +0100
+
+    Fix displaying fixed decimals amount
+
+[33mcommit 423fa4303fe0a0fa1f6f25d5161ee896d49ded3e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 23:32:15 2019 +0100
+
+    Implement DAO unit tests
+
+[33mcommit a0a9fbe3961794467a2c604ca78af101967e7498[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 20:13:40 2019 +0100
+
+    Round amounts displayed in rewards UI
+
+[33mcommit 338faedd8fa59594104d4d8a2805a3177739a1ec[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:46:54 2019 +0100
+
+    Fix initialization status of wallets calculation
+
+[33mcommit cc09356e6956877157b2e685521ea64133a301cb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:45:09 2019 +0100
+
+    Enhance initial funds with computed ether amount instead of configuring
+    it
+
+[33mcommit 9d4d8484c1c3bffae7e51d7766f7ae26b175d785[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:44:10 2019 +0100
+
+    Delete useless UI containers in send forms
+
+[33mcommit c205cfc5d4ccc4fce218c5e525448742842a262a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:43:36 2019 +0100
+
+    Fix error message when a reward transaction happens
+
+[33mcommit 06cdc2cc375bb0f67ed31ce8ad98b48bb34146a4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:41:48 2019 +0100
+
+    Display 3 decimals amounts in wallet UI
+
+[33mcommit c4cdbaf37eddfb3e992485cae195163f190dfcea[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 19:40:44 2019 +0100
+
+    Delete contract data from storage when not coherent to rebuild it from
+    blockchain
+
+[33mcommit 2c4057ab92de4fd244ea0c5410b64cebf86cd96b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 07:13:33 2019 +0100
+
+    Delete SonarLint warnings
+
+[33mcommit b86e1c53e31945c6359d94fd139fe12dc38d0c8a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jul 1 07:11:20 2019 +0100
+
+    Allow all 'rewarding' group members to access all wallets
+
+[33mcommit c111327e5805fbe745cf29a26cf521fcf28bb32a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 30 20:16:35 2019 +0100
+
+    Change token word to contract name
+
+[33mcommit 173f7ef1ba03d0d754ef05cc7bfcac39ffc7348e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 30 19:56:49 2019 +0100
+
+    Add Send ether from admin wallet feature
+
+[33mcommit 5f3bf1ed29088edd7fb81a0bae0c6875db0dbdca[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 30 17:00:14 2019 +0100
+
+    Add wallet feature plugin
+
+[33mcommit 7e3cd00227bc06b4965a9dd800f2fc1bd1bf9748[m
+Merge: ff5c8dcd eda4ff7a
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 27 11:50:40 2019 +0100
+
+    Merge pull request #3 from feature/rewards - iteration 1
+
+[33mcommit eda4ff7a9fbf077baf7a7c4acf7f8e89c2e02d59[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 27 10:25:49 2019 +0100
+
+    Delete useless page navigation
+
+[33mcommit 052025e90558a162a969db904bb8ea690179dd0b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 27 08:28:51 2019 +0100
+
+    Add some test cases
+
+[33mcommit 3784cea0b5254da51e2a0e5184986d81e667eeaf[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 19:12:04 2019 +0100
+
+    Fix initial funds settings retrieving on server startup
+
+[33mcommit 78ac527dc94ae668c69b0d438d7839668b336bde[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 17:50:53 2019 +0100
+
+    Delete service injection from constructor
+
+[33mcommit 8c143b679c3fe51b6e239d4eb94fc80598ed6ee9[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 17:25:19 2019 +0100
+
+    Add swagger REST API documentation
+
+[33mcommit 73a72a82a373715ba44e6559c7ec325e49fb9478[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 15:01:04 2019 +0100
+
+    Improve services API
+
+[33mcommit b7aa2f162277ad5fbde7e3fb7a17bd86bd63a3a5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 14:41:43 2019 +0100
+
+    Fix admin wallet level check
+
+[33mcommit 90121821c0fa463e038209cc704273d2f4851ab5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 14:41:25 2019 +0100
+
+    Update classes to consider remarks
+
+[33mcommit 4ecfe14016862d5793fcd4031dc7c271d8e1b95c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 08:57:29 2019 +0100
+
+    Enhance javadoc and delete useless API methods
+
+[33mcommit f092602aa0bc49561f143856a4933d9ca0dd843d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 26 07:35:02 2019 +0100
+
+    Enhance Java API log levels managements
+
+[33mcommit c6afb8e3ba5c6db81b30f2579819ad066fa4a2e1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 19:01:13 2019 +0100
+
+    Fix condition on transaction fee computation
+
+[33mcommit 78bc28692ac76f16651bf08d5e08c8a5100b2e70[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 18:33:37 2019 +0100
+
+    Fix habilitation level label
+
+[33mcommit e1f53e6eccb9f3a46a141cbd75aefca0350b3ddd[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 16:18:54 2019 +0100
+
+    Display token sell price instead of total supply
+
+[33mcommit 6d4c370a9a39874355b405cdece648dfdb383cc4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 16:11:07 2019 +0100
+
+    Display Transactions List for user not admin with level 4 on Token
+
+[33mcommit 4d76b133f4048ec76f0f8391d34f2064e528c1c5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 11:39:38 2019 +0100
+
+    Enhance contract application
+
+[33mcommit 986a9caf5a3d815a2014cc48613d78739399607b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 11:39:16 2019 +0100
+
+    Ensure to listen blockchain transaction for known wallets only
+
+[33mcommit e6afdebcaeede17a05ca2775b35d218cc2af1393[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 25 08:58:54 2019 +0100
+
+    Add contract page and upgrade token modal
+
+[33mcommit a007c54b5d93532e7d83fba8b3c2cbf0ab8224e5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 19:11:04 2019 +0100
+
+    Seperate contract administration in different page
+
+[33mcommit 01367d10f9f15696051362de7449c1eba6cca813[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 18:42:49 2019 +0100
+
+    Fix opening reward transactions
+
+[33mcommit b9760ba2ee61978fa4e055f776414b083a2d42a7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 18:34:11 2019 +0100
+
+    Display wallet status column
+
+[33mcommit fdf040881ccd5798cacd51eba4f9a99c9fca53f6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 17:58:27 2019 +0100
+
+    Fix displayed amounts in notifications
+
+[33mcommit 4f14e70b038b4b26d69d7d9eb6b1885f88dc61de[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 17:43:26 2019 +0100
+
+    Fix reset wallet password
+
+[33mcommit fdc8178b7a68b7b80b483b31ed921985419c8035[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 17:40:13 2019 +0100
+
+    Fix opening transaction detail from URL
+
+[33mcommit 633c2be9a58c0424c219f7debf1fdf12a4efc251[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 17:12:47 2019 +0100
+
+    Enhance wallet admin filtering buttons
+
+[33mcommit cbfe5da7ff4baad134403e300990f2a79c856c27[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 16:43:24 2019 +0100
+
+    Improve Wallet Chart buttons style
+
+[33mcommit 979cb66faae4dc190568c8e7b61a60f430c116f5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 16:22:15 2019 +0100
+
+    Delete useless buttons in admin UI
+
+[33mcommit 469ccf1856574ebd31931b016aeff7c309fc104f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 15:28:55 2019 +0100
+
+    Avoid sending form on pressing enter button
+
+[33mcommit 86434a8f77652eb1bbed620da34557032173c1fa[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 14:59:24 2019 +0100
+
+    Change tooltip label
+
+[33mcommit 1af5030acb6acad637d99ac40ca84ea9ee1ae3d6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 12:14:54 2019 +0100
+
+    Display wallet intitialization state info for space administrator only
+
+[33mcommit 919ec16b5cad037d6fb24655371d7ea473396de1[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 24 11:13:32 2019 +0100
+
+    Set wallet as initialized if it's already approved
+
+[33mcommit 093dab2a52ebc39b131fee56b1e82f9b73bf7614[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Mon Jun 24 16:48:17 2019 +0100
+
+    Make sure that Wallet status and user types are all selected for wallet admin's interface initialization
+
+[33mcommit 1ac22d592b16f58014a87e10fbe184008b4be824[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Mon Jun 24 15:58:15 2019 +0100
+
+    Add Wallet status column for wallet admin's data table
+    
+    code clean up
+
+[33mcommit 0b3b17abf1d571eda2884e52c37f535f350e78fb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 14:17:37 2019 +0100
+
+    Fix Space Wallet application registry initialization
+
+[33mcommit 04f1869672b7f06b50d5ccd45f9cb752c9854d80[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 13:53:05 2019 +0100
+
+    Change user settings tab to security modal
+
+[33mcommit d0093f44d5a3cb9d7a3791563d09fb17d964882d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 13:48:41 2019 +0100
+
+    Allow to use membership expressions in ACL
+
+[33mcommit 28d450663231d040f65d6397800ef621914894a5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 13:00:29 2019 +0100
+
+    Refresh wallet UI when transaction is mined
+
+[33mcommit db50e13929e9ce66bfc8e330b1ad6cbf6cbc36ee[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 12:13:43 2019 +0100
+
+    Refresh admin UI after transaction gets mined
+
+[33mcommit d21d948b12c4d7bb38220b407c566104b1c9482a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 11:31:01 2019 +0100
+
+    Fix sending ether to contract
+
+[33mcommit 994514620354683f7e18f6bc2961fc84b0918a0e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 10:20:22 2019 +0100
+
+    Refresh initialization state for end user just after changing it
+
+[33mcommit 4480affe079aba51d2046b1ef725192f727610ad[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 10:10:04 2019 +0100
+
+    Fix wallet administration filtering
+
+[33mcommit 16de9c84ab98773f6ed81fff5a924321f820520c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sun Jun 23 10:09:41 2019 +0100
+
+    Improve general settings usage in Vue components
+
+[33mcommit 3bddeca843497ba0d6469a69e7058ce70123cafc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 18:20:32 2019 +0100
+
+    Cleanup code and fix send token
+
+[33mcommit d52f322b0e8bdc74f6c4a873424c43ebf75057b7[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 17:44:30 2019 +0100
+
+    Save contract details after retrieving it from blockchain
+
+[33mcommit 5d13b4468e89ebf82064ba61a7104f3a8c5d0a9b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 17:09:12 2019 +0100
+
+    Restrict access to reward admin to rewarding group
+
+[33mcommit 253efd37e4dc431055ee53115797796df3d363b6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 16:14:31 2019 +0100
+
+    Fix javadoc
+
+[33mcommit a06b83837eddece3d9c94a7bab7185bd82982ce8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 09:42:44 2019 +0100
+
+    Enhance single contract retrieval in UI
+
+[33mcommit cb54ece82686f7d7e1acf004dcaff4b1289ac369[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 07:44:47 2019 +0100
+
+    Remove useless contracts management from UI
+
+[33mcommit 5b1845e7fc464878a7662e2901913d496d20791c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 07:32:46 2019 +0100
+
+    Delete contract deployment and management UI
+
+[33mcommit 08462b8f04df5f954939015340ddd2c77d4ef6d8[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 07:23:17 2019 +0100
+
+    Delete useless JS files
+
+[33mcommit 84f0870b4b3ecf9666d24c74a17945926e19287b[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Sat Jun 22 07:18:28 2019 +0100
+
+    Delete usage of Metamask
+
+[33mcommit 40cd439f145ee1cc90b7d9a313b5d1462d8df93f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jun 21 17:03:14 2019 +0100
+
+    Refactor Services to use one single contract displayed in wallet
+
+[33mcommit 7c83099867b66c87673dc6832d20ade995b1fb3d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jun 21 17:06:28 2019 +0100
+
+    Fix portal configuraton
+
+[33mcommit b2cc04cb019c1db6ec7dd9f78ec3fb514dfe0507[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Fri Jun 21 18:13:30 2019 +0100
+
+    Add combobox for wallet status, work still in progress
+
+[33mcommit 90a196a1a43b62f9f2135c96cee11c061ffbe37a[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jun 21 10:10:33 2019 +0100
+
+    Avoid marking wallet as modified when not changing wallet address
+
+[33mcommit 53ba286b97cd58c45ed821515c5fb70ab3a386da[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jun 21 10:09:29 2019 +0100
+
+    Improve Services dependencies injection to not block portal container startup
+
+[33mcommit 4212255d9677900575b718dac0c98e030a207a0d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 19:17:35 2019 +0100
+
+    Create admin wallet after container startup
+
+[33mcommit 5782175d6a25cc5f00e7b4d5eb4ee1d341699063[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 16:01:42 2019 +0100
+
+    Delete useless components
+
+[33mcommit bcdb370103ef5ffb44814bfd3b8995a7e41643ac[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 15:42:50 2019 +0100
+
+    Regroup wallet administration UI
+
+[33mcommit bdc43e9bfee09e035faa9eb802ef30f3bb07fed2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 14:55:58 2019 +0100
+
+    Auto create admin wallet
+
+[33mcommit c9ceb4f90a8a1f7f53b053fdb40bc0c3ac3721bb[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Thu Jun 20 15:20:39 2019 +0100
+
+    Add group buttons for wallets dispaly options by users, spaces and admin
+
+[33mcommit 42466d883fa116c482ab634861a7db5c19fd3db4[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 14:35:52 2019 +0100
+
+    Enhance application first display time
+
+[33mcommit 7264dd2ff35c74c6c2b0434f41817e0b6eeee14e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 14:02:51 2019 +0100
+
+    Fix width of buttons in mobile view
+
+[33mcommit a8f1055b0bdfb5d9b5fbf6e476b6f0040820255f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 13:56:26 2019 +0100
+
+    Replace token label by funds
+
+[33mcommit 8cdef60c725b8b3ec480ed0abe06851cb8dc7095[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 13:55:52 2019 +0100
+
+    Add icon to wallet UI buttons
+
+[33mcommit 579cabd8332111b3a2f3cba4e2f854b2bb9599e6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 12:27:41 2019 +0100
+
+    Align wallet UI items correctly
+
+[33mcommit 6a14598f8a42015910235059fb679109f6b26a93[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 12:11:48 2019 +0100
+
+    Add buttons in fixed positions for wallet UI
+
+[33mcommit ec68073b754521ab207f9b2f77d8a1f16e37e369[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 11:31:29 2019 +0100
+
+    Enhance chart labels
+
+[33mcommit 2edcbbdedba1a1d67713837ea106d7b9f9d2d22e[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 08:58:03 2019 +0100
+
+    Exclude current user from funds forms
+
+[33mcommit d5cb148bf9812a5ce6f005241e7c9786a52035d3[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu Jun 20 08:38:47 2019 +0100
+
+    Delete Account selection in funds request form
+
+[33mcommit 32ae654a756bb397ef4d0060d092b8fbc8e10789[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 19 18:57:09 2019 +0100
+
+    Delete currency selection from send funds form and delete useless compoennts
+
+[33mcommit 4c769e710fb6496a50f7c3a6f6f9905f1b13a125[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Wed Jun 19 18:21:10 2019 +0100
+
+    Fix templete layout and chart buttons
+
+[33mcommit 4ee08eef1f7a2b2b61daaf13062be22c4ceb2c69[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Wed Jun 19 17:14:49 2019 +0100
+
+    Delete adress element in wallets table
+
+[33mcommit 0b6bd01dd6c217fce5454d5142d967106fcc365f[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Wed Jun 19 16:08:58 2019 +0100
+
+    Reorder wallets table's headers and elements
+    
+    Code clean-up
+
+[33mcommit d0e16f81285516a6569507bad4c95c02f83dcd4c[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Wed Jun 19 14:38:29 2019 +0100
+
+    Move search field in the same line with filter switch buttons
+    
+    Code clean-up
+
+[33mcommit f4fe397ef35f5a14c613c9b994c9e98f8400a441[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Fri Jun 14 18:01:25 2019 +0100
+
+    Display current month in Month Chart
+
+[33mcommit d8f6eed84cb9b966c53e99ca2e0eec89788ce67d[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri Jun 14 14:12:54 2019 +0100
+
+    Display chart in Month and Year
+
+[33mcommit 3cbc15e5564567901f82d96bd1391b98290c1c91[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Fri Jun 14 11:35:25 2019 +0100
+
+    add toggle button to chart
+
+[33mcommit ad7d4b09f4a5a03bcfeb7898f0395ea8fd24abe7[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Fri Jun 14 11:13:47 2019 +0100
+
+    add transaction statictics for month periodicity
+
+[33mcommit 32fbd61d8369b75ebd72425a8935c323f15a37bc[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed Jun 12 17:46:33 2019 +0100
+
+    Update flag after Admin account creation
+
+[33mcommit fc5158cc5e4ba843028c98821afbc2e51bb3ea28[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Wed Jun 12 11:28:48 2019 +0100
+
+    Fix the retrieving of initializeAccount transactions statistics
+
+[33mcommit 0610f5e66e59902356cdaa831ed2af6abfb8ac9f[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 11 18:49:44 2019 +0100
+
+    Fix transactions history computing
+
+[33mcommit f74f4a1fcf2d4d859bfac7c04eccdf612387e36c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Tue Jun 11 10:58:46 2019 +0100
+
+    Implement sent amounts statistics query
+
+[33mcommit a449fa98e60cd67e0d4d85409db2d87af2bbcab2[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Mon Jun 10 19:03:01 2019 +0100
+
+    Fix Retrieving transaction statistics
+
+[33mcommit 3d0e73531819a886f8c5da71bd27119823749bf5[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri May 31 15:04:09 2019 +0100
+
+    Initialize Chart Component in Wallet App
+
+[33mcommit 12e307b38354c9c4cc4095c372697341e29fdc70[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri May 31 12:51:53 2019 +0100
+
+    Display rewarding transactions list
+
+[33mcommit eec7446c3504a907490062db929e063c503a0636[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Fri May 31 10:50:20 2019 +0100
+
+    Review layout of balances blocks in summary
+
+[33mcommit eaf39798cb48a20c8f30ae58655591f71a0f7c34[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu May 30 16:04:02 2019 +0100
+
+    Implement Summary of new Wallet App
+
+[33mcommit 11dfcd564a8d9c4817f6b30602e93767504220cb[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu May 30 11:49:29 2019 +0100
+
+    Enhance Wallet layout
+
+[33mcommit ae0979eb99163b30b74d76775ea5f0acb304d689[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed May 29 16:43:57 2019 +0100
+
+    Add new summary layout
+
+[33mcommit 20ca5da7404c403086224f6bf521ab40967458e6[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed May 29 13:13:28 2019 +0100
+
+    Migrate toFixed method usage
+
+[33mcommit 3e73e42febd7e91eb3727e3feaeda47f46c9536d[m
+Author: mdiha <mdiha@exoplatform.com>
+Date:   Tue May 28 13:38:23 2019 +0100
+
+    Gather reward items under Reward node
+
+[33mcommit 180813a54a47b7e3cda8596b2be7752b82ff6ce8[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Tue May 28 10:24:03 2019 +0100
+
+    Delete useless files
+
+[33mcommit 565abe6d18d50fb7e666833457a6b402fee13513[m
+Author: Ahmed Chakroun <achakroun@exoplatform.com>
+Date:   Fri May 24 14:45:35 2019 +0100
+
+    Templete Wallet Skin static Html
+
+[33mcommit ff5c8dcd66aa71d34f788cbf76aa4736d6356e37[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu May 23 16:17:07 2019 +0100
+
+    Fix wallet configuration files (#2)
+
+[33mcommit ae5d7c17058ef107b99fcedc2bb012fec775842c[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu May 23 11:51:56 2019 +0100
+
+    PLF-8384 Add Test coverage ratio in wallet-services (#1)
+
+[33mcommit 170d6b54367d91c948cc0f670d97d342dcc83bfd[m
+Author: Vincent Sellier <vsellier@exoplatform.com>
+Date:   Mon May 20 19:22:56 2019 +0200
+
+    SWF-4789 update GAV, dependencies and module naming
+
+[33mcommit 2ea0ce499544031074ca5b5b69f089e43ad507ca[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Thu May 16 16:25:30 2019 +0100
+
+    Add a new webapp common module
+
+[33mcommit 957b42571cf3dcf244ae4df454ccf093d3bc30e0[m
+Author: Boubaker Khanfir <bkhanfir@exoplatform.com>
+Date:   Wed May 15 15:53:40 2019 +0100
+
+    First commit to prepare new addon for wallet
