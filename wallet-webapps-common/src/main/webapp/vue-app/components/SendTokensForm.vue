@@ -74,7 +74,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 class="d-flex align-center ml-n5">
                 <img
                   class="mt-n1"
-                  :src="`/perk-store/images/metamask.svg`"
+                  :src="`/wallet-common/images/metamask.svg`"
                   alt="Metamask"
                   width="18">
                 <span class="pl-2 amountLabel">{{ $t('exoplatform.wallet.label.metamask') }}</span>
