@@ -65,7 +65,31 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               validate-on-blur
               class="mt-n4"
               @input="$emit('amount-selected', amount)" />
-
+            <p v-if="!storedPassword && isInternalWallet" class="amountLabel mb-0 mt-2">{{ $t('exoplatform.wallet.label.walletPassword') }}</p>
+            <p v-else-if="!isInternalWallet" class="amountLabel mb-0 mt-2">{{ $t('exoplatform.wallet.label.settings.internal') }}</p>
+            <v-row class="pl-5" v-if="!isInternalWallet">
+              <v-col
+                cols="12"
+                sm="6" 
+                class="d-flex align-center ml-n5">
+                <img
+                  class="mt-n1"
+                  :src="`/wallet-common/images/metamask.svg`"
+                  alt="Metamask"
+                  width="18">
+                <span class="pl-2 amountLabel">{{ $t('exoplatform.wallet.label.metamask') }}</span>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                align="right">
+                <v-chip class="grey-background">  
+                  <span class="mr-3 dark-grey-color walletTitle">
+                    {{ metamaskAddressPreview }}
+                  </span>
+                </v-chip>
+              </v-col>
+            </v-row>
             <v-text-field
               v-if="!storedPassword && isInternalWallet"
               ref="walletPassword"
@@ -74,14 +98,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               :type="walletPasswordShow ? 'text' : 'password'"
               :disabled="loading"
               :rules="mandatoryRule"
-              :label="$t('exoplatform.wallet.label.walletPassword')"
               :placeholder="$t('exoplatform.wallet.label.walletPasswordPlaceholder')"
               name="walletPassword"
               required
               validate-on-blur
+              class="mt-n4"
               autocomplete="current-password"
               @click:append="walletPasswordShow = !walletPasswordShow" />
-
             <v-text-field
               v-model="transactionLabel"
               :disabled="loading || transaction"
@@ -207,11 +230,8 @@ export default {
     walletAddress() {
       return this.wallet && this.wallet.address;
     },
-    provider() {
-      return window.walletSettings.wallet?.provider;
-    },
-    isInternalWallet() {
-      return this.provider === 'INTERNAL_WALLET' ;
+    metamaskAddressPreview() {
+      return this.walletAddress && `${this.walletAddress.substring(0,5)}...${this.walletAddress.substring(this.walletAddress.length-4,this.walletAddress.length)}`;
     },
     disabled() {
       return (!this.isSameAddress || !this.isSameNetworkVersion) || (!this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length))));
@@ -242,6 +262,9 @@ export default {
     },
     transactionFeeToken() {
       return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei));
+    },
+    isInternalWallet() {
+      return window.walletSettings.wallet?.provider === 'INTERNAL_WALLET';
     },
   },
   watch: {
