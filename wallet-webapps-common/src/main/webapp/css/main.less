@@ -379,6 +379,48 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
   }
 
+  #walletWelcomeScreen {
+    padding: 5px;
+    max-width: 100%;
+    margin: auto;
+    .v-btn {
+      text-transform: capitalize !important;
+      font-size: 16px;
+      font-weight: bold;
+      height: 50px;
+    }
+    .disabledButton{
+      background-color: @disabledBackgroundButtonDefault !important;
+      pointer-events: auto !important;
+    }
+    .title {
+      font-weight: bold;
+      font-size: 18px !important;
+    }
+    .subtitle {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .walletInformation {
+      text-align: start;
+      font-weight: bold;
+      color: @greyColorLighten1;
+    }
+    .styleTitle {
+      color: @darkGrey;
+      text-align: start;
+      > a {
+        font-weight: bold;
+      }
+    }
+    ul {
+      list-style-type: none;
+    }
+    li:before {
+      content: '- ';
+    }
+  }
+
   #walletMetamaskSetup {
     padding: 1px;
 

@@ -45,8 +45,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div v-if="displayWalletNotExistingYet" class="alert alert-info">
       <i class="uiIconInfo"></i> {{ $t('exoplatform.wallet.info.spaceWalletNotCreatedYet') }}
     </div>
+    <wallet-welcome-screen
+      v-if="displayWelcomeScreen && !displayWalletBrowserSetup && !isSpace"
+      @create-internal-wallet="displayWalletBrowserSetup = true"
+      @configured="refresh()" />
     <wallet-reward-browser-setup
-      v-if="displayWalletBrowserSetup"
+      v-if="displayWalletBrowserSetup || isSpace"
       ref="walletBrowserSetup"
       :is-space="isSpace"
       :is-space-administrator="isSpaceAdministrator"
@@ -107,6 +111,7 @@ export default {
       isReadOnly: false,
       browserWalletExists: false,
       displayWalletSetup: false,
+      displayWalletBrowserSetup: false,
     };
   },
   computed: {
@@ -128,7 +133,7 @@ export default {
     displayWalletBackup() {
       return !this.loading && !this.isAdministration && this.walletAddress && this.browserWalletExists && !this.backedUp && this.initializationState !== 'DELETED' && (this.wallet && this.wallet.provider === 'INTERNAL_WALLET');
     },
-    displayWalletBrowserSetup() {
+    displayWelcomeScreen() {
       return this.displayWalletSetup && (this.wallet && !this.wallet.address ||  this.initializationState === 'DELETED');
     },
   },

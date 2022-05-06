@@ -14,10 +14,20 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
+<%@ page import="javax.servlet.http.HttpServletRequest" %>
+<%@ page import="javax.servlet.http.HttpSession" %>
+<%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
+<%@ page import="org.exoplatform.web.application.RequestContext" %>
+<%@ page import="org.exoplatform.wallet.utils.WalletUtils" %>
+<%
+    HttpServletRequest httpRequest = ((WebuiRequestContext) RequestContext.getCurrentInstance()).getRequest();
+    HttpSession httpSession = httpRequest.getSession();
+    String generatedToken = WalletUtils.generateToken(httpSession);
+    %>
 <div class="VuetifyApp">
   <div id="WalletApp">
     <script>
-      require(['PORTLET/wallet/Wallet'], app => app.init())
+      require(['PORTLET/wallet/Wallet'], app => app.init('<%=generatedToken%>'))
     </script>
   </div>
 </div>
