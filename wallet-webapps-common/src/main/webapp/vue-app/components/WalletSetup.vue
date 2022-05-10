@@ -16,6 +16,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <v-flex id="walletSetup" class="text-center">
+    <div
+        v-if="displayWelcomeScreen && displayWalletBrowserSetup && !isSpace"
+        class="backToWelcomeScreen">
+      <i class="uiIcon uiArrowBAckIcon" @click="displayWalletBrowserSetup = false"></i>
+    </div>
     <wallet-reward-backup-modal
       ref="walletBackupModal"
       class="me-3"
