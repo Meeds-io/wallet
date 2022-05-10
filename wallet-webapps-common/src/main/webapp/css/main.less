@@ -420,6 +420,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       content: '- ';
     }
   }
+  .backToWelcomeScreen {
+    top: 16px !important;
+    left: 20px ~'!important; /** orientation=lt */ ';
+    right: auto  ~'!important; /** orientation=lt */ ';
+    float: left  ~'!important; /** orientation=lt */ ';
+
+    left: auto ~'!important; /** orientation=rt */ ';
+    right: 20px  ~'!important; /** orientation=rt */ ';
+    float: right  ~'!important; /** orientation=rt */ ';
+    position: absolute;
+    .uiArrowBAckIcon {
+      color: @darkGrey !important;
+      font-size: 24px;
+    }
+  }
 
   #walletMetamaskSetup {
     padding: 1px;
