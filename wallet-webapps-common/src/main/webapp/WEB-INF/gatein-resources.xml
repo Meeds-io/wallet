@@ -66,6 +66,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <as>EthereumQRPlugin</as>
     </depends>
     <depends>
+      <module>Jdenticon</module>
+      <as>jdenticon</as>
+    </depends>
+    <depends>
       <module>extensionRegistry</module>
     </depends>
     <depends>
@@ -83,6 +87,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <depends>
       <module>vue</module>
     </depends>
+  </module>
+
+  <module>
+    <name>Jdenticon</name>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/jdenticon.min.js</path>
+    </script>
   </module>
 
   <module>
