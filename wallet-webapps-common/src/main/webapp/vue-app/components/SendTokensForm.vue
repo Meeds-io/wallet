@@ -266,6 +266,9 @@ export default {
     isInternalWallet() {
       return window.walletSettings.wallet?.provider === 'INTERNAL_WALLET';
     },
+    isMetamaskWallet() {
+      return window.walletSettings.wallet?.provider === 'METAMASK';
+    },
   },
   watch: {
     contractDetails() {
@@ -466,7 +469,7 @@ export default {
         timestamp: Date.now()
       };
         
-      if (this.provider === 'INTERNAL_WALLET') {
+      if (this.isInternalWallet) {
 
         Object.assign(transactionDetail, { 
           gas: window.walletSettings.network.gasLimit,
@@ -521,12 +524,12 @@ export default {
             lockBrowserWallet();
             this.close();
           });
-      } else {
+      } else if (this.isMetamaskWallet) {
         
         if (window.ethereum?.isMetaMask) {
           const transactionParameters = {
-            to: this.contractDetails.address,
-            from: sender,
+            to: this.contractDetails.address.toLowerCase(),
+            from: sender.toLowerCase(),
             data: transfer( receiver, convertTokenAmountToSend(this.amount, this.contractDetails.decimals).toString())
               .encodeABI()
           };
@@ -557,6 +560,8 @@ export default {
               lockBrowserWallet();
               this.close();
             });}
+      } else {
+        console.error('Error getting provider');
       }
       
     },
