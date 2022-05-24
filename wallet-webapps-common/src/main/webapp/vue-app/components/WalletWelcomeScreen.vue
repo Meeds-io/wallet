@@ -42,7 +42,7 @@
           class="ignore-vuetify-classes mx-2"
           :class="metamaskBtnClass"
           :title="metamaskBtnTitle">
-          {{ $t('exoplatform.wallet.label.metamask') }}
+          {{ $t('exoplatform.wallet.button.metamask') }}
           <img
             class="ml-2"
             :src="`/wallet-common/images/metamask.svg`"
