@@ -35,7 +35,7 @@
         </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item class="mt-n2" v-if="metamaskAddress">
+    <v-list-item class="mt-n2" v-if="metamaskAddress && !savingMetamaskAddress">
       <v-list-item-content>
         <v-list-item-subtitle
           class="text-sub-title pl-5">
@@ -43,6 +43,7 @@
             <span class="mr-3 dark-grey-color walletTitle">
               {{ metamaskAddressPreview }}
             </span>
+            <wallet-settings-jdenticon :address="metamaskAddress" />
           </v-chip>
         </v-list-item-subtitle>
       </v-list-item-content>
