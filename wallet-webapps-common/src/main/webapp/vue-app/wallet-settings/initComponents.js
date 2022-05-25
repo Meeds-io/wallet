@@ -20,6 +20,7 @@ import WalletSettingsAlert from './components/WalletSettingsAlert.vue';
 import WalletSettingsInternal from './components/WalletSettingsInternal.vue';
 import WalletSettingsInternalDetails from './components/WalletSettingsInternalDetails.vue';
 import WalletSettingsMetamask from './components/WalletSettingsMetamask.vue';
+import WalletSettingsJdenticon from './components/jdenticon.vue';
 
 Vue.prototype.$applicationLoaded = function() {
   this.$root.$emit('application-loaded');
@@ -36,6 +37,7 @@ const components = {
   'wallet-settings-internal': WalletSettingsInternal,
   'wallet-settings-internal-details': WalletSettingsInternalDetails,
   'wallet-settings-metamask': WalletSettingsMetamask,
+  'wallet-settings-jdenticon': WalletSettingsJdenticon,
 };
 
 for (const key in components) {
