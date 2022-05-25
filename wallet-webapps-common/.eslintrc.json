@@ -6,7 +6,8 @@
     "isMaximized": true,
     "abiDecoder": true,
     "WalletCommon": true,
-    "VueChart": true
+    "VueChart": true,
+    "jdenticon": true
   },
   "extends": [
     "eslint-config-meedsio"

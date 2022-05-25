@@ -39,6 +39,7 @@ import WalletSettingsAlert from './wallet-settings/components/WalletSettingsAler
 import WalletSettingsInternal from './wallet-settings/components/WalletSettingsInternal.vue';
 import WalletSettingsInternalDetails from './wallet-settings/components/WalletSettingsInternalDetails.vue';
 import WalletSettingsMetamask from './wallet-settings/components/WalletSettingsMetamask.vue';
+import WalletSettingsJdenticon from './wallet-settings/components/jdenticon.vue';
 import WalletSettings from './wallet-settings/components/WalletSettings.vue';
 import WalletAlert from './components/AlertWalletApp.vue';
 import WalletWelcomeScreen from './components/WalletWelcomeScreen.vue';
@@ -86,6 +87,7 @@ export const components = {
   'wallet-settings-internal': WalletSettingsInternal,
   'wallet-settings-internal-details': WalletSettingsInternalDetails,
   'wallet-settings-metamask': WalletSettingsMetamask,
+  'wallet-settings-jdenticon': WalletSettingsJdenticon,
   'wallet-app-alert': WalletAlert,
   'wallet-welcome-screen': WalletWelcomeScreen,
 
