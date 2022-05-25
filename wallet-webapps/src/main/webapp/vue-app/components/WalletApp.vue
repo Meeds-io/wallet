@@ -258,7 +258,7 @@ export default {
       // Init application
       this.init()
         .then(() => {
-          if (this.$refs.walletSummary) {
+          if (this.$refs.walletSummary && this.wallet && this.wallet.address) {
             this.$refs.walletSummary.prepareSendForm();
             this.$refs.walletSummary.loadPendingTransactions();
           }
