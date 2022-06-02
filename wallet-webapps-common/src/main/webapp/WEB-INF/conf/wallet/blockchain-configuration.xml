@@ -149,7 +149,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <property name="jobName" value="PendingTransactionVerifierJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.job.PendingTransactionVerifierJob"/>
-          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0 15 7 * * ?}"/>
+          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0 0/1 * * * ?}"/>
         </properties-param>
       </init-params>
     </component-plugin>
