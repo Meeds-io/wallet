@@ -50,7 +50,8 @@ import org.exoplatform.wallet.storage.WalletStorage;
 
 public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService, Startable {
 
-  private static final Log        LOG                                     = ExoLogger.getLogger(WalletAccountServiceImpl.class);
+  private static final Log        LOG                                     =
+                                      ExoLogger.getLogger(WalletAccountServiceImpl.class);
 
   private static final String     USER_MESSAGE_IN_EXCEPTION               = "User '";
 
@@ -169,18 +170,19 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       LOG.warn("Can't refresh wallet from blockchain because TokenAdminService isn't initialized yet");
     } else {
       try {
-        Set<String> walletModifications = walletsModifications == null ? null : walletsModifications.get(wallet.getAddress());
+        Set<String> walletModifications = walletsModifications == null ? null
+                                                                       : walletsModifications.get(wallet.getAddress());
         accountStorage.retrieveWalletBlockchainState(wallet, contractDetail.getAddress());
-        getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet, contractDetail, walletModifications);
+        getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
+                                                                       contractDetail,
+                                                                       walletModifications);
         saveWalletBlockchainState(wallet, contractDetail.getAddress());
 
-        if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.INITIALIZED.name())
-            && !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.PENDING.name())
-            && !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.DENIED.name())
+        if (!StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.INITIALIZED.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.PENDING.name()) &&
+            !StringUtils.equalsIgnoreCase(wallet.getInitializationState(), WalletState.DENIED.name())
             && ((wallet.getIsInitialized() != null && wallet.getIsInitialized())
-                || (wallet.getEtherBalance() > 0 && wallet.getTokenBalance() > 0))) { // if wallet was sent cryptos & tokens from
-                                                                                      // outside and its state is NEW, we set it
-                                                                                      // to initialized
+                || (wallet.getEtherBalance() > 0 && wallet.getTokenBalance() > 0))) { // if wallet was sent cryptos & tokens from outside and its state is NEW, we set it to initialized
           wallet.setInitializationState(WalletState.INITIALIZED.name());
           setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
@@ -293,7 +295,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   public String getPrivateKeyByTypeAndId(String type, String remoteId, String currentUser) throws IllegalAccessException {
     if (WalletType.isAdmin(type)) {
       throw new IllegalAccessException(USER_MESSAGE_IN_EXCEPTION + currentUser
-          + "' is not allowed to access private key of admin '" + remoteId + "'");
+          + "' is not allowed to access private key of admin '" + remoteId
+          + "'");
     }
     Wallet wallet = getWalletByTypeAndId(type, remoteId);
     if (wallet == null || wallet.getTechnicalId() < 1) {
@@ -402,9 +405,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (isNew) {
       // New wallet created for user/space
       wallet.setInitializationState(WalletState.NEW.name());
-      if (StringUtils.isBlank(wallet.getProvider())) {
-        wallet.setProvider(WalletProvider.INTERNAL_WALLET.name());
-      }
+      wallet.setProvider(WalletProvider.INTERNAL_WALLET.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       wallet.setInitializationState(WalletState.MODIFIED.name());
       wallet.setProvider(oldWallet.getProvider());
@@ -547,7 +548,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     }
     if (!isUserRewardingAdmin(currentUser)) {
       throw new IllegalAccessException("Current user " + currentUser + " attempts to delete wallet with address " + address
-          + " of " + wallet.getType() + " " + wallet.getId());
+          + " of "
+          + wallet.getType() + " " + wallet.getId());
     }
     accountStorage.removeWallet(wallet.getTechnicalId());
   }
@@ -561,7 +563,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalArgumentException("remote id parameter is mandatory");
     }
     if (!isUserRewardingAdmin(currentUser)) {
-      throw new IllegalAccessException("Current user " + currentUser + " attempts to delete wallet of " + type + " " + remoteId);
+      throw new IllegalAccessException("Current user " + currentUser + " attempts to delete wallet of "
+          + type + " " + remoteId);
     }
     Identity identity = getIdentityByTypeAndId(WalletType.getType(type), remoteId);
     if (identity == null) {
@@ -593,7 +596,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       // Only 'rewarding' group members can change wallets
       if (!isUserRewardingAdmin(currentUser)) {
         throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to disable wallet with address " + address
-            + " of " + wallet.getType() + " " + wallet.getId());
+            + " of "
+            + wallet.getType() + " " + wallet.getId());
       }
       wallet.setEnabled(enable);
       accountStorage.saveWallet(wallet, false);
@@ -633,7 +637,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       // is to request to initialize his wallet when it has been denied by an
       // administrator or to delete his wallet
       WalletState oldInitializationState = WalletState.valueOf(wallet.getInitializationState());
-      if (oldInitializationState != WalletState.DENIED || initializationState != WalletState.MODIFIED
+      if (oldInitializationState != WalletState.DENIED
+          || initializationState != WalletState.MODIFIED
           || !isWalletOwner(wallet, currentUser)) {
         throw new IllegalAccessException(USER_MESSAGE_PREFIX + currentUser + " attempts to change wallet status with address "
             + address + " to " + initializationState.name());
@@ -826,7 +831,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalAccessException();
     }
 
-    Wallet walletByAddress = accountStorage.getWalletByAddress(wallet.getAddress(), getContractAddress());
+    Wallet walletByAddress =
+                           accountStorage.getWalletByAddress(wallet.getAddress(), getContractAddress());
     if (walletByAddress != null && walletByAddress.getId() != null && !walletByAddress.getId().equals(wallet.getId())) {
       throw new IllegalStateException(USER_MESSAGE_PREFIX + currentUser + " attempts to assign address of wallet of "
           + walletByAddress);
@@ -878,14 +884,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   private String generateSecurityPhrase() {
     return RandomStringUtils.random(20, SIMPLE_CHARS);
   }
-
   /**
    * @param walletAddress wallet Address (wallet public key)
    * @param rawMessage raw signed message
    * @param signedMessage encrypted message
    * @return true if the message has been decrypted successfully, else false
-   * @throws UnsupportedEncodingException when UTF-8 isn't recognized as Encoding
-   *           Charset
+   * @throws UnsupportedEncodingException when UTF-8 isn't recognized as
+   *           Encoding Charset
    * @throws SignatureException when an error occurs while decrypting signed
    *           message
    */

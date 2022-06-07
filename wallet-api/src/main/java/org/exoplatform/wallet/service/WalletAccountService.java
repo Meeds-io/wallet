@@ -76,7 +76,8 @@ public interface WalletAccountService {
   Wallet getAdminWallet();
 
   /**
-   * Save wallet private key for a wallet identified by identity type and remoteId
+   * Save wallet private key for a wallet identified by identity type and
+   * remoteId
    * 
    * @param type 'user' or 'space'
    * @param remoteId username or space pretty name
@@ -85,7 +86,10 @@ public interface WalletAccountService {
    * @throws IllegalAccessException when the current user is not allowed to save
    *           the encrypted private key of wallet
    */
-  void savePrivateKeyByTypeAndId(String type, String remoteId, String content, String currentUser) throws IllegalAccessException;
+  void savePrivateKeyByTypeAndId(String type,
+                                 String remoteId,
+                                 String content,
+                                 String currentUser) throws IllegalAccessException;
 
   /**
    * Retrieve wallet private key by identity type and remoteId
@@ -238,8 +242,8 @@ public interface WalletAccountService {
   /**
    * @param wallet
    * @param currentUser
-   * @return true if user is accessing his wallet or is accessing a space that he
-   *         manages wallet
+   * @return true if user is accessing his wallet or is accessing a space that
+   *           he manages wallet
    */
   boolean isWalletOwner(Wallet wallet, String currentUser);
 
@@ -289,8 +293,8 @@ public interface WalletAccountService {
    * 
    * @param privateKey admin account wallet private key
    * @param currentUser current user creating wallet
-   * @throws IllegalAccessException if current user is not allowed to create admin
-   *           wallet account
+   * @throws IllegalAccessException if current user is not allowed to create
+   *           admin wallet account
    */
   void createAdminAccount(String privateKey, String currentUser) throws IllegalAccessException;
 
