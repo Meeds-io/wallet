@@ -20,6 +20,31 @@ import {getSavedTransactionByHash} from './TransactionUtils';
 
 const DEFAULT_DECIMALS = 3;
 
+const POLYGON_METAMASK_NETWORKS = {
+  '0x89': {
+    chainId: '0x89', // 137
+    chainName: 'Polygon Mainnet',
+    nativeCurrency: {
+      name: 'MATIC Token',
+      symbol: 'MATIC',
+      decimals: 18
+    },
+    rpcUrls: ['https://rpc-mainnet.matic.quiknode.pro'],
+    blockExplorerUrls: ['https://polygonscan.com/']
+  },
+  '0x13881': {
+    chainId: '0x13881', // 8001
+    chainName: 'Polygon Mumbai',
+    nativeCurrency: {
+      name: 'MATIC Token',
+      symbol: 'MATIC',
+      decimals: 18
+    },
+    rpcUrls: ['https://matic-mumbai.chainstacklabs.com/'],
+    blockExplorerUrls: ['https://mumbai.polygonscan.com/']
+  },
+};
+
 export function etherToFiat(amount) {
   if (window.walletSettings.fiatPrice && amount) {
     return toFixed(window.walletSettings.fiatPrice * amount);
@@ -600,6 +625,40 @@ export function deleteWallet(address) {
       throw new Error('Error while deleting wallet');
     }
   });
+}
+
+export function switchMetamaskNetwork(networkId) {
+  return window.ethereum && window.ethereum.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: networkId }],
+  }).catch(switchError => {
+    if (switchError.code === 4902 && POLYGON_METAMASK_NETWORKS[networkId]) {
+      return window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          POLYGON_METAMASK_NETWORKS[networkId],
+        ],
+      });
+    } else {
+      throw switchError;
+    }
+  }) || Promise.reject(new Error('No Metamask installed'));
+}
+
+export function getSelectedChainId() {
+  return window.walletSettings?.network?.id;
+}
+
+export function onNetworkChangeToPolygon() {
+  return window.ethereum && window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+    if (chainId === '0x13881'){
+      return true;
+    }
+  }) || Promise.reject(new Error('No Metamask installed'));
+}
+
+export function selectSuitableAccount() {
+  return window.ethereum && window.ethereum.request({ method: 'eth_requestAccounts' }) || Promise.reject(new Error('No Metamask installed'));
 }
 
 function triggerTransactionMinedEvent(event) {

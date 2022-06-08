@@ -23,7 +23,7 @@ module.exports = merge(webpackProductionConfig, {
   mode: 'development',
   devtool: 'eval-source-map',
   output: {
-    path: '/home/exo/work/binaries/plf-community-tomcat-standalone-1.4.x-meedsv2-20220605.224338-193/meeds-community-1.4.x-meedsv2-SNAPSHOT/webapps/wallet-common/',
+    path: '/exo-server/webapps/wallet-common/',
     filename: 'js/[name].bundle.js'
   }
 });
