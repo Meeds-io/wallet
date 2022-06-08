@@ -506,7 +506,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalArgumentException("provider is mandatory");
     }
     if (StringUtils.isBlank(address)) {
-      throw new IllegalArgumentException("Wallet address is empty, thus it can't be saved");
+      throw new IllegalArgumentException("Wallet address is mandatory");
     }
 
     Identity identity = getIdentityById(identityId);
@@ -520,21 +520,18 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setProvider(provider.name());
     wallet.setTechnicalId(identityId);
     wallet.setType(type.name());
-    computeWalletIdentity(wallet);
+
     Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), getContractAddress());
     boolean isNew = oldWallet == null;
 
-    checkCanSaveWallet(wallet, oldWallet, identity.getRemoteId());
     if (isNew) {
       wallet.setInitializationState(WalletState.NEW.name());
     } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       wallet.setInitializationState(WalletState.MODIFIED.name());
-    } else {
-      throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
-    return accountStorage.saveWallet(wallet, isNew);
+    return wallet;
   }
 
   @Override

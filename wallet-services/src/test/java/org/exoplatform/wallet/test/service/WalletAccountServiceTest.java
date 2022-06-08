@@ -772,18 +772,11 @@ public class WalletAccountServiceTest extends BaseWalletTest {
                  () -> walletAccountService.createWalletInstance(WalletProvider.METAMASK, null, CURRENT_USER_IDENTITY_ID));
     assertThrows(IllegalArgumentException.class,
                  () -> walletAccountService.createWalletInstance(null, walletAddress, CURRENT_USER_IDENTITY_ID));
-
     Wallet wallet = walletAccountService.createWalletInstance(WalletProvider.METAMASK, walletAddress, CURRENT_USER_IDENTITY_ID);
-    entitiesToClean.add(wallet);
 
-    Wallet savedWallet = walletAccountService.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
-    assertNotNull(savedWallet);
-    assertEquals(walletAddress.toLowerCase(), savedWallet.getAddress());
-    assertEquals(WalletProvider.METAMASK.name(), savedWallet.getProvider());
-    assertThrows(IllegalAccessException.class,
-                 () -> walletAccountService.createWalletInstance(WalletProvider.METAMASK,
-                                                                 walletAddress,
-                                                                 CURRENT_USER_IDENTITY_ID));
+    assertNotNull(wallet);
+    assertEquals(walletAddress.toLowerCase(), wallet.getAddress().toLowerCase());
+    assertEquals(WalletProvider.METAMASK.name(), wallet.getProvider());
   }
 
 }
