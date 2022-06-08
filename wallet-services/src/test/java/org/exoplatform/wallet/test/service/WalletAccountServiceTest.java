@@ -756,4 +756,21 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertEquals(WalletState.MODIFIED.name(), wallet.getInitializationState());
   }
 
+  @Test
+  public void testCreateWalletInstance() {
+    String walletAddress = "0x927f51a2996FJ74d1C380F92DC9006b53A225CeF";
+
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+
+    assertThrows(IllegalArgumentException.class,
+                 () -> walletAccountService.createWalletInstance(WalletProvider.METAMASK, null, CURRENT_USER_IDENTITY_ID));
+    assertThrows(IllegalArgumentException.class,
+                 () -> walletAccountService.createWalletInstance(null, walletAddress, CURRENT_USER_IDENTITY_ID));
+    Wallet wallet = walletAccountService.createWalletInstance(WalletProvider.METAMASK, walletAddress, CURRENT_USER_IDENTITY_ID);
+
+    assertNotNull(wallet);
+    assertEquals(walletAddress.toLowerCase(), wallet.getAddress().toLowerCase());
+    assertEquals(WalletProvider.METAMASK.name(), wallet.getProvider());
+  }
+
 }
