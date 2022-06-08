@@ -35,7 +35,6 @@ import WalletAddress from './components/WalletAddress.vue';
 import WalletSetup from './components/WalletSetup.vue';
 import BackupDrawer from './components/WalletBackupDrawer.vue';
 import WalletSettingsDetails from './wallet-settings/components/WalletSettingsDetails.vue';
-import WalletSettingsAlert from './wallet-settings/components/WalletSettingsAlert.vue';
 import WalletSettingsInternal from './wallet-settings/components/WalletSettingsInternal.vue';
 import WalletSettingsInternalDetails from './wallet-settings/components/WalletSettingsInternalDetails.vue';
 import WalletSettingsMetamask from './wallet-settings/components/WalletSettingsMetamask.vue';
@@ -83,7 +82,6 @@ export const components = {
   'wallet-reward-backup-drawer': BackupDrawer,
   'wallet-settings': WalletSettings,
   'wallet-settings-details': WalletSettingsDetails,
-  'wallet-settings-alert': WalletSettingsAlert,
   'wallet-settings-internal': WalletSettingsInternal,
   'wallet-settings-internal-details': WalletSettingsInternalDetails,
   'wallet-settings-metamask': WalletSettingsMetamask,

@@ -234,9 +234,34 @@ export function sendContractTransaction(transactionDetail, method, parameters) {
     });
 }
 
+export function switchMetamaskNetwork(networkId) {
+  return window.ethereum.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: networkId }],
+  });
+}
+
+
+export function getSelectedChainId() {
+  return window.walletSettings?.network?.id;
+}
+
+export function onNetworkChangeToPolygon() {
+  return window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
+    if (chainId === '0x13881'){
+      return true;
+    }
+  });
+}
+
+export function selectSuitableAccount() {
+  return window.ethereum.request({ method: 'eth_requestAccounts' });
+}
+
 export function getTransactionCount(walletAddress, status) {
   return window.localWeb3.eth.getTransactionCount(walletAddress, status || 'latest');
 }
+
 
 function getNewTransactionNonce(walletAddress) {
   return getTransactionCount(walletAddress, 'pending')

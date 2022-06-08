@@ -594,15 +594,24 @@ export default {
       }
       this.$refs.sendTokensForm.open();
       if (!this.isSameNetworkVersion){
-        this.$root.$emit('show-alert', {type: 'warning',message: `${this.$t('exoplatform.wallet.warn.networkVersion')}<br>${this.walletUtils.getNetworkLink()}`});
+        this.showAlert('warning',`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`,true);
+        
       }
       if (!this.isSameAddress){
-        this.$root.$emit('show-alert', {type: 'warning',message: this.$t('exoplatform.wallet.warn.selectedAddress')});
+        this.showAlert('warning',this.$t('exoplatform.wallet.warn.selectedAddress'),true);
+        
       }
     },
     close(){
       this.$refs.sendTokensForm.close();
-    }
+    },
+    showAlert(alertType,alertMessage,alertshouldSwitchNetwork){
+      this.$root.$emit('show-alert', {
+        type: alertType,
+        message: alertMessage,
+        shouldSwitchNetwork: alertshouldSwitchNetwork
+      });
+    },
   },
 };
 </script>
