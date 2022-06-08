@@ -756,14 +756,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertEquals(WalletState.MODIFIED.name(), wallet.getInitializationState());
   }
 
-  /**
-   * Test save wallet address
-   *
-   * @throws IllegalAccessException when error happens while proceeding request
-   *           with CURRENT_USER
-   */
   @Test
-  public void testCreateWalletInstance() throws IllegalAccessException {
+  public void testCreateWalletInstance() {
     String walletAddress = "0x927f51a2996FJ74d1C380F92DC9006b53A225CeF";
 
     WalletAccountService walletAccountService = getService(WalletAccountService.class);

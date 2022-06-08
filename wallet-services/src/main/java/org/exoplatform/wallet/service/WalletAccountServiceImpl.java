@@ -398,28 +398,23 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     computeWalletIdentity(wallet);
 
-    Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), getContractAddress());
+    long identityId = wallet.getTechnicalId();
+    Wallet oldWallet = accountStorage.getWalletByIdentityId(identityId, getContractAddress());
     boolean isNew = oldWallet == null;
-
     checkCanSaveWallet(wallet, oldWallet, currentUser);
-    if (isNew) {
-      // New wallet created for user/space
-      wallet.setInitializationState(WalletState.NEW.name());
-      wallet.setProvider(WalletProvider.INTERNAL_WALLET.name());
-    } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
-      wallet.setInitializationState(WalletState.MODIFIED.name());
-      wallet.setProvider(oldWallet.getProvider());
-    } else {
+    if (!isNew && StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
-    wallet.setEnabled(isNew || oldWallet.isEnabled());
-    setWalletPassPhrase(wallet, oldWallet);
+
+    WalletProvider provider = isNew || oldWallet.getProvider() == null ? WalletProvider.INTERNAL_WALLET
+                                                                       : WalletProvider.valueOf(oldWallet.getProvider());
+    computeWalletProperties(wallet, oldWallet, provider, isNew);
     accountStorage.saveWallet(wallet, isNew);
 
     if (!isNew) {
       // Automatically Remove old private key when modifying address associated
       // to wallet
-      accountStorage.removeWalletPrivateKey(wallet.getTechnicalId());
+      accountStorage.removeWalletPrivateKey(identityId);
     }
 
     // This is about address modification or creation, thus, the blockchain must
@@ -470,7 +465,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       if (!valid) {
         throw new IllegalStateException("Invalid Signed Message");
       }
-    } catch (UnsupportedEncodingException | SignatureException e) {
+    } catch (SignatureException e) {
       throw new IllegalStateException("Invalid Signed Message", e);
     }
 
@@ -501,7 +496,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
-  public Wallet createWalletInstance(WalletProvider provider, String address, long identityId) throws IllegalAccessException {
+  public Wallet createWalletInstance(WalletProvider provider, String address, long identityId) {
     if (provider == null) {
       throw new IllegalArgumentException("provider is mandatory");
     }
@@ -511,26 +506,14 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     Identity identity = getIdentityById(identityId);
     WalletType type = WalletType.getType(identity.getProviderId());
-    if (type.isSpace() && provider != WalletProvider.INTERNAL_WALLET) {
-      throw new IllegalStateException("Can't create wallet with provider " + provider.name() + "for a space"
-          + identity.getRemoteId());
-    }
     Wallet wallet = new Wallet();
     wallet.setAddress(address);
-    wallet.setProvider(provider.name());
     wallet.setTechnicalId(identityId);
     wallet.setType(type.name());
 
     Wallet oldWallet = accountStorage.getWalletByIdentityId(wallet.getTechnicalId(), getContractAddress());
     boolean isNew = oldWallet == null;
-
-    if (isNew) {
-      wallet.setInitializationState(WalletState.NEW.name());
-    } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
-      wallet.setInitializationState(WalletState.MODIFIED.name());
-    }
-    wallet.setEnabled(isNew || oldWallet.isEnabled());
-    setWalletPassPhrase(wallet, oldWallet);
+    computeWalletProperties(wallet, oldWallet, provider, isNew);
     return wallet;
   }
 
@@ -744,18 +727,18 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
-  public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) {
+  public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) { // NOSONAR
     Map<String, Object> parameters = new HashMap<>();
     if (StringUtils.equals(STATISTIC_OPERATION_INITIALIZATION, operation)) {
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return null;
+        return Collections.emptyMap();
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return null;
+        return Collections.emptyMap();
       } else {
         parameters.put("", wallet);
       }
@@ -764,21 +747,21 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         parameters.put(OPERATION, "reject");
       } else {
         LOG.debug("No statistic log is handeled for initialization state modification to {}", initializationState);
-        return null;
+        return Collections.emptyMap();
       }
     } else if (StringUtils.equals(STATISTIC_OPERATION_ENABLE, operation)) {
       if (result == null || !((boolean) result)) {
-        return null;
+        return Collections.emptyMap();
       }
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return null;
+        return Collections.emptyMap();
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return null;
+        return Collections.emptyMap();
       } else {
         parameters.put("", wallet);
       }
@@ -788,13 +771,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       Wallet wallet = (Wallet) methodArgs[0];
       if (wallet == null) {
         LOG.debug("Wallet not found in parameters. No statistic log will be added");
-        return null;
+        return Collections.emptyMap();
       } else {
         parameters.put("", wallet);
       }
     } else {
       LOG.warn("Statistic operation type '{}' not handled", operation);
-      return null;
+      return Collections.emptyMap();
     }
 
     String issuer = (String) methodArgs[methodArgs.length - 1];
@@ -893,7 +876,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
    */
   private boolean validateSignedMessage(String walletAddress,
                                         String rawMessage,
-                                        String signedMessage) throws UnsupportedEncodingException, SignatureException {
+                                        String signedMessage) throws SignatureException {
     if (StringUtils.isBlank(walletAddress) || StringUtils.isBlank(rawMessage) || StringUtils.isBlank(signedMessage)) {
       return false;
     }
@@ -914,6 +897,18 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       }
     }
     return false;
+  }
+
+  private void computeWalletProperties(Wallet wallet, Wallet oldWallet, WalletProvider provider, boolean isNew) {
+    if (isNew) {
+      // New wallet created for user/space
+      wallet.setInitializationState(WalletState.NEW.name());
+    } else if (!StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
+      wallet.setInitializationState(WalletState.MODIFIED.name());
+    }
+    wallet.setProvider(provider.name());
+    wallet.setEnabled(isNew || oldWallet.isEnabled());
+    setWalletPassPhrase(wallet, oldWallet);
   }
 
   private WalletTokenAdminService getTokenAdminService() {

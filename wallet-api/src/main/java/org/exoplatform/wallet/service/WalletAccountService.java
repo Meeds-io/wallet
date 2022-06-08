@@ -180,14 +180,15 @@ public interface WalletAccountService {
   Wallet saveWallet(Wallet wallet, boolean isNew);
 
   /**
-   * Save wallet address with specific provider
+   * Creates a transient wallet instance with pre-filled default properties of a
+   * wallet that will be ready to store.
    *
    * @param provider new {@link WalletProvider}
    * @param address new address of {@link Wallet} of selected identity
    * @param identityId user/space technical identty id
-   * @throws IllegalAccessException when the user is not able to save wallet
+   * @return new {@link Wallet} instance
    */
-  Wallet createWalletInstance(WalletProvider provider, String address, long identityId) throws IllegalAccessException;
+  Wallet createWalletInstance(WalletProvider provider, String address, long identityId);
 
   /**
    * Switches the provider of selected identity and changes the address
