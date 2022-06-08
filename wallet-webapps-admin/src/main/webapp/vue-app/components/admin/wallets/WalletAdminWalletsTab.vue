@@ -147,7 +147,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 size="20" />
               <template v-else>
                 {{ walletUtils.toFixed(props.item.tokenBalance) || 0 }} {{ contractDetails && contractDetails.symbol ? contractDetails.symbol : '' }}
-              </template>
+              </template> 
             </td>
             <td class="clickable text-center" @click="openAccountDetail(props.item)">
               <v-progress-circular
@@ -170,9 +170,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 size="20" />
               <v-menu
                 v-else
-                offset-y
+                attach
+                bottom
+                :left="rtlDisplay"
                 :value="actionSelectedWallet === props.item"
-                attach>
+              >
                 <template
                   #activator="{ on }">
                   <v-btn
@@ -405,6 +407,9 @@ export default {
     displayedWallets() {
       return this.wallets.filter(this.isDisplayWallet);
     },
+    rtlDisplay() {
+      return !this.$vuetify.rtl; 
+    }
   },
   watch: {
     seeAccountDetails() {
