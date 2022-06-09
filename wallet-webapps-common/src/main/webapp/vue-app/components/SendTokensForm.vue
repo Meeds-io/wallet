@@ -17,11 +17,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <exo-drawer
     ref="sendTokensForm"
+    width="100%"
     :right="!$vuetify.rtl">
     <template slot="title">
-      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.sendfunds') }} </span></div>
+      <div>
+        <i class="uiIcon uiArrowBAckIcon" @click="close"></i> 
+        <span> {{ $t('exoplatform.wallet.button.sendfunds') }} </span>
+      </div>
     </template>
+    
     <template slot="content">
+      <wallet-notification-warnings />      
       <v-card
         id="sendTokenForm"
         flat
@@ -228,6 +234,7 @@ export default {
     };
   },
   computed: {
+  
     walletAddress() {
       return this.wallet && this.wallet.address;
     },
@@ -320,6 +327,8 @@ export default {
     this.init();
   },
   methods: {
+    //generateId    
+
     init() {
       this.$nextTick(() => {
         if (this.$refs.autocomplete) {
@@ -594,23 +603,30 @@ export default {
       }
       this.$refs.sendTokensForm.open();
       if (!this.isSameNetworkVersion){
-        this.showAlert('warning',`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`,true);
+        this.showAlert('warning',`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`);
+        this.showWarning(`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`,'changeNetwork');
         
       }
       if (!this.isSameAddress){
-        this.showAlert('warning',this.$t('exoplatform.wallet.warn.selectedAddress'),true);
-        
+        this.showAlert('warning',this.$t('exoplatform.wallet.warn.selectedAddress'));
+        this.showWarning(this.$t('exoplatform.wallet.warn.selectedAddress'),'changeAccount');
       }
     },
     close(){
       this.$refs.sendTokensForm.close();
     },
-    showAlert(alertType,alertMessage,alertshouldSwitchNetwork){
+    showAlert(alertType,alertMessage){
       this.$root.$emit('show-alert', {
         type: alertType,
         message: alertMessage,
-        shouldSwitchNetwork: alertshouldSwitchNetwork
       });
+    },
+    showWarning(alertMessage,aletSwitchMetamaskActions){
+      this.$root.$emit('show-warning', {
+        message: alertMessage,
+        switchMetamaskActions: aletSwitchMetamaskActions
+      });
+      
     },
   },
 };

@@ -16,8 +16,8 @@ export default {
   }),
   created() {
     this.$root.$on('show-alert', alert => {
-      this.alertMessage = alert.message;
       this.alertType = alert.type;
+      this.alertMessage = alert.message;
       this.displayAlert= true;
       window.setTimeout(() => this.displayAlert = false, 5000); 
     });

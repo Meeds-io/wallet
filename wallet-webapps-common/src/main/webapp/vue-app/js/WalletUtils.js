@@ -649,13 +649,6 @@ export function getSelectedChainId() {
   return window.walletSettings?.network?.id;
 }
 
-export function onNetworkChangeToPolygon() {
-  return window.ethereum && window.ethereum.request({ method: 'eth_chainId' }).then(chainId => {
-    if (chainId === '0x13881'){
-      return true;
-    }
-  }) || Promise.reject(new Error('No Metamask installed'));
-}
 
 export function selectSuitableAccount() {
   return window.ethereum && window.ethereum.request({ method: 'eth_requestAccounts' }) || Promise.reject(new Error('No Metamask installed'));

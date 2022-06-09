@@ -41,8 +41,8 @@ import WalletSettingsMetamask from './wallet-settings/components/WalletSettingsM
 import WalletSettingsJdenticon from './wallet-settings/components/jdenticon.vue';
 import WalletSettings from './wallet-settings/components/WalletSettings.vue';
 import WalletNotificationAlerts from './components/WalletNotificationAlerts.vue';
+import WalletNotificationWarnings from './components/WalletNotificationWarnings.vue';
 import WalletWelcomeScreen from './components/WalletWelcomeScreen.vue';
-
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
@@ -87,6 +87,7 @@ export const components = {
   'wallet-settings-jdenticon': WalletSettingsJdenticon,
   'wallet-welcome-screen': WalletWelcomeScreen,
   'wallet-notification-alerts': WalletNotificationAlerts,
+  'wallet-notification-warnings': WalletNotificationWarnings
 };
 
 for (const key in components) {
