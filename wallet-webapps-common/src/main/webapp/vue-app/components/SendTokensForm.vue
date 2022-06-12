@@ -132,7 +132,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </template>
     <template slot="footer">
       <div v-if="switchAlertAndWarning">
-        <wallet-notification-warnings :alert-message="alertMessage" :alert-switch-metamask-actions="alertSwitchMetamaskActions" />      
+        <wallet-notification-warnings
+          :alert-message="alertMessage"
+          :alert-switch-metamask-actions="alertSwitchMetamaskActions"
+          :alert-button-message="alertButtonMessage" />      
       </div>
       <div class="VuetifyApp flex d-flex" v-else>
         <v-spacer />
@@ -236,6 +239,7 @@ export default {
       isSameAddress: true,
       warningInsteadOfbtns: false,
       alertMessage: '',
+      alertButtonMessage: '',
       alertSwitchMetamaskActions: ''
     };
   },
@@ -340,11 +344,13 @@ export default {
         if (!this.isSameAddress) {
           this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
           this.alertSwitchMetamaskActions= 'changeAccount';
+          this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeAccount');
           this.switchAlertAndWarning = true;}
         if (!this.isSameNetworkVersion){
           this.switchAlertAndWarning=false;
           this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
           this.alertSwitchMetamaskActions= 'changeNetwork';
+          this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeNetwork');
           this.switchAlertAndWarning=true;
         }
         if (this.isSameAddress && this.isSameNetworkVersion )
@@ -359,12 +365,14 @@ export default {
         if (!this.isSameNetworkVersion){
           this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
           this.alertSwitchMetamaskActions= 'changeNetwork';
+          this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeNetwork');
           this.switchAlertAndWarning=true;
         }
         if (!this.isSameAddress){
           this.switchAlertAndWarning=false;
           this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
           this.alertSwitchMetamaskActions= 'changeAccount';
+          this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeAccount');
           this.switchAlertAndWarning = true;
         }
         if (this.isSameNetworkVersion && this.isSameAddress )
@@ -649,13 +657,15 @@ export default {
         this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
       }
       if (!this.isSameNetworkVersion){
-        this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
+        this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')}`;
         this.alertSwitchMetamaskActions= 'changeNetwork';
+        this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeNetwork');
         this.switchAlertAndWarning=true;
       }
       if (!this.isSameAddress){
         this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
         this.alertSwitchMetamaskActions= 'changeAccount';
+        this.alertButtonMessage= this.$t('exoplatform.wallet.warn.changeAccount');
         this.switchAlertAndWarning= true;
       }
       this.$refs.sendTokensForm.open();

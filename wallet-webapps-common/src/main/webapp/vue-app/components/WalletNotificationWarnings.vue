@@ -12,9 +12,10 @@
       </div>
       <div class="align-self-center">
         <v-btn
+          width="145px"
           class="btn btn-primary"
           @click="switchActions">
-          Open Metamask
+          {{ alertButtonMessage }}
         </v-btn>
       </div>
     </div>
@@ -26,8 +27,12 @@ export default {
     alertMessage: {
       type: String,
       default: () => '',
-    },
+    },    
     alertSwitchMetamaskActions: {
+      type: String,
+      default: () => '',
+    },
+    alertButtonMessage: {
       type: String,
       default: () => '',
     },
@@ -40,7 +45,7 @@ export default {
     switchActions(){
       switch (this.alertSwitchMetamaskActions){
       case 'changeNetwork': 
-        this.walletUtils.switchMetamaskNetwork('0x13881');
+        this.walletUtils.switchMetamaskNetwork('0x89');
         break;
       case 'changeAccount':
         this.walletUtils.selectSuitableAccount();
