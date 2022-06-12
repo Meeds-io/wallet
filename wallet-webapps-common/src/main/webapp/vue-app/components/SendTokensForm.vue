@@ -27,7 +27,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </template>
     
     <template slot="content">
-      <wallet-notification-warnings />      
       <v-card
         id="sendTokenForm"
         flat
@@ -132,7 +131,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </v-card>
     </template>
     <template slot="footer">
-      <div class="VuetifyApp flex d-flex">
+      <div v-if="switchAlertAndWarning">
+        <wallet-notification-warnings :alert-message="alertMessage" :alert-switch-metamask-actions="alertSwitchMetamaskActions" />      
+      </div>
+      <div class="VuetifyApp flex d-flex" v-else>
         <v-spacer />
         <button
           :disabled="disabled"
@@ -209,6 +211,7 @@ export default {
   },
   data() {
     return {
+      switchAlertAndWarning: false,
       loading: false,
       showQRCodeModal: false,
       storedPassword: false,
@@ -231,6 +234,9 @@ export default {
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
       isSameNetworkVersion: true,
       isSameAddress: true,
+      warningInsteadOfbtns: false,
+      alertMessage: '',
+      alertSwitchMetamaskActions: ''
     };
   },
   computed: {
@@ -326,6 +332,47 @@ export default {
   created () {
     this.init();
   },
+  mounted() {
+    window.ethereum.on('accountsChanged' , () => {
+      if (window.walletSettings?.wallet?.provider !== 'INTERNAL_WALLET') {
+        this.isSameNetworkVersion = parseInt(window.ethereum?.networkVersion) === window.walletSettings?.network?.id;
+        this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
+        if (!this.isSameAddress) {
+          this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
+          this.alertSwitchMetamaskActions= 'changeAccount';
+          this.switchAlertAndWarning = true;}
+        if (!this.isSameNetworkVersion){
+          this.switchAlertAndWarning=false;
+          this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
+          this.alertSwitchMetamaskActions= 'changeNetwork';
+          this.switchAlertAndWarning=true;
+        }
+        if (this.isSameAddress && this.isSameNetworkVersion )
+        {this.switchAlertAndWarning = false;}
+      }
+    });
+
+    window.ethereum.on('chainChanged', () => {
+      if (window.walletSettings?.wallet?.provider !== 'INTERNAL_WALLET') {
+        this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
+        this.isSameNetworkVersion = parseInt(window.ethereum?.networkVersion) !== window.walletSettings?.network?.id;
+        if (!this.isSameNetworkVersion){
+          this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
+          this.alertSwitchMetamaskActions= 'changeNetwork';
+          this.switchAlertAndWarning=true;
+        }
+        if (!this.isSameAddress){
+          this.switchAlertAndWarning=false;
+          this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
+          this.alertSwitchMetamaskActions= 'changeAccount';
+          this.switchAlertAndWarning = true;
+        }
+        if (this.isSameNetworkVersion && this.isSameAddress )
+        {this.switchAlertAndWarning= false;}
+      }
+    });
+  },
+  
   methods: {
     //generateId    
 
@@ -601,32 +648,21 @@ export default {
         this.isSameNetworkVersion = parseInt(window.ethereum?.networkVersion) === window.walletSettings?.network?.id;
         this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
       }
-      this.$refs.sendTokensForm.open();
       if (!this.isSameNetworkVersion){
-        this.showAlert('warning',`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`);
-        this.showWarning(`${this.$t('exoplatform.wallet.warn.networkVersion')}\n${this.walletUtils.getNetworkLink()}`,'changeNetwork');
-        
+        this.alertMessage=`${this.$t('exoplatform.wallet.warn.networkVersion')} Polygon`;
+        this.alertSwitchMetamaskActions= 'changeNetwork';
+        this.switchAlertAndWarning=true;
       }
       if (!this.isSameAddress){
-        this.showAlert('warning',this.$t('exoplatform.wallet.warn.selectedAddress'));
-        this.showWarning(this.$t('exoplatform.wallet.warn.selectedAddress'),'changeAccount');
+        this.alertMessage=this.$t('exoplatform.wallet.warn.selectedAddress');
+        this.alertSwitchMetamaskActions= 'changeAccount';
+        this.switchAlertAndWarning= true;
       }
+      this.$refs.sendTokensForm.open();
+
     },
     close(){
       this.$refs.sendTokensForm.close();
-    },
-    showAlert(alertType,alertMessage){
-      this.$root.$emit('show-alert', {
-        type: alertType,
-        message: alertMessage,
-      });
-    },
-    showWarning(alertMessage,aletSwitchMetamaskActions){
-      this.$root.$emit('show-warning', {
-        message: alertMessage,
-        switchMetamaskActions: aletSwitchMetamaskActions
-      });
-      
     },
   },
 };

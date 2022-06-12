@@ -33,7 +33,7 @@ const POLYGON_METAMASK_NETWORKS = {
     blockExplorerUrls: ['https://polygonscan.com/']
   },
   '0x13881': {
-    chainId: '0x13881', // 8001
+    chainId: '0x13881', // 80001
     chainName: 'Polygon Mumbai',
     nativeCurrency: {
       name: 'MATIC Token',
