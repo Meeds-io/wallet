@@ -238,6 +238,7 @@ export function getTransactionCount(walletAddress, status) {
   return window.localWeb3.eth.getTransactionCount(walletAddress, status || 'latest');
 }
 
+
 function getNewTransactionNonce(walletAddress) {
   return getTransactionCount(walletAddress, 'pending')
     .then(nonce => 

@@ -19,8 +19,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     ref="sendTokensForm"
     :right="!$vuetify.rtl">
     <template slot="title">
-      <div><i class="uiIcon uiArrowBAckIcon" @click="close"></i> <span class="pb-2"> {{ $t('exoplatform.wallet.button.sendfunds') }} </span></div>
+      <div>
+        <i class="uiIcon uiArrowBAckIcon" @click="close"></i> 
+        <span> {{ $t('exoplatform.wallet.button.sendfunds') }} </span>
+      </div>
     </template>
+    
     <template slot="content">
       <v-card
         id="sendTokenForm"
@@ -126,7 +130,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </v-card>
     </template>
     <template slot="footer">
-      <div class="VuetifyApp flex d-flex">
+      <div v-if="displayMetamaskWarnings">
+        <wallet-metamask-warnings
+          :not-installed="!metamaskInstalled"
+          :not-connected="!metamaskConnected"
+          :invalid-network="invalidMetamaskNetwork"
+          :invalid-account="invalidMetamaskAccount" />      
+      </div>
+      <div class="VuetifyApp flex d-flex" v-else>
         <v-spacer />
         <button
           :disabled="disabled"
@@ -223,8 +234,9 @@ export default {
       information: null,
       error: null,
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
-      isSameNetworkVersion: true,
-      isSameAddress: true,
+      metamaskAddress: null,
+      metamaskNetworkId: null,
+      metamaskConnected: false,
     };
   },
   computed: {
@@ -235,7 +247,16 @@ export default {
       return this.walletAddress && `${this.walletAddress.substring(0,5)}...${this.walletAddress.substring(this.walletAddress.length-4,this.walletAddress.length)}`;
     },
     disabled() {
-      return (!this.isSameAddress || !this.isSameNetworkVersion) || (!this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length))));
+      return !this.walletAddress || this.loading || !this.gasPrice || !this.recipient || !this.amount || !this.canSendToken || (this.isInternalWallet && (!this.storedPassword && (!this.walletPassword || !this.walletPassword.trim().length)));
+    },
+    invalidMetamaskAccount() {
+      return !this.metamaskAddress || (this.metamaskAddress || '').toLowerCase() !== (this.walletAddress || '').toLowerCase();
+    },
+    invalidMetamaskNetwork() {
+      return this.metamaskNetworkId !== window.walletSettings?.network?.id;
+    },
+    displayMetamaskWarnings() {
+      return this.isMetamaskWallet && (this.invalidMetamaskNetwork || this.invalidMetamaskAccount || !this.metamaskConnected);
     },
     transactionFeeString() {
       if (this.transactionFeeToken) {
@@ -316,10 +337,32 @@ export default {
       }
     },
   },
-  created () {
+  created() {
     this.init();
+    document.addEventListener('wallet-metamask-accountsChanged', this.updateSelectedMetamaskAddress);
+    document.addEventListener('wallet-metamask-chainChanged', this.updateSelectedMetamaskNetworkId);
+    document.addEventListener('wallet-metamask-connected', this.updateSelectedMetamaskInformation);
+    document.addEventListener('wallet-metamask-disconnected', this.updateSelectedMetamaskInformation);
+  },
+  beforeDestroy() {
+    document.removeEventListener('wallet-metamask-accountsChanged', this.updateSelectedMetamaskAddress);
+    document.removeEventListener('wallet-metamask-chainChanged', this.updateSelectedMetamaskNetworkId);
+    document.removeEventListener('wallet-metamask-chainChanged', this.updateSelectedMetamaskInformation);
+    document.removeEventListener('wallet-metamask-chainChanged', this.updateSelectedMetamaskInformation);
   },
   methods: {
+    updateSelectedMetamaskNetworkId() {
+      this.metamaskNetworkId = window.walletSettings.metamask?.networkId;
+    },
+    updateSelectedMetamaskAddress() {
+      this.metamaskAddress = window.walletSettings.metamask?.address;
+    },
+    updateSelectedMetamaskInformation() {
+      this.metamaskInstalled = window.walletSettings.metamask?.installed;
+      this.metamaskConnected = window.walletSettings.metamask?.connected;
+      this.updateSelectedMetamaskNetworkId();
+      this.updateSelectedMetamaskAddress();
+    },
     init() {
       this.$nextTick(() => {
         if (this.$refs.autocomplete) {
@@ -587,22 +630,16 @@ export default {
         return;
       }
     },
-    open(){
-      if (window.walletSettings?.wallet?.provider !== 'INTERNAL_WALLET') {
-        this.isSameNetworkVersion = parseInt(window.ethereum?.networkVersion) === window.walletSettings?.network?.id;
-        this.isSameAddress = window.ethereum?.selectedAddress && window.ethereum?.selectedAddress === window.walletSettings?.wallet?.address || false;
+    open() {
+      if (this.isMetamaskWallet) {
+        this.updateSelectedMetamaskInformation();
       }
       this.$refs.sendTokensForm.open();
-      if (!this.isSameNetworkVersion){
-        this.$root.$emit('show-alert', {type: 'warning',message: `${this.$t('exoplatform.wallet.warn.networkVersion')}<br>${this.walletUtils.getNetworkLink()}`});
-      }
-      if (!this.isSameAddress){
-        this.$root.$emit('show-alert', {type: 'warning',message: this.$t('exoplatform.wallet.warn.selectedAddress')});
-      }
+
     },
     close(){
       this.$refs.sendTokensForm.close();
-    }
+    },
   },
 };
 </script>
