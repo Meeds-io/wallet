@@ -17,7 +17,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <exo-drawer
     ref="sendTokensForm"
-    width="100%"
     :right="!$vuetify.rtl">
     <template slot="title">
       <div>
