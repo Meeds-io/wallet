@@ -1,8 +1,8 @@
 <template>
   <v-alert
-    class="paragraph"
     v-model="displayAlert"
     :type="alertType"
+    class="paragraph"
     dismissible>
     <div v-sanitized-html="alertMessage" class="mt-8"></div>
   </v-alert>
