@@ -21,6 +21,7 @@ const webpackProductionConfig = require('./webpack.prod.js');
 
 module.exports = merge(webpackProductionConfig, {
   mode: 'development',
+  devtool: 'eval-source-map',
   output: {
     path: '/exo-server/webapps/wallet-common/',
     filename: 'js/[name].bundle.js'

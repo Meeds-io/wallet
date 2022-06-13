@@ -2,8 +2,9 @@
   <v-alert
     v-model="displayAlert"
     :type="alertType"
+    class="paragraph"
     dismissible>
-    {{ alertMessage }}
+    <div v-sanitized-html="alertMessage" class="mt-8"></div>
   </v-alert>
 </template>
 <script>
@@ -15,11 +16,11 @@ export default {
   }),
   created() {
     this.$root.$on('show-alert', alert => {
-      this.alertMessage = alert.message;
       this.alertType = alert.type;
+      this.alertMessage = alert.message;
       this.displayAlert= true;
       window.setTimeout(() => this.displayAlert = false, 5000); 
     });
-  }
+  },
 };
 </script>
