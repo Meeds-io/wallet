@@ -654,6 +654,25 @@ export function selectSuitableAccount() {
   return window.ethereum && window.ethereum.request({ method: 'eth_requestAccounts' }) || Promise.reject(new Error('No Metamask installed'));
 }
 
+export function connectToMetamask() {
+  let selectedAddress = null;
+  return window.ethereum.request({ method: 'wallet_requestPermissions',
+    params: [ { eth_accounts: {} } ]
+  })
+    .then(() => this.retrieveAddress())
+    .then((retrievedAddress) => {
+      selectedAddress = retrievedAddress;
+      return this.signMessage(retrievedAddress);
+    })
+    .then(() => {
+      window.walletSettings.wallet.address = selectedAddress;
+      window.walletSettings.wallet.provider = 'METAMASK';
+    })
+    .catch(() => {
+      this.savingMetamaskAddress = false;
+    });
+}
+
 function triggerTransactionMinedEvent(event) {
   return triggerTransactionMined(event && event.detail && event.detail.string);
 }

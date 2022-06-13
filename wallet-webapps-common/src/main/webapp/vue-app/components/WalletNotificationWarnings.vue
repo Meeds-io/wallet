@@ -48,7 +48,7 @@ export default {
         this.walletUtils.switchMetamaskNetwork('0x89');
         break;
       case 'changeAccount':
-        this.walletUtils.selectSuitableAccount();
+        this.walletUtils.connectToMetamask();
         break;
       }
     }
