@@ -31,7 +31,7 @@
           @open-detail="openDetail" />
       </v-list>
     </v-card>
-    <wallet-settings-alert />
+    <wallet-notification-alert />
   </v-app>
 </template>
 <script>

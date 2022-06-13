@@ -22,10 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <span class="mx-2"> {{ $t('exoplatform.wallet.label.exchanges') }} </span>
     </template>
     <template slot="content">
-      <v-layout
-        row
-        wrap
-        class="walletSummaryActions walletSummaryBalance">
+      <div class="walletSummaryActions mx-4">
         <v-flex
           class="walletSummaryAction">
           <wallet-reward-send-tokens-modal
@@ -53,7 +50,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             :wallet-address="walletAddress"
             :contract-details="contractDetails" />
         </v-flex>
-      </v-layout>
+      </div>
     </template>
   </exo-drawer>
 </template>

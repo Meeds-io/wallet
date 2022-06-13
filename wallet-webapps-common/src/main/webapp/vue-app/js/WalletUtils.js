@@ -20,6 +20,42 @@ import {getSavedTransactionByHash} from './TransactionUtils';
 
 const DEFAULT_DECIMALS = 3;
 
+const POLYGON_METAMASK_NETWORKS = {
+  137: {
+    'chainName': 'Polygon Mainnet',
+    'chainId': '0x89', // 137
+    'nativeCurrency': {
+      'decimals': 18,
+      'name': 'MATIC',
+      'symbol': 'MATIC'
+    },
+    'rpcUrls': [
+      'https://polygon-rpc.com/',
+      'https://rpc-mainnet.matic.network',
+      'https://matic-mainnet.chainstacklabs.com',
+      'https://rpc-mainnet.maticvigil.com',
+      'https://rpc-mainnet.matic.quiknode.pro',
+      'https://matic-mainnet-full-rpc.bwarelabs.com'
+    ],
+    'blockExplorerUrls': ['https://polygonscan.com']
+  },
+  80001: {
+    'chainName': 'Mumbai',
+    'chainId': '0x13881', // 80001
+    'nativeCurrency': {
+      'decimals': 18,
+      'name': 'MATIC',
+      'symbol': 'MATIC'
+    },
+    'rpcUrls': [
+      'https://matic-mumbai.chainstacklabs.com',
+      'https://rpc-mumbai.maticvigil.com',
+      'https://matic-testnet-archive-rpc.bwarelabs.com'
+    ],
+    'blockExplorerUrls': ['https://mumbai.polygonscan.com']
+  },
+};
+
 export function etherToFiat(amount) {
   if (window.walletSettings.fiatPrice && amount) {
     return toFixed(window.walletSettings.fiatPrice * amount);
@@ -153,6 +189,43 @@ export function initSettings(isSpace, useCometd, isAdministration) {
 
         document.addEventListener('exo.wallet.transaction.modified', triggerTransactionMinedEvent);
         initCometd(window.walletSettings);
+      }
+
+      if (window.walletSettings?.wallet?.provider === 'METAMASK') {
+        const connected = isMetamaskConnected();
+        const installed = isMetamaskInstalled();
+        window.walletSettings.metamask = {
+          connected,
+          installed,
+        };
+        if (installed) {
+          if (connected) {
+            getMetamaskSelectedAccount();
+            getMetamaskSelectedNetworkId();
+          }
+          window.ethereum.on('connect', () => {
+            window.walletSettings.metamask.connected = true;
+            getMetamaskSelectedNetworkId()
+              .finally(() => document.dispatchEvent(new CustomEvent('wallet-metamask-chainChanged', {detail: window.walletSettings.metamask.networkId})));
+            getMetamaskSelectedAccount()
+              .finally(() => document.dispatchEvent(new CustomEvent('wallet-metamask-accountsChanged', {detail: window.walletSettings.metamask.address})));
+            document.dispatchEvent(new CustomEvent('wallet-metamask-connected'));
+          });
+          window.ethereum.on('disconnect', () => {
+            window.walletSettings.metamask.connected = false;
+            window.walletSettings.metamask.networkId = null;
+            window.walletSettings.metamask.address = null;
+            document.dispatchEvent(new CustomEvent('wallet-metamask-disconnected'));
+          });
+          window.ethereum.on('accountsChanged' , () => {
+            getMetamaskSelectedAccount()
+              .finally(() => document.dispatchEvent(new CustomEvent('wallet-metamask-accountsChanged', {detail: window.walletSettings.metamask.address})));
+          });
+          window.ethereum.on('chainChanged', () => {
+            getMetamaskSelectedNetworkId()
+              .finally(() => document.dispatchEvent(new CustomEvent('wallet-metamask-chainChanged', {detail: window.walletSettings.metamask.networkId})));
+          });
+        }
       }
     })
     .then(() => {
@@ -600,6 +673,64 @@ export function deleteWallet(address) {
       throw new Error('Error while deleting wallet');
     }
   });
+}
+
+export function getMetamaskSelectedAccount() {
+  return window.ethereum?.request({
+    method: 'eth_accounts'
+  }).then(address => window.walletSettings.metamask.address = address && address.length && address[0] || null);
+}
+
+export function getMetamaskSelectedNetworkId() {
+  return window.ethereum?.request({
+    method: 'eth_chainId'
+  }).then(networkId => window.walletSettings.metamask.networkId = Number(networkId));
+}
+
+export function isMetamaskInstalled() {
+  return window.ethereum && window.ethereum.isMetaMask;
+}
+
+export function isMetamaskConnected() {
+  return isMetamaskInstalled() && window.ethereum.isConnected();
+}
+
+export function connectToMetamask() {
+  return window.ethereum.request({
+    method: 'eth_requestAccounts'
+  });
+}
+
+export function switchMetamaskAccount() {
+  return window.ethereum?.request({
+    method: 'wallet_requestPermissions',
+    params: [{ eth_accounts: {} }],
+  }) || Promise.reject(new Error('No Metamask installed'));
+}
+
+export function switchMetamaskNetwork() {
+  const network = POLYGON_METAMASK_NETWORKS[window.walletSettings.network.id];
+  const networkId = network?.chainId;
+  if (!networkId) {
+    return Promise.reject(new Error('Unexpected Network id'));
+  }
+  return window.ethereum && window.ethereum.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{
+      chainId: networkId,
+    }],
+  }).catch(switchError => {
+    if (switchError.code === 4902) {
+      return window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          network,
+        ],
+      });
+    } else {
+      throw switchError;
+    }
+  }) || Promise.reject(new Error('No Metamask installed'));
 }
 
 function triggerTransactionMinedEvent(event) {
