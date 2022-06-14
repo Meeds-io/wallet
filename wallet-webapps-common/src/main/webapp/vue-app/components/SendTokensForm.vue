@@ -24,7 +24,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <span> {{ $t('exoplatform.wallet.button.sendfunds') }} </span>
       </div>
     </template>
-    
     <template slot="content">
       <v-card
         id="sendTokenForm"
@@ -401,7 +400,6 @@ export default {
           this.gasPrice = window.walletSettings.network.normalGasPrice;
         }
       }
-
       this.fiatSymbol = window.walletSettings.fiatSymbol;
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
       this.$nextTick(() => {
@@ -443,9 +441,8 @@ export default {
         savedTransaction,
         contractDetails
       );
-
       this.$emit('close');
-
+      this.showAlert('success',this.$t('exoplatform.wallet.metamask.message.transactionSent'),savedTransaction.hash);
       if (notificationId) {
         // Asynchronously mark notification as sent
         markFundRequestAsSent(notificationId);
@@ -472,7 +469,6 @@ export default {
         this.error = this.$t('exoplatform.wallet.warning.invalidAmount');
         return;
       }
-
       if (this.isInternalWallet) {
         if (!this.storedPassword && (!this.walletPassword || !this.walletPassword.length)) {
           this.error = this.$t('exoplatform.wallet.warning.requiredPassword');
@@ -514,7 +510,6 @@ export default {
       };
         
       if (this.isInternalWallet) {
-
         Object.assign(transactionDetail, { 
           gas: window.walletSettings.network.gasLimit,
           gasPrice: this.gasPrice,
@@ -522,7 +517,6 @@ export default {
           feeFiat: this.transactionFeeFiat,
           tokenFee: this.transactionFeeToken,
         });
-
         if (this.transaction) {
           Object.assign(transactionDetail, {
             nonce: this.transaction.nonce,
@@ -533,7 +527,6 @@ export default {
             boost: true,
           });
         }
-      
         return transfer(transactionDetail.to, convertTokenAmountToSend(transactionDetail.contractAmount, this.contractDetails.decimals).toString())
           .estimateGas({
             from: transactionDetail.from,
@@ -562,6 +555,7 @@ export default {
           .catch((e) => {
             console.error('Web3 contract.transfer method - error', e);
             this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+            this.showAlert('error',this.$t('exoplatform.wallet.metamask.error.transactionFailed',this.savedTransaction.hash));
           })
           .finally(() => {
             this.loading = false;
@@ -569,7 +563,6 @@ export default {
             this.close();
           });
       } else if (this.isMetamaskWallet) {
-        
         if (window.ethereum?.isMetaMask) {
           const transactionParameters = {
             to: this.contractDetails.address.toLowerCase(),
@@ -607,21 +600,17 @@ export default {
       } else {
         console.error('Error getting provider');
       }
-      
     },
     checkErrors() {
       this.error = null;
-
       if (!this.contractDetails) {
         return;
       }
-
       if (this.recipient === this.walletAddress && this.contractDetails.contractType > 0) {
         this.error = `You can't send '${this.contractDetails.name}' to yourself`;
         this.canSendToken = false;
         return;
       }
-
       if (this.amount && (isNaN(parseFloat(this.amount)) || !isFinite(this.amount) || this.amount <= 0)) {
         this.error = 'Invalid amount';
         return;
@@ -635,11 +624,17 @@ export default {
         this.updateSelectedMetamaskInformation();
       }
       this.$refs.sendTokensForm.open();
-
     },
     close(){
       this.$refs.sendTokensForm.close();
     },
+    showAlert(alertType,alertMessage,alertTransactionHash){
+      this.$root.$emit('show-alert', {
+        type: alertType,
+        message: alertMessage,
+        transactionHash: alertTransactionHash
+      });
+    }
   },
 };
 </script>
