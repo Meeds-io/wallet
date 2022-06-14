@@ -550,6 +550,7 @@ export default {
             }
             if (savedTransaction) {
               this.finalizeSendTransaction(savedTransaction, this.contractDetails, this.notificationId);
+              this.close();
             }
           })
           .catch((e) => {
@@ -560,7 +561,6 @@ export default {
           .finally(() => {
             this.loading = false;
             lockBrowserWallet();
-            this.close();
           });
       } else if (this.isMetamaskWallet) {
         if (window.ethereum?.isMetaMask) {
@@ -586,6 +586,7 @@ export default {
               }
               if (savedTransaction) {
                 this.finalizeSendTransaction(savedTransaction, this.contractDetails, this.notificationId);
+                this.close();
               }
             })
             .catch((e) => {
@@ -595,7 +596,6 @@ export default {
             .finally(() => {
               this.loading = false;
               lockBrowserWallet();
-              this.close();
             });}
       } else {
         console.error('Error getting provider');
