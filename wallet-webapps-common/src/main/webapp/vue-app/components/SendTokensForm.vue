@@ -556,6 +556,7 @@ export default {
             }
             if (savedTransaction) {
               this.finalizeSendTransaction(savedTransaction, this.contractDetails, this.notificationId);
+              this.close();
             }
           })
           .catch((e) => {
@@ -596,6 +597,7 @@ export default {
               }
               if (savedTransaction) {
                 this.finalizeSendTransaction(savedTransaction, this.contractDetails, this.notificationId);
+                this.close();
               }
             })
             .catch((e) => {
