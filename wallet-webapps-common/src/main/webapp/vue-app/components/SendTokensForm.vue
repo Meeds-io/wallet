@@ -442,9 +442,13 @@ export default {
         contractDetails
       );
       this.$emit('close');
+<<<<<<< HEAD
       this.showAlert('success', this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
         savedTransaction.hash);
       this.close();
+=======
+      this.showAlert('success',this.$t('exoplatform.wallet.metamask.message.transactionSent'),savedTransaction.hash);
+>>>>>>> 61b8e7b5 (BUILDERS-180: Add a toast success/failure notif when sending tokens from wallet)
       if (notificationId) {
         // Asynchronously mark notification as sent
         markFundRequestAsSent(notificationId);
@@ -557,8 +561,12 @@ export default {
           .catch((e) => {
             console.error('Web3 contract.transfer method - error', e);
             this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+<<<<<<< HEAD
             this.showAlert('error', this.$t('exoplatform.wallet.metamask.error.transactionFailed', 
               this.savedTransaction.hash));
+=======
+            this.showAlert('error',this.$t('exoplatform.wallet.metamask.error.transactionFailed',this.savedTransaction.hash));
+>>>>>>> 61b8e7b5 (BUILDERS-180: Add a toast success/failure notif when sending tokens from wallet)
           })
           .finally(() => {
             this.loading = false;
@@ -629,11 +637,19 @@ export default {
     close(){
       this.$refs.sendTokensForm.close();
     },
+<<<<<<< HEAD
     showAlert(alertType, alertMessage, alertTransactionHash){
       this.$root.$emit('wallet-notification-alert', {
         type: alertType,
         message: alertMessage,
         transactionHash: alertTransactionHash,
+=======
+    showAlert(alertType,alertMessage,alertTransactionHash){
+      this.$root.$emit('show-alert', {
+        type: alertType,
+        message: alertMessage,
+        transactionHash: alertTransactionHash
+>>>>>>> 61b8e7b5 (BUILDERS-180: Add a toast success/failure notif when sending tokens from wallet)
       });
     }
   },

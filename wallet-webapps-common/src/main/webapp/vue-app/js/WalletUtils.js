@@ -457,6 +457,10 @@ export function getNetworkLink() {
   }
 }
 
+export function getUrlHostName(url){
+  return new URL(url).hostname;
+}
+
 export function getCurrentBrowserWallet() {
   return window && window.localWeb3 && window.localWeb3.eth.accounts.wallet && window.walletSettings.wallet.address && window.localWeb3.eth.accounts.wallet[window.walletSettings.wallet.address];
 }
