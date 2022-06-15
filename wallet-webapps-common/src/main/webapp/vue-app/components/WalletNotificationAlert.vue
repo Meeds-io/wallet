@@ -40,6 +40,14 @@ export default {
     alert() {
       this.snackbar = !!this.alert;
     }
+<<<<<<< HEAD
+=======
+  },
+  computed: {
+    transactionLinkLabel() {
+      return this.$t('exoplatform.wallet.message.followTransaction',{0: this.walletUtils.getUrlHostName(this.walletUtils.getTransactionEtherscanlink())});
+    },
+>>>>>>> ea95bc7c (optimizing code)
   },
   created() {
     this.$root.$on('wallet-notification-alert', alert => this.alert = alert);
