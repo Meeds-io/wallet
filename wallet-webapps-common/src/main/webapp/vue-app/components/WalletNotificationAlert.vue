@@ -16,7 +16,7 @@
           rel="external nofollow noreferrer noopener"
           class="d-block"
           target="_blank">
-          {{ transactionLinkLabel }}
+          <br>{{ transactionLinkLabel }}
         </a>
       </template>
     </exo-notification-alert>
