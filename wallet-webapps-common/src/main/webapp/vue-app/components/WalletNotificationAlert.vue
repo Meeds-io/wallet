@@ -20,6 +20,11 @@ export default {
   watch: {
     alert() {
       this.snackbar = !!this.alert;
+    }
+  },
+  computed: {
+    transactionLinkLabel() {
+      return this.$t('exoplatform.wallet.message.followTransaction',{0: this.walletUtils.getUrlHostName(this.walletUtils.getTransactionEtherscanlink())});
     },
   },
   created() {
