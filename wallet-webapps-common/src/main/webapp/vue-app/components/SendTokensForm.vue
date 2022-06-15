@@ -443,6 +443,7 @@ export default {
       );
       this.$emit('close');
       this.showAlert('success',this.$t('exoplatform.wallet.metamask.message.transactionSent'),savedTransaction.hash);
+      this.close();
       if (notificationId) {
         // Asynchronously mark notification as sent
         markFundRequestAsSent(notificationId);
@@ -627,10 +628,10 @@ export default {
       this.$refs.sendTokensForm.close();
     },
     showAlert(alertType,alertMessage,alertTransactionHash){
-      this.$root.$emit('show-alert', {
+      this.$root.$emit('wallet-notification-alert', {
         type: alertType,
         message: alertMessage,
-        transactionHash: alertTransactionHash
+        transactionHash: alertTransactionHash,
       });
     }
   },
