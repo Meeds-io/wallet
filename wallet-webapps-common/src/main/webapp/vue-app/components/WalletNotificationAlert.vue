@@ -14,7 +14,7 @@
           :href="transactionHashLink"
           :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
           target="_blank">
-          {{ transactionLinkLabel }}
+          <br>{{ transactionLinkLabel }}
         </a>
       </template>
     </exo-notification-alert>
@@ -31,7 +31,7 @@ export default {
       return this.$t('exoplatform.wallet.message.followTransaction',{0: this.walletUtils.getUrlHostName(this.walletUtils.getTransactionEtherscanlink())});
     },
     transactionHashLink(){
-      return this.alert.transactionHash;
+      return this.walletUtils.getTransactionEtherscanlink().concat(this.alert.transactionHash);
     }
   },
   watch: {

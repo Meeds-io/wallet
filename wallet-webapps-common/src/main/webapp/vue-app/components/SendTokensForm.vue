@@ -442,7 +442,8 @@ export default {
         contractDetails
       );
       this.$emit('close');
-      this.showAlert('success',this.$t('exoplatform.wallet.metamask.message.transactionSent'),savedTransaction.hash);
+      this.showAlert('success', this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
+        savedTransaction.hash);
       this.close();
       if (notificationId) {
         // Asynchronously mark notification as sent
@@ -556,7 +557,8 @@ export default {
           .catch((e) => {
             console.error('Web3 contract.transfer method - error', e);
             this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
-            this.showAlert('error',this.$t('exoplatform.wallet.metamask.error.transactionFailed',this.savedTransaction.hash));
+            this.showAlert('error', this.$t('exoplatform.wallet.metamask.error.transactionFailed', 
+              this.savedTransaction.hash));
           })
           .finally(() => {
             this.loading = false;
@@ -627,7 +629,7 @@ export default {
     close(){
       this.$refs.sendTokensForm.close();
     },
-    showAlert(alertType,alertMessage,alertTransactionHash){
+    showAlert(alertType, alertMessage, alertTransactionHash){
       this.$root.$emit('wallet-notification-alert', {
         type: alertType,
         message: alertMessage,
