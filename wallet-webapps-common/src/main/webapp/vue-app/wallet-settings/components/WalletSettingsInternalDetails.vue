@@ -172,14 +172,20 @@ export default {
     deleteWallet() {
       return this.walletUtils.deleteWallet(this.walletSettings.wallet.address)
         .then(() => {
-          this.$root.$emit('wallet-notification-alert', {type: 'success',message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')});
+          this.$root.$emit('wallet-notification-alert', {
+            type: 'success',
+            message: this.$t('exoplatform.wallet.message.deleteWalletSuccess')
+          });
           if (this.wallet.type === 'user') {
             return window.location.href = `${eXo.env.portal.context}/${eXo.env.portal.portalName}/wallet`;
           } else {
             return window.location.href =  `${eXo.env.portal.context}/g/:spaces:${eXo.env.portal.spaceGroup}/${eXo.env.portal.spaceName}/SpaceWallet`;
           }
         }).catch(e => {
-          this.$root.$emit('wallet-notification-alert', {type: 'error',message: String(e)});
+          this.$root.$emit('wallet-notification-alert', {
+            type: 'error',
+            message: String(e)
+          });
         });
     },
   },

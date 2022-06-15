@@ -128,7 +128,10 @@ export default {
           this.$emit('backed-up');
           this.close();
         }).catch((error) => {
-          this.$root.$emit('wallet-notification-alert', {type: 'error',message: String(error)});
+          this.$root.$emit('wallet-notification-alert', {
+            type: 'error',
+            message: String(error)
+          });
         })
         .finally(() => {
           this.loading = false;
@@ -147,13 +150,19 @@ export default {
         if (unlocked) {
           const wallet = getCurrentBrowserWallet();
           if (!wallet || !wallet.privateKey) {
-            this.$root.$emit('wallet-notification-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.walletNotFound')});
+            this.$root.$emit('wallet-notification-alert', {
+              type: 'error',
+              message: this.$t('exoplatform.wallet.error.walletNotFound')
+            });
             return;
           }
           this.loading = false;
           this.walletPrivateKey = wallet.privateKey;
         } else {
-          this.$root.$emit('wallet-notification-alert', {type: 'error',message: this.$t('exoplatform.wallet.warning.wrongPassword')});
+          this.$root.$emit('wallet-notification-alert', {
+            type: 'error',
+            message: this.$t('exoplatform.wallet.warning.wrongPassword')
+          });
         }
       } finally {
         this.loading = false;

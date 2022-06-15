@@ -159,7 +159,10 @@ export default {
             saveBrowserWalletInstance(wallet, this.walletPassword, thiss.isSpace, true, true)
               .then(() => {
                 thiss.loading = false;
-                this.$root.$emit('wallet-notification-alert', {type: 'success',message: this.$t('exoplatform.wallet.success.walletImportedSuccessfully')});
+                this.$root.$emit('wallet-notification-alert', {
+                  type: 'success',
+                  message: this.$t('exoplatform.wallet.success.walletImportedSuccessfully')
+                });
                 thiss.close();
                 thiss.$nextTick(() => {
                   thiss.$emit('configured');
@@ -168,16 +171,25 @@ export default {
               .catch((e) => {
                 thiss.loading = false;
                 console.error('saveBrowserWalletInstance method - error', e);
-                this.$root.$emit('wallet-notification-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.errorProcessingNewKeys')});
+                this.$root.$emit('wallet-notification-alert', {
+                  type: 'error',
+                  message: this.$t('exoplatform.wallet.error.errorProcessingNewKeys')
+                });
               });
           } else {
             thiss.loading = false;
-            this.$root.$emit('wallet-notification-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.wrongPrivateKey', {0: thiss.walletAddress})});
+            this.$root.$emit('wallet-notification-alert', {
+              type: 'error',
+              message: this.$t('exoplatform.wallet.error.wrongPrivateKey', {0: thiss.walletAddress})
+            });
           }
         } catch (e) {
           thiss.loading = false;
           console.error('Error importing private key', e);
-          this.$root.$emit('wallet-notification-alert', {type: 'error',message: this.$t('exoplatform.wallet.error.errorImportingPrivateKey')});
+          this.$root.$emit('wallet-notification-alert', {
+            type: 'error',
+            message: this.$t('exoplatform.wallet.error.errorImportingPrivateKey')
+          });
         }
       }, 200);
     },
