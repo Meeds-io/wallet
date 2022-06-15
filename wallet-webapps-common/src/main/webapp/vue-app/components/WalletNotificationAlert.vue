@@ -1,26 +1,34 @@
 <template>
-  <v-alert
-    v-model="displayAlert"
-    :type="alertType"
-    class="paragraph"
-    dismissible>
-    <div v-sanitized-html="alertMessage" class="mt-8"></div>
-  </v-alert>
+  <v-snackbar
+    v-model="snackbar"
+    :left="!$vuetify.rtl"
+    :right="$vuetify.rtl"
+    color="transparent"
+    elevation="0"
+    app>
+    <exo-notification-alert
+      :alert="alert"
+      @dismissed="clear" />
+  </v-snackbar>
 </template>
 <script>
 export default {
   data: () => ({
-    displayAlert: false,
-    alertMessage: null,
-    alertType: null,
+    snackbar: false,
+    alert: null,
   }),
+  watch: {
+    alert() {
+      this.snackbar = !!this.alert;
+    },
+  },
   created() {
-    this.$root.$on('show-alert', alert => {
-      this.alertType = alert.type;
-      this.alertMessage = alert.message;
-      this.displayAlert= true;
-      window.setTimeout(() => this.displayAlert = false, 5000); 
-    });
+    this.$root.$on('wallet-notification-alert', alert => this.alert = alert);
+  },
+  methods: {
+    clear() {
+      this.alert = null;
+    },
   },
 };
 </script>
