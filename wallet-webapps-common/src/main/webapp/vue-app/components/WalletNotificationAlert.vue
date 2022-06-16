@@ -13,6 +13,7 @@
         <a
           :href="transactionHashLink"
           :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
+          rel="external nofollow noreferrer noopener"
           target="_blank">
           <br>{{ transactionLinkLabel }}
         </a>
