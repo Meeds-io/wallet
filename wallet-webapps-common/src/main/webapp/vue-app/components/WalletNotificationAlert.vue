@@ -29,7 +29,7 @@ export default {
   }),
   computed: {
     transactionLinkLabel() {
-      return this.$t('exoplatform.wallet.message.followTransaction',{0: this.walletUtils.getUrlHostName(this.walletUtils.getTransactionEtherscanlink())});
+      return this.$t('exoplatform.wallet.message.followTransaction', {0: this.walletUtils.getTransactionEtherscanlink()});
     },
     transactionHashLink(){
       return this.walletUtils.getTransactionEtherscanlink().concat(this.alert.transactionHash);
