@@ -14,7 +14,10 @@
           :href="transactionHashLink"
           :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
           rel="external nofollow noreferrer noopener"
+<<<<<<< HEAD
           class="d-block"
+=======
+>>>>>>> 22160753 (Update wallet-webapps-common/src/main/webapp/vue-app/components/WalletNotificationAlert.vue)
           target="_blank">
           <br>{{ transactionLinkLabel }}
         </a>
