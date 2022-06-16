@@ -14,8 +14,9 @@
           :href="transactionHashLink"
           :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
           rel="external nofollow noreferrer noopener"
+          class="d-block"
           target="_blank">
-          <br>{{ transactionLinkLabel }}
+          {{ transactionLinkLabel }}
         </a>
       </template>
     </exo-notification-alert>
@@ -29,7 +30,7 @@ export default {
   }),
   computed: {
     transactionLinkLabel() {
-      return this.$t('exoplatform.wallet.message.followTransaction', {0: this.walletUtils.getTransactionEtherscanlink()});
+      return this.$t('exoplatform.wallet.message.followTransaction', {0: this.walletUtils.getTransactionExplorerName()});
     },
     transactionHashLink(){
       return this.walletUtils.getTransactionEtherscanlink().concat(this.alert.transactionHash);

@@ -372,6 +372,23 @@ export function rememberPassword(remember, password, address) {
   }
 }
 
+export function getTransactionExplorerName() {
+  switch (window.walletSettings.network.id) {
+  case 1:
+    return 'Etherscan';
+  case 3:
+    return 'Ropsten Etherscan';
+  case 5:
+    return 'Goerli Etherscan';
+  case 137:
+    return 'Polygonscan';
+  case 80001:
+    return 'Mumbai Polygonscan';
+  default:
+    return '#';
+  }
+}
+
 export function getAddressEtherscanlink() {
   switch (window.walletSettings.network.id) {
   case 1:
