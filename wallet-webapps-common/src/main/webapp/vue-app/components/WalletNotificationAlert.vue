@@ -9,7 +9,7 @@
     <exo-notification-alert
       :alert="alert"
       @dismissed="clear">
-      <template #actions>
+      <template #actions v-if="showTransactionLink">
         <a
           :href="transactionHashLink"
           :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
@@ -34,6 +34,9 @@ export default {
     },
     transactionHashLink(){
       return this.walletUtils.getTransactionEtherscanlink().concat(this.alert.transactionHash);
+    },
+    showTransactionLink() {
+      return this.alert?.transactionHash;
     }
   },
   watch: {
