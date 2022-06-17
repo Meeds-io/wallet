@@ -235,8 +235,7 @@ export default {
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
       metamaskAddress: null,
       metamaskNetworkId: null,
-      metamaskConnected: false,
-      showTransactionLink: true
+      metamaskConnected: false
     };
   },
   computed: {
@@ -447,7 +446,6 @@ export default {
         'success', 
         this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
         savedTransaction.hash,
-        this.showTransactionLink
       );
       this.close();
       if (notificationId) {
@@ -565,8 +563,7 @@ export default {
             this.showAlert(
               'error', 
               this.$t('exoplatform.wallet.metamask.error.transactionFailed'), 
-              this.savedTransaction.hash, 
-              this.showTransactionLink
+              this.savedTransaction.hash
             );
           })
           .finally(() => {
@@ -638,12 +635,11 @@ export default {
     close(){
       this.$refs.sendTokensForm.close();
     },
-    showAlert(alertType, alertMessage, alertTransactionHash, alertShowTransactionLink){
+    showAlert(alertType, alertMessage, alertTransactionHash){
       this.$root.$emit('wallet-notification-alert', {
         type: alertType,
         message: alertMessage,
         transactionHash: alertTransactionHash,
-        showTransactionLink: alertShowTransactionLink
       });
     }
   },

@@ -36,7 +36,7 @@ export default {
       return this.walletUtils.getTransactionEtherscanlink().concat(this.alert.transactionHash);
     },
     showTransactionLink() {
-      return this.alert.showTransactionLink || false;
+      return this.alert?.transactionHash;
     }
   },
   watch: {
