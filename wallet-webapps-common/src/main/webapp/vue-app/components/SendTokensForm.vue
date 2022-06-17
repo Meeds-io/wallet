@@ -456,7 +456,6 @@ export default {
     sendTokens() {
       this.error = null;
       this.warning = null;
-      this.savedTransaction = null;
 
       if (!this.$refs.form.validate()) {
         return;
