@@ -235,7 +235,7 @@ export default {
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
       metamaskAddress: null,
       metamaskNetworkId: null,
-      metamaskConnected: false,
+      metamaskConnected: false
     };
   },
   computed: {
@@ -442,8 +442,11 @@ export default {
         contractDetails
       );
       this.$emit('close');
-      this.showAlert('success', this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
-        savedTransaction.hash);
+      this.showAlert(
+        'success', 
+        this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
+        savedTransaction.hash,
+      );
       this.close();
       if (notificationId) {
         // Asynchronously mark notification as sent
@@ -556,9 +559,10 @@ export default {
           })
           .catch((e) => {
             console.error('Web3 contract.transfer method - error', e);
-            this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
-            this.showAlert('error', this.$t('exoplatform.wallet.metamask.error.transactionFailed', 
-              this.savedTransaction.hash));
+            this.showAlert(
+              'error', 
+              this.$t('exoplatform.wallet.metamask.error.transactionFailed'), 
+            );
           })
           .finally(() => {
             this.loading = false;
