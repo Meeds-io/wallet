@@ -456,6 +456,7 @@ export default {
     sendTokens() {
       this.error = null;
       this.warning = null;
+      this.savedTransaction = null;
 
       if (!this.$refs.form.validate()) {
         return;
@@ -559,11 +560,9 @@ export default {
           })
           .catch((e) => {
             console.error('Web3 contract.transfer method - error', e);
-            this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
             this.showAlert(
               'error', 
               this.$t('exoplatform.wallet.metamask.error.transactionFailed'), 
-              this.savedTransaction.hash
             );
           })
           .finally(() => {
