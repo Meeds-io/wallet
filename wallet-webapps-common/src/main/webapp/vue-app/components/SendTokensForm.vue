@@ -32,10 +32,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-card-text class="pt-0">
           <div v-if="error && !loading" class="alert alert-error v-content">
             <i class="uiIconError"></i>{{ error }}
-          </div> <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
+          </div>
+          <div v-if="!error && warning && warning.length" class="alert alert-warning v-content">
             <i class="uiIconWarning"></i>{{ warning }}
-          </div> <div v-if="!error && !warning && information && information.length" class="alert alert-info v-content">
-            <i class="uiIconInfo"></i>{{ information }}
           </div>
           <v-form
             ref="form"
@@ -173,9 +172,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import {unlockBrowserWallet, lockBrowserWallet, truncateError, hashCode, toFixed, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
+import {unlockBrowserWallet, lockBrowserWallet, hashCode, convertTokenAmountToSend, etherToFiat, markFundRequestAsSent} from '../js/WalletUtils.js';
 import {sendContractTransaction} from '../js/TokenUtils.js';
-import {searchWalletByAddress} from '../js/AddressRegistry.js';
 import {saveTransactionDetails} from '../js/TransactionUtils.js';
 
 export default {
@@ -230,7 +228,6 @@ export default {
       estimatedGas: 0,
       fiatSymbol: null,
       warning: null,
-      information: null,
       error: null,
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
       metamaskAddress: null,
@@ -257,21 +254,6 @@ export default {
     displayMetamaskWarnings() {
       return this.isMetamaskWallet && (this.invalidMetamaskNetwork || this.invalidMetamaskAccount || !this.metamaskConnected);
     },
-    transactionFeeString() {
-      if (this.transactionFeeToken) {
-        if (this.contractDetails) {
-          return `${toFixed(this.transactionFeeToken)} ${this.contractDetails && this.contractDetails.symbol}`;
-        } else {
-          return '';
-        }
-      } else if (this.transactionFeeFiat) {
-        return `${toFixed(this.transactionFeeFiat)} ${this.fiatSymbol}`;
-      }
-      return '';
-    },
-    sellPriceInWei() {
-      return this.contractDetails && this.contractDetails.sellPrice ? window.localWeb3.utils.toWei(String(this.contractDetails.sellPrice), 'ether') : 0;
-    },
     transactionFeeInWei() {
       return this.estimatedGas && this.gasPrice ? parseInt(this.estimatedGas * this.gasPrice) : 0;
     },
@@ -281,9 +263,6 @@ export default {
     transactionFeeFiat() {
       return this.transactionFeeEther ? etherToFiat(this.transactionFeeEther) : 0;
     },
-    transactionFeeToken() {
-      return this.contractDetails && (this.contractDetails.isOwner || !this.transactionFeeInWei || !this.sellPriceInWei ? 0 : toFixed(this.transactionFeeInWei / this.sellPriceInWei));
-    },
     isInternalWallet() {
       return window.walletSettings.wallet?.provider === 'INTERNAL_WALLET';
     },
@@ -292,47 +271,12 @@ export default {
     },
   },
   watch: {
-    contractDetails() {
-      if (this.contractDetails && this.contractDetails.isPaused) {
-        this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
-      }
-    },
     amount() {
       this.checkErrors();
     },
     recipient(newValue, oldValue) {
       if (oldValue !== newValue) {
-        this.error = null;
-        this.warning = null;
-        this.information = null;
-
-        this.canSendToken = true;
-      }
-
-      if (newValue && oldValue !== newValue) {
         this.checkErrors();
-        if (this.error) {
-          return;
-        }
-
-        if (this.contractDetails.contractType > 0) {
-          this.warning = null;
-          this.information = null;
-
-          return searchWalletByAddress(this.recipient, true)
-            .then((receiverWallet) => {
-              // Unknown wallet address
-              if (!receiverWallet || !receiverWallet.address || !receiverWallet.id) {
-                this.canSendToken = true;
-                return;
-              }
-
-              // Async gas estimation if current address is owner of contract
-              if (this.canSendToken && this.contractDetails && this.contractDetails.isOwner) {
-                this.estimateTransactionFee();
-              }
-            });
-        }
       }
     },
   },
@@ -383,7 +327,6 @@ export default {
       this.transactionLabel = '';
       this.walletPassword = '';
       this.walletPasswordShow = false;
-      this.error = null;
       this.loading = false;
       this.disabledRecipient = !!this.transaction;
       this.showQRCodeModal = false;
@@ -402,36 +345,25 @@ export default {
       }
       this.fiatSymbol = window.walletSettings.fiatSymbol;
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;
-      this.$nextTick(() => {
-        if (this.contractDetails && this.contractDetails.isPaused) {
-          this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
-        } else {
-          this.estimateTransactionFee();
-          this.warning = null;
-        }
-      });
+      this.$nextTick(() => this.estimateTransactionFee());
     },
     estimateTransactionFee() {
-      if (this.contractDetails && !this.contractDetails.isPaused && this.wallet.tokenBalance && this.wallet.etherBalance && this.contractDetails.sellPrice && this.contractDetails.owner && this.contractDetails.contractType) {
-        const recipient = this.contractDetails.isOwner ? this.recipient : this.contractDetails.owner;
-
-        if (recipient) {
-          // Estimate gas
-          this.contractDetails.contract.methods
-            .transfer(recipient, String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
-            .estimateGas({
-              from: this.contractDetails.contract.options.from,
-              gas: window.walletSettings.network.gasLimit,
-              gasPrice: this.gasPrice,
-            })
-            .then((estimatedGas) => {
-              // Add 10% to ensure that the operation doesn't take more than the estimation
-              this.estimatedGas = parseInt(estimatedGas * 1.1);
-            })
-            .catch((e) => {
-              console.error('Error while estimating gas', e);
-            });
-        }
+      if (this.contractDetails && this.wallet.tokenBalance && this.wallet.etherBalance) {
+        // Estimate gas
+        return this.contractDetails.contract.methods
+          .transfer('0x0000000000000000000000000000000000000001', String(Math.pow(10, this.contractDetails.decimals ? this.contractDetails.decimals : 0)))
+          .estimateGas({
+            from: this.walletAddress,
+            gas: window.walletSettings.network.gasLimit,
+            gasPrice: this.gasPrice,
+          })
+          .then((estimatedGas) => {
+            // Add 10% to ensure that the operation doesn't take more than the estimation
+            this.estimatedGas = parseInt(estimatedGas * 1.1);
+          })
+          .catch((e) => {
+            console.error('Error while estimating gas', e);
+          });
       }
     },
     finalizeSendTransaction(savedTransaction, contractDetails, notificationId) {
@@ -455,13 +387,8 @@ export default {
     },
     sendTokens() {
       this.error = null;
-      this.warning = null;
 
       if (!this.$refs.form.validate()) {
-        return;
-      }
-      if (this.contractDetails && this.contractDetails.isPaused) {
-        this.warning = this.$t('exoplatform.wallet.warning.contractPaused', {0: this.contractDetails.name});
         return;
       }
 
@@ -499,7 +426,6 @@ export default {
       const receiver = this.recipient;
       const transfer =  this.contractDetails.contract.methods.transfer;
 
-      this.error = null;
       this.loading = true;
       const transactionDetail = {
         from: sender.toLowerCase(),
@@ -520,7 +446,6 @@ export default {
           gasPrice: this.gasPrice,
           fee: this.transactionFeeEther,
           feeFiat: this.transactionFeeFiat,
-          tokenFee: this.transactionFeeToken,
         });
         if (this.transaction) {
           Object.assign(transactionDetail, {
@@ -543,7 +468,7 @@ export default {
             return 0;
           })
           .then((estimatedGas) => {
-            if (estimatedGas > window.walletSettings.network.gasLimit) {
+            if (this.isInternalWallet && estimatedGas > window.walletSettings.network.gasLimit) {
               this.warning = this.$t('exoplatform.wallet.warning.lowConfiguredTransactionGas', {0: window.walletSettings.network.gasLimit, 1: estimatedGas});
               return;
             }
@@ -595,33 +520,36 @@ export default {
               }
             })
             .catch((e) => {
+              if (e && e.code === 4001) {
+                // User rejected transaction from Metamask popin
+                return;
+              }
               console.error('Web3 contract.transfer method - error', e);
-              this.error = `${this.$t('exoplatform.wallet.error.emptySendingTransaction')}: ${truncateError(e)}`;
+              this.$root.$emit('wallet-notification-alert', {
+                type: 'error',
+                message: this.$t('exoplatform.wallet.error.errorSendingTransaction'),
+              });
             })
             .finally(() => {
               this.loading = false;
               lockBrowserWallet();
-            });}
+            });
+        }
       } else {
         console.error('Error getting provider');
       }
     },
     checkErrors() {
       this.error = null;
-      if (!this.contractDetails) {
-        return;
-      }
-      if (this.recipient === this.walletAddress && this.contractDetails.contractType > 0) {
-        this.error = `You can't send '${this.contractDetails.name}' to yourself`;
+      if (this.recipient && this.recipient.toLowerCase() === this.walletAddress.toLowerCase()) {
+        this.error = this.$t('exoplatform.wallet.warning.receiverMustBeDifferentFromSender');
         this.canSendToken = false;
         return;
       }
       if (this.amount && (isNaN(parseFloat(this.amount)) || !isFinite(this.amount) || this.amount <= 0)) {
-        this.error = 'Invalid amount';
-        return;
+        this.error = this.$t('exoplatform.wallet.warning.invalidAmount');
       } else if (this.amount && $.isNumeric(this.amount)) {
-        this.error = (!this.wallet || this.wallet.tokenBalance >= this.amount) ? null : 'Unsufficient funds';
-        return;
+        this.error = (!this.wallet || this.wallet.tokenBalance >= this.amount) ? null : this.$t('exoplatform.wallet.warning.unsufficientFunds');
       }
     },
     open() {
