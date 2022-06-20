@@ -457,6 +457,45 @@ export function getNetworkLink() {
   }
 }
 
+export function getMetamaskErrorMessage(metamaskErrorCode) {
+  switch (metamaskErrorCode) {
+  case -32700:
+    return 'Invalid JSON was received by the server. An error occurred on the server while parsing the JSON text.';
+  case -32600: 
+    return 'The JSON sent is not a valid Request object.';
+  case -32601: 
+    return 'The method does not exist or it is not available.';
+  case -32602: 
+    return 'Invalid method parameter(s).';
+  case -32603: 
+    return 'Internal JSON-RPC error.';
+  case -32000: 
+    return 'Invalid input.';
+  case -32001: 
+    return 'Resource not found.';
+  case -32002: 
+    return 'Resource unavailable.';
+  case -32003: 
+    return 'Transaction rejected.';
+  case -32004: 
+    return 'Method not supported.';
+  case -32005: 
+    return 'Request limit exceeded.';
+  case 4001: 
+    return 'User rejected the request.';
+  case 4100: 
+    return 'The requested account and/or method has not been authorized by the user.';
+  case 4200: 
+    return 'The requested method is not supported by this Ethereum provider.';
+  case 4900: 
+    return 'The provider is disconnected from all chains.';
+  case 4901:
+    return 'The provider is disconnected from the specified chain.';
+  default:
+    return '';
+  }
+}
+
 export function getCurrentBrowserWallet() {
   return window && window.localWeb3 && window.localWeb3.eth.accounts.wallet && window.walletSettings.wallet.address && window.localWeb3.eth.accounts.wallet[window.walletSettings.wallet.address];
 }
@@ -539,13 +578,17 @@ export function truncateError(error) {
   if (!error) {
     return '';
   }
-  error = String(error);
-  if (error.indexOf(' at ') >= 0) {
+  
+  if (String(error).indexOf(' at ') >= 0) {
     error = error.substring(0, error.indexOf(' at '));
   }
 
   if (String(error).indexOf('transaction underpriced') >= 0 || String(error).indexOf('nonce too low') >= 0|| String(error).indexOf('known transaction') >= 0) {
     error = 'Another transaction is in progress please wait until the first transaction is finished';
+  }
+
+  if (error.code){
+    error = getMetamaskErrorMessage(error.code);
   }
   return error;
 }

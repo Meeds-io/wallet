@@ -235,7 +235,7 @@ export default {
       mandatoryRule: [(v) => !!v || this.$t('exoplatform.wallet.warning.requiredField')],
       metamaskAddress: null,
       metamaskNetworkId: null,
-      metamaskConnected: false
+      metamaskConnected: false,
     };
   },
   computed: {
@@ -442,12 +442,12 @@ export default {
         contractDetails
       );
       this.$emit('close');
+      this.close();
       this.showAlert(
         'success', 
         this.$t('exoplatform.wallet.metamask.message.transactionSent'), 
         savedTransaction.hash,
       );
-      this.close();
       if (notificationId) {
         // Asynchronously mark notification as sent
         markFundRequestAsSent(notificationId);
