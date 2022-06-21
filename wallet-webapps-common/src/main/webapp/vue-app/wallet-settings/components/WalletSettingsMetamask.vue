@@ -200,7 +200,7 @@ export default {
           window.walletSettings.wallet.address = address;
           window.walletSettings.wallet.provider = 'METAMASK';
 
-          this.$root.$emit('show-alert', {
+          this.$root.$emit('wallet-notification-alert', {
             type: 'success',
             message: this.$t('exoplatform.wallet.metamask.message.connectedSuccess')
           });
