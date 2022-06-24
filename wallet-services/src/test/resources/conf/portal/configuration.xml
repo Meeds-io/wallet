@@ -75,12 +75,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </value-param>
     </init-params>
   </component>
-
-  <component>
-      <key>org.exoplatform.commons.api.settings.ExoFeatureService</key>
-      <type>org.exoplatform.settings.impl.ExoFeatureServiceImpl</type>
-  </component>
-
   <import>jar:/conf/portal/wallet-configuration.xml</import>
 
   <remove-configuration>org.exoplatform.commons.search.index.IndexingOperationProcessor</remove-configuration>
