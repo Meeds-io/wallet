@@ -38,9 +38,6 @@ public class UserSettings extends GlobalSettings {
   private boolean           walletEnabled        = true;
 
   @Exclude
-  private boolean           metamaskEnabled      = false;
-
-  @Exclude
   private boolean           isUseDynamicGasPrice = true;
 
   @Exclude
