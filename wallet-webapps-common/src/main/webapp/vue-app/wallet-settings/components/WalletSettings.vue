@@ -26,7 +26,7 @@
           :wallet-settings="walletSettings"
           @open-detail="openDetail" />
         <wallet-settings-metamask
-          v-if="!isSpace"
+          v-if="metamaskFeatureEnabled && !isSpace"
           :wallet-settings="walletSettings"
           @open-detail="openDetail" />
       </v-list>
@@ -49,6 +49,9 @@ export default {
     walletSettingsClass() {
       return eXo.env.portal.spaceName ? '': 'ma-4' ;
     },
+    metamaskFeatureEnabled() {
+      return this.walletSettings && this.walletSettings.metamaskEnabled;
+    }
   },
   created() {
     document.addEventListener('hideSettingsApps', (event) => {

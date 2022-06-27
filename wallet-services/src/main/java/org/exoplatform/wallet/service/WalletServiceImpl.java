@@ -28,8 +28,7 @@ import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
-import org.exoplatform.commons.api.settings.SettingService;
-import org.exoplatform.commons.api.settings.SettingValue;
+import org.exoplatform.commons.api.settings.*;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -47,6 +46,8 @@ import org.exoplatform.wallet.model.transaction.FundsRequest;
  */
 public class WalletServiceImpl implements WalletService, Startable {
 
+  private static final String          METAMASK_FEATURE_NAME    = "walletMetamask";
+
   private static final Log             LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
 
   private ExoContainer                 container;
@@ -63,6 +64,8 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   private WalletWebSocketService       webSocketService;
 
+  private ExoFeatureService            featureService;
+
   private GlobalSettings               configuredGlobalSettings = new GlobalSettings();
 
   private boolean                      useDynamicGasPrice;
@@ -75,6 +78,7 @@ public class WalletServiceImpl implements WalletService, Startable {
                            WalletAccountService accountService,
                            WalletWebSocketService webSocketService,
                            WebNotificationStorage webNotificationStorage,
+                           ExoFeatureService featureService,
                            PortalContainer container,
                            InitParams params) {
     this.container = container;
@@ -82,6 +86,7 @@ public class WalletServiceImpl implements WalletService, Startable {
     this.contractService = contractService;
     this.webSocketService = webSocketService;
     this.webNotificationStorage = webNotificationStorage;
+    this.featureService = featureService;
 
     NetworkSettings network = this.configuredGlobalSettings.getNetwork();
     if (params.containsKey(NETWORK_ID)) {
@@ -274,6 +279,7 @@ public class WalletServiceImpl implements WalletService, Startable {
       if (isAdministration && isUserMemberOfGroupOrUser(currentUser, REWARDINGS_GROUP)) {
         userSettings.setInitialFunds(getInitialFundsSettings());
       }
+      userSettings.setMetamaskEnabled(featureService.isFeatureActiveForUser(METAMASK_FEATURE_NAME, currentUser));
     }
     if (this.isUseDynamicGasPrice()) {
       userSettings.setUseDynamicGasPrice(true);
