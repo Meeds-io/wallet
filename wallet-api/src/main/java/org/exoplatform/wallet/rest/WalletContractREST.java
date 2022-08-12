@@ -23,6 +23,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.common.http.HTTPStatus;
@@ -32,11 +37,10 @@ import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.service.WalletContractService;
 
-import io.swagger.annotations.*;
 
 @Path("/wallet/api/contract")
 @RolesAllowed("users")
-@Api(value = "/wallet/api/contract", description = "Manages internally stored token contract detail") // NOSONAR
+@Tag(name = "/wallet/api/contract", description = "Manages internally stored token contract detail")
 public class WalletContractREST implements ResourceContainer {
 
   private static final Log      LOG = ExoLogger.getLogger(WalletContractREST.class);
@@ -50,13 +54,16 @@ public class WalletContractREST implements ResourceContainer {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Retrieves stored contract details in internal datasource", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract detail object")
+  @Operation(
+          summary = "Retrieves stored contract details in internal datasource",
+          method = "GET",
+          description = "Retrieves stored contract details in internal datasource")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getContract(@ApiParam(value = "contract address", required = true) @QueryParam("address") String address) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getContract(@Parameter(description = "contract address", required = true) @QueryParam("address") String address) {
     if (StringUtils.isBlank(address)) {
       LOG.warn("Empty contract address");
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -76,13 +83,13 @@ public class WalletContractREST implements ResourceContainer {
   @GET
   @Path("bin/{name}")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Retrieves contract binary", httpMethod = "GET", response = Response.class, notes = "returns contract bin content")
+  @Operation(summary = "Retrieves contract binary", method = "GET", description = "returns contract bin content")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getBin(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getBin(@Parameter(description = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -104,13 +111,16 @@ public class WalletContractREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("abi/{name}")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Retrieves contract ABI", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "returns contract ABI object")
+  @Operation(
+          summary = "Retrieves contract ABI",
+          method = "GET",
+          description = "returns contract ABI object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getAbi(@ApiParam(value = "contract name", required = true) @PathParam("name") String name) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getAbi(@Parameter(description = "contract name", required = true) @PathParam("name") String name) {
     if (StringUtils.isBlank(name)) {
       LOG.warn("Empty resource name");
       return Response.status(HTTPStatus.BAD_REQUEST).build();

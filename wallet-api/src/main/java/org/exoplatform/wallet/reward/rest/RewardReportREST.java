@@ -22,6 +22,11 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,11 +39,10 @@ import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.reward.service.RewardReportService;
 import org.exoplatform.wallet.utils.WalletUtils;
 
-import io.swagger.annotations.*;
 
 @Path("/wallet/api/reward/")
 @RolesAllowed("rewarding")
-@Api(value = "/wallet/api/reward", description = "Manage wallet rewards") // NOSONAR
+@Tag(name = "/wallet/api/reward", description = "Manage wallet rewards")
 public class RewardReportREST implements ResourceContainer {
   private static final Log    LOG = ExoLogger.getLogger(RewardReportREST.class);
 
@@ -52,12 +56,15 @@ public class RewardReportREST implements ResourceContainer {
   @Path("compute")
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Compute rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns a set of wallet reward object")
+  @Operation(
+          summary = "Compute rewards of wallets per a chosen period of time",
+          method = "GET",
+          description = "returns a set of wallet reward object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response computeRewards(@Parameter(description = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     if (periodDateInSeconds == 0) {
       periodDateInSeconds = System.currentTimeMillis() / 1000;
     }
@@ -80,12 +87,15 @@ public class RewardReportREST implements ResourceContainer {
   @GET
   @Path("send")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Send rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, notes = "return empty response")
+  @Operation(
+          summary = "Send rewards of wallets per a chosen period of time",
+          method = "GET",
+          description = "Send rewards of wallets per a chosen period of time and returns an empty response")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.NO_CONTENT, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response sendRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+      @ApiResponse(responseCode = "204", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response sendRewards(@Parameter(description = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
     try {
       rewardReportService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
       return Response.noContent().build();
@@ -105,12 +115,15 @@ public class RewardReportREST implements ResourceContainer {
   @Path("list")
   @RolesAllowed("users")
   @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation(value = "Return list of rewards for current user with a limit of items to return", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return list of rewards per user")
+  @Operation(
+          summary = "Return list of rewards for current user with a limit of items to return",
+          method = "GET",
+          description = "return list of rewards per user")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response listRewards(@ApiParam(value = "limit of items to load", required = false) @QueryParam("limit") int limit) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response listRewards(@Parameter(description = "limit of items to load") @QueryParam("limit") int limit) {
     try {
       List<WalletReward> rewards = rewardReportService.listRewards(WalletUtils.getCurrentUserId(), limit);
       return Response.ok(rewards).build();
@@ -130,12 +143,15 @@ public class RewardReportREST implements ResourceContainer {
   @Path("countRewards")
   @RolesAllowed("users")
   @Produces(MediaType.APPLICATION_JSON)
-  @ApiOperation(value = "Return sum of rewards for user", httpMethod = "GET", produces = "application/json", response = Response.class, notes = "return sum of rewards per user")
+  @Operation(
+          summary = "Return sum of rewards for user",
+          method = "GET",
+          description = "return sum of rewards per user")
   @ApiResponses(value = {
-          @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-          @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-          @ApiResponse(code = 500, message = "Internal server error") })
-  public Response countRewards(@Context Request request, @ApiParam(value = "user id", required = true) @QueryParam("userId") String userId ) {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response countRewards(@Context Request request, @Parameter(description = "user id", required = true) @QueryParam("userId") String userId ) {
     try {
       Double sumRewards = rewardReportService.countRewards(userId);
       EntityTag eTag = new EntityTag(String.valueOf(sumRewards));
