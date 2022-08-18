@@ -26,6 +26,12 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.common.http.HTTPStatus;
@@ -37,11 +43,10 @@ import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.wallet.service.*;
 
-import io.swagger.annotations.*;
 
 @Path("/wallet/api/transaction")
 @RolesAllowed("users")
-@Api(value = "/wallet/api/transaction", description = "Manages internally stored transactions") // NOSONAR
+@Tag(name = "/wallet/api/transaction", description = "Manages internally stored transactions") // NOSONAR
 public class WalletTransactionREST implements ResourceContainer {
 
   private static final String          EMPTY_ADDRESS_ERROR = "Bad request sent to server with empty address {}";
@@ -63,13 +68,16 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Save transaction details in internal datasource", httpMethod = "POST", response = Response.class, consumes = "application/json", produces = "application/json", notes = "returns saved transaction detail")
+  @Operation(
+          summary = "Save transaction details in internal datasource",
+          method = "POST",
+          description = "Save transaction details in internal datasource")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response saveTransactionDetails(@ApiParam(value = "transaction detail object", required = true) TransactionDetail transactionDetail) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response saveTransactionDetails(@RequestBody(description = "transaction detail object", required = true) TransactionDetail transactionDetail) {
     if (transactionDetail == null || StringUtils.isBlank(transactionDetail.getFrom())) {
       LOG.warn("Bad request sent to server with empty transaction details: {}",
                transactionDetail == null ? "" : transactionDetail.toString());
@@ -103,13 +111,16 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getSavedTransactionByHash")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get saved transaction in internal database by hash", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction detail")
+  @Operation(
+          summary = "Get saved transaction in internal database by hash",
+          method = "GET",
+          description = "Get saved transaction in internal database by hash and returns transaction detail")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getSavedTransactionByHash(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getSavedTransactionByHash(@Parameter(description = "transaction hash", required = true) @QueryParam("hash") String hash) {
     if (StringUtils.isBlank(hash)) {
       LOG.warn("Empty transaction hash", hash);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -127,13 +138,16 @@ public class WalletTransactionREST implements ResourceContainer {
   @GET
   @Path("getNonce")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get nonce to include in next transaction to send for a wallet", httpMethod = "GET", response = Response.class, notes = "returns transaction nonce")
+  @Operation(
+          summary = "Get nonce to include in next transaction to send for a wallet",
+          method = "GET",
+          description = "Get nonce to include in next transaction to send for a wallet")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getNonce(@Parameter(description = "Transaction sender address", required = true) @QueryParam("from") String fromAddress) {
     if (StringUtils.isBlank(fromAddress)) {
       LOG.warn("Empty transaction sender", fromAddress);
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -156,16 +170,19 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactionsAmounts")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get token amounts sent per each period of time by a wallet identified by its address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns transaction statistics object")
+  @Operation(
+          summary = "Get token amounts sent per each period of time by a wallet identified by its address",
+          method = "GET",
+          description = "returns transaction statistics object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getTransactionsAmounts(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
-                                         @ApiParam(value = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
-                                         @ApiParam(value = "Selected date", required = false) @QueryParam("date") String selectedDate,
-                                         @ApiParam(value = "user locale language", required = false) @QueryParam("lang") String lang) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getTransactionsAmounts(@Parameter(description = "wallet address", required = true) @QueryParam("address") String address,
+                                         @Parameter(description = "periodicity : month or year", required = true) @QueryParam("periodicity") String periodicity,
+                                         @Parameter(description = "Selected date") @QueryParam("date") String selectedDate,
+                                         @Parameter(description = "user locale language") @QueryParam("lang") String lang) {
     if (StringUtils.isBlank(periodicity)) {
       LOG.warn("Bad request sent to server with empty periodicity parameter");
       return Response.status(HTTPStatus.BAD_REQUEST).build();
@@ -191,19 +208,22 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getTransactions")
   @RolesAllowed("users")
-  @ApiOperation(value = "Get list of transactions of an address", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns list of transaction detail object")
+  @Operation(
+          summary = "Get list of transactions of an address",
+          method = "GET",
+          description = "returns list of transaction detail object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getTransactions(@ApiParam(value = "wallet address", required = true) @QueryParam("address") String address,
-                                  @ApiParam(value = "token contract address to filter with", required = false) @QueryParam("contractAddress") String contractAddress,
-                                  @ApiParam(value = "token contract method to filter with", required = false) @QueryParam("contractMethodName") String contractMethodName,
-                                  @ApiParam(value = "transaction hash to include in response", required = false) @QueryParam("hash") String hash,
-                                  @ApiParam(value = "limit transactions to retrieve", required = false) @QueryParam("limit") int limit,
-                                  @ApiParam(value = "whether to include only pending or not", required = false) @QueryParam("pending") boolean onlyPending,
-                                  @ApiParam(value = "whether to include administration transactions or not", required = false) @QueryParam("administration") boolean administration) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getTransactions(@Parameter(description = "wallet address", required = true) @QueryParam("address") String address,
+                                  @Parameter(description = "token contract address to filter with") @QueryParam("contractAddress") String contractAddress,
+                                  @Parameter(description = "token contract method to filter with") @QueryParam("contractMethodName") String contractMethodName,
+                                  @Parameter(description = "transaction hash to include in response") @QueryParam("hash") String hash,
+                                  @Parameter(description = "limit transactions to retrieve") @QueryParam("limit") int limit,
+                                  @Parameter(description = "whether to include only pending or not") @QueryParam("pending") boolean onlyPending,
+                                  @Parameter(description = "whether to include administration transactions or not") @QueryParam("administration") boolean administration) {
     String currentUserId = getCurrentUserId();
     if(StringUtils.isBlank(address)) {
       LOG.warn("Bad request sent to server with empty wallet address");
@@ -232,12 +252,15 @@ public class WalletTransactionREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("refreshTransactionFromBlockchain")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "refresh transaction detail from blockchain", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "return transaction detail refreshed from blockchain")
+  @Operation(
+          summary = "refresh transaction detail from blockchain",
+          method = "GET",
+          description = "return transaction detail refreshed from blockchain")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response refreshTransactionFromBlockchain(@ApiParam(value = "transaction hash", required = true) @QueryParam("hash") String hash) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "200", description = "Invalid query input"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response refreshTransactionFromBlockchain(@Parameter(description = "transaction hash", required = true) @QueryParam("hash") String hash) {
     if (StringUtils.isBlank(hash)) {
       LOG.warn("Bad request sent to server with empty transaction hash");
       return Response.status(HTTPStatus.BAD_REQUEST).build();
