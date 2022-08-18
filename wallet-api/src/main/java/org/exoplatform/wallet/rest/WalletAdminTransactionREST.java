@@ -17,12 +17,16 @@
 package org.exoplatform.wallet.rest;
 
 import static org.exoplatform.wallet.utils.WalletUtils.getCurrentUserId;
-import static org.exoplatform.wallet.utils.WalletUtils.getWalletService;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.common.http.HTTPStatus;
@@ -34,11 +38,10 @@ import org.exoplatform.wallet.model.settings.InitialFundsSettings;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
 
-import io.swagger.annotations.*;
 
 @Path("/wallet/api/admin/transaction")
 @RolesAllowed("rewarding")
-@Api(value = "/wallet/api/admin/transaction", description = "Manages admin wallet transactions to send on blockchain") // NOSONAR
+@Tag(name = "/wallet/api/admin/transaction", description = "Manages admin wallet transactions to send on blockchain")
 public class WalletAdminTransactionREST implements ResourceContainer {
 
   private static final String     BAD_REQUEST_SENT_TO_SERVER_BY = "Bad request sent to server by '";
@@ -50,17 +53,20 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @POST
   @Path("intiialize")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
+  @Operation(
+          summary = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address",
+          method = "POST",
+          description = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address and returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response initializeWallet(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
-                                  @ApiParam(value = "ether amount to send to wallet", required = false) @FormParam("etherAmount") double etherAmount,
-                                  @ApiParam(value = "token amount to send to wallet", required = false) @FormParam("tokenAmount") double tokenAmount,
-                                  @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
-                                  @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response initializeWallet(@Parameter(description = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                                  @Parameter(description = "ether amount to send to wallet") @FormParam("etherAmount") double etherAmount,
+                                  @Parameter(description = "token amount to send to wallet") @FormParam("tokenAmount") double tokenAmount,
+                                  @Parameter(description = "transaction label") @FormParam("transactionLabel") String transactionLabel,
+                                  @Parameter(description = "transaction message to send to receiver with transaction") @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
@@ -93,16 +99,19 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @POST
   @Path("sendEther")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Send ether using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
+  @Operation(
+          summary = "Send ether using blockchain transaction from Admin wallet",
+          method = "POST",
+          description = "Send ether using blockchain transaction from Admin wallet and returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response sendEther(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
-                            @ApiParam(value = "ether amount to send", required = true) @FormParam("etherAmount") double etherAmount,
-                            @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
-                            @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response sendEther(@Parameter(description = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                            @Parameter(description = "ether amount to send", required = true) @FormParam("etherAmount") double etherAmount,
+                            @Parameter(description = "transaction label") @FormParam("transactionLabel") String transactionLabel,
+                            @Parameter(description = "transaction message to send to receiver with transaction") @FormParam("transactionMessage") String transactionMessage) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
@@ -130,16 +139,19 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   @POST
   @Path("sendToken")
   @RolesAllowed("rewarding")
-  @ApiOperation(value = "Send tokens using blockchain transaction from Admin wallet", httpMethod = "POST", response = Response.class, notes = "returns transaction hash")
+  @Operation(
+          summary = "Send tokens using blockchain transaction from Admin wallet",
+          method = "POST",
+          description = "Send tokens using blockchain transaction from Admin wallet and returns transaction hash")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response sendToken(@ApiParam(value = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
-                            @ApiParam(value = "transaction label", required = false) @FormParam("transactionLabel") String transactionLabel,
-                            @ApiParam(value = "transaction message to send to receiver with transaction", required = false) @FormParam("transactionMessage") String transactionMessage,
-                            @ApiParam(value = "value of token to send to receiver", required = false) @FormParam("tokenAmount") double tokenAmount) {
+      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "400", description = "Invalid query input"),
+      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response sendToken(@Parameter(description = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
+                            @Parameter(description = "transaction label") @FormParam("transactionLabel") String transactionLabel,
+                            @Parameter(description = "transaction message to send to receiver with transaction") @FormParam("transactionMessage") String transactionMessage,
+                            @Parameter(description = "value of token to send to receiver") @FormParam("tokenAmount") double tokenAmount) {
     String currentUserId = getCurrentUserId();
     if (StringUtils.isBlank(receiver)) {
       LOG.warn(BAD_REQUEST_SENT_TO_SERVER_BY + currentUserId + "' with empty address");
