@@ -16,17 +16,31 @@
  */
 package org.exoplatform.wallet.utils;
 
-import static org.exoplatform.wallet.statistic.StatisticUtils.*;
-import static org.exoplatform.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static org.exoplatform.wallet.statistic.StatisticUtils.LOCAL_SERVICE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS_CODE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.transformCapitalWithUnderscore;
 
 import java.io.ByteArrayInputStream;
-import java.math.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.security.SecureRandom;
 
 import javax.servlet.http.HttpSession;
 
@@ -46,15 +60,24 @@ import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.organization.*;
+import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.Membership;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.UserProfile;
 import org.exoplatform.services.resources.ResourceBundleService;
-import org.exoplatform.services.security.*;
+import org.exoplatform.services.security.Authenticator;
+import org.exoplatform.services.security.ConversationState;
+import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.services.security.MembershipEntry;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import org.exoplatform.wallet.model.*;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
@@ -63,7 +86,11 @@ import org.exoplatform.wallet.service.WalletTokenAdminService;
 import org.exoplatform.wallet.statistic.StatisticUtils;
 import org.exoplatform.ws.frameworks.json.JsonGenerator;
 import org.exoplatform.ws.frameworks.json.JsonParser;
-import org.exoplatform.ws.frameworks.json.impl.*;
+import org.exoplatform.ws.frameworks.json.impl.JsonDefaultHandler;
+import org.exoplatform.ws.frameworks.json.impl.JsonException;
+import org.exoplatform.ws.frameworks.json.impl.JsonGeneratorImpl;
+import org.exoplatform.ws.frameworks.json.impl.JsonParserImpl;
+import org.exoplatform.ws.frameworks.json.impl.ObjectBuilder;
 
 /**
  * Utils class to provide common tools and constants
@@ -197,7 +224,10 @@ public class WalletUtils {
 
   public static final String                          NEW_BLOCK_MINED_EVENT                    = "exo.wallet.block.mined";
 
-  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            = "exo.wallet.transaction.mined";
+  public static final String                          TRANSACTION_MINED_EVENT                  = "exo.wallet.transaction.mined";
+
+  public static final String                          TRANSACTION_MINED_BY_HASH_EVENT          =
+                                                                                      "exo.wallet.transaction.minedByHash";
 
   public static final String                          KNOWN_TRANSACTION_REPLACED_EVENT         =
                                                                                        "exo.wallet.transaction.replaced";

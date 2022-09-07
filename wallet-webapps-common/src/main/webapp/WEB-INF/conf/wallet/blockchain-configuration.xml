@@ -41,14 +41,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <type>org.exoplatform.wallet.listener.AutoTransactionListener</type>
     </component-plugin>
     <component-plugin>
-      <name>exo.wallet.block.mined</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.blockchain.listener.BlockMinedListener</type>
-    </component-plugin>
-    <component-plugin>
       <name>exo.wallet.transaction.mined</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.minedByHash</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedByHashListener</type>
     </component-plugin>
     <component-plugin>
       <name>exo.wallet.transaction.modified</name>

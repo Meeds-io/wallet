@@ -198,4 +198,11 @@ public interface WalletTransactionService {
    */
   public long countTransactionsByNonce(TransactionDetail transactionDetail);
 
+  /**
+   * Broadcast event when a transaction gets mined
+   * 
+   * @param transactionDetail mined {@link TransactionDetail}
+   */
+  void broadcastTransactionMinedEvent(TransactionDetail transactionDetail);
+
 }

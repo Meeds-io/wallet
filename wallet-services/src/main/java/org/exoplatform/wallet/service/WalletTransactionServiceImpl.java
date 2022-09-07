@@ -333,6 +333,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     transactionDetail.setIssuer(issuerWallet);
     transactionDetail.setNetworkId(getNetworkId());
     transactionStorage.saveTransactionDetail(transactionDetail);
+    broadcastTransactionSentEvent(transactionDetail);
   }
 
   @Override
@@ -366,6 +367,16 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public boolean isLogAllTransaction() {
     return logAllTransaction;
+  }
+
+  @Override
+  public void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
+    try {
+      Map<String, Object> transaction = transactionToMap(transactionDetail);
+      getListenerService().broadcast(TRANSACTION_MINED_EVENT, null, transaction);
+    } catch (Exception e) {
+      LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
+    }
   }
 
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
@@ -484,16 +495,17 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
   }
 
-  private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
+  private void broadcastTransactionSentEvent(TransactionDetail transactionDetail) {
     try {
-      Map<String, Object> transaction = transactionToMap(transactionDetail);
-      getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
+      if (transactionDetail.isPending() && StringUtils.isBlank(transactionDetail.getRawTransaction())) {
+        // Broadcast event that transaction was sent to blockchain only when
+        // sent via external tools such as Metamask
+        getListenerService().broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
+      }
     } catch (Exception e) {
-      LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
+      LOG.warn("Error while broadcasting transaction sent event: {}", transactionDetail, e);
     }
   }
-
-
 
   private SpaceService getSpaceService() {
     if (spaceService == null) {

@@ -172,6 +172,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       try {
         Set<String> walletModifications = walletsModifications == null ? null
                                                                        : walletsModifications.get(wallet.getAddress());
+        Wallet originalWallet = wallet.clone();
         accountStorage.retrieveWalletBlockchainState(wallet, contractDetail.getAddress());
         getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
                                                                        contractDetail,
@@ -187,7 +188,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
           setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
 
-        getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+        if (!originalWallet.equals(wallet)) {
+          getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+        }
       } catch (Exception e) {
         LOG.error("Error refreshing wallet state on blockchain", e);
       }

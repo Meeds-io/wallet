@@ -349,7 +349,7 @@ export default {
     },
     walletUpdated(event) {
       if (event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
-        this.addressRegistry.refreshWallet(this.wallet,true);
+        this.addressRegistry.refreshWallet(this.wallet);
       }
     },
     reloadContract() {
@@ -415,7 +415,7 @@ export default {
       }
     },
     refreshWallet() {
-      return this.addressRegistry.refreshWallet(this.wallet, true);
+      return this.addressRegistry.refreshWallet(this.wallet);
     }
   },
 };
