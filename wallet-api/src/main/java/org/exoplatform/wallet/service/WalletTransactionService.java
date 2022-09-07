@@ -19,6 +19,7 @@ package org.exoplatform.wallet.service;
 import java.util.List;
 import java.util.Locale;
 
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 
@@ -29,9 +30,16 @@ public interface WalletTransactionService {
 
   /**
    * @return {@link List} of pending {@link TransactionDetail} marked as pending
-   *         on blockchain
+   *         in database
    */
   public List<TransactionDetail> getPendingTransactions();
+
+  /**
+   * @param address {@link Wallet} address
+   * @return {@link List} of pending {@link TransactionDetail} of type ether
+   *         sending marked as pending in database
+   */
+  public List<TransactionDetail> getPendingEtherTransactions(String address);
 
   /**
    * @return pending transactions count
@@ -54,7 +62,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user isn't allowed to access
    *           wallet transactions
    */
-  List<TransactionDetail> getTransactions(String address,
+  List<TransactionDetail> getTransactions(String address, // NOSONAR
                                           String contractAddress,
                                           String contractMethodName,
                                           String hash,
@@ -74,10 +82,7 @@ public interface WalletTransactionService {
    * @return {@link TransactionStatistics} with sent and received amounts and
    *         labels
    */
-  TransactionStatistics getTransactionStatistics(String address,
-                                                 String periodicity,
-                                                 String selectedDate,
-                                                 Locale locale);
+  TransactionStatistics getTransactionStatistics(String address, String periodicity, String selectedDate, Locale locale);
 
   /**
    * @param hash transaction hash
@@ -145,8 +150,8 @@ public interface WalletTransactionService {
   long getPendingTransactionMaxDays();
 
   /**
-   * @return {@link List} of {@link TransactionDetail} having
-   *         RawTransaction to send on blockchain
+   * @return {@link List} of {@link TransactionDetail} having RawTransaction to
+   *         send on blockchain
    */
   List<TransactionDetail> getTransactionsToSend();
 
@@ -172,12 +177,6 @@ public interface WalletTransactionService {
   long getMaxAttemptsToSend();
 
   /**
-   * @return true if all transactions including uknown ones detected on contract
-   *         has to be logged, else false
-   */
-  boolean isLogAllTransaction();
-
-  /**
    * @return Max parallel transactions
    */
   long getMaxParallelPendingTransactions();
@@ -192,9 +191,11 @@ public interface WalletTransactionService {
   public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
 
   /**
-   * Count the number of transactions sent from the same Wallet and having same Nonce
+   * Count the number of transactions sent from the same Wallet and having same
+   * Nonce
    *
    * @param transactionDetail of type {@link TransactionDetail}
+   * @return {@link Long} for transactions having same designated nonce
    */
   public long countTransactionsByNonce(TransactionDetail transactionDetail);
 

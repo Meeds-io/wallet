@@ -19,27 +19,36 @@ package org.exoplatform.wallet.blockchain.listener;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
+import org.exoplatform.wallet.model.ContractTransactionEvent;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletTransactionService;
 
 @Asynchronous
-public class TransactionMinedAndUpdatedListener extends Listener<Object, TransactionDetail> {
+public class ContractTransactionMinedListener extends Listener<String, ContractTransactionEvent> {
 
   private WalletTransactionService     walletTransactionService;
 
   private BlockchainTransactionService blockchainTransactionService;
 
-  public TransactionMinedAndUpdatedListener(WalletTransactionService walletTransactionService,
-                                            BlockchainTransactionService blockchainTransactionService) {
+  public ContractTransactionMinedListener(WalletTransactionService walletTransactionService,
+                                          BlockchainTransactionService blockchainTransactionService) {
     this.walletTransactionService = walletTransactionService;
     this.blockchainTransactionService = blockchainTransactionService;
   }
 
   @Override
-  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
-    if (this.walletTransactionService.countPendingTransactions() == 0) {
-      this.blockchainTransactionService.stopWatchingBlockchain();
+  public void onEvent(Event<String, ContractTransactionEvent> event) throws Exception {
+    ContractTransactionEvent contractEvent = event.getData();
+    String transactionHash = contractEvent.getTransactionHash();
+    TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
+    if (transactionDetail != null) {
+      if (transactionDetail.isPending() || !transactionDetail.isSucceeded()) {
+        blockchainTransactionService.refreshTransactionFromBlockchain(transactionHash);
+      }
+    } else if (blockchainTransactionService.hasManagedWalletInTransaction(contractEvent)) {
+      blockchainTransactionService.refreshTransactionFromBlockchain(transactionHash);
     }
   }
+
 }

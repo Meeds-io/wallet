@@ -16,26 +16,41 @@
  */
 package org.exoplatform.wallet.blockchain.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.EMPTY_HASH;
+import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
+import static org.exoplatform.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_CONTEXT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static org.exoplatform.wallet.utils.WalletUtils.getContractDetail;
+import static org.exoplatform.wallet.utils.WalletUtils.getNetworkId;
+import static org.exoplatform.wallet.utils.WalletUtils.hasKnownWalletInTransaction;
+import static org.exoplatform.wallet.utils.WalletUtils.isWalletEmpty;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response.Error;
-import org.web3j.protocol.core.methods.response.*;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
-import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
@@ -44,24 +59,25 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.ContractTransactionEvent;
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
-import org.exoplatform.wallet.service.*;
-
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 
 public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
-  private static final Log                 LOG                         =
+  private static final Log                 LOG                     =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
 
-  private static final String              TRANSFER_SIG                = EventEncoder.encode(MeedsToken.TRANSFER_EVENT);
+  private static final String              TRANSFER_SIG            = EventEncoder.encode(MeedsToken.TRANSFER_EVENT);
 
-  private static final String              APPROVAL_SIG                = EventEncoder.encode(MeedsToken.APPROVAL_EVENT);
+  private static final String              APPROVAL_SIG            = EventEncoder.encode(MeedsToken.APPROVAL_EVENT);
 
-  private static final String              TRANSFER_OWNERSHIP_SIG      =
-                                                                  EventEncoder.encode(MeedsToken.OWNERSHIPTRANSFERRED_EVENT);
+  private static final String              TRANSFER_OWNERSHIP_SIG  = EventEncoder.encode(MeedsToken.OWNERSHIPTRANSFERRED_EVENT);
 
-  private static final Map<String, String> CONTRACT_METHODS_BY_SIG     = new HashMap<>();
+  private static final Map<String, String> CONTRACT_METHODS_BY_SIG = new HashMap<>();
 
   static {
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, MeedsToken.FUNC_TRANSFER);
@@ -84,22 +100,27 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   public EthereumBlockchainTransactionService(SettingService settingService,
                                               EthereumClientConnector ethereumClientConnector,
                                               WalletTransactionService transactionService,
-                                              WalletAccountService accountService) {
+                                              WalletAccountService accountService,
+                                              ListenerService listenerService) {
     this.settingService = settingService;
     this.ethereumClientConnector = ethereumClientConnector;
     this.transactionService = transactionService;
     this.accountService = accountService;
+    this.listenerService = listenerService;
   }
 
   @Override
   public void start() {
-    try {
-      networkId = getNetworkId();
-      if (ethereumClientConnector.isPermanentlyScanBlockchain()) {
-        startWatchingBlockchain(getLastWatchedBlockNumber());
-      }
-    } catch (Exception e) {
-      LOG.error("Error while getting latest block number from blockchain with network id: {}", networkId, e);
+    networkId = getNetworkId();
+    long lastWatchedBlockNumber = getLastWatchedBlockNumber();
+    if (lastWatchedBlockNumber <= 0) {
+      lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+      saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+    }
+    ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
+
+    if (ethereumClientConnector.isPermanentlyScanBlockchain() || transactionService.countPendingTransactions() > 0) {
+      startWatchingBlockchain();
     }
   }
 
@@ -109,74 +130,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void checkPendingTransactions() {
-    List<TransactionDetail> pendingTransactions = transactionService.getPendingTransactions();
-
-    if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
-      LOG.debug("Checking on blockchain the status of {} transactions marked as pending in database",
-                pendingTransactions.size());
-
-      startWatchingBlockchain(getLastWatchedBlockNumber());
-
-      for (TransactionDetail pendingTransactionDetail : pendingTransactions) {
-        try { // NOSONAR
-          checkTransactionStatusOnBlockchain(pendingTransactionDetail.getHash(), true);
-        } catch (Exception e) {
-          LOG.warn("Error treating pending transaction: {}", pendingTransactionDetail, e);
-        }
-      }
-    } else if (!ethereumClientConnector.isPermanentlyScanBlockchain()) {
-      stopWatchingBlockchain();
-    }
-  }
-
-  @Override
-  public void scanNewerBlocks() throws IOException {
-    long lastEthereumBlockNumber = ethereumClientConnector.getLastestBlockNumber();
-    long lastWatchedBlockNumber = getLastWatchedBlockNumber();
-    if (lastEthereumBlockNumber <= lastWatchedBlockNumber) {
-      LOG.debug("No new blocks to verify. last watched = {}. last blockchain block = {}",
-                lastWatchedBlockNumber,
-                lastEthereumBlockNumber);
-      return;
-    }
-
-    String contractAddress = getContractAddress();
-    Set<String> transactionHashes = ethereumClientConnector.getContractTransactions(contractAddress,
-                                                                                    lastWatchedBlockNumber,
-                                                                                    lastEthereumBlockNumber);
-
-    LOG.debug("{} transactions has been found on contract {} between block {} and {}",
-              transactionHashes.size(),
-              contractAddress,
-              lastWatchedBlockNumber,
-              lastEthereumBlockNumber);
-
-    boolean processed = true;
-    for (String transactionHash : transactionHashes) {
-      TransactionDetail transaction = transactionService.getTransactionByHash(transactionHash);
-      if (transaction != null && transaction.isSucceeded()) {
-        continue;
-      }
-
-      try {
-        checkTransactionStatusOnBlockchain(transactionHash, false);
-      } catch (Exception e) {
-        LOG.warn("Error processing transaction with hash: {}", transactionHash, e);
-        processed = false;
-      }
-    }
-    if (processed) {
-      // Save last verified block for contracts transactions
-      saveLastWatchedBlockNumber(lastEthereumBlockNumber);
-    }
-  }
-
-  @Override
-  public void sendRawTransactions() {
+  public void sendPendingTransactionsToBlockchain() {
     List<TransactionDetail> transactions = transactionService.getTransactionsToSend();
     Set<String> walletAddressesWithTransactionsSent = new HashSet<>();
-    for (TransactionDetail transactionDetail : transactions) {
+    for (TransactionDetail transactionDetail : transactions) { // NOSONAR
       String from = transactionDetail.getFrom();
       long sendingAttemptCount = transactionDetail.getSendingAttemptCount();
 
@@ -224,7 +181,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
         transactionService.saveTransactionDetail(transactionDetail, false);
 
-        getListenerService().broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
+        listenerService.broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
       } catch (Throwable e) {
         if (isIOException(e)) {
           LOG.error("IO Error while sending transaction {} to blockchain", transactionDetail, e);
@@ -239,119 +196,11 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void checkPendingTransactionValidity(TransactionDetail transactionDetail) {
-    if (transactionDetail == null || !transactionDetail.isPending()) {
-      return;
-    }
-    long pendingTransactionMaxDays = transactionService.getPendingTransactionMaxDays();
-
-    long maxAttemptsToSend = transactionService.getMaxAttemptsToSend();
-
-    String transactionHash = transactionDetail.getHash();
-    long sentTimestamp = transactionDetail.getRawTransaction() == null || transactionDetail.getSendingAttemptCount() == 0 ? transactionDetail.getTimestamp()
-                                                                       : transactionDetail.getSentTimestamp();
-    Duration duration = Duration.ofMillis(System.currentTimeMillis() - sentTimestamp);
-
-    boolean transactionSendingTimedOut = pendingTransactionMaxDays > 0 && duration.toDays() >= pendingTransactionMaxDays;
-    if (transactionSendingTimedOut) {
-      // Verify if transaction reached blockchain successfully, if reached, we
-      // will have to wait its mining status
-      Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
-      if (transaction == null) {
-        // Transaction Not found on blockchain for more than max waiting
-        // days, marking transaction as failed in internal database if it's
-        // not sent using a raw transaction stored in internal database or
-        // if the sending attempts has reached the maximum allowed attempts
-        if (transactionDetail.getRawTransaction() == null) {
-          transactionDetail.setPending(false);
-          // Mark transaction as failed, ContractTransactionVerifierJob will
-          // remake it as success if it detects it when it would be mined
-          transactionDetail.setSucceeded(false);
-          // Cancel usage of transaction nonce to be able to reuse it if
-          // transaction is not arrived really on blockchain (tx can be
-          // purged
-          // from MemPool of miners when there are too many pending
-          // transaction: could happen on mainnet only)
-          transactionDetail.setNonce(0);
-          LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
-                   transactionHash,
-                   pendingTransactionMaxDays);
-          transactionService.saveTransactionDetail(transactionDetail, true);
-          return;
-        } else if (transactionDetail.getSendingAttemptCount() <= maxAttemptsToSend) {
-          // Raw transaction was sent to blockchain, but it seems that it
-          // wasn't sent successfully, thus it will be sent again
-          LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, it will be resent again",
-                   transactionHash,
-                   duration.toDays());
-
-          transactionDetail.setSentTimestamp(0);
-          transactionService.saveTransactionDetail(transactionDetail, false);
-          return;
-        } else if(transactionDetail.getSendingAttemptCount() > maxAttemptsToSend) {
-          // We need to cancel transaction in database, to make it possible to resend it
-          transactionDetail.setPending(false);
-          transactionDetail.setSucceeded(false);
-          transactionService.saveTransactionDetail(transactionDetail, false);
-        }
-      } else {
-        LOG.info("Transaction '{}' was FOUND on blockchain for more than '{}' days, so avoid marking it as failed",
-                 transactionHash,
-                 pendingTransactionMaxDays);
-        checkTransactionStatusOnBlockchain(transactionHash, transaction, true);
-        return;
-      }
-    }
-
-    if (transactionDetail.isPending() && transactionDetail.getSentTimestamp() == 0
-        && transactionDetail.getSendingAttemptCount() > maxAttemptsToSend) {
-      transactionDetail.setPending(false);
-      transactionDetail.setSucceeded(false);
-      // Cancel usage of transaction nonce to be able to reuse it if
-      // transaction is not arrived really on blockchain (tx can be
-      // purged from MemPool of miners when there are too many pending
-      // transaction: could happen on mainnet only)
-      transactionDetail.setNonce(0);
-      LOG.info("Transaction '{}' was NOT FOUND on blockchain after attempting sending it for '{}' times, so mark it as failed",
-               transactionHash,
-               pendingTransactionMaxDays);
-      transactionService.saveTransactionDetail(transactionDetail, true);
-      return;
-    }
-
-    if (transactionDetail.isPending()) {
-      long nonce = transactionDetail.getNonce();
-      BigInteger lastMinedTransactionNonce = null;
-      try {
-        lastMinedTransactionNonce = ethereumClientConnector.getNonce(transactionDetail.getFrom(),
-                                                                     DefaultBlockParameterName.LATEST);
-      } catch (IOException e) {
-        LOG.warn("Error retrieving last nonce of {}", transactionDetail.getFrom(), e);
-        return;
-      }
-      if (lastMinedTransactionNonce != null && nonce < lastMinedTransactionNonce.longValue()) {
-        transactionDetail.setPending(false);
-        LOG.info("Transaction '{}' was sent with same nonce as previous mined transaction, so mark it as not pending anymore",
-                 transactionHash);
-        transactionService.saveTransactionDetail(transactionDetail, true);
-      }
-    }
-  }
-
-  @Override
-  public void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase) {
+  public TransactionDetail refreshTransactionFromBlockchain(String transactionHash) {
+    TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
-    checkTransactionStatusOnBlockchain(transactionHash, transaction, pendingTransactionFromDatabase);
-  }
-
-  @Override
-  public TransactionDetail refreshTransactionFromBlockchain(String hash) {
-    TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
-    if (transactionDetail == null) {
-      return null;
-    }
-    checkTransactionStatusOnBlockchain(hash, true);
-    return transactionService.getTransactionByHash(hash);
+    retrieveTransactionDetailsFromBlockchain(transactionDetail, transaction);
+    return transactionService.getTransactionByHash(transactionHash);
   }
 
   @Override
@@ -359,50 +208,74 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     return ethereumClientConnector.getGasPrice().longValue();
   }
 
-  private void stopWatchingBlockchain() {
-    ethereumClientConnector.stopListeningToBlockchain();
-  }
-
-  private void startWatchingBlockchain(long lastWatchedBlockNumber) {
-    try {
-      if (!ethereumClientConnector.isListeningToBlockchain()) {
-        if (lastWatchedBlockNumber <= 0) {
-          lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
-          saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+  @Override
+  public boolean hasManagedWalletInTransaction(ContractTransactionEvent transactionEvent) {
+    if (CollectionUtils.isNotEmpty(transactionEvent.getTopics())) {
+      List<String> topics = transactionEvent.getTopics();
+      String methodName = CONTRACT_METHODS_BY_SIG.get(topics.get(0));
+      if (StringUtils.equals(methodName, MeedsToken.FUNC_TRANSFER)) {
+        org.web3j.protocol.core.methods.response.Log log = new org.web3j.protocol.core.methods.response.Log();
+        log.setAddress(transactionEvent.getContractAddress());
+        log.setData(transactionEvent.getData());
+        log.setTopics(topics);
+        EventValues parameters = Contract.staticExtractEventParameters(MeedsToken.TRANSFER_EVENT, log);
+        if (parameters == null) {
+          return false;
         }
-        ethereumClientConnector.renewBlockSubscription(lastWatchedBlockNumber + 1);
+        String from = parameters.getIndexedValues().get(0).getValue().toString();
+        String to = parameters.getIndexedValues().get(1).getValue().toString();
+        if (accountService.getWalletByAddress(from) != null) {
+          return true;
+        }
+        if (accountService.getWalletByAddress(to) != null) {
+          return true;
+        }
       }
-    } catch (Exception e) {
-      throw new IllegalStateException("Error watching blockchain starting from block " + lastWatchedBlockNumber, e);
     }
+    return false;
   }
 
-  private void checkTransactionStatusOnBlockchain(String transactionHash,
-                                                  Transaction transaction,
-                                                  boolean pendingTransactionFromDatabase) {
-    if (transaction == null) {
-      if (pendingTransactionFromDatabase) {
-        TransactionDetail transactionDetail = transactionService.getPendingTransactionByHash(transactionHash);
-        if (transactionDetail == null) {
-          throw new IllegalStateException("Transaction with hash " + transactionHash
-              + " wasn't found in internal database while it should have been retrieved from it.");
-        }
-        LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain", transactionHash);
-        checkPendingTransactionValidity(transactionDetail);
+  @Override
+  public long getLastWatchedBlockNumber() {
+    SettingValue<?> lastBlockNumberValue =
+                                         settingService.get(WALLET_CONTEXT, WALLET_SCOPE, LAST_BLOCK_NUMBER_KEY_NAME + networkId);
+    if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
+      return Long.parseLong(lastBlockNumberValue.getValue().toString());
+    }
+    return 0;
+  }
+
+  @Override
+  public void saveLastWatchedBlockNumber(long lastWatchedBlockNumber) {
+    LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
+    settingService.set(WALLET_CONTEXT,
+                       WALLET_SCOPE,
+                       LAST_BLOCK_NUMBER_KEY_NAME + networkId,
+                       SettingValue.create(lastWatchedBlockNumber));
+  }
+
+  @Override
+  public void startWatchingBlockchain() {
+    ethereumClientConnector.renewTransactionListeningSubscription(getLastWatchedBlockNumber() + 1);
+  }
+
+  @Override
+  public void stopWatchingBlockchain() {
+    if (!ethereumClientConnector.isPermanentlyScanBlockchain()) {
+      ethereumClientConnector.stopListeningToBlockchain();
+    }
+    saveLastWatchedBlockNumber(ethereumClientConnector.getLastWatchedBlockNumber());
+  }
+
+  private void retrieveTransactionDetailsFromBlockchain(TransactionDetail transactionDetail, // NOSONAR
+                                                        Transaction transaction) {
+    if (transaction == null || isTransactionPendingOnBlockchain(transaction)) {
+      if (transactionDetail == null) {
+        throw new IllegalStateException("Nothing to verify for a null transaction from DB and Blockchain.");
       } else {
-        throw new IllegalStateException("Transaction with hash " + transactionHash
-            + " is not marked as pending but the transaction wasn't found on blockchain");
-      }
-      return;
-    } else {
-      String blockHash = transaction.getBlockHash();
-      if (StringUtils.isBlank(blockHash) || StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
-          || transaction.getBlockNumber() == null) {
-        if (!pendingTransactionFromDatabase) {
-          throw new IllegalStateException("Transaction " + transactionHash
-              + " is marked as pending in blockchain while it's not marked as pending in database");
-        }
-        LOG.debug("Transaction {} is marked as pending in database and is always pending on blockchain", transactionHash);
+        LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain",
+                  transactionDetail.getHash());
+        checkPendingTransactionValidity(transactionDetail);
         return;
       }
     }
@@ -412,13 +285,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       throw new IllegalStateException("Principal contract detail wasn't found in database");
     }
 
-    TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
+    String transactionHash = transaction.getHash();
     if (transactionDetail == null) {
-      if (pendingTransactionFromDatabase) {
-        throw new IllegalStateException("Transaction with hash " + transactionHash
-            + " wasn't found in internal database while it should have been retrieved from it.");
-      }
-
       String contractAddress = transaction.getTo();
       if (!StringUtils.equalsIgnoreCase(contractDetail.getAddress(), contractAddress)) {
         LOG.debug("Transaction '{}' is not a contract transaction, thus it will not be added into database", transactionHash);
@@ -428,7 +296,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionDetail = new TransactionDetail();
       transactionDetail.setNetworkId(networkId);
       transactionDetail.setHash(transactionHash);
-      transactionDetail.setPending(true);
     }
 
     TransactionReceipt transactionReceipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
@@ -441,39 +308,119 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     boolean broadcastMinedTransaction = transactionDetail.isPending()
         || (transactionDetail.isSucceeded() != transactionReceipt.isStatusOK());
 
-    if (pendingTransactionFromDatabase && !transactionDetail.isPending()) {
+    computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);
+
+    // Compute wallets
+    if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
+      Wallet wallet = accountService.getWalletByAddress(transactionDetail.getFrom());
+      transactionDetail.setFromWallet(wallet);
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
+      Wallet wallet = accountService.getWalletByAddress(transactionDetail.getTo());
+      transactionDetail.setToWallet(wallet);
+    }
+    if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
+      Wallet wallet = accountService.getWalletByAddress(transactionDetail.getBy());
+      transactionDetail.setByWallet(wallet);
+    }
+
+    // Check if it has a know wallet from internal database before saving
+    if (hasKnownWalletInTransaction(transactionDetail)) {
+      transactionService.saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
+    }
+
+    if (transactionDetail.isSucceeded()) {
       long transactionsWithSameNonce = transactionService.countTransactionsByNonce(transactionDetail);
-      if(transactionsWithSameNonce > 1) {
-        // Transaction was replaced by another one which was succeeded, let's mark the latter with canceled
+      if (transactionsWithSameNonce > 1) {
+        // Transaction was replaced by another one which was succeeded, let's
+        // mark the latter with canceled
         transactionService.cancelTransactionsWithSameNonce(transactionDetail);
-      } else {
-        LOG.debug("Transaction '{}' seems to be already marked as not pending, skip processing it", transactionHash);
-        return;
+      }
+    }
+  }
+
+  private boolean isTransactionPendingOnBlockchain(Transaction transaction) {
+    String blockHash = transaction.getBlockHash();
+    return StringUtils.isBlank(blockHash) || StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
+        || transaction.getBlockNumber() == null;
+  }
+
+  private void checkPendingTransactionValidity(TransactionDetail transactionDetail) {
+    long pendingTransactionMaxDays = transactionService.getPendingTransactionMaxDays();
+    long maxAttemptsToSend = transactionService.getMaxAttemptsToSend();
+    String transactionHash = transactionDetail.getHash();
+    long sentTimestamp = transactionDetail.getRawTransaction() == null
+        || transactionDetail.getSendingAttemptCount() == 0 ? transactionDetail.getTimestamp()
+                                                           : transactionDetail.getSentTimestamp();
+    Duration duration = Duration.ofMillis(System.currentTimeMillis() - sentTimestamp);
+    boolean transactionSendingTimedOut = pendingTransactionMaxDays > 0 && duration.toDays() >= pendingTransactionMaxDays;
+    if (transactionSendingTimedOut) {
+      // Transaction Not found on blockchain for more than max waiting
+      // days, marking transaction as failed in internal database if it's
+      // not sent using a raw transaction stored in internal database or
+      // if the sending attempts has reached the maximum allowed attempts
+      if (transactionDetail.getRawTransaction() == null) {
+        transactionDetail.setPending(false);
+        // Mark transaction as failed
+        transactionDetail.setSucceeded(false);
+        // Cancel usage of transaction nonce to be able to reuse it if
+        // transaction is not arrived really on blockchain (tx can be
+        // purged from MemPool of miners when there are too many pending
+        // transaction: could happen on mainnet only)
+        transactionDetail.setNonce(0);
+        LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, so mark it as failed",
+                 transactionHash,
+                 pendingTransactionMaxDays);
+        transactionService.saveTransactionDetail(transactionDetail, true);
+      } else if (transactionDetail.getSendingAttemptCount() <= maxAttemptsToSend) {
+        // Raw transaction was sent to blockchain, but it seems that it
+        // wasn't sent successfully, thus it will be sent again
+        LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, it will be resent again",
+                 transactionHash,
+                 duration.toDays());
+
+        transactionDetail.setSentTimestamp(0);
+        transactionService.saveTransactionDetail(transactionDetail, false);
+      } else if (transactionDetail.getSendingAttemptCount() > maxAttemptsToSend) {
+        // We need to cancel transaction in database, to make it possible to
+        // resend it
+        transactionDetail.setPending(false);
+        transactionDetail.setSucceeded(false);
+        transactionService.saveTransactionDetail(transactionDetail, false);
       }
     }
 
-    computeTransactionDetail(transactionDetail, contractDetail, transaction, transactionReceipt);
+    if (transactionDetail.isPending() && transactionDetail.getSentTimestamp() == 0
+        && transactionDetail.getSendingAttemptCount() > maxAttemptsToSend) {
+      LOG.info("Mark transaction '{}' as failed since it's pending and not found in Blockchain for more than '{}' days",
+               transactionHash,
+               pendingTransactionMaxDays);
+      transactionDetail.setPending(false);
+      transactionDetail.setSucceeded(false);
+      // Cancel usage of transaction nonce to be able to reuse it if
+      // transaction is not arrived really on blockchain (tx can be
+      // purged from MemPool of miners when there are too many pending
+      // transaction: could happen on mainnet only)
+      transactionDetail.setNonce(0);
+      transactionService.saveTransactionDetail(transactionDetail, true);
+      return;
+    }
 
-    if (pendingTransactionFromDatabase) {
-      // Only save modifications if it's coming from database
-      transactionService.saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
-    } else {
-      // Compute wallets
-      if (StringUtils.isNotBlank(transactionDetail.getFrom()) && isWalletEmpty(transactionDetail.getFromWallet())) {
-        transactionDetail.setFromWallet(accountService.getWalletByAddress(transactionDetail.getFrom()));
+    if (transactionDetail.isPending()) {
+      long nonce = transactionDetail.getNonce();
+      BigInteger lastMinedTransactionNonce = null;
+      try {
+        lastMinedTransactionNonce =
+                                  ethereumClientConnector.getNonce(transactionDetail.getFrom(), DefaultBlockParameterName.LATEST);
+      } catch (IOException e) {
+        LOG.warn("Error retrieving last nonce of {}", transactionDetail.getFrom(), e);
+        return;
       }
-      if (StringUtils.isNotBlank(transactionDetail.getTo()) && isWalletEmpty(transactionDetail.getToWallet())) {
-        transactionDetail.setToWallet(accountService.getWalletByAddress(transactionDetail.getTo()));
-      }
-      if (StringUtils.isNotBlank(transactionDetail.getBy()) && isWalletEmpty(transactionDetail.getByWallet())) {
-        transactionDetail.setByWallet(accountService.getWalletByAddress(transactionDetail.getBy()));
-      }
-
-      // Check if it has a know wallet from internal database before saving
-      if (hasKnownWalletInTransaction(transactionDetail)) {
-        transactionService.saveTransactionDetail(transactionDetail, broadcastMinedTransaction);
-      } else if (transactionService.isLogAllTransaction()) {
-        logStatistics(transactionDetail);
+      if (lastMinedTransactionNonce != null && nonce < lastMinedTransactionNonce.longValue()) {
+        transactionDetail.setPending(false);
+        LOG.info("Transaction '{}' was sent with same nonce as previous mined transaction, so mark it as not pending anymore",
+                 transactionHash);
+        transactionService.saveTransactionDetail(transactionDetail, true);
       }
     }
   }
@@ -510,8 +457,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       boolean hasError = exception != null
           || (transaction != null && (transactionError != null || StringUtils.isBlank(transaction.getResult())));
       if (hasError) {
-        String exceptionMessage = exception == null ? "No result returned"
-                                                    : exception.getMessage();
+        String exceptionMessage = exception == null ? "No result returned" : exception.getMessage();
         String errorMessage = transaction == null || transactionError == null ? exceptionMessage
                                                                               : getTransactionErrorMessage(transactionError);
         LOG.warn("Error when sending transaction {} - {}.", transactionDetail, errorMessage, exception);
@@ -645,37 +591,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
   }
 
-  private long getLastWatchedBlockNumber() {
-    SettingValue<?> lastBlockNumberValue = settingService.get(WALLET_CONTEXT,
-                                                              WALLET_SCOPE,
-                                                              LAST_BLOCK_NUMBER_KEY_NAME + networkId);
-    if (lastBlockNumberValue != null && lastBlockNumberValue.getValue() != null) {
-      return Long.parseLong(lastBlockNumberValue.getValue().toString());
-    }
-    return 0;
-  }
-
-  private void saveLastWatchedBlockNumber(long lastWatchedBlockNumber) {
-    LOG.debug("Save watched block number {} on network {}", lastWatchedBlockNumber, networkId);
-    settingService.set(WALLET_CONTEXT,
-                       WALLET_SCOPE,
-                       LAST_BLOCK_NUMBER_KEY_NAME + networkId,
-                       SettingValue.create(lastWatchedBlockNumber));
-  }
-
   private String getTransactionErrorMessage(Error transactionError) {
     if (transactionError == null) {
       return null;
     }
     return "Code: " + transactionError.getCode() + ", Message: " + transactionError.getMessage() + ", Data: "
         + transactionError.getData();
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
   }
 
   private boolean isIOException(Throwable exception) {

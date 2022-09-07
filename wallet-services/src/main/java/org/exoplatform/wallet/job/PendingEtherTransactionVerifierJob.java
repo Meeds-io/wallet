@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meeds project (https://meeds.io/).
- * Copyright (C) 2020 Meeds Association
+ * Copyright (C) 2022 Meeds Association
  * contact@meeds.io
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,30 +16,48 @@
  */
 package org.exoplatform.wallet.job;
 
-import org.quartz.*;
+import java.util.List;
 
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 
+/**
+ * A job that will refresh periodically ether transactions sent by admin wallet
+ * from blockchain
+ */
 @DisallowConcurrentExecution
-public class ContractTransactionVerifierJob implements Job {
+public class PendingEtherTransactionVerifierJob implements Job {
 
-  private static final Log             LOG = ExoLogger.getLogger(ContractTransactionVerifierJob.class);
+  private static final Log             LOG = ExoLogger.getLogger(PendingEtherTransactionVerifierJob.class);
 
   private ExoContainer                 container;
 
   private BlockchainTransactionService blockchainTransactionService;
 
+  private WalletTransactionService     walletTransactionService;
+
   private WalletAccountService         walletAccountService;
 
-  public ContractTransactionVerifierJob() {
+  public PendingEtherTransactionVerifierJob() {
     this.container = PortalContainer.getInstance();
+    this.blockchainTransactionService = this.container.getComponentInstanceOfType(BlockchainTransactionService.class);
+    this.walletTransactionService = this.container.getComponentInstanceOfType(WalletTransactionService.class);
+    this.walletAccountService = this.container.getComponentInstanceOfType(WalletAccountService.class);
   }
 
   @Override
@@ -48,10 +66,13 @@ public class ContractTransactionVerifierJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      // Refresh gas price only when admin wallet has been initialized
-      Wallet adminWallet = getWalletAccountService().getAdminWallet();
-      if (adminWallet != null && adminWallet.getIsInitialized() != null && adminWallet.getIsInitialized().booleanValue()) {
-        getBlockchainTransactionService().scanNewerBlocks();
+      Wallet adminWallet = walletAccountService.getAdminWallet();
+      if (adminWallet != null) {
+        List<TransactionDetail> transactionDetails =
+                                                   walletTransactionService.getPendingEtherTransactions(adminWallet.getAddress());
+        if (CollectionUtils.isNotEmpty(transactionDetails)) {
+          transactionDetails.forEach(transactionDetail -> blockchainTransactionService.refreshTransactionFromBlockchain(transactionDetail.getHash()));
+        }
       }
     } catch (Exception e) {
       LOG.error("Error while checking pending transactions", e);
@@ -59,19 +80,5 @@ public class ContractTransactionVerifierJob implements Job {
       RequestLifeCycle.end();
       ExoContainerContext.setCurrentContainer(currentContainer);
     }
-  }
-
-  private BlockchainTransactionService getBlockchainTransactionService() {
-    if (blockchainTransactionService == null) {
-      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
-    }
-    return blockchainTransactionService;
-  }
-
-  public WalletAccountService getWalletAccountService() {
-    if (walletAccountService == null) {
-      walletAccountService = CommonsUtils.getService(WalletAccountService.class);
-    }
-    return walletAccountService;
   }
 }

@@ -16,12 +16,14 @@
  */
 package org.exoplatform.wallet.test.service;
 
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
 import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.junit.Test;
@@ -176,6 +178,8 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    ListenerService listenerService = getService(ListenerService.class);
+
     TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
                                                                   WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
                                                                   CONTRACT_AMOUNT,
@@ -198,12 +202,65 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
       // Expected: "root9" shouldn't be able to save transaction of "root1"
     }
 
+    AtomicInteger triggerCount = new AtomicInteger();
+    listenerService.addListener(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, new Listener<TransactionDetail, TransactionDetail>() {
+      @Override
+      public void onEvent(Event<TransactionDetail, TransactionDetail> event) throws Exception {
+        triggerCount.incrementAndGet();
+      }
+    });
     walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    assertEquals(1, triggerCount.get());
 
     TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertNotNull(storedTransactionDetail);
     assertEquals(transactionDetail, storedTransactionDetail);
     entitiesToClean.add(storedTransactionDetail);
+
+    triggerCount.set(0);
+    transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                CONTRACT_AMOUNT,
+                                                ETHER_VALUE,
+                                                WALLET_ADDRESS_1,
+                                                WALLET_ADDRESS_2,
+                                                null,
+                                                CURRENT_USER_IDENTITY_ID,
+                                                TRANSACTION_LABEL,
+                                                TRANSACTION_MESSAGE,
+                                                false,
+                                                true,
+                                                false,
+                                                RAW_TRANSACTION,
+                                                System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertNotNull(storedTransactionDetail);
+    assertEquals(transactionDetail, storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetail);
+    assertEquals(0, triggerCount.get());
+
+    transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                CONTRACT_AMOUNT,
+                                                ETHER_VALUE,
+                                                WALLET_ADDRESS_1,
+                                                WALLET_ADDRESS_2,
+                                                null,
+                                                CURRENT_USER_IDENTITY_ID,
+                                                TRANSACTION_LABEL,
+                                                TRANSACTION_MESSAGE,
+                                                false,
+                                                false,
+                                                false,
+                                                null,
+                                                System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertNotNull(storedTransactionDetail);
+    assertEquals(transactionDetail, storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetail);
+    assertEquals(0, triggerCount.get());
   }
 
   /**

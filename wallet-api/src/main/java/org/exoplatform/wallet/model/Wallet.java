@@ -18,12 +18,16 @@ package org.exoplatform.wallet.model;
 
 import java.io.Serializable;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode.Exclude;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class Wallet implements Serializable, Cloneable {
 
   private static final long serialVersionUID     = 8011288624609310945L;
@@ -99,10 +103,24 @@ public class Wallet implements Serializable, Cloneable {
 
   @Override
   public Wallet clone() { // NOSONAR
-    try {
-      return (Wallet) super.clone();
-    } catch (CloneNotSupportedException e) {
-      return null; // NOSONAR
-    }
+    return new Wallet(id,
+                      type,
+                      technicalId,
+                      spaceId,
+                      name,
+                      address,
+                      isEnabled,
+                      provider,
+                      initializationState,
+                      isDisabledUser,
+                      isDeletedUser,
+                      avatar,
+                      passPhrase,
+                      isSpaceAdministrator,
+                      hasPrivateKey,
+                      backedUp,
+                      etherBalance,
+                      tokenBalance,
+                      isInitialized);
   }
 }

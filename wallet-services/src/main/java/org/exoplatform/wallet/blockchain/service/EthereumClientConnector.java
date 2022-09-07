@@ -16,23 +16,51 @@
  */
 package org.exoplatform.wallet.blockchain.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.GWEI_TO_WEI_DECIMALS;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_FILTER_CONTRACT_TRANSACTIONS;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_LAST_BLOCK_NUMBER;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_COUNT;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_RECEIPT;
+import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_SEND_TRANSACTION;
+import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
+import static org.exoplatform.wallet.utils.WalletUtils.getContractAddress;
+import static org.exoplatform.wallet.utils.WalletUtils.getNetworkId;
+import static org.exoplatform.wallet.utils.WalletUtils.getWebsocketURL;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
+import org.web3j.abi.EventEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.web3j.protocol.core.methods.response.*;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.EthLog.LogResult;
-import org.web3j.protocol.websocket.*;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.EthTransaction;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.websocket.WebSocketClient;
+import org.web3j.protocol.websocket.WebSocketListener;
+import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.utils.Async;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -42,6 +70,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.MeedsToken;
+import org.exoplatform.wallet.model.ContractTransactionEvent;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
@@ -72,6 +101,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private ScheduledExecutorService connectionVerifierExecutor = null;
 
+  private ExecutorService          flowableExecutor           = null;
+
   private boolean                  permanentlyScanBlockchain  = false;
 
   private boolean                  listeningToBlockchain      = false;
@@ -90,15 +121,16 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private Disposable               blockSubscribtion;
 
-  private long                     poolingInterval            = 0;
+  private long                     poolingInterval;
 
   private long                     lastWatchedBlockNumber;
-
-  private long                     lastBlockNumber;
 
   public EthereumClientConnector() {
     ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
+
+    namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-contract-flowable-%d").build();
+    flowableExecutor = Executors.newFixedThreadPool(2, namedThreadFactory);
 
     String poolingIntervalParam = System.getProperty("exo.wallet.blockchain.pooling.intervalInSeconds");
     if (StringUtils.isNotBlank(poolingIntervalParam)) {
@@ -132,10 +164,10 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
 
     if (permanentlyScanBlockchain) {
-      startListeningBlockchain();
       if (blocking) {
         waitConnection();
       }
+      startListeningBlockchain();
     }
   }
 
@@ -154,14 +186,14 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   public void stopListeningToBlockchain() {
     if (this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed()) {
-      LOG.info("Close mined blocks subscription");
+      LOG.info("Close mined contract transactions subscription");
       try {
         this.blockSubscribtion.dispose();
       } catch (Exception e) {
         LOG.warn("Error when closing old subscription", e.getMessage());
       }
-      this.listeningToBlockchain = false;
     }
+    this.listeningToBlockchain = false;
   }
 
   public boolean isPermanentlyScanBlockchain() {
@@ -223,9 +255,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @throws IOException when error sending transaction on blockchain
    */
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_LAST_BLOCK_NUMBER)
-  public long getLastestBlockNumber() throws IOException {
-    BigInteger blockNumber = getWeb3j().ethBlockNumber().send().getBlockNumber();
-    return blockNumber.longValue();
+  public long getLastestBlockNumber() {
+    try {
+      BigInteger blockNumber = getWeb3j().ethBlockNumber().send().getBlockNumber();
+      return blockNumber.longValue();
+    } catch (IOException e) {
+      throw new IllegalStateException("Connection error with Blockchain while attempting to retrieve block number", e);
+    }
   }
 
   /**
@@ -240,9 +276,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    *           blockchain
    */
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_FILTER_CONTRACT_TRANSACTIONS)
-  public Set<String> getContractTransactions(String contractsAddress,
-                                             long fromBlock,
-                                             long toBlock) throws IOException {
+  public Set<String> getContractTransactions(String contractsAddress, long fromBlock, long toBlock) throws IOException {
     org.web3j.protocol.core.methods.request.EthFilter filter =
                                                              new org.web3j.protocol.core.methods.request.EthFilter(new DefaultBlockParameterNumber(fromBlock),
                                                                                                                    new DefaultBlockParameterNumber(toBlock),
@@ -274,16 +308,15 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    */
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_SEND_TRANSACTION)
   public CompletableFuture<EthSendTransaction> sendTransactionToBlockchain(final TransactionDetail transactionDetail) throws IOException {
-    return getWeb3j().ethSendRawTransaction(transactionDetail.getRawTransaction())
-                     .sendAsync();
+    return getWeb3j().ethSendRawTransaction(transactionDetail.getRawTransaction()).sendAsync();
   }
 
   /**
-   * Retruns nonce corresponding for a given wallet address:
-   *
-   *  * if using {@link DefaultBlockParameterName#LATEST}, this will return last mined transaction nonce
-   *
-   *  * if using {@link DefaultBlockParameterName#PENDING}, this will return last pending transaction nonce that can be used to compute next pending transaction nonce
+   * Retruns nonce corresponding for a given wallet address: * if using
+   * {@link DefaultBlockParameterName#LATEST}, this will return last mined
+   * transaction nonce * if using {@link DefaultBlockParameterName#PENDING},
+   * this will return last pending transaction nonce that can be used to compute
+   * next pending transaction nonce
    *
    * @param walletAddress wallet adres to determine its next nonce
    * @param blockParameterName {@link DefaultBlockParameterName} value
@@ -295,9 +328,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     if (blockParameterName == null) {
       blockParameterName = DefaultBlockParameterName.LATEST;
     }
-    return getWeb3j().ethGetTransactionCount(walletAddress, blockParameterName)
-                     .send()
-                     .getTransactionCount();
+    return getWeb3j().ethGetTransactionCount(walletAddress, blockParameterName).send().getTransactionCount();
   }
 
   /**
@@ -307,18 +338,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    */
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_GAS_PRICE)
   public BigInteger getGasPrice() throws IOException {
-    return getWeb3j().ethGasPrice()
-                     .send()
-                     .getGasPrice();
+    return getWeb3j().ethGasPrice().send().getGasPrice();
   }
 
   public Web3j getWeb3j() {
-    if (isPermanentlyScanBlockchain()) {
-      this.waitConnection();
-    } else {
-      checkConnection();
-    }
-
+    this.checkConnection();
     return web3j;
   }
 
@@ -381,9 +405,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       }
 
       double contractAmount = transactionDetail.getContractAmount();
-      if (contractAmount > 0 && (StringUtils.equals(MeedsToken.FUNC_TRANSFER, methodName)
-          || StringUtils.equals(MeedsToken.FUNC_APPROVE, methodName)
-          || StringUtils.equals(MeedsToken.FUNC_TRANSFERFROM, methodName))) {
+      if (contractAmount > 0
+          && (StringUtils.equals(MeedsToken.FUNC_TRANSFER, methodName) || StringUtils.equals(MeedsToken.FUNC_APPROVE, methodName)
+              || StringUtils.equals(MeedsToken.FUNC_TRANSFERFROM, methodName))) {
         parameters.put("amount_token", contractAmount);
       }
 
@@ -399,16 +423,22 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return parameters;
   }
 
-  public void renewBlockSubscription(long lastWatchedBlockNumber) throws IOException {
-    this.lastWatchedBlockNumber = lastWatchedBlockNumber;
-    this.lastBlockNumber = getLastestBlockNumber();
-    LOG.info("Start watching mined blocks from blockchain from block '{}'", this.lastWatchedBlockNumber);
+  public void renewTransactionListeningSubscription(long lastWatchedBlockNumber) {
+    checkConnection();
+    if (this.connectionInProgress
+        || (this.listeningToBlockchain && this.blockSubscribtion != null && !this.blockSubscribtion.isDisposed())) {
+      return;
+    }
+    if (lastWatchedBlockNumber > 0) {
+      this.lastWatchedBlockNumber = lastWatchedBlockNumber;
+    }
 
     // Close old subscription if exists
     stopListeningToBlockchain();
 
-    // Renew subscription that will trigger an event each time a block is mined
-    subscribeToBlockMining();
+    // Renew subscription that will trigger an event each time a transaction is
+    // mined on contract
+    subscribeToBlockchain();
   }
 
   public void setPoolingInterval(long poolingInterval) {
@@ -421,6 +451,14 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   public long getPoolingInterval() {
     return poolingInterval;
+  }
+
+  public void setLastWatchedBlockNumber(long blockNumber) {
+    this.lastWatchedBlockNumber = Math.max(this.lastWatchedBlockNumber, blockNumber);
+  }
+
+  public long getLastWatchedBlockNumber() {
+    return lastWatchedBlockNumber;
   }
 
   private boolean isConnected() {
@@ -451,10 +489,14 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  private boolean connect() throws Exception { // NOSONAR
+  private synchronized boolean connect() throws Exception { // NOSONAR
     if (this.connectionInProgress) {
       LOG.debug("Web3 connection is in progress");
       return false;
+    }
+    if (isConnected()) {
+      LOG.debug("Web3 connection is already made");
+      return true;
     }
     if (this.serviceStopping) {
       LOG.info("Stopping server, thus no new connection is attempted again");
@@ -476,7 +518,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
         boolean reconnected = this.webSocketClient.reconnectBlocking();
         if (reconnected) {
           LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
-          renewBlockSubscription(this.lastWatchedBlockNumber + 1);
+          if (this.listeningToBlockchain) {
+            renewTransactionListeningSubscription(this.lastWatchedBlockNumber);
+          }
         }
         return reconnected;
       } else {
@@ -514,9 +558,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     try {
       if (!isConnected()) {
         connect();
-        waitConnection();
+        if (permanentlyScanBlockchain) {
+          waitConnection();
+        }
       }
-    } catch (Throwable e) {
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } catch (Throwable e) { // NOSONAR
       if (LOG.isDebugEnabled()) {
         LOG.warn("Error while checking connection status to Etherreum Websocket endpoint", e);
       } else {
@@ -556,25 +604,31 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  private void subscribeToBlockMining() {
+  private void subscribeToBlockchain() {
     // Replay all blocks until last mined one
-    LOG.debug("Replay all blocks starting from number '{}' until last mined one {}.",
-              this.lastWatchedBlockNumber,
-              this.lastBlockNumber);
     this.listeningToBlockchain = true;
-    Flowable<EthBlock> blocksFlowable = getWeb3j().replayPastAndFutureBlocksFlowable(getLastWatchedBlock(), false);
-    initSubscribe(blocksFlowable);
-  }
-
-  private void initSubscribe(Flowable<EthBlock> flowable) {
-    blockSubscribtion = flowable.subscribe(ethBlock -> handleNewBlockEvent(ethBlock), exception -> {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Subscription to mined blocks events is interrupted, reattempt subsciption it !", exception);
-      } else {
-        LOG.info("Subscription to mined blocks events is interrupted with message: {}, reattempt subsciption it !",
-                 getLastExceptionMessage(exception));
-      }
-      renewBlockSubscription(this.lastWatchedBlockNumber + 1);
+    LOG.info("Start watching mined contract transactions from blockchain from block '{}'", this.lastWatchedBlockNumber);
+    DefaultBlockParameterNumber lastWatchedBlock = getLastWatchedBlock();
+    flowableExecutor.execute(() -> {
+      org.web3j.protocol.core.methods.request.EthFilter ethFilter =
+                                                                  new org.web3j.protocol.core.methods.request.EthFilter(lastWatchedBlock,
+                                                                                                                        DefaultBlockParameterName.LATEST,
+                                                                                                                        getContractAddress());
+      ethFilter.addSingleTopic(EventEncoder.encode(MeedsToken.TRANSFER_EVENT));
+      Flowable<org.web3j.protocol.core.methods.response.Log> flowable = web3j.ethLogFlowable(ethFilter);
+      blockSubscribtion = flowable.subscribe(this::handleNewContractTransactionMined, exception -> {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Subscription to mined contract transactions mining event is interrupted, reattempt subsciption it !",
+                    exception);
+        } else {
+          LOG.info("Subscription to mined contract transactions mining event is interrupted with message: {}, reattempt subsciption it !",
+                   getLastExceptionMessage(exception));
+        }
+        if (this.listeningToBlockchain) { // check if the listening was asked to
+                                          // be stopped asynchronously
+          subscribeToBlockchain();
+        }
+      });
     });
   }
 
@@ -588,17 +642,20 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  private void handleNewBlockEvent(EthBlock ethBlock) throws Exception {
-    if (ethBlock == null || ethBlock.getBlock() == null) {
+  private void handleNewContractTransactionMined(org.web3j.protocol.core.methods.response.Log log) throws Exception {
+    String transactionHash = log.getTransactionHash();
+    if (StringUtils.isBlank(transactionHash)) {
       return;
     }
-
-    Block block = ethBlock.getBlock();
-    long blockNumber = block.getNumber().longValue();
-
-    getListenerService().broadcast(NEW_BLOCK_MINED_EVENT, block, blockNumber > this.lastBlockNumber);
-
+    long blockNumber = log.getBlockNumber().longValue();
     this.lastWatchedBlockNumber = Math.max(this.lastWatchedBlockNumber, blockNumber);
+    getListenerService().broadcast(CONTRACT_TRANSACTION_MINED_EVENT,
+                                   null,
+                                   new ContractTransactionEvent(transactionHash,
+                                                                log.getAddress(),
+                                                                log.getData(),
+                                                                log.getTopics(),
+                                                                blockNumber));
   }
 
   private DefaultBlockParameterNumber getLastWatchedBlock() {
@@ -611,4 +668,5 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
     return listenerService;
   }
+
 }

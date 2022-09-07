@@ -74,20 +74,6 @@ public interface WalletTokenAdminService {
   TransactionDetail reward(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
 
   /**
-   * Initializes (on blockchain) a receiver wallet address using 'Admin' wallet
-   * by using funds transmitted in transaction detail. The transaction issuer,
-   * label and message will be stored in transaction details inside eXo server
-   * only.
-   * 
-   * @param transactionDetail
-   * @param issuerUsername
-   * @return {@link TransactionDetail} with the hash of the transaction sent in
-   *         blockchain
-   * @throws Exception
-   */
-  TransactionDetail initialize(TransactionDetail transactionDetail, String issuerUsername) throws Exception;// NOSONAR
-
-  /**
    * Send ether (on blockchain) to a receiver wallet address using 'Admin'
    * wallet. The transaction issuer, label and message will be stored in
    * transaction details inside eXo server only.
@@ -150,12 +136,8 @@ public interface WalletTokenAdminService {
    * 
    * @param contractDetail existing contract detail retrieved from internal
    *          database to refresh its attributes.
-   * @param contractModifications list of called method names to change contract
-   *          state on blockchain. This parameter will be used to know which
-   *          methods to call to refresh contract state in order to optimize the
-   *          number of calls to Blockchain
    */
-  void refreshContractDetailFromBlockchain(ContractDetail contractDetail, Set<String> contractModifications);
+  void refreshContractDetailFromBlockchain(ContractDetail contractDetail);
 
   /**
    * Retrieves wallet details from blockchain

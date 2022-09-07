@@ -95,7 +95,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private Integer                  configuredContractDecimals;
 
-  private String             adminPrivateKey;
+  private String                   adminPrivateKey;
 
   public EthereumWalletTokenAdminService(EthereumClientConnector clientConnector) {
     this.clientConnector = clientConnector;
@@ -130,7 +130,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       if (contractDetail == null) {
         contractDetail = new ContractDetail();
         contractDetail.setAddress(configuredContractAddress);
-        refreshContractDetailFromBlockchain(contractDetail, null);
+        refreshContractDetailFromBlockchain(contractDetail);
         getWalletService().setConfiguredContractDetail(contractDetail);
       }
       configuredContractDecimals = getPrincipalContractDetail().getDecimals();
@@ -139,25 +139,20 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     RequestLifeCycle.begin(PortalContainer.getInstance());
     try {
-
       // Create admin wallet if not exists
-      Wallet wallet = getAccountService().getAdminWallet();
-      if (wallet == null || StringUtils.isBlank(wallet.getAddress())) {
+      Wallet adminWallet = getAccountService().getAdminWallet();
+      if (adminWallet == null || StringUtils.isBlank(adminWallet.getAddress())) {
         if (StringUtils.isBlank(adminPrivateKey)) {
           createAdminAccount();
         } else {
-          try {
-            createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
-            LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
-          } catch (Exception e) {
-            createAdminAccount();
-          }
+          createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
+          LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
         }
-      } else {
+      } else if (StringUtils.isNotBlank(adminPrivateKey)) {
         LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
       }
-    }catch (Exception e) {
-
+    } catch (Exception e) {
+      LOG.warn("Error while creating Admin wallet", e);
     } finally {
       RequestLifeCycle.end();
     }
@@ -269,38 +264,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Can't get ether balance of " + address + " . Connection is not established.");
     }
     return web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
-  }
-
-  @Override
-  public final TransactionDetail initialize(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
-    if (transactionDetail == null) {
-      throw new IllegalArgumentException(TRANSACTION_DETAIL_IS_MANDATORY);
-    }
-    String receiverAddress = transactionDetail.getTo();
-    if (StringUtils.isBlank(receiverAddress)) {
-      throw new IllegalArgumentException(RECEIVER_ADDRESS_PARAMETER_IS_MANDATORY);
-    }
-
-    checkAdminWalletIsValid();
-
-    setIssuer(transactionDetail, issuerUsername);
-
-    if (isInitializedAccount(transactionDetail.getToWallet())) {
-      throw new IllegalStateException("Wallet {} is already initialized");
-    }
-
-    if (StringUtils.isBlank(configuredContractAddress)) {
-      throw new IllegalStateException(NO_CONFIGURED_CONTRACT_ADDRESS);
-    }
-
-    // Send tokens
-    sendToken(transactionDetail, issuerUsername);
-    TransactionDetail etherTransaction = transactionDetail.clone();
-    // Send Ethers
-    sendEther(etherTransaction, issuerUsername);
-    getAccountService().setInitializationStatus(receiverAddress, WalletState.INITIALIZED);
-
-    return transactionDetail;
   }
 
   @Override
@@ -452,7 +415,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail, Set<String> contractModifications) {
+  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail) {
     if (contractDetail == null) {
       throw new IllegalArgumentException("contractDetail is mandatory");
     }
@@ -521,7 +484,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       break;
     default:
       LOG.warn("Statistic type {} is not managed", operation);
-      return null;
+      return null; // NOSONAR must be null if operation not known
     }
     return parameters;
   }

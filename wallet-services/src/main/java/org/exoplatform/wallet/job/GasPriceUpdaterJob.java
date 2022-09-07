@@ -16,22 +16,28 @@
  */
 package org.exoplatform.wallet.job;
 
-import org.quartz.*;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.*;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.service.BlockchainTransactionService;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletService;
 
 @DisallowConcurrentExecution
 public class GasPriceUpdaterJob implements Job {
 
   private static final Log             LOG = ExoLogger.getLogger(GasPriceUpdaterJob.class);
 
-  private ExoContainer                 container;
+  private PortalContainer              container;
 
   private BlockchainTransactionService blockchainTransactionService;
 
@@ -41,20 +47,23 @@ public class GasPriceUpdaterJob implements Job {
 
   public GasPriceUpdaterJob() {
     this.container = PortalContainer.getInstance();
+    this.blockchainTransactionService = this.container.getComponentInstanceOfType(BlockchainTransactionService.class);
+    this.walletService = this.container.getComponentInstanceOfType(WalletService.class);
+    this.walletAccountService = this.container.getComponentInstanceOfType(WalletAccountService.class);
   }
 
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
-    if (getWalletService().isUseDynamicGasPrice()) {
+    if (walletService.isUseDynamicGasPrice()) {
       ExoContainer currentContainer = ExoContainerContext.getCurrentContainer();
       ExoContainerContext.setCurrentContainer(container);
       RequestLifeCycle.begin(this.container);
       try {
         // Refresh gas price only when admin wallet has been initialized
-        Wallet adminWallet = getWalletAccountService().getAdminWallet();
-        if (adminWallet != null && adminWallet.getIsInitialized() != null && Boolean.TRUE.equals(adminWallet.getIsInitialized())) {
-          long blockchainGasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
-          getWalletService().setDynamicGasPrice(blockchainGasPrice);
+        Wallet adminWallet = walletAccountService.getAdminWallet();
+        if (adminWallet != null && Boolean.TRUE.equals(adminWallet.getIsInitialized())) {
+          long blockchainGasPrice = blockchainTransactionService.refreshBlockchainGasPrice();
+          walletService.setDynamicGasPrice(blockchainGasPrice);
         }
       } catch (Exception e) {
         LOG.error("Error while refreshing gas price", e);
@@ -65,24 +74,4 @@ public class GasPriceUpdaterJob implements Job {
     }
   }
 
-  private BlockchainTransactionService getBlockchainTransactionService() {
-    if (blockchainTransactionService == null) {
-      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
-    }
-    return blockchainTransactionService;
-  }
-
-  public WalletService getWalletService() {
-    if (walletService == null) {
-      walletService = CommonsUtils.getService(WalletService.class);
-    }
-    return walletService;
-  }
-
-  public WalletAccountService getWalletAccountService() {
-    if (walletAccountService == null) {
-      walletAccountService = CommonsUtils.getService(WalletAccountService.class);
-    }
-    return walletAccountService;
-  }
 }

@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.wallet.entity.TransactionEntity;
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 
 public class TransactionStorage {
@@ -43,6 +44,17 @@ public class TransactionStorage {
    */
   public List<TransactionDetail> getPendingTransaction(long networkId) {
     List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(networkId);
+    return fromEntities(transactions);
+  }
+
+  /**
+   * @param address {@link Wallet} address
+   * @param networkId blockchain network id
+   * @return {@link List} of {@link TransactionDetail} of type ether transfer
+   *         marked as pending in internal database
+   */
+  public List<TransactionDetail> getPendingEtherTransactions(String address, long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingEtherTransactions(address, networkId);
     return fromEntities(transactions);
   }
 

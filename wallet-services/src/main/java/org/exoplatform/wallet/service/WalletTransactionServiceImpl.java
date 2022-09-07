@@ -67,8 +67,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private long                  maxAttemptsToSend;
 
-  private boolean               logAllTransaction;
-
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
                                       WalletContractService contractService,
@@ -90,10 +88,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         String value = params.getValueParam(MAX_SENDING_TRANSACTIONS_ATTEMPTS).getValue();
         this.maxAttemptsToSend = Long.parseLong(value);
       }
-      if (params.containsKey(LOG_ALL_CONTRACT_TRANSACTIONS)) {
-        String value = params.getValueParam(LOG_ALL_CONTRACT_TRANSACTIONS).getValue();
-        this.logAllTransaction = Boolean.parseBoolean(value);
-      }
     }
     if (this.maxParallelPendingTransactions <= 0) {
       LOG.warn("Invalid value {} for parameter {}, using default value {}",
@@ -114,6 +108,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public List<TransactionDetail> getPendingTransactions() {
     return transactionStorage.getPendingTransaction(getNetworkId());
+  }
+
+  @Override
+  public List<TransactionDetail> getPendingEtherTransactions(String address) {
+    return transactionStorage.getPendingEtherTransactions(address, getNetworkId());
   }
 
   @Override
@@ -333,6 +332,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     transactionDetail.setIssuer(issuerWallet);
     transactionDetail.setNetworkId(getNetworkId());
     transactionStorage.saveTransactionDetail(transactionDetail);
+    broadcastTransactionSentEvent(transactionDetail);
   }
 
   @Override
@@ -361,11 +361,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getMaxParallelPendingTransactions() {
     return maxParallelPendingTransactions;
-  }
-
-  @Override
-  public boolean isLogAllTransaction() {
-    return logAllTransaction;
   }
 
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
@@ -487,13 +482,23 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
     try {
       Map<String, Object> transaction = transactionToMap(transactionDetail);
-      getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
+      getListenerService().broadcast(TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
     }
   }
 
-
+  private void broadcastTransactionSentEvent(TransactionDetail transactionDetail) {
+    try {
+      if (transactionDetail.isPending() && StringUtils.isBlank(transactionDetail.getRawTransaction())) {
+        // Broadcast event that transaction was sent to blockchain only when
+        // sent via external tools such as Metamask
+        getListenerService().broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
+      }
+    } catch (Exception e) {
+      LOG.warn("Error while broadcasting transaction sent event: {}", transactionDetail, e);
+    }
+  }
 
   private SpaceService getSpaceService() {
     if (spaceService == null) {

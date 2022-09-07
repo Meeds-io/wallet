@@ -35,6 +35,7 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
     @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getNetworkTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId ORDER BY tx.createdDate DESC"),
     @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
+    @NamedQuery(name = "WalletTransaction.getPendingEtherTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.fromAddress = :address OR tx.toAddress = :address) AND tx.isPending = TRUE AND tx.value > 0"),
     @NamedQuery(name = "WalletTransaction.countPendingTransactions", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
     @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash order by tx.id desc"),
     @NamedQuery(name = "WalletTransaction.getPendingTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash and tx.isPending=true order by tx.createdDate DESC"),

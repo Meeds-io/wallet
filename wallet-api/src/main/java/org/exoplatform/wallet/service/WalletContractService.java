@@ -17,7 +17,6 @@
 package org.exoplatform.wallet.service;
 
 import java.io.IOException;
-import java.util.Set;
 
 import org.json.JSONArray;
 
@@ -74,11 +73,4 @@ public interface WalletContractService {
    */
   String getContractFileContent(String name, String extension) throws IOException;
 
-  /**
-   * Refresh contract details from blockchain
-   * 
-   * @param contractModifications list of called method names to change contract
-   *          state on blockchain
-   */
-  void refreshContractDetail(Set<String> contractModifications);
 }
