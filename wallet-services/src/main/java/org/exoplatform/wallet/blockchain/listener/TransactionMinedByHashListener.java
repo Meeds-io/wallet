@@ -35,7 +35,7 @@ public class TransactionMinedByHashListener extends Listener<String, Object> {
   public void onEvent(Event<String, Object> event) throws Exception {
     String transactionHash = event.getSource();
     TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
-    if (transactionDetail != null) {
+    if (transactionDetail != null && transactionDetail.isPending()) {
       walletTransactionService.broadcastTransactionMinedEvent(transactionDetail);
     }
   }

@@ -16,21 +16,49 @@
  */
 package org.exoplatform.wallet.test.service;
 
-import static org.junit.Assert.*;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
 import org.exoplatform.wallet.dao.AddressLabelDAO;
 import org.exoplatform.wallet.entity.AddressLabelEntity;
-import org.exoplatform.wallet.model.*;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletAddressLabel;
+import org.exoplatform.wallet.model.WalletProvider;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletAccountServiceImpl;
+import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.storage.AddressLabelStorage;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 
@@ -771,6 +799,56 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertNotNull(wallet);
     assertEquals(walletAddress.toLowerCase(), wallet.getAddress().toLowerCase());
     assertEquals(WalletProvider.METAMASK.name(), wallet.getProvider());
+  }
+
+  @Test
+  public void testRefreshWalletFromBlockchain() throws Exception {
+    WalletStorage accountStorage = mock(WalletStorage.class);
+    ListenerService listenerService = mock(ListenerService.class);
+    WalletTokenAdminService tokenAdminService = mock(WalletTokenAdminService.class);
+
+    WalletAccountServiceImpl walletAccountService = new WalletAccountServiceImpl(mock(PortalContainer.class),
+                                                                                 accountStorage,
+                                                                                 mock(AddressLabelStorage.class),
+                                                                                 mock(InitParams.class));
+    walletAccountService.setTokenAdminService(tokenAdminService);
+    walletAccountService.setListenerService(listenerService);
+
+    String walletAddress = "walletAddress";
+    String contractAddress = "contractAddress";
+    ContractDetail contractDetail = mock(ContractDetail.class);
+    when(contractDetail.getAddress()).thenReturn(contractAddress);
+
+    Map<String, Set<String>> walletModifications = new HashMap<>();
+    HashSet<String> modifications = new HashSet<>();
+    walletModifications.put(walletAddress, modifications);
+
+    walletAccountService.refreshWalletFromBlockchain(null, contractDetail, walletModifications);
+    verifyNoInteractions(accountStorage, listenerService, tokenAdminService, contractDetail);
+
+    Wallet wallet = new Wallet();
+    wallet.setAddress(walletAddress);
+
+    doAnswer(invocation -> {
+      wallet.setEtherBalance(0.02d);
+      wallet.setTokenBalance(3.02d);
+      return null;
+    }).when(accountStorage).retrieveWalletBlockchainState(wallet, contractAddress);
+
+    doNothing().when(tokenAdminService).retrieveWalletInformationFromBlockchain(wallet, contractDetail, modifications);
+
+    walletAccountService.refreshWalletFromBlockchain(wallet, contractDetail, walletModifications);
+    verify(listenerService, times(0)).broadcast(eq(WALLET_MODIFIED_EVENT), eq(null), any(Wallet.class));
+
+    reset(tokenAdminService);
+    doAnswer(invocation -> {
+      wallet.setEtherBalance(0.03d);
+      wallet.setTokenBalance(3.05d);
+      return null;
+    }).when(tokenAdminService).retrieveWalletInformationFromBlockchain(wallet, contractDetail, modifications);
+
+    walletAccountService.refreshWalletFromBlockchain(wallet, contractDetail, walletModifications);
+    verify(listenerService, times(1)).broadcast(eq(WALLET_MODIFIED_EVENT), eq(null), any(Wallet.class));
   }
 
 }

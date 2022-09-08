@@ -172,8 +172,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       try {
         Set<String> walletModifications = walletsModifications == null ? null
                                                                        : walletsModifications.get(wallet.getAddress());
-        Wallet originalWallet = wallet.clone();
         accountStorage.retrieveWalletBlockchainState(wallet, contractDetail.getAddress());
+        Wallet originalWallet = wallet.clone();
+
         getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
                                                                        contractDetail,
                                                                        walletModifications);
@@ -188,7 +189,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
           setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
 
-        if (!originalWallet.equals(wallet)) {
+        if (!Objects.equals(originalWallet.getEtherBalance(), wallet.getEtherBalance())
+            || !Objects.equals(originalWallet.getTokenBalance(), wallet.getTokenBalance())) {
           getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
         }
       } catch (Exception e) {
@@ -800,6 +802,28 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     return adminAccountEnabled;
   }
 
+  public void setTokenAdminService(WalletTokenAdminService tokenAdminService) {
+    this.tokenAdminService = tokenAdminService;
+  }
+
+  public void setListenerService(ListenerService listenerService) {
+    this.listenerService = listenerService;
+  }
+
+  private WalletTokenAdminService getTokenAdminService() {
+    if (tokenAdminService == null) {
+      tokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return tokenAdminService;
+  }
+
+  private ListenerService getListenerService() {
+    if (listenerService == null) {
+      listenerService = CommonsUtils.getService(ListenerService.class);
+    }
+    return listenerService;
+  }
+
   private void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
     // 'rewarding' group members can change all wallets
     if (isUserRewardingAdmin(currentUser)) {
@@ -912,20 +936,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setProvider(provider.name());
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
-  }
-
-  private WalletTokenAdminService getTokenAdminService() {
-    if (tokenAdminService == null) {
-      tokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
-    }
-    return tokenAdminService;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
   }
 
 }
