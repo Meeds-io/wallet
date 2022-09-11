@@ -16,12 +16,13 @@
  */
 package org.exoplatform.wallet.test.service;
 
+import static org.exoplatform.wallet.utils.WalletUtils.*;
 import static org.junit.Assert.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.junit.Test;
@@ -176,6 +177,22 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    ListenerService listenerService = getService(ListenerService.class);
+    AtomicInteger createdTriggerCount = new AtomicInteger();
+    listenerService.addListener(TRANSACTION_CREATED_EVENT, new Listener<TransactionDetail, TransactionDetail>() {
+      @Override
+      public void onEvent(Event<TransactionDetail, TransactionDetail> event) throws Exception {
+        createdTriggerCount.incrementAndGet();
+      }
+    });
+    AtomicInteger modifiedTriggerCount = new AtomicInteger();
+    listenerService.addListener(TRANSACTION_MODIFIED_EVENT, new Listener<TransactionDetail, TransactionDetail>() {
+      @Override
+      public void onEvent(Event<TransactionDetail, TransactionDetail> event) throws Exception {
+        modifiedTriggerCount.incrementAndGet();
+      }
+    });
+
     TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
                                                                   WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
                                                                   CONTRACT_AMOUNT,
@@ -197,13 +214,73 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     } catch (IllegalAccessException e) {
       // Expected: "root9" shouldn't be able to save transaction of "root1"
     }
+    assertEquals(1, createdTriggerCount.get());
+    assertEquals(0, modifiedTriggerCount.get());
+    createdTriggerCount.set(0);
 
     walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    assertEquals(0, createdTriggerCount.get());
+    assertEquals(1, modifiedTriggerCount.get());
+    modifiedTriggerCount.set(0);
 
     TransactionDetail storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertNotNull(storedTransactionDetail);
     assertEquals(transactionDetail, storedTransactionDetail);
     entitiesToClean.add(storedTransactionDetail);
+
+    transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                CONTRACT_AMOUNT,
+                                                ETHER_VALUE,
+                                                WALLET_ADDRESS_1,
+                                                WALLET_ADDRESS_2,
+                                                null,
+                                                CURRENT_USER_IDENTITY_ID,
+                                                TRANSACTION_LABEL,
+                                                TRANSACTION_MESSAGE,
+                                                false,
+                                                true,
+                                                false,
+                                                RAW_TRANSACTION,
+                                                System.currentTimeMillis());
+    assertEquals(1, createdTriggerCount.get());
+    assertEquals(0, modifiedTriggerCount.get());
+    createdTriggerCount.set(0);
+
+    walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertNotNull(storedTransactionDetail);
+    assertEquals(transactionDetail, storedTransactionDetail);
+    assertEquals(0, createdTriggerCount.get());
+    assertEquals(1, modifiedTriggerCount.get());
+    modifiedTriggerCount.set(0);
+
+    transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                CONTRACT_AMOUNT,
+                                                ETHER_VALUE,
+                                                WALLET_ADDRESS_1,
+                                                WALLET_ADDRESS_2,
+                                                null,
+                                                CURRENT_USER_IDENTITY_ID,
+                                                TRANSACTION_LABEL,
+                                                TRANSACTION_MESSAGE,
+                                                false,
+                                                false,
+                                                false,
+                                                null,
+                                                System.currentTimeMillis());
+    assertEquals(1, createdTriggerCount.get());
+    assertEquals(0, modifiedTriggerCount.get());
+    createdTriggerCount.set(0);
+
+    walletTransactionService.saveTransactionDetail(transactionDetail, CURRENT_USER);
+    storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
+    assertNotNull(storedTransactionDetail);
+    assertEquals(transactionDetail, storedTransactionDetail);
+    entitiesToClean.add(storedTransactionDetail);
+    assertEquals(0, createdTriggerCount.get());
+    assertEquals(1, modifiedTriggerCount.get());
   }
 
   /**
@@ -277,7 +354,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
 
 
   /**
-   * Test {@link WalletTransactionService#countTransactionsByNonce(TransactionDetail)}
+   * Test {@link WalletTransactionService#countPendingTransactionsWithSameNonce(String, String, long)}
    */
   @Test
   public void testCountTransactionsByNonce() {
@@ -316,8 +393,10 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   System.currentTimeMillis());
     walletTransactionService.saveTransactionDetail(transactionDetail1, true);
     walletTransactionService.saveTransactionDetail(transactionDetail2, true);
-    long countOfTransactions = walletTransactionService.countTransactionsByNonce(transactionDetail1);
-    assertEquals(2, countOfTransactions);
+    long countOfTransactions = walletTransactionService.countPendingTransactionsWithSameNonce(transactionDetail1.getHash(),
+                                                                                              transactionDetail1.getFrom(),
+                                                                                              transactionDetail1.getNonce());
+    assertEquals(1, countOfTransactions);
     entitiesToClean.add(transactionDetail1);
     entitiesToClean.add(transactionDetail2);
   }
@@ -463,7 +542,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                     false,
                                                                     RAW_TRANSACTION,
                                                                     System.currentTimeMillis());
-      transactionDetail.setSendingAttemptCount(1);
+      transactionDetail.setSentTimestamp(System.currentTimeMillis());
       walletTransactionService.saveTransactionDetail(transactionDetail, false);
       entitiesToClean.add(transactionDetail);
     }
@@ -515,12 +594,18 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
   }
 
   /**
-   * Test {@link WalletTransactionService#getPendingTransactions()}
+   * Test
+   * {@link WalletTransactionService#getPendingWalletTransactionsNotSent(String)}
+   * and
+   * {@link WalletTransactionService#getPendingWalletTransactionsSent(String)}
    */
   @Test
-  public void testGetPendingTransactionHashes() {
+  public void testGetPendingWalletTransactionsHashes() {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingTransactions();
+    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingWalletTransactionsNotSent(WALLET_ADDRESS_1);
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+    pendingTransactions = walletTransactionService.getPendingWalletTransactionsSent(WALLET_ADDRESS_1);
     assertNotNull(pendingTransactions);
     assertEquals(0, pendingTransactions.size());
 
@@ -557,11 +642,76 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   System.currentTimeMillis());
     entitiesToClean.add(transactionDetail);
 
-    assertEquals(1, walletTransactionService.countPendingTransactions());
-    pendingTransactions = walletTransactionService.getPendingTransactions();
+    assertEquals(1, walletTransactionService.countContractPendingTransactionsSent());
+    pendingTransactions = walletTransactionService.getPendingWalletTransactionsSent(WALLET_ADDRESS_1);
     assertNotNull(pendingTransactions);
     assertEquals(1, pendingTransactions.size());
     assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next().getHash());
+    pendingTransactions = walletTransactionService.getPendingWalletTransactionsNotSent(WALLET_ADDRESS_1);
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+
+    pendingTransactionDetail.setSentTimestamp(0);
+    pendingTransactionDetail.setSendingAttemptCount(0);
+    pendingTransactionDetail.setRawTransaction(RAW_TRANSACTION);
+    walletTransactionService.saveTransactionDetail(pendingTransactionDetail, false);
+
+    assertEquals(0, walletTransactionService.countContractPendingTransactionsSent());
+    pendingTransactions = walletTransactionService.getPendingWalletTransactionsSent(WALLET_ADDRESS_1);
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+    pendingTransactions = walletTransactionService.getPendingWalletTransactionsNotSent(WALLET_ADDRESS_1);
+    assertNotNull(pendingTransactions);
+    assertEquals(1, pendingTransactions.size());
+    assertEquals(pendingTransactionDetail.getHash(), pendingTransactions.iterator().next().getHash());
+  }
+
+  @Test
+  public void testCountContractPendingTransactionsToSend() {
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    List<TransactionDetail> pendingTransactions = walletTransactionService.getPendingWalletTransactionsNotSent(WALLET_ADDRESS_1);
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+
+    TransactionDetail pendingTransactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                         WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                         CONTRACT_AMOUNT,
+                                                                         ETHER_VALUE,
+                                                                         WALLET_ADDRESS_1,
+                                                                         WALLET_ADDRESS_2,
+                                                                         WALLET_ADDRESS_3,
+                                                                         USER_TEST_IDENTITY_ID,
+                                                                         TRANSACTION_LABEL,
+                                                                         TRANSACTION_MESSAGE,
+                                                                         false,
+                                                                         true,
+                                                                         false,
+                                                                         RAW_TRANSACTION,
+                                                                         System.currentTimeMillis());
+    pendingTransactionDetail.setSentTimestamp(0);
+    walletTransactionService.saveTransactionDetail(pendingTransactionDetail, false);
+    entitiesToClean.add(pendingTransactionDetail);
+    TransactionDetail transactionDetail = createTransactionDetail(generateTransactionHash(),
+                                                                  WalletUtils.CONTRACT_FUNC_TRANSFERFROM,
+                                                                  CONTRACT_AMOUNT,
+                                                                  ETHER_VALUE,
+                                                                  WALLET_ADDRESS_1,
+                                                                  WALLET_ADDRESS_2,
+                                                                  WALLET_ADDRESS_3,
+                                                                  USER_TEST_IDENTITY_ID,
+                                                                  TRANSACTION_LABEL,
+                                                                  TRANSACTION_MESSAGE,
+                                                                  false,
+                                                                  true,
+                                                                  true,
+                                                                  RAW_TRANSACTION,
+                                                                  System.currentTimeMillis());
+    transactionDetail.setSentTimestamp(System.currentTimeMillis());
+    walletTransactionService.saveTransactionDetail(transactionDetail, false);
+    entitiesToClean.add(transactionDetail);
+
+    assertEquals(1, walletTransactionService.countContractPendingTransactionsSent());
+    assertEquals(1, walletTransactionService.countContractPendingTransactionsToSend());
   }
 
 }

@@ -64,7 +64,8 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     if (limit > 0) {
       query.setMaxResults(limit);
     }
-    return query.getResultList();
+    List<TransactionEntity> result = query.getResultList();
+    return result == null ? Collections.emptyList() : result;
   }
 
   public List<TransactionEntity> getTransactions(long networkId, int limit) {
@@ -74,7 +75,8 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     if (limit > 0) {
       query.setMaxResults(limit);
     }
-    return query.getResultList();
+    List<TransactionEntity> result = query.getResultList();
+    return result == null ? Collections.emptyList() : result;
   }
 
   public List<TransactionEntity> getWalletTransactions(long networkId,
@@ -93,6 +95,7 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     if (!includeAdministrationTransactions) {
       queryString.append(" AND tx.isAdminOperation = FALSE");
     }
+    queryString.append(" AND tx.isDropped = FALSE");
 
     queryString.append(" AND (tx.fromAddress = '");
     queryString.append(address);
@@ -123,19 +126,47 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     if (limit > 0) {
       query.setMaxResults(limit);
     }
-    return query.getResultList();
+    List<TransactionEntity> result = query.getResultList();
+    return result == null ? Collections.emptyList() : result;
   }
 
-  public List<TransactionEntity> getPendingTransactions(long networkId) {
-    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactions",
+  public List<TransactionEntity> getPendingEtherTransactions(String address, long networkId) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingEtherTransactions",
                                                                               TransactionEntity.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
     List<TransactionEntity> resultList = query.getResultList();
     return resultList == null ? null : resultList;
   }
 
-  public int countPendingTransactions(long networkId) {
-    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactions",
+  public List<TransactionEntity> getPendingWalletTransactionsNotSent(String address, long networkId) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingWalletTransactionsNotSent",
+                                                                              TransactionEntity.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    List<TransactionEntity> resultList = query.getResultList();
+    return resultList == null ? Collections.emptyList() : resultList;
+  }
+
+  public List<TransactionEntity> getPendingWalletTransactionsSent(String address, long networkId) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingWalletTransactionsSent",
+                                                                              TransactionEntity.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(address));
+    List<TransactionEntity> resultList = query.getResultList();
+    return resultList == null ? Collections.emptyList() : resultList;
+  }
+
+  public int countContractPendingTransactionsSent(long networkId) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countContractPendingTransactionsSent",
+                                                                 Long.class);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+    Long result = query.getSingleResult();
+    return result == null ? 0 : result.intValue();
+  }
+
+  public int countContractPendingTransactionsToSend(long networkId) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countContractPendingTransactionsToSend",
                                                                  Long.class);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     Long result = query.getSingleResult();
@@ -158,21 +189,23 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
-  public List<TransactionEntity> getTransactionsByNonce(long networkId, String fromAddress, long nonce) {
-    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getTransactionsByNonce",
+  public List<TransactionEntity> getPendingTransactionsWithSameNonce(long networkId, String transactionHash, String fromAddress, long nonce) {
+    TypedQuery<TransactionEntity> query = getEntityManager().createNamedQuery("WalletTransaction.getPendingTransactionsWithSameNonce",
                                                                               TransactionEntity.class);
     query.setParameter(NONCE_PARAM, nonce);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    query.setParameter(HASH_PARAM, StringUtils.lowerCase(transactionHash));
     List<TransactionEntity> resultList = query.getResultList();
-    return resultList == null || resultList.isEmpty() ? Collections.emptyList() : resultList;
+    return resultList == null ? Collections.emptyList() : resultList;
   }
-  public long countTransactionsByNonce(long networkId, String fromAddress, long nonce) {
-    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countTransactionsByNonce",
-                                                                              Long.class);
+
+  public long countPendingTransactionsWithSameNonce(long networkId, String transactionHash, String fromAddress, long nonce) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactionsWithSameNonce", Long.class);
     query.setParameter(NONCE_PARAM, nonce);
     query.setParameter(NETWORK_ID_PARAM, networkId);
     query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    query.setParameter(HASH_PARAM, StringUtils.lowerCase(transactionHash));
     Long result = query.getSingleResult();
     return result == null ? 0 : result;
   }

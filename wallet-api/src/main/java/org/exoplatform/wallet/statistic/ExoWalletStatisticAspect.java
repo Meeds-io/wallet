@@ -70,28 +70,28 @@ public class ExoWalletStatisticAspect {
         Map<String, Object> parameters = statisticService.getStatisticParameters(operation, result, point.getArgs());
         if (parameters != null) {
           if (local) {
-            parameters.put(LOCAL_SERVICE, service);
+            put(parameters, LOCAL_SERVICE, service);
           } else {
-            parameters.put(REMOTE_SERVICE, service);
+            put(parameters, REMOTE_SERVICE, service);
           }
           if (!parameters.containsKey(OPERATION)) {
-            parameters.put(OPERATION, operation);
+            put(parameters, OPERATION, operation);
           }
           if (!parameters.containsKey(DURATION)) {
-            parameters.put(DURATION, duration);
+            put(parameters, DURATION, duration);
           }
           if (parameters.containsKey(ERROR_MSG) || StringUtils.isNotBlank(errorMessage)) {
             if (!parameters.containsKey(ERROR_MSG)) {
-              parameters.put(ERROR_MSG, errorMessage);
+              put(parameters, ERROR_MSG, errorMessage);
             }
-            parameters.put(STATUS, "ko");
-            parameters.put(STATUS_CODE, "500");
+            put(parameters, STATUS, "ko");
+            put(parameters, STATUS_CODE, "500");
           } else {
             if (!parameters.containsKey(STATUS)) {
-              parameters.put(STATUS, "ok");
+              put(parameters, STATUS, "ok");
             }
             if (!parameters.containsKey(STATUS_CODE)) {
-              parameters.put(STATUS_CODE, "200");
+              put(parameters, STATUS_CODE, "200");
             }
           }
           addStatisticEntry(parameters);
@@ -99,6 +99,12 @@ public class ExoWalletStatisticAspect {
       } catch (Throwable e) {
         LOG.warn("Error adding statistic log entry in method {} for statistic type {}", method.getName(), operation, e);
       }
+    }
+  }
+
+  private void put(Map<String, Object> parameters, String key, Object value) {
+    if (StringUtils.isNotBlank(key) && value != null) {
+      parameters.put(key, value);
     }
   }
 

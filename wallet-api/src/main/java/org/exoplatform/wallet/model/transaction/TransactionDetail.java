@@ -24,12 +24,16 @@ import java.math.BigInteger;
 
 import org.exoplatform.wallet.model.Wallet;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode.Exclude;
 import lombok.ToString;
 
 @Data
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransactionDetail implements Serializable, Cloneable {
 
   private static final long serialVersionUID = 658273092293607458L;
@@ -52,6 +56,8 @@ public class TransactionDetail implements Serializable, Cloneable {
   private boolean           pending;
 
   private boolean           succeeded;
+
+  private boolean           dropped;
 
   private boolean           isAdminOperation;
 
@@ -104,11 +110,38 @@ public class TransactionDetail implements Serializable, Cloneable {
 
   @Override
   public TransactionDetail clone() { // NOSONAR
-    try {
-      return (TransactionDetail) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new IllegalStateException("Error while cloning object", e);
-    }
+    return new TransactionDetail(id,
+                                 issuer,
+                                 issuerId,
+                                 networkId,
+                                 hash,
+                                 contractAddress,
+                                 contractMethodName,
+                                 pending,
+                                 succeeded,
+                                 dropped,
+                                 isAdminOperation,
+                                 from,
+                                 fromWallet,
+                                 to,
+                                 toWallet,
+                                 by,
+                                 byWallet,
+                                 label,
+                                 message,
+                                 value,
+                                 contractAmount,
+                                 gasUsed,
+                                 gasPrice,
+                                 tokenFee,
+                                 etherFee,
+                                 noContractFunds,
+                                 timestamp,
+                                 nonce,
+                                 boost,
+                                 rawTransaction,
+                                 sentTimestamp,
+                                 sendingAttemptCount);
   }
 
   public BigInteger getContractAmountDecimal(int decimals) {

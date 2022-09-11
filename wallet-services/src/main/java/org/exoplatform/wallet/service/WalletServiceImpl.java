@@ -16,29 +16,70 @@
  */
 package org.exoplatform.wallet.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.ACCESS_PERMISSION;
+import static org.exoplatform.wallet.utils.WalletUtils.DEFAULT_INITIAL_USER_FUND;
+import static org.exoplatform.wallet.utils.WalletUtils.DEFAULT_MIN_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
+import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
+import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_SENDER_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_SENT;
+import static org.exoplatform.wallet.utils.WalletUtils.GAS_LIMIT;
+import static org.exoplatform.wallet.utils.WalletUtils.GWEI_TO_WEI_DECIMALS;
+import static org.exoplatform.wallet.utils.WalletUtils.INITIAL_FUNDS_KEY_NAME;
+import static org.exoplatform.wallet.utils.WalletUtils.MAX_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.MIN_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.NETWORK_ID;
+import static org.exoplatform.wallet.utils.WalletUtils.NETWORK_URL;
+import static org.exoplatform.wallet.utils.WalletUtils.NETWORK_WS_URL;
+import static org.exoplatform.wallet.utils.WalletUtils.NORMAL_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.REWARDINGS_GROUP;
+import static org.exoplatform.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.SETTINGS_KEY_NAME;
+import static org.exoplatform.wallet.utils.WalletUtils.TOKEN_ADDRESS;
+import static org.exoplatform.wallet.utils.WalletUtils.USE_DYNAMIC_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_CONTEXT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static org.exoplatform.wallet.utils.WalletUtils.canAccessWallet;
+import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
+import static org.exoplatform.wallet.utils.WalletUtils.fromJsonString;
+import static org.exoplatform.wallet.utils.WalletUtils.hideWalletOwnerPrivateInformation;
+import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfGroupOrUser;
+import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfSpaceOrGroupOrUser;
+import static org.exoplatform.wallet.utils.WalletUtils.isUserSpaceMember;
+import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
 import java.math.BigInteger;
 
 import org.apache.commons.lang.StringUtils;
-import org.exoplatform.commons.utils.PropertyManager;
 import org.picocontainer.Startable;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
-import org.exoplatform.commons.api.settings.*;
+import org.exoplatform.commons.api.settings.ExoFeatureService;
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.*;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.wallet.model.*;
-import org.exoplatform.wallet.model.settings.*;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletType;
+import org.exoplatform.wallet.model.settings.GlobalSettings;
+import org.exoplatform.wallet.model.settings.InitialFundsSettings;
+import org.exoplatform.wallet.model.settings.NetworkSettings;
+import org.exoplatform.wallet.model.settings.UserSettings;
+import org.exoplatform.wallet.model.settings.WalletSettings;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
 
 /**
@@ -219,7 +260,7 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   @Override
-  public UserSettings getUserSettings(String spaceId, String currentUser, boolean isAdministration) {
+  public UserSettings getUserSettings(String spaceId, String currentUser, boolean isAdministration) { // NOSONAR
     GlobalSettings globalSettings = getSettings();
 
     UserSettings userSettings = new UserSettings(globalSettings);

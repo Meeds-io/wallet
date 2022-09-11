@@ -166,40 +166,39 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
   public void testCountTransactionsByNonce() {
     String hashOfTX = "hashTX";
     createTransaction(hashOfTX,
-            null,
-            null,
-            0, // token amount
-            0, // ether amount
-            "from",
-            "to",
-            "by",
-            0,
-            "label",
-            "message",
-            true, // isSuccess
-            true, // isPending
-            1,
-            true, // isAdminOperation
-            System.currentTimeMillis());
-    createTransaction(hashOfTX,
-            null,
-            null,
-            0, // token amount
-            0, // ether amount
-            "from",
-            "to",
-            "by",
-            0,
-            "label",
-            "message",
-            true, // isSuccess
-            true, // isPending
-            1,
-            true, // isAdminOperation
-            System.currentTimeMillis());
+                      null,
+                      null,
+                      0, // token amount
+                      0, // ether amount
+                      "from",
+                      "to",
+                      "by",
+                      0,
+                      "label",
+                      "message",
+                      true, // isSuccess
+                      true, // isPending
+                      1,
+                      true, // isAdminOperation
+                      System.currentTimeMillis());
+    createTransaction(hashOfTX + 2,
+                      null,
+                      null,
+                      0, // token amount
+                      0, // ether amount
+                      "from",
+                      "to",
+                      "by",
+                      0,
+                      "label",
+                      "message",
+                      true, // isSuccess
+                      true, // isPending
+                      1,
+                      true, // isAdminOperation
+                      System.currentTimeMillis());
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
-    assertEquals(2,walletTransactionDAO.countTransactionsByNonce(WalletUtils.getNetworkId(),"from",1));
-
+    assertEquals(1, walletTransactionDAO.countPendingTransactionsWithSameNonce(WalletUtils.getNetworkId(), hashOfTX, "from", 1));
   }
 
   /**
@@ -269,20 +268,20 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
   public void testGetPendingTransactions() {
     String contractAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
     String contractMethodName = "transfer";
-    String firstAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
+    String firstAddress = "0xe7dfec7864af9e581a85ce3987d026be0f509ac9";
 
     generateTransactions(firstAddress, contractAddress, contractMethodName);
 
     WalletTransactionDAO walletTransactionDAO = getService(WalletTransactionDAO.class);
 
     // Search all pending transactions using the network id
-    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(1);
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingWalletTransactionsNotSent(firstAddress, NETWORK_ID);
 
     assertNotNull("Returned transactions list is null", transactions);
-    assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
+    assertEquals("Returned pending transactions list count on a network is not coherent", 10, transactions.size());
 
     // Use non existing network ID
-    transactions = walletTransactionDAO.getPendingTransactions(2);
+    transactions = walletTransactionDAO.getPendingWalletTransactionsNotSent(firstAddress, NETWORK_ID + 1);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 

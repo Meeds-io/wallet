@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :fiat-symbol="fiatSymbol"
                       :selected-transaction-hash="selectedTransactionHash"
                       :selected-contract-method-name="selectedContractMethodName"
-                      @refresh="refreshWallet()"
+                      @refresh="refreshWallet(true)"
                       @display-transactions="openAccountDetail"
                       @error="error = $event" />
                     <div class="my-8 walletRewardSetup">
@@ -349,7 +349,7 @@ export default {
     },
     walletUpdated(event) {
       if (event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
-        this.addressRegistry.refreshWallet(this.wallet,true);
+        this.refreshWallet();
       }
     },
     reloadContract() {
@@ -414,9 +414,9 @@ export default {
           .catch(e => this.error = String(e));
       }
     },
-    refreshWallet() {
-      return this.addressRegistry.refreshWallet(this.wallet, true);
-    }
+    refreshWallet(fromBlockchain) {
+      return this.addressRegistry.refreshWallet(this.wallet, fromBlockchain);
+    },
   },
 };
 </script>

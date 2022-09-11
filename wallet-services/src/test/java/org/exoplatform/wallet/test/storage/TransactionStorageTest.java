@@ -180,14 +180,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
     String oldestTransactionHash = transactionHashList.get(0);
-    transactions = transactionStorage.getWalletTransactions(1,
-                                                            firstAddress,
-                                                            null,
-                                                            null,
-                                                            oldestTransactionHash,
-                                                            10,
-                                                            false,
-                                                            true);
+    transactions = transactionStorage.getWalletTransactions(1, firstAddress, null, null, oldestTransactionHash, 10, false, true);
     assertEquals("Returned wallet transactions list should include all transactions, even if limit = 10, the selected hash must be included in result",
                  60,
                  transactions.size());
@@ -204,98 +197,108 @@ public class TransactionStorageTest extends BaseWalletTest {
                                                             includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
+    includeAdministrationTransactions = true;
+    onlyPending = false;
+    transactions = transactionStorage.getWalletTransactions(1,
+                                                            firstAddress,
+                                                            null,
+                                                            null,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
+    assertEquals("Returned wallet transactions list count is not coherent", 60, transactions.size());
+
+    // Mark all transactions as dropped and replace it by others with the same
+    // nonce
+    transactions.forEach(transaction -> {
+      transaction.setDropped(true);
+      transactionStorage.saveTransactionDetail(transaction);
+    });
     // duplicate already created transactions
     // Transactions are duplicated with duplication of the nonce
     generateTransactions(firstAddress, contractAddress, contractMethodName);
 
-    //retest the same cases with duplicated transactions and asserts that returns the same values
-    //when 2 transaction from the same address having the same nonce one of them must be ignored
+    // retest the same cases with duplicated transactions and asserts that
+    // returns the same values
+    // when 2 transaction from the same address having the same nonce one of
+    // them must be ignored
 
     // Search all transactions where a wallet is receiver, sender delegator
-     includeAdministrationTransactions = true;
-     onlyPending = false;
-   transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            null,
-            null,
-            null,
-            0,
-            onlyPending,
-            includeAdministrationTransactions);
+    transactions = transactionStorage.getWalletTransactions(1,
+                                                            firstAddress,
+                                                            null,
+                                                            null,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
 
     assertNotNull("Returned transactions list is null", transactions);
     assertEquals("Returned wallet transactions list count is not coherent", 60, transactions.size());
 
     // Test pagination
     transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            null,
-            null,
-            null,
-            20,
-            onlyPending,
-            includeAdministrationTransactions);
+                                                            firstAddress,
+                                                            null,
+                                                            null,
+                                                            null,
+                                                            20,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 20, transactions.size());
 
     // Filter on contract address
     transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            contractAddress,
-            null,
-            null,
-            0,
-            onlyPending,
-            includeAdministrationTransactions);
+                                                            firstAddress,
+                                                            contractAddress,
+                                                            null,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 30, transactions.size());
 
     // Filter on contract method name
     transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            contractAddress,
-            contractMethodName,
-            null,
-            0,
-            onlyPending,
-            includeAdministrationTransactions);
+                                                            firstAddress,
+                                                            contractAddress,
+                                                            contractMethodName,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
     // Filter on only pending transactions
     onlyPending = true;
     transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            contractAddress,
-            contractMethodName,
-            null,
-            0,
-            onlyPending,
-            includeAdministrationTransactions);
+                                                            firstAddress,
+                                                            contractAddress,
+                                                            contractMethodName,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
     oldestTransactionHash = transactionHashList.get(0);
-    transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            null,
-            null,
-            oldestTransactionHash,
-            10,
-            false,
-            true);
+    transactions = transactionStorage.getWalletTransactions(1, firstAddress, null, null, oldestTransactionHash, 10, false, true);
     assertEquals("Returned wallet transactions list should include all transactions, even if limit = 10, the selected hash must be included in result",
-            60,
-            transactions.size());
+                 60,
+                 transactions.size());
 
     // Filter on only pending transactions
     includeAdministrationTransactions = false;
     transactions = transactionStorage.getWalletTransactions(1,
-            firstAddress,
-            contractAddress,
-            contractMethodName,
-            null,
-            0,
-            onlyPending,
-            includeAdministrationTransactions);
+                                                            firstAddress,
+                                                            contractAddress,
+                                                            contractMethodName,
+                                                            null,
+                                                            0,
+                                                            onlyPending,
+                                                            includeAdministrationTransactions);
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
-
   }
 
   /**
@@ -305,20 +308,20 @@ public class TransactionStorageTest extends BaseWalletTest {
   public void testGetPendingTransactions() {
     String contractAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
     String contractMethodName = "transfer";
-    String firstAddress = "0xe9dfec7864af9e581a85ce3987d026be0f509ac9";
+    String firstAddress = "0xe8dfec7864af9e581a85ce3987d026be0f509ac9";
 
     generateTransactions(firstAddress, contractAddress, contractMethodName);
 
     TransactionStorage transactionStorage = getService(TransactionStorage.class);
 
     // Search all pending transactions using the network id
-    List<TransactionDetail> transactions = transactionStorage.getPendingTransaction(1);
+    List<TransactionDetail> transactions = transactionStorage.getPendingWalletTransactionsNotSent(firstAddress, NETWORK_ID);
 
     assertNotNull("Returned transactions list is null", transactions);
-    assertEquals("Returned pending transactions list count on a network is not coherent", 30, transactions.size());
+    assertEquals("Returned pending transactions list count on a network is not coherent", 10, transactions.size());
 
     // Use non existing network ID
-    transactions = transactionStorage.getPendingTransaction(2);
+    transactions = transactionStorage.getPendingWalletTransactionsNotSent(firstAddress, NETWORK_ID + 1);
     assertEquals("Returned wallet transactions list count on a non existing network is not coherent", 0, transactions.size());
   }
 

@@ -131,7 +131,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       assertNotNull(initialRewardPeriodsInProgress);
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
