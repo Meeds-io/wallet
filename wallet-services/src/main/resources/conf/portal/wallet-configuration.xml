@@ -98,11 +98,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <description>Maximum attempts to send a transaction to blockchain</description>
         <value>${exo.wallet.transaction.pending.maxSendingAttempts:3}</value>
       </value-param>
-      <value-param>
-        <name>transaction.logAllContractTransactions</name>
-        <description>Whether to log all transactions made on principal contract or not</description>
-        <value>${exo.wallet.transaction.logAllContractTransactions:false}</value>
-      </value-param>
     </init-params>
   </component>
 

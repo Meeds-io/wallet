@@ -35,11 +35,6 @@ public class EthereumWalletTokenAdminServiceMock implements WalletTokenAdminServ
   }
 
   @Override
-  public TransactionDetail initialize(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
-    return null;
-  }
-
-  @Override
   public TransactionDetail sendEther(TransactionDetail transactionDetail, String issuerUsername) throws Exception {
     return null;
   }
@@ -50,7 +45,7 @@ public class EthereumWalletTokenAdminServiceMock implements WalletTokenAdminServ
   }
 
   @Override
-  public BigInteger balanceOf(String address) throws Exception {
+  public BigInteger getTokenBalanceOf(String address) throws Exception {
     return null;
   }
 
@@ -65,7 +60,7 @@ public class EthereumWalletTokenAdminServiceMock implements WalletTokenAdminServ
   }
 
   @Override
-  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail, Set<String> contractModifications) {
+  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail) {
 
   }
 

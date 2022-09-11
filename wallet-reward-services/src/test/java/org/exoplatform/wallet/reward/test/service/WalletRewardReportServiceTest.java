@@ -324,7 +324,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       teams.add(rewardTeam6);
 
       // Admin having only 10 tokens
-      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf(10l).pow(contractDecimals));
       try {
         walletRewardService.sendRewards(startDateInSeconds, "root");
@@ -335,14 +335,14 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       Mockito.verify(tokenAdminService, Mockito.times(0)).reward(Mockito.any(), Mockito.any());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       // Send reward for the second time for the same period
       resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
-      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       try {
         walletRewardService.sendRewards(startDateInSeconds, "root");
@@ -475,7 +475,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       assertEquals(0, walletRewards.size());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.balanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());

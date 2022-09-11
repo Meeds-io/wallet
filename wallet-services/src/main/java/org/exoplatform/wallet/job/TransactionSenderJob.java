@@ -16,10 +16,14 @@
  */
 package org.exoplatform.wallet.job;
 
-import org.quartz.*;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.*;
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -36,6 +40,7 @@ public class TransactionSenderJob implements Job {
 
   public TransactionSenderJob() {
     this.container = PortalContainer.getInstance();
+    this.blockchainTransactionService = this.container.getComponentInstanceOfType(BlockchainTransactionService.class);
   }
 
   @Override
@@ -44,7 +49,7 @@ public class TransactionSenderJob implements Job {
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
-      getBlockchainTransactionService().sendRawTransactions();
+      blockchainTransactionService.sendPendingTransactionsToBlockchain();
     } catch (Exception e) {
       LOG.error("Error while sending raw transactions", e);
     } finally {
@@ -53,10 +58,4 @@ public class TransactionSenderJob implements Job {
     }
   }
 
-  private BlockchainTransactionService getBlockchainTransactionService() {
-    if (blockchainTransactionService == null) {
-      blockchainTransactionService = CommonsUtils.getService(BlockchainTransactionService.class);
-    }
-    return blockchainTransactionService;
-  }
 }

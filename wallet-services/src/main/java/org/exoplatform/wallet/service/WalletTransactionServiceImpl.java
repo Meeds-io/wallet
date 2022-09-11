@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -67,8 +68,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private long                  maxAttemptsToSend;
 
-  private boolean               logAllTransaction;
-
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
                                       WalletContractService contractService,
@@ -90,10 +89,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         String value = params.getValueParam(MAX_SENDING_TRANSACTIONS_ATTEMPTS).getValue();
         this.maxAttemptsToSend = Long.parseLong(value);
       }
-      if (params.containsKey(LOG_ALL_CONTRACT_TRANSACTIONS)) {
-        String value = params.getValueParam(LOG_ALL_CONTRACT_TRANSACTIONS).getValue();
-        this.logAllTransaction = Boolean.parseBoolean(value);
-      }
     }
     if (this.maxParallelPendingTransactions <= 0) {
       LOG.warn("Invalid value {} for parameter {}, using default value {}",
@@ -112,13 +107,28 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public List<TransactionDetail> getPendingTransactions() {
-    return transactionStorage.getPendingTransaction(getNetworkId());
+  public List<TransactionDetail> getPendingWalletTransactionsNotSent(String address) {
+    return transactionStorage.getPendingWalletTransactionsNotSent(address, getNetworkId());
   }
 
   @Override
-  public int countPendingTransactions() {
-    return transactionStorage.countPendingTransactions(getNetworkId());
+  public List<TransactionDetail> getPendingWalletTransactionsSent(String address) {
+    return transactionStorage.getPendingWalletTransactionsSent(address, getNetworkId());
+  }
+
+  @Override
+  public List<TransactionDetail> getPendingEtherTransactions(String address) {
+    return transactionStorage.getPendingEtherTransactions(address, getNetworkId());
+  }
+
+  @Override
+  public int countContractPendingTransactionsSent() {
+    return transactionStorage.countContractPendingTransactionsSent(getNetworkId());
+  }
+
+  @Override
+  public int countContractPendingTransactionsToSend() {
+    return transactionStorage.countContractPendingTransactionsToSend(getNetworkId());
   }
 
   @Override
@@ -292,26 +302,25 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public long countTransactionsByNonce(TransactionDetail transactionDetail) {
-    return transactionStorage.countTransactionsByNonce(transactionDetail.getNetworkId(), transactionDetail.getFrom(), transactionDetail.getNonce());
+  public long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce) {
+    return transactionStorage.countPendingTransactionsWithSameNonce(getNetworkId(), transactionHash, fromAddress, nonce);
   }
 
   @Override
   public void cancelTransactionsWithSameNonce(TransactionDetail replacingTransaction) {
-    List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(replacingTransaction.getNetworkId(),
-                                                                                            replacingTransaction.getFrom(),
-                                                                                            replacingTransaction.getNonce());
-    if (transactionsByNonce.size() > 1) {
+    List<TransactionDetail> transactions =
+                                         transactionStorage.getPendingTransactionsWithSameNonce(replacingTransaction.getNetworkId(),
+                                                                                                replacingTransaction.getHash(),
+                                                                                                replacingTransaction.getFrom(),
+                                                                                                replacingTransaction.getNonce());
+    if (CollectionUtils.isNotEmpty(transactions)) {
       // Change status of other transactions having same nonce only when
       // none succeeded
-      transactionsByNonce.forEach(replacedTransaction -> {
-        if (!replacedTransaction.isPending() && !replacingTransaction.isPending()) {
-          return;
-        }
+      transactions.forEach(replacedTransaction -> {
+        replacedTransaction.setDropped(true);
         replacedTransaction.setPending(false);
-        replacedTransaction.setSucceeded(false);
-        broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
         saveTransactionDetail(replacedTransaction, true);
+        broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
       });
     }
   }
@@ -361,11 +370,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public long getMaxParallelPendingTransactions() {
     return maxParallelPendingTransactions;
-  }
-
-  @Override
-  public boolean isLogAllTransaction() {
-    return logAllTransaction;
   }
 
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
@@ -487,13 +491,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
     try {
       Map<String, Object> transaction = transactionToMap(transactionDetail);
-      getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
+      getListenerService().broadcast(TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
     }
   }
-
-
 
   private SpaceService getSpaceService() {
     if (spaceService == null) {
