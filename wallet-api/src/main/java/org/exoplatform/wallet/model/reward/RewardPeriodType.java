@@ -35,9 +35,9 @@ public enum RewardPeriodType {
     switch (this) {
     case WEEK:
       LocalDateTime firstDayOfThisWeek = localDateTime.with(DayOfWeek.MONDAY);
-      LocalDateTime firstDayOfNextWeek = firstDayOfThisWeek.plusWeeks(1);
+      LocalDateTime lastDayOfThisWeek = firstDayOfThisWeek.plusDays(6);
       rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(firstDayOfThisWeek));
-      rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(firstDayOfNextWeek));
+      rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(lastDayOfThisWeek));
       break;
     case MONTH:
       YearMonth currentMonth = yearMonth;

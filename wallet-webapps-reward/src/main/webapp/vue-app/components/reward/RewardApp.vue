@@ -176,7 +176,7 @@ export default {
     },
     periodDatesDisplay() {
       const selectedStartDate = this.period && this.formatDate(new Date(this.period.startDateInSeconds * 1000));
-      const selectedEndDate = this.period && this.formatDate(new Date((this.period.endDateInSeconds -1) * 1000));
+      const selectedEndDate = this.period && this.formatDate(new Date((this.period.endDateInSeconds) * 1000));
       if (selectedStartDate && selectedEndDate) {
         return `${selectedStartDate} ${this.$t('exoplatform.wallet.label.to')} ${selectedEndDate}`;
       } else if (selectedStartDate) {
