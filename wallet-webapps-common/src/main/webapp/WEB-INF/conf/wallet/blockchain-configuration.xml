@@ -100,18 +100,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <external-component-plugins>
     <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
     <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <name>TransactionSenderJob</name>
+      <set-method>addPeriodJob</set-method>
+      <type>org.exoplatform.services.scheduler.PeriodJob</type>
       <description>Configuration for transaction sending to blockchain</description>
       <init-params>
         <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for transaction sending to blockchain</description>
+          <name>job.info</name>
+          <description>details of the execution of the bulk indexing job</description>
           <property name="jobName" value="TransactionSenderJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.job.TransactionSenderJob"/>
-          <property name="expression" value="${exo.wallet.TransactionSenderJob.expression:0/30 * * * * ?}"/>
+          <property name="repeatCount" value="0"/>
+          <property name="period" value="${exo.wallet.TransactionSenderJob.interval:30000}"/><!-- default 30 seconds -->
+          <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
+          <property name="endTime" value=""/>
         </properties-param>
       </init-params>
     </component-plugin>
@@ -133,17 +136,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </component-plugin>
     <component-plugin>
       <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <set-method>addPeriodJob</set-method>
+      <type>org.exoplatform.services.scheduler.PeriodJob</type>
       <description>A job to update gas price from blockchain</description>
       <init-params>
         <properties-param>
-          <name>cronjob.info</name>
-          <description>A job to update gas price from blockchain</description>
+          <name>job.info</name>
           <property name="jobName" value="GasPriceUpdaterJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.job.GasPriceUpdaterJob"/>
-          <property name="expression" value="${exo.wallet.GasPriceUpdaterJob.expression:0 0/2 * * * ?}"/>
+          <property name="repeatCount" value="0"/>
+          <property name="period" value="${exo.wallet.GasPriceUpdaterJob.interval:120000}"/><!-- default 30 seconds -->
+          <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
+          <property name="endTime" value=""/>
         </properties-param>
       </init-params>
     </component-plugin>

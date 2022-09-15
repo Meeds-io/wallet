@@ -57,7 +57,7 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
   }
 
   @Override
-  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
+  public void onEvent(Event<Object, TransactionDetail> event) throws Exception { // NOSONAR
     TransactionDetail transactionDetail = event.getData();
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);

@@ -87,8 +87,6 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
       addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getByWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_APPROVE)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
     }
   }
 

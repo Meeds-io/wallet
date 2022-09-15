@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,6 +65,8 @@ import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
+
+  private static final String NEW = "NEW";
 
   @Test
   public void testContainerStart() {
@@ -234,13 +237,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     entitiesToClean.add(wallet);
 
     String privateKeyContent = "Private key";
-    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                   CURRENT_USER,
-                                                   privateKeyContent,
-                                                   CURRENT_USER);
-    String storedPrivateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                                            CURRENT_USER,
-                                                                            CURRENT_USER);
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, privateKeyContent, CURRENT_USER);
+    String storedPrivateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
     assertEquals("Wallet private key should be equal", privateKeyContent, storedPrivateKey);
   }
 
@@ -396,10 +394,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     entitiesToClean.add(wallet);
 
     String content = "Private key";
-    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                   CURRENT_USER,
-                                                   content,
-                                                   CURRENT_USER);
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, content, CURRENT_USER);
     try {
       walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), "root0", "root0");
     } catch (Exception e) {
@@ -407,17 +402,13 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     try {
-      walletAccountService.getPrivateKeyByTypeAndId(WalletType.ADMIN.name(),
-                                                    CURRENT_USER,
-                                                    CURRENT_USER);
+      walletAccountService.getPrivateKeyByTypeAndId(WalletType.ADMIN.name(), CURRENT_USER, CURRENT_USER);
       fail("User is not allowed to access private key of admin");
     } catch (Exception e) {
       // Expected, user is not allowed to access private key of admin
     }
 
-    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                                      CURRENT_USER,
-                                                                      CURRENT_USER);
+    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, CURRENT_USER);
     assertNotNull("Wallet private key shouldn't be null", privateKey);
   }
 
@@ -435,13 +426,9 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     String content = "Save private key";
     walletAccountService.saveWalletAddress(wallet, CURRENT_USER);
     assertNotNull(wallet);
-    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                   CURRENT_USER,
-                                                   content,
-                                                   CURRENT_USER);
+    walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, content, CURRENT_USER);
 
-    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(),
-                                                                      CURRENT_USER);
+    String privateKey = walletAccountService.getPrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER);
     assertNotNull("Wallet private key shouldn't be null", privateKey);
     entitiesToClean.add(wallet);
   }
@@ -540,7 +527,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     String type = wallet.getType();
     walletAccountService.removeWalletByTypeAndId(type, CURRENT_USER, CURRENT_USER);
     Set<Wallet> wallets = walletAccountService.listWallets();
-    assertEquals("Wallet list Should be empty", wallets.size(), 0);
+    assertTrue("Wallet list Should be empty", wallets.isEmpty());
   }
 
   /**
@@ -648,7 +635,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW, CURRENT_USER);
-    assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
+    assertEquals("Wallet initial status Should be NEW", NEW, wallet.getInitializationState());
     entitiesToClean.add(wallet);
   }
 
@@ -682,7 +669,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     }
 
     walletAccountService.setInitializationStatus(WALLET_ADDRESS_1, WalletState.NEW);
-    assertEquals("Wallet initial status Should be NEW", wallet.getInitializationState(), "NEW");
+    assertEquals("Wallet initial status Should be NEW", NEW, wallet.getInitializationState());
     entitiesToClean.add(wallet);
   }
 
@@ -701,7 +688,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     String walletAddress = "0x927f51a2996Ff74d1C380F92DC9006b53A225CeF";
     String rawMessage = "-2037692822791791745-3891968992033463560-1384458414145506416";
-    String signedMessage = "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
+    String signedMessage =
+                         "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
 
     Wallet wallet = walletAccountService.saveWallet(newWallet(), true);
     long technicalId = wallet.getTechnicalId();
@@ -746,7 +734,8 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     String privateKeyContent = "content";
     String walletAddress = "0x927f51a2996Ff74d1C380F92DC9006b53A225CeF";
     String rawMessage = "-2037692822791791745-3891968992033463560-1384458414145506416";
-    String signedMessage = "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
+    String signedMessage =
+                         "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c";
 
     Wallet wallet = newWallet();
     wallet.setAddress(internalWalletAddress);
@@ -758,7 +747,6 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     entitiesToClean.add(wallet);
 
     walletAccountService.savePrivateKeyByTypeAndId(WalletType.USER.name(), CURRENT_USER, privateKeyContent, CURRENT_USER);
-
 
     walletAccountService.switchWalletProvider(wallet.getTechnicalId(),
                                               WalletProvider.METAMASK,
@@ -839,7 +827,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     doNothing().when(tokenAdminService).retrieveWalletInformationFromBlockchain(wallet, contractDetail, modifications);
 
     walletAccountService.refreshWalletFromBlockchain(wallet, contractDetail, walletModifications);
-    verify(listenerService, times(0)).broadcast(eq(WALLET_MODIFIED_EVENT), eq(null), any(Wallet.class));
+    verify(listenerService, never()).broadcast(eq(WALLET_MODIFIED_EVENT), eq(null), any(Wallet.class));
 
     reset(tokenAdminService);
     doAnswer(invocation -> {

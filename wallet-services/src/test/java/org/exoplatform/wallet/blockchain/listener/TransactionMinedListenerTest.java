@@ -159,8 +159,7 @@ public class TransactionMinedListenerTest {
     listener.onEvent(event);
     verify(listenerService, times(1)).broadcast(TRANSACTION_MINED_AND_UPDATED_EVENT, null, transactionDetail);
     Map<String, Set<String>> walletModifications = new HashMap<>();
-    walletModifications.put(fromAddress,
-                            new HashSet<>(Arrays.asList(WalletUtils.ETHER_FUNC_SEND_FUNDS, MeedsToken.FUNC_APPROVE)));
+    walletModifications.put(fromAddress, new HashSet<>(Arrays.asList(WalletUtils.ETHER_FUNC_SEND_FUNDS)));
     verify(accountService, times(1)).refreshWalletsFromBlockchain(walletModifications);
   }
 

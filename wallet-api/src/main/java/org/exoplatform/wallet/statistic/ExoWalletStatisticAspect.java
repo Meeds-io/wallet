@@ -46,7 +46,7 @@ public class ExoWalletStatisticAspect {
    * @throws Throwable if processing point throws an exception
    */
   @Around("execution(* *(..)) && @annotation(org.exoplatform.wallet.statistic.ExoWalletStatistic)")
-  public Object around(ProceedingJoinPoint point) throws Throwable {
+  public Object around(ProceedingJoinPoint point) throws Throwable { // NOSONAR
     ExoWalletStatisticService statisticService = (ExoWalletStatisticService) point.getThis();
     MethodSignature methodSignature = (MethodSignature) point.getSignature();
     Method method = methodSignature.getMethod();
@@ -97,14 +97,18 @@ public class ExoWalletStatisticAspect {
           addStatisticEntry(parameters);
         }
       } catch (Throwable e) {
-        LOG.warn("Error adding statistic log entry in method {} for statistic type {}", method.getName(), operation, e);
+        LOG.warn("Error adding statistic log entry in method '{}' for statistic type '{}'", method.getName(), operation, e);
       }
     }
   }
 
   private void put(Map<String, Object> parameters, String key, Object value) {
     if (StringUtils.isNotBlank(key) && value != null) {
-      parameters.put(key, value);
+      try {
+        parameters.put(key, value);
+      } catch (Exception e) {
+        LOG.warn("Error adding statistic log entry with values", key, value, e);
+      }
     }
   }
 

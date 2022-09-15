@@ -69,11 +69,11 @@ public class TransactionStorage {
     return fromEntities(transactions);
   }
 
-  public int countContractPendingTransactionsSent(long networkId) {
+  public long countContractPendingTransactionsSent(long networkId) {
     return walletTransactionDAO.countContractPendingTransactionsSent(networkId);
   }
 
-  public int countContractPendingTransactionsToSend(long networkId) {
+  public long countContractPendingTransactionsToSend(long networkId) {
     return walletTransactionDAO.countContractPendingTransactionsToSend(networkId);
   }
 
@@ -193,6 +193,7 @@ public class TransactionStorage {
       transactionDetail.setTimestamp(System.currentTimeMillis());
     }
     if (transactionDetail.getSentTimestamp() <= 0 && StringUtils.isBlank(transactionDetail.getRawTransaction())) {
+      // Transaction sent by external wallet, thus add sending timestamp
       transactionDetail.setSentTimestamp(transactionDetail.getTimestamp());
     }
     TransactionEntity transactionEntity = toEntity(transactionDetail);

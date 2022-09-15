@@ -771,12 +771,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
@@ -785,21 +785,21 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         parameters.put(OPERATION, "reject");
       } else {
         LOG.debug("No statistic log is handeled for initialization state modification to {}", initializationState);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
     } else if (StringUtils.equals(STATISTIC_OPERATION_ENABLE, operation)) {
       if (result == null || !((boolean) result)) {
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
@@ -809,13 +809,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       Wallet wallet = (Wallet) methodArgs[0];
       if (wallet == null) {
         LOG.debug("Wallet not found in parameters. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
     } else {
       LOG.warn("Statistic operation type '{}' not handled", operation);
-      return Collections.emptyMap();
+      return null; // NOSONAR should be null to not collect stats
     }
 
     String issuer = (String) methodArgs[methodArgs.length - 1];

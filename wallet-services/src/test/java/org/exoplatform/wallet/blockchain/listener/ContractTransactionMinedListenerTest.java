@@ -17,6 +17,7 @@
 package org.exoplatform.wallet.blockchain.listener;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,7 +84,7 @@ public class ContractTransactionMinedListenerTest {
   public void testOnEventWhenTransactionIsNoKnownAndWalletsNotKnown() throws Exception {
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, times(0)).refreshTransactionFromBlockchain(any());
+    verify(blockchainTransactionService, never()).refreshTransactionFromBlockchain(any());
   }
 
   @Test
@@ -94,7 +95,7 @@ public class ContractTransactionMinedListenerTest {
 
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, times(0)).refreshTransactionFromBlockchain(any());
+    verify(blockchainTransactionService, never()).refreshTransactionFromBlockchain(any());
   }
 
   @Test

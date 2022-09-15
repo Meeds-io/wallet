@@ -67,7 +67,7 @@ public class TransactionMinedAndUpdatedListenerTest {
 
   @Test
   public void testOnEventWhenHavingPendingTransactions() throws Exception {
-    when(walletTransactionService.countContractPendingTransactionsSent()).thenReturn(1);
+    when(walletTransactionService.countContractPendingTransactionsSent()).thenReturn(1l);
 
     listener.onEvent(event);
 
@@ -76,7 +76,7 @@ public class TransactionMinedAndUpdatedListenerTest {
 
   @Test
   public void testOnEventWhenHavingPendingTransactionsToSend() throws Exception {
-    when(walletTransactionService.countContractPendingTransactionsToSend()).thenReturn(1);
+    when(walletTransactionService.countContractPendingTransactionsToSend()).thenReturn(1l);
 
     listener.onEvent(event);
 

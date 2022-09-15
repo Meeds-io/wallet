@@ -2,6 +2,7 @@ package org.exoplatform.wallet.listener;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -45,7 +46,7 @@ public class TransactionCreatedListenerTest {
     transactionDetail.setPending(true);
     listener.onEvent(event);
     verify(walletTransactionService, times(1)).cancelTransactionsWithSameNonce(transactionDetail);
-    verify(listenerService, times(0)).broadcast(anyString(), any(), any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
   }
 
   @Test
@@ -54,7 +55,7 @@ public class TransactionCreatedListenerTest {
     transactionDetail.setPending(false);
     listener.onEvent(event);
     verify(walletTransactionService, times(1)).cancelTransactionsWithSameNonce(transactionDetail);
-    verify(listenerService, times(0)).broadcast(anyString(), any(), any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
   }
 
   @Test
@@ -72,7 +73,7 @@ public class TransactionCreatedListenerTest {
     transactionDetail.setPending(false);
     listener.onEvent(event);
     verify(walletTransactionService, times(1)).cancelTransactionsWithSameNonce(transactionDetail);
-    verify(listenerService, times(0)).broadcast(anyString(), any(), any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
   }
 
 }

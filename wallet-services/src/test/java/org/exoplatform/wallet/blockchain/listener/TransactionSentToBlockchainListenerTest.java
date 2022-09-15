@@ -16,6 +16,7 @@
  */
 package org.exoplatform.wallet.blockchain.listener;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,12 +58,12 @@ public class TransactionSentToBlockchainListenerTest {
   public void testOnEventWhenNoPendingTransactions() throws Exception {
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, times(0)).startWatchingBlockchain();
+    verify(blockchainTransactionService, never()).startWatchingBlockchain();
   }
 
   @Test
   public void testOnEventWhenHavingPendingTransactions() throws Exception {
-    when(walletTransactionService.countContractPendingTransactionsSent()).thenReturn(1);
+    when(walletTransactionService.countContractPendingTransactionsSent()).thenReturn(1l);
 
     listener.onEvent(event);
 

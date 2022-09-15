@@ -28,7 +28,7 @@ import org.exoplatform.wallet.service.WalletTransactionService;
  * This listener is triggered when a user wallet is deleted to remove all its
  * not sent pending transactions
  */
-public class WalletDeletedListener extends Listener<Object, String> {
+public class WalletDeletedListener extends Listener<Wallet, String> {
 
   private WalletTransactionService transactionService;
 
@@ -37,17 +37,14 @@ public class WalletDeletedListener extends Listener<Object, String> {
   }
 
   @Override
-  public void onEvent(Event<Object, String> event) throws Exception {
-    Wallet wallet = (Wallet) event.getSource();
+  public void onEvent(Event<Wallet, String> event) throws Exception {
+    Wallet wallet = event.getSource();
     List<TransactionDetail> pendingTransactions = transactionService.getPendingWalletTransactionsNotSent(wallet.getAddress());
     if (pendingTransactions != null) {
       pendingTransactions.forEach(transactionDetail -> {
         // Cancel only not sent transactions yet
-        if (transactionDetail.getSendingAttemptCount() == 0) {
-          transactionDetail.setPending(false);
-          transactionDetail.setDropped(true);
-          transactionService.saveTransactionDetail(transactionDetail, true);
-        }
+        transactionDetail.setPending(false);
+        transactionService.saveTransactionDetail(transactionDetail, true);
       });
     }
   }

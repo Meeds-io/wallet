@@ -255,7 +255,7 @@ public class WalletRewardReportService implements RewardReportService {
       Set<Long> identityIds = walletRewards.stream().map(wr -> wr.getIdentityId()).collect(Collectors.toSet());
       Map<Long, Double> earnedPoints = plugin.getEarnedPoints(identityIds,
                                                               period.getStartDateInSeconds(),
-                                                              period.getEndDateInSeconds());
+                                                              period.getEndDateInSeconds() - 1);
 
       Set<WalletReward> validWalletRewards = pluginSettings.isUsePools() ? enabledTeamRewards : enabledRewards;
       computeReward(pluginSettings, earnedPoints, validWalletRewards, walletRewardsByPlugin);

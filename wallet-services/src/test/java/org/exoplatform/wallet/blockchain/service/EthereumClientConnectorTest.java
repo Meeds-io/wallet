@@ -5,11 +5,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -116,16 +116,6 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     assertFalse(service.connect());
   }
 
-  @Test
-  public void testWaitConnection() throws Exception {
-    service.start();
-    service.connect();
-    assertTrue(service.isConnected());
-
-    service.stop();
-    assertThrows(IllegalStateException.class, () -> service.waitConnection());
-  }
-
   @SuppressWarnings("unchecked")
   @Test
   public void testRenewTransactionListeningSubscription() throws Exception {
@@ -167,13 +157,13 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
                                                                              log.getBlockNumber().longValue()));
     assertTrue(service.isListeningToBlockchain());
     assertFalse(ethFilterSubscribtion.isDisposed());
-    service.stopListeningToBlockchain();
+    service.cancelTransactionListeningToBlockchain();
     assertTrue(ethFilterSubscribtion.isDisposed());
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testRenewTransactionListeningSubscriptionException() throws Exception {
+  public void testRenewTransactionListeningSubscriptionWhenException() throws Exception {
     service.start();
     service.connect();
     assertTrue(service.isConnected());
@@ -189,9 +179,12 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     Future<Disposable> future = service.renewTransactionListeningSubscription(123);
     assertNotNull(future);
     assertNull(future.get());
-    verify(listenerService, times(0)).broadcast(any(), any(), any());
+    verify(listenerService, never()).broadcast(any(), any(), any());
 
-    assertFalse(service.isListeningToBlockchain());
+    // The subscription has to be re-attempted by scheduled job
+    // even if an exception occurs while subscribing the first time
+    assertTrue(service.isListeningToBlockchain());
+    assertNotNull(service.getConnectionVerifierFuture());
   }
 
   @SuppressWarnings("unchecked")
@@ -242,7 +235,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
                                                                              log.getBlockNumber().longValue()));
     assertTrue(service.isListeningToBlockchain());
     assertFalse(ethFilterSubscribtion.isDisposed());
-    service.stopListeningToBlockchain();
+    service.cancelTransactionListeningToBlockchain();
     assertTrue(ethFilterSubscribtion.isDisposed());
   }
 

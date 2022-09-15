@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -109,17 +110,15 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
   private FutureCache<String, TransactionReceipt, Object> receiptFutureCache           = null;
 
+  private ScheduledExecutorService                        subscriptionVerifierExecutor = null;
+
   private ScheduledExecutorService                        connectionVerifierExecutor   = null;
 
-  private ScheduledExecutorService                        subscriptionVerifierExecutor = null;
+  private ScheduledFuture<?>                              connectionVerifierFuture;
 
   private boolean                                         permanentlyScanBlockchain    = false;
 
   private boolean                                         listeningToBlockchain        = false;
-
-  private boolean                                         connectionInProgress         = false;
-
-  private boolean                                         serviceStarted               = false;
 
   private boolean                                         serviceStopping              = false;
 
@@ -138,12 +137,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   private long                                            lastWatchedBlockNumber;
 
   public EthereumClientConnector(CacheService cacheService) {
-    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
-    connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
-
-    namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-contract-flowable-%d").build();
-    subscriptionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
-
     String pollingIntervalParam = System.getProperty("exo.wallet.blockchain.polling.intervalInSeconds");
     if (StringUtils.isNotBlank(pollingIntervalParam)) {
       setPollingInterval(Long.parseLong(pollingIntervalParam) * 1000);
@@ -153,6 +146,12 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
 
     String permanentlyScanParam = System.getProperty("exo.wallet.blockchain.permanentlyScan", "false");
     permanentlyScanBlockchain = Boolean.parseBoolean(permanentlyScanParam);
+
+    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
+    connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
+
+    namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-contract-flowable-%d").build();
+    subscriptionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
 
     ExoCache<String, Transaction> transactionCache = cacheService.getCacheInstance("wallet.blockchain.transaction");
     ExoCache<String, TransactionReceipt> receiptCache = cacheService.getCacheInstance("wallet.blockchain.transactionReceipt");
@@ -164,7 +163,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public void start() {
     this.websocketURL = getWebsocketURL();
     this.networkId = getNetworkId();
-    this.serviceStarted = true;
 
     // Default unhandeled errors management
     if (RxJavaPlugins.getErrorHandler() == null) {
@@ -176,10 +174,11 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       });
     }
 
+    if (permanentlyScanBlockchain) {
+      startPeriodicConnectionVerifier();
+    }
     // Blockchain connection verifier
-    connectionVerifierExecutor.scheduleWithFixedDelay(this::checkConnection, 0, 30, TimeUnit.SECONDS);
-    // Blockchain connection verifier
-    subscriptionVerifierExecutor.scheduleWithFixedDelay(this::checkSubscription, 0, 15, TimeUnit.SECONDS);
+    subscriptionVerifierExecutor.scheduleWithFixedDelay(this::checkSubscription, 10, 15, TimeUnit.SECONDS);
   }
 
   @Override
@@ -189,18 +188,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     subscriptionVerifierExecutor.shutdownNow();
     stopListeningToBlockchain();
     closeConnection();
-  }
-
-  public synchronized void stopListeningToBlockchain() {
-    if (this.ethFilterSubscribtion != null && !this.ethFilterSubscribtion.isDisposed()) {
-      LOG.info("Close mined contract transactions subscription");
-      try {
-        this.ethFilterSubscribtion.dispose();
-      } catch (Exception e) {
-        LOG.warn("Error when closing old subscription", e.getMessage());
-      }
-    }
-    this.listeningToBlockchain = false;
   }
 
   public boolean isPermanentlyScanBlockchain() {
@@ -373,8 +360,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   public Web3j getWeb3j() {
-    this.checkConnection();
-    this.waitConnection();
+    this.checkConnection(false);
     return web3j;
   }
 
@@ -437,9 +423,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       }
 
       double contractAmount = transactionDetail.getContractAmount();
-      if (contractAmount > 0
-          && (StringUtils.equals(MeedsToken.FUNC_TRANSFER, methodName) || StringUtils.equals(MeedsToken.FUNC_APPROVE, methodName)
-              || StringUtils.equals(MeedsToken.FUNC_TRANSFERFROM, methodName))) {
+      if (contractAmount > 0 && (StringUtils.equals(MeedsToken.FUNC_TRANSFER, methodName)
+          || StringUtils.equals(MeedsToken.FUNC_TRANSFERFROM, methodName))) {
         parameters.put("amount_token", contractAmount);
       }
 
@@ -456,20 +441,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   public synchronized Future<Disposable> renewTransactionListeningSubscription(long lastWatchedBlockNumber) {
-    checkConnection();
-    waitConnection();
-
     this.setLastWatchedBlockNumber(lastWatchedBlockNumber);
-    if (!this.listeningToBlockchain
-        || (!this.subscriptionInProgress && (this.ethFilterSubscribtion == null || this.ethFilterSubscribtion.isDisposed()))) {
-      // Close old subscription if exists
-      stopListeningToBlockchain();
+    return renewTransactionListeningSubscription();
+  }
 
-      // Renew subscription that will trigger an event each time a transaction
-      // is mined on contract
-      return subscribeToBlockchain();
-    }
-    return null;
+  public synchronized void cancelTransactionListeningToBlockchain() {
+    stopListeningToBlockchain();
+    stopPeriodicConnectionVerifier();
   }
 
   public void setPollingInterval(long pollingInterval) {
@@ -508,35 +486,13 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return web3j != null && web3jService != null && webSocketClient != null && webSocketClient.isOpen();
   }
 
-  protected void waitConnection() {
-    if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
-      throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
-    }
-    if (this.serviceStopping) {
-      throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
-    }
-    try {
-      while (!isConnected() && !Thread.currentThread().isInterrupted()) {
-        if (this.serviceStarted && StringUtils.isBlank(websocketURL)) {
-          throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
-        }
-        if (this.serviceStopping) {
-          throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
-        }
-        LOG.debug("Wait until Websocket connection to blockchain is established to retrieve information");
-        Thread.sleep(5000);
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    } catch (Exception e) {
-      throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
-    }
+  protected boolean connect() throws Exception { // NOSONAR
+    return connect(false);
   }
 
-  protected synchronized boolean connect() throws Exception { // NOSONAR
-    if (this.connectionInProgress) {
-      LOG.debug("Web3 connection is in progress");
-      return false;
+  protected synchronized boolean connect(boolean periodicCheck) throws Exception { // NOSONAR
+    if (periodicCheck) {
+      startPeriodicConnectionVerifier();
     }
     if (isConnected()) {
       LOG.debug("Web3 connection is already made");
@@ -555,63 +511,46 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       return false;
     }
 
-    this.connectionInProgress = true;
-    try {
-      if (this.web3j != null && this.web3jService != null && this.webSocketClient != null) {
-        LOG.info("Reconnect to blockchain endpoint {}", websocketURL);
-        boolean reconnected = this.webSocketClient.reconnectBlocking();
-        if (reconnected) {
-          LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
-          if (this.listeningToBlockchain) {
-            renewTransactionListeningSubscription(this.lastWatchedBlockNumber);
-          }
+    if (this.web3j != null && this.web3jService != null && this.webSocketClient != null) {
+      LOG.info("Reconnect to blockchain endpoint {}", websocketURL);
+      return this.webSocketClient.reconnectBlocking();
+    } else {
+      LOG.info("Connecting to Ethereum network endpoint {}", websocketURL);
+      this.webSocketClient = new WebSocketClient(new URI(websocketURL));
+      this.webSocketClient.setConnectionLostTimeout(10);
+      this.web3jService = new WebSocketService(webSocketClient, true);
+      this.webSocketClient.setListener(new WebSocketListener() {
+        @Override
+        public void onMessage(String message) throws IOException {
+          LOG.debug("A new message is delivered from blockchain: {}", message);
         }
-        return reconnected;
-      } else {
-        LOG.info("Connecting to Ethereum network endpoint {}", websocketURL);
-        this.webSocketClient = new WebSocketClient(new URI(websocketURL));
-        this.webSocketClient.setConnectionLostTimeout(10);
-        this.web3jService = new WebSocketService(webSocketClient, true);
-        this.webSocketClient.setListener(new WebSocketListener() {
-          @Override
-          public void onMessage(String message) throws IOException {
-            LOG.debug("A new message is delivered from blockchain: {}", message);
-          }
 
-          @Override
-          public void onError(Exception e) {
-            LOG.warn("Error connecting to blockchain: {}", (e == null ? "" : e.getMessage()));
-          }
+        @Override
+        public void onError(Exception e) {
+          LOG.warn("Error connecting to blockchain: {}", (e == null ? "" : e.getMessage()));
+        }
 
-          @Override
-          public void onClose() {
-            LOG.debug("Blockchain websocket connection closed");
-          }
-        });
-        this.web3jService.connect();
-        web3j = Web3j.build(web3jService, getPollingInterval(), Async.defaultExecutorService());
-        LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
-        return true;
-      }
-    } finally {
-      this.connectionInProgress = false;
+        @Override
+        public void onClose() {
+          LOG.debug("Blockchain websocket connection closed");
+        }
+      });
+      this.web3jService.connect();
+      web3j = Web3j.build(web3jService, getPollingInterval(), Async.defaultExecutorService());
+      LOG.info("Connection established to Ethereum network endpoint {}", websocketURL);
+      return true;
     }
   }
 
-  protected void checkConnection() {
+  protected boolean checkConnection(boolean periodicCheck) {
     try {
-      if (!isConnected()) {
-        connect();
-      }
+      return connect(periodicCheck);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (Throwable e) { // NOSONAR
-      if (LOG.isDebugEnabled()) {
-        LOG.warn("Error while checking connection status to Etherreum Websocket endpoint", e);
-      } else {
-        LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e.getMessage());
-      }
+      LOG.warn("Error while checking connection status to Etherreum Websocket endpoint: {}", e);
     }
+    return false;
   }
 
   protected void closeConnection() {
@@ -649,24 +588,64 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     this.listenerService = listenerService;
   }
 
+  protected ScheduledFuture<?> getConnectionVerifierFuture() { // NOSONAR
+    return connectionVerifierFuture;
+  }
+
   protected synchronized void checkSubscription() {
     if (this.listeningToBlockchain && !this.subscriptionInProgress
         && (this.ethFilterSubscribtion == null || this.ethFilterSubscribtion.isDisposed())) {
       try {
-        Future<Disposable> subscribion = subscribeToBlockchain();
-        subscribion.get();
+        if (checkConnection(false)) {
+          Future<Disposable> subscribion = subscribeToBlockchain();
+          subscribion.get();
+        }
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       } catch (ExecutionException e) {
         LOG.warn("Error subscribing to blockchain", e);
-      } finally {
-        this.subscriptionInProgress = false;
       }
     }
   }
 
+  private synchronized void startPeriodicConnectionVerifier() {
+    if (connectionVerifierFuture == null) {
+      LOG.info("Start periodic WebSocket endpoint connection status check");
+      // Blockchain connection verifier
+      connectionVerifierFuture = connectionVerifierExecutor.scheduleWithFixedDelay(() -> this.checkConnection(false),
+                                                                                   0,
+                                                                                   30,
+                                                                                   TimeUnit.SECONDS);
+    }
+  }
+
+  private void stopPeriodicConnectionVerifier() {
+    if (connectionVerifierFuture != null && !permanentlyScanBlockchain) {
+      connectionVerifierFuture.cancel(false);
+      connectionVerifierFuture = null;
+      LOG.info("Stop periodic WebSocket endpoint connection status check");
+    }
+  }
+
+  private Future<Disposable> renewTransactionListeningSubscription() {
+    try {
+      checkConnection(true);
+      if (!this.listeningToBlockchain
+          || (!this.subscriptionInProgress && (this.ethFilterSubscribtion == null || this.ethFilterSubscribtion.isDisposed()))) {
+        // Close old subscription if exists
+        stopListeningToBlockchain();
+
+        // Renew subscription that will trigger an event each time a transaction
+        // is mined on contract
+        return subscribeToBlockchain();
+      }
+    } finally {
+      this.listeningToBlockchain = true;
+    }
+    return null;
+  }
+
   private Future<Disposable> subscribeToBlockchain() {
-    // Replay all blocks until last mined one
     this.listeningToBlockchain = true;
     this.subscriptionInProgress = true;
     LOG.info("Start watching mined contract transactions from blockchain from block '{}'", this.lastWatchedBlockNumber);
@@ -684,13 +663,27 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
                                                                           exception));
         return ethFilterSubscribtion;
       } catch (Exception e) {
-        this.listeningToBlockchain = false;
         LOG.warn("Error while subscribing to Blockchain Filter Contract events", e);
         return null;
       } finally {
         this.subscriptionInProgress = false;
       }
     });
+  }
+
+  private synchronized void stopListeningToBlockchain() {
+    try {
+      if (this.ethFilterSubscribtion != null && !this.ethFilterSubscribtion.isDisposed()) {
+        LOG.info("Close mined contract transactions subscription");
+        try {
+          this.ethFilterSubscribtion.dispose();
+        } catch (Exception e) {
+          LOG.warn("Error when closing old subscription", e.getMessage());
+        }
+      }
+    } finally {
+      this.listeningToBlockchain = false;
+    }
   }
 
   private void handleNewContractTransactionMined(org.web3j.protocol.core.methods.response.Log log) throws Exception {

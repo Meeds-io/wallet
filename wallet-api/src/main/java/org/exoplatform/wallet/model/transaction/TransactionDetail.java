@@ -174,4 +174,8 @@ public class TransactionDetail implements Serializable, Cloneable {
     }
   }
 
+  public void increaseSendingAttemptCount() {
+    setSendingAttemptCount(sendingAttemptCount + 1);
+  }
+
 }

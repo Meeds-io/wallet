@@ -17,6 +17,7 @@
 package org.exoplatform.wallet.blockchain.listener;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -97,7 +98,7 @@ public class EtherTransactionVerifierListenerTest {
 
     listener.onEvent(event);
     verifyNoInteractions(blockchainTransactionService);
-    verify(transactionService, times(0)).getPendingEtherTransactions(any());
+    verify(transactionService, never()).getPendingEtherTransactions(any());
   }
 
   @Test

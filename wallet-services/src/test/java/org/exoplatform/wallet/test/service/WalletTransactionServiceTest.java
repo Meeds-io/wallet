@@ -401,11 +401,8 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     entitiesToClean.add(transactionDetail2);
   }
 
-  /**
-   * Test {@link WalletTransactionService#getNonce(String, String)}
-   */
   @Test
-  public void testGetNonce() {
+  public void testGetNonce() throws Exception {
     addCurrentUserWallet();
 
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
@@ -424,28 +421,28 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
                                                                   false,
                                                                   null,
                                                                   System.currentTimeMillis());
+
+    assertThrows(IllegalAccessException.class, () -> walletTransactionService.getNonce(WALLET_ADDRESS_1, USER_TEST));
+
+    long nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+    assertEquals(NONCE + 1, nonce);
+
+    transactionDetail.setNonce(0);
     walletTransactionService.saveTransactionDetail(transactionDetail, false);
-    entitiesToClean.add(transactionDetail);
+    nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+    assertEquals("When a pending transaction has nonce 0 (whole first transaction of a wallet, it should return 1 for next nonce to use) ",
+                 1,
+                 nonce);
 
-    try {
-      long nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
-      assertEquals(NONCE + 1, nonce);
-    } catch (IllegalAccessException e) {
-      fail("Unexpected error while getting nonce of wallet");
-    }
-
-    try {
-      walletTransactionService.getNonce(WALLET_ADDRESS_1, USER_TEST);
-      fail("Expected to throw error while getting nonce of wallet of other user");
-    } catch (IllegalAccessException e) {
-      // Expected
-    }
-
+    transactionDetail.setNonce(NONCE);
     transactionDetail.setPending(false);
     walletTransactionService.saveTransactionDetail(transactionDetail, false);
 
+    nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+    assertEquals("No Pending transaction of wallet in database, thus the nonce should be retrieved from UI using a dedicated call on blockchain", 0, nonce);
+
     try {
-      long nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
+      nonce = walletTransactionService.getNonce(WALLET_ADDRESS_1, CURRENT_USER);
       assertEquals(0, nonce);
     } catch (IllegalAccessException e) {
       fail("Unexpected error while getting nonce of wallet");

@@ -1,21 +1,32 @@
 package org.exoplatform.wallet.blockchain.service;
 
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -23,6 +34,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.web3j.protocol.core.Response.Error;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -81,7 +94,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
     verify(settingService, times(1)).set(any(), any(), any(), argThat(value -> Objects.equal(value.getValue(), blockNumber)));
     verify(ethereumClientConnector, times(1)).setLastWatchedBlockNumber(blockNumber);
-    verify(ethereumClientConnector, times(0)).renewTransactionListeningSubscription(anyLong());
+    verify(ethereumClientConnector, never()).renewTransactionListeningSubscription(anyLong());
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -95,14 +108,14 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     service.startAsync();
     verify(ethereumClientConnector, timeout(10000).times(1)).setLastWatchedBlockNumber(anyLong());
 
-    verify(settingService, times(0)).set(any(), any(), any(), any());
+    verify(settingService, never()).set(any(), any(), any(), any());
     verify(ethereumClientConnector, times(1)).setLastWatchedBlockNumber(blockNumber);
     verify(ethereumClientConnector, times(1)).renewTransactionListeningSubscription(anyLong());
   }
 
   @Test
   public void testOnServiceStartWhenNotPermanentListeningButHavePendingTransactions() throws Exception {
-    when(transactionService.countContractPendingTransactionsSent()).thenReturn(1);
+    when(transactionService.countContractPendingTransactionsSent()).thenReturn(1l);
 
     service.startAsync();
     verify(ethereumClientConnector, timeout(10000).times(1)).renewTransactionListeningSubscription(anyLong());
@@ -160,7 +173,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(transaction.getBlockHash()).thenReturn("blockHash");
     when(transaction.getBlockNumber()).thenReturn(BigInteger.TEN);
     service.refreshTransactionFromBlockchain(transactionHash);
-    verify(ethereumClientConnector, times(0)).getTransactionReceipt(any());
+    verify(ethereumClientConnector, never()).getTransactionReceipt(any());
   }
 
   @Test
@@ -172,15 +185,15 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     transactionDetail.setHash(transactionHash);
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setPending(true);
-    transactionDetail.setRawTransaction(null);
     transactionDetail.setNonce(0);
     transactionDetail.setSendingAttemptCount(0);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
 
     when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
     when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
 
     service.refreshTransactionFromBlockchain(transactionHash);
-    verify(transactionService, times(0)).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
   }
 
   @Test
@@ -190,7 +203,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(transactionService.getTransactionByHash(transactionHash)).thenReturn(transactionDetail);
 
     transactionDetail.setHash(transactionHash);
-    transactionDetail.setTimestamp(System.currentTimeMillis() - 24 * 3600000l - 1);
+    transactionDetail.setTimestamp(System.currentTimeMillis() - 86400000l - 1);
     transactionDetail.setPending(true);
     transactionDetail.setRawTransaction(null);
     transactionDetail.setNonce(25l);
@@ -199,6 +212,11 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
     when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
 
+    service.refreshTransactionFromBlockchain(transactionHash);
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+
+    // Internal wallet transaction
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
     service.refreshTransactionFromBlockchain(transactionHash);
     verify(transactionService, times(1)).saveTransactionDetail(
                                                                argThat(transaction -> !transaction.isPending()
@@ -216,15 +234,15 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setSentTimestamp(System.currentTimeMillis());
     transactionDetail.setPending(true);
-    transactionDetail.setRawTransaction("rawTransaction");
     transactionDetail.setNonce(25l);
     transactionDetail.setSendingAttemptCount(1);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
 
     when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
     when(transactionService.getMaxAttemptsToSend()).thenReturn(transactionDetail.getSendingAttemptCount());
 
     service.refreshTransactionFromBlockchain(transactionHash);
-    verify(transactionService, times(0)).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
   }
 
   @Test
@@ -240,21 +258,21 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setSentTimestamp(System.currentTimeMillis());
     transactionDetail.setPending(true);
-    transactionDetail.setRawTransaction("rawTransaction");
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
     transactionDetail.setNonce(nonce);
     transactionDetail.setSendingAttemptCount(0);
     transactionDetail.setFrom(fromAddress);
 
     when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
     when(transactionService.getMaxAttemptsToSend()).thenReturn(3l);
-    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(nonce + 1));
+    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(nonce));
 
     service.refreshTransactionFromBlockchain(transactionHash);
-    verify(transactionService, times(0)).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
 
     transactionDetail.setSendingAttemptCount(transactionService.getMaxAttemptsToSend());
     service.refreshTransactionFromBlockchain(transactionHash);
-    verify(transactionService, times(0)).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
 
     when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(nonce + 2));
     service.refreshTransactionFromBlockchain(transactionHash);
@@ -287,13 +305,13 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setSentTimestamp(System.currentTimeMillis());
     transactionDetail.setPending(true);
-    transactionDetail.setRawTransaction("rawTransaction");
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
     transactionDetail.setNonce(nonce);
     transactionDetail.setSendingAttemptCount(1);
     transactionDetail.setFrom(fromAddress);
 
     assertThrows(IllegalStateException.class, () -> service.refreshTransactionFromBlockchain(transactionHash));
-    verify(transactionService, times(0)).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
 
     TransactionReceipt transactionReceipt = mock(TransactionReceipt.class);
     when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(transactionReceipt);
@@ -324,7 +342,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
       return true;
     }), eq(true));
 
-    verify(transactionService, times(0)).cancelTransactionsWithSameNonce(any());
+    verify(transactionService, never()).cancelTransactionsWithSameNonce(any());
     when(transactionReceipt.isStatusOK()).thenReturn(true);
     service.refreshTransactionFromBlockchain(transactionHash);
     verify(transactionService, times(1)).cancelTransactionsWithSameNonce(transactionDetail);
@@ -333,7 +351,6 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
   @Test
   public void testRefreshTransactionFromBlockchainWhenTransactionFoundOnDBAndBlockchain_ContractTransaction() throws Exception {
     ContractTransactionEvent contractTransactionEvent = newContractTransactionEvent();
-    ;
     String transactionHash = contractTransactionEvent.getTransactionHash();
     String fromAddress = "0x2b7e115f52171d164529fdb1ac72571e608a474e";
     long nonce = 25l;
@@ -361,7 +378,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setSentTimestamp(System.currentTimeMillis());
     transactionDetail.setPending(true);
-    transactionDetail.setRawTransaction("rawTransaction");
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
     transactionDetail.setNonce(nonce);
     transactionDetail.setSendingAttemptCount(1);
     transactionDetail.setFrom(fromAddress);
@@ -394,6 +411,641 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     }), eq(true));
 
     verify(transactionService, times(1)).cancelTransactionsWithSameNonce(transactionDetail);
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_NoTransactions() throws Exception {
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, never()).sendTransactionToBlockchain(any());
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_TimedOutPendingTransaction() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis() - 86400000l - 1);
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, never()).sendTransactionToBlockchain(any());
+    verify(transactionService, times(1)).saveTransactionDetail(
+                                                               argThat(transaction -> !transaction.isPending()
+                                                                   && !transaction.isSucceeded() && transaction.getNonce() == 0),
+                                                               eq(true));
+
+    transactionDetail.setPending(true);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setSendingAttemptCount(0);
+
+    service.sendPendingTransactionsToBlockchain();
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_MaxAttemptsToSendReachedButNotSentToBlockchain() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(1l);
+
+    TransactionDetail originalTransactionDetail = transactionDetail.clone();
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(transactionDetail.getNonce()));
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(mock(EthSendTransaction.class), new IOException());
+    });
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    assertEquals(originalTransactionDetail, transactionDetail);
+
+    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(transactionDetail.getNonce() + 1));
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(transactionService, times(1)).saveTransactionDetail(
+                                                               argThat(transaction -> !transaction.isPending()
+                                                                   && !transaction.isSucceeded() && transaction.getNonce() == 0),
+                                                               eq(true));
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_MaxAttemptsToSendReachedAndAlreadySentToBlockchain() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(1l);
+    transactionDetail.setSentTimestamp(System.currentTimeMillis());
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(transactionDetail.getNonce()));
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+    // Keep it on purpose to always check verifications are 0 even when this
+    // condition is true
+    lenient().when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(false);
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, never()).sendTransactionToBlockchain(any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_IsNotBoostAndIsMaxParallelRequestsReached() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    TransactionDetail originalTransactionDetail = transactionDetail.clone();
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    // Keep it on purpose to always check verifications are 0 even when this
+    // condition is true
+    lenient().when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(false);
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, never()).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(any(), any(), any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    assertEquals(originalTransactionDetail, transactionDetail);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_IsBoostAndIsMaxParallelRequestsReached() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setBoost(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    TransactionDetail originalTransactionDetail = transactionDetail.clone();
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    // Keep it on purpose to always check verifications are 0 even when this
+    // condition is true
+    lenient().when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(mock(EthSendTransaction.class), new IOException());
+    });
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    assertEquals(originalTransactionDetail, transactionDetail);
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_IsSendingBlockchainRequestFutureNull() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    TransactionDetail originalTransactionDetail = transactionDetail.clone();
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    when(ethereumClientConnector.sendTransactionToBlockchain(transactionDetail)).thenReturn(null);
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    assertEquals(originalTransactionDetail, transactionDetail);
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_CancelModificationsWhenIOException() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    when(ethereumClientConnector.sendTransactionToBlockchain(transactionDetail)).thenThrow(new IllegalStateException(new IOException()));
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, times(1)).saveTransactionDetail(
+                                                               argThat(transaction -> transaction.getSendingAttemptCount() == 0
+                                                                   && transaction.getSentTimestamp() == 0),
+                                                               eq(false));
+  }
+
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenNotIOException() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setNonce(25l);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    when(ethereumClientConnector.sendTransactionToBlockchain(transactionDetail)).thenThrow(new IllegalStateException());
+
+    service.sendPendingTransactionsToBlockchain();
+
+    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, times(1)).saveTransactionDetail(
+                                                               argThat(transaction -> transaction.getSendingAttemptCount() == 1
+                                                                   && transaction.getSentTimestamp() == 0),
+                                                               eq(false));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenIOExceptionFromWeb3() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(mock(EthSendTransaction.class), new IOException());
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionIsNotNull() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(null, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(1, pendingTransactions.size());
+    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
+
+    assertNotNull(handledTransactionDetail);
+    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
+    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+
+    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
+        && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
+    verify(listenerService, times(1)).broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
+                                                handledTransactionDetail,
+                                                handledTransactionDetail);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionHasDiffrentHash() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+
+    service.sendPendingTransactionsToBlockchain();
+    EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
+    String newHash = "transactionHash2";
+    when(ethTransaction.getTransactionHash()).thenReturn(newHash);
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(ethTransaction, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(1, pendingTransactions.size());
+    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
+    assertNotNull(handledTransactionDetail);
+    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
+    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+    assertEquals(newHash, handledTransactionDetail.getHash());
+
+    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
+        && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
+    verify(listenerService, times(1)).broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
+                                                handledTransactionDetail,
+                                                handledTransactionDetail);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionHasError() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+
+    service.sendPendingTransactionsToBlockchain();
+    EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
+    Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
+    when(ethTransaction.getError()).thenReturn(transactionError);
+
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(ethTransaction, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+
+    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
+        && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionHasErrorAndReceipt() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+
+    service.sendPendingTransactionsToBlockchain();
+    EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
+    Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
+    when(ethTransaction.getError()).thenReturn(transactionError);
+    TransactionReceipt receipt = mock(TransactionReceipt.class);
+    when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(receipt);
+    lenient().when(receipt.isStatusOK()).thenReturn(true);
+
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(ethTransaction, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(1, pendingTransactions.size());
+    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
+    assertNotNull(handledTransactionDetail);
+    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
+    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+    assertFalse(handledTransactionDetail.isSucceeded());
+    assertTrue(handledTransactionDetail.isPending());
+
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionHasUnrecoverableError() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+    EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
+    Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
+    when(ethTransaction.getError()).thenReturn(transactionError);
+    when(transactionError.getMessage()).thenReturn("Error: insufficient funds");
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(ethTransaction, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(0, pendingTransactions.size());
+
+    verify(transactionService, times(1)).saveTransactionDetail(
+                                                               argThat(transaction -> !transaction.isPending()
+                                                                   && !transaction.isSucceeded() && transaction.getNonce() == 0),
+                                                               eq(true));
+    verify(listenerService, never()).broadcast(anyString(), any(), any());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testSendPendingTransactionsToBlockchain_AvoidBroadcastingTransactionWhenAlreadySentToBlockchain() throws Exception {
+    String transactionHash = "transactionHash";
+    String fromAddress = "fromAddress";
+    TransactionDetail transactionDetail = new TransactionDetail();
+
+    transactionDetail.setHash(transactionHash);
+    transactionDetail.setFrom(fromAddress);
+    transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
+    transactionDetail.setNonce(NONCE);
+    transactionDetail.setRawTransaction(RAW_TRANSACTION);
+    transactionDetail.setSendingAttemptCount(0);
+    when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
+
+    when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
+    when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
+    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
+    CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
+    CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
+
+    AtomicReference<BiFunction<EthSendTransaction, Throwable, TransactionDetail>> handler = new AtomicReference<>();
+    when(ethereumClientConnector.sendTransactionToBlockchain(any())).thenReturn(future);
+    when(future.handleAsync(any())).thenAnswer(invocation -> {
+      handler.set(invocation.getArgument(0, BiFunction.class));
+      return resultFuture;
+    });
+    EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
+    Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
+    when(ethTransaction.getError()).thenReturn(transactionError);
+    when(transactionError.getMessage()).thenReturn("Error: Already known");
+    when(resultFuture.get()).thenAnswer(invocation -> {
+      return handler.get().apply(ethTransaction, null);
+    });
+
+    List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
+    assertNotNull(pendingTransactions);
+    assertEquals(1, pendingTransactions.size());
+    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
+    assertNotNull(handledTransactionDetail);
+    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
+    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+    assertTrue(handledTransactionDetail.isPending());
+    assertFalse(handledTransactionDetail.isSucceeded());
+    assertEquals(NONCE, handledTransactionDetail.getNonce());
+
+    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
+        && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
+    verify(listenerService, times(1)).broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
+                                                handledTransactionDetail,
+                                                handledTransactionDetail);
   }
 
 }

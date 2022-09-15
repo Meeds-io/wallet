@@ -451,7 +451,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     wallet.setEtherBalance(convertFromDecimals(walletEtherBalance, ETHER_TO_WEI_DECIMALS));
 
     if (wallet.getTokenBalance() == null || walletModifications == null || walletModifications.contains(MeedsToken.FUNC_TRANSFER)
-        || walletModifications.contains(MeedsToken.FUNC_TRANSFERFROM) || walletModifications.contains(MeedsToken.FUNC_APPROVE)) {
+        || walletModifications.contains(MeedsToken.FUNC_TRANSFERFROM)) {
       BigInteger walletTokenBalance = getTokenBalanceOf(walletAddress);
       wallet.setTokenBalance(convertFromDecimals(walletTokenBalance, configuredContractDecimals));
     }

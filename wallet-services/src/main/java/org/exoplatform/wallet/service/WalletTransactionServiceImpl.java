@@ -122,12 +122,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public int countContractPendingTransactionsSent() {
+  public long countContractPendingTransactionsSent() {
     return transactionStorage.countContractPendingTransactionsSent(getNetworkId());
   }
 
   @Override
-  public int countContractPendingTransactionsToSend() {
+  public long countContractPendingTransactionsToSend() {
     return transactionStorage.countContractPendingTransactionsToSend(getNetworkId());
   }
 
@@ -141,14 +141,14 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException {
     if (administration && !isUserRewardingAdmin(currentUser)) {
-      throw new IllegalAccessException("User " + currentUser + " is not allowed to get administrative transactions");
+      throw new IllegalAccessException(currentUser + " user is not allowed to get administrative transactions");
     }
 
     if (contractService.isContract(address)) {
       if (isUserRewardingAdmin(currentUser)) {
         return getContractTransactions(address, contractMethodName, limit, currentUser);
       } else {
-        throw new IllegalAccessException("User " + currentUser + " is not allowed to get all contract transactions");
+        throw new IllegalAccessException(currentUser + " user is not allowed to get all contract transactions");
       }
     } else if (StringUtils.isNotBlank(address)) {
       return getWalletTransactions(address,
@@ -162,12 +162,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     } else if (administration) {
       return getTransactions(limit, currentUser);
     } else {
-      throw new IllegalStateException("User " + currentUser + " is not allowed to get all contract transactions");
+      throw new IllegalStateException(currentUser + " user is not allowed to get all contract transactions");
     }
   }
 
   @Override
-  public TransactionStatistics getTransactionStatistics(String address,
+  public TransactionStatistics getTransactionStatistics(String address, // NOSONAR
                                                         String periodicity,
                                                         String selectedDate,
                                                         Locale locale) {
@@ -219,7 +219,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                              .collect(Collectors.toList()));
 
       // Compte list of days of current month to include in chart
-      periodList = dayList.stream().map(dayOfMonth -> selectedMonth.atDay(dayOfMonth)).collect(Collectors.toList());
+      periodList = dayList.stream().map(selectedMonth::atDay).collect(Collectors.toList());
     } else {
       throw new IllegalArgumentException("Uknown periodicity parameter: " + periodicity);
     }
@@ -260,7 +260,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       return 0;
     } else {
       long maxUsedNonce = transactionStorage.getMaxUsedNonce(getNetworkId(), fromAddress);
-      return maxUsedNonce == 0 ? 0 : maxUsedNonce + 1;
+      return maxUsedNonce + 1;
     }
   }
 
@@ -352,14 +352,13 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public List<TransactionDetail> getTransactionsToSend() {
     List<TransactionDetail> transactionsToSend = transactionStorage.getTransactionsToSend(getNetworkId());
-
-    transactionsToSend.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail));
+    transactionsToSend.forEach(this::retrieveWalletsDetails);
     return transactionsToSend;
   }
 
   @Override
   public boolean canSendTransactionToBlockchain(String fromAddress) {
-    return transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) < this.maxParallelPendingTransactions;
+    return transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) < this.getMaxParallelPendingTransactions();
   }
 
   @Override
@@ -399,7 +398,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     return transactionDetails;
   }
 
-  private List<TransactionDetail> getWalletTransactions(String address,
+  private List<TransactionDetail> getWalletTransactions(String address, // NOSONAR
                                                         String contractAddress,
                                                         String contractMethodName,
                                                         String hash,

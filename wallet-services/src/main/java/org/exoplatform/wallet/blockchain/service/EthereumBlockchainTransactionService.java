@@ -29,10 +29,13 @@ import static org.exoplatform.wallet.utils.WalletUtils.isWalletEmpty;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import javax.servlet.ServletContext;
 
@@ -46,6 +49,8 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
+
+import com.google.javascript.jscomp.jarjar.com.google.re2j.Pattern;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
@@ -68,18 +73,19 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 
 public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
-  private static final Log                 LOG                     =
+  private static final Log                 LOG                               =
                                                ExoLogger.getLogger(EthereumBlockchainTransactionService.class);
 
-  private static final String              TRANSFER_SIG            = EventEncoder.encode(MeedsToken.TRANSFER_EVENT);
+  private static final Pattern             GAS_PRICE_TOO_LOW_MESSAGE_PATTERN = Pattern.compile("transaction gas price.*too low");
 
-  private static final String              APPROVAL_SIG            = EventEncoder.encode(MeedsToken.APPROVAL_EVENT);
+  private static final Pattern             NONCE_TOO_LOW_MESSAGE_PATTERN     = Pattern.compile("nonce (is )?too low");
 
-  private static final Map<String, String> CONTRACT_METHODS_BY_SIG = new HashMap<>();
+  private static final String              TRANSFER_SIG                      = EventEncoder.encode(MeedsToken.TRANSFER_EVENT);
+
+  private static final Map<String, String> CONTRACT_METHODS_BY_SIG           = new HashMap<>();
 
   static {
     CONTRACT_METHODS_BY_SIG.put(TRANSFER_SIG, MeedsToken.FUNC_TRANSFER);
-    CONTRACT_METHODS_BY_SIG.put(APPROVAL_SIG, MeedsToken.FUNC_APPROVE);
   }
 
   private PortalContainer          container;
@@ -132,48 +138,27 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void sendPendingTransactionsToBlockchain() {
-    List<TransactionDetail> transactions = transactionService.getTransactionsToSend();
-    for (TransactionDetail transactionDetail : transactions) { // NOSONAR
-      if (!checkPendingTransactionValidity(transactionDetail)) {
-        continue;
-      }
-
-      String from = transactionDetail.getFrom();
-      if (!transactionDetail.isBoost() && !transactionService.canSendTransactionToBlockchain(from)) {
-        continue;
-      }
-
-      long sendingAttemptCount = transactionDetail.getSendingAttemptCount();
-      transactionDetail.setSendingAttemptCount(sendingAttemptCount + 1);
-      transactionDetail.setSentTimestamp(System.currentTimeMillis());
-      transactionService.saveTransactionDetail(transactionDetail, false);
-
-      try {
-        ethereumClientConnector.sendTransactionToBlockchain(transactionDetail).handleAsync((ethSendTransaction, throwable) -> {
-          ExoContainerContext.setCurrentContainer(container);
-          RequestLifeCycle.begin(container);
-          try {
-            handleTransactionSendingRequest(transactionDetail, ethSendTransaction, throwable);
-          } finally {
-            RequestLifeCycle.end();
-          }
-          return transactionDetail;
-        });
-
-        listenerService.broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
-      } catch (Throwable e) { // NOSONAR
-        if (isIOException(e)) {
-          LOG.error("IO Error while sending transaction {} to blockchain", transactionDetail, e);
-          // Avoid incrementing SendingAttemptCount when it's a temporary fail
-          // of sending transaction
-          transactionDetail.setSendingAttemptCount(sendingAttemptCount);
-          transactionDetail.setSentTimestamp(0);
-          transactionService.saveTransactionDetail(transactionDetail, false);
-        } else {
-          LOG.error("Error while sending transaction {} to blockchain", transactionDetail, e);
+  public List<TransactionDetail> sendPendingTransactionsToBlockchain() {
+    List<TransactionDetail> transactionsToSend = transactionService.getTransactionsToSend();
+    if (CollectionUtils.isEmpty(transactionsToSend)) {
+      return Collections.emptyList();
+    }
+    long startTime = System.currentTimeMillis();
+    LOG.info("Start sending {} transactions to blockchain", transactionsToSend.size());
+    List<TransactionDetail> sentTransactions = new ArrayList<>();
+    try {
+      for (TransactionDetail transactionDetail : transactionsToSend) {
+        TransactionDetail trantactionDetailSent = this.sendTransactionToBlockchain(transactionDetail);
+        if (trantactionDetailSent != null && trantactionDetailSent.isPending() && trantactionDetailSent.getSentTimestamp() > 0) {
+          sentTransactions.add(trantactionDetailSent);
         }
       }
+      return sentTransactions;
+    } finally {
+      LOG.info("End sending {}/{} pending transactions to blockchain in {}ms",
+               sentTransactions.size(),
+               transactionsToSend.size(),
+               System.currentTimeMillis() - startTime);
     }
   }
 
@@ -243,16 +228,19 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public void startWatchingBlockchain() {
-    ethereumClientConnector.renewTransactionListeningSubscription(getLastWatchedBlockNumber() + 1);
+  @SuppressWarnings("rawtypes")
+  public Future startWatchingBlockchain() {
+    long startWatchingBlockNumber = getLastWatchedBlockNumber() + 1;
+    return ethereumClientConnector.renewTransactionListeningSubscription(startWatchingBlockNumber);
   }
 
   @Override
   public void stopWatchingBlockchain() {
-    if (!ethereumClientConnector.isPermanentlyScanBlockchain()) {
-      ethereumClientConnector.stopListeningToBlockchain();
+    try {
+      ethereumClientConnector.cancelTransactionListeningToBlockchain();
+    } finally {
+      saveLastWatchedBlockNumber(ethereumClientConnector.getLastWatchedBlockNumber());
     }
-    saveLastWatchedBlockNumber(ethereumClientConnector.getLastWatchedBlockNumber());
   }
 
   protected void startAsync() {
@@ -350,33 +338,24 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private boolean checkPendingTransactionValidity(TransactionDetail transactionDetail) {
     if (!transactionDetail.isPending()) {
-      return true;
+      return false;
     }
-    String transactionHash = transactionDetail.getHash();
-    long pendingTransactionMaxDays = transactionService.getPendingTransactionMaxDays();
-    long maxAttemptsToSend = transactionService.getMaxAttemptsToSend();
-    boolean isInternalWalletTransaction = transactionDetail.getRawTransaction() == null;
-    long sendingAttemptCount = transactionDetail.getSendingAttemptCount();
-    long sentTimestamp = isInternalWalletTransaction || sendingAttemptCount == 0 ? transactionDetail.getTimestamp()
-                                                                                 : transactionDetail.getSentTimestamp();
-    Duration duration = Duration.ofMillis(System.currentTimeMillis() - sentTimestamp);
-    boolean transactionSendingTimedOut = sentTimestamp > 0 && pendingTransactionMaxDays > 0
-        && duration.toDays() >= pendingTransactionMaxDays;
-    boolean notPending = transactionSendingTimedOut;
+    boolean maxSendingTentativesReached = isMaxSendingTentativesReached(transactionDetail);
+    boolean markTransactionAsFailed = isTransactionTimedOut(transactionDetail);
 
-    // Check if there were transactions that was mined with a higher Nonce
-    // Thus automatically mark this one as failed and reset its nonce
-    boolean maxSendingTentativesReached = sendingAttemptCount > 0 && sendingAttemptCount >= maxAttemptsToSend;
-    boolean checkNonceValidity = !notPending && (maxSendingTentativesReached || transactionSendingTimedOut);
+    // Check on nonce validity only if the transaction is not to be marked as
+    // failed already (due to outdated)
+    // and the maximum tentatives to send is reached
+    boolean checkNonceValidity = !markTransactionAsFailed && maxSendingTentativesReached;
     if (checkNonceValidity) {
       String senderAddress = transactionDetail.getFrom();
       long nonce = transactionDetail.getNonce();
       if (isSameNonceAlreadyMined(senderAddress, nonce)) {
-        notPending = true;
+        markTransactionAsFailed = true;
       }
     }
 
-    if (notPending) {
+    if (markTransactionAsFailed) {
       // Transaction Not found on blockchain for more than max waiting
       // days, marking transaction as failed in internal database if it's
       // not sent using a raw transaction stored in internal database or
@@ -390,91 +369,128 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       // transaction: could happen on mainnet only)
       transactionDetail.setNonce(0);
       LOG.info("Transaction '{}' was NOT FOUND on blockchain for more than '{}' days, and after '{}' tentatives to send",
-               transactionHash,
-               pendingTransactionMaxDays,
-               sendingAttemptCount);
+               transactionDetail.getHash(),
+               transactionService.getPendingTransactionMaxDays(),
+               transactionDetail.getSendingAttemptCount());
       transactionService.saveTransactionDetail(transactionDetail, true);
       return false;
     }
-    return maxSendingTentativesReached && transactionDetail.getSentTimestamp() == 0;
+    return !maxSendingTentativesReached || transactionDetail.getSentTimestamp() == 0;
+  }
+
+  private boolean isMaxSendingTentativesReached(TransactionDetail transactionDetail) {
+    // Check if there were transactions that was mined with a higher Nonce
+    // Thus automatically mark this one as failed and reset its nonce
+    long sendingAttemptCount = transactionDetail.getSendingAttemptCount();
+    long maxAttemptsToSend = transactionService.getMaxAttemptsToSend();
+    return sendingAttemptCount > 0 && sendingAttemptCount >= maxAttemptsToSend;
+  }
+
+  private boolean isTransactionTimedOut(TransactionDetail transactionDetail) {
+    boolean isInternalWalletTransaction = StringUtils.isNotBlank(transactionDetail.getRawTransaction());
+    boolean transactionSendingTimedOut = false;
+    if (isInternalWalletTransaction) {
+      long timestamp = transactionDetail.getTimestamp();
+      long pendingTransactionMaxDays = transactionService.getPendingTransactionMaxDays();
+      Duration duration = Duration.ofMillis(System.currentTimeMillis() - timestamp);
+      transactionSendingTimedOut =
+                                 timestamp > 0 && pendingTransactionMaxDays > 0 && duration.toDays() >= pendingTransactionMaxDays;
+    }
+    return transactionSendingTimedOut;
   }
 
   private boolean isSameNonceAlreadyMined(String senderAddress, long nonce) {
     try {
-      BigInteger lastMinedTransactionNonce = ethereumClientConnector.getNonce(senderAddress);
-      return lastMinedTransactionNonce != null && ++nonce < lastMinedTransactionNonce.longValue();
+      BigInteger nextNonce = ethereumClientConnector.getNonce(senderAddress);
+      return nextNonce != null && nonce < nextNonce.longValue();
     } catch (Exception e) {
       LOG.warn("Error retrieving last nonce of {}", senderAddress, e);
       return false;
     }
   }
 
-  private void handleTransactionSendingRequest(TransactionDetail transactionDetail, // NOSONAR
-                                               EthSendTransaction transaction,
-                                               Throwable exception) {
-    boolean transactionModified = false;
-    boolean broadcastMined = false;
-
+  private boolean handleTransactionSendingRequest(TransactionDetail transactionDetail, // NOSONAR
+                                                  EthSendTransaction transaction,
+                                                  Throwable exception) {
     String transactionHash = transactionDetail.getHash();
+
+    if (isIOException(exception)) {
+      LOG.warn("IO Error when sending transaction {}", transactionHash, exception);
+      // Decrement previously incremented sending tentative. The error was due
+      // to network connection error, thus it shouldn't increment the send
+      // tentative count
+      return false;
+    }
+
+    transactionDetail.setSentTimestamp(System.currentTimeMillis());
+    transactionDetail.increaseSendingAttemptCount();
+
+    if (transaction != null && transaction.getTransactionHash() != null) {
+      transactionHash = transaction.getTransactionHash();
+      transactionDetail.setHash(transactionHash);
+    }
+
+    boolean alreadyMined = false;
+    boolean sentToBlockchain = false;
     try {
-      if (isIOException(exception)) {
-        LOG.warn("IO Error when sending transaction {}", transactionHash, exception);
-        // Decrement previously incremented sending tentative. The error was due
-        // to network connection error, thus it shouldn't increment the send
-        // tentative count
-        transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() - 1);
-        transactionDetail.setSentTimestamp(0);
-        transactionModified = true;
-        return;
-      }
-      if (transaction != null && transaction.getTransactionHash() != null
-          && !StringUtils.equalsIgnoreCase(transaction.getTransactionHash(), transactionHash)) {
-        transactionHash = transaction.getTransactionHash();
-        transactionDetail.setHash(transactionHash);
-        transactionModified = true;
-      }
-
       Error transactionError = transaction == null ? null : transaction.getError();
-      boolean hasError = exception != null
-          || (transaction != null && (transactionError != null || StringUtils.isBlank(transaction.getResult())));
+      boolean hasError = exception != null || (transactionError != null && StringUtils.isBlank(transaction.getResult()));
       if (hasError) {
-        String exceptionMessage = exception == null ? "No result returned" : exception.getMessage();
-        String errorMessage = transaction == null || transactionError == null ? exceptionMessage
-                                                                              : getTransactionErrorMessage(transactionError);
-        LOG.warn("Error when sending transaction {} - {}.", transactionDetail, errorMessage, exception);
-
-        Transaction transactionFromBlockchain = ethereumClientConnector.getTransaction(transactionHash);
-
-        // An exception occurred
-        if (transactionFromBlockchain == null) {
+        if (isAlreadySentError(transactionError)) {
+          // Trigger sent to blockchain only when it's the first time sending
+          sentToBlockchain = true;
+        } else {
           TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-          if (receipt != null) {
-            transactionDetail.setPending(false);
-            transactionDetail.setSucceeded(receipt.isStatusOK());
-            broadcastMined = true;
-            transactionModified = true;
-          } else if (transactionError != null) {
-            transactionDetail.setSentTimestamp(0);
-            transactionModified = true;
+          if (receipt == null) {
+            logTransactionError(transactionDetail, exception, transactionError);
+            if (isUnrecoverableError(transactionError)) {
+              transactionDetail.setNonce(0);
+              transactionDetail.setPending(false);
+              transactionDetail.setSucceeded(false);
+            } else {
+              // Reattempt sending next time the job is triggered
+              transactionDetail.setSentTimestamp(0);
+            }
+          } else {
+            alreadyMined = true;
           }
         }
+      } else {
+        sentToBlockchain = true;
       }
     } catch (Exception e) {
       LOG.warn("Error handling Transaction '{}' Sending", transactionHash, e);
-      if (isIOException(e)) {
-        LOG.warn("IO Error when sending transaction {}", transactionHash, e);
-        // Decrement previously incremented sending tentative. The error was due
-        // to network connection error, thus it shouldn't increment the send
-        // tentative count
-        transactionDetail.setSendingAttemptCount(transactionDetail.getSendingAttemptCount() - 1);
-        transactionDetail.setSentTimestamp(0);
-        transactionModified = true;
-      }
-    } finally {
-      if (transactionModified) {
-        transactionService.saveTransactionDetail(transactionDetail, broadcastMined);
-      }
     }
+    // Avoid saving mined transaction to not asynchronously
+    // save transaction at the same time than other asynchronous jobs which may
+    // erase changes coming from Blockchain listening Job
+    if (!alreadyMined) {
+      // Broadcast mined only when pending status has changed
+      boolean broadcastMined = !transactionDetail.isPending();
+      transactionService.saveTransactionDetail(transactionDetail, broadcastMined);
+    }
+    return sentToBlockchain;
+  }
+
+  private boolean isUnrecoverableError(Error transactionError) {
+    String message = StringUtils.lowerCase(getTransactionErrorMessage(transactionError));
+    return message != null && (StringUtils.containsAny(message,
+                                                       "insufficient funds",
+                                                       "base fee exceeds gas limit",
+                                                       "replacement transaction underpriced",
+                                                       "only replay-protected")
+        || NONCE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find() || GAS_PRICE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find());
+  }
+
+  private boolean isAlreadySentError(Error transactionError) {
+    String message = StringUtils.lowerCase(getTransactionErrorMessage(transactionError));
+    return StringUtils.containsIgnoreCase(message, "already known");
+  }
+
+  private void logTransactionError(TransactionDetail transactionDetail, Throwable exception, Error transactionError) {
+    String exceptionMessage = exception == null ? "No result returned" : exception.getMessage();
+    String errorMessage = transactionError == null ? exceptionMessage : getTransactionErrorMessage(transactionError);
+    LOG.warn("Error when sending transaction {}. Error: [{}].", transactionDetail.getHash(), errorMessage, exception);
   }
 
   private void computeTransactionDetail(TransactionDetail transactionDetail,
@@ -526,8 +542,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       String hash = transactionDetail.getHash();
       LOG.debug("Retrieving information from blockchain for transaction {} with {} LOGS", hash, logsSize);
       int i = 0;
-      boolean transactionLogTreated = false;
-      while (!transactionLogTreated && i < logsSize) {
+      while (i < logsSize) {
         org.web3j.protocol.core.methods.response.Log log = logs.get(i++);
 
         List<String> topics = log.getTopics();
@@ -544,23 +559,62 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         if (StringUtils.isNotBlank(methodName)) {
           transactionDetail.setContractAddress(contractDetail.getAddress());
           transactionDetail.setContractMethodName(methodName);
-          EventValues parameters = null;
-          switch (methodName) {
-          case MeedsToken.FUNC_TRANSFER:
-            transactionLogTreated = true;
-            parameters = Contract.staticExtractEventParameters(MeedsToken.TRANSFER_EVENT, log);
+          if (StringUtils.equals(methodName, MeedsToken.FUNC_TRANSFER)) {
+            EventValues parameters = Contract.staticExtractEventParameters(MeedsToken.TRANSFER_EVENT, log);
             readTransactionDetailsFromEventParameters(transactionDetail, parameters, contractDecimals);
-            break;
-          case MeedsToken.FUNC_APPROVE:
-            transactionLogTreated = true;
-            parameters = Contract.staticExtractEventParameters(MeedsToken.APPROVAL_EVENT, log);
-            readTransactionDetailsFromEventParameters(transactionDetail, parameters, contractDecimals);
-            break;
-          default:
-            break;
+            return;
           }
         }
       }
+    }
+  }
+
+  private TransactionDetail sendTransactionToBlockchain(TransactionDetail transactionDetail) {
+    if (!checkPendingTransactionValidity(transactionDetail)) {
+      return null;
+    }
+
+    if (!transactionDetail.isBoost() && !transactionService.canSendTransactionToBlockchain(transactionDetail.getFrom())) {
+      return null;
+    }
+
+    try {
+      CompletableFuture<EthSendTransaction> future = ethereumClientConnector.sendTransactionToBlockchain(transactionDetail);
+      if (future != null) {
+        return future.handleAsync((ethSendTransaction, throwable) -> {
+          ExoContainerContext.setCurrentContainer(container);
+          RequestLifeCycle.begin(container);
+          try {
+            boolean sent = handleTransactionSendingRequest(transactionDetail, ethSendTransaction, throwable);
+            if (sent) {
+              broadcastTransactionSentToBlockchain(transactionDetail);
+            }
+            return transactionDetail;
+          } finally {
+            RequestLifeCycle.end();
+          }
+        }).get();
+      }
+    } catch (Throwable e) { // NOSONAR
+      if (isIOException(e)) {
+        LOG.error("IO Error while sending transaction {} to blockchain", transactionDetail, e);
+        // Avoid incrementing SendingAttemptCount when it's a temporary fail
+        // of sending transaction
+      } else {
+        LOG.error("Error while sending transaction {} to blockchain", transactionDetail, e);
+        transactionDetail.increaseSendingAttemptCount();
+      }
+      transactionDetail.setSentTimestamp(0);
+      transactionService.saveTransactionDetail(transactionDetail, false);
+    }
+    return null;
+  }
+
+  private void broadcastTransactionSentToBlockchain(TransactionDetail transactionDetail) {
+    try {
+      listenerService.broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT, transactionDetail, transactionDetail);
+    } catch (Exception e) {
+      LOG.warn("Error when triggering event after transaction '{}' sent to blockchain", transactionDetail.getHash(), e);
     }
   }
 

@@ -17,6 +17,8 @@
 package org.exoplatform.wallet.service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Future;
 
 import org.exoplatform.wallet.model.ContractTransactionEvent;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
@@ -25,8 +27,11 @@ public interface BlockchainTransactionService {
 
   /**
    * Sends raw transactions to blockchain
+   * 
+   * @return {@link List} of {@link TransactionDetail} asynchronously after sent
+   *         to blockchain
    */
-  void sendPendingTransactionsToBlockchain();
+  List<TransactionDetail> sendPendingTransactionsToBlockchain();
 
   /**
    * This will refresh transaction from blockchain. If the transaction detail
@@ -57,8 +62,10 @@ public interface BlockchainTransactionService {
 
   /**
    * Renew subscription to listen to new transactions from Blockchain
+   * @return {@link Future} of async watching operation
    */
-  public void startWatchingBlockchain();
+  @SuppressWarnings("rawtypes")
+  public Future startWatchingBlockchain();
 
   /**
    * Stop subscription to listen on Blockchain

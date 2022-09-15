@@ -56,12 +56,12 @@ public interface WalletTransactionService {
   /**
    * @return pending contract transactions already sent to blockchain
    */
-  int countContractPendingTransactionsSent();
+  long countContractPendingTransactionsSent();
 
   /**
    * @return pending contract transactions not yet sent to blockchain
    */
-  int countContractPendingTransactionsToSend();
+  long countContractPendingTransactionsToSend();
 
   /**
    * @param address wallet address
