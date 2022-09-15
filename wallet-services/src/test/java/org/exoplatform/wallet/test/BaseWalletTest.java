@@ -66,7 +66,7 @@ public abstract class BaseWalletTest {
 
   protected static final double    GAS_PRICE                = 0.000000006d;
 
-  protected static final long      GAS_PRICE_WEI            = 6000000000l;
+  protected static final double    GAS_PRICE_WEI            = 6000000000l;
 
   protected static final String    RAW_TRANSACTION          = "RAW_TRANSACTION";
 
@@ -117,7 +117,7 @@ public abstract class BaseWalletTest {
       container.unregisterComponent(BlockchainTransactionService.class);
     }
     blockchainTransactionService = Mockito.mock(BlockchainTransactionService.class);
-    Mockito.lenient().when(blockchainTransactionService.refreshBlockchainGasPrice()).thenReturn(GAS_PRICE_WEI);
+    Mockito.lenient().when(blockchainTransactionService.getGasPrice()).thenReturn(GAS_PRICE_WEI);
     container.registerComponentInstance(BlockchainTransactionService.class, blockchainTransactionService);
 
     setContractDetails();

@@ -148,9 +148,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <value>${exo.wallet.blockchain.defaultInitialCryptoCurrencyFunds}</value>
       </value-param>
       <value-param>
-        <name>useDynamicGasPrice</name>
-        <description>A parameter to make used gas price for all wallet based applications use dynamic gas price</description>
-        <value>${exo.wallet.blockchain.useDynamicGasPrice:true}</value>
+        <name>dynamicGasPriceUpdateInterval</name>
+        <description>A parameter to determine the update interval in milliseconds of gas price from blockchain</description>
+        <value>${exo.wallet.blockchain.dynamicGasPriceUpdateInterval:120000}</value>
       </value-param>
       <value-param>
         <name>gasLimit</name>

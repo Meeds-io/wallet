@@ -30,7 +30,6 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
@@ -54,22 +53,16 @@ public class PendingEtherTransactionVerifierJob implements Job {
 
   private WalletAccountService         walletAccountService;
 
-  private EthereumClientConnector      ethereumClientConnector;
-
   public PendingEtherTransactionVerifierJob() {
     this.container = PortalContainer.getInstance();
     this.blockchainTransactionService = this.container.getComponentInstanceOfType(BlockchainTransactionService.class);
     this.walletTransactionService = this.container.getComponentInstanceOfType(WalletTransactionService.class);
     this.walletAccountService = this.container.getComponentInstanceOfType(WalletAccountService.class);
-    this.ethereumClientConnector = this.container.getComponentInstanceOfType(EthereumClientConnector.class);
   }
 
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     // Avoid retrieving pending transactions twice
-    if (ethereumClientConnector.isListeningToBlockchain()) {
-      return;
-    }
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
     try {
@@ -81,7 +74,7 @@ public class PendingEtherTransactionVerifierJob implements Job {
           LOG.info("Start refreshing Admin wallet ether {} transactions", transactionDetails.size());
           transactionDetails.forEach(transactionDetail -> {
             try {
-              blockchainTransactionService.refreshTransactionFromBlockchain(transactionDetail.getHash());
+              blockchainTransactionService.addTransactionToRefreshFromBlockchain(transactionDetail);
             } catch (Exception e) {
               LOG.warn("Error refreshing Ether Transaction {}", transactionDetail.getHash(), e);
             }
@@ -95,4 +88,5 @@ public class PendingEtherTransactionVerifierJob implements Job {
       RequestLifeCycle.end();
     }
   }
+
 }

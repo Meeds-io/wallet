@@ -132,7 +132,7 @@ public class WalletUtils {
 
   public static final String                          DEFAULT_INITIAL_USER_FUND                = "defaultInitialFunds";
 
-  public static final String                          USE_DYNAMIC_GAS_PRICE                    = "useDynamicGasPrice";
+  public static final String                          DYNAMIC_GAS_PRICE_UPDATE_INTERVAL        = "gasPriceUpdateInterval";
 
   public static final String                          GAS_LIMIT                                = "gasLimit";
 
@@ -769,7 +769,8 @@ public class WalletUtils {
   }
 
   public static final double convertFromDecimals(BigInteger amount, int decimals) {
-    return BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
+    return amount == null ? 0
+                          : BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
   }
 
   public static final GlobalSettings getSettings() {
@@ -778,14 +779,6 @@ public class WalletUtils {
 
   public static final Long getGasLimit() {
     return getSettings().getNetwork().getGasLimit();
-  }
-
-  public static final Long getAdminGasPrice() {
-    if (getWalletService().isUseDynamicGasPrice()) {
-      return getWalletService().getDynamicGasPrice();
-    } else {
-      return getSettings().getNetwork().getNormalGasPrice();
-    }
   }
 
   public static final ContractDetail getContractDetail() {
@@ -1010,38 +1003,38 @@ public class WalletUtils {
       newHash = newTransaction.getHash();
       if (oldTransaction.getContractAmount() != newTransaction.getContractAmount()) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same amount: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractAmount(),
-                newTransaction.getContractAmount());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAmount(),
+                 newTransaction.getContractAmount());
         return;
       }
       if (!StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
         throw new IllegalStateException("Issuer of transaction replacement must be the same wallet address: "
-                + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
+            + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
       }
       if (!StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target wallet: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getTo(),
-                newTransaction.getTo());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getTo(),
+                 newTransaction.getTo());
         return;
       }
       if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractAddress(),
-                newTransaction.getContractAddress());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAddress(),
+                 newTransaction.getContractAddress());
         return;
       }
       if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract method: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractMethodName(),
-                newTransaction.getContractMethodName());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractMethodName(),
+                 newTransaction.getContractMethodName());
         return;
       }
       Map<String, Object> transaction = transactionToMap(newTransaction);

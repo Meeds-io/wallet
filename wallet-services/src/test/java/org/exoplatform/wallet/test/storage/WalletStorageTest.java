@@ -318,9 +318,9 @@ public class WalletStorageTest extends BaseWalletTest {
     } catch (IllegalArgumentException e) {
       // Expected
     }
+    Wallet newWallet = newWallet();
+    newWallet.setTechnicalId(0);
     try {
-      Wallet newWallet = newWallet();
-      newWallet.setTechnicalId(0);
       walletStorage.saveWalletBlockchainState(newWallet, contractAddress);
       fail("should throw exception when wallet id is 0");
     } catch (IllegalArgumentException e) {

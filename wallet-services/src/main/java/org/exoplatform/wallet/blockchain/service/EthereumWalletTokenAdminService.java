@@ -21,7 +21,6 @@ import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_ETHER_BALAN
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_READ_FROM_TOKEN;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
-import static org.exoplatform.wallet.utils.WalletUtils.getAdminGasPrice;
 import static org.exoplatform.wallet.utils.WalletUtils.getGasLimit;
 import static org.exoplatform.wallet.utils.WalletUtils.getIdentityByTypeAndId;
 import static org.exoplatform.wallet.utils.WalletUtils.getNetworkId;
@@ -32,6 +31,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
@@ -337,7 +337,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     transactionDetail.setTimestamp(System.currentTimeMillis());
     transactionDetail.setAdminOperation(false);
     transactionDetail.setPending(true);
-    transactionDetail.setGasPrice(getAdminGasPrice());
+    transactionDetail.setGasPrice(walletService.getGasPrice());
 
     getTransactionService().saveTransactionDetail(transactionDetail, false);
     return transactionDetail;
@@ -393,8 +393,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   @Override
   public void boostAdminTransactions() throws Exception {
     List<TransactionDetail> pendingTransactions = getTransactionService().getPendingWalletTransactionsSent(getAdminWalletAddress());
+    double gasPrice = walletService.getGasPrice();
     for (TransactionDetail transactionDetail : pendingTransactions) {
-      boolean newGasPriceIsHigher = transactionDetail.getGasPrice() < getAdminGasPrice().doubleValue();
+      boolean newGasPriceIsHigher = transactionDetail.getGasPrice() < gasPrice;
       boolean alreadyBoosted = transactionDetail.isBoost();
       boolean exceededWaitTime = (System.currentTimeMillis() - transactionDetail.getSentTimestamp()) > 7200000;
       if (newGasPriceIsHigher && !alreadyBoosted && exceededWaitTime) {
@@ -437,7 +438,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalArgumentException("wallet is mandatory");
     }
     if (StringUtils.isBlank(wallet.getAddress())) {
-      LOG.debug("No wallet address: {}", wallet);
       return;
     }
     if (contractDetail == null || StringUtils.isBlank(contractDetail.getAddress()) || contractDetail.getDecimals() == null) {
@@ -605,8 +605,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       throw new IllegalStateException("Can't find admin credentials");
     }
 
-    Long adminGasPrice = getAdminGasPrice();
-    BigInteger gasPrice = BigInteger.valueOf(adminGasPrice);
+    double adminGasPrice = walletService.getGasPrice();
+    BigInteger gasPrice = BigDecimal.valueOf(adminGasPrice).toBigInteger();
     transactionDetail.setGasPrice(adminGasPrice);
     BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
     if (transactionDetail.getNonce() == 0) {
@@ -655,7 +655,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     Web3j web3j = getClientConnector().getWeb3j();
     // Retrieve cached contract instance
     if (this.ertInstance == null) {
-      BigInteger gasPrice = BigInteger.valueOf(getAdminGasPrice());
+      double adminGasPrice = walletService.getGasPrice();
+      BigInteger gasPrice = BigDecimal.valueOf(adminGasPrice).toBigInteger();
       BigInteger gasLimit = BigInteger.valueOf(getGasLimit());
 
       this.ertInstance = MeedsToken.load(contractAddress,

@@ -38,7 +38,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.REWARDINGS_GROUP;
 import static org.exoplatform.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
 import static org.exoplatform.wallet.utils.WalletUtils.SETTINGS_KEY_NAME;
 import static org.exoplatform.wallet.utils.WalletUtils.TOKEN_ADDRESS;
-import static org.exoplatform.wallet.utils.WalletUtils.USE_DYNAMIC_GAS_PRICE;
+import static org.exoplatform.wallet.utils.WalletUtils.DYNAMIC_GAS_PRICE_UPDATE_INTERVAL;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_CONTEXT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
 import static org.exoplatform.wallet.utils.WalletUtils.canAccessWallet;
@@ -50,6 +50,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfSpaceOrGrou
 import static org.exoplatform.wallet.utils.WalletUtils.isUserSpaceMember;
 import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.apache.commons.lang.StringUtils;
@@ -87,9 +88,9 @@ import org.exoplatform.wallet.model.transaction.FundsRequest;
  */
 public class WalletServiceImpl implements WalletService, Startable {
 
-  private static final String          METAMASK_FEATURE_NAME    = "walletMetamask";
+  private static final String          METAMASK_FEATURE_NAME         = "walletMetamask";
 
-  private static final Log             LOG                      = ExoLogger.getLogger(WalletServiceImpl.class);
+  private static final Log             LOG                           = ExoLogger.getLogger(WalletServiceImpl.class);
 
   private ExoContainer                 container;
 
@@ -107,11 +108,13 @@ public class WalletServiceImpl implements WalletService, Startable {
 
   private ExoFeatureService            featureService;
 
-  private GlobalSettings               configuredGlobalSettings = new GlobalSettings();
+  private GlobalSettings               configuredGlobalSettings      = new GlobalSettings();
 
-  private boolean                      useDynamicGasPrice;
+  private double                       dynamicGasPrice;
 
-  private long                         dynamicGasPrice;
+  private long                         dynamicGasPriceLastUpdateTime = System.currentTimeMillis();
+
+  private long                         dynamicGasPriceUpdateInterval = 120000l;
 
   private Double                       initialUserFunds;
 
@@ -192,9 +195,9 @@ public class WalletServiceImpl implements WalletService, Startable {
       this.configuredGlobalSettings.setContractAddress(contractAddress);
     }
 
-    if (params.containsKey(USE_DYNAMIC_GAS_PRICE)) {
-      String useDynamicGasPriceParamValue = params.getValueParam(USE_DYNAMIC_GAS_PRICE).getValue();
-      this.useDynamicGasPrice = Boolean.parseBoolean(useDynamicGasPriceParamValue);
+    if (params.containsKey(DYNAMIC_GAS_PRICE_UPDATE_INTERVAL)) {
+      String gasPriceUpdateIntervalValue = params.getValueParam(DYNAMIC_GAS_PRICE_UPDATE_INTERVAL).getValue();
+      this.dynamicGasPriceUpdateInterval = Long.parseLong(gasPriceUpdateIntervalValue);
     }
   }
 
@@ -322,10 +325,6 @@ public class WalletServiceImpl implements WalletService, Startable {
       }
       userSettings.setMetamaskEnabled(featureService.isFeatureActiveForUser(METAMASK_FEATURE_NAME, currentUser));
     }
-    if (this.isUseDynamicGasPrice()) {
-      userSettings.setUseDynamicGasPrice(true);
-      userSettings.getNetwork().setNormalGasPrice(getDynamicGasPrice());
-    }
     return userSettings;
   }
 
@@ -411,20 +410,12 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   @Override
-  public boolean isUseDynamicGasPrice() {
-    return useDynamicGasPrice;
-  }
-
-  @Override
-  public long getDynamicGasPrice() {
-    if (!useDynamicGasPrice) {
-      LOG.warn("Dynamic gas price was configured to not be used!");
-    }
-
-    if (dynamicGasPrice == 0) {
+  public double getGasPrice() {
+    if (dynamicGasPrice == 0 || (System.currentTimeMillis() - dynamicGasPriceLastUpdateTime) > dynamicGasPriceUpdateInterval) {
       try {
-        long gasPrice = getBlockchainTransactionService().refreshBlockchainGasPrice();
-        setDynamicGasPrice(gasPrice);
+        double gasPrice = getBlockchainTransactionService().getGasPrice();
+        setGasPrice(gasPrice);
+        dynamicGasPriceLastUpdateTime = System.currentTimeMillis();
       } catch (Exception e) {
         LOG.debug("Error retrieving gas price from blockchain. Return normal gas price setting", e);
         return getSettings().getNetwork().getNormalGasPrice();
@@ -434,18 +425,18 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   @Override
-  public void setDynamicGasPrice(long blockchainGasPrice) {
+  public void setGasPrice(double blockchainGasPrice) {
     NetworkSettings network = getSettings().getNetwork();
     Long maxGasPriceInWei = network.getMaxGasPrice();
     Long minGasPriceInWei = network.getMinGasPrice();
     if (blockchainGasPrice > maxGasPriceInWei) {
       LOG.info("GAS Price detected on blockchain '{}' GWEI exceeds maximum allowed gas price '{}' GWEI, thus the maximum gas price will be used instead.",
-               convertFromDecimals(BigInteger.valueOf(blockchainGasPrice), GWEI_TO_WEI_DECIMALS),
+               convertFromDecimals(BigDecimal.valueOf(blockchainGasPrice).toBigInteger(), GWEI_TO_WEI_DECIMALS),
                convertFromDecimals(BigInteger.valueOf(maxGasPriceInWei), GWEI_TO_WEI_DECIMALS));
       blockchainGasPrice = maxGasPriceInWei;
     } else if (blockchainGasPrice < minGasPriceInWei) {
       LOG.info("GAS Price detected on blockchain '{}' GWEI is lower than minimum allowed gas price '{}' GWEI, thus the minimum gas price will be used instead.",
-               convertFromDecimals(BigInteger.valueOf(blockchainGasPrice), GWEI_TO_WEI_DECIMALS),
+               convertFromDecimals(BigDecimal.valueOf(blockchainGasPrice).toBigInteger(), GWEI_TO_WEI_DECIMALS),
                convertFromDecimals(BigInteger.valueOf(minGasPriceInWei), GWEI_TO_WEI_DECIMALS));
       blockchainGasPrice = minGasPriceInWei;
     }
@@ -467,11 +458,12 @@ public class WalletServiceImpl implements WalletService, Startable {
   }
 
   private double computeInitialEtherFund() {
-    if(this.initialUserFunds != null){
+    if (this.initialUserFunds != null) {
       return this.initialUserFunds;
     } else {
       NetworkSettings network = this.configuredGlobalSettings.getNetwork();
-      long gasLimit = 200000L; // Default gas limit to use in contract transaction
+      long gasLimit = 200000L; // Default gas limit to use in contract
+                               // transaction
       long gasPrice = 20000000000L; // Default max gas price to use in contract
       // transaction
       if (network != null) {

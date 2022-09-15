@@ -34,8 +34,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletContext;
 
@@ -50,6 +56,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.javascript.jscomp.jarjar.com.google.re2j.Pattern;
 
 import org.exoplatform.commons.api.settings.SettingService;
@@ -102,6 +109,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private long                     networkId;
 
+  private Queue<TransactionDetail> transactionDetailsToRefresh = new PriorityBlockingQueue<>(1, this::compareTransactionDate);
+
+  private ScheduledExecutorService transactionRefreshExecutor  = null;
+
   public EthereumBlockchainTransactionService(PortalContainer container,
                                               WalletService walletService, // NOSONAR
                                                                            // added
@@ -119,6 +130,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     this.transactionService = transactionService;
     this.accountService = accountService;
     this.listenerService = listenerService;
+
+    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-transaction-refresh-%d").build();
+    transactionRefreshExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
   }
 
   @Override
@@ -128,6 +142,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       @Override
       public void execute(ServletContext context, PortalContainer portalContainer) {
         CompletableFuture.runAsync(EthereumBlockchainTransactionService.this::startAsync);
+        transactionRefreshExecutor.scheduleWithFixedDelay(EthereumBlockchainTransactionService.this::processTransactionRefreshingFromBlockchain,
+                                                          0,
+                                                          ethereumClientConnector.getPollingInterval(),
+                                                          TimeUnit.MILLISECONDS);
       }
     });
   }
@@ -163,8 +181,21 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
+  public void addTransactionToRefreshFromBlockchain(TransactionDetail transactionDetail) {
+    if (transactionDetailsToRefresh.stream()
+                                   .noneMatch(otherTransactionDetail -> StringUtils.equalsIgnoreCase(otherTransactionDetail.getHash(),
+                                                                                                     transactionDetail.getHash()))) {
+      transactionDetailsToRefresh.add(transactionDetail);
+    }
+  }
+
+  @Override
   public TransactionDetail refreshTransactionFromBlockchain(String transactionHash) {
     TransactionDetail transactionDetail = transactionService.getTransactionByHash(transactionHash);
+    if (transactionDetail != null && !transactionDetail.isPending() && transactionDetail.isSucceeded()) {
+      // Already refreshed no need to change it
+      return transactionDetail;
+    }
     Transaction transaction = ethereumClientConnector.getTransaction(transactionHash);
     retrieveTransactionDetailsFromBlockchain(transactionDetail, transaction);
     if (transaction != null && transaction.getBlockNumber() != null
@@ -177,8 +208,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   @Override
-  public long refreshBlockchainGasPrice() throws IOException {
-    return ethereumClientConnector.getGasPrice().longValue();
+  public double getGasPrice() throws IOException {
+    return ethereumClientConnector.getGasPrice().doubleValue();
   }
 
   @Override
@@ -248,14 +279,35 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     RequestLifeCycle.begin(container);
     try {
       long lastWatchedBlockNumber = getLastWatchedBlockNumber();
-      if (lastWatchedBlockNumber <= 0) {
+      long pendingContractTransactionsSent = transactionService.countContractPendingTransactionsSent();
+      if (lastWatchedBlockNumber <= 0 || pendingContractTransactionsSent == 0) {
         lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
         saveLastWatchedBlockNumber(lastWatchedBlockNumber);
       }
       ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
-      if (ethereumClientConnector.isPermanentlyScanBlockchain()
-          || transactionService.countContractPendingTransactionsSent() > 0) {
+      if (ethereumClientConnector.isPermanentlyScanBlockchain() || pendingContractTransactionsSent > 0) {
         startWatchingBlockchain();
+      }
+    } finally {
+      RequestLifeCycle.end();
+    }
+  }
+
+  private void processTransactionRefreshingFromBlockchain() {
+    ExoContainerContext.setCurrentContainer(container);
+    RequestLifeCycle.begin(container);
+    try {
+      // Limit to 10 to not exceed rate limit all time
+      int limit = transactionDetailsToRefresh.size() > 10 ? 10 : transactionDetailsToRefresh.size();
+      for (int i = 0; i < limit; i++) {
+        TransactionDetail transactionDetail = transactionDetailsToRefresh.poll();
+        String hash = transactionDetail.getHash();
+        try {
+          refreshTransactionFromBlockchain(hash);
+        } catch (Exception e) {
+          LOG.warn("Error while refreshing transaction with has {}. Retry it after few seconds.", hash, e);
+          addTransactionToRefreshFromBlockchain(transactionDetail);
+        }
       }
     } finally {
       RequestLifeCycle.end();
@@ -440,8 +492,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           // Trigger sent to blockchain only when it's the first time sending
           sentToBlockchain = true;
         } else {
-          TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-          if (receipt == null) {
+          if (isNonceTooLow(transactionError)) {
+            TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
+            if (StringUtils.equals(receipt.getTransactionHash(), transactionHash)) {
+              alreadyMined = true;
+              addTransactionToRefreshFromBlockchain(transactionDetail);
+            }
+          }
+          if (!alreadyMined) {
             logTransactionError(transactionDetail, exception, transactionError);
             if (isUnrecoverableError(transactionError)) {
               transactionDetail.setNonce(0);
@@ -451,8 +509,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
               // Reattempt sending next time the job is triggered
               transactionDetail.setSentTimestamp(0);
             }
-          } else {
-            alreadyMined = true;
           }
         }
       } else {
@@ -479,12 +535,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                                                        "base fee exceeds gas limit",
                                                        "replacement transaction underpriced",
                                                        "only replay-protected")
-        || NONCE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find() || GAS_PRICE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find());
+        || GAS_PRICE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find() || isNonceTooLow(transactionError));
   }
 
   private boolean isAlreadySentError(Error transactionError) {
     String message = StringUtils.lowerCase(getTransactionErrorMessage(transactionError));
     return StringUtils.containsIgnoreCase(message, "already known");
+  }
+
+  private boolean isNonceTooLow(Error transactionError) {
+    String message = StringUtils.lowerCase(getTransactionErrorMessage(transactionError));
+    return NONCE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find();
   }
 
   private void logTransactionError(TransactionDetail transactionDetail, Throwable exception, Error transactionError) {
@@ -574,7 +635,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       return null;
     }
 
-    if (!transactionDetail.isBoost() && !transactionService.canSendTransactionToBlockchain(transactionDetail.getFrom())) {
+    if (!transactionDetail.isBoost() && transactionDetail.getSendingAttemptCount() == 0
+        && !transactionService.canSendTransactionToBlockchain(transactionDetail.getFrom())) {
       return null;
     }
 
@@ -655,6 +717,10 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     } else {
       return isIOException(exception.getCause());
     }
+  }
+
+  private int compareTransactionDate(TransactionDetail transactionDetail, TransactionDetail otherTransactionDetail) {
+    return (int) (transactionDetail.getTimestamp() - otherTransactionDetail.getTimestamp());
   }
 
 }

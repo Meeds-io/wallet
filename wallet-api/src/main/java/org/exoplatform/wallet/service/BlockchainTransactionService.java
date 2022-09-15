@@ -18,6 +18,7 @@ package org.exoplatform.wallet.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.Future;
 
 import org.exoplatform.wallet.model.ContractTransactionEvent;
@@ -44,13 +45,19 @@ public interface BlockchainTransactionService {
   TransactionDetail refreshTransactionFromBlockchain(String transactionHash);
 
   /**
-   * Refreshes gas price from blockchain and cache it
+   * Get gas price from blockchain
    * 
    * @return last gas price retrieved from blockchain
    * @throws IOException when an error occurs while requesting gas price from
    *           blockchain
    */
-  long refreshBlockchainGasPrice() throws IOException;
+  double getGasPrice() throws IOException;
+
+  /**
+   * Add {@link TransactionDetail} to refresh processing {@link Queue}
+   * @param transactionDetail {@link TransactionDetail} to refresh from blockchain
+   */
+  void addTransactionToRefreshFromBlockchain(TransactionDetail transactionDetail);
 
   /**
    * Checks whether the Contract Transaction Topics contains a managed wallet

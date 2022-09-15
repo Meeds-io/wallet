@@ -106,7 +106,7 @@ public class ContractTransactionMinedListenerTest {
 
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, times(1)).refreshTransactionFromBlockchain(hash);
+    verify(blockchainTransactionService, times(1)).addTransactionToRefreshFromBlockchain(transactionDetail);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class ContractTransactionMinedListenerTest {
 
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, times(1)).refreshTransactionFromBlockchain(hash);
+    verify(blockchainTransactionService, times(1)).addTransactionToRefreshFromBlockchain(transactionDetail);
   }
 
   @Test

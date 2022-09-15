@@ -191,7 +191,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return;
     }
     if (StringUtils.isBlank(wallet.getAddress())) {
-      LOG.debug("No wallet address: {}", wallet);
       return;
     }
 
@@ -266,7 +265,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return;
     }
     if (StringUtils.isBlank(wallet.getAddress())) {
-      LOG.debug("No wallet address: {}", wallet);
       return;
     }
     accountStorage.retrieveWalletBlockchainState(wallet, contractAddress);

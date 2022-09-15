@@ -16,15 +16,11 @@
  */
 package org.exoplatform.wallet.blockchain.listener;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.log.ExoLogger;
@@ -42,48 +38,49 @@ import org.exoplatform.wallet.service.WalletTransactionService;
  * instantly refresh ether transactions state just after a contract transaction
  * gets mined.
  */
-@Asynchronous
-public class EtherTransactionVerifierListener extends Listener<Object, Map<String, Object>> {
+public class TransactionWithNonceVerifierListener extends Listener<Object, Map<String, Object>> {
 
-  private static final Log             LOG = ExoLogger.getLogger(EtherTransactionVerifierListener.class);
+  private static final Log             LOG = ExoLogger.getLogger(TransactionWithNonceVerifierListener.class);
 
   private BlockchainTransactionService blockchainTransactionService;
 
   private WalletTransactionService     transactionService;
 
-  public EtherTransactionVerifierListener(BlockchainTransactionService blockchainTransactionService,
-                                          WalletTransactionService transactionService) {
+  public TransactionWithNonceVerifierListener(BlockchainTransactionService blockchainTransactionService,
+                                              WalletTransactionService transactionService) {
     this.blockchainTransactionService = blockchainTransactionService;
     this.transactionService = transactionService;
   }
 
   @Override
   public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
-    Map<String, Object> transactionDetailObject = event.getData();
-    String hash = (String) transactionDetailObject.get("hash");
-    TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
-    if (transactionDetail == null || transactionDetail.isPending()) {
-      return;
+    String hash = null;
+    try {
+      Map<String, Object> transactionDetailObject = event.getData();
+      hash = (String) transactionDetailObject.get("hash");
+      TransactionDetail transactionDetail = transactionService.getTransactionByHash(hash);
+      if (transactionDetail == null || transactionDetail.isPending()) {
+        return;
+      }
+      refreshEtherTransactions(transactionDetail.getFromWallet(), transactionDetail.getNonce());
+    } catch (Exception e) {
+      LOG.error("Error refreshing ether transaction with hash {}", hash, e);
     }
-    refreshEtherTransactions(transactionDetail.getToWallet(), transactionDetail.getFromWallet(), transactionDetail.getByWallet());
   }
 
-  private void refreshEtherTransactions(Wallet... wallets) {
-    Set<TransactionDetail> transactionDetails = new HashSet<>();
-    Arrays.stream(wallets).forEach(wallet -> {
-      if (wallet != null) {
-        List<TransactionDetail> transactions = transactionService.getPendingEtherTransactions(wallet.getAddress());
-        if (CollectionUtils.isNotEmpty(transactions)) {
-          transactionDetails.addAll(transactions);
-        }
-      }
-    });
-    if (CollectionUtils.isNotEmpty(transactionDetails)) {
-      transactionDetails.forEach(transactionDetail -> {
-        try {
-          blockchainTransactionService.refreshTransactionFromBlockchain(transactionDetail.getHash());
-        } catch (Exception e) {
-          LOG.warn("Error refreshing Ether Transaction {}", transactionDetail.getHash(), e);
+  private void refreshEtherTransactions(Wallet fromWallet, long untilNonce) {
+    if (fromWallet == null) {
+      return;
+    }
+    List<TransactionDetail> transactions = transactionService.getPendingWalletTransactionsSent(fromWallet.getAddress());
+    if (CollectionUtils.isNotEmpty(transactions)) {
+      transactions.forEach(transactionDetail -> {
+        if (transactionDetail.getNonce() < untilNonce) {
+          try {
+            blockchainTransactionService.addTransactionToRefreshFromBlockchain(transactionDetail);
+          } catch (Exception e) {
+            LOG.warn("Error refreshing Transaction {}", transactionDetail.getHash(), e);
+          }
         }
       });
     }

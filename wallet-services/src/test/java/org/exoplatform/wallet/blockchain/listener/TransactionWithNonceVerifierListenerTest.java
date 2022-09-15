@@ -42,38 +42,36 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EtherTransactionVerifierListenerTest {
+public class TransactionWithNonceVerifierListenerTest {
+
+  private static final int                     NONCE       = 12;
 
   @Mock
-  private WalletTransactionService           transactionService;
+  private WalletTransactionService             transactionService;
 
   @Mock
-  private BlockchainTransactionService       blockchainTransactionService;
+  private BlockchainTransactionService         blockchainTransactionService;
 
-  private EtherTransactionVerifierListener   listener;
+  private TransactionWithNonceVerifierListener listener;
 
-  private Event<Object, Map<String, Object>> event;
+  private Event<Object, Map<String, Object>>   event;
 
-  private TransactionDetail                  transactionDetail;
+  private TransactionDetail                    transactionDetail;
 
-  private String                             hash        = "transactionHash";
+  private String                               hash        = "transactionHash";
 
-  private String                             fromAddress = "fromAddress";
-
-  private String                             toAddress   = "toAddress";
-
-  private String                             byAddress   = "byAddress";
+  private String                               fromAddress = "fromAddress";
 
   @Before
   public void setUp() {
-    listener = new EtherTransactionVerifierListener(blockchainTransactionService, transactionService);
+    listener = new TransactionWithNonceVerifierListener(blockchainTransactionService, transactionService);
     event = new Event<Object, Map<String, Object>>(WalletUtils.TRANSACTION_MINED_EVENT,
                                                    null,
                                                    Collections.singletonMap("hash", hash));
     transactionDetail = new TransactionDetail();
     transactionDetail.setHash(hash);
     transactionDetail.setFrom(fromAddress);
-    transactionDetail.setTo(toAddress);
+    transactionDetail.setNonce(NONCE);
   }
 
   @Test
@@ -98,7 +96,7 @@ public class EtherTransactionVerifierListenerTest {
 
     listener.onEvent(event);
     verifyNoInteractions(blockchainTransactionService);
-    verify(transactionService, never()).getPendingEtherTransactions(any());
+    verify(transactionService, never()).getPendingWalletTransactionsSent(any());
   }
 
   @Test
@@ -107,28 +105,17 @@ public class EtherTransactionVerifierListenerTest {
     transactionDetail.setContractMethodName(MeedsToken.FUNC_TRANSFER);
     transactionDetail.setFromWallet(new Wallet());
     transactionDetail.getFromWallet().setAddress(fromAddress);
-    transactionDetail.setToWallet(new Wallet());
-    transactionDetail.getToWallet().setAddress(toAddress);
-    transactionDetail.setByWallet(new Wallet());
-    transactionDetail.getByWallet().setAddress(byAddress);
 
     List<TransactionDetail> fromTransactions = Collections.singletonList(new TransactionDetail());
     fromTransactions.get(0).setHash("from1");
-    when(transactionService.getPendingEtherTransactions(fromAddress)).thenReturn(fromTransactions);
-
-    List<TransactionDetail> toTransactions = Collections.singletonList(new TransactionDetail());
-    toTransactions.get(0).setHash("to1");
-    when(transactionService.getPendingEtherTransactions(toAddress)).thenReturn(toTransactions);
+    fromTransactions.get(0).setNonce(NONCE - 1);
+    when(transactionService.getPendingWalletTransactionsSent(fromAddress)).thenReturn(fromTransactions);
 
     listener.onEvent(event);
-    verify(transactionService, times(3)).getPendingEtherTransactions(any());
-    verify(transactionService, times(1)).getPendingEtherTransactions(fromAddress);
-    verify(transactionService, times(1)).getPendingEtherTransactions(toAddress);
-    verify(transactionService, times(1)).getPendingEtherTransactions(byAddress);
+    verify(transactionService, times(1)).getPendingWalletTransactionsSent(any());
+    verify(transactionService, times(1)).getPendingWalletTransactionsSent(fromAddress);
 
-    verify(blockchainTransactionService, times(2)).refreshTransactionFromBlockchain(any());
-    verify(blockchainTransactionService, times(1)).refreshTransactionFromBlockchain(fromTransactions.get(0).getHash());
-    verify(blockchainTransactionService, times(1)).refreshTransactionFromBlockchain(toTransactions.get(0).getHash());
+    verify(blockchainTransactionService, times(1)).addTransactionToRefreshFromBlockchain(fromTransactions.get(0));
   }
 
 }

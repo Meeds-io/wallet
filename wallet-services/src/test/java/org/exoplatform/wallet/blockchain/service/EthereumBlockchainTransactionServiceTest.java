@@ -1,5 +1,6 @@
 package org.exoplatform.wallet.blockchain.service;
 
+import static org.exoplatform.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
 import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -104,13 +105,16 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     SettingValue value = SettingValue.create(blockNumber);
     when(settingService.get(any(), any(), any())).thenReturn(value);
     when(ethereumClientConnector.isPermanentlyScanBlockchain()).thenReturn(true);
+    when(ethereumClientConnector.getLastestBlockNumber()).thenReturn(blockNumber);
 
     service.startAsync();
-    verify(ethereumClientConnector, timeout(10000).times(1)).setLastWatchedBlockNumber(anyLong());
 
-    verify(settingService, never()).set(any(), any(), any(), any());
-    verify(ethereumClientConnector, times(1)).setLastWatchedBlockNumber(blockNumber);
+    verify(ethereumClientConnector, timeout(10000).times(1)).setLastWatchedBlockNumber(blockNumber);
     verify(ethereumClientConnector, times(1)).renewTransactionListeningSubscription(anyLong());
+    verify(settingService, times(1)).set(any(),
+                                         any(),
+                                         eq(LAST_BLOCK_NUMBER_KEY_NAME + 0),
+                                         any());
   }
 
   @Test
@@ -476,7 +480,6 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
     when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(transactionDetail.getNonce()));
     when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
-    when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(true);
 
     CompletableFuture<EthSendTransaction> future = mock(CompletableFuture.class);
     CompletableFuture<TransactionDetail> resultFuture = mock(CompletableFuture.class);
@@ -525,11 +528,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
     when(transactionService.getPendingTransactionMaxDays()).thenReturn(1l);
     when(transactionService.getMaxAttemptsToSend()).thenReturn(1l);
-    when(ethereumClientConnector.getNonce(fromAddress)).thenReturn(BigInteger.valueOf(transactionDetail.getNonce()));
     when(transactionService.getTransactionsToSend()).thenReturn(Collections.singletonList(transactionDetail));
-    // Keep it on purpose to always check verifications are 0 even when this
-    // condition is true
-    lenient().when(transactionService.canSendTransactionToBlockchain(fromAddress)).thenReturn(false);
 
     service.sendPendingTransactionsToBlockchain();
 
@@ -921,13 +920,11 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
       return resultFuture;
     });
 
-    service.sendPendingTransactionsToBlockchain();
     EthSendTransaction ethTransaction = mock(EthSendTransaction.class);
     Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
     when(ethTransaction.getError()).thenReturn(transactionError);
     TransactionReceipt receipt = mock(TransactionReceipt.class);
-    when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(receipt);
-    lenient().when(receipt.isStatusOK()).thenReturn(true);
+    lenient().when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(receipt);
 
     when(resultFuture.get()).thenAnswer(invocation -> {
       return handler.get().apply(ethTransaction, null);
@@ -935,15 +932,10 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
     List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
     assertNotNull(pendingTransactions);
-    assertEquals(1, pendingTransactions.size());
-    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
-    assertNotNull(handledTransactionDetail);
-    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
-    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
-    assertFalse(handledTransactionDetail.isSucceeded());
-    assertTrue(handledTransactionDetail.isPending());
+    assertEquals(0, pendingTransactions.size());
 
-    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
+    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
+        && transaction.getSentTimestamp() == 0 && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
     verify(listenerService, never()).broadcast(anyString(), any(), any());
   }
 

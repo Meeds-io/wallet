@@ -495,7 +495,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       startPeriodicConnectionVerifier();
     }
     if (isConnected()) {
-      LOG.debug("Web3 connection is already made");
       return true;
     }
     if (this.serviceStopping) {

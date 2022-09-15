@@ -322,7 +322,7 @@ public class TransactionStorage {
 
   private List<TransactionDetail> fromEntities(List<TransactionEntity> transactions) {
     return transactions == null ? Collections.emptyList()
-                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
+                                : transactions.stream().sequential().map(this::fromEntity).collect(Collectors.toList());
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {

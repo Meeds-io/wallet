@@ -19,6 +19,8 @@ package org.exoplatform.wallet.blockchain.listener;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.ContractTransactionEvent;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
@@ -34,6 +36,8 @@ import org.exoplatform.wallet.service.WalletTransactionService;
  */
 @Asynchronous
 public class ContractTransactionMinedListener extends Listener<String, ContractTransactionEvent> {
+
+  private static final Log             LOG = ExoLogger.getLogger(ContractTransactionMinedListener.class);
 
   private WalletTransactionService     walletTransactionService;
 
@@ -52,7 +56,8 @@ public class ContractTransactionMinedListener extends Listener<String, ContractT
     TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(transactionHash);
     if (transactionDetail != null) {
       if (transactionDetail.isPending() || !transactionDetail.isSucceeded()) {
-        blockchainTransactionService.refreshTransactionFromBlockchain(transactionHash);
+        LOG.debug("Transaction with hash {} has been mined successfully", transactionDetail.getHash());
+        blockchainTransactionService.addTransactionToRefreshFromBlockchain(transactionDetail);
       }
     } else if (blockchainTransactionService.hasManagedWalletInTransaction(contractEvent)) {
       blockchainTransactionService.refreshTransactionFromBlockchain(transactionHash);

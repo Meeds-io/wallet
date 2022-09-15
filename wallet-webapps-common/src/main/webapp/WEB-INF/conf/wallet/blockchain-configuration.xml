@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>exo.wallet.transaction.mined</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.blockchain.listener.EtherTransactionVerifierListener</type>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionWithNonceVerifierListener</type>
     </component-plugin>
     <component-plugin>
       <name>exo.wallet.transaction.minedForContract</name>
@@ -119,7 +119,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </init-params>
     </component-plugin>
     <component-plugin>
-      <name>AddCronJob</name>
+      <name>BoostAdminTransactionJob</name>
       <set-method>addCronJob</set-method>
       <type>org.exoplatform.services.scheduler.CronJob</type>
       <description>Configuration for the Job that boost transaction sending to blockchain</description>
@@ -135,25 +135,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </init-params>
     </component-plugin>
     <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addPeriodJob</set-method>
-      <type>org.exoplatform.services.scheduler.PeriodJob</type>
-      <description>A job to update gas price from blockchain</description>
-      <init-params>
-        <properties-param>
-          <name>job.info</name>
-          <property name="jobName" value="GasPriceUpdaterJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.wallet.job.GasPriceUpdaterJob"/>
-          <property name="repeatCount" value="0"/>
-          <property name="period" value="${exo.wallet.GasPriceUpdaterJob.interval:120000}"/><!-- default 30 seconds -->
-          <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
-          <property name="endTime" value=""/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>AddCronJob</name>
+      <name>PendingEtherTransactionVerifierJob</name>
       <set-method>addCronJob</set-method>
       <type>org.exoplatform.services.scheduler.CronJob</type>
       <description>A job to refresh ether transactions sent by admin wallet</description>
