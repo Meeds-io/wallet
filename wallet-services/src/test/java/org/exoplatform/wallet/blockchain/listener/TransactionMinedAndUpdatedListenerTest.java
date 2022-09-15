@@ -62,7 +62,7 @@ public class TransactionMinedAndUpdatedListenerTest {
   public void testOnEventWhenNoPendingTransactions() throws Exception {
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, timeout(1000).times(1)).stopWatchingBlockchain();
+    verify(blockchainTransactionService, timeout(5000).times(1)).stopWatchingBlockchain();
   }
 
   @Test
@@ -71,7 +71,8 @@ public class TransactionMinedAndUpdatedListenerTest {
 
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, timeout(3000).times(0)).stopWatchingBlockchain();
+    verify(walletTransactionService, timeout(10000).times(1)).countContractPendingTransactionsSent();
+    verify(blockchainTransactionService, timeout(5000).times(0)).stopWatchingBlockchain();
   }
 
   @Test
@@ -80,7 +81,8 @@ public class TransactionMinedAndUpdatedListenerTest {
 
     listener.onEvent(event);
 
-    verify(blockchainTransactionService, timeout(3000).times(0)).stopWatchingBlockchain();
+    verify(walletTransactionService, timeout(10000).times(1)).countContractPendingTransactionsToSend();
+    verify(blockchainTransactionService, timeout(5000).times(0)).stopWatchingBlockchain();
   }
 
 }
