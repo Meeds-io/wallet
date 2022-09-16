@@ -122,7 +122,7 @@ public class WalletRewardReportService implements RewardReportService {
       throw new IllegalStateException("No rewards to send for selected period");
     }
     ContractDetail contractDetail = getContractDetail();
-    BigInteger adminTokenBalance = getTokenAdminService().balanceOf(adminWalletAddress);
+    BigInteger adminTokenBalance = getTokenAdminService().getTokenBalanceOf(adminWalletAddress);
     double adminBalance = convertFromDecimals(adminTokenBalance, contractDetail.getDecimals());
     double rewardsAmount = rewardReport.getRemainingTokensToSend();
 
@@ -142,8 +142,8 @@ public class WalletRewardReportService implements RewardReportService {
         transactionDetail.setLabel(transactionLabel);
         String transactionMessage = getTransactionMessage(walletReward, contractDetail, rewardPeriod);
         transactionDetail.setMessage(transactionMessage);
-        transactionDetail = getTokenAdminService().reward(transactionDetail, username);
         walletReward.setTransaction(transactionDetail);
+        getTokenAdminService().reward(transactionDetail, username);
       } catch (Exception e) {
         LOG.warn("Error while sending reward transaction for user '{}'", walletReward.getWallet().getName(), e);
       }
@@ -255,7 +255,7 @@ public class WalletRewardReportService implements RewardReportService {
       Set<Long> identityIds = walletRewards.stream().map(wr -> wr.getIdentityId()).collect(Collectors.toSet());
       Map<Long, Double> earnedPoints = plugin.getEarnedPoints(identityIds,
                                                               period.getStartDateInSeconds(),
-                                                              period.getEndDateInSeconds());
+                                                              period.getEndDateInSeconds() - 1);
 
       Set<WalletReward> validWalletRewards = pluginSettings.isUsePools() ? enabledTeamRewards : enabledRewards;
       computeReward(pluginSettings, earnedPoints, validWalletRewards, walletRewardsByPlugin);
