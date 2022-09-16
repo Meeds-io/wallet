@@ -70,7 +70,7 @@ public class ApplicationRegistrySetupService implements StartableClusterAware {
 
         Application application = new Application();
         walletCategory.setApplications(Collections.singletonList(application));
-        application.setAccessPermissions(new ArrayList<String>(EVERYONE_PERMISSION_LIST));
+        application.setAccessPermissions(new ArrayList<>(EVERYONE_PERMISSION_LIST));
         application.setDisplayName("Space Wallet");
         application.setDescription("Space Wallet");
         application.setApplicationName(SPACE_WALLET_PORTLET_NAME);

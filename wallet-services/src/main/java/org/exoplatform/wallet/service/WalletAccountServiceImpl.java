@@ -17,12 +17,40 @@
 package org.exoplatform.wallet.service;
 
 import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.ADMIN_KEY_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.MODIFY_ADDRESS_ASSOCIATED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.SIMPLE_CHARS;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_DELETED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_DISABLED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ENABLED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZATION_MODIFICATION_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_PROVIDER_MODIFIED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.canAccessWallet;
+import static org.exoplatform.wallet.utils.WalletUtils.checkUserIsSpaceManager;
+import static org.exoplatform.wallet.utils.WalletUtils.computeWalletFromIdentity;
+import static org.exoplatform.wallet.utils.WalletUtils.computeWalletIdentity;
+import static org.exoplatform.wallet.utils.WalletUtils.getContractAddress;
+import static org.exoplatform.wallet.utils.WalletUtils.getContractDetail;
+import static org.exoplatform.wallet.utils.WalletUtils.getIdentityById;
+import static org.exoplatform.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static org.exoplatform.wallet.utils.WalletUtils.getSettings;
+import static org.exoplatform.wallet.utils.WalletUtils.getSpacePrettyName;
+import static org.exoplatform.wallet.utils.WalletUtils.hideWalletOwnerPrivateInformation;
+import static org.exoplatform.wallet.utils.WalletUtils.isUserRewardingAdmin;
+import static org.exoplatform.wallet.utils.WalletUtils.isUserSpaceManager;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 
@@ -35,14 +63,21 @@ import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.*;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.RootContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.wallet.model.*;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletAddressLabel;
+import org.exoplatform.wallet.model.WalletProvider;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
 import org.exoplatform.wallet.storage.AddressLabelStorage;
@@ -102,13 +137,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     PortalContainer.addInitTask(container.getPortalContext(), new RootContainer.PortalContainerPostInitTask() {
       @Override
       public void execute(ServletContext context, PortalContainer portalContainer) {
-        ExoContainerContext.setCurrentContainer(container);
-        RequestLifeCycle.begin(container);
+        ExoContainerContext.setCurrentContainer(portalContainer);
+        RequestLifeCycle.begin(portalContainer);
         try {
           Wallet adminWallet = getAdminWallet();
-          retrieveWalletBlockchainState(adminWallet);
-
-          WalletAccountServiceImpl.this.adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
+          adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
         } catch (Exception e) {
           LOG.error("Error starting service", e);
         } finally {
@@ -151,14 +184,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   }
 
   @Override
-  public void refreshWalletFromBlockchain(Wallet wallet,
+  public void refreshWalletFromBlockchain(Wallet wallet, // NOSONAR
                                           ContractDetail contractDetail,
                                           Map<String, Set<String>> walletsModifications) {
     if (wallet == null) {
       return;
     }
     if (StringUtils.isBlank(wallet.getAddress())) {
-      LOG.debug("No wallet address: {}", wallet);
       return;
     }
 
@@ -173,6 +205,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         Set<String> walletModifications = walletsModifications == null ? null
                                                                        : walletsModifications.get(wallet.getAddress());
         accountStorage.retrieveWalletBlockchainState(wallet, contractDetail.getAddress());
+        Wallet originalWallet = wallet.clone();
+
         getTokenAdminService().retrieveWalletInformationFromBlockchain(wallet,
                                                                        contractDetail,
                                                                        walletModifications);
@@ -187,7 +221,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
           setInitializationStatus(wallet.getAddress(), WalletState.INITIALIZED);
         }
 
-        getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+        if (!Objects.equals(originalWallet.getEtherBalance(), wallet.getEtherBalance())
+            || !Objects.equals(originalWallet.getTokenBalance(), wallet.getTokenBalance())) {
+          getListenerService().broadcast(WALLET_MODIFIED_EVENT, null, wallet);
+        }
       } catch (Exception e) {
         LOG.error("Error refreshing wallet state on blockchain", e);
       }
@@ -219,16 +256,15 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public void retrieveWalletBlockchainState(Wallet wallet) {
-    String contractAddress = getContractAddress();
     if (wallet == null) {
       return;
     }
+    String contractAddress = getContractAddress();
     if (StringUtils.isBlank(contractAddress)) {
       LOG.warn("Contract address is empty, thus wallets can't be refreshed");
       return;
     }
     if (StringUtils.isBlank(wallet.getAddress())) {
-      LOG.debug("No wallet address: {}", wallet);
       return;
     }
     accountStorage.retrieveWalletBlockchainState(wallet, contractAddress);
@@ -419,13 +455,15 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     // This is about address modification or creation, thus, the blockchain must
     // be retrieved again
-    refreshWalletFromBlockchain(wallet, getContractDetail(), null);
+    if (!WalletType.isAdmin(wallet.getType())) {
+      refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-    String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
-    try {
-      getListenerService().broadcast(eventName, wallet.clone(), currentUser);
-    } catch (Exception e) {
-      LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+      try {
+        getListenerService().broadcast(eventName, wallet.clone(), currentUser);
+      } catch (Exception e) {
+        LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      }
     }
   }
 
@@ -733,12 +771,12 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
@@ -747,21 +785,21 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         parameters.put(OPERATION, "reject");
       } else {
         LOG.debug("No statistic log is handeled for initialization state modification to {}", initializationState);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
     } else if (StringUtils.equals(STATISTIC_OPERATION_ENABLE, operation)) {
       if (result == null || !((boolean) result)) {
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       String address = (String) methodArgs[0];
       if (StringUtils.isBlank(address)) {
         LOG.debug("Address parameter is missing. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       }
       Wallet wallet = getWalletByAddress(address);
       if (wallet == null) {
         LOG.debug("Wallet not found for address {}. No statistic log will be added", address);
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
@@ -771,13 +809,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       Wallet wallet = (Wallet) methodArgs[0];
       if (wallet == null) {
         LOG.debug("Wallet not found in parameters. No statistic log will be added");
-        return Collections.emptyMap();
+        return null; // NOSONAR should be null to not collect stats
       } else {
         parameters.put("", wallet);
       }
     } else {
       LOG.warn("Statistic operation type '{}' not handled", operation);
-      return Collections.emptyMap();
+      return null; // NOSONAR should be null to not collect stats
     }
 
     String issuer = (String) methodArgs[methodArgs.length - 1];
@@ -795,6 +833,28 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   public boolean isAdminAccountEnabled() {
     return adminAccountEnabled;
+  }
+
+  public void setTokenAdminService(WalletTokenAdminService tokenAdminService) {
+    this.tokenAdminService = tokenAdminService;
+  }
+
+  public void setListenerService(ListenerService listenerService) {
+    this.listenerService = listenerService;
+  }
+
+  private WalletTokenAdminService getTokenAdminService() {
+    if (tokenAdminService == null) {
+      tokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
+    }
+    return tokenAdminService;
+  }
+
+  private ListenerService getListenerService() {
+    if (listenerService == null) {
+      listenerService = CommonsUtils.getService(ListenerService.class);
+    }
+    return listenerService;
   }
 
   private void checkCanSaveWallet(Wallet wallet, Wallet storedWallet, String currentUser) throws IllegalAccessException {
@@ -909,20 +969,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setProvider(provider.name());
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
-  }
-
-  private WalletTokenAdminService getTokenAdminService() {
-    if (tokenAdminService == null) {
-      tokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
-    }
-    return tokenAdminService;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
   }
 
 }

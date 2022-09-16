@@ -319,6 +319,9 @@ export default {
       if (this.$refs.amount) {
         this.$refs.amount.blur();
       }
+
+      this.transactionUtils.getGasPrice().then(data => this.gasPrice = data);
+
       this.recipient = null;
       this.amount = null;
       this.notificationId = null;
@@ -339,9 +342,6 @@ export default {
       } else {
         this.transactionLabel = this.defaultLabel;
         this.transactionMessage = this.defaultMessage;
-        if (!this.gasPrice) {
-          this.gasPrice = window.walletSettings.network.normalGasPrice;
-        }
       }
       this.fiatSymbol = window.walletSettings.fiatSymbol;
       this.storedPassword = window.walletSettings.storedPassword && window.walletSettings.browserWalletExists;

@@ -187,7 +187,7 @@ export function initSettings(isSpace, useCometd, isAdministration) {
       if (useCometd && !window.walletComedDInitialized) {
         window.walletComedDInitialized = true;
 
-        document.addEventListener('exo.wallet.transaction.modified', triggerTransactionMinedEvent);
+        document.addEventListener('exo.wallet.transaction.minedAndUpdated', triggerTransactionMinedEvent);
         initCometd(window.walletSettings);
       }
 

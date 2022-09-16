@@ -117,17 +117,11 @@ public interface WalletService {
    * 
    * @param blockchainGasPrice gas price in WEI
    */
-  void setDynamicGasPrice(long blockchainGasPrice);
+  void setGasPrice(double blockchainGasPrice);
 
   /**
    * @return gas price retrieved from blockchain
    */
-  long getDynamicGasPrice();
-
-  /**
-   * @return true if services are configured to use dynamic gas price from
-   *         blockchain, else false
-   */
-  boolean isUseDynamicGasPrice();
+  double getGasPrice();
 
 }

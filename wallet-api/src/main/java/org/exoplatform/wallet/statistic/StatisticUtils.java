@@ -48,7 +48,7 @@ public class StatisticUtils {
 
   public static final String PARAMETERS     = "parameters";
 
-  public static void addStatisticEntry(Map<String, Object> parameters) {
+  public static void addStatisticEntry(Map<String, Object> parameters) { // NOSONAR
     if (parameters == null || parameters.isEmpty()) {
       throw new IllegalArgumentException("parameters is mandatory");
     }
