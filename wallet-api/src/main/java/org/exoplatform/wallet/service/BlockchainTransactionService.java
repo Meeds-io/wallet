@@ -17,69 +17,78 @@
 package org.exoplatform.wallet.service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.Future;
 
+import org.exoplatform.wallet.model.ContractTransactionEvent;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 
 public interface BlockchainTransactionService {
 
   /**
-   * Scans newly mined blocks in Blockchain to verify if there are transactions
-   * on configured token or wallet. If found, save it in DB.
-   * 
-   * @throws IOException
-   */
-  void scanNewerBlocks() throws IOException;
-
-  /**
    * Sends raw transactions to blockchain
+   * 
+   * @return {@link List} of {@link TransactionDetail} asynchronously after sent
+   *         to blockchain
    */
-  void sendRawTransactions();
+  List<TransactionDetail> sendPendingTransactionsToBlockchain();
 
   /**
-   * Checks transaction identified by its hash on blockchain to see if it's
-   * mined. If mined, the information will be retrieved from mined transaction
-   * and saved on database (by replacing existing while the transaction was
-   * pendinginformation for more data integrity)
+   * This will refresh transaction from blockchain. If the transaction detail
+   * exists in database, it will update its status, else it will create a new
+   * one with data found on Blockchain mined Transaction
    * 
-   * @param transactionHash
-   * @param pendingTransactionFromDatabase
-   */
-  void checkTransactionStatusOnBlockchain(String transactionHash, boolean pendingTransactionFromDatabase);
-
-  /**
-   * This will refresh transaction from blockchain if the transaction is marked
-   * as pending or marked as error
-   * 
-   * @param hash hash of transaction to update
+   * @param transactionHash hash of transaction to update
    * @return refreshed {@link TransactionDetail} from blockchain
    */
-  TransactionDetail refreshTransactionFromBlockchain(String hash);
+  TransactionDetail refreshTransactionFromBlockchain(String transactionHash);
 
   /**
-   * Checks that a transaction marked as pending in internal database is valid
-   * and available on blockchain. If not and if it has exceede
-   * {@link WalletTransactionService#getPendingTransactionMaxDays()}, then mark
-   * it as 'failed'. I will be remade as 'Success' if
-   * ContractTransactionVerifierJob detects a Contract Log
-   * 
-   * @param transactionDetail
-   */
-  void checkPendingTransactionValidity(TransactionDetail transactionDetail);
-
-  /**
-   * Refreshes gas price from blockchain and cache it
+   * Get gas price from blockchain
    * 
    * @return last gas price retrieved from blockchain
    * @throws IOException when an error occurs while requesting gas price from
    *           blockchain
    */
-  long refreshBlockchainGasPrice() throws IOException;
+  double getGasPrice() throws IOException;
 
   /**
-   * checks transactions marked as pending in DB and verify their status on
-   * blockchain. If mined, the status gets updated on DB, else wait for next
-   * trigger time.
+   * Add {@link TransactionDetail} to refresh processing {@link Queue}
+   * @param transactionDetail {@link TransactionDetail} to refresh from blockchain
    */
-  void checkPendingTransactions();
+  void addTransactionToRefreshFromBlockchain(TransactionDetail transactionDetail);
+
+  /**
+   * Checks whether the Contract Transaction Topics contains a managed wallet
+   * 
+   * @param contractEvent Contract Event Log
+   * @return true if a wallet is found in topics list
+   */
+  boolean hasManagedWalletInTransaction(ContractTransactionEvent contractEvent);
+
+  /**
+   * Renew subscription to listen to new transactions from Blockchain
+   * @return {@link Future} of async watching operation
+   */
+  @SuppressWarnings("rawtypes")
+  public Future startWatchingBlockchain();
+
+  /**
+   * Stop subscription to listen on Blockchain
+   */
+  void stopWatchingBlockchain();
+
+  /**
+   * @return last watched block number
+   */
+  long getLastWatchedBlockNumber();
+
+  /**
+   * Saves last watched block number
+   * 
+   * @param lastWatchedBlockNumber
+   */
+  void saveLastWatchedBlockNumber(long lastWatchedBlockNumber);
 
 }

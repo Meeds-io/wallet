@@ -40,8 +40,14 @@ public class UserSettings extends GlobalSettings {
   @Exclude
   private boolean           metamaskEnabled      = false;
 
+  /**
+   * @deprecated since the blockchains uses EIP-1559, the gasPrice has to be
+   *             always dynamic. This is kept for backward compatibility
+   * @since 15 Sept. 2022
+   */
   @Exclude
-  private boolean           isUseDynamicGasPrice = true;
+  @Deprecated(since = "Versions starting from 15 Sept. 2022", forRemoval = false)
+  private boolean           isUseDynamicGasPrice = true; // NOSONAR
 
   @Exclude
   private String            cometdChannel        = WalletUtils.COMETD_CHANNEL;

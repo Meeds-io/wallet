@@ -173,8 +173,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 attach
                 bottom
                 :left="rtlDisplay"
-                :value="actionSelectedWallet === props.item"
-              >
+                :value="actionSelectedWallet === props.item">
                 <template
                   #activator="{ on }">
                   <v-btn
@@ -195,13 +194,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <v-divider />
                     <template v-if="(props.item.type === 'user' || props.item.type === 'space')">
                       <template v-if="useWalletAdmin">
-                        <template v-if="contractDetails && contractDetails.contractType && (props.item.initializationState === 'NEW' || props.item.initializationState === 'MODIFIED') && !props.item.disabledUser && !props.item.deletedUser && props.item.enabled">
-                          <v-list-item :disabled="adminNotHavingEnoughToken" @mousedown="$event.preventDefault()">
-                            <v-list-item-title class="options" @click="openAcceptInitializationModal(props.item)">{{ $t('exoplatform.wallet.button.initializeWallet') }}</v-list-item-title>
-                          </v-list-item>
-                          <v-divider />
-                        </template>
-                        <template v-else-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
+                        <template v-if="!props.item.disabledUser && !props.item.deletedUser && props.item.enabled && (Number(props.item.etherBalance) === 0 || (etherAmount && walletUtils.toFixed(props.item.etherBalance) < Number(etherAmount)))">
                           <v-list-item :disabled="adminNotHavingEnoughEther" @mousedown="$event.preventDefault()">
                             <v-list-item-title class="options" @click="openSendEtherModal(props.item)">{{ $t('exoplatform.wallet.button.sendEther') }}</v-list-item-title>
                           </v-list-item>
@@ -231,10 +224,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </transition>
       </template>
     </v-data-table>
-
-    <wallet-initialize-account-modal
-      ref="initAccountModal"
-      @sent="walletPendingTransaction" />
 
     <wallet-send-token-modal
       ref="sendTokenModal"
@@ -585,10 +574,6 @@ export default {
         this.$set(this.walletToProcess, 'pendingTransaction', (this.walletToProcess.pendingTransaction || 0) + 1);
         this.watchWalletTransaction(this.walletToProcess, hash);
       }
-    },
-    openAcceptInitializationModal(wallet) {
-      this.walletToProcess = wallet;
-      this.$refs.initAccountModal.open(wallet, window.walletSettings.initialFunds.requestMessage, this.etherAmount, this.tokenAmount);
     },
     openSendTokenModal(wallet) {
       this.walletToProcess = wallet;
