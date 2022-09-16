@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -15,6 +16,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,13 +28,24 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Request;
+import org.web3j.protocol.core.methods.response.EthBlockNumber;
+import org.web3j.protocol.core.methods.response.EthGasPrice;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.websocket.WebSocketClient;
 import org.web3j.protocol.websocket.WebSocketService;
 
 import org.exoplatform.services.cache.CacheService;
+import org.exoplatform.services.cache.concurrent.ConcurrentFIFOExoCache;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.model.ContractTransactionEvent;
+import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.test.BaseWalletTest;
 
 import io.reactivex.Flowable;
@@ -43,6 +57,9 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
   @Mock
   private Web3j                   web3j;
+
+  @Mock
+  private CacheService            cacheService;
 
   @Mock
   private WebSocketClient         webSocketClient;
@@ -61,6 +78,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
   @Before
   public void setUp() throws InterruptedException {
+    when(cacheService.getCacheInstance(any())).thenReturn(new ConcurrentFIFOExoCache<>());
     instantiateService();
     when(webSocketClient.reconnectBlocking()).thenAnswer(invocation -> webSocketConnected = true);
     when(webSocketClient.isOpen()).thenAnswer(invocation -> webSocketConnected);
@@ -161,6 +179,226 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     assertTrue(ethFilterSubscribtion.isDisposed());
   }
 
+  @Test
+  public void testGetNotFoundTransaction() throws Exception {
+    assertNull(service.getTransaction("test"));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionWhenThrowException() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    when(request.send()).thenThrow(IOException.class);
+
+    when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
+
+    assertNull(service.getTransaction(transactionHash));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionTwiceWhenNullUsingCache() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
+
+    assertNull(service.getTransaction(transactionHash));
+    assertNull(service.getTransaction(transactionHash));
+
+    verify(web3j, times(2)).ethGetTransactionByHash(transactionHash);
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionTwiceUsingCacheWithAResult() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    EthTransaction ethTransaction = mock(EthTransaction.class);
+    Transaction transaction = mock(Transaction.class);
+    when(request.send()).thenReturn(ethTransaction);
+    when(ethTransaction.getResult()).thenReturn(transaction);
+
+    when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
+
+    assertEquals(transaction, service.getTransaction(transactionHash));
+    assertEquals(transaction, service.getTransaction(transactionHash));
+
+    verify(web3j, times(1)).ethGetTransactionByHash(transactionHash);
+  }
+
+  @Test
+  public void testGetNotFoundTransactionReceipt() throws Exception {
+    assertNull(service.getTransactionReceipt("test"));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionReceiptWhenThrowException() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    when(request.send()).thenThrow(IOException.class);
+
+    when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
+
+    assertNull(service.getTransactionReceipt(transactionHash));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionReceiptTwiceWhenNullUsingCache() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
+
+    assertNull(service.getTransactionReceipt(transactionHash));
+    assertNull(service.getTransactionReceipt(transactionHash));
+
+    verify(web3j, times(2)).ethGetTransactionReceipt(transactionHash);
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetTransactionReceiptTwiceUsingCacheWithAResult() throws Exception {
+    String transactionHash = "test";
+    Request request = mock(Request.class);
+    EthGetTransactionReceipt ethTransactionReceipt = mock(EthGetTransactionReceipt.class);
+    TransactionReceipt transactionReceipt = mock(TransactionReceipt.class);
+    when(request.send()).thenReturn(ethTransactionReceipt);
+    when(ethTransactionReceipt.getResult()).thenReturn(transactionReceipt);
+
+    when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
+
+    assertEquals(transactionReceipt, service.getTransactionReceipt(transactionHash));
+    assertEquals(transactionReceipt, service.getTransactionReceipt(transactionHash));
+
+    verify(web3j, times(1)).ethGetTransactionReceipt(transactionHash);
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testSendTransactionToBlockchainAsync() throws Exception {
+    String rawTransaction = "test";
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setRawTransaction(rawTransaction);
+
+    Request request = mock(Request.class);
+    when(web3j.ethSendRawTransaction(rawTransaction)).thenReturn(request);
+
+    service.sendTransactionToBlockchain(transactionDetail);
+
+    verify(request, times(1)).sendAsync();
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetLastestBlockNumberThrowExceptionWhenIOException() throws Exception {
+    String rawTransaction = "test";
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setRawTransaction(rawTransaction);
+
+    Request request = mock(Request.class);
+    when(web3j.ethBlockNumber()).thenReturn(request);
+    when(request.send()).thenThrow(IOException.class);
+
+    assertThrows(IllegalStateException.class, () -> service.getLastestBlockNumber());
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetLastestBlockNumberSync() throws Exception {
+    String rawTransaction = "test";
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setRawTransaction(rawTransaction);
+
+    Request request = mock(Request.class);
+    when(web3j.ethBlockNumber()).thenReturn(request);
+    EthBlockNumber ethBlockNumber = mock(EthBlockNumber.class);
+    when(request.send()).thenReturn(ethBlockNumber);
+    when(ethBlockNumber.getBlockNumber()).thenReturn(BigInteger.TWO);
+
+    assertEquals(2l, service.getLastestBlockNumber());
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetGasPrice() throws Exception {
+    Request request = mock(Request.class);
+    when(web3j.ethGasPrice()).thenReturn(request);
+    EthGasPrice ethGasPrice = mock(EthGasPrice.class);
+    when(request.send()).thenReturn(ethGasPrice);
+    when(ethGasPrice.getGasPrice()).thenReturn(BigInteger.TWO);
+
+    assertEquals(BigInteger.TWO, service.getGasPrice());
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetLatestNonceByDefault() throws Exception {
+    String walletAddress = "address";
+
+    Request request = mock(Request.class);
+    when(web3j.ethGetTransactionCount(walletAddress, DefaultBlockParameterName.LATEST)).thenReturn(request);
+    EthGetTransactionCount ethGetTransactionCount = mock(EthGetTransactionCount.class);
+    when(request.send()).thenReturn(ethGetTransactionCount);
+    when(ethGetTransactionCount.getTransactionCount()).thenReturn(BigInteger.TEN);
+
+    assertEquals(BigInteger.TEN, service.getNonce(walletAddress));
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @Test
+  public void testGetNonceByBlock() throws Exception {
+    String walletAddress = "address";
+
+    Request request = mock(Request.class);
+    when(web3j.ethGetTransactionCount(walletAddress, DefaultBlockParameterName.PENDING)).thenReturn(request);
+    EthGetTransactionCount ethGetTransactionCount = mock(EthGetTransactionCount.class);
+    when(request.send()).thenReturn(ethGetTransactionCount);
+    when(ethGetTransactionCount.getTransactionCount()).thenReturn(BigInteger.TEN);
+
+    assertEquals(BigInteger.TEN, service.getNonce(walletAddress, DefaultBlockParameterName.PENDING));
+  }
+
+  @Test
+  public void testSetPollingIntervalWhenLowerThanMinimum() throws Exception {
+    assertThrows(IllegalStateException.class, () -> service.setPollingInterval(EthereumClientConnector.MINIMUM_POLLING_TIME - 1));
+  }
+
+  @Test
+  public void testSetPollingIntervalWhenGreaterThanMinimum() throws Exception {
+    int pollingInterval = EthereumClientConnector.MINIMUM_POLLING_TIME + 1;
+    service.setPollingInterval(pollingInterval);
+    assertEquals(pollingInterval, service.getPollingInterval());
+  }
+
+  @Test
+  public void testGetPollingIntervalDefaultValue() throws Exception {
+    assertEquals(EthereumClientConnector.DEFAULT_POLLING_TIME, service.getPollingInterval());
+  }
+
+  @Test
+  public void testSetLastWatchedBlockNumberGreaterThanExisting() throws Exception {
+    long blockNumber = 12l;
+    service.setLastWatchedBlockNumber(blockNumber);
+    assertEquals(blockNumber, service.getLastWatchedBlockNumber());
+
+    service.setLastWatchedBlockNumber(blockNumber + 1);
+
+    assertEquals(blockNumber + 1, service.getLastWatchedBlockNumber());
+  }
+
+  @Test
+  public void testSetLastWatchedBlockNumberLowerThanExisting() throws Exception {
+    long blockNumber = 12l;
+    service.setLastWatchedBlockNumber(blockNumber);
+    assertEquals(blockNumber, service.getLastWatchedBlockNumber());
+
+    service.setLastWatchedBlockNumber(blockNumber - 1);
+
+    assertEquals(blockNumber, service.getLastWatchedBlockNumber());
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   public void testRenewTransactionListeningSubscriptionWhenException() throws Exception {
@@ -243,7 +481,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     if (service != null && service.isConnected()) {
       service.stop();
     }
-    service = new EthereumClientConnector(mock(CacheService.class));
+    service = new EthereumClientConnector(cacheService);
     service.setWeb3j(web3j);
     service.setWeb3jService(web3jService);
     service.setWebSocketClient(webSocketClient);

@@ -32,11 +32,11 @@ import org.exoplatform.wallet.service.BlockchainTransactionService;
 @DisallowConcurrentExecution
 public class TransactionSenderJob implements Job {
 
-  private static final Log             LOG = ExoLogger.getLogger(TransactionSenderJob.class);
+  private static final Log               LOG = ExoLogger.getLogger(TransactionSenderJob.class);
 
-  private ExoContainer                 container;
+  protected ExoContainer                 container;
 
-  private BlockchainTransactionService blockchainTransactionService;
+  protected BlockchainTransactionService blockchainTransactionService;
 
   public TransactionSenderJob() {
     this.container = PortalContainer.getInstance();

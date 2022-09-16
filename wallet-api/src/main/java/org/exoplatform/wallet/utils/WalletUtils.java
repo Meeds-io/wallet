@@ -305,8 +305,6 @@ public class WalletUtils {
 
   public static final String                          OPERATION_GET_TRANSACTION_RECEIPT        = "eth_getTransactionReceipt";
 
-  public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
-
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
 
   public static final ArgumentLiteral<Wallet>         FUNDS_REQUEST_SENDER_DETAIL_PARAMETER    =

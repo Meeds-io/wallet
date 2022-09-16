@@ -473,13 +473,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       // tentative count
       return false;
     }
-
-    transactionDetail.setSentTimestamp(System.currentTimeMillis());
     transactionDetail.increaseSendingAttemptCount();
 
     if (transaction != null && transaction.getTransactionHash() != null) {
       transactionHash = transaction.getTransactionHash();
       transactionDetail.setHash(transactionHash);
+      setSentTimestampIfNotSet(transactionDetail);
     }
 
     boolean alreadyMined = false;
@@ -491,25 +490,22 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         if (isAlreadySentError(transactionError)) {
           // Trigger sent to blockchain only when it's the first time sending
           sentToBlockchain = true;
+          setSentTimestampIfNotSet(transactionDetail);
+          // Mark transaction as really pending on blockchain
+          // with a magic number = (Max * 2) to avoid resending it again
+          markTransactionAsSent(transactionDetail);
+        } else if (isNonceTooLow(transactionError) && hasTransactionReceipt(transactionDetail.getHash())) {
+          alreadyMined = true;
+          addTransactionToRefreshFromBlockchain(transactionDetail);
+        } else if (isUnrecoverableError(transactionError)) {
+          transactionDetail.setNonce(0);
+          transactionDetail.setPending(false);
+          transactionDetail.setSucceeded(false);
+          LOG.warn("Error when sending transaction {} with an unrecoverable Error: [{}]. Mark it as failed.",
+                   transactionDetail.getHash(),
+                   getTransactionErrorMessage(transactionError));
         } else {
-          if (isNonceTooLow(transactionError)) {
-            TransactionReceipt receipt = ethereumClientConnector.getTransactionReceipt(transactionHash);
-            if (StringUtils.equals(receipt.getTransactionHash(), transactionHash)) {
-              alreadyMined = true;
-              addTransactionToRefreshFromBlockchain(transactionDetail);
-            }
-          }
-          if (!alreadyMined) {
-            logTransactionError(transactionDetail, exception, transactionError);
-            if (isUnrecoverableError(transactionError)) {
-              transactionDetail.setNonce(0);
-              transactionDetail.setPending(false);
-              transactionDetail.setSucceeded(false);
-            } else {
-              // Reattempt sending next time the job is triggered
-              transactionDetail.setSentTimestamp(0);
-            }
-          }
+          logTransactionError(transactionDetail, exception, transactionError);
         }
       } else {
         sentToBlockchain = true;
@@ -526,6 +522,20 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
       transactionService.saveTransactionDetail(transactionDetail, broadcastMined);
     }
     return sentToBlockchain;
+  }
+
+  private void markTransactionAsSent(TransactionDetail transactionDetail) {
+    transactionDetail.setSendingAttemptCount(transactionService.getMaxAttemptsToSend() * 2);
+  }
+
+  private boolean hasTransactionReceipt(String hash) {
+    return ethereumClientConnector.getTransactionReceipt(hash) != null;
+  }
+
+  private void setSentTimestampIfNotSet(TransactionDetail transactionDetail) {
+    if (transactionDetail.getSentTimestamp() == 0) {
+      transactionDetail.setSentTimestamp(System.currentTimeMillis());
+    }
   }
 
   private boolean isUnrecoverableError(Error transactionError) {

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.test.service;
+package org.exoplatform.wallet.service;
 
 import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.getWalletService;

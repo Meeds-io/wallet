@@ -15,7 +15,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-package org.exoplatform.wallet.test.dao;
+package org.exoplatform.wallet.dao;
 
 import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
 import org.exoplatform.wallet.dao.WalletAccountDAO;

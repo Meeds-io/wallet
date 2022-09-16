@@ -744,7 +744,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionIsNotNull() throws Exception {
+  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionIsNull() throws Exception {
     String transactionHash = "transactionHash";
     String fromAddress = "fromAddress";
     TransactionDetail transactionDetail = new TransactionDetail();
@@ -777,18 +777,11 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
     List<TransactionDetail> pendingTransactions = service.sendPendingTransactionsToBlockchain();
     assertNotNull(pendingTransactions);
-    assertEquals(1, pendingTransactions.size());
-    TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
-
-    assertNotNull(handledTransactionDetail);
-    assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
-    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+    assertEquals(0, pendingTransactions.size());
 
     verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
         && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
-    verify(listenerService, times(1)).broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
-                                                handledTransactionDetail,
-                                                handledTransactionDetail);
+    verify(listenerService, times(1)).broadcast(eq(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT), any(), any());
   }
 
   @SuppressWarnings("unchecked")
@@ -893,7 +886,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testSendPendingTransactionsToBlockchain_ResentWithAttemptIncrementWhenSentTransactionHasErrorAndReceipt() throws Exception {
+  public void testSendPendingTransactionsToBlockchain_RefreshWhenSentTransactionHasNonceTooLowErrorAndReceiptWithSameHash() throws Exception {
     String transactionHash = "transactionHash";
     String fromAddress = "fromAddress";
     TransactionDetail transactionDetail = new TransactionDetail();
@@ -924,7 +917,8 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     Error transactionError = mock(org.web3j.protocol.core.Response.Error.class);
     when(ethTransaction.getError()).thenReturn(transactionError);
     TransactionReceipt receipt = mock(TransactionReceipt.class);
-    lenient().when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(receipt);
+    when(ethereumClientConnector.getTransactionReceipt(transactionHash)).thenReturn(receipt);
+    when(transactionError.getMessage()).thenReturn("Error: nonce too low");
 
     when(resultFuture.get()).thenAnswer(invocation -> {
       return handler.get().apply(ethTransaction, null);
@@ -934,8 +928,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     assertNotNull(pendingTransactions);
     assertEquals(0, pendingTransactions.size());
 
-    verify(transactionService, times(1)).saveTransactionDetail(argThat(transaction -> transaction.isPending()
-        && transaction.getSentTimestamp() == 0 && !transaction.isSucceeded() && transaction.getNonce() == NONCE), eq(false));
+    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
     verify(listenerService, never()).broadcast(anyString(), any(), any());
   }
 
@@ -1028,7 +1021,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     TransactionDetail handledTransactionDetail = pendingTransactions.get(0);
     assertNotNull(handledTransactionDetail);
     assertTrue(handledTransactionDetail.getSentTimestamp() > 0);
-    assertEquals(1l, handledTransactionDetail.getSendingAttemptCount());
+    assertEquals(transactionService.getMaxAttemptsToSend() * 2, handledTransactionDetail.getSendingAttemptCount());
     assertTrue(handledTransactionDetail.isPending());
     assertFalse(handledTransactionDetail.isSucceeded());
     assertEquals(NONCE, handledTransactionDetail.getNonce());

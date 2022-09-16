@@ -43,15 +43,15 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 @DisallowConcurrentExecution
 public class PendingEtherTransactionVerifierJob implements Job {
 
-  private static final Log             LOG = ExoLogger.getLogger(PendingEtherTransactionVerifierJob.class);
+  private static final Log               LOG = ExoLogger.getLogger(PendingEtherTransactionVerifierJob.class);
 
-  private ExoContainer                 container;
+  protected ExoContainer                 container;
 
-  private BlockchainTransactionService blockchainTransactionService;
+  protected BlockchainTransactionService blockchainTransactionService;
 
-  private WalletTransactionService     walletTransactionService;
+  protected WalletTransactionService     walletTransactionService;
 
-  private WalletAccountService         walletAccountService;
+  protected WalletAccountService         walletAccountService;
 
   public PendingEtherTransactionVerifierJob() {
     this.container = PortalContainer.getInstance();

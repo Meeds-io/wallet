@@ -18,7 +18,6 @@ package org.exoplatform.wallet.blockchain.service;
 
 import static org.exoplatform.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.GWEI_TO_WEI_DECIMALS;
-import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_FILTER_CONTRACT_TRANSACTIONS;
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_GAS_PRICE;
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_LAST_BLOCK_NUMBER;
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION;
@@ -34,10 +33,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -54,8 +50,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.web3j.protocol.core.methods.response.EthLog;
-import org.web3j.protocol.core.methods.response.EthLog.LogResult;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Transaction;
@@ -205,7 +199,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @return Web3j Transaction object
    */
   public Transaction getTransaction(String transactionHash) {
-    return transactionFutureCache.get(null, transactionHash.toLowerCase());
+    return transactionFutureCache.get(null, StringUtils.lowerCase(transactionHash));
   }
 
   /**
@@ -218,10 +212,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   public Transaction getTransactionFromBlockchain(String transactionHash) {
     try {
       EthTransaction ethTransaction = getWeb3j().ethGetTransactionByHash(transactionHash).send();
-      if (ethTransaction != null) {
-        return ethTransaction.getResult();
-      }
-      return null;
+      return ethTransaction == null ? null : ethTransaction.getResult();
     } catch (IOException e) {
       throw new IllegalStateException("Connection error with Blockchain while attempting to retrieve transaction "
           + transactionHash, e);
@@ -235,7 +226,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @return Web3j Transaction receipt object
    */
   public TransactionReceipt getTransactionReceipt(String transactionHash) {
-    return receiptFutureCache.get(null, transactionHash.toLowerCase());
+    return receiptFutureCache.get(null, StringUtils.lowerCase(transactionHash));
   }
 
   /**
@@ -247,11 +238,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_TRANSACTION_RECEIPT)
   public TransactionReceipt getTransactionReceiptFromBlockchain(String transactionHash) {
     try {
-      EthGetTransactionReceipt ethGetTransactionReceipt = getWeb3j().ethGetTransactionReceipt(transactionHash).send();
-      if (ethGetTransactionReceipt != null) {
-        return ethGetTransactionReceipt.getResult();
-      }
-      return null;
+      EthGetTransactionReceipt ethTransactionReceipt = getWeb3j().ethGetTransactionReceipt(transactionHash).send();
+      return ethTransactionReceipt == null ? null : ethTransactionReceipt.getResult();
     } catch (IOException e) {
       throw new IllegalStateException("Connection error with Blockchain while attempting to retrieve transaction receipt "
           + transactionHash, e);
@@ -269,38 +257,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     } catch (IOException e) {
       throw new IllegalStateException("Connection error with Blockchain while attempting to retrieve block number", e);
     }
-  }
-
-  /**
-   * Retrieve from blockchain transaction hashes from contract starting from a
-   * block number to a block number
-   * 
-   * @param contractsAddress blockchain contract address
-   * @param fromBlock search starting from this block number
-   * @param toBlock search until this block number
-   * @return a {@link Set} of transaction hashes
-   * @throws IOException if an error happens while getting information from
-   *           blockchain
-   */
-  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_FILTER_CONTRACT_TRANSACTIONS)
-  public Set<String> getContractTransactions(String contractsAddress, long fromBlock, long toBlock) throws IOException {
-    org.web3j.protocol.core.methods.request.EthFilter filter =
-                                                             new org.web3j.protocol.core.methods.request.EthFilter(new DefaultBlockParameterNumber(fromBlock),
-                                                                                                                   new DefaultBlockParameterNumber(toBlock),
-                                                                                                                   contractsAddress);
-    EthLog contractTransactions = getWeb3j().ethGetLogs(filter).send();
-
-    @SuppressWarnings("rawtypes")
-    List<LogResult> logs = contractTransactions.getResult();
-    Set<String> txHashes = new HashSet<>();
-    if (logs != null && !logs.isEmpty()) {
-      for (LogResult<?> logResult : logs) {
-        org.web3j.protocol.core.methods.response.Log contractEventLog =
-                                                                      (org.web3j.protocol.core.methods.response.Log) logResult.get();
-        txHashes.add(contractEventLog.getTransactionHash());
-      }
-    }
-    return txHashes;
   }
 
   /**
@@ -346,7 +302,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @throws IOException if an I/O problem happens when connecting to blockchain
    */
   public BigInteger getNonce(String walletAddress) throws IOException {
-    return getNonce(walletAddress, DefaultBlockParameterName.LATEST);
+    return getNonce(walletAddress, null);
   }
 
   /**
@@ -395,15 +351,6 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
       break;
     case OPERATION_GET_LAST_BLOCK_NUMBER:
       parameters.put("last_block_number", result);
-      break;
-    case OPERATION_FILTER_CONTRACT_TRANSACTIONS:
-      parameters.put("from_block_number", methodArgs[1]);
-      parameters.put("to_block_number", methodArgs[2]);
-      if (result instanceof Set) {
-        parameters.put("transactions_count_received", ((Set<?>) result).size());
-      } else {
-        LOG.warn("Statistict type {} has an unexpected result class type", statisticType);
-      }
       break;
     case OPERATION_SEND_TRANSACTION:
       TransactionDetail transactionDetail = (TransactionDetail) methodArgs[0];
