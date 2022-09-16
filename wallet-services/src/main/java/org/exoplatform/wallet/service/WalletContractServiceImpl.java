@@ -16,16 +16,19 @@
  */
 package org.exoplatform.wallet.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.ABI_PATH_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.BIN_PATH_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_CONTEXT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static org.exoplatform.wallet.utils.WalletUtils.fromJsonString;
+import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.exoplatform.commons.utils.PropertyManager;
 import org.json.JSONArray;
 import org.picocontainer.Startable;
 
@@ -33,46 +36,38 @@ import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.commons.utils.IOUtil;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.configuration.ConfigurationManager;
 import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.ContractDetail;
-import org.exoplatform.wallet.model.settings.GlobalSettings;
 
 public class WalletContractServiceImpl implements WalletContractService, Startable {
 
-  private static final Log        LOG                                    =
-                                      ExoLogger.getLogger(WalletContractServiceImpl.class);
+  private static final Log     LOG                                    = ExoLogger.getLogger(WalletContractServiceImpl.class);
 
-  private static final String     ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE = "address parameter is mandatory";
+  private static final String  ADDRESS_PARAMETER_IS_MANDATORY_MESSAGE = "address parameter is mandatory";
 
-  private static final String     SYMBOL_PROPERTY_NAME                   = "exo.wallet.blockchain.token.symbol";
+  private static final String  SYMBOL_PROPERTY_NAME                   = "exo.wallet.blockchain.token.symbol";
 
-  private static final String     CRYPTOCURRENCY_PROPERTY_NAME           = "exo.wallet.blockchain.network.cryptocurrency";
+  private static final String  CRYPTOCURRENCY_PROPERTY_NAME           = "exo.wallet.blockchain.network.cryptocurrency";
 
-  private ConfigurationManager    configurationManager;
+  private ConfigurationManager configurationManager;
 
-  private String                  contractAbiPath;
+  private String               contractAbiPath;
 
-  private JSONArray               contractAbi;
+  private JSONArray            contractAbi;
 
-  private String                  contractBinaryPath;
+  private String               contractBinaryPath;
 
-  private String                  contractBinary;
+  private String               contractBinary;
 
-  private SettingService          settingService;
+  private SettingService       settingService;
 
-  private ListenerService         listenerService;
+  private WalletService        walletService;
 
-  private WalletService           walletService;
-
-  private WalletTokenAdminService walletTokenAdminService;
-
-  public WalletContractServiceImpl(SettingService settingService,
-                                   ConfigurationManager configurationManager,
-                                   InitParams params) {
+  public WalletContractServiceImpl(SettingService settingService, ConfigurationManager configurationManager, InitParams params) {
     this.configurationManager = configurationManager;
     this.settingService = settingService;
 
@@ -162,24 +157,6 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
   }
 
   @Override
-  public void refreshContractDetail(Set<String> contractModifications) {
-    GlobalSettings settings = getSettings();
-    String contractAddress = settings.getContractAddress();
-    ContractDetail contractDetail = getContractDetail(contractAddress);
-    if (contractDetail == null) {
-      contractDetail = new ContractDetail();
-      contractDetail.setAddress(contractAddress);
-    }
-    getWalletTokenAdminService().refreshContractDetailFromBlockchain(contractDetail, contractModifications);
-    getWalletService().setConfiguredContractDetail(contractDetail);
-    try {
-      getListenerService().broadcast(CONTRACT_MODIFIED_EVENT, null, contractDetail);
-    } catch (Exception e) {
-      LOG.error("Error while broadcasting contract modification event", e);
-    }
-  }
-
-  @Override
   public JSONArray getContractAbi() {
     return contractAbi;
   }
@@ -204,20 +181,6 @@ public class WalletContractServiceImpl implements WalletContractService, Startab
       walletService = CommonsUtils.getService(WalletService.class);
     }
     return walletService;
-  }
-
-  private WalletTokenAdminService getWalletTokenAdminService() {
-    if (walletTokenAdminService == null) {
-      walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
-    }
-    return walletTokenAdminService;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
   }
 
   private void setNetworkCryptoCurrency(ContractDetail contractDetail) {

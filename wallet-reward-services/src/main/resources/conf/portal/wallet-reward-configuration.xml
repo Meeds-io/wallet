@@ -135,7 +135,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
-          <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
+          <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0 0 ? * * *}"/>
         </properties-param>
       </init-params>
     </component-plugin>

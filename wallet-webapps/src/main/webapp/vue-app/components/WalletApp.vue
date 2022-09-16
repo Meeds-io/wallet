@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                       :fiat-symbol="fiatSymbol"
                       :selected-transaction-hash="selectedTransactionHash"
                       :selected-contract-method-name="selectedContractMethodName"
-                      @refresh="refreshWallet()"
+                      @refresh="refreshWallet(true)"
                       @display-transactions="openAccountDetail"
                       @error="error = $event" />
                     <div class="my-8 walletRewardSetup">
@@ -151,13 +151,13 @@ export default {
       isApplicationEnabled: true,
       loading: true,
       disabledYear: true,
+      gasPrice: null,
       disabledMonth: false,
       isReadOnly: true,
       isSpaceAdministrator: false,
       seeAccountDetails: false,
       seeAccountDetailsPermanent: false,
       showSettingsModal: false,
-      gasPriceInEther: null,
       browserWalletExists: false,
       wallet: null,
       selectedTransactionHash: null,
@@ -195,12 +195,15 @@ export default {
     displayWarnings() {
       return this.displayEtherBalanceTooLow;
     },
+    gasPriceInEther() {
+      return this.gasPrice && window.localWeb3.utils.fromWei(String(this.gasPrice), 'ether') || 0;
+    },
     displayEtherBalanceTooLow() {
       return this.browserWalletExists
           && !this.loading
           && !this.error
           && (!this.isSpace || this.isSpaceAdministrator)
-          && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther));
+          && (this.gasPriceInEther && (!this.etherBalance || this.etherBalance < this.walletUtils.gasToEther(this.settings.network.gasLimit, this.gasPriceInEther)));
     },
     etherBalance() {
       return this.wallet && this.wallet.etherBalance || 0;
@@ -255,6 +258,8 @@ export default {
     this.$nextTick(() => {
       // Init application
       this.init()
+        .then(() => this.etherBalance && this.transactionUtils.getGasPrice())
+        .then(data => this.gasPrice = data || window.walletSettings.network.normalGasPrice)
         .then(() => {
           if (this.$refs.walletSummary) {
             this.$refs.walletSummary.prepareSendForm();
@@ -320,7 +325,6 @@ export default {
           this.browserWalletExists = this.settings.browserWalletExists;
           this.initializationState = this.settings.wallet.initializationState;
           this.fiatSymbol = this.settings.fiatSymbol || '$';
-          this.gasPriceInEther = this.gasPriceInEther || window.localWeb3.utils.fromWei(String(this.settings.network.minGasPrice), 'ether');
           return this.$nextTick();
         })
         .then(() => this.periodChanged(this.periodicity))
@@ -347,7 +351,7 @@ export default {
     },
     walletUpdated(event) {
       if (event && event.detail && event.detail.string && this.walletAddress === event.detail.string.toLowerCase()) {
-        this.addressRegistry.refreshWallet(this.wallet,true);
+        this.refreshWallet();
       }
     },
     reloadContract() {
@@ -411,9 +415,9 @@ export default {
           .catch(e => this.error = String(e));
       }
     },
-    refreshWallet() {
-      return this.addressRegistry.refreshWallet(this.wallet, true);
-    }
+    refreshWallet(fromBlockchain) {
+      return this.addressRegistry.refreshWallet(this.wallet, fromBlockchain);
+    },
   },
 };
 </script>

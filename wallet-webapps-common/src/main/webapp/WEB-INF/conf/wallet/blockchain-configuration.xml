@@ -41,29 +41,39 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <type>org.exoplatform.wallet.listener.AutoTransactionListener</type>
     </component-plugin>
     <component-plugin>
-      <name>exo.wallet.block.mined</name>
-      <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.blockchain.listener.BlockMinedListener</type>
-    </component-plugin>
-    <component-plugin>
       <name>exo.wallet.transaction.mined</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedListener</type>
     </component-plugin>
     <component-plugin>
-      <name>exo.wallet.transaction.modified</name>
+      <name>exo.wallet.transaction.mined</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.TransactionWithNonceVerifierListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.minedForContract</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.blockchain.listener.ContractTransactionMinedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.minedAndUpdated</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.listener.TransactionNotificationListener</type>
     </component-plugin>
     <component-plugin>
-      <name>exo.wallet.transaction.modified</name>
+      <name>exo.wallet.transaction.minedAndUpdated</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.blockchain.listener.WebSocketTransactionListener</type>
     </component-plugin>
     <component-plugin>
-      <name>exo.wallet.transaction.modified</name>
+      <name>exo.wallet.transaction.minedAndUpdated</name>
       <set-method>addListener</set-method>
       <type>org.exoplatform.wallet.blockchain.listener.TransactionMinedAndUpdatedListener</type>
+    </component-plugin>
+    <component-plugin>
+      <name>exo.wallet.transaction.created</name>
+      <set-method>addListener</set-method>
+      <type>org.exoplatform.wallet.listener.TransactionCreatedListener</type>
     </component-plugin>
     <component-plugin>
       <name>exo.wallet.transaction.sent</name>
@@ -83,46 +93,33 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>exo.wallet.deleted</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.listener.CancelTransactionListener</type>
+      <type>org.exoplatform.wallet.listener.WalletDeletedListener</type>
     </component-plugin>
   </external-component-plugins>
 
   <external-component-plugins>
     <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
     <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Add a job to verify if mined contract transactions are added in database</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>Add a job to verify if mined contract transactions are added in database</description>
-          <property name="jobName" value="ContractTransactionVerifierJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.wallet.job.ContractTransactionVerifierJob"/>
-          <property name="expression" value="${exo.wallet.ContractTransactionVerifierJob.expression:0 0/5 * ? * * *}"/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
+      <name>TransactionSenderJob</name>
+      <set-method>addPeriodJob</set-method>
+      <type>org.exoplatform.services.scheduler.PeriodJob</type>
       <description>Configuration for transaction sending to blockchain</description>
       <init-params>
         <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for transaction sending to blockchain</description>
+          <name>job.info</name>
+          <description>details of the execution of the bulk indexing job</description>
           <property name="jobName" value="TransactionSenderJob"/>
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.job.TransactionSenderJob"/>
-          <property name="expression" value="${exo.wallet.TransactionSenderJob.expression:0/30 * * * * ?}"/>
+          <property name="repeatCount" value="0"/>
+          <property name="period" value="${exo.wallet.TransactionSenderJob.interval:30000}"/><!-- default 30 seconds -->
+          <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
+          <property name="endTime" value=""/>
         </properties-param>
       </init-params>
     </component-plugin>
     <component-plugin>
-      <name>AddCronJob</name>
+      <name>BoostAdminTransactionJob</name>
       <set-method>addCronJob</set-method>
       <type>org.exoplatform.services.scheduler.CronJob</type>
       <description>Configuration for the Job that boost transaction sending to blockchain</description>
@@ -138,34 +135,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </init-params>
     </component-plugin>
     <component-plugin>
-      <name>AddCronJob</name>
+      <name>PendingEtherTransactionVerifierJob</name>
       <set-method>addCronJob</set-method>
       <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Configuration for pending transactions check on blockchain</description>
+      <description>A job to refresh ether transactions sent by admin wallet</description>
       <init-params>
         <properties-param>
           <name>cronjob.info</name>
-          <description>Configuration for pending transactions check on blockchain</description>
-          <property name="jobName" value="PendingTransactionVerifierJob"/>
+          <description>A job to refresh ether transactions sent by admin wallet</description>
+          <property name="jobName" value="PendingEtherTransactionVerifierJob"/>
           <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.wallet.job.PendingTransactionVerifierJob"/>
-          <property name="expression" value="${exo.wallet.PendingTransactionVerifierJob.expression:0 15 7 * * ?}"/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>A job to update gas price from blockchain</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>A job to update gas price from blockchain</description>
-          <property name="jobName" value="GasPriceUpdaterJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.wallet.job.GasPriceUpdaterJob"/>
-          <property name="expression" value="${exo.wallet.GasPriceUpdaterJob.expression:0 0/2 * * * ?}"/>
+          <property name="job" value="org.exoplatform.wallet.job.PendingEtherTransactionVerifierJob"/>
+          <property name="expression" value="${exo.wallet.PendingEtherTransactionVerifierJob.expression:0 0/15 * * * ?}"/>
         </properties-param>
       </init-params>
     </component-plugin>

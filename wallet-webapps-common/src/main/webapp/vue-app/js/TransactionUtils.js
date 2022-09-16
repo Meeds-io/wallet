@@ -109,6 +109,18 @@ export function getNonce(from) {
   });
 }
 
+export function getGasPrice() {
+  return fetch('/portal/rest/wallet/api/transaction/getGasPrice', {
+    credentials: 'include'
+  }).then((resp) => {
+    if (resp && resp.ok) {
+      return resp.text();
+    } else {
+      return null;
+    }
+  });
+}
+
 export function getSavedTransactionByHash(hash) {
   return fetch(`/portal/rest/wallet/api/transaction/getSavedTransactionByHash?hash=${hash}`, {credentials: 'include'}).then((resp) => {
     if (resp && resp.ok) {

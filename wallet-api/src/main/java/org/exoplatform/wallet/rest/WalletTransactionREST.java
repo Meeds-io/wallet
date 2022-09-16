@@ -18,11 +18,17 @@ package org.exoplatform.wallet.rest;
 
 import static org.exoplatform.wallet.utils.WalletUtils.getCurrentUserId;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -35,9 +41,16 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.service.BlockchainTransactionService;
+import org.exoplatform.wallet.service.WalletService;
+import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Path("/wallet/api/transaction")
 @RolesAllowed("users")
@@ -54,8 +67,11 @@ public class WalletTransactionREST implements ResourceContainer {
 
   private WalletTokenAdminService      walletTokenAdminService;
 
-  public WalletTransactionREST(WalletTransactionService transactionService) {
+  private WalletService                walletService;
+
+  public WalletTransactionREST(WalletTransactionService transactionService, WalletService walletService) {
     this.transactionService = transactionService;
+    this.walletService = walletService;
   }
 
   @POST
@@ -132,7 +148,7 @@ public class WalletTransactionREST implements ResourceContainer {
       @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
       @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
+      @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
   public Response getNonce(@ApiParam(value = "Transaction sender address", required = true) @QueryParam("from") String fromAddress) {
     if (StringUtils.isBlank(fromAddress)) {
       LOG.warn("Empty transaction sender", fromAddress);
@@ -150,6 +166,18 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.error("Error getting nonce for address {}", fromAddress, e);
       return Response.serverError().build();
     }
+  }
+
+  @GET
+  @Path("getGasPrice")
+  @RolesAllowed("users")
+  @ApiResponses(value = {
+      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error")
+  })
+  public Response getGasPrice() {
+    double gasPrice = walletService.getGasPrice();
+    return Response.ok(BigDecimal.valueOf(gasPrice).toBigInteger().toString()).build();
   }
 
   @GET
