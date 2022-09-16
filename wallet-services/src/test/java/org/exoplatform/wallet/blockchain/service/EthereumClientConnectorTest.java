@@ -193,6 +193,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
     when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
 
+    service.start();
+
     assertNull(service.getTransaction(transactionHash));
   }
 
@@ -202,6 +204,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     String transactionHash = "test";
     Request request = mock(Request.class);
     when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
+
+    service.start();
 
     assertNull(service.getTransaction(transactionHash));
     assertNull(service.getTransaction(transactionHash));
@@ -220,6 +224,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     when(ethTransaction.getResult()).thenReturn(transaction);
 
     when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
+
+    service.start();
 
     assertEquals(transaction, service.getTransaction(transactionHash));
     assertEquals(transaction, service.getTransaction(transactionHash));
@@ -241,6 +247,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
     when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
 
+    service.start();
+
     assertNull(service.getTransactionReceipt(transactionHash));
   }
 
@@ -250,6 +258,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     String transactionHash = "test";
     Request request = mock(Request.class);
     when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
+
+    service.start();
 
     assertNull(service.getTransactionReceipt(transactionHash));
     assertNull(service.getTransactionReceipt(transactionHash));
@@ -266,6 +276,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     TransactionReceipt transactionReceipt = mock(TransactionReceipt.class);
     when(request.send()).thenReturn(ethTransactionReceipt);
     when(ethTransactionReceipt.getResult()).thenReturn(transactionReceipt);
+
+    service.start();
 
     when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
 

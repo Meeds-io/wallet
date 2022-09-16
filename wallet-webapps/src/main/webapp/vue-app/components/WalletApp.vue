@@ -260,8 +260,8 @@ export default {
     this.$nextTick(() => {
       // Init application
       this.init()
-        .then(() => this.transactionUtils.getGasPrice())
-        .then(data => this.gasPrice = data)
+        .then(() => this.etherBalance && this.transactionUtils.getGasPrice())
+        .then(data => this.gasPrice = data || window.walletSettings.network.normalGasPrice)
         .then(() => {
           if (this.$refs.walletSummary && this.wallet && this.wallet.address) {
             this.$refs.walletSummary.prepareSendForm();

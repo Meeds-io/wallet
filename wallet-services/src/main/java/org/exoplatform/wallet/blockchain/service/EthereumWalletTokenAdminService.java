@@ -17,7 +17,6 @@
 package org.exoplatform.wallet.blockchain.service;
 
 import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
-import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_GET_ETHER_BALANCE;
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_READ_FROM_TOKEN;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
@@ -161,7 +160,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     etherBalanceCache.setLiveTime(5);
     tokenBalanceFutureCache = new FutureExoCache<>((context, address) -> getTokenBalanceOfFromBlockchain(address),
                                                    tokenBalanceCache);
-    etherBalanceFutureCache = new FutureExoCache<>((context, address) -> getEtherBalanceOfFromBlockchain(address),
+    etherBalanceFutureCache = new FutureExoCache<>((context, address) -> getClientConnector().getEtherBalanceOf(address),
                                                    etherBalanceCache);
   }
 
@@ -392,16 +391,16 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   @Override
   public void boostAdminTransactions() throws Exception {
-    List<TransactionDetail> pendingTransactions = getTransactionService().getPendingWalletTransactionsSent(getAdminWalletAddress());
+    List<TransactionDetail> pendingTransactions =
+                                                getTransactionService().getPendingWalletTransactionsSent(getAdminWalletAddress());
     double gasPrice = walletService.getGasPrice();
     for (TransactionDetail transactionDetail : pendingTransactions) {
       boolean newGasPriceIsHigher = transactionDetail.getGasPrice() < gasPrice;
       boolean alreadyBoosted = transactionDetail.isBoost();
-      boolean exceededWaitTime = (System.currentTimeMillis() - transactionDetail.getSentTimestamp()) > 7200000;
+      long sentTimestamp = transactionDetail.getSentTimestamp();
+      boolean exceededWaitTime = sentTimestamp > 0 && (System.currentTimeMillis() - sentTimestamp) > 7200000;
       if (newGasPriceIsHigher && !alreadyBoosted && exceededWaitTime) {
-        LOG.info("Boost transaction {} which was sent since {}",
-                 transactionDetail.getHash(),
-                 new Date(transactionDetail.getSentTimestamp()));
+        LOG.info("Boost transaction {} which was sent since {}", transactionDetail.getHash(), new Date(sentTimestamp));
         TransactionDetail boostedTransaction = transactionDetail.clone();
         boostedTransaction.setId(0L);
         boostedTransaction.setHash(null);
@@ -504,18 +503,12 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       parameters.put("blockchain_network_id", networkId);
     }
 
-    switch (operation) {
-    case OPERATION_GET_ETHER_BALANCE:
-      parameters.put("address", methodArgs[0]);
-      break;
-    case OPERATION_READ_FROM_TOKEN:
-      parameters.put("contract_address", methodArgs[0]);
-      parameters.put("contract_method", methodArgs[1]);
-      break;
-    default:
+    if (!StringUtils.equals(OPERATION_READ_FROM_TOKEN, operation)) {
       LOG.warn("Statistic type {} is not managed", operation);
       return null; // NOSONAR must be null if operation not known
     }
+    parameters.put("contract_address", methodArgs[0]);
+    parameters.put("contract_method", methodArgs[1]);
     return parameters;
   }
 
@@ -530,15 +523,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     String contractAddress = checkContractAddress();
     return (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_BALANCEOF, address);
-  }
-
-  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_ETHER_BALANCE)
-  public final BigInteger getEtherBalanceOfFromBlockchain(String address) throws Exception { // NOSONAR
-    Web3j web3j = getClientConnector().getWeb3j();
-    if (web3j == null) {
-      throw new IllegalStateException("Can't get ether balance of " + address + " . Connection is not established.");
-    }
-    return web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
   }
 
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_READ_FROM_TOKEN)
@@ -652,7 +636,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   private MeedsToken getContractInstance(final String contractAddress) {
-    Web3j web3j = getClientConnector().getWeb3j();
+    Web3j web3j = getClientConnector().getWeb3j(false);
     // Retrieve cached contract instance
     if (this.ertInstance == null) {
       double adminGasPrice = walletService.getGasPrice();

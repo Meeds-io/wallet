@@ -109,6 +109,8 @@ public class WalletUtils {
 
   public static final String                          COMETD_CHANNEL                           = "/eXo/Application/Addons/Wallet";
 
+  public static final int                             TRANSACTION_EFFECTIVELY_SENT_CODE        = -200;
+
   public static final int                             ETHER_TO_WEI_DECIMALS                    = 18;
 
   public static final int                             GWEI_TO_WEI_DECIMALS                     = 9;

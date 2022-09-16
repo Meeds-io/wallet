@@ -19,6 +19,7 @@ package org.exoplatform.wallet.blockchain.service;
 import static org.exoplatform.wallet.utils.WalletUtils.EMPTY_HASH;
 import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
 import static org.exoplatform.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
 import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_CONTEXT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
@@ -68,6 +69,8 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.blockchain.BlockchainRequestException;
+import org.exoplatform.wallet.blockchain.MaxRequestRateReachedException;
 import org.exoplatform.wallet.contract.MeedsToken;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.ContractTransactionEvent;
@@ -305,7 +308,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         try {
           refreshTransactionFromBlockchain(hash);
         } catch (Exception e) {
-          LOG.warn("Error while refreshing transaction with has {}. Retry it after few seconds.", hash, e);
+          LOG.warn("Error while refreshing transaction with hash {}. Retry it after few seconds.", hash, e);
           addTransactionToRefreshFromBlockchain(transactionDetail);
         }
       }
@@ -319,12 +322,12 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     if (transaction == null || isTransactionPendingOnBlockchain(transaction)) {
       if (transactionDetail == null) {
         throw new IllegalStateException("Nothing to verify for a null transaction from DB and Blockchain.");
-      } else {
+      } else if (transactionDetail.isPending()) {
         LOG.debug("Transaction {} is marked as pending in database and is not yet found on blockchain",
                   transactionDetail.getHash());
         checkPendingTransactionValidity(transactionDetail);
-        return;
       }
+      return;
     }
 
     ContractDetail contractDetail = getContractDetail();
@@ -382,16 +385,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
   }
 
-  private boolean isTransactionPendingOnBlockchain(Transaction transaction) {
-    String blockHash = transaction.getBlockHash();
-    return StringUtils.isBlank(blockHash) || StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
-        || transaction.getBlockNumber() == null;
-  }
-
-  private boolean checkPendingTransactionValidity(TransactionDetail transactionDetail) {
-    if (!transactionDetail.isPending()) {
-      return false;
-    }
+  private void checkPendingTransactionValidity(TransactionDetail transactionDetail) {
     boolean maxSendingTentativesReached = isMaxSendingTentativesReached(transactionDetail);
     boolean markTransactionAsFailed = isTransactionTimedOut(transactionDetail);
 
@@ -399,12 +393,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     // failed already (due to outdated)
     // and the maximum tentatives to send is reached
     boolean checkNonceValidity = !markTransactionAsFailed && maxSendingTentativesReached;
-    if (checkNonceValidity) {
-      String senderAddress = transactionDetail.getFrom();
-      long nonce = transactionDetail.getNonce();
-      if (isSameNonceAlreadyMined(senderAddress, nonce)) {
-        markTransactionAsFailed = true;
-      }
+    if (checkNonceValidity && isSameNonceAlreadyMined(transactionDetail.getFrom(), transactionDetail.getNonce())) {
+      markTransactionAsFailed = !hasTransactionReceipt(transactionDetail.getHash());
     }
 
     if (markTransactionAsFailed) {
@@ -425,9 +415,34 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                transactionService.getPendingTransactionMaxDays(),
                transactionDetail.getSendingAttemptCount());
       transactionService.saveTransactionDetail(transactionDetail, true);
-      return false;
     }
-    return !maxSendingTentativesReached || transactionDetail.getSentTimestamp() == 0;
+  }
+
+  private boolean isTransactionPendingOnBlockchain(Transaction transaction) {
+    String blockHash = transaction.getBlockHash();
+    return StringUtils.isBlank(blockHash) || StringUtils.equalsIgnoreCase(EMPTY_HASH, blockHash)
+        || transaction.getBlockNumber() == null;
+  }
+
+  private boolean canSendPendingTransactionToBlockchain(TransactionDetail transactionDetail) {
+    boolean isPending = transactionDetail.isPending();
+    boolean maxSendingTentativesReached = isMaxSendingTentativesReached(transactionDetail);
+    boolean isTimedOut = isTransactionTimedOut(transactionDetail);
+    boolean isEffectivelySent = isEffectivelySentToBlockchain(transactionDetail);
+    boolean isAlreadySent = transactionDetail.getSendingAttemptCount() > 0 || transactionDetail.getSentTimestamp() > 0;
+    // Never send transactions in those conditions:
+    // - transaction is not pending anymore
+    // - transaction has reached its maximum tentatives
+    // - transaction has been attempted to be sent for a while
+    // - transaction is never sent before (we will just reattempt sending
+    // failing
+    // transactions) and the max transactions to send is reached
+    return isPending && !maxSendingTentativesReached && !isTimedOut && !isEffectivelySent
+        && (isAlreadySent || transactionService.canSendTransactionToBlockchain(transactionDetail.getFrom()));
+  }
+
+  private boolean isEffectivelySentToBlockchain(TransactionDetail transactionDetail) {
+    return transactionDetail.getSendingAttemptCount() == TRANSACTION_EFFECTIVELY_SENT_CODE;
   }
 
   private boolean isMaxSendingTentativesReached(TransactionDetail transactionDetail) {
@@ -462,39 +477,34 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   private boolean handleTransactionSendingRequest(TransactionDetail transactionDetail, // NOSONAR
-                                                  EthSendTransaction transaction,
-                                                  Throwable exception) {
+                                                  EthSendTransaction transaction) {
     String transactionHash = transactionDetail.getHash();
 
-    if (isIOException(exception)) {
-      LOG.warn("IO Error when sending transaction {}", transactionHash, exception);
-      // Decrement previously incremented sending tentative. The error was due
-      // to network connection error, thus it shouldn't increment the send
-      // tentative count
-      return false;
-    }
     transactionDetail.increaseSendingAttemptCount();
-
     if (transaction != null && transaction.getTransactionHash() != null) {
       transactionHash = transaction.getTransactionHash();
+      LOG.debug("Received transaction hash {} for sent transaction {}", transactionHash, transactionDetail.getHash());
       transactionDetail.setHash(transactionHash);
       setSentTimestampIfNotSet(transactionDetail);
+      if (transaction.getError() == null) {
+        markTransactionAsEffectivelySent(transactionDetail);
+      }
     }
 
     boolean alreadyMined = false;
     boolean sentToBlockchain = false;
     try {
       Error transactionError = transaction == null ? null : transaction.getError();
-      boolean hasError = exception != null || (transactionError != null && StringUtils.isBlank(transaction.getResult()));
+      boolean hasError = transactionError != null && StringUtils.isBlank(transaction.getResult());
       if (hasError) {
-        if (isAlreadySentError(transactionError)) {
+        if (isRequestRateLimitReached(transactionError)) {
+          throw new MaxRequestRateReachedException(transactionDetail.getHash(), transactionError.getMessage());
+        } else if (isAlreadySentError(transactionError)) {
           // Trigger sent to blockchain only when it's the first time sending
           sentToBlockchain = true;
           setSentTimestampIfNotSet(transactionDetail);
-          // Mark transaction as really pending on blockchain
-          // with a magic number = (Max * 2) to avoid resending it again
-          markTransactionAsSent(transactionDetail);
-        } else if (isNonceTooLow(transactionError) && hasTransactionReceipt(transactionDetail.getHash())) {
+          markTransactionAsEffectivelySent(transactionDetail);
+        } else if (hasTransactionReceipt(transactionDetail.getHash())) {
           alreadyMined = true;
           addTransactionToRefreshFromBlockchain(transactionDetail);
         } else if (isUnrecoverableError(transactionError)) {
@@ -505,11 +515,15 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
                    transactionDetail.getHash(),
                    getTransactionErrorMessage(transactionError));
         } else {
-          logTransactionError(transactionDetail, exception, transactionError);
+          LOG.warn("Error when sending transaction {}. Error: [{}].",
+                   transactionDetail.getHash(),
+                   getTransactionErrorMessage(transactionError));
         }
       } else {
         sentToBlockchain = true;
       }
+    } catch (MaxRequestRateReachedException e) {
+      throw e;
     } catch (Exception e) {
       LOG.warn("Error handling Transaction '{}' Sending", transactionHash, e);
     }
@@ -524,8 +538,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     return sentToBlockchain;
   }
 
-  private void markTransactionAsSent(TransactionDetail transactionDetail) {
-    transactionDetail.setSendingAttemptCount(transactionService.getMaxAttemptsToSend() * 2);
+  private boolean isRequestRateLimitReached(Error transactionError) {
+    return transactionError != null && transactionError.getCode() == 429;
+  }
+
+  private void markTransactionAsEffectivelySent(TransactionDetail transactionDetail) {
+    // Mark transaction as really pending on blockchain
+    // with a magic number = -200 to avoid re-sending it again
+    transactionDetail.setSendingAttemptCount(TRANSACTION_EFFECTIVELY_SENT_CODE);
   }
 
   private boolean hasTransactionReceipt(String hash) {
@@ -556,12 +576,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   private boolean isNonceTooLow(Error transactionError) {
     String message = StringUtils.lowerCase(getTransactionErrorMessage(transactionError));
     return NONCE_TOO_LOW_MESSAGE_PATTERN.matcher(message).find();
-  }
-
-  private void logTransactionError(TransactionDetail transactionDetail, Throwable exception, Error transactionError) {
-    String exceptionMessage = exception == null ? "No result returned" : exception.getMessage();
-    String errorMessage = transactionError == null ? exceptionMessage : getTransactionErrorMessage(transactionError);
-    LOG.warn("Error when sending transaction {}. Error: [{}].", transactionDetail.getHash(), errorMessage, exception);
   }
 
   private void computeTransactionDetail(TransactionDetail transactionDetail,
@@ -641,23 +655,21 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   }
 
   private TransactionDetail sendTransactionToBlockchain(TransactionDetail transactionDetail) {
-    if (!checkPendingTransactionValidity(transactionDetail)) {
-      return null;
-    }
-
-    if (!transactionDetail.isBoost() && transactionDetail.getSendingAttemptCount() == 0
-        && !transactionService.canSendTransactionToBlockchain(transactionDetail.getFrom())) {
+    if (!canSendPendingTransactionToBlockchain(transactionDetail)) {
       return null;
     }
 
     try {
       CompletableFuture<EthSendTransaction> future = ethereumClientConnector.sendTransactionToBlockchain(transactionDetail);
       if (future != null) {
-        return future.handleAsync((ethSendTransaction, throwable) -> {
+        CompletableFuture<TransactionDetail> completableFuture = future.handle((ethSendTransaction, throwable) -> {
+          if (throwable != null) {
+            throw new BlockchainRequestException(TRANSFER_SIG, throwable);
+          }
           ExoContainerContext.setCurrentContainer(container);
           RequestLifeCycle.begin(container);
           try {
-            boolean sent = handleTransactionSendingRequest(transactionDetail, ethSendTransaction, throwable);
+            boolean sent = handleTransactionSendingRequest(transactionDetail, ethSendTransaction);
             if (sent) {
               broadcastTransactionSentToBlockchain(transactionDetail);
             }
@@ -665,19 +677,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
           } finally {
             RequestLifeCycle.end();
           }
-        }).get();
+        });
+        return completableFuture.get();
       }
+    } catch (MaxRequestRateReachedException | BlockchainRequestException e) {
+      throw e;
     } catch (Throwable e) { // NOSONAR
-      if (isIOException(e)) {
-        LOG.error("IO Error while sending transaction {} to blockchain", transactionDetail, e);
-        // Avoid incrementing SendingAttemptCount when it's a temporary fail
-        // of sending transaction
-      } else {
-        LOG.error("Error while sending transaction {} to blockchain", transactionDetail, e);
-        transactionDetail.increaseSendingAttemptCount();
-      }
-      transactionDetail.setSentTimestamp(0);
-      transactionService.saveTransactionDetail(transactionDetail, false);
+      throw new BlockchainRequestException(transactionDetail.getHash(), e);
     }
     return null;
   }
@@ -714,19 +720,6 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     }
     return "Code: " + transactionError.getCode() + ", Message: " + transactionError.getMessage() + ", Data: "
         + transactionError.getData();
-  }
-
-  private boolean isIOException(Throwable exception) {
-    if (exception == null) {
-      return false;
-    }
-    if (exception instanceof IOException) {
-      return true;
-    } else if (exception.getCause() == exception) {
-      return false;
-    } else {
-      return isIOException(exception.getCause());
-    }
   }
 
   private int compareTransactionDate(TransactionDetail transactionDetail, TransactionDetail otherTransactionDetail) {
