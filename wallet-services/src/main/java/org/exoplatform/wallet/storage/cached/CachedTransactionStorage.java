@@ -20,6 +20,7 @@ import org.exoplatform.commons.cache.future.FutureExoCache;
 import org.exoplatform.commons.cache.future.Loader;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.storage.TransactionStorage;
@@ -28,8 +29,8 @@ public class CachedTransactionStorage extends TransactionStorage {
 
   private FutureExoCache<String, TransactionDetail, Object> transactionFutureCache = null;
 
-  public CachedTransactionStorage(CacheService cacheService, WalletTransactionDAO walletTransactionDAO) {
-    super(walletTransactionDAO);
+  public CachedTransactionStorage(CacheService cacheService, ListenerService listenerService, WalletTransactionDAO walletTransactionDAO) {
+    super(listenerService, walletTransactionDAO);
 
     ExoCache<String, TransactionDetail> transactionCache = cacheService.getCacheInstance("wallet.transaction");
 

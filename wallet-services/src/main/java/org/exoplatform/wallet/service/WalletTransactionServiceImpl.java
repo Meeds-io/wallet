@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
@@ -67,8 +68,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
   private long                  maxAttemptsToSend;
 
-  private boolean               logAllTransaction;
-
   public WalletTransactionServiceImpl(WalletAccountService accountService,
                                       TransactionStorage transactionStorage,
                                       WalletContractService contractService,
@@ -90,10 +89,6 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
         String value = params.getValueParam(MAX_SENDING_TRANSACTIONS_ATTEMPTS).getValue();
         this.maxAttemptsToSend = Long.parseLong(value);
       }
-      if (params.containsKey(LOG_ALL_CONTRACT_TRANSACTIONS)) {
-        String value = params.getValueParam(LOG_ALL_CONTRACT_TRANSACTIONS).getValue();
-        this.logAllTransaction = Boolean.parseBoolean(value);
-      }
     }
     if (this.maxParallelPendingTransactions <= 0) {
       LOG.warn("Invalid value {} for parameter {}, using default value {}",
@@ -112,13 +107,28 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public List<TransactionDetail> getPendingTransactions() {
-    return transactionStorage.getPendingTransaction(getNetworkId());
+  public List<TransactionDetail> getPendingWalletTransactionsNotSent(String address) {
+    return transactionStorage.getPendingWalletTransactionsNotSent(address, getNetworkId());
   }
 
   @Override
-  public int countPendingTransactions() {
-    return transactionStorage.countPendingTransactions(getNetworkId());
+  public List<TransactionDetail> getPendingWalletTransactionsSent(String address) {
+    return transactionStorage.getPendingWalletTransactionsSent(address, getNetworkId());
+  }
+
+  @Override
+  public List<TransactionDetail> getPendingEtherTransactions(String address) {
+    return transactionStorage.getPendingEtherTransactions(address, getNetworkId());
+  }
+
+  @Override
+  public long countContractPendingTransactionsSent() {
+    return transactionStorage.countContractPendingTransactionsSent(getNetworkId());
+  }
+
+  @Override
+  public long countContractPendingTransactionsToSend() {
+    return transactionStorage.countContractPendingTransactionsToSend(getNetworkId());
   }
 
   @Override
@@ -131,14 +141,14 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                                  boolean administration,
                                                  String currentUser) throws IllegalAccessException {
     if (administration && !isUserRewardingAdmin(currentUser)) {
-      throw new IllegalAccessException("User " + currentUser + " is not allowed to get administrative transactions");
+      throw new IllegalAccessException(currentUser + " user is not allowed to get administrative transactions");
     }
 
     if (contractService.isContract(address)) {
       if (isUserRewardingAdmin(currentUser)) {
         return getContractTransactions(address, contractMethodName, limit, currentUser);
       } else {
-        throw new IllegalAccessException("User " + currentUser + " is not allowed to get all contract transactions");
+        throw new IllegalAccessException(currentUser + " user is not allowed to get all contract transactions");
       }
     } else if (StringUtils.isNotBlank(address)) {
       return getWalletTransactions(address,
@@ -152,12 +162,12 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     } else if (administration) {
       return getTransactions(limit, currentUser);
     } else {
-      throw new IllegalStateException("User " + currentUser + " is not allowed to get all contract transactions");
+      throw new IllegalStateException(currentUser + " user is not allowed to get all contract transactions");
     }
   }
 
   @Override
-  public TransactionStatistics getTransactionStatistics(String address,
+  public TransactionStatistics getTransactionStatistics(String address, // NOSONAR
                                                         String periodicity,
                                                         String selectedDate,
                                                         Locale locale) {
@@ -209,7 +219,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
                                              .collect(Collectors.toList()));
 
       // Compte list of days of current month to include in chart
-      periodList = dayList.stream().map(dayOfMonth -> selectedMonth.atDay(dayOfMonth)).collect(Collectors.toList());
+      periodList = dayList.stream().map(selectedMonth::atDay).collect(Collectors.toList());
     } else {
       throw new IllegalArgumentException("Uknown periodicity parameter: " + periodicity);
     }
@@ -250,7 +260,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       return 0;
     } else {
       long maxUsedNonce = transactionStorage.getMaxUsedNonce(getNetworkId(), fromAddress);
-      return maxUsedNonce == 0 ? 0 : maxUsedNonce + 1;
+      return maxUsedNonce + 1;
     }
   }
 
@@ -292,26 +302,25 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public long countTransactionsByNonce(TransactionDetail transactionDetail) {
-    return transactionStorage.countTransactionsByNonce(transactionDetail.getNetworkId(), transactionDetail.getFrom(), transactionDetail.getNonce());
+  public long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce) {
+    return transactionStorage.countPendingTransactionsWithSameNonce(getNetworkId(), transactionHash, fromAddress, nonce);
   }
 
   @Override
   public void cancelTransactionsWithSameNonce(TransactionDetail replacingTransaction) {
-    List<TransactionDetail> transactionsByNonce = transactionStorage.getTransactionsByNonce(replacingTransaction.getNetworkId(),
-                                                                                            replacingTransaction.getFrom(),
-                                                                                            replacingTransaction.getNonce());
-    if (transactionsByNonce.size() > 1) {
+    List<TransactionDetail> transactions =
+                                         transactionStorage.getPendingTransactionsWithSameNonce(replacingTransaction.getNetworkId(),
+                                                                                                replacingTransaction.getHash(),
+                                                                                                replacingTransaction.getFrom(),
+                                                                                                replacingTransaction.getNonce());
+    if (CollectionUtils.isNotEmpty(transactions)) {
       // Change status of other transactions having same nonce only when
       // none succeeded
-      transactionsByNonce.forEach(replacedTransaction -> {
-        if (!replacedTransaction.isPending() && !replacingTransaction.isPending()) {
-          return;
-        }
+      transactions.forEach(replacedTransaction -> {
+        replacedTransaction.setDropped(true);
         replacedTransaction.setPending(false);
-        replacedTransaction.setSucceeded(false);
-        broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
         saveTransactionDetail(replacedTransaction, true);
+        broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
       });
     }
   }
@@ -343,14 +352,13 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   @Override
   public List<TransactionDetail> getTransactionsToSend() {
     List<TransactionDetail> transactionsToSend = transactionStorage.getTransactionsToSend(getNetworkId());
-
-    transactionsToSend.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail));
+    transactionsToSend.forEach(this::retrieveWalletsDetails);
     return transactionsToSend;
   }
 
   @Override
   public boolean canSendTransactionToBlockchain(String fromAddress) {
-    return transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) < this.maxParallelPendingTransactions;
+    return transactionStorage.countPendingTransactionSent(getNetworkId(), fromAddress) < this.getMaxParallelPendingTransactions();
   }
 
   @Override
@@ -364,8 +372,8 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   }
 
   @Override
-  public boolean isLogAllTransaction() {
-    return logAllTransaction;
+  public long countTransactions() {
+    return transactionStorage.countTransactions();
   }
 
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
@@ -395,7 +403,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     return transactionDetails;
   }
 
-  private List<TransactionDetail> getWalletTransactions(String address,
+  private List<TransactionDetail> getWalletTransactions(String address, // NOSONAR
                                                         String contractAddress,
                                                         String contractMethodName,
                                                         String hash,
@@ -487,13 +495,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
   private void broadcastTransactionMinedEvent(TransactionDetail transactionDetail) {
     try {
       Map<String, Object> transaction = transactionToMap(transactionDetail);
-      getListenerService().broadcast(KNOWN_TRANSACTION_MINED_EVENT, null, transaction);
+      getListenerService().broadcast(TRANSACTION_MINED_EVENT, null, transaction);
     } catch (Exception e) {
       LOG.warn("Error while broadcasting transaction mined event: {}", transactionDetail, e);
     }
   }
-
-
 
   private SpaceService getSpaceService() {
     if (spaceService == null) {

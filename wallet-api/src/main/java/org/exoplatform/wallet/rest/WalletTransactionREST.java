@@ -18,6 +18,7 @@ package org.exoplatform.wallet.rest;
 
 import static org.exoplatform.wallet.utils.WalletUtils.getCurrentUserId;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,7 +44,6 @@ import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.wallet.service.*;
 
-
 @Path("/wallet/api/transaction")
 @RolesAllowed("users")
 @Tag(name = "/wallet/api/transaction", description = "Manages internally stored transactions") // NOSONAR
@@ -59,8 +59,11 @@ public class WalletTransactionREST implements ResourceContainer {
 
   private WalletTokenAdminService      walletTokenAdminService;
 
-  public WalletTransactionREST(WalletTransactionService transactionService) {
+  private WalletService                walletService;
+
+  public WalletTransactionREST(WalletTransactionService transactionService, WalletService walletService) {
     this.transactionService = transactionService;
+    this.walletService = walletService;
   }
 
   @POST
@@ -164,6 +167,17 @@ public class WalletTransactionREST implements ResourceContainer {
       LOG.error("Error getting nonce for address {}", fromAddress, e);
       return Response.serverError().build();
     }
+  }
+
+  @GET
+  @Path("getGasPrice")
+  @RolesAllowed("users")
+  @Operation(summary = "Get current gas price from blockchain", method = "GET", description = "Get current gas price from blockchain to be used to send a transaction")
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+      @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getGasPrice() {
+    double gasPrice = walletService.getGasPrice();
+    return Response.ok(BigDecimal.valueOf(gasPrice).toBigInteger().toString()).build();
   }
 
   @GET
