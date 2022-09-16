@@ -211,18 +211,6 @@ export default {
 
         const network = this.settings.network;
 
-        network.minGasPriceEther = network.minGasPriceEther || window.localWeb3.utils.fromWei(String(network.minGasPrice * Number(network.gasLimit)), 'ether').toString();
-        network.normalGasPriceEther = network.normalGasPriceEther || window.localWeb3.utils.fromWei(String(network.normalGasPrice * Number(network.gasLimit)), 'ether').toString();
-        network.maxGasPriceEther = network.maxGasPriceEther || window.localWeb3.utils.fromWei(String(network.maxGasPrice * Number(network.gasLimit)), 'ether').toString();
-
-        let gasPrice = sendTokensRequest.gasPrice || network.normalGasPrice;
-        const gasPriceEther = window.localWeb3.utils.fromWei(String(Number(gasPrice) * Number(network.gasLimit)), 'ether').toString();
-
-        if (this.wallet.etherBalance < gasPriceEther) {
-          console.error('User can\'t be charged for transaction fees using parametered gas price. Thus gas price will be computed from user ether balance');
-          gasPrice = parseInt(gasPrice * this.wallet.etherBalance / gasPriceEther);
-        }
-
         if (!amount || Number.isNaN(parseFloat(amount)) || !Number.isFinite(amount) || amount <= 0) {
           document.dispatchEvent(new CustomEvent('exo-wallet-send-tokens-error', {
             detail: this.$t('exoplatform.wallet.warning.invalidPaymentAmount')
@@ -275,6 +263,7 @@ export default {
         let senderAddress = null;
         let receiverWallet = null;
         let senderWallet = null;
+        let gasPrice = null;
 
         return this.addressRegistry.searchWalletByTypeAndId(receiver.id, receiver.type)
           .then((wallet) => {
@@ -303,6 +292,8 @@ export default {
               throw new Error(this.$t('exoplatform.wallet.warning.receiverMustBeDifferentFromSender'));
             }
           })
+          .then(() => this.transactionUtils.getGasPrice())
+          .then(data => gasPrice = data)
           .then(() => transfer(receiverAddress, amountWithDecimals).estimateGas({
             from: senderAddress,
             gas: defaultGas,

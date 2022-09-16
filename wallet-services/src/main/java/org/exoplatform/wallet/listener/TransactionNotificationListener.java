@@ -39,8 +39,8 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 
 /**
  * A listener that is triggered when a watched transaction by the addon is mined
- * on blockchain. This will mark the transaction as not pending in internal
- * database and send notifications.
+ * on blockchain. This will send notifications to all involved wallets wallets
+ * but Admin/Corporate wallet.
  */
 @Asynchronous
 public class TransactionNotificationListener extends Listener<Object, TransactionDetail> {
@@ -57,7 +57,7 @@ public class TransactionNotificationListener extends Listener<Object, Transactio
   }
 
   @Override
-  public void onEvent(Event<Object, TransactionDetail> event) throws Exception {
+  public void onEvent(Event<Object, TransactionDetail> event) throws Exception { // NOSONAR
     TransactionDetail transactionDetail = event.getData();
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);

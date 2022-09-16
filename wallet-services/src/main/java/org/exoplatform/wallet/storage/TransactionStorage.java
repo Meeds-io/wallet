@@ -16,38 +16,65 @@
  */
 package org.exoplatform.wallet.storage;
 
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.formatTransactionHash;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.services.listener.ListenerService;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.wallet.entity.TransactionEntity;
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 
 public class TransactionStorage {
 
+  private static final Log     LOG = ExoLogger.getLogger(TransactionStorage.class);
+
   private WalletTransactionDAO walletTransactionDAO;
 
-  public TransactionStorage(WalletTransactionDAO walletTransactionDAO) {
+  private ListenerService      listenerService;
+
+  public TransactionStorage(ListenerService listenerService, WalletTransactionDAO walletTransactionDAO) {
+    this.listenerService = listenerService;
     this.walletTransactionDAO = walletTransactionDAO;
   }
 
   /**
+   * @param address {@link Wallet} address
    * @param networkId blockchain network id
-   * @return {@link List} of {@link TransactionDetail} marked as pending in
-   *         internal database
+   * @return {@link List} of {@link TransactionDetail} of type ether transfer
+   *         marked as pending in internal database
    */
-  public List<TransactionDetail> getPendingTransaction(long networkId) {
-    List<TransactionEntity> transactions = walletTransactionDAO.getPendingTransactions(networkId);
+  public List<TransactionDetail> getPendingEtherTransactions(String address, long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingEtherTransactions(address, networkId);
     return fromEntities(transactions);
   }
 
-  public int countPendingTransactions(long networkId) {
-    return walletTransactionDAO.countPendingTransactions(networkId);
+  public List<TransactionDetail> getPendingWalletTransactionsNotSent(String address, long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingWalletTransactionsNotSent(address, networkId);
+    return fromEntities(transactions);
+  }
+
+  public List<TransactionDetail> getPendingWalletTransactionsSent(String address, long networkId) {
+    List<TransactionEntity> transactions = walletTransactionDAO.getPendingWalletTransactionsSent(address, networkId);
+    return fromEntities(transactions);
+  }
+
+  public long countContractPendingTransactionsSent(long networkId) {
+    return walletTransactionDAO.countContractPendingTransactionsSent(networkId);
+  }
+
+  public long countContractPendingTransactionsToSend(long networkId) {
+    return walletTransactionDAO.countContractPendingTransactionsToSend(networkId);
   }
 
   /**
@@ -109,7 +136,7 @@ public class TransactionStorage {
    * @return {@link List} of {@link TransactionDetail} with corresponding filter
    *         entries
    */
-  public List<TransactionDetail> getWalletTransactions(long networkId,
+  public List<TransactionDetail> getWalletTransactions(long networkId, // NOSONAR
                                                        String address,
                                                        String contractAddress,
                                                        String contractMethodName,
@@ -118,68 +145,42 @@ public class TransactionStorage {
                                                        boolean pending,
                                                        boolean administration) {
     List<TransactionEntity> transactions = getWalletTransactions(networkId,
-            address,
-            contractAddress,
-            contractMethodName,
-            hash,
-            limit,
-            pending,
-            administration,
-            false);
-    boolean loadMore = transactions.size() < limit;
+                                                                 address,
+                                                                 contractAddress,
+                                                                 contractMethodName,
+                                                                 limit,
+                                                                 pending,
+                                                                 administration);
     boolean limitNotReached = transactions.size() == limit;
+    int limitToSearchForHash = limit * 2;
     if ((StringUtils.isNotBlank(hash) && limitNotReached
-            && transactions.stream().noneMatch(transaction -> StringUtils.equalsIgnoreCase(transaction.getHash(), hash)))) {
+        && transactions.stream().noneMatch(transaction -> StringUtils.equalsIgnoreCase(transaction.getHash(), hash)))) {
       return getWalletTransactions(networkId,
-              address,
-              contractAddress,
-              contractMethodName,
-              hash,
-              limit * 2,
-              pending,
-              administration);
-    } else if((StringUtils.isBlank(hash)) && loadMore) {
-      return fromEntities(getWalletTransactions(networkId,
-       address,
-       contractAddress,
-       contractMethodName,
-       hash,
-       limit * 2,
-       pending,
-       administration,
-       false));
+                                   address,
+                                   contractAddress,
+                                   contractMethodName,
+                                   hash,
+                                   limitToSearchForHash,
+                                   pending,
+                                   administration);
     }
     return fromEntities(transactions);
   }
-  private List<TransactionEntity> getWalletTransactions(long networkId,
-                                                       String address,
-                                                       String contractAddress,
-                                                       String contractMethodName,
-                                                       String hash,
-                                                       int limit,
-                                                       boolean pending,
-                                                       boolean administration,
-                                                       boolean loadMore) {
 
-    address = StringUtils.lowerCase(address);
-    List<TransactionEntity> transactions = walletTransactionDAO.getWalletTransactions(networkId,
-                                                                                      address,
-                                                                                      contractAddress,
-                                                                                      contractMethodName,
-                                                                                      limit,
-                                                                                      pending,
-                                                                                      administration);
-    // filter transactions having same Nonce and keep last ones
-    Map<Long, TransactionEntity> filterTransactions = new HashMap<>();
-   List <TransactionEntity> filteredTransactions = new ArrayList<>();
-    for(TransactionEntity transaction : transactions) {
-      TransactionEntity transactionDetail = filterTransactions.get(transaction.getNonce());
-      if(transactionDetail == null || !transactionDetail.getFromAddress().equals(transaction.getFromAddress()) && (transaction.isSuccess() || (!transaction.isSuccess() && !transactionDetail.isSuccess() && transactionDetail.getSentDate() < transaction.getSentDate()))) {
-        filterTransactions.put(transaction.getNonce(), transaction);
-        filteredTransactions.add(transaction);
-      }
-    }
-    return filteredTransactions;
+  private List<TransactionEntity> getWalletTransactions(long networkId, // NOSONAR
+                                                        String address,
+                                                        String contractAddress,
+                                                        String contractMethodName,
+                                                        int limit,
+                                                        boolean pending,
+                                                        boolean administration) {
+    return walletTransactionDAO.getWalletTransactions(networkId,
+                                                      address,
+                                                      contractAddress,
+                                                      contractMethodName,
+                                                      limit,
+                                                      pending,
+                                                      administration);
   }
 
   /**
@@ -192,14 +193,17 @@ public class TransactionStorage {
       transactionDetail.setTimestamp(System.currentTimeMillis());
     }
     if (transactionDetail.getSentTimestamp() <= 0 && StringUtils.isBlank(transactionDetail.getRawTransaction())) {
+      // Transaction sent by external wallet, thus add sending timestamp
       transactionDetail.setSentTimestamp(transactionDetail.getTimestamp());
     }
     TransactionEntity transactionEntity = toEntity(transactionDetail);
     if (transactionEntity.getId() == 0) {
       transactionEntity = walletTransactionDAO.create(transactionEntity);
       transactionDetail.setId(transactionEntity.getId());
+      broadcastTransactionEvent(transactionDetail, TRANSACTION_CREATED_EVENT);
     } else {
       walletTransactionDAO.update(transactionEntity);
+      broadcastTransactionEvent(transactionDetail, TRANSACTION_MODIFIED_EVENT);
     }
   }
 
@@ -207,25 +211,34 @@ public class TransactionStorage {
    * Return list of transactions for a given address that corresponds to a nonce
    * 
    * @param networkId blockchain network id
+   * @param transactionHash Transaction hash that will replace others
    * @param fromAddress transaction sender address
    * @param nonce Nonce of the transaction
    * @return {@link List} of {@link TransactionDetail}
    */
-  public List<TransactionDetail> getTransactionsByNonce(long networkId, String fromAddress, long nonce) {
-    List<TransactionEntity> transactionEntities = walletTransactionDAO.getTransactionsByNonce(networkId, fromAddress, nonce);
-    return this.fromEntities(transactionEntities);
+  public List<TransactionDetail> getPendingTransactionsWithSameNonce(long networkId,
+                                                                     String transactionHash,
+                                                                     String fromAddress,
+                                                                     long nonce) {
+    List<TransactionEntity> transactionEntities = walletTransactionDAO.getPendingTransactionsWithSameNonce(networkId,
+                                                                                                           transactionHash,
+                                                                                                           fromAddress,
+                                                                                                           nonce);
+    return fromEntities(transactionEntities);
   }
 
   /**
-   * Count the number of transactions for a given address that corresponds to a nonce
+   * Count the number of transactions for a given address that corresponds to a
+   * given nonce and that are always marked as pending
    *
    * @param networkId blockchain network id
+   * @param transactionHash Transaction hash to exclude from count
    * @param fromAddress transaction sender address
    * @param nonce Nonce of the transaction
    * @return {@link List} of {@link TransactionDetail}
    */
-  public long countTransactionsByNonce(long networkId, String fromAddress, long nonce) {
-    return walletTransactionDAO.countTransactionsByNonce(networkId, fromAddress, nonce);
+  public long countPendingTransactionsWithSameNonce(long networkId, String transactionHash, String fromAddress, long nonce) {
+    return walletTransactionDAO.countPendingTransactionsWithSameNonce(networkId, transactionHash, fromAddress, nonce);
   }
   
   /**
@@ -299,9 +312,21 @@ public class TransactionStorage {
     return walletTransactionDAO.countSentContractAmount(contractAddress, address, startDate, endDate);
   }
 
+  public long countTransactions() {
+    return walletTransactionDAO.count();
+  }
+
+  private void broadcastTransactionEvent(TransactionDetail transactionDetail, String eventName) {
+    try {
+      listenerService.broadcast(eventName, transactionDetail, transactionDetail);
+    } catch (Exception e) {
+      LOG.warn("Error when broadcasting event '{}' on transaction '{}'", eventName, transactionDetail.getHash());
+    }
+  }
+
   private List<TransactionDetail> fromEntities(List<TransactionEntity> transactions) {
     return transactions == null ? Collections.emptyList()
-                                : transactions.stream().map(this::fromEntity).collect(Collectors.toList());
+                                : transactions.stream().sequential().map(this::fromEntity).collect(Collectors.toList());
   }
 
   private TransactionDetail fromEntity(TransactionEntity entity) {
@@ -326,6 +351,7 @@ public class TransactionStorage {
     detail.setNetworkId(entity.getNetworkId());
     detail.setPending(entity.isPending());
     detail.setSucceeded(entity.isSuccess());
+    detail.setDropped(entity.isDropped());
     detail.setGasPrice(entity.getGasPrice());
     detail.setGasUsed(entity.getGasUsed());
     detail.setTokenFee(entity.getTokenFee());
@@ -357,6 +383,7 @@ public class TransactionStorage {
     entity.setMessage(detail.getMessage());
     entity.setPending(detail.isPending());
     entity.setSuccess(detail.isSucceeded());
+    entity.setDropped(detail.isDropped());
     entity.setValue(detail.getValue());
     entity.setGasPrice(detail.getGasPrice());
     entity.setTokenFee(detail.getTokenFee());

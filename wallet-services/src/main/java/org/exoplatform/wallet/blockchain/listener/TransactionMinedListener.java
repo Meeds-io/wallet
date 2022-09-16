@@ -17,79 +17,66 @@
 package org.exoplatform.wallet.blockchain.listener;
 
 import static org.exoplatform.wallet.utils.WalletUtils.ETHER_FUNC_SEND_FUNDS;
-import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import org.exoplatform.wallet.blockchain.service.EthereumClientConnector;
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.services.listener.Asynchronous;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.contract.MeedsToken;
-import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.services.listener.*;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 
+/**
+ * A listener that is triggered once a transaction is mined. It will update the
+ * balances of user {@link Wallet}
+ */
 @Asynchronous
 public class TransactionMinedListener extends Listener<Object, Map<String, Object>> {
 
   private WalletAccountService     accountService;
 
-  private WalletContractService    contractService;
-
   private WalletTransactionService walletTransactionService;
-
-  private EthereumClientConnector web3jConnector;
 
   private ListenerService          listenerService;
 
-  public TransactionMinedListener(EthereumClientConnector web3jConnector) {
-    this.web3jConnector = web3jConnector;
+  public TransactionMinedListener(WalletAccountService accountService,
+                                  WalletTransactionService walletTransactionService,
+                                  ListenerService listenerService) {
+    this.accountService = accountService;
+    this.walletTransactionService = walletTransactionService;
+    this.listenerService = listenerService;
   }
 
   @Override
   public void onEvent(Event<Object, Map<String, Object>> event) throws Exception {
     Map<String, Object> transactionDetailObject = event.getData();
     String hash = (String) transactionDetailObject.get("hash");
-    TransactionDetail transactionDetail = getTransactionService().getTransactionByHash(hash);
+    TransactionDetail transactionDetail = walletTransactionService.getTransactionByHash(hash);
     if (transactionDetail == null) {
       return;
     }
 
-    Set<String> contractMethodsInvoked = new HashSet<>();
     Map<String, Set<String>> walletsModifications = new HashMap<>();
-    String contractMethodName = transactionDetail.getContractMethodName();
-    if (StringUtils.isNotBlank(contractMethodName)) {
-      contractMethodsInvoked.add(contractMethodName);
-    }
-
-    if (transactionDetail.isSucceeded()) {
-      addWalletsModification(transactionDetail, walletsModifications);
-    }
-
-    // Refresh saved contract detail in internal database from blockchain
-    if (!contractMethodsInvoked.isEmpty()) {
-      getContractService().refreshContractDetail(contractMethodsInvoked);
-    }
-
-    // Refresh modified wallets in blockchain
+    addWalletsModification(transactionDetail, walletsModifications);
     if (!walletsModifications.isEmpty()) {
-      getAccountService().refreshWalletsFromBlockchain(walletsModifications);
+      // Refresh modified wallets in blockchain
+      accountService.refreshWalletsFromBlockchain(walletsModifications);
     }
 
-    if (transactionDetail.isSucceeded() || web3jConnector.getTransaction(transactionDetail.getHash()) != null) {
-      walletTransactionService.cancelTransactionsWithSameNonce(transactionDetail);
-    }
-
-    getListenerService().broadcast(TRANSACTION_MODIFIED_EVENT, null, transactionDetail);
+    listenerService.broadcast(TRANSACTION_MINED_AND_UPDATED_EVENT, null, transactionDetail);
   }
 
   private void addWalletsModification(TransactionDetail transactionDetail, Map<String, Set<String>> walletsModifications) {
-    if (transactionDetail == null) {
-      return;
-    }
-
     addWalletModificationState(transactionDetail.getFromWallet(), ETHER_FUNC_SEND_FUNDS, walletsModifications);
 
     String contractMethodName = transactionDetail.getContractMethodName();
@@ -100,11 +87,6 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
       addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
       addWalletModificationState(transactionDetail.getByWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_APPROVE)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-    } else if (StringUtils.equals(contractMethodName, MeedsToken.FUNC_TRANSFEROWNERSHIP)) {
-      addWalletModificationState(transactionDetail.getFromWallet(), contractMethodName, walletsModifications);
-      addWalletModificationState(transactionDetail.getToWallet(), contractMethodName, walletsModifications);
     }
   }
 
@@ -114,39 +96,7 @@ public class TransactionMinedListener extends Listener<Object, Map<String, Objec
     if (wallet == null) {
       return;
     }
-    String address = wallet.getAddress();
-    if (!walletsModifications.containsKey(address)) {
-      walletsModifications.put(address, new HashSet<>());
-    }
-    walletsModifications.get(address).add(contractMethodName);
-  }
-
-  private WalletTransactionService getTransactionService() {
-    if (walletTransactionService == null) {
-      walletTransactionService = CommonsUtils.getService(WalletTransactionService.class);
-    }
-    return walletTransactionService;
-  }
-
-  private WalletAccountService getAccountService() {
-    if (accountService == null) {
-      accountService = CommonsUtils.getService(WalletAccountService.class);
-    }
-    return accountService;
-  }
-
-  private WalletContractService getContractService() {
-    if (contractService == null) {
-      contractService = CommonsUtils.getService(WalletContractService.class);
-    }
-    return contractService;
-  }
-
-  private ListenerService getListenerService() {
-    if (listenerService == null) {
-      listenerService = CommonsUtils.getService(ListenerService.class);
-    }
-    return listenerService;
+    walletsModifications.computeIfAbsent(wallet.getAddress(), k -> new HashSet<>()).add(contractMethodName);
   }
 
 }

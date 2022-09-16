@@ -19,6 +19,7 @@ package org.exoplatform.wallet.service;
 import java.util.List;
 import java.util.Locale;
 
+import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 
@@ -28,15 +29,39 @@ import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 public interface WalletTransactionService {
 
   /**
-   * @return {@link List} of pending {@link TransactionDetail} marked as pending
-   *         on blockchain
+   * Retrieves the list of pending transactions of a given wallet from database
+   * which is not yet sent to blockchain
+   *
+   * @param address {@link Wallet} address
+   * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingTransactions();
+  public List<TransactionDetail> getPendingWalletTransactionsNotSent(String address);
 
   /**
-   * @return pending transactions count
+   * Retrieves the list of pending transactions of a given wallet from database
+   * which was sent to blockchain
+   *
+   * @param address {@link Wallet} address
+   * @return {@link List} of pending {@link TransactionDetail}
    */
-  int countPendingTransactions();
+  public List<TransactionDetail> getPendingWalletTransactionsSent(String address);
+
+  /**
+   * @param address {@link Wallet} address
+   * @return {@link List} of pending {@link TransactionDetail} of type ether
+   *         sending marked as pending in database
+   */
+  public List<TransactionDetail> getPendingEtherTransactions(String address);
+
+  /**
+   * @return pending contract transactions already sent to blockchain
+   */
+  long countContractPendingTransactionsSent();
+
+  /**
+   * @return pending contract transactions not yet sent to blockchain
+   */
+  long countContractPendingTransactionsToSend();
 
   /**
    * @param address wallet address
@@ -54,7 +79,7 @@ public interface WalletTransactionService {
    * @throws IllegalAccessException if the current user isn't allowed to access
    *           wallet transactions
    */
-  List<TransactionDetail> getTransactions(String address,
+  List<TransactionDetail> getTransactions(String address, // NOSONAR
                                           String contractAddress,
                                           String contractMethodName,
                                           String hash,
@@ -74,10 +99,7 @@ public interface WalletTransactionService {
    * @return {@link TransactionStatistics} with sent and received amounts and
    *         labels
    */
-  TransactionStatistics getTransactionStatistics(String address,
-                                                 String periodicity,
-                                                 String selectedDate,
-                                                 Locale locale);
+  TransactionStatistics getTransactionStatistics(String address, String periodicity, String selectedDate, Locale locale);
 
   /**
    * @param hash transaction hash
@@ -145,8 +167,8 @@ public interface WalletTransactionService {
   long getPendingTransactionMaxDays();
 
   /**
-   * @return {@link List} of {@link TransactionDetail} having
-   *         RawTransaction to send on blockchain
+   * @return {@link List} of {@link TransactionDetail} having RawTransaction to
+   *         send on blockchain
    */
   List<TransactionDetail> getTransactionsToSend();
 
@@ -172,12 +194,6 @@ public interface WalletTransactionService {
   long getMaxAttemptsToSend();
 
   /**
-   * @return true if all transactions including uknown ones detected on contract
-   *         has to be logged, else false
-   */
-  boolean isLogAllTransaction();
-
-  /**
    * @return Max parallel transactions
    */
   long getMaxParallelPendingTransactions();
@@ -192,10 +208,20 @@ public interface WalletTransactionService {
   public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
 
   /**
-   * Count the number of transactions sent from the same Wallet and having same Nonce
-   *
-   * @param transactionDetail of type {@link TransactionDetail}
+   * Count the number of transactions sent from the same Wallet and having same
+   * Nonce than another transaction
+   * 
+   * @param transactionHash transaction hash
+   * @param fromAddress wallet address
+   * @param nonce transaction nonce
+   * @return {@link Long} for transactions having same nonce but the designated
+   *         transactionHash
    */
-  public long countTransactionsByNonce(TransactionDetail transactionDetail);
+  public long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce);
+
+  /**
+   * @return count of transactions present in database
+   */
+  public long countTransactions();
 
 }

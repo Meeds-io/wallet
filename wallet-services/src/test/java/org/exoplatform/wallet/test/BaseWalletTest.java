@@ -17,9 +17,12 @@
 package org.exoplatform.wallet.test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -63,7 +66,7 @@ public abstract class BaseWalletTest {
 
   protected static final double    GAS_PRICE                = 0.000000006d;
 
-  protected static final long      GAS_PRICE_WEI            = 6000000000l;
+  protected static final double    GAS_PRICE_WEI            = 6000000000l;
 
   protected static final String    RAW_TRANSACTION          = "RAW_TRANSACTION";
 
@@ -87,7 +90,7 @@ public abstract class BaseWalletTest {
 
   protected static final String    CURRENT_SPACE            = "space1";
 
-  protected static final long      NETWORK_ID               = 1;
+  protected static final long      NETWORK_ID               = 137;
 
   protected static final int       CONTRACT_AMOUNT          = 500;
 
@@ -114,7 +117,7 @@ public abstract class BaseWalletTest {
       container.unregisterComponent(BlockchainTransactionService.class);
     }
     blockchainTransactionService = Mockito.mock(BlockchainTransactionService.class);
-    Mockito.when(blockchainTransactionService.refreshBlockchainGasPrice()).thenReturn(GAS_PRICE_WEI);
+    Mockito.lenient().when(blockchainTransactionService.getGasPrice()).thenReturn(GAS_PRICE_WEI);
     container.registerComponentInstance(BlockchainTransactionService.class, blockchainTransactionService);
 
     setContractDetails();
@@ -508,5 +511,32 @@ public abstract class BaseWalletTest {
     contractDetail.setContractType("3");
     contractDetail.setNetworkId(1l);
     walletService.setConfiguredContractDetail(contractDetail);
+  }
+
+  protected org.web3j.protocol.core.methods.response.Log newLog() {
+    ContractTransactionEvent contractTransactionEvent = newContractTransactionEvent();;
+    org.web3j.protocol.core.methods.response.Log log = mock(org.web3j.protocol.core.methods.response.Log.class);
+    when(log.getTopics()).thenReturn(contractTransactionEvent.getTopics());
+    when(log.getData()).thenReturn(contractTransactionEvent.getData());
+    when(log.getBlockNumber()).thenReturn(BigInteger.valueOf(contractTransactionEvent.getBlockNumber()));
+    when(log.getTransactionHash()).thenReturn(contractTransactionEvent.getTransactionHash());
+    when(log.getAddress()).thenReturn(contractTransactionEvent.getContractAddress());
+    return log;
+  }
+
+  protected ContractTransactionEvent newContractTransactionEvent() {
+    String hash = "transactionHash";
+    String contractAddress = "0x334d85047da64738c065d36e10b2adeb965000d0";
+    String data = "0x0000000000000000000000000000000000000000000000001bc16d674ec80000";
+    List<String> topics = Arrays.asList("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                                        "0x0000000000000000000000002b7e115f52171d164529fdb1ac72571e608a474e",
+                                        "0x0000000000000000000000001d94f732223996e9f773261e82340889934a6c03");
+    long blockNumber = 28047704;
+    ContractTransactionEvent contractTransactionEvent = new ContractTransactionEvent(hash,
+                                                                                     contractAddress,
+                                                                                     data,
+                                                                                     topics,
+                                                                                     blockNumber);
+    return contractTransactionEvent;
   }
 }

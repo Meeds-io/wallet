@@ -16,6 +16,7 @@
  */
 package org.exoplatform.wallet.reward.dao;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Query;
@@ -28,7 +29,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.reward.entity.WalletRewardEntity;
 
 public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
-  private static final Log LOG = ExoLogger.getLogger(RewardDAO.class);
+  private static final Log    LOG         = ExoLogger.getLogger(RewardDAO.class);
 
   private static final String IDENTITY_ID = "identityId";
 
@@ -36,7 +37,8 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     TypedQuery<WalletRewardEntity> query = getEntityManager().createNamedQuery("Reward.findRewardsByPeriodId",
                                                                                WalletRewardEntity.class);
     query.setParameter("periodId", periodId);
-    return query.getResultList();
+    List<WalletRewardEntity> result = query.getResultList();
+    return toNotNullList(result);
   }
 
   public List<WalletRewardEntity> findRewardsByIdentityId(long identityId, int limit) {
@@ -46,14 +48,15 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     if (limit > 0) {
       query.setMaxResults(limit);
     }
-    return query.getResultList();
+    List<WalletRewardEntity> result = query.getResultList();
+    return toNotNullList(result);
   }
 
   public double countRewardsByIdentityId(long identityId) {
-    TypedQuery<Double> query = getEntityManager().createNamedQuery("Reward.countRewardsByIdentityId",
-                                                                               Double.class);
+    TypedQuery<Double> query = getEntityManager().createNamedQuery("Reward.countRewardsByIdentityId", Double.class);
     query.setParameter(IDENTITY_ID, identityId);
-    return query.getSingleResult();
+    Double result = query.getSingleResult();
+    return toNotNullDouble(result);
   }
 
   public WalletRewardEntity findRewardByIdentityIdAndPeriodId(long identityId, long periodId) {
@@ -67,7 +70,7 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     } else if (result.size() > 1) {
       LOG.warn("More than one reward was found for identityId {} and periodId {}", identityId, periodId);
     }
-    return result.get(0);
+    return getFirstItem(result);
   }
 
   @ExoTransactional
@@ -76,6 +79,18 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     query.setParameter("oldHash", oldHash);
     query.setParameter("newHash", newHash);
     query.executeUpdate();
+  }
+
+  private List<WalletRewardEntity> toNotNullList(List<WalletRewardEntity> result) {
+    return result == null ? Collections.emptyList() : result;
+  }
+
+  private double toNotNullDouble(Double result) {
+    return result == null ? 0 : result;
+  }
+
+  private WalletRewardEntity getFirstItem(List<WalletRewardEntity> resultList) {
+    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
 }
