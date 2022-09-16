@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.reward.test.service;
+package org.exoplatform.wallet.reward.job;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,10 +27,10 @@ import org.mockito.Mockito;
 
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.reward.BaseWalletRewardTest;
 import org.exoplatform.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob;
 import org.exoplatform.wallet.reward.service.*;
 import org.exoplatform.wallet.reward.storage.RewardReportStorage;
-import org.exoplatform.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
 import org.exoplatform.wallet.storage.WalletStorage;

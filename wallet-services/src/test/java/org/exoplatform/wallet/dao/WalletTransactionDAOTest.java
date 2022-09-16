@@ -96,7 +96,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     // Search all transactions where a wallet is receiver, sender delegator
     boolean includeAdministrationTransactions = true;
     boolean onlyPending = false;
-    List<TransactionEntity> transactions = walletTransactionDAO.getWalletTransactions(1,
+    List<TransactionEntity> transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                                                       firstAddress,
                                                                                       null,
                                                                                       null,
@@ -108,7 +108,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 60, transactions.size());
 
     // Test pagination
-    transactions = walletTransactionDAO.getWalletTransactions(1,
+    transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                               firstAddress,
                                                               null,
                                                               null,
@@ -118,7 +118,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 20, transactions.size());
 
     // Filter on contract address
-    transactions = walletTransactionDAO.getWalletTransactions(1,
+    transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                               firstAddress,
                                                               contractAddress,
                                                               null,
@@ -128,7 +128,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 30, transactions.size());
 
     // Filter on contract method name
-    transactions = walletTransactionDAO.getWalletTransactions(1,
+    transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                               firstAddress,
                                                               contractAddress,
                                                               contractMethodName,
@@ -139,7 +139,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
 
     // Filter on only pending transactions
     onlyPending = true;
-    transactions = walletTransactionDAO.getWalletTransactions(1,
+    transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                               firstAddress,
                                                               contractAddress,
                                                               contractMethodName,
@@ -150,7 +150,7 @@ public class WalletTransactionDAOTest extends BaseWalletTest {
 
     // Filter on only pending transactions
     includeAdministrationTransactions = false;
-    transactions = walletTransactionDAO.getWalletTransactions(1,
+    transactions = walletTransactionDAO.getWalletTransactions(NETWORK_ID,
                                                               firstAddress,
                                                               contractAddress,
                                                               contractMethodName,

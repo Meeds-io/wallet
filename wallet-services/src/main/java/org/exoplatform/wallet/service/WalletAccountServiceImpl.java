@@ -455,13 +455,15 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     // This is about address modification or creation, thus, the blockchain must
     // be retrieved again
-    refreshWalletFromBlockchain(wallet, getContractDetail(), null);
+    if (!WalletType.isAdmin(wallet.getType())) {
+      refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-    String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
-    try {
-      getListenerService().broadcast(eventName, wallet.clone(), currentUser);
-    } catch (Exception e) {
-      LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+      try {
+        getListenerService().broadcast(eventName, wallet.clone(), currentUser);
+      } catch (Exception e) {
+        LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      }
     }
   }
 

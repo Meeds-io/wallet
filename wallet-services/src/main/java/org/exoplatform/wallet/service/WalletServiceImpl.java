@@ -50,6 +50,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfSpaceOrGrou
 import static org.exoplatform.wallet.utils.WalletUtils.isUserSpaceMember;
 import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -413,9 +414,7 @@ public class WalletServiceImpl implements WalletService, Startable {
   public double getGasPrice() {
     if (dynamicGasPrice == 0 || (System.currentTimeMillis() - dynamicGasPriceLastUpdateTime) > dynamicGasPriceUpdateInterval) {
       try {
-        double gasPrice = getBlockchainTransactionService().getGasPrice();
-        setGasPrice(gasPrice);
-        dynamicGasPriceLastUpdateTime = System.currentTimeMillis();
+        return getGasPriceBlocking();
       } catch (Exception e) {
         LOG.debug("Error retrieving gas price from blockchain. Return normal gas price setting", e);
         return getSettings().getNetwork().getNormalGasPrice();
@@ -428,17 +427,11 @@ public class WalletServiceImpl implements WalletService, Startable {
   public void setGasPrice(double blockchainGasPrice) {
     NetworkSettings network = getSettings().getNetwork();
     Long maxGasPriceInWei = network.getMaxGasPrice();
-    Long minGasPriceInWei = network.getMinGasPrice();
     if (blockchainGasPrice > maxGasPriceInWei) {
       LOG.info("GAS Price detected on blockchain '{}' GWEI exceeds maximum allowed gas price '{}' GWEI, thus the maximum gas price will be used instead.",
                convertFromDecimals(BigDecimal.valueOf(blockchainGasPrice).toBigInteger(), GWEI_TO_WEI_DECIMALS),
                convertFromDecimals(BigInteger.valueOf(maxGasPriceInWei), GWEI_TO_WEI_DECIMALS));
       blockchainGasPrice = maxGasPriceInWei;
-    } else if (blockchainGasPrice < minGasPriceInWei) {
-      LOG.info("GAS Price detected on blockchain '{}' GWEI is lower than minimum allowed gas price '{}' GWEI, thus the minimum gas price will be used instead.",
-               convertFromDecimals(BigDecimal.valueOf(blockchainGasPrice).toBigInteger(), GWEI_TO_WEI_DECIMALS),
-               convertFromDecimals(BigInteger.valueOf(minGasPriceInWei), GWEI_TO_WEI_DECIMALS));
-      blockchainGasPrice = minGasPriceInWei;
     }
     this.dynamicGasPrice = blockchainGasPrice;
   }
@@ -481,6 +474,15 @@ public class WalletServiceImpl implements WalletService, Startable {
       double etherAmountDecimals = Math.pow(10, etherAmountMaxDecimals);
       return Math.ceil(etherInitialFund * etherAmountDecimals) / etherAmountDecimals;
     }
+  }
+
+  private synchronized double getGasPriceBlocking() throws IOException {
+    if (dynamicGasPrice == 0 || (System.currentTimeMillis() - dynamicGasPriceLastUpdateTime) > dynamicGasPriceUpdateInterval) {
+      double gasPrice = getBlockchainTransactionService().getGasPrice();
+      setGasPrice(gasPrice);
+      dynamicGasPriceLastUpdateTime = System.currentTimeMillis();
+    }
+    return dynamicGasPrice;
   }
 
   private SettingService getSettingService() {

@@ -14,10 +14,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,9 +93,10 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
   public void testOnServiceStartWhenNotPermanentListeningAndNoPendingTransactions() throws Exception {
     long blockNumber = 2559l;
     when(ethereumClientConnector.getLastestBlockNumber()).thenReturn(blockNumber);
+    when(transactionService.countTransactions()).thenReturn(1l);
 
     service.startAsync();
-    verify(ethereumClientConnector, timeout(10000).times(1)).setLastWatchedBlockNumber(anyLong());
+    verify(ethereumClientConnector, times(1)).setLastWatchedBlockNumber(anyLong());
 
     verify(settingService, times(1)).set(any(), any(), any(), argThat(value -> Objects.equal(value.getValue(), blockNumber)));
     verify(ethereumClientConnector, times(1)).setLastWatchedBlockNumber(blockNumber);
@@ -110,10 +111,11 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(settingService.get(any(), any(), any())).thenReturn(value);
     when(ethereumClientConnector.isPermanentlyScanBlockchain()).thenReturn(true);
     when(ethereumClientConnector.getLastestBlockNumber()).thenReturn(blockNumber);
+    when(transactionService.countTransactions()).thenReturn(1l);
 
     service.startAsync();
 
-    verify(ethereumClientConnector, timeout(10000).times(1)).setLastWatchedBlockNumber(blockNumber);
+    verify(ethereumClientConnector, atLeast(1)).setLastWatchedBlockNumber(blockNumber);
     verify(ethereumClientConnector, times(1)).renewTransactionListeningSubscription(anyLong());
     verify(settingService, times(1)).set(any(), any(), eq(LAST_BLOCK_NUMBER_KEY_NAME + 0), any());
   }
@@ -123,7 +125,7 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     when(transactionService.countContractPendingTransactionsSent()).thenReturn(1l);
 
     service.startAsync();
-    verify(ethereumClientConnector, timeout(10000).times(1)).renewTransactionListeningSubscription(anyLong());
+    verify(ethereumClientConnector, times(1)).renewTransactionListeningSubscription(anyLong());
   }
 
   @Test

@@ -312,6 +312,10 @@ public class TransactionStorage {
     return walletTransactionDAO.countSentContractAmount(contractAddress, address, startDate, endDate);
   }
 
+  public long countTransactions() {
+    return walletTransactionDAO.count();
+  }
+
   private void broadcastTransactionEvent(TransactionDetail transactionDetail, String eventName) {
     try {
       listenerService.broadcast(eventName, transactionDetail, transactionDetail);

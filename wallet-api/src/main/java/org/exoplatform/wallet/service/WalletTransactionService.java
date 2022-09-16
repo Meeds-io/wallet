@@ -219,4 +219,9 @@ public interface WalletTransactionService {
    */
   public long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce);
 
+  /**
+   * @return count of transactions present in database
+   */
+  public long countTransactions();
+
 }

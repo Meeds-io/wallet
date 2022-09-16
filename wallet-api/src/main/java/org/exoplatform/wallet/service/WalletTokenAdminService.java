@@ -129,16 +129,6 @@ public interface WalletTokenAdminService {
    */
   boolean isInitializedAccount(Wallet wallet) throws Exception;// NOSONAR
 
-
-  /**
-   * Retrieves contract details from blockchain, like: - Sell price - Owner -
-   * Symbol - Name ...
-   * 
-   * @param contractDetail existing contract detail retrieved from internal
-   *          database to refresh its attributes.
-   */
-  void refreshContractDetailFromBlockchain(ContractDetail contractDetail);
-
   /**
    * Retrieves wallet details from blockchain
    * 

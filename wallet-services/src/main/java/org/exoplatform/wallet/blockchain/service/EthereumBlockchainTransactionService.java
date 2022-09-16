@@ -264,8 +264,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   @Override
   @SuppressWarnings("rawtypes")
   public Future startWatchingBlockchain() {
-    long startWatchingBlockNumber = getLastWatchedBlockNumber() + 1;
-    return ethereumClientConnector.renewTransactionListeningSubscription(startWatchingBlockNumber);
+    long lastWatchedBlockNumber = getLastWatchedBlockNumber();
+    if (lastWatchedBlockNumber == 0) {
+      lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+      saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+    }
+    ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
+    return ethereumClientConnector.renewTransactionListeningSubscription(lastWatchedBlockNumber + 1);
   }
 
   @Override
@@ -281,13 +286,17 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(container);
     try {
-      long lastWatchedBlockNumber = getLastWatchedBlockNumber();
       long pendingContractTransactionsSent = transactionService.countContractPendingTransactionsSent();
-      if (lastWatchedBlockNumber <= 0 || pendingContractTransactionsSent == 0) {
-        lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+      boolean noPendingTransactionsToWatch = pendingContractTransactionsSent == 0;
+      Wallet adminWallet = accountService.getAdminWallet();
+      boolean isAdminWalletEnabled = adminWallet != null && adminWallet.isEnabled() && adminWallet.getEtherBalance() != null
+          && adminWallet.getEtherBalance() > 0 && adminWallet.getTokenBalance() != null && adminWallet.getTokenBalance() > 0;
+      boolean hasEverUsedWallet = isAdminWalletEnabled || transactionService.countTransactions() > 0;
+      if (hasEverUsedWallet && noPendingTransactionsToWatch) {
+        long lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
         saveLastWatchedBlockNumber(lastWatchedBlockNumber);
+        ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
       }
-      ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
       if (ethereumClientConnector.isPermanentlyScanBlockchain() || pendingContractTransactionsSent > 0) {
         startWatchingBlockchain();
       }

@@ -14,14 +14,20 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.reward.test.service;
+package org.exoplatform.wallet.reward.job;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.LongStream;
 
 import org.junit.Test;
@@ -31,14 +37,25 @@ import org.mockito.stubbing.Answer;
 
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardBudgetType;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPluginSettings;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.reward.RewardTeam;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.wallet.reward.BaseWalletRewardTest;
 import org.exoplatform.wallet.reward.api.RewardPlugin;
-import org.exoplatform.wallet.reward.job.RewardStatusVerifierJob;
-import org.exoplatform.wallet.reward.service.*;
+import org.exoplatform.wallet.reward.service.RewardTeamService;
+import org.exoplatform.wallet.reward.service.WalletRewardReportService;
+import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
+import org.exoplatform.wallet.reward.service.WalletRewardTeamService;
 import org.exoplatform.wallet.reward.storage.RewardReportStorage;
-import org.exoplatform.wallet.reward.test.BaseWalletRewardTest;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
@@ -158,6 +175,22 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
         transactionDetail.setSucceeded(true);
         walletTransactionService.saveTransactionDetail(transactionDetail, true);
       }
+
+      WalletAccountService walletAccountServiceMock = mock(WalletAccountService.class);
+      when(walletAccountServiceMock.isAdminAccountEnabled()).thenReturn(true);
+
+      rewardReportNotificationJob.execute(null);
+
+      rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
+      assertNotNull(rewardPeriodsInProgress);
+      assertEquals(1, rewardPeriodsInProgress.size());
+
+      rewardReportNotificationJob.walletAccountService = walletAccountServiceMock;
+      Wallet adminWallet = new Wallet();
+      when(walletAccountServiceMock.getAdminWallet()).thenReturn(adminWallet);
+      adminWallet.setEtherBalance(2d);
+      adminWallet.setTokenBalance(3d);
+      adminWallet.setEnabled(true);
 
       rewardReportNotificationJob.execute(null);
 

@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.reward.notification.test;
+package org.exoplatform.wallet.reward.notification;
 
 import static org.exoplatform.wallet.utils.RewardUtils.*;
 import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
@@ -33,8 +33,8 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParam;
 import org.exoplatform.wallet.model.reward.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.wallet.reward.BaseWalletRewardTest;
 import org.exoplatform.wallet.reward.notification.RewardSuccessNotificationPlugin;
-import org.exoplatform.wallet.reward.test.BaseWalletRewardTest;
 
 public class RewardSuccessNotificationPluginTest extends BaseWalletRewardTest {
 

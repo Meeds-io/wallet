@@ -371,6 +371,11 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     return maxParallelPendingTransactions;
   }
 
+  @Override
+  public long countTransactions() {
+    return transactionStorage.countTransactions();
+  }
+
   private List<TransactionDetail> getTransactions(int limit, String currentUser) {
     List<TransactionDetail> transactionDetails = transactionStorage.getTransactions(getNetworkId(), limit);
     transactionDetails.stream().forEach(transactionDetail -> retrieveWalletsDetails(transactionDetail, currentUser));

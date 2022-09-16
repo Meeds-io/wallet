@@ -90,7 +90,7 @@ public abstract class BaseWalletTest {
 
   protected static final String    CURRENT_SPACE            = "space1";
 
-  protected static final long      NETWORK_ID               = 1;
+  protected static final long      NETWORK_ID               = 137;
 
   protected static final int       CONTRACT_AMOUNT          = 500;
 

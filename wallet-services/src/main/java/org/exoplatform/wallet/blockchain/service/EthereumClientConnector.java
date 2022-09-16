@@ -250,7 +250,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_GET_LAST_BLOCK_NUMBER)
   public long getLastestBlockNumber() {
     try {
-      BigInteger blockNumber = getWeb3j(false).ethBlockNumber().send().getBlockNumber();
+      BigInteger blockNumber = getWeb3j(true).ethBlockNumber().send().getBlockNumber();
       return blockNumber.longValue();
     } catch (IOException e) {
       throw new IllegalStateException("Connection error with Blockchain while attempting to retrieve block number", e);
@@ -314,9 +314,9 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
   }
 
   public Web3j getWeb3j(boolean waitUntilConnected) {
-    boolean connected = this.checkConnection(waitUntilConnected);
+    boolean connected = this.checkConnection(false);
     if (waitUntilConnected && !connected) {
-      this.waitConnection();
+      this.waitConnection(3);
     }
     return web3j;
   }
@@ -498,7 +498,7 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     } catch (Throwable e) { // NOSONAR
-      LOG.warn("Error while connecting to Etherreum Websocket endpoint: {}", e);
+      LOG.warn("Error while connecting to Etherreum Websocket endpoint: {}", e.getMessage());
     }
     return false;
   }
@@ -558,23 +558,23 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  protected void waitConnection() {
+  protected void waitConnection(int tentatives) {
     if (StringUtils.isBlank(websocketURL)) {
       throw new IllegalStateException("No websocket connection is configured for ethereum blockchain");
     }
     if (this.serviceStopping) {
       throw new IllegalStateException("Server is stopping, thus no Web3 request should be emitted");
     }
-    while (!isConnected() && !Thread.currentThread().isInterrupted()) {
+    while (!isConnected() && !Thread.currentThread().isInterrupted() && tentatives-- > 0) {
       try {
+        Thread.sleep(5000);
         if (!connect(false)) {
           LOG.debug("Wait until Websocket connection to blockchain is established to retrieve information");
-          Thread.sleep(5000);
         }
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       } catch (Exception e) {
-        throw new IllegalStateException("An error is thrown while waiting for connection on blockchain", e);
+        LOG.warn("Error while connecting to Etherreum Websocket endpoint: {}", e.getMessage());
       }
     }
   }

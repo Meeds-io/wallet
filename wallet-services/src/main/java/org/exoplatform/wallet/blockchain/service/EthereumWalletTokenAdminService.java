@@ -20,6 +20,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
 import static org.exoplatform.wallet.utils.WalletUtils.OPERATION_READ_FROM_TOKEN;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
+import static org.exoplatform.wallet.utils.WalletUtils.getContractDetail;
 import static org.exoplatform.wallet.utils.WalletUtils.getGasLimit;
 import static org.exoplatform.wallet.utils.WalletUtils.getIdentityByTypeAndId;
 import static org.exoplatform.wallet.utils.WalletUtils.getNetworkId;
@@ -40,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.servlet.ServletContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
@@ -73,7 +72,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.RootContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.services.cache.CacheService;
@@ -197,8 +195,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         contractDetail.setName("Meeds Token");
         contractDetail.setSymbol("MEED");
         contractDetail.setNetworkId(this.networkId);
+        getContractService().saveContractDetail(contractDetail);
         walletService.setConfiguredContractDetail(contractDetail);
-        refreshContractDetailFromBlockchainAsync(contractDetail);
       }
       configuredContractDecimals = getPrincipalContractDetail().getDecimals();
     } catch (Exception e) {
@@ -279,6 +277,9 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
       getAccountService().removeWalletByAddress(wallet.getAddress(), currentUser);
     }
 
+    if (StringUtils.isNotBlank(privateKey)) {
+      getAccountService().refreshWalletFromBlockchain(wallet, getContractDetail(), null);
+    }
     return wallet;
   }
 
@@ -457,40 +458,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail) {
-    if (contractDetail == null) {
-      throw new IllegalArgumentException("contractDetail is mandatory");
-    }
-    String contractAddress = contractDetail.getAddress();
-    try {
-      if (contractDetail.getNetworkId() == null || contractDetail.getNetworkId() <= 0) {
-        contractDetail.setNetworkId(this.networkId);
-      }
-
-      if (contractDetail.getDecimals() == null || contractDetail.getDecimals() <= 0) {
-        readContractDecimals(contractDetail, contractAddress);
-      }
-
-      if (StringUtils.isEmpty(contractDetail.getName())) {
-        readContractName(contractDetail, contractAddress);
-      }
-
-      if (StringUtils.isEmpty(contractDetail.getSymbol())) {
-        readContractSymbol(contractDetail, contractAddress);
-      }
-
-      if (StringUtils.isEmpty(contractDetail.getTotalSupply())) {
-        readTotalSupply(contractDetail, contractAddress);
-      }
-
-      getContractService().saveContractDetail(contractDetail);
-    } catch (Exception e) {
-      throw new IllegalStateException("Error while retrieving contract details from blockchain with address: " + contractAddress,
-                                      e);
-    }
-  }
-
-  @Override
   public Map<String, Object> getStatisticParameters(String operation, Object result, Object... methodArgs) {
     Map<String, Object> parameters = new HashMap<>();
 
@@ -536,23 +503,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     }
     RemoteCall<?> response = (RemoteCall<?>) methodToInvoke.invoke(contractInstance, arguments);
     return response.send();
-  }
-
-  private void refreshContractDetailFromBlockchainAsync(ContractDetail contractDetail) {
-    PortalContainer.addInitTask(container.getPortalContext(), new RootContainer.PortalContainerPostInitTask() {
-      @Override
-      public void execute(ServletContext context, PortalContainer portalContainer) {
-        CompletableFuture.runAsync(() -> {
-          ExoContainerContext.setCurrentContainer(container);
-          RequestLifeCycle.begin(container);
-          try {
-            refreshContractDetailFromBlockchain(contractDetail);
-          } finally {
-            RequestLifeCycle.end();
-          }
-        });
-      }
-    });
   }
 
   private void createAdminWalletAsync() {
@@ -763,42 +713,6 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return new Function(MeedsToken.FUNC_TRANSFER,
                         Arrays.<Type> asList(new Address(toAddress), new Uint256(tokenAmount)),
                         Collections.<TypeReference<?>> emptyList());
-  }
-
-  private void readContractName(ContractDetail contractDetail, String contractAddress) throws Exception {
-    try {
-      String name = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_NAME);
-      contractDetail.setName(name);
-    } catch (Exception e) {
-      LOG.warn("Error retrieving contract name", e);
-    }
-  }
-
-  private void readContractSymbol(ContractDetail contractDetail, String contractAddress) throws Exception {
-    try {
-      String symbol = (String) executeReadOperation(contractAddress, MeedsToken.FUNC_SYMBOL);
-      contractDetail.setSymbol(symbol);
-    } catch (Exception e) {
-      LOG.warn("Error retrieving contract symbol", e);
-    }
-  }
-
-  private void readContractDecimals(ContractDetail contractDetail, String contractAddress) {
-    try {
-      BigInteger decimals = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_DECIMALS);
-      contractDetail.setDecimals(decimals.intValue());
-    } catch (Exception e) {
-      LOG.warn("Error retrieving contract decimals", e);
-    }
-  }
-
-  private void readTotalSupply(ContractDetail contractDetail, String contractAddress) throws Exception {
-    try {
-      BigInteger totalSupply = (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_TOTALSUPPLY);
-      contractDetail.setTotalSupply(String.valueOf(convertFromDecimals(totalSupply, contractDetail.getDecimals())));
-    } catch (Exception e) {
-      LOG.warn("Error retrieving contract total supply", e);
-    }
   }
 
 }

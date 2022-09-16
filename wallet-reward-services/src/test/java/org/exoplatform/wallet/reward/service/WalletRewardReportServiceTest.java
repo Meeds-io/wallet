@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.reward.test.service;
+package org.exoplatform.wallet.reward.service;
 
 import static org.junit.Assert.*;
 
@@ -32,9 +32,9 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.reward.*;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
+import org.exoplatform.wallet.reward.BaseWalletRewardTest;
 import org.exoplatform.wallet.reward.service.*;
 import org.exoplatform.wallet.reward.storage.RewardReportStorage;
-import org.exoplatform.wallet.reward.test.BaseWalletRewardTest;
 import org.exoplatform.wallet.service.*;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;

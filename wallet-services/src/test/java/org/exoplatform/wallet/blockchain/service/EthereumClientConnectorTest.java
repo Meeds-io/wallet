@@ -313,6 +313,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     when(web3j.ethBlockNumber()).thenReturn(request);
     when(request.send()).thenThrow(IOException.class);
 
+    service.start();
+
     assertThrows(IllegalStateException.class, () -> service.getLastestBlockNumber());
   }
 
@@ -328,6 +330,8 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     EthBlockNumber ethBlockNumber = mock(EthBlockNumber.class);
     when(request.send()).thenReturn(ethBlockNumber);
     when(ethBlockNumber.getBlockNumber()).thenReturn(BigInteger.TWO);
+
+    service.start();
 
     assertEquals(2l, service.getLastestBlockNumber());
   }

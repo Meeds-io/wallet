@@ -124,7 +124,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     // Search all transactions where a wallet is receiver, sender delegator
     boolean includeAdministrationTransactions = true;
     boolean onlyPending = false;
-    List<TransactionDetail> transactions = transactionStorage.getWalletTransactions(1,
+    List<TransactionDetail> transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                                                     firstAddress,
                                                                                     null,
                                                                                     null,
@@ -137,7 +137,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 60, transactions.size());
 
     // Test pagination
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             null,
                                                             null,
@@ -148,7 +148,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 20, transactions.size());
 
     // Filter on contract address
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             null,
@@ -159,7 +159,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 30, transactions.size());
 
     // Filter on contract method name
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,
@@ -171,7 +171,7 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     // Filter on only pending transactions
     onlyPending = true;
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,
@@ -182,14 +182,14 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
     String oldestTransactionHash = transactionHashList.get(0);
-    transactions = transactionStorage.getWalletTransactions(1, firstAddress, null, null, oldestTransactionHash, 10, false, true);
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID, firstAddress, null, null, oldestTransactionHash, 10, false, true);
     assertEquals("Returned wallet transactions list should include all transactions, even if limit = 10, the selected hash must be included in result",
                  60,
                  transactions.size());
 
     // Filter on only pending transactions
     includeAdministrationTransactions = false;
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,
@@ -201,7 +201,7 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     includeAdministrationTransactions = true;
     onlyPending = false;
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             null,
                                                             null,
@@ -227,7 +227,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     // them must be ignored
 
     // Search all transactions where a wallet is receiver, sender delegator
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             null,
                                                             null,
@@ -240,7 +240,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 60, transactions.size());
 
     // Test pagination
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             null,
                                                             null,
@@ -251,7 +251,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 20, transactions.size());
 
     // Filter on contract address
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             null,
@@ -262,7 +262,7 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 30, transactions.size());
 
     // Filter on contract method name
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,
@@ -274,7 +274,7 @@ public class TransactionStorageTest extends BaseWalletTest {
 
     // Filter on only pending transactions
     onlyPending = true;
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,
@@ -285,14 +285,14 @@ public class TransactionStorageTest extends BaseWalletTest {
     assertEquals("Returned wallet transactions list count is not coherent", 10, transactions.size());
 
     oldestTransactionHash = transactionHashList.get(0);
-    transactions = transactionStorage.getWalletTransactions(1, firstAddress, null, null, oldestTransactionHash, 10, false, true);
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID, firstAddress, null, null, oldestTransactionHash, 10, false, true);
     assertEquals("Returned wallet transactions list should include all transactions, even if limit = 10, the selected hash must be included in result",
                  60,
                  transactions.size());
 
     // Filter on only pending transactions
     includeAdministrationTransactions = false;
-    transactions = transactionStorage.getWalletTransactions(1,
+    transactions = transactionStorage.getWalletTransactions(NETWORK_ID,
                                                             firstAddress,
                                                             contractAddress,
                                                             contractMethodName,

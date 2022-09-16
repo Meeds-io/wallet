@@ -60,11 +60,6 @@ public class EthereumWalletTokenAdminServiceMock implements WalletTokenAdminServ
   }
 
   @Override
-  public void refreshContractDetailFromBlockchain(ContractDetail contractDetail) {
-
-  }
-
-  @Override
   public void retrieveWalletInformationFromBlockchain(Wallet wallet, ContractDetail contractDetail, Set<String> walletModifications) throws Exception {
 
   }
