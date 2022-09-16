@@ -16,14 +16,29 @@
  */
 package org.exoplatform.wallet.utils;
 
-import static org.exoplatform.wallet.statistic.StatisticUtils.*;
+import static org.exoplatform.wallet.statistic.StatisticUtils.LOCAL_SERVICE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS_CODE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.transformCapitalWithUnderscore;
 
 import java.io.ByteArrayInputStream;
-import java.math.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -42,15 +57,24 @@ import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.organization.*;
+import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.Membership;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.UserProfile;
 import org.exoplatform.services.resources.ResourceBundleService;
-import org.exoplatform.services.security.*;
+import org.exoplatform.services.security.Authenticator;
+import org.exoplatform.services.security.ConversationState;
+import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.services.security.MembershipEntry;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import org.exoplatform.wallet.model.*;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.model.settings.GlobalSettings;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
@@ -59,7 +83,11 @@ import org.exoplatform.wallet.service.WalletTokenAdminService;
 import org.exoplatform.wallet.statistic.StatisticUtils;
 import org.exoplatform.ws.frameworks.json.JsonGenerator;
 import org.exoplatform.ws.frameworks.json.JsonParser;
-import org.exoplatform.ws.frameworks.json.impl.*;
+import org.exoplatform.ws.frameworks.json.impl.JsonDefaultHandler;
+import org.exoplatform.ws.frameworks.json.impl.JsonException;
+import org.exoplatform.ws.frameworks.json.impl.JsonGeneratorImpl;
+import org.exoplatform.ws.frameworks.json.impl.JsonParserImpl;
+import org.exoplatform.ws.frameworks.json.impl.ObjectBuilder;
 
 /**
  * Utils class to provide common tools and constants
@@ -77,6 +105,8 @@ public class WalletUtils {
       '2', '3', '4', '5', '6', '7', '8', '9' };
 
   public static final String                          COMETD_CHANNEL                           = "/eXo/Application/Addons/Wallet";
+
+  public static final int                             TRANSACTION_EFFECTIVELY_SENT_CODE        = -200;
 
   public static final int                             ETHER_TO_WEI_DECIMALS                    = 18;
 
@@ -101,7 +131,7 @@ public class WalletUtils {
 
   public static final String                          DEFAULT_INITIAL_USER_FUND                = "defaultInitialFunds";
 
-  public static final String                          USE_DYNAMIC_GAS_PRICE                    = "useDynamicGasPrice";
+  public static final String                          DYNAMIC_GAS_PRICE_UPDATE_INTERVAL        = "gasPriceUpdateInterval";
 
   public static final String                          GAS_LIMIT                                = "gasLimit";
 
@@ -153,16 +183,21 @@ public class WalletUtils {
 
   public static final String                          CONTRACT_MODIFIED_EVENT                  = "exo.wallet.contract.modified";
 
-  public static final String                          TRANSACTION_MODIFIED_EVENT               =
-                                                                                 "exo.wallet.transaction.modified";
+  public static final String                          TRANSACTION_MINED_AND_UPDATED_EVENT      =
+                                                                                          "exo.wallet.transaction.minedAndUpdated";
 
   public static final String                          TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT     = "exo.wallet.transaction.sent";
+
+  public static final String                          TRANSACTION_CREATED_EVENT                = "exo.wallet.transaction.created";
+
+  public static final String                          TRANSACTION_MODIFIED_EVENT               =
+                                                                                 "exo.wallet.transaction.modified";
 
   public static final String                          WALLET_ENABLED_EVENT                     = "exo.wallet.enabled";
 
   public static final String                          WALLET_DISABLED_EVENT                    = "exo.wallet.disabled";
 
-  public static final String                          WALLET_DELETED_EVENT                    = "exo.wallet.deleted";
+  public static final String                          WALLET_DELETED_EVENT                     = "exo.wallet.deleted";
 
   public static final String                          WALLET_INITIALIZATION_MODIFICATION_EVENT =
                                                                                                "exo.wallet.initialization.state";
@@ -191,7 +226,10 @@ public class WalletUtils {
 
   public static final String                          NEW_BLOCK_MINED_EVENT                    = "exo.wallet.block.mined";
 
-  public static final String                          KNOWN_TRANSACTION_MINED_EVENT            = "exo.wallet.transaction.mined";
+  public static final String                          TRANSACTION_MINED_EVENT                  = "exo.wallet.transaction.mined";
+
+  public static final String                          CONTRACT_TRANSACTION_MINED_EVENT         =
+                                                                                       "exo.wallet.transaction.minedForContract";
 
   public static final String                          KNOWN_TRANSACTION_REPLACED_EVENT         =
                                                                                        "exo.wallet.transaction.replaced";
@@ -202,9 +240,6 @@ public class WalletUtils {
 
   public static final String                          MAX_SENDING_TRANSACTIONS_ATTEMPTS        =
                                                                                         "transaction.pending.maxSendingAttempts";
-
-  public static final String                          LOG_ALL_CONTRACT_TRANSACTIONS            =
-                                                                                    "transaction.logAllContractTransactions";
 
   public static final String                          WALLET_SENDER_NOTIFICATION_ID            = "EtherSenderNotificationPlugin";
 
@@ -266,8 +301,6 @@ public class WalletUtils {
   public static final String                          OPERATION_GET_BLOCK_BY_HASH              = "eth_getBlockByHash";
 
   public static final String                          OPERATION_GET_TRANSACTION_RECEIPT        = "eth_getTransactionReceipt";
-
-  public static final String                          OPERATION_FILTER_CONTRACT_TRANSACTIONS   = "eth_getLogs";
 
   public static final String                          OPERATION_SEND_TRANSACTION               = "eth_sendRawTransaction";
 
@@ -580,7 +613,7 @@ public class WalletUtils {
     try {
       return checkUserIsSpaceManager(id, modifier, false);
     } catch (IllegalAccessException e) {
-      return false;
+      throw new IllegalStateException("Unexpected exception thrown");
     }
   }
 
@@ -721,7 +754,8 @@ public class WalletUtils {
   }
 
   public static final double convertFromDecimals(BigInteger amount, int decimals) {
-    return BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
+    return amount == null ? 0
+                          : BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
   }
 
   public static final GlobalSettings getSettings() {
@@ -730,14 +764,6 @@ public class WalletUtils {
 
   public static final Long getGasLimit() {
     return getSettings().getNetwork().getGasLimit();
-  }
-
-  public static final Long getAdminGasPrice() {
-    if (getWalletService().isUseDynamicGasPrice()) {
-      return getWalletService().getDynamicGasPrice();
-    } else {
-      return getSettings().getNetwork().getNormalGasPrice();
-    }
   }
 
   public static final ContractDetail getContractDetail() {
@@ -773,11 +799,6 @@ public class WalletUtils {
     NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale(lang));
     numberFormat.setMaximumFractionDigits(3);
     return numberFormat.format(Double.parseDouble(amount.toString()));
-  }
-
-  public static final boolean hasKnownWalletInTransaction(TransactionDetail transactionDetail) {
-    return !isWalletEmpty(transactionDetail.getToWallet()) || !isWalletEmpty(transactionDetail.getFromWallet())
-        || !isWalletEmpty(transactionDetail.getByWallet());
   }
 
   public static final boolean isWalletEmpty(Wallet wallet) {
@@ -869,13 +890,13 @@ public class WalletUtils {
     }
 
     if (transactionDetail.getFromWallet() != null) {
-      parameters.put("sender", transactionDetail.getFromWallet());
+      parameters.put(SENDER, transactionDetail.getFromWallet());
     } else if (transactionDetail.getFrom() != null) {
       parameters.put("sender_wallet_address", transactionDetail.getFrom());
     }
 
     if (transactionDetail.getToWallet() != null) {
-      parameters.put("receiver", transactionDetail.getToWallet());
+      parameters.put(RECEIVER, transactionDetail.getToWallet());
     } else if (transactionDetail.getTo() != null) {
       parameters.put("receiver_wallet_address", transactionDetail.getTo());
     }
@@ -967,38 +988,38 @@ public class WalletUtils {
       newHash = newTransaction.getHash();
       if (oldTransaction.getContractAmount() != newTransaction.getContractAmount()) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same amount: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractAmount(),
-                newTransaction.getContractAmount());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAmount(),
+                 newTransaction.getContractAmount());
         return;
       }
-      if (!org.apache.commons.lang.StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getFrom(), newTransaction.getFrom())) {
         throw new IllegalStateException("Issuer of transaction replacement must be the same wallet address: "
-                + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
+            + oldTransaction.getFrom() + " != " + newTransaction.getFrom());
       }
-      if (!org.apache.commons.lang.StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getTo(), newTransaction.getTo())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target wallet: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getTo(),
-                newTransaction.getTo());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getTo(),
+                 newTransaction.getTo());
         return;
       }
-      if (!org.apache.commons.lang.StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractAddress(), newTransaction.getContractAddress())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractAddress(),
-                newTransaction.getContractAddress());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractAddress(),
+                 newTransaction.getContractAddress());
         return;
       }
-      if (!org.apache.commons.lang.StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
+      if (!StringUtils.equalsIgnoreCase(oldTransaction.getContractMethodName(), newTransaction.getContractMethodName())) {
         LOG.info("Transaction {} had replaced {} with the same nonce but they don't have same target contract method: {} != {}",
-                oldHash,
-                newHash,
-                oldTransaction.getContractMethodName(),
-                newTransaction.getContractMethodName());
+                 oldHash,
+                 newHash,
+                 oldTransaction.getContractMethodName(),
+                 newTransaction.getContractMethodName());
         return;
       }
       Map<String, Object> transaction = transactionToMap(newTransaction);
@@ -1014,7 +1035,7 @@ public class WalletUtils {
     transaction.put("hash", transactionDetail.getHash());
     transaction.put("from", transactionDetail.getFromWallet() == null ? 0 : transactionDetail.getFromWallet().getTechnicalId());
     transaction.put("to", transactionDetail.getToWallet() == null ? 0 : transactionDetail.getToWallet().getTechnicalId());
-    transaction.put("contractAddress", transactionDetail.getContractAddress());
+    transaction.put(CONTRACT_ADDRESS, transactionDetail.getContractAddress());
     transaction.put("contractAmount", transactionDetail.getContractAmount());
     transaction.put("contractMethodName", transactionDetail.getContractMethodName());
     transaction.put("etherAmount", transactionDetail.getValue());

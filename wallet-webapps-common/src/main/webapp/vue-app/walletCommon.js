@@ -17,7 +17,6 @@
 import AccountDetail from './components/AccountDetail.vue';
 import AddressAutoComplete from './components/AddressAutoComplete.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
-import GasPriceChoice from './components/GasPriceChoice.vue';
 import InformationBubble from './components/InformationBubble.vue';
 import WarningBubble from './components/WarningBubble.vue';
 import ProfileChip from './components/ProfileChip.vue';
@@ -56,7 +55,6 @@ export const components = {
   'wallet-reward-account-detail': AccountDetail,
   'wallet-reward-address-auto-complete': AddressAutoComplete,
   'wallet-reward-confirm-dialog': ConfirmDialog,
-  'wallet-reward-gas-price-choice': GasPriceChoice,
   'wallet-reward-information-bubble': InformationBubble,
   'wallet-reward-warning-bubble': WarningBubble,
   'wallet-reward-profile-chip': ProfileChip,

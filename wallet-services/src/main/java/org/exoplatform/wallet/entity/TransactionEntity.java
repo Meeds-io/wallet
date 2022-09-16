@@ -28,23 +28,24 @@ import org.exoplatform.commons.api.persistence.ExoEntity;
 @ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_TRANSACTION")
-@NamedQueries({
-    @NamedQuery(name = "WalletTransaction.countReceivedContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.toAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate"),
-    @NamedQuery(name = "WalletTransaction.countSentContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.fromAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate"),
-    @NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC"),
-    @NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC"),
-    @NamedQuery(name = "WalletTransaction.getNetworkTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId ORDER BY tx.createdDate DESC"),
-    @NamedQuery(name = "WalletTransaction.getPendingTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
-    @NamedQuery(name = "WalletTransaction.countPendingTransactions", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE"),
-    @NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash order by tx.id desc"),
-    @NamedQuery(name = "WalletTransaction.getPendingTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash and tx.isPending=true order by tx.createdDate DESC"),
-    @NamedQuery(name = "WalletTransaction.getTransactionsByNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address"),
-    @NamedQuery(name = "WalletTransaction.countTransactionsByNonce", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address"),
-    @NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address"),
-    @NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.sentDate = 0 AND tx.rawTransaction IS NOT NULL ORDER BY tx.nonce ASC"),
-    @NamedQuery(name = "WalletTransaction.countPendingTransactionSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address AND tx.sendingAttemptCount > 0"),
-    @NamedQuery(name = "WalletTransaction.countPendingTransactionAsSender", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address"),
-})
+@NamedQuery(name = "WalletTransaction.countReceivedContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.toAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate")
+@NamedQuery(name = "WalletTransaction.countSentContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.fromAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate")
+@NamedQuery(name = "WalletTransaction.getContractTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) ORDER BY tx.createdDate DESC")
+@NamedQuery(name = "WalletTransaction.getContractTransactionsWithMethodName", query = "SELECT tx FROM WalletTransaction tx WHERE (tx.contractAddress = :contractAddress OR tx.toAddress = :contractAddress) AND tx.contractMethodName = :methodName ORDER BY tx.createdDate DESC")
+@NamedQuery(name = "WalletTransaction.getNetworkTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId ORDER BY tx.createdDate DESC")
+@NamedQuery(name = "WalletTransaction.getPendingEtherTransactions", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND (tx.fromAddress = :address OR tx.toAddress = :address) AND tx.isPending = TRUE AND tx.contractAddress IS NULL AND tx.sentDate > 0 ORDER BY tx.nonce ASC")
+@NamedQuery(name = "WalletTransaction.getPendingWalletTransactionsSent", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address AND tx.isPending = TRUE AND tx.sentDate > 0 ORDER BY tx.nonce ASC")
+@NamedQuery(name = "WalletTransaction.getPendingWalletTransactionsNotSent", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address AND tx.isPending = TRUE AND tx.sentDate = 0 ORDER BY tx.nonce ASC")
+@NamedQuery(name = "WalletTransaction.countContractPendingTransactionsSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.contractAddress IS NOT NULL AND tx.sentDate > 0")
+@NamedQuery(name = "WalletTransaction.getTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash order by tx.id desc")
+@NamedQuery(name = "WalletTransaction.getPendingTransactionByHash", query = "SELECT tx FROM WalletTransaction tx WHERE tx.hash = :hash and tx.isPending=true order by tx.createdDate DESC")
+@NamedQuery(name = "WalletTransaction.getPendingTransactionsWithSameNonce", query = "SELECT tx FROM WalletTransaction tx WHERE tx.isPending = TRUE AND tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address AND tx.hash <> :hash")
+@NamedQuery(name = "WalletTransaction.countPendingTransactionsWithSameNonce", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.isPending = TRUE AND tx.nonce = :nonce AND tx.networkId = :networkId AND tx.fromAddress = :address AND tx.hash <> :hash")
+@NamedQuery(name = "WalletTransaction.getMaxUsedNonce", query = "SELECT MAX(tx.nonce) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.fromAddress = :address")
+@NamedQuery(name = "WalletTransaction.getTransactionsToSend", query = "SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.rawTransaction IS NOT NULL ORDER BY tx.nonce ASC")
+@NamedQuery(name = "WalletTransaction.countContractPendingTransactionsToSend", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.contractAddress IS NOT NULL AND tx.rawTransaction IS NOT NULL AND tx.sentDate = 0")
+@NamedQuery(name = "WalletTransaction.countPendingTransactionSent", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address AND tx.rawTransaction IS NOT NULL AND tx.sentDate > 0")
+@NamedQuery(name = "WalletTransaction.countPendingTransactionAsSender", query = "SELECT count(tx) FROM WalletTransaction tx WHERE tx.networkId = :networkId AND tx.isPending = TRUE AND tx.fromAddress = :address")
 public class TransactionEntity implements Serializable {
 
   private static final long serialVersionUID = 485850826850947238L;
@@ -69,6 +70,9 @@ public class TransactionEntity implements Serializable {
 
   @Column(name = "SUCCESS")
   private boolean           isSuccess;
+
+  @Column(name = "DROPPED")
+  private boolean           isDropped;
 
   @Column(name = "ADMIN_OP")
   private boolean           isAdminOperation;
@@ -171,6 +175,14 @@ public class TransactionEntity implements Serializable {
 
   public void setSuccess(boolean isSuccess) {
     this.isSuccess = isSuccess;
+  }
+
+  public boolean isDropped() {
+    return isDropped;
+  }
+
+  public void setDropped(boolean isDropped) {
+    this.isDropped = isDropped;
   }
 
   public boolean isAdminOperation() {

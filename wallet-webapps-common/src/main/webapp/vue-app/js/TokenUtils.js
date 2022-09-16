@@ -76,25 +76,6 @@ export function newContractInstance(abi, bin, ...args) {
 }
 
 /*
- * Creates Web3 conract deployment transaction
- */
-export function deployContract(contractInstance, account, gasLimit, gasPrice, transactionHashCallback) {
-  let transactionHash;
-  return contractInstance
-    .send({
-      from: account,
-      gas: gasLimit,
-      gasPrice: gasPrice,
-    })
-    .on('transactionHash', (hash) => {
-      return transactionHashCallback && transactionHashCallback((transactionHash = hash));
-    })
-    .on('receipt', () => {
-      return transactionHashCallback && transactionHashCallback(transactionHash);
-    });
-}
-
-/*
  * Retrieve contract details from eXo Platform server if exists
  */
 export function getSavedContractDetails(address) {

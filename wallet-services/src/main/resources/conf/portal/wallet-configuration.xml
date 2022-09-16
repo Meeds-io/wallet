@@ -76,17 +76,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value-param>
         <name>transaction.pending.maxToSend</name>
         <description>Maximum parallel pending transactions to send for a given wallet</description>
-        <value>${exo.wallet.transaction.pending.maxToSend:5}</value>
+        <value>${exo.wallet.transaction.pending.maxToSend:3}</value>
       </value-param>
       <value-param>
         <name>transaction.pending.maxSendingAttempts</name>
         <description>Maximum attempts to send a transaction to blockchain</description>
         <value>${exo.wallet.transaction.pending.maxSendingAttempts:3}</value>
-      </value-param>
-      <value-param>
-        <name>transaction.logAllContractTransactions</name>
-        <description>Whether to log all transactions made on principal contract or not</description>
-        <value>${exo.wallet.transaction.logAllContractTransactions:false}</value>
       </value-param>
     </init-params>
   </component>
@@ -115,22 +110,22 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value-param>
         <name>networkId</name>
         <description>Default used ethereum network ID</description>
-        <value>${exo.wallet.blockchain.networkId:1}</value>
+        <value>${exo.wallet.blockchain.networkId:137}</value>
       </value-param>
       <value-param>
         <name>networkURL</name>
         <description>Default used ethereum network URL</description>
-        <value>${exo.wallet.blockchain.network.http:https://mainnet.infura.io/v3/d355b1603771462291372496a2377a1c}</value>
+        <value>${exo.wallet.blockchain.network.http:https://polygon-mainnet.g.alchemy.com/v2/42__hNUhaJOqnPydKcg665FogVwtxMLH}</value>
       </value-param>
       <value-param>
         <name>networkWSURL</name>
         <description>Default used ethereum network Websocket URL</description>
-        <value>${exo.wallet.blockchain.network.websocket:wss://mainnet.infura.io/ws/v3/d355b1603771462291372496a2377a1c}</value>
+        <value>${exo.wallet.blockchain.network.websocket:wss://polygon-mainnet.g.alchemy.com/v2/42__hNUhaJOqnPydKcg665FogVwtxMLH}</value>
       </value-param>
       <value-param>
         <name>tokenAddress</name>
         <description>Token address to display for users</description>
-        <value>${exo.wallet.blockchain.token.address:0xc76987d43b77c45d51653b6eb110b9174acce8fb}</value>
+        <value>${exo.wallet.blockchain.token.address:0x6aca77cf3bab0c4e8210a09b57b07854a995289a}</value>
       </value-param>
       <value-param>
         <name>defaultInitialFunds</name>
@@ -138,29 +133,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <value>${exo.wallet.blockchain.defaultInitialCryptoCurrencyFunds}</value>
       </value-param>
       <value-param>
-        <name>useDynamicGasPrice</name>
-        <description>A parameter to make used gas price for all wallet based applications use dynamic gas price</description>
-        <value>${exo.wallet.blockchain.useDynamicGasPrice:true}</value>
+        <name>dynamicGasPriceUpdateInterval</name>
+        <description>A parameter to determine the update interval in milliseconds of gas price from blockchain</description>
+        <value>${exo.wallet.blockchain.dynamicGasPriceUpdateInterval:120000}</value>
       </value-param>
       <value-param>
         <name>gasLimit</name>
         <description>Blockchain transaction gas limit</description>
-        <value>${exo.wallet.transaction.gas.limit:200000}</value>
+        <value>${exo.wallet.transaction.gas.limit:100000}</value>
       </value-param>
       <value-param>
         <name>cheapGasPrice</name>
         <description>Default used gas for transactions</description>
-        <value>${exo.wallet.transaction.gas.cheapPrice:4000000000}</value>
+        <value>${exo.wallet.transaction.gas.cheapPrice:12000000000}</value>
       </value-param>
       <value-param>
         <name>normalGasPrice</name>
         <description>Default used gas for transactions</description>
-        <value>${exo.wallet.transaction.gas.normalPrice:8000000000}</value>
+        <value>${exo.wallet.transaction.gas.normalPrice:20000000000}</value>
       </value-param>
       <value-param>
         <name>fastGasPrice</name>
         <description>Default used gas for transactions</description>
-        <value>${exo.wallet.transaction.gas.fastPrice:20000000000}</value>
+        <value>${exo.wallet.transaction.gas.fastPrice:80000000000}</value>
       </value-param>
       <value-param>
         <name>accessPermission</name>
