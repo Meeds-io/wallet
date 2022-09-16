@@ -16,14 +16,15 @@
  */
 package org.exoplatform.wallet.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 
-import org.exoplatform.wallet.dao.WalletPrivateKeyDAO;
 import org.exoplatform.wallet.entity.WalletPrivateKeyEntity;
 import org.exoplatform.wallet.test.BaseWalletTest;
 

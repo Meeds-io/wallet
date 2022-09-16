@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import org.exoplatform.wallet.dao.AddressLabelDAO;
 import org.exoplatform.wallet.entity.AddressLabelEntity;
 import org.exoplatform.wallet.test.BaseWalletTest;
 

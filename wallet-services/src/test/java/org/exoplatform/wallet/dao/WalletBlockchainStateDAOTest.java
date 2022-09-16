@@ -23,8 +23,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import org.exoplatform.wallet.dao.WalletAccountDAO;
-import org.exoplatform.wallet.dao.WalletBlockchainStateDAO;
 import org.exoplatform.wallet.entity.WalletBlockchainStateEntity;
 import org.exoplatform.wallet.entity.WalletEntity;
 import org.exoplatform.wallet.model.WalletType;

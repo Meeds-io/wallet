@@ -16,7 +16,10 @@
  */
 package org.exoplatform.wallet.storage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -26,7 +29,6 @@ import org.junit.Test;
 
 import org.exoplatform.wallet.entity.TransactionEntity;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.storage.TransactionStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 

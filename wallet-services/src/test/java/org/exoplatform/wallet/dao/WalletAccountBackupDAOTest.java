@@ -17,20 +17,20 @@
 
 package org.exoplatform.wallet.dao;
 
-import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
-import org.exoplatform.wallet.dao.WalletAccountDAO;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Test;
+
 import org.exoplatform.wallet.entity.WalletBackupEntity;
 import org.exoplatform.wallet.entity.WalletEntity;
 import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.test.BaseWalletTest;
-import org.junit.Test;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.*;
-import static org.junit.Assert.fail;
 
 public class WalletAccountBackupDAOTest extends BaseWalletTest {
 

@@ -16,17 +16,18 @@
  */
 package org.exoplatform.wallet.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import org.exoplatform.wallet.utils.WalletUtils;
 import org.junit.Test;
 
-import org.exoplatform.wallet.dao.WalletTransactionDAO;
 import org.exoplatform.wallet.entity.TransactionEntity;
 import org.exoplatform.wallet.test.BaseWalletTest;
+import org.exoplatform.wallet.utils.WalletUtils;
 
 public class WalletTransactionDAOTest extends BaseWalletTest {
 

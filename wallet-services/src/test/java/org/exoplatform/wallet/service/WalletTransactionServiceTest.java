@@ -16,20 +16,29 @@
  */
 package org.exoplatform.wallet.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
-import static org.junit.Assert.*;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.junit.Test;
 
-import org.exoplatform.services.listener.*;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.model.transaction.TransactionStatistics;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 

@@ -16,19 +16,23 @@
  */
 package org.exoplatform.wallet.storage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Set;
+
+import org.junit.Test;
 
 import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
 import org.exoplatform.wallet.entity.WalletBackupEntity;
 import org.exoplatform.wallet.entity.WalletEntity;
-import org.exoplatform.wallet.model.WalletProvider;
-import org.junit.Test;
-
 import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
-import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 

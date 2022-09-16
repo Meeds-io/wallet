@@ -16,14 +16,17 @@
  */
 package org.exoplatform.wallet.storage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Set;
 
 import org.junit.Test;
 
 import org.exoplatform.wallet.model.WalletAddressLabel;
-import org.exoplatform.wallet.storage.AddressLabelStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
 
 public class AddressLabelStorageTest extends BaseWalletTest {

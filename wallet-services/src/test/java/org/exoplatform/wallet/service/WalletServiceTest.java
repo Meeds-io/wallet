@@ -18,7 +18,12 @@ package org.exoplatform.wallet.service;
 
 import static org.exoplatform.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.getWalletService;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -30,9 +35,12 @@ import org.exoplatform.commons.api.notification.service.storage.WebNotificationS
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.settings.*;
+import org.exoplatform.wallet.model.settings.GlobalSettings;
+import org.exoplatform.wallet.model.settings.InitialFundsSettings;
+import org.exoplatform.wallet.model.settings.NetworkSettings;
+import org.exoplatform.wallet.model.settings.UserSettings;
+import org.exoplatform.wallet.model.settings.WalletSettings;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
-import org.exoplatform.wallet.service.*;
 import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.test.mock.IdentityManagerMock;
 
@@ -71,7 +79,7 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Default contract address shouldn't be null", settings.getContractAddress());
     NetworkSettings networkSettings = settings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
-    assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
+    assertTrue("Default blockchain network id shouldn't be null", networkSettings.getId() > 0);
     assertNotNull("Default blockchain network gas limit shouldn't be null", networkSettings.getGasLimit());
     assertNotNull("Default blockchain tansaction minimum gas price shouldn't be null",
                   networkSettings.getMinGasPrice());
@@ -163,7 +171,7 @@ public class WalletServiceTest extends BaseWalletTest {
 
     NetworkSettings networkSettings = userSettings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
-    assertNotNull("Default blockchain network id shouldn't be null", networkSettings.getId());
+    assertTrue("Default blockchain network id shouldn't be null", networkSettings.getId() > 0);
     assertNotNull("Default blockchain network gas limit shouldn't be null", networkSettings.getGasLimit());
     assertNotNull("Default blockchain tansaction minimum gas price shouldn't be null",
                   networkSettings.getMinGasPrice());
@@ -319,8 +327,7 @@ public class WalletServiceTest extends BaseWalletTest {
       // Expected, Target user of notification is different from current user
     }
     Boolean isFundsRequestSent = walletService.isFundRequestSent(notification.getId(), CURRENT_USER);
-    assertEquals("ContractType are not equals", isFundsRequestSent, false);
-
+    assertFalse("ContractType are not equals", isFundsRequestSent);
   }
 
 }
