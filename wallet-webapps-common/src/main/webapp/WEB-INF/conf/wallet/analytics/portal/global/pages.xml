@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  This file is part of the Meeds project (https://meeds.io/).
+  Copyright (C) 2022 Meeds Association
+  contact@meeds.io
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  You should have received a copy of the GNU Lesser General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+-->
+<page-set
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.exoplatform.org/xml/ns/gatein_objects_1_8 http://www.exoplatform.org/xml/ns/gatein_objects_1_8"
+  xmlns="http://www.exoplatform.org/xml/ns/gatein_objects_1_8">
+
+  <page>
+    <name>analytics-wallet</name>
+    <title>Analytics Wallet</title>
+    <access-permissions>*:/platform/analytics;*:/platform/administrators</access-permissions>
+    <edit-permission>manager:/platform/analytics</edit-permission>
+    <container id="topAnalyticsPage" template="system:/groovy/portal/webui/container/UIContainer.gtmpl" cssClass="singlePageApplication border-box-sizing">
+      <access-permissions>Everyone</access-permissions>
+      <container id="breadcrumbAnalytics" template="system:/groovy/portal/webui/container/UIContainer.gtmpl">
+        <access-permissions>Everyone</access-permissions>
+        <portlet-application>
+          <portlet>
+            <application-ref>analytics</application-ref>
+            <portlet-ref>AnalyticsDashboardBreadcrumb</portlet-ref>
+          </portlet>
+          <title>Breadcrumb Analytics</title>
+          <access-permissions>Everyone</access-permissions>
+          <show-info-bar>false</show-info-bar>
+        </portlet-application>
+      </container>
+      <container cssClass="analyticsPageRow" template="system:/groovy/portal/webui/container/UIContainer.gtmpl">
+        <access-permissions>Everyone</access-permissions>
+        <portlet-application>
+          <portlet>
+            <application-ref>analytics</application-ref>
+            <portlet-ref>AnalyticsPortlet</portlet-ref>
+            <preferences>
+              <preference>
+                <name>settings</name>
+                <value>
+                  {
+                    "filters": [
+                      {
+                        "field": "module",
+                        "type": "EQUAL",
+                        "valueString": "wallet"
+                      },
+                      {
+                        "field": "subModule",
+                        "type": "EQUAL",
+                        "valueString": "blockchain"
+                      }
+                    ],
+                    "aggregations": [
+                      {
+                        "field": "timestamp",
+                        "type": "DATE",
+                        "interval": "day",
+                        "useBounds": false,
+                        "sortDirection": "asc"
+                      },
+                      {
+                        "field": "timestamp",
+                        "type": "COUNT",
+                        "useBounds": false,
+                        "sortDirection": "desc"
+                      }
+                    ],
+                    "yAxisAggregation": {
+                      "field": "timestamp",
+                      "type": "COUNT",
+                      "useBounds": false,
+                      "sortDirection": "desc"
+                    },
+                    "xAxisAggregations": [
+                      {
+                        "field": "timestamp",
+                        "type": "DATE",
+                        "interval": "day",
+                        "useBounds": false,
+                        "sortDirection": "asc"
+                      }
+                    ],
+                    "multipleCharts": false,
+                    "chartType": "bar",
+                    "title": "Blockchain Calls"
+                  }
+                </value>
+              </preference>
+            </preferences>
+          </portlet>
+          <title>Blockchain Calls</title>
+          <access-permissions>Everyone</access-permissions>
+          <show-info-bar>false</show-info-bar>
+        </portlet-application>
+        <portlet-application>
+          <portlet>
+            <application-ref>analytics</application-ref>
+            <portlet-ref>AnalyticsPortlet</portlet-ref>
+            <preferences>
+              <preference>
+                <name>settings</name>
+                <value>
+                  {
+                    "filters": [
+                      {
+                        "field": "module",
+                        "type": "EQUAL",
+                        "valueString": "wallet"
+                      },
+                      {
+                        "field": "subModule",
+                        "type": "EQUAL",
+                        "valueString": "blockchain"
+                      }
+                    ],
+                    "aggregations": [
+                      {
+                        "field": "operation",
+                        "type": "TERMS",
+                        "useBounds": false,
+                        "sortDirection": "desc"
+                      },
+                      {
+                        "field": "operation",
+                        "type": "COUNT",
+                        "useBounds": false,
+                        "sortDirection": "desc"
+                      }
+                    ],
+                    "yAxisAggregation": {
+                      "field": "operation",
+                      "type": "COUNT",
+                      "useBounds": false,
+                      "sortDirection": "desc"
+                    },
+                    "xAxisAggregations": [
+                      {
+                        "field": "operation",
+                        "type": "TERMS",
+                        "useBounds": false,
+                        "sortDirection": "desc"
+                      }
+                    ],
+                    "multipleCharts": false,
+                    "chartType": "pie",
+                    "colors": [
+                      "#F97575",
+                      "#9EE4F5",
+                      "#98cc81",
+                      "#4273c8",
+                      "#cea6ac",
+                      "#bc99e7",
+                      "#9ee4f5",
+                      "#774ea9",
+                      "#ffa500",
+                      "#bed67e",
+                      "#0E100F",
+                      "#ffaacc"
+                    ],
+                    "title": "Blockchain Calls By Operation"
+                  }
+                </value>
+              </preference>
+            </preferences>
+          </portlet>
+          <title>Blockchain Calls By Operation</title>
+          <access-permissions>Everyone</access-permissions>
+          <show-info-bar>false</show-info-bar>
+        </portlet-application>
+      </container>
+    </container>
+  </page>
+</page-set>

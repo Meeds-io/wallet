@@ -266,7 +266,7 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
   public Future startWatchingBlockchain() {
     long lastWatchedBlockNumber = getLastWatchedBlockNumber();
     if (lastWatchedBlockNumber == 0) {
-      lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber();
+      lastWatchedBlockNumber = ethereumClientConnector.getLastestBlockNumber() - 1;
       saveLastWatchedBlockNumber(lastWatchedBlockNumber);
     }
     ethereumClientConnector.setLastWatchedBlockNumber(lastWatchedBlockNumber);
