@@ -65,7 +65,7 @@ public class EthereumWalletTokenAdminServiceMock implements WalletTokenAdminServ
   }
 
   @Override
-  public void boostAdminTransactions() throws Exception {
+  public void boostAdminTransactions() {
 
   }
 }
