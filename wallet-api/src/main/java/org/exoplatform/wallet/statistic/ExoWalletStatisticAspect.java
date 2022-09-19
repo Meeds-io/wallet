@@ -16,7 +16,14 @@
  */
 package org.exoplatform.wallet.statistic;
 
-import static org.exoplatform.wallet.statistic.StatisticUtils.*;
+import static org.exoplatform.wallet.statistic.StatisticUtils.DURATION;
+import static org.exoplatform.wallet.statistic.StatisticUtils.ERROR_MSG;
+import static org.exoplatform.wallet.statistic.StatisticUtils.LOCAL_SERVICE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.OPERATION;
+import static org.exoplatform.wallet.statistic.StatisticUtils.REMOTE_SERVICE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS;
+import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS_CODE;
+import static org.exoplatform.wallet.statistic.StatisticUtils.addStatisticEntry;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -27,6 +34,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -58,6 +68,11 @@ public class ExoWalletStatisticAspect {
     String errorMessage = null;
     long startTime = System.currentTimeMillis();
     Object result = null;
+    ExoContainer currentContainer = ExoContainerContext.getCurrentContainerIfPresent();
+    boolean replaceCurrentContainer = !(currentContainer instanceof PortalContainer);
+    if (replaceCurrentContainer) {
+      ExoContainerContext.setCurrentContainer(PortalContainer.getInstance());
+    }
     try {
       result = point.proceed();
       return result;
@@ -98,6 +113,10 @@ public class ExoWalletStatisticAspect {
         }
       } catch (Throwable e) {
         LOG.warn("Error adding statistic log entry in method '{}' for statistic type '{}'", method.getName(), operation, e);
+      } finally {
+        if (replaceCurrentContainer) {
+          ExoContainerContext.setCurrentContainer(currentContainer);
+        }
       }
     }
   }
