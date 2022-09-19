@@ -14,14 +14,32 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.blockchain;
+package org.exoplatform.wallet.service;
 
-public class BlockchainRequestException extends RuntimeException {
+import java.util.Collections;
 
-  private static final long serialVersionUID = -2980322954170797218L;
+import org.apache.commons.lang3.StringUtils;
+import org.picocontainer.Startable;
 
-  public BlockchainRequestException(String transactionHash, Throwable e) {
-    super("Error while sending transaction " + transactionHash + " to blockchain", e);
+import org.exoplatform.commons.utils.PropertyManager;
+import org.exoplatform.container.RootContainer;
+
+/**
+ * A container listener that will allow to add wallet analytics page when
+ * feature is enabled
+ */
+public class WalletAnalyticsProfileService implements Startable {
+
+  @Override
+  public void start() {
+    if (StringUtils.equals(PropertyManager.getProperty("exo.feature.wallet.analytics.enabled"), "true")) {
+      RootContainer.addProfiles(Collections.singleton("wallet-analytics"));
+    }
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
   }
 
 }

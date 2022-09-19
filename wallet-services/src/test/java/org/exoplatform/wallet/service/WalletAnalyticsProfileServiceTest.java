@@ -14,14 +14,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.exoplatform.wallet.blockchain;
+package org.exoplatform.wallet.service;
 
-public class BlockchainRequestException extends RuntimeException {
+import static org.junit.Assert.assertFalse;
 
-  private static final long serialVersionUID = -2980322954170797218L;
+import org.junit.Before;
+import org.junit.Test;
 
-  public BlockchainRequestException(String transactionHash, Throwable e) {
-    super("Error while sending transaction " + transactionHash + " to blockchain", e);
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.RootContainer;
+
+public class WalletAnalyticsProfileServiceTest {
+
+  @Before
+  public void setup() {
+    PortalContainer.getInstance();
+  }
+
+  @Test
+  public void testWalletAnalyticsDisabledByDefault() {
+    assertFalse(RootContainer.getProfiles().contains("wallet-analytics"));
   }
 
 }
