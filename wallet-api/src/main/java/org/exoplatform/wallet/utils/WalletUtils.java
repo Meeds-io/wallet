@@ -284,6 +284,14 @@ public class WalletUtils {
 
   public static final String                          OPERATION_GET_TRANSACTION_COUNT          = "eth_getTransactionCount";
 
+  public static final String                          OPERATION_GET_FILTER_LOGS                = "getFilterLogs";
+
+  public static final String                          OPERATION_NEW_FILTER                     = "eth_newFilter";
+
+  public static final String                          OPERATION_UNINSTALL_FILTER               = "eth_uninstallFilter";
+
+  public static final String                          OPERATION_GET_FILTER_CHANGES             = "eth_getFilterChanges";
+
   public static final String                          OPERATION_GET_GAS_PRICE                  = "eth_getGasPrice";
 
   public static final String                          OPERATION_READ_FROM_TOKEN                = "eth_call";
@@ -357,6 +365,12 @@ public class WalletUtils {
       return ConversationState.getCurrent().getIdentity().getUserId();
     }
     return null;
+  }
+
+  public static final long getCurrentUserIdentityId() {
+    String username = getCurrentUserId();
+    Identity identity = getIdentityByTypeAndId(WalletType.USER, username);
+    return Long.parseLong(identity.getId());
   }
 
   public static List<String> getNotificationReceiversUsers(Wallet wallet, String excludedId) {
