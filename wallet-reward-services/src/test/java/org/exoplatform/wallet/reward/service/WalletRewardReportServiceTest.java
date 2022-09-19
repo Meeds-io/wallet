@@ -16,11 +16,18 @@
  */
 package org.exoplatform.wallet.reward.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.LongStream;
 
 import org.junit.Test;
@@ -30,12 +37,21 @@ import org.mockito.stubbing.Answer;
 
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardBudgetType;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPluginSettings;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.reward.RewardTeam;
+import org.exoplatform.wallet.model.reward.WalletPluginReward;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.service.*;
 import org.exoplatform.wallet.reward.storage.RewardReportStorage;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
@@ -324,7 +340,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       teams.add(rewardTeam6);
 
       // Admin having only 10 tokens
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf(10l).pow(contractDecimals));
       try {
         walletRewardService.sendRewards(startDateInSeconds, "root");
@@ -335,14 +351,14 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       Mockito.verify(tokenAdminService, Mockito.times(0)).reward(Mockito.any(), Mockito.any());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       // Send reward for the second time for the same period
       resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       try {
         walletRewardService.sendRewards(startDateInSeconds, "root");
@@ -475,7 +491,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       assertEquals(0, walletRewards.size());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       walletRewardService.sendRewards(startDateInSeconds, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
