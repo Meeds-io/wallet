@@ -146,8 +146,6 @@ public interface WalletTokenAdminService {
 
   /**
    * Boosts the transaction issued from Admin wallet by increasing the gas price
-   * @return {@link TransactionDetail} with the new gas price boosted and the hash of the transaction sent in
-   *         blockchain
    */
-  void boostAdminTransactions() throws Exception;
+  void boostAdminTransactions();
 }

@@ -391,7 +391,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public void boostAdminTransactions() throws Exception {
+  public void boostAdminTransactions() {
     List<TransactionDetail> pendingTransactions =
                                                 getTransactionService().getPendingWalletTransactionsSent(getAdminWalletAddress());
     double gasPrice = walletService.getGasPrice();
@@ -492,7 +492,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return (BigInteger) executeReadOperation(contractAddress, MeedsToken.FUNC_BALANCEOF, address);
   }
 
-  @ExoWalletStatistic(service = "org/exoplatform/wallet/blockchain", local = false, operation = OPERATION_READ_FROM_TOKEN)
+  @ExoWalletStatistic(service = "blockchain", local = false, operation = OPERATION_READ_FROM_TOKEN)
   public Object executeReadOperation(final String contractAddress,
                                      final String methodName,
                                      final Object... arguments) throws Exception {
