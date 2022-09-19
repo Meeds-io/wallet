@@ -32,7 +32,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <groupId>${project.groupId}</groupId>
       <artifactId>wallet-api</artifactId>
       <scope>provided</scope>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.addons.analytics</groupId>
+      <artifactId>analytics-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.exoplatform.ws</groupId>
@@ -127,13 +131,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.addons.wallet</groupId>
-      <artifactId>wallet-api</artifactId>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>

@@ -45,7 +45,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
   @Override
   public List<RewardTeam> getTeams() {
     List<RewardTeamEntity> teamEntities = rewardTeamDAO.findNotDeletedTeams();
-    return teamEntities.stream().map(teamEntity -> toDTO(teamEntity)).collect(Collectors.toList());
+    return teamEntities.stream().map(WalletRewardTeamStorage::toDTO).collect(Collectors.toList());
   }
 
   @Override
@@ -87,7 +87,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
   @Override
   public List<RewardTeam> findTeamsByMemberId(long identityId) {
     List<RewardTeamEntity> entities = rewardTeamDAO.findTeamsByMemberId(identityId);
-    return entities.stream().map(team -> toDTO(team)).collect(Collectors.toList());
+    return entities.stream().map(WalletRewardTeamStorage::toDTO).collect(Collectors.toList());
   }
 
   @Override
@@ -148,7 +148,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     if (teamEntity.getMembers() != null && !teamEntity.getMembers().isEmpty()) {
       List<RewardTeamMember> list = teamEntity.getMembers()
                                               .stream()
-                                              .map(teamMemberEntity -> getRewardTeamMember(teamMemberEntity))
+                                              .map(WalletRewardTeamStorage::getRewardTeamMember)
                                               .collect(Collectors.toList());
       rewardTeam.setMembers(new ArrayList<>(list));
     }
@@ -185,7 +185,7 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
       return null;
     }
     IdentityManager identityManager = CommonsUtils.getService(IdentityManager.class);
-    Identity identity = identityManager.getIdentity(String.valueOf(identityId), true);
+    Identity identity = identityManager.getIdentity(String.valueOf(identityId));
     if (identity == null) {
       return null;
     }

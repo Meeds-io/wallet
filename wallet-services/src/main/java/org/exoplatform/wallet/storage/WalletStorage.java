@@ -52,10 +52,12 @@ public class WalletStorage {
     this.privateKeyDAO = privateKeyDAO;
     this.blockchainStateDAO = blockchainStateDAO;
 
-    try {
-      this.codec = codecInitializer.getCodec();
-    } catch (Exception e) {
-      LOG.error("Error initializing codecs", e);
+    if (codecInitializer != null) {
+      try {
+        this.codec = codecInitializer.getCodec();
+      } catch (Exception e) {
+        LOG.error("Error initializing codecs", e);
+      }
     }
   }
 
