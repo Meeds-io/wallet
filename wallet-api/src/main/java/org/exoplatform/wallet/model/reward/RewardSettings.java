@@ -17,10 +17,13 @@
 package org.exoplatform.wallet.model.reward;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Set;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -30,7 +33,13 @@ public class RewardSettings implements Serializable, Cloneable {
 
   private RewardPeriodType          periodType       = RewardPeriodType.DEFAULT;
 
+  private String                    timeZone         = ZoneId.systemDefault().getId();
+
   private Set<RewardPluginSettings> pluginSettings;
+
+  public ZoneId zoneId() {
+    return ZoneId.of(timeZone);
+  }
 
   @Override
   public RewardSettings clone() { // NOSONAR
@@ -41,7 +50,7 @@ public class RewardSettings implements Serializable, Cloneable {
       Set<RewardPluginSettings> clonedPluginSettings =
                                                      pluginSettings == null ? null
                                                                             : (Set<RewardPluginSettings>) new HashSet<>(pluginSettings).clone();
-      return new RewardSettings(periodType, clonedPluginSettings);
+      return new RewardSettings(periodType, timeZone, clonedPluginSettings);
     }
   }
 }

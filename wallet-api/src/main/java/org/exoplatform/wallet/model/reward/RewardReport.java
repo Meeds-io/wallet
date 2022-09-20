@@ -79,13 +79,13 @@ public class RewardReport {
 
   public double getTokensToSend() {
     return rewards.stream()
-                  .mapToDouble(rewardItem -> rewardItem.getTokensToSend())
+                  .mapToDouble(WalletReward::getTokensToSend)
                   .sum();
   }
 
   public double getTokensSent() {
     return rewards.stream()
-                  .mapToDouble(rewardItem -> rewardItem.getTokensSent())
+                  .mapToDouble(WalletReward::getTokensSent)
                   .sum();
   }
 

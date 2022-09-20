@@ -33,6 +33,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             return-masked-value
             small-chips />
         </div>
+        <span>
+          {{ $t('exoplatform.wallet.label.timezone') }}:
+        </span>
+        <div id="selectedRewardSettingTimeZone" class="ms-2">
+          <wallet-reward-timezone-selectbox
+            v-model="settingsToSave.timeZone"
+            :disabled="!configurationEditable" />
+        </div>
       </div>
 
       <v-card v-if="settingsToSave && settingsToSave.pluginSettings" flat>
@@ -153,8 +161,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import {saveRewardSettings} from '../../js/RewardServices.js';
-
 export default {
   data() {
     return {
@@ -214,7 +220,7 @@ export default {
       this.loadingSettings = true;
       // Wait to refresh UI for visual loading icon
       window.setTimeout(() => {
-        saveRewardSettings(this.settingsToSave)
+        this.$rewardService.saveRewardSettings(this.settingsToSave)
           .then((saved) => {
             if (saved) {
               this.configurationEditable = false;
