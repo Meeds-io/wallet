@@ -19,7 +19,10 @@ package org.exoplatform.wallet.model.reward;
 import static org.exoplatform.wallet.utils.RewardUtils.formatTime;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,6 +34,8 @@ public class RewardPeriod implements Serializable {
 
   private RewardPeriodType  rewardPeriodType;
 
+  private String            timeZone         = ZoneId.systemDefault().getId();
+
   private long              startDateInSeconds;
 
   private long              endDateInSeconds;
@@ -40,17 +45,27 @@ public class RewardPeriod implements Serializable {
   }
 
   public static RewardPeriod getCurrentPeriod(RewardSettings rewardSettings) {
-    return getPeriodOfTime(rewardSettings, LocalDateTime.now());
+    ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
+    return getPeriodOfTime(rewardSettings, ZonedDateTime.now(zoneId));
   }
 
-  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, LocalDateTime localDateTime) {
+  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, ZonedDateTime zonedDateTime) {
+    ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
     RewardPeriodType rewardPeriodType = null;
     if (rewardSettings == null || rewardSettings.getPeriodType() == null) {
       rewardPeriodType = RewardPeriodType.DEFAULT;
     } else {
       rewardPeriodType = rewardSettings.getPeriodType();
     }
-    return rewardPeriodType.getPeriodOfTime(localDateTime);
+    return rewardPeriodType.getPeriodOfTime(zonedDateTime.withZoneSameLocal(zoneId));
+  }
+
+  public ZoneId zoneId() {
+    return ZoneId.of(timeZone);
+  }
+
+  public LocalDate getPeriodMedianDate() {
+    return LocalDate.ofInstant(Instant.ofEpochSecond((endDateInSeconds + startDateInSeconds) / 2), zoneId());
   }
 
   public String getStartDateFormatted(String lang) {

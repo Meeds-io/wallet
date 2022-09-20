@@ -24,12 +24,10 @@
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.reward.storage.RewardTeamStorage</key>
     <type>org.exoplatform.wallet.reward.storage.WalletRewardTeamStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.reward.storage.RewardReportStorage</key>
     <type>org.exoplatform.wallet.reward.storage.WalletRewardReportStorage</type>
   </component>
 
@@ -105,22 +103,6 @@
           <property name="groupName" value="Wallet"/>
           <property name="job" value="org.exoplatform.wallet.reward.job.RewardStatusVerifierJob"/>
           <property name="expression" value="${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}"/>
-        </properties-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>AddCronJob</name>
-      <set-method>addCronJob</set-method>
-      <type>org.exoplatform.services.scheduler.CronJob</type>
-      <description>Add a job to current period reward estimation</description>
-      <init-params>
-        <properties-param>
-          <name>cronjob.info</name>
-          <description>Configuration for reward report updater for current period</description>
-          <property name="jobName" value="RewardCurrentPeriodStatusUpdaterJob"/>
-          <property name="groupName" value="Wallet"/>
-          <property name="job" value="org.exoplatform.wallet.reward.job.RewardCurrentPeriodStatusUpdaterJob"/>
-          <property name="expression" value="${exo.wallet.RewardCurrentPeriodStatusUpdaterJob.expression:0 0/15 * ? * * *}"/>
         </properties-param>
       </init-params>
     </component-plugin>
