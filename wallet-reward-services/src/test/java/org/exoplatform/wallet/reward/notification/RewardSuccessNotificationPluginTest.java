@@ -16,9 +16,17 @@
  */
 package org.exoplatform.wallet.reward.notification;
 
-import static org.exoplatform.wallet.utils.RewardUtils.*;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_FAIL_COUNT;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_PENDING_COUNT;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_SUCCESS_COUNT;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_TRANSACTION_COUNT;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_VALID_MEMBERS_COUNT;
+import static org.exoplatform.wallet.utils.RewardUtils.getRewardSettings;
 import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,10 +39,11 @@ import org.exoplatform.commons.api.notification.plugin.config.PluginConfig;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParam;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.notification.RewardSuccessNotificationPlugin;
 
 public class RewardSuccessNotificationPluginTest extends BaseWalletRewardTest {
 

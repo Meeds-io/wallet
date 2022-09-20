@@ -362,7 +362,7 @@ public class WalletAccountREST implements ResourceContainer {
 
     if (provider != WalletProvider.INTERNAL_WALLET) {
       if (StringUtils.isBlank(address)) {
-        return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty address").build();
+        return Response.status(HTTPStatus.BAD_REQUEST).entity(EMPTY_ADDRESS_MESSAGE).build();
       } else if (StringUtils.isBlank(rawMessage) || StringUtils.isBlank(signedMessage)) {
         return Response.status(HTTPStatus.BAD_REQUEST)
                        .entity("Must Sign a raw message to verify that user has the private key of selected address")

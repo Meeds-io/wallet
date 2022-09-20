@@ -19,16 +19,16 @@ package org.exoplatform.wallet.reward.service;
 import java.util.List;
 
 import org.exoplatform.wallet.model.reward.RewardTeam;
-import org.exoplatform.wallet.reward.storage.RewardTeamStorage;
+import org.exoplatform.wallet.reward.storage.WalletRewardTeamStorage;
 
 /**
  * A service to manage reward teams
  */
 public class WalletRewardTeamService implements RewardTeamService {
 
-  private RewardTeamStorage rewardTeamStorage;
+  private WalletRewardTeamStorage rewardTeamStorage;
 
-  public WalletRewardTeamService(RewardTeamStorage rewardTeamStorage) {
+  public WalletRewardTeamService(WalletRewardTeamStorage rewardTeamStorage) {
     this.rewardTeamStorage = rewardTeamStorage;
   }
 

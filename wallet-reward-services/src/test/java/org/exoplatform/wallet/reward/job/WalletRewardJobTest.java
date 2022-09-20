@@ -22,7 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,12 +54,11 @@ import org.exoplatform.wallet.reward.service.RewardTeamService;
 import org.exoplatform.wallet.reward.service.WalletRewardReportService;
 import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.wallet.reward.service.WalletRewardTeamService;
-import org.exoplatform.wallet.reward.storage.RewardReportStorage;
+import org.exoplatform.wallet.reward.storage.WalletRewardReportStorage;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
 import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.storage.WalletStorage;
-import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 public class WalletRewardJobTest extends BaseWalletRewardTest {
@@ -68,7 +69,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     Collection<RewardPlugin> rewardPlugins = rewardSettingsService.getRewardPlugins();
     assertEquals(2, rewardPlugins.size());
 
-    RewardPeriod period = RewardPeriodType.WEEK.getPeriodOfTime(RewardUtils.timeFromSeconds(System.currentTimeMillis() / 1000));
+    RewardPeriod period = RewardPeriodType.WEEK.getPeriodOfTime(LocalDate.now(), ZoneId.systemDefault());
     for (RewardPlugin rewardPlugin : rewardPlugins) {
       try {
         rewardPlugin.getEarnedPoints(Collections.singleton(1l), period.getStartDateInSeconds(), period.getEndDateInSeconds());
@@ -85,7 +86,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
+    WalletRewardReportStorage rewardReportStorage = getService(WalletRewardReportStorage.class);
 
     WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
                                                                                   rewardSettingsService,
@@ -95,9 +96,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 07)
-                                                                           .atEndOfMonth()
-                                                                           .atStartOfDay());
+    LocalDate date = YearMonth.of(2019, 07).atEndOfMonth();
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
@@ -150,7 +149,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       // Admin having enough funds
       Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
-      walletRewardService.sendRewards(startDateInSeconds, "root");
+      walletRewardService.sendRewards(date, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       List<RewardPeriod> rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
@@ -166,7 +165,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(initialRewardPeriodsInProgress.size() + 1l, rewardPeriodsInProgress.size());
 
-      RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
+      RewardReport rewardReport = walletRewardService.computeRewards(date);
       Set<WalletReward> rewards = rewardReport.getRewards();
       for (WalletReward walletReward : rewards) {
         String hash = walletReward.getTransaction().getHash();

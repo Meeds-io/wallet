@@ -19,6 +19,7 @@ package org.exoplatform.wallet.utils;
 import java.lang.reflect.Method;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -38,6 +39,10 @@ public class RewardUtils {
 
   public static final DateTimeFormatter             DATE_FORMATTER                           =
                                                                    DateTimeFormatter.ofPattern("d MMM uuuu");
+
+  public static final DateTimeFormatter             RFC_3339_FORMATTER                       =
+                                                                       DateTimeFormatter.ofPattern("yyyy-MM-dd['T'HH:mm:ss][.SSS][XXX]")
+                                                                                        .withResolverStyle(ResolverStyle.LENIENT);
 
   public static final String                        TRANSACTION_STATUS_PENDING               = "pending";
 
@@ -109,8 +114,8 @@ public class RewardUtils {
     return LocalDateTime.ofInstant(Instant.ofEpochSecond(createdDate), TimeZone.getDefault().toZoneId());
   }
 
-  public static long timeToSecondsAtDayStart(LocalDateTime time) {
-    return time.toLocalDate().atStartOfDay().atZone(ZoneOffset.systemDefault()).toEpochSecond();
+  public static long timeToSecondsAtDayStart(LocalDate date, ZoneId zoneId) {
+    return date.atStartOfDay(zoneId).toEpochSecond();
   }
 
   public static final String getCurrentUserId() {
@@ -151,6 +156,23 @@ public class RewardUtils {
 
   public static final RewardSettings getRewardSettings() {
     return CommonsUtils.getService(RewardSettingsService.class).getSettings();
+  }
+
+  public static ZonedDateTime parseRFC3339ToZonedDateTime(String dateString, ZoneId zoneId) {
+    if (StringUtils.isBlank(dateString)) {
+      return null;
+    }
+    if (dateString.length() == 10) {
+      return LocalDate.parse(dateString, RFC_3339_FORMATTER).atStartOfDay(zoneId);
+    } else if (dateString.length() > 20) {
+      return ZonedDateTime.parse(dateString, RFC_3339_FORMATTER).withZoneSameInstant(zoneId);
+    } else {
+      return LocalDateTime.parse(dateString, RFC_3339_FORMATTER).atZone(zoneId);
+    }
+  }
+
+  public static String formatDateTime(ZonedDateTime zonedDateTime) {
+    return zonedDateTime.format(RFC_3339_FORMATTER);
   }
 
 }
