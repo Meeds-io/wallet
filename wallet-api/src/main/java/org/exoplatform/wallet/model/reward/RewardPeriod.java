@@ -22,13 +22,14 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class RewardPeriod implements Serializable {
   private static final long serialVersionUID = -4860665131754056537L;
 
@@ -46,10 +47,10 @@ public class RewardPeriod implements Serializable {
 
   public static RewardPeriod getCurrentPeriod(RewardSettings rewardSettings) {
     ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
-    return getPeriodOfTime(rewardSettings, ZonedDateTime.now(zoneId));
+    return getPeriodOfTime(rewardSettings, LocalDate.now(zoneId));
   }
 
-  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, ZonedDateTime zonedDateTime) {
+  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, LocalDate date) {
     ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
     RewardPeriodType rewardPeriodType = null;
     if (rewardSettings == null || rewardSettings.getPeriodType() == null) {
@@ -57,7 +58,7 @@ public class RewardPeriod implements Serializable {
     } else {
       rewardPeriodType = rewardSettings.getPeriodType();
     }
-    return rewardPeriodType.getPeriodOfTime(zonedDateTime.withZoneSameLocal(zoneId));
+    return rewardPeriodType.getPeriodOfTime(date, zoneId);
   }
 
   public ZoneId zoneId() {
