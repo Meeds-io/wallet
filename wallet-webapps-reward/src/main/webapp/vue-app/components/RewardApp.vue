@@ -174,7 +174,7 @@ export default {
       return this.period?.timeZone || this.rewardSettings?.timeZone;
     },
     selectedDate() {
-      return this.period?.startDate.substring(0, 19) || new Date().toISOString().substring(0, 10);
+      return this.period?.startDate.substring(0, 10) || new Date().toISOString().substring(0, 10);
     },
     dateformat() {
       return this.timeZone && {
