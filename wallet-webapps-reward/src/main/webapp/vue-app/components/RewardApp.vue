@@ -1,6 +1,6 @@
 <!--
 This file is part of the Meeds project (https://meeds.io/).
-Copyright (C) 2020 Meeds Association
+Copyright (C) 2022 Meeds Association
 contact@meeds.io
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -103,6 +103,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 :contract-details="contractDetails"
                 :period-dates-display="periodDatesDisplay"
                 :transaction-etherscan-link="transactionEtherscanLink"
+                :time-zone="timeZone"
                 @dates-changed="refreshRewards($event)"
                 @refresh="refreshRewards"
                 @error="error = $event" />
@@ -141,9 +142,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-
-import {getRewardTeams, getRewardSettings, computeRewards} from '../../js/RewardServices.js';
-
 export default {
   data() {
     return {
@@ -159,14 +157,12 @@ export default {
       rewardSettings: {},
       totalRewards: [],
       teams: [],
+      period: null,
     };
   },
   computed: {
     duplicatedWallets() {
       return (this.walletRewards && this.walletRewards.filter(walletReward => walletReward.teams && walletReward.teams.length > 1)) || [];
-    },
-    period() {
-      return this.rewardReport && this.rewardReport.period;
     },
     walletRewards() {
       return (this.rewardReport && this.rewardReport.rewards) || [];
@@ -174,16 +170,41 @@ export default {
     periodType() {
       return this.rewardSettings && this.rewardSettings.periodType;
     },
+    timeZone() {
+      return this.period?.timeZone || this.rewardSettings?.timeZone;
+    },
+    selectedDate() {
+      return this.period?.startDate.substring(0, 10) || new Date().toISOString().substring(0, 10);
+    },
+    dateformat() {
+      return this.timeZone && {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short',
+        timeZone: this.timeZone,
+      } || {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      };
+    },
     periodDatesDisplay() {
-      const selectedStartDate = this.period && this.formatDate(new Date(this.period.startDateInSeconds * 1000));
-      const selectedEndDate = this.period && this.formatDate(new Date((this.period.endDateInSeconds -1) * 1000));
-      if (selectedStartDate && selectedEndDate) {
-        return `${selectedStartDate} ${this.$t('exoplatform.wallet.label.to')} ${selectedEndDate}`;
-      } else if (selectedStartDate) {
-        return selectedStartDate;
-      } else {
+      if (!this.period) {
         return '';
       }
+      const startDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.period.startDateInSeconds * 1000), this.dateformat, eXo.env.portal.language);
+      const endDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.period.endDateInSeconds * 1000 - 1), this.dateformat, eXo.env.portal.language);
+      return `${startDateFormatted} ${this.$t('exoplatform.wallet.label.to')} ${endDateFormatted}`;
+    },
+  },
+  watch: {
+    rewardReport() {
+      this.period = this.rewardReport?.period;
     },
   },
   created() {
@@ -219,7 +240,7 @@ export default {
     },
     refreshRewardSettings() {
       this.loading = true;
-      return getRewardSettings()
+      return this.$rewardService.getRewardSettings()
         .then(settings => this.rewardSettings = settings || {})
         .then(() => this.$nextTick())
         .then(() => this.$refs.configurationTab.init())
@@ -233,11 +254,12 @@ export default {
         return;
       }
 
-      period = period || this.period;
-      const selectedDateInSeconds = period && period.startDateInSeconds;
+      if (period) {
+        this.period = period;
+      }
 
       this.loading = true;
-      return computeRewards(selectedDateInSeconds)
+      return this.$rewardService.computeRewards(this.selectedDate)
         .then(rewardReport => {
           if (rewardReport.error) {
             this.error = (typeof rewardReport.error === 'object' ? rewardReport.error[0] : rewardReport.error);
@@ -308,7 +330,7 @@ export default {
         .finally(() => this.loading = false);
     },
     refreshTeams() {
-      return getRewardTeams()
+      return this.$rewardService.getRewardTeams()
         .then(teams => this.teams = teams || [])
         .catch((e) => {
           console.error  ('Error getting teams list', e);

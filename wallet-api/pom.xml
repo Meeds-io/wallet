@@ -29,7 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <rest.api.doc.version>1.0</rest.api.doc.version>
     <rest.api.doc.description>Wallet addon rest endpoints</rest.api.doc.description>
 
-    <exo.test.coverage.ratio>0.03</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.10</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
@@ -81,6 +81,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-annotations</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.exoplatform.ws</groupId>
+      <artifactId>exo.ws.testframework</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

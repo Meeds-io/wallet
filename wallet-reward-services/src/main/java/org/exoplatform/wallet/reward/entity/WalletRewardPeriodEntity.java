@@ -30,10 +30,8 @@ import org.exoplatform.wallet.model.reward.RewardStatus;
 @ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_REWARD_PERIOD")
-@NamedQueries({
-    @NamedQuery(name = "RewardPeriod.findRewardPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime"),
-    @NamedQuery(name = "RewardPlugin.findRewardPeriodsByStatus", query = "SELECT rp FROM RewardPeriod rp WHERE rp.status = :status"),
-})
+@NamedQuery(name = "RewardPeriod.findRewardPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime")
+@NamedQuery(name = "RewardPlugin.findRewardPeriodsByStatus", query = "SELECT rp FROM RewardPeriod rp WHERE rp.status = :status")
 public class WalletRewardPeriodEntity implements Serializable {
 
   private static final long serialVersionUID = -6286934482105645678L;
@@ -53,6 +51,9 @@ public class WalletRewardPeriodEntity implements Serializable {
 
   @Column(name = "END_TIME", nullable = false)
   private Long              endTime;
+
+  @Column(name = "TIME_ZONE")
+  private String            timeZone;
 
   @Enumerated(EnumType.ORDINAL)
   @Column(name = "STATUS", nullable = false)
@@ -88,6 +89,14 @@ public class WalletRewardPeriodEntity implements Serializable {
 
   public void setEndTime(long endTime) {
     this.endTime = endTime;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(String timeZone) {
+    this.timeZone = timeZone;
   }
 
   public RewardStatus getStatus() {

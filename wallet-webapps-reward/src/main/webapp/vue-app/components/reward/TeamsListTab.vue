@@ -238,9 +238,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-
-import {saveRewardTeam, removeRewardTeam} from '../../js/RewardServices.js';
-
 export default {
   props: {
     teams: {
@@ -309,7 +306,7 @@ export default {
 
       this.loading = true;
       delete teamToSave.validMembersWallets;
-      return saveRewardTeam(teamToSave)
+      return this.$rewardService.saveRewardTeam(teamToSave)
         .then(() => {
           this.$emit('refresh-teams');
         })
@@ -325,7 +322,7 @@ export default {
       if (id < 1) {
         console.error('Can\'t delete team with id', id);
       }
-      removeRewardTeam(id)
+      this.$rewardService.removeRewardTeam(id)
         .then((status) => {
           if (status) {
             this.teamToDelete = null;

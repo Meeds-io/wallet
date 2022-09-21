@@ -16,9 +16,13 @@
  */
 package org.exoplatform.wallet.reward.storage;
 
-import static org.exoplatform.wallet.utils.RewardUtils.timeFromSeconds;
-
-import java.util.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,14 +30,26 @@ import org.apache.commons.lang.StringUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.RewardStatus;
+import org.exoplatform.wallet.model.reward.RewardTeam;
+import org.exoplatform.wallet.model.reward.WalletPluginReward;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.reward.dao.*;
-import org.exoplatform.wallet.reward.entity.*;
+import org.exoplatform.wallet.reward.dao.RewardDAO;
+import org.exoplatform.wallet.reward.dao.RewardPeriodDAO;
+import org.exoplatform.wallet.reward.dao.RewardPluginDAO;
+import org.exoplatform.wallet.reward.dao.RewardTeamDAO;
+import org.exoplatform.wallet.reward.entity.RewardTeamEntity;
+import org.exoplatform.wallet.reward.entity.WalletRewardEntity;
+import org.exoplatform.wallet.reward.entity.WalletRewardPeriodEntity;
+import org.exoplatform.wallet.reward.entity.WalletRewardPluginEntity;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTransactionService;
 
-public class WalletRewardReportStorage implements RewardReportStorage {
+public class WalletRewardReportStorage {
 
   private static final Log         LOG = ExoLogger.getLogger(WalletRewardReportStorage.class);
 
@@ -45,7 +61,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
 
   private RewardTeamDAO            rewardTeamDAO;
 
-  private RewardTeamStorage        rewardTeamStorage;
+  private WalletRewardTeamStorage  rewardTeamStorage;
 
   private WalletAccountService     walletAccountService;
 
@@ -55,7 +71,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
                                    RewardDAO rewardDAO,
                                    RewardPeriodDAO rewardPeriodDAO,
                                    RewardTeamDAO rewardTeamDAO,
-                                   RewardTeamStorage rewardTeamStorage,
+                                   WalletRewardTeamStorage rewardTeamStorage,
                                    WalletAccountService walletAccountService,
                                    WalletTransactionService walletTransactionService) {
     this.rewardPluginDAO = rewardPluginDAO;
@@ -67,28 +83,28 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     this.walletTransactionService = walletTransactionService;
   }
 
-  @Override
-  public RewardReport getRewardReport(RewardPeriodType periodType, long periodTimeInSeconds) {
-    RewardPeriod period = periodType.getPeriodOfTime(timeFromSeconds(periodTimeInSeconds));
+  public RewardReport getRewardReport(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
+    RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
                                                                                                 period.getStartDateInSeconds());
     if (rewardPeriodEntity == null) {
       return null;
     }
     RewardReport rewardReport = new RewardReport();
-    RewardPeriod periodOfTime = rewardPeriodEntity.getPeriodType().getPeriodOfTime(timeFromSeconds(periodTimeInSeconds));
+    RewardPeriod periodOfTime = rewardPeriodEntity.getPeriodType().getPeriodOfTime(date, zoneId);
     rewardReport.setPeriod(periodOfTime);
 
     List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByPeriodId(rewardPeriodEntity.getId());
     if (rewardEntities != null) {
-      Set<WalletReward> rewards = rewardEntities.stream().map(rewardEntity -> toDTO(rewardEntity)).collect(Collectors.toSet());
+      Set<WalletReward> rewards = rewardEntities.stream()
+                                                .map(rewardEntity -> toDTO(rewardEntity, zoneId))
+                                                .collect(Collectors.toSet());
       rewardReport.setRewards(rewards);
     }
     return rewardReport;
   }
 
-  @Override
-  public void saveRewardReport(RewardReport rewardReport) {
+  public void saveRewardReport(RewardReport rewardReport) { // NOSONAR
     if (rewardReport == null) {
       throw new IllegalArgumentException("reward report is null");
     }
@@ -110,6 +126,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     rewardPeriodEntity.setPeriodType(period.getRewardPeriodType());
     rewardPeriodEntity.setStartTime(period.getStartDateInSeconds());
     rewardPeriodEntity.setEndTime(period.getEndDateInSeconds());
+    rewardPeriodEntity.setTimeZone(period.getTimeZone());
 
     if (rewardReport.isCompletelyProceeded()) {
       rewardPeriodEntity.setStatus(RewardStatus.SUCCESS);
@@ -139,7 +156,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     // No null check, it has been already checked by
     // rewardReport.countValidRewards()
     Set<WalletReward> rewards = rewardReport.getRewards();
-    for (WalletReward walletReward : rewards) {
+    for (WalletReward walletReward : rewards) { // NOSONAR
       if (walletReward.getWallet() == null || StringUtils.isBlank(walletReward.getWallet().getAddress())) {
         continue;
       }
@@ -179,7 +196,7 @@ public class WalletRewardReportStorage implements RewardReportStorage {
       for (WalletPluginReward rewardPlugin : rewardPlugins) {
         WalletRewardPluginEntity rewardPluginEntity =
                                                     rewardPluginDAO.getRewardPluginsByRewardIdAndPluginId(rewardEntity.getId(),
-                                                                                                        rewardPlugin.getPluginId());
+                                                                                                          rewardPlugin.getPluginId());
         if (rewardPluginEntity == null) {
           rewardPluginEntity = new WalletRewardPluginEntity();
         }
@@ -198,17 +215,15 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     }
   }
 
-  @Override
   public List<RewardPeriod> findRewardPeriodsByStatus(RewardStatus rewardStatus) {
     List<WalletRewardPeriodEntity> rewardPeriodEntities = rewardPeriodDAO.findRewardPeriodsByStatus(rewardStatus);
-    return rewardPeriodEntities.stream().map(period -> toDTO(period)).collect(Collectors.toList());
+    return rewardPeriodEntities.stream().map(this::toDTO).collect(Collectors.toList());
   }
 
-  @Override
-  public List<WalletReward> listRewards(long identityId, int limit) {
+  public List<WalletReward> listRewards(long identityId, ZoneId zoneId, int limit) {
     List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByIdentityId(identityId, limit);
     List<WalletReward> walletRewards = rewardEntities.stream()
-                                                     .map(rewardEntity -> toDTO(rewardEntity))
+                                                     .map(rewardEntity -> toDTO(rewardEntity, zoneId))
                                                      .collect(Collectors.toList());
     if (!walletRewards.isEmpty()) {
       WalletReward walletReward = walletRewards.get(0);
@@ -219,13 +234,11 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     return walletRewards;
   }
 
-  @Override
   public double countRewards(long identityId) {
     double countRewardsByUser = rewardDAO.countRewardsByIdentityId(identityId);
-    return  Double.isNaN(countRewardsByUser) ? 0 : countRewardsByUser;
+    return Double.isNaN(countRewardsByUser) ? 0 : countRewardsByUser;
   }
 
-  @Override
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardDAO.replaceRewardTransactions(oldHash, newHash);
   }
@@ -234,6 +247,9 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     RewardPeriod rewardPeriod = new RewardPeriod(period.getPeriodType());
     rewardPeriod.setStartDateInSeconds(period.getStartTime());
     rewardPeriod.setEndDateInSeconds(period.getEndTime());
+    if (StringUtils.isNotBlank(period.getTimeZone())) {
+      rewardPeriod.setTimeZone(period.getTimeZone());
+    }
     return rewardPeriod;
   }
 
@@ -245,14 +261,12 @@ public class WalletRewardReportStorage implements RewardReportStorage {
   private Set<WalletPluginReward> getRewardPluginsByRewardId(Long rewardId) {
     List<WalletRewardPluginEntity> rewardsPluginEntities = rewardPluginDAO.getRewardPluginsByRewardId(rewardId);
     if (rewardsPluginEntities != null) {
-      return rewardsPluginEntities.stream()
-                                  .map(entity -> toDTO(entity))
-                                  .collect(Collectors.toSet());
+      return rewardsPluginEntities.stream().map(this::toDTO).collect(Collectors.toSet());
     }
     return Collections.emptySet();
   }
 
-  private WalletReward toDTO(WalletRewardEntity rewardEntity) {
+  private WalletReward toDTO(WalletRewardEntity rewardEntity, ZoneId zoneId) {
     WalletReward walletReward = new WalletReward();
     retrieveTeam(rewardEntity, walletReward);
     retrieveWallet(rewardEntity, walletReward);
@@ -261,7 +275,8 @@ public class WalletRewardReportStorage implements RewardReportStorage {
     WalletRewardPeriodEntity periodEntity = rewardEntity.getPeriod();
     if (periodEntity != null && periodEntity.getPeriodType() != null) {
       RewardPeriodType rewardPeriodType = periodEntity.getPeriodType();
-      walletReward.setPeriod(rewardPeriodType.getPeriodOfTime(timeFromSeconds(periodEntity.getStartTime())));
+      ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(periodEntity.getStartTime()), zoneId);
+      walletReward.setPeriod(rewardPeriodType.getPeriodOfTime(zonedDateTime));
     }
     return walletReward;
   }
