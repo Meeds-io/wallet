@@ -16,12 +16,15 @@
  */
 package org.exoplatform.wallet.reward.rest;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,9 +32,15 @@ import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPeriodWithFullDate;
 import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.RewardSettings;
 import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.reward.service.RewardReportService;
+import org.exoplatform.wallet.reward.service.RewardSettingsService;
+import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 import io.swagger.annotations.*;
@@ -40,12 +49,17 @@ import io.swagger.annotations.*;
 @RolesAllowed("rewarding")
 @Api(value = "/wallet/api/reward", description = "Manage wallet rewards") // NOSONAR
 public class RewardReportREST implements ResourceContainer {
+  private static final String ERROR_PARAM = "error";
+
   private static final Log    LOG = ExoLogger.getLogger(RewardReportREST.class);
 
-  private RewardReportService rewardReportService;
+  private RewardReportService   rewardReportService;
 
-  public RewardReportREST(RewardReportService rewardReportService) {
+  private RewardSettingsService rewardSettingsService;
+
+  public RewardReportREST(RewardReportService rewardReportService, RewardSettingsService rewardSettingsService) {
     this.rewardReportService = rewardReportService;
+    this.rewardSettingsService = rewardSettingsService;
   }
 
   @GET
@@ -54,22 +68,27 @@ public class RewardReportREST implements ResourceContainer {
   @RolesAllowed("rewarding")
   @ApiOperation(value = "Compute rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns a set of wallet reward object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 401, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response computeRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
-    if (periodDateInSeconds == 0) {
-      periodDateInSeconds = System.currentTimeMillis() / 1000;
+  public Response computeRewards(
+                                 @ApiParam(value = "A date with format yyyy-MM-dd", required = true)
+                                 @QueryParam("date")
+                                 String date) {
+    if (StringUtils.isBlank(date)) {
+      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
     }
-
     try {
-      RewardReport rewardReport = rewardReportService.computeRewards(periodDateInSeconds);
+      RewardPeriod rewardPeriod = getRewardPeriod(date);
+      RewardReport rewardReport = rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate());
+      rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
       return Response.ok(rewardReport).build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
-        object.append("error", e.getMessage());
+        object.append(ERROR_PARAM, e.getMessage());
       } catch (JSONException e1) {
         // Nothing to do
       }
@@ -83,17 +102,25 @@ public class RewardReportREST implements ResourceContainer {
   @ApiOperation(value = "Send rewards of wallets per a chosen period of time", httpMethod = "GET", response = Response.class, notes = "return empty response")
   @ApiResponses(value = {
       @ApiResponse(code = HTTPStatus.NO_CONTENT, message = "Request fulfilled"),
+      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
       @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
-      @ApiResponse(code = 500, message = "Internal server error") })
-  public Response sendRewards(@ApiParam(value = "Start date of period in milliseconds", required = true) @QueryParam("periodDateInSeconds") long periodDateInSeconds) {
+      @ApiResponse(code = HTTPStatus.INTERNAL_ERROR, message = "Internal server error") })
+  public Response sendRewards(
+                              @ApiParam(value = "A date with format yyyy-MM-dd", required = true)
+                              @QueryParam("date")
+                              String date) {
     try {
-      rewardReportService.sendRewards(periodDateInSeconds, WalletUtils.getCurrentUserId());
+      if (StringUtils.isBlank(date)) {
+        return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+      }
+      RewardPeriod rewardPeriod = getRewardPeriod(date);
+      rewardReportService.sendRewards(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserId());
       return Response.noContent().build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);
       JSONObject object = new JSONObject();
       try {
-        object.append("error", e.getMessage());
+        object.append(ERROR_PARAM, e.getMessage());
       } catch (JSONException e1) {
         // Nothing to do
       }
@@ -113,12 +140,13 @@ public class RewardReportREST implements ResourceContainer {
   public Response listRewards(@ApiParam(value = "limit of items to load", required = false) @QueryParam("limit") int limit) {
     try {
       List<WalletReward> rewards = rewardReportService.listRewards(WalletUtils.getCurrentUserId(), limit);
+      rewards.forEach(reward -> reward.setPeriod(new RewardPeriodWithFullDate(reward.getPeriod())));
       return Response.ok(rewards).build();
     } catch (Exception e) {
       LOG.error("Error getting list of reward for current user", e);
       JSONObject object = new JSONObject();
       try {
-        object.append("error", e.getMessage());
+        object.append(ERROR_PARAM, e.getMessage());
       } catch (JSONException e1) {
         // Nothing to do
       }
@@ -151,12 +179,21 @@ public class RewardReportREST implements ResourceContainer {
       LOG.error("Error getting sum of reward for current user", e);
       JSONObject object = new JSONObject();
       try {
-        object.append("error", e.getMessage());
+        object.append(ERROR_PARAM, e.getMessage());
       } catch (JSONException e1) {
         // Nothing to do
       }
       return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
     }
+  }
+
+  private RewardPeriod getRewardPeriod(String date) {
+    RewardSettings settings = rewardSettingsService.getSettings();
+    ZoneId zoneId = settings.zoneId();
+    RewardPeriodType rewardPeriodType = settings.getPeriodType();
+
+    ZonedDateTime zonedDateTime = RewardUtils.parseRFC3339ToZonedDateTime(date, zoneId);
+    return rewardPeriodType.getPeriodOfTime(zonedDateTime);
   }
 
 }

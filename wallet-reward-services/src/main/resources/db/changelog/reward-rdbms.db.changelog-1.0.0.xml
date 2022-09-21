@@ -179,4 +179,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <createSequence sequenceName="SEQ_WALLET_REWARD_PLUGIN_ID" startValue="1" />
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-14">
+    <addColumn tableName="ADDONS_WALLET_REWARD_PERIOD">
+      <column name="TIME_ZONE" type="VARCHAR(200)" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>

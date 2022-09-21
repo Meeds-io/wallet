@@ -34,7 +34,7 @@ import org.exoplatform.wallet.reward.entity.RewardTeamMemberEntity;
 /**
  * A storage service to save/load reward teams
  */
-public class WalletRewardTeamStorage implements RewardTeamStorage {
+public class WalletRewardTeamStorage {
 
   private RewardTeamDAO rewardTeamDAO;
 
@@ -42,13 +42,11 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     this.rewardTeamDAO = rewardTeamDAO;
   }
 
-  @Override
   public List<RewardTeam> getTeams() {
     List<RewardTeamEntity> teamEntities = rewardTeamDAO.findNotDeletedTeams();
     return teamEntities.stream().map(WalletRewardTeamStorage::toDTO).collect(Collectors.toList());
   }
 
-  @Override
   public RewardTeam saveTeam(RewardTeam rewardTeam) {
     if (rewardTeam == null) {
       throw new IllegalArgumentException("Empty team to save");
@@ -62,7 +60,6 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     return toDTO(rewardTeamDAO.find(teamEntity.getId()));
   }
 
-  @Override
   public RewardTeam removeTeam(Long teamId) {
     if (teamId == null || teamId == 0) {
       throw new IllegalArgumentException("Team id is required");
@@ -75,7 +72,6 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     return toDTO(entity);
   }
 
-  @Override
   public RewardTeam getTeamById(long teamId) {
     if (teamId == 0) {
       throw new IllegalArgumentException("Team id is required");
@@ -84,13 +80,11 @@ public class WalletRewardTeamStorage implements RewardTeamStorage {
     return toDTO(entity);
   }
 
-  @Override
   public List<RewardTeam> findTeamsByMemberId(long identityId) {
     List<RewardTeamEntity> entities = rewardTeamDAO.findTeamsByMemberId(identityId);
     return entities.stream().map(WalletRewardTeamStorage::toDTO).collect(Collectors.toList());
   }
 
-  @Override
   public RewardTeam getTeamsById(long teamId) {
     RewardTeamEntity teamEntity = rewardTeamDAO.find(teamId);
     return toDTO(teamEntity);

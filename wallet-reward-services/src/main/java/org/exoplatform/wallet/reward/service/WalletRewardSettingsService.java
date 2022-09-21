@@ -45,7 +45,7 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   }
 
   @Override
-  public RewardSettings getSettings() {
+  public RewardSettings getSettings() { // NOSONAR
     // Retrieve cached reward settings
     if (this.configuredRewardSettings != null) {
       return this.configuredRewardSettings.clone();

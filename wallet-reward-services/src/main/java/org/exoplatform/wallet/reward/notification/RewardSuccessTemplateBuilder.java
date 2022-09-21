@@ -77,7 +77,7 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put(REWARD_END_PERIOD_DATE_FORMATTED, formatTime(Long.parseLong(rewardEndPeriodDate) - 1, language));
 
       String notificationRead = notification.getValueOwnerParameter(NotificationMessageUtils.READ_PORPERTY.getKey());
-      templateContext.put("READ", Boolean.valueOf(notificationRead) ? "read" : "unread");
+      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
 
       setLastModifiedDate(notification, language, templateContext);
 
