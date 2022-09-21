@@ -104,7 +104,7 @@ public class WalletReward implements Serializable {
     if (rewards == null || rewards.isEmpty()) {
       return 0;
     } else {
-      return rewards.stream().mapToDouble(reward -> reward.getAmount()).sum();
+      return rewards.stream().mapToDouble(WalletPluginReward::getAmount).sum();
     }
   }
 
@@ -112,7 +112,7 @@ public class WalletReward implements Serializable {
     if (rewards == null || rewards.isEmpty()) {
       return 0;
     } else {
-      return rewards.stream().filter(WalletPluginReward::isPoolsUsed).mapToDouble(reward -> reward.getAmount()).sum();
+      return rewards.stream().filter(WalletPluginReward::isPoolsUsed).mapToDouble(WalletPluginReward::getAmount).sum();
     }
   }
 }

@@ -35,12 +35,14 @@ import org.exoplatform.commons.api.notification.service.setting.PluginContainer;
 import org.exoplatform.commons.api.notification.service.setting.PluginSettingService;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.xml.*;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.container.xml.ObjectParameter;
+import org.exoplatform.container.xml.ValueParam;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.notification.RewardSuccessNotificationPlugin;
-import org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider;
 
 public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
 

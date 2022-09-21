@@ -16,11 +16,18 @@
  */
 package org.exoplatform.wallet.reward.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.LongStream;
 
 import org.junit.Test;
@@ -30,12 +37,21 @@ import org.mockito.stubbing.Answer;
 
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardBudgetType;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPluginSettings;
+import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.reward.RewardTeam;
+import org.exoplatform.wallet.model.reward.WalletPluginReward;
+import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.service.*;
-import org.exoplatform.wallet.reward.storage.RewardReportStorage;
-import org.exoplatform.wallet.service.*;
+import org.exoplatform.wallet.reward.storage.WalletRewardReportStorage;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
@@ -53,10 +69,8 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
   @Test
   public void testComputeRewards() {
     WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
-    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 03)
-                                                                           .atEndOfMonth()
-                                                                           .atStartOfDay());
-    RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
+    LocalDate date = YearMonth.of(2019, 03).atEndOfMonth();
+    RewardReport rewardReport = walletRewardService.computeRewards(date);
     assertNotNull(rewardReport);
     assertNotNull(rewardReport.getRewards());
     assertEquals(0, rewardReport.getRewards().size());
@@ -71,7 +85,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       entitiesToClean.add(wallet);
     }
 
-    rewardReport = walletRewardService.computeRewards(startDateInSeconds);
+    rewardReport = walletRewardService.computeRewards(date);
     assertNotNull(rewardReport);
     // Even if settings are null, the returned rewards shouldn't be empty
     assertEquals(enabledWalletsCount, rewardReport.getRewards().size());
@@ -106,7 +120,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // fixed
       // budget per point
       double sumOfTokensToSend = checkComputedRewards(walletRewardService,
-                                                      startDateInSeconds,
+                                                      date,
                                                       enabledWalletsCount,
                                                       amount);
 
@@ -117,7 +131,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // Check computed amount for plugin per wallet when no teams and with
       // fixed total budget for reward plugin
       checkComputedRewards(walletRewardService,
-                           startDateInSeconds,
+                           date,
                            enabledWalletsCount,
                            amount);
 
@@ -128,7 +142,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // Check computed amount for plugin per wallet when no teams and with
       // fixed budget per member
       checkComputedRewards(walletRewardService,
-                           startDateInSeconds,
+                           date,
                            enabledWalletsCount,
                            amount);
 
@@ -140,7 +154,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // Check computed amount for plugin per wallet when no teams and with
       // fixed budget per point and with Threshold
       checkComputedRewards(walletRewardService,
-                           startDateInSeconds,
+                           date,
                            30,
                            amount);
 
@@ -165,7 +179,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // Check computed amount for plugin per wallet with teams (each having 10
       // members), with fixed budget per point and with plugin not using teams
       checkComputedRewards(walletRewardService,
-                           startDateInSeconds,
+                           date,
                            enabledWalletsCount,
                            amount);
 
@@ -178,7 +192,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       // members), with fixed total budget and with plugin using teams that are
       // disabled
       checkComputedRewards(walletRewardService,
-                           startDateInSeconds,
+                           date,
                            0,
                            0);
 
@@ -191,7 +205,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
         rewardTeamService.saveTeam(team);
       });
 
-      rewardReport = walletRewardService.computeRewards(startDateInSeconds);
+      rewardReport = walletRewardService.computeRewards(date);
 
       // check total budget to send
       double tokensToSend = rewardReport.getRewards().stream().mapToDouble(WalletReward::getTokensToSend).sum();
@@ -264,7 +278,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
+    WalletRewardReportStorage rewardReportStorage = getService(WalletRewardReportStorage.class);
 
     WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
                                                                                   rewardSettingsService,
@@ -274,9 +288,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 04)
-                                                                           .atEndOfMonth()
-                                                                           .atStartOfDay());
+    LocalDate date = YearMonth.of(2019, 04).atEndOfMonth();
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
@@ -324,10 +336,10 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       teams.add(rewardTeam6);
 
       // Admin having only 10 tokens
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf(10l).pow(contractDecimals));
       try {
-        walletRewardService.sendRewards(startDateInSeconds, "root");
+        walletRewardService.sendRewards(date, "root");
         fail("Shouldn't send funds when admin not having enough funds");
       } catch (Exception e) {
         // Expected
@@ -335,17 +347,17 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       Mockito.verify(tokenAdminService, Mockito.times(0)).reward(Mockito.any(), Mockito.any());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
-      walletRewardService.sendRewards(startDateInSeconds, "root");
+      walletRewardService.sendRewards(date, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       // Send reward for the second time for the same period
       resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
       try {
-        walletRewardService.sendRewards(startDateInSeconds, "root");
+        walletRewardService.sendRewards(date, "root");
       } catch (Exception e) {
         // Expected, no rewards to send
       }
@@ -359,14 +371,14 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
   @Test
   public void testSaveRewardReport() {
     RewardReport rewardReport = new RewardReport();
-    LocalDateTime date = LocalDateTime.now();
+    LocalDate date = LocalDate.now();
 
     WalletAccountService accountService = getService(WalletAccountService.class);
 
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
 
-    RewardPeriod period = defaultSettings.getPeriodType().getPeriodOfTime(date);
+    RewardPeriod period = defaultSettings.getPeriodType().getPeriodOfTime(date, ZoneId.systemDefault());
     rewardReport.setPeriod(period);
     Set<WalletReward> rewards = new HashSet<>();
     for (int i = 0; i < 20; i++) {
@@ -400,7 +412,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     RequestLifeCycle.end();
     RequestLifeCycle.begin(container);
 
-    RewardReport savedRewardReport = rewardReportService.getRewardReport(date.toEpochSecond(ZoneOffset.UTC));
+    RewardReport savedRewardReport = rewardReportService.getRewardReport(date);
     assertEquals(rewardReport, savedRewardReport);
   }
 
@@ -410,7 +422,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    RewardReportStorage rewardReportStorage = getService(RewardReportStorage.class);
+    WalletRewardReportStorage rewardReportStorage = getService(WalletRewardReportStorage.class);
 
     WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
                                                                                   rewardSettingsService,
@@ -421,9 +433,7 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
     resetTokenAdminService(walletTransactionService, tokenAdminService, false, true);
 
     int contractDecimals = WalletUtils.getContractDetail().getDecimals();
-    long startDateInSeconds = RewardUtils.timeToSecondsAtDayStart(YearMonth.of(2019, 05)
-                                                                           .atEndOfMonth()
-                                                                           .atStartOfDay());
+    LocalDate date = YearMonth.of(2019, 05).atEndOfMonth();
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
     rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
@@ -475,9 +485,9 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       assertEquals(0, walletRewards.size());
 
       // Admin having enough funds
-      Mockito.when(tokenAdminService.getTokenBalanceOf(Mockito.eq("adminAddress")))
+      Mockito.when(tokenAdminService.getTokenBalanceOf("adminAddress"))
              .thenReturn(BigInteger.valueOf((long) sumOfTokensToSend + 1).pow(contractDecimals));
-      walletRewardService.sendRewards(startDateInSeconds, "root");
+      walletRewardService.sendRewards(date, "root");
       Mockito.verify(tokenAdminService, Mockito.times(60)).reward(Mockito.any(), Mockito.any());
 
       walletRewards = walletRewardService.listRewards("root3", 10);
@@ -562,11 +572,11 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
   }
 
   private double checkComputedRewards(WalletRewardReportService walletRewardService,
-                                      long startDateInSeconds,
+                                      LocalDate date,
                                       int enabledWalletsCount,
                                       long amount) {
     double sumOfTokensToSend = 0;
-    RewardReport rewardReport = walletRewardService.computeRewards(startDateInSeconds);
+    RewardReport rewardReport = walletRewardService.computeRewards(date);
     assertNotNull(rewardReport);
     Set<WalletReward> rewards = rewardReport.getRewards();
     assertNotNull(rewards);

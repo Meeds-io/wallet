@@ -51,52 +51,6 @@ public class WalletAdminTransactionREST implements ResourceContainer {
   private WalletTokenAdminService walletTokenAdminService;
 
   @POST
-  @Path("intiialize")
-  @RolesAllowed("rewarding")
-  @Operation(
-          summary = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address",
-          method = "POST",
-          description = "Send blockchain transaction using Admin wallet to initialize wallet identified by its address and returns transaction hash")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Request fulfilled"),
-      @ApiResponse(responseCode = "400", description = "Invalid query input"),
-      @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
-      @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public Response initializeWallet(@Parameter(description = "receiver wallet address", required = true) @FormParam("receiver") String receiver,
-                                  @Parameter(description = "ether amount to send to wallet") @FormParam("etherAmount") double etherAmount,
-                                  @Parameter(description = "token amount to send to wallet") @FormParam("tokenAmount") double tokenAmount,
-                                  @Parameter(description = "transaction label") @FormParam("transactionLabel") String transactionLabel,
-                                  @Parameter(description = "transaction message to send to receiver with transaction") @FormParam("transactionMessage") String transactionMessage) {
-    String currentUserId = getCurrentUserId();
-    if (StringUtils.isBlank(receiver)) {
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
-
-    try {
-      // Send Ether
-      TransactionDetail etherTransactionDetail = new TransactionDetail();
-      etherTransactionDetail.setTo(receiver);
-      etherTransactionDetail.setValue(etherAmount);
-      etherTransactionDetail.setLabel(transactionLabel);
-      etherTransactionDetail.setMessage(transactionMessage);
-      getWalletTokenAdminService().sendEther(etherTransactionDetail, currentUserId);
-
-      // Send Token
-      TransactionDetail transactionDetail = new TransactionDetail();
-      transactionDetail.setTo(receiver);
-      transactionDetail.setContractAmount(tokenAmount);
-      transactionDetail.setLabel(transactionLabel);
-      transactionDetail.setMessage(transactionMessage);
-      transactionDetail = getWalletTokenAdminService().sendToken(transactionDetail, currentUserId);
-
-      return Response.ok(transactionDetail == null ? "" : transactionDetail.getHash()).build();
-    } catch (Exception e) {
-      LOG.error("Error initializing wallet {}", receiver, e);
-      return Response.serverError().build();
-    }
-  }
-
-  @POST
   @Path("sendEther")
   @RolesAllowed("rewarding")
   @Operation(

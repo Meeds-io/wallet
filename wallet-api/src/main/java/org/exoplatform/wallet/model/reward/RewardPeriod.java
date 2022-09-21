@@ -19,17 +19,23 @@ package org.exoplatform.wallet.model.reward;
 import static org.exoplatform.wallet.utils.RewardUtils.formatTime;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class RewardPeriod implements Serializable {
   private static final long serialVersionUID = -4860665131754056537L;
 
   private RewardPeriodType  rewardPeriodType;
+
+  private String            timeZone         = ZoneId.systemDefault().getId();
 
   private long              startDateInSeconds;
 
@@ -40,17 +46,27 @@ public class RewardPeriod implements Serializable {
   }
 
   public static RewardPeriod getCurrentPeriod(RewardSettings rewardSettings) {
-    return getPeriodOfTime(rewardSettings, LocalDateTime.now());
+    ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
+    return getPeriodOfTime(rewardSettings, LocalDate.now(zoneId));
   }
 
-  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, LocalDateTime localDateTime) {
+  public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, LocalDate date) {
+    ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
     RewardPeriodType rewardPeriodType = null;
     if (rewardSettings == null || rewardSettings.getPeriodType() == null) {
       rewardPeriodType = RewardPeriodType.DEFAULT;
     } else {
       rewardPeriodType = rewardSettings.getPeriodType();
     }
-    return rewardPeriodType.getPeriodOfTime(localDateTime);
+    return rewardPeriodType.getPeriodOfTime(date, zoneId);
+  }
+
+  public ZoneId zoneId() {
+    return ZoneId.of(timeZone);
+  }
+
+  public LocalDate getPeriodMedianDate() {
+    return LocalDate.ofInstant(Instant.ofEpochSecond((endDateInSeconds + startDateInSeconds) / 2), zoneId());
   }
 
   public String getStartDateFormatted(String lang) {
