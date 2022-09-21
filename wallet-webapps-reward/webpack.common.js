@@ -20,6 +20,9 @@ const { VueLoaderPlugin } = require('vue-loader')
 
 const config = {
   context: path.resolve(__dirname, '.'),
+  entry: {
+    rewardApp: './src/main/webapp/vue-app/main.js',
+  },
   module: {
     rules: [
       {

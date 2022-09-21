@@ -24,7 +24,6 @@ import java.util.List;
 import org.junit.Test;
 
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.wallet.reward.entity.RewardTeamEntity;
 
 public class RewardTeamDAOTest extends BaseWalletRewardTest {

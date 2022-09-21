@@ -27,7 +27,6 @@ import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider;
 
 public class RewardSuccessTemplateProviderTest extends BaseWalletRewardTest {
 

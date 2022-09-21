@@ -131,11 +131,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <scope>test</scope>
@@ -153,9 +148,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <exo.properties.url>classpath:/conf/configuration.properties</exo.properties.url>
             <exo.profiles>hsqldb</exo.profiles>
+            <java.naming.factory.initial>org.exoplatform.services.naming.SimpleContextFactory</java.naming.factory.initial>
             <exo.files.storage.dir>${project.build.directory}/files</exo.files.storage.dir>
+            <gatein.test.tmp.dir>${project.build.directory}</gatein.test.tmp.dir>
+            <gatein.test.output.path>${project.build.directory}</gatein.test.output.path>
+            <com.arjuna.ats.arjuna.objectstore.objectStoreDir>${project.build.directory}</com.arjuna.ats.arjuna.objectstore.objectStoreDir>
+            <ObjectStoreEnvironmentBean.objectStoreDir>${project.build.directory}</ObjectStoreEnvironmentBean.objectStoreDir>
+            <org.apache.commons.logging.Log>org.apache.commons.logging.impl.SimpleLog</org.apache.commons.logging.Log>
+            <org.apache.commons.logging.simplelog.defaultlog>info</org.apache.commons.logging.simplelog.defaultlog>
             <exo.wallet.admin.privateKey>3b40ba6f0924ab5b8ed1f3ec46ef5c415bac58544e39dc0d1fb712beabf219c9</exo.wallet.admin.privateKey>
           </systemPropertyVariables>
         </configuration>

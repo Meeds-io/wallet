@@ -16,16 +16,27 @@
  */
 package org.exoplatform.wallet.reward.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardBudgetType;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPluginSettings;
+import org.exoplatform.wallet.model.reward.RewardSettings;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
 import org.exoplatform.wallet.reward.api.RewardPlugin;
-import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 
 public class WalletRewardSettingsServiceTest extends BaseWalletRewardTest {
 
