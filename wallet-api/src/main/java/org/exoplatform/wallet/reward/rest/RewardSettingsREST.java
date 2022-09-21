@@ -17,10 +17,17 @@
 package org.exoplatform.wallet.reward.rest;
 
 import static org.exoplatform.wallet.utils.RewardUtils.getCurrentUserId;
-import static org.exoplatform.wallet.utils.RewardUtils.timeFromSeconds;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -30,10 +37,18 @@ import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.rest.resource.ResourceContainer;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.wallet.model.reward.RewardPeriod;
+import org.exoplatform.wallet.model.reward.RewardPeriodType;
+import org.exoplatform.wallet.model.reward.RewardPeriodWithFullDate;
+import org.exoplatform.wallet.model.reward.RewardSettings;
 import org.exoplatform.wallet.reward.service.RewardSettingsService;
+import org.exoplatform.wallet.utils.RewardUtils;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Path("/wallet/api/reward/settings")
 @RolesAllowed("rewarding")
@@ -95,23 +110,24 @@ public class RewardSettingsREST implements ResourceContainer {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Get dates corresponding to chosen period type and start date", httpMethod = "GET", response = Response.class, produces = "application/json", notes = "returns reward period dates object")
   @ApiResponses(value = {
-      @ApiResponse(code = HTTPStatus.OK, message = "Request fulfilled"),
-      @ApiResponse(code = HTTPStatus.BAD_REQUEST, message = "Invalid query input"),
-      @ApiResponse(code = HTTPStatus.UNAUTHORIZED, message = "Unauthorized operation"),
+      @ApiResponse(code = 200, message = "Request fulfilled"),
+      @ApiResponse(code = 400, message = "Invalid query input"),
+      @ApiResponse(code = 401, message = "Unauthorized operation"),
       @ApiResponse(code = 500, message = "Internal server error") })
-  public Response getRewardDates(@ApiParam(value = "Reward period type", required = true) @QueryParam("periodType") String periodType,
-                                 @ApiParam(value = "A chosen date to calculate its period", required = true) @QueryParam("dateInSeconds") long dateInSeconds) {
-    if (dateInSeconds == 0) {
-      LOG.warn("Bad request sent to server with empty 'dateInSeconds' parameter");
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
+  public Response getRewardDates(
+                                 @ApiParam(value = "A date with format yyyy-MM-dd", required = true)
+                                 @QueryParam("date")
+                                 String date) {
+    if (StringUtils.isBlank(date)) {
+      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
     }
-    if (StringUtils.isBlank(periodType)) {
-      LOG.warn("Bad request sent to server with empty 'periodType' parameter");
-      return Response.status(HTTPStatus.BAD_REQUEST).build();
-    }
-    RewardPeriodType rewardPeriodType = RewardPeriodType.valueOf(periodType);
-    RewardPeriod rewardPeriod = rewardPeriodType.getPeriodOfTime(timeFromSeconds(dateInSeconds));
-    return Response.ok(rewardPeriod).build();
-  }
+    RewardSettings settings = rewardSettingsService.getSettings();
+    ZoneId zoneId = settings.zoneId();
+    RewardPeriodType rewardPeriodType = settings.getPeriodType();
 
+    ZonedDateTime zonedDateTime = RewardUtils.parseRFC3339ToZonedDateTime(date, zoneId);
+    RewardPeriod rewardPeriod = rewardPeriodType.getPeriodOfTime(zonedDateTime);
+    RewardPeriodWithFullDate periodWithFullDate = new RewardPeriodWithFullDate(rewardPeriod);
+    return Response.ok(periodWithFullDate).build();
+  }
 }

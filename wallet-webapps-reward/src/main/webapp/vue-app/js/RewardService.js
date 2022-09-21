@@ -14,6 +14,29 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import TIMEZONE_IDS from '../json/timezones.json';
+export const TIMEZONES = [];
+
+export function getTimeZones() {
+  if (TIMEZONES.length) {
+    return TIMEZONES;
+  }
+  const dateObj = new Date(0);
+  TIMEZONE_IDS.forEach((timeZone) => {
+    const dateFormat = new Intl.DateTimeFormat(eXo.env.portal.language, {
+      timeZoneName: 'long',
+      second: 'numeric',
+      timeZone: timeZone,
+    });
+    const timeZoneName = dateFormat.format(dateObj);
+    TIMEZONES.push({
+      value: timeZone,
+      text: `${timeZoneName.charAt(2).toUpperCase() + timeZoneName.substring(3, timeZoneName.length)  } (${timeZone})`,
+    });
+  });
+  return TIMEZONES;
+}
+
 export function getRewardSettings() {
   return fetch('/portal/rest/wallet/api/reward/settings', {
     method: 'GET',
@@ -61,10 +84,8 @@ export function removeRewardTeam(id) {
   }).then((resp) => resp && resp.ok);
 }
 
-export function getRewardDates(date, periodType) {
-  // convert from milliseconds to seconds
-  date = parseInt(date.getTime() / 1000);
-  return fetch(`/portal/rest/wallet/api/reward/settings/getDates?dateInSeconds=${date}&periodType=${periodType}`, {
+export function getRewardDates(date) {
+  return fetch(`/portal/rest/wallet/api/reward/settings/getDates?date=${date}`, {
     credentials: 'include',
     headers: {
       Accept: 'application/json',
@@ -73,8 +94,8 @@ export function getRewardDates(date, periodType) {
   }).then((resp) => resp && resp.ok && resp.json());
 }
 
-export function sendRewards(periodDateInSeconds) {
-  return fetch(`/portal/rest/wallet/api/reward/send?periodDateInSeconds=${periodDateInSeconds}`, {
+export function sendRewards(date) {
+  return fetch(`/portal/rest/wallet/api/reward/send?date=${date}`, {
     method: 'GET',
     credentials: 'include',
   }).then((resp) => {
@@ -97,9 +118,8 @@ export function sendRewards(periodDateInSeconds) {
   });
 }
 
-export function computeRewards(periodDateInSeconds) {
-  periodDateInSeconds = periodDateInSeconds || parseInt(Date.now() / 1000);
-  return fetch(`/portal/rest/wallet/api/reward/compute?periodDateInSeconds=${periodDateInSeconds}`, {
+export function computeRewards(date) {
+  return fetch(`/portal/rest/wallet/api/reward/compute?date=${date}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

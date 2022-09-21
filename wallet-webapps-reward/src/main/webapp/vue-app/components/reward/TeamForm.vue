@@ -264,8 +264,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import {saveRewardTeam} from '../../js/RewardServices.js';
-
 export default {
   props: {
     team: {
@@ -526,7 +524,7 @@ export default {
           },
         };
 
-        return saveRewardTeam(team)
+        return this.$rewardService.saveRewardTeam(team)
           .then((addedTeam) => {
             if (addedTeam) {
               this.$emit('saved', addedTeam);

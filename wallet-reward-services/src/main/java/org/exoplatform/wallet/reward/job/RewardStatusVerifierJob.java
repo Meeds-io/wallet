@@ -78,20 +78,11 @@ public class RewardStatusVerifierJob implements Job {
         Iterator<RewardPeriod> rewardPeriodsIterator = rewardPeriodsInProgress.iterator();
         while (rewardPeriodsIterator.hasNext()) {
           RewardPeriod rewardPeriod = rewardPeriodsIterator.next();
-          RewardReport rewardReport = getRewardReportService().computeRewards(rewardPeriod.getStartDateInSeconds());
+          RewardReport rewardReport = getRewardReportService().computeRewards(rewardPeriod.getPeriodMedianDate());
           if (rewardReport == null) {
             continue;
           }
           if (rewardReport.isCompletelyProceeded()) {
-            LOG.debug("Rewards sent successfully for period {}: wallets to reward = {} ,transactions = {} , success = {}, failed = {}, pending = {}, completed = {}",
-                      rewardPeriod.getStartDateInSeconds(),
-                      rewardReport.getValidRewardCount(),
-                      rewardReport.getTransactionsCount(),
-                      rewardReport.getSuccessTransactionCount(),
-                      rewardReport.getFailedTransactionCount(),
-                      rewardReport.getPendingTransactionCount(),
-                      rewardReport.isCompletelyProceeded());
-
             getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
             rewardPeriodsIterator.remove();
           }

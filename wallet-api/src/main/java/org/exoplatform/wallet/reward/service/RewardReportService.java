@@ -16,6 +16,7 @@
  */
 package org.exoplatform.wallet.reward.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -30,31 +31,32 @@ public interface RewardReportService {
    * Compute rewards swicth configurations for the list of identities passed in
    * parameters
    * 
-   * @param periodDateInSeconds a timestamp in seconds inside the period time
+   * @param localDate a {@link LocalDate} inside the period time
    *          that will be retrieved
    * @return a {@link Set} of {@link WalletReward} with the details of sent
    *         tokens and tokens to send
    */
-  RewardReport computeRewards(long periodDateInSeconds);
+  RewardReport computeRewards(LocalDate localDate);
 
   /**
    * Send rewards transactions
    * 
-   * @param periodDateInSeconds a timestamp in seconds inside the period time
+   * @param localDate a {@link LocalDate} inside the period time
    *          that will be retrieved
    * @param username current username sending rewards
    * @throws Exception if an error occurs while sending the rewards transactions
    *           on blockchain
    */
-  void sendRewards(long periodDateInSeconds, String username) throws Exception; // NOSONAR
+  void sendRewards(LocalDate localDate, String username) throws Exception; // NOSONAR
 
   /**
    * Retrieve a {@link RewardReport} corresponding to a period of time
    * 
-   * @param periodTimeInSeconds selected date period
+   * @param localDate a {@link LocalDate} inside the period time
+   *          that will be retrieved
    * @return {@link RewardReport} if there is a saved one, else null
    */
-  RewardReport getRewardReport(long periodTimeInSeconds);
+  RewardReport getRewardReport(LocalDate localDate);
 
   /**
    * @param rewardReport save generated reward report

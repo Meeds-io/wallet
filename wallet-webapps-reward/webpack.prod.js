@@ -20,9 +20,6 @@ const webpackCommonConfig = require('./webpack.common.js');
 
 const config = merge(webpackCommonConfig, {
   mode: 'production',
-  entry: {
-    rewardApp: './src/main/webapp/vue-app/rewardApp.js',
-  },
   output: {
     path: path.join(__dirname, 'target/wallet-reward/'),
     filename: 'js/[name].bundle.js',

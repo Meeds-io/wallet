@@ -23,12 +23,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-card-text>
     <v-flex
       :id="id"
-      class="datePickerComponent text-center">
+      class="text-center">
       <v-menu
         ref="selectedDateMenu"
         v-model="selectedDateMenu"
         :content-class="menuId"
         :close-on-content-click="false"
+        min-width="auto"
         transition="scale-transition"
         offset-y
         class="dateSelector">
@@ -36,8 +37,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-text-field
             :value="periodDatesDisplay"
             :label="$t('exoplatform.wallet.label.selectPeriodDate')"
-            class="dateSelectorInput"
-            prepend-icon="event"
+            :title="periodDatesDisplay"
+            class="dateSelectorInput clickable mt-8"
+            readonly
             v-on="on" />
         </template>
         <v-date-picker
@@ -257,9 +259,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-
-import {getRewardDates, sendRewards} from '../../js/RewardServices.js';
-
 export default {
   props: {
     rewardReport: {
@@ -409,9 +408,6 @@ export default {
       }
       return disabledButton;
     },
-    selectedDateInSeconds() {
-      return this.selectedDate ? new Date(this.selectedDate).getTime() / 1000 : 0;
-    },
     symbol() {
       return this.contractDetails && this.contractDetails.symbol ? this.contractDetails.symbol : '';
     },
@@ -430,6 +426,17 @@ export default {
         return this.walletUtils.toFixed(result);
       } else {
         return 0;
+      }
+    },
+    selectedCompleteDateDate() {
+      if (this.selectedDate.length === 4) {
+        return `${this.selectedDate}-01-01`;
+      } else if (this.selectedDate.length === 7) {
+        return `${this.selectedDate}-01`;
+      } else if (this.selectedDate.length > 10) {
+        return this.selectedDate.substring(0, 10);
+      } else {
+        return this.selectedDate;
       }
     },
   },
@@ -451,10 +458,13 @@ export default {
         this.$refs.rewardDetails.open();
       }
     },
-    selectedDate() {
+    selectedCompleteDateDate() {
+      if (!this.selectedCompleteDateDate) {
+        return;
+      }
       this.loading = true;
       this.lang = eXo.env.portal.language;
-      return getRewardDates(new Date(this.selectedDate), this.periodType)
+      return this.$rewardService.getRewardDates(this.selectedCompleteDateDate)
         .then((period) => {
           this.$emit('dates-changed', period);
         })
@@ -484,7 +494,7 @@ export default {
     sendRewards() {
       this.error = null;
       this.sendingRewards = true;
-      sendRewards(this.selectedDateInSeconds)
+      this.$rewardService.sendRewards(this.selectedCompleteDateDate)
         .catch(e => {
           this.error = String(e);
         })

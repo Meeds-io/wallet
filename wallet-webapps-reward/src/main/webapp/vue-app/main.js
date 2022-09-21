@@ -14,8 +14,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import RewardApp from './components/reward/RewardApp.vue';
 import './initComponents.js';
+import * as rewardService from './js/RewardService.js';
+
+if (!Vue.prototype.$rewardService) {
+  window.Object.defineProperty(Vue.prototype, '$rewardService', {
+    value: rewardService,
+  });
+}
 
 Vue.use(Vuetify);
 Vue.use(WalletCommon);
@@ -25,12 +31,14 @@ const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
 
+const appId = 'RewardApp';
+
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
     new Vue({
-      render: (h) => h(RewardApp),
+      template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
       i18n,
       vuetify,
-    }).$mount('#RewardApp');
+    }).$mount(`#${appId}`);
   });
 }
