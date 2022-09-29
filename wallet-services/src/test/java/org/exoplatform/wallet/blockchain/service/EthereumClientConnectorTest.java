@@ -518,6 +518,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
     service.setWeb3jService(web3jService);
     service.setWebSocketClient(webSocketClient);
     service.setListenerService(listenerService);
+    System.setProperty("exo.wallet.blockchain.permanentlyScan", "false");
   }
 
   private void setAsConnected() {
