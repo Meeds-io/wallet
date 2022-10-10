@@ -18,6 +18,7 @@ package org.exoplatform.wallet.reward.plugin;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.configuration.ConfigurationManager;
@@ -33,7 +34,7 @@ public class KudosRewardPlugin extends RewardPlugin {
 
   private static final String  KUDOS_SERVICE_FQN             = "org.exoplatform.kudos.service.KudosService";
 
-  private static final String  COUNT_USERS_KUDOS_METHOD_NAME = "countKudosByPeriodAndReceiver";
+  private static final String  COUNT_USERS_KUDOS_METHOD_NAME = "countKudosByPeriodAndReceivers";
 
   private ConfigurationManager configurationManager;
 
@@ -68,16 +69,17 @@ public class KudosRewardPlugin extends RewardPlugin {
     if (method == null) {
       throw new IllegalStateException("Can't find kudos service method to retrieve user points");
     }
-    for (Long identityId : identityIds) {
-      long points = 0;
-      try {
-        points = (Long) method.invoke(getService(), identityId, startDateInSeconds, endDateInSeconds);
-      } catch (Exception e) {
-        LOG.warn("Error getting kudos count for user with id {}", identityId, e);
-      }
-      earnedPoints.put(identityId, (double) points);
+    Map<Long, Long> points = new HashMap<>();
+    try {
+      points = (Map<Long, Long>) method.invoke(getService(),
+                                               identityIds.stream().collect(Collectors.toList()),
+                                               startDateInSeconds,
+                                               endDateInSeconds);
+    } catch (Exception e) {
+      LOG.warn("Error getting kudos count for users with ids {}", identityIds, e);
     }
-    return earnedPoints;
+    return points.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().doubleValue()));
+
   }
 
   private Method getMethod() {
