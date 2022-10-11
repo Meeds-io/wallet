@@ -18,6 +18,7 @@ package org.exoplatform.wallet.reward.plugin;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.PortalContainer;
@@ -35,7 +36,7 @@ public class GamificationRewardPlugin extends RewardPlugin {
   private static final String  GAMIFICATION_SERVICE_FQN     =
                                                         "org.exoplatform.addons.gamification.service.effective.GamificationService";
 
-  private static final String  FIND_USER_POINTS_METHOD_NAME = "findUserReputationScoreBetweenDate";
+  private static final String  FIND_USER_POINTS_METHOD_NAME = "findUsersReputationScoreBetweenDate";
 
   private ConfigurationManager configurationManager;
 
@@ -72,16 +73,16 @@ public class GamificationRewardPlugin extends RewardPlugin {
     if (method == null) {
       throw new IllegalStateException("Can't find gamification service method to retrieve user points");
     }
-    for (Long identityId : identityIds) {
-      long points = 0;
-      try {
-        points = (Long) method.invoke(getService(), String.valueOf(identityId), startDate, endDate);
-      } catch (Exception e) {
-        LOG.warn("Error getting gamification points for user with id {}", identityId, e);
-      }
-      earnedPoints.put(identityId, (double) points);
+    Map<Long, Long> points = new HashMap<>();
+    try {
+      points = (Map<Long, Long>) method.invoke(getService(),
+                                               identityIds.stream().map(Object::toString).collect(Collectors.toList()),
+                                               startDate,
+                                               endDate);
+    } catch (Exception e) {
+      LOG.warn("Error getting gamification points for user with ids {}", identityIds, e);
     }
-    return earnedPoints;
+    return points.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().doubleValue()));
   }
 
   private Method getMethod() {
