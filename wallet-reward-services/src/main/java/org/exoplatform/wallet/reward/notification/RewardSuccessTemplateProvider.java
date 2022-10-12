@@ -28,6 +28,7 @@ import org.exoplatform.commons.api.notification.model.ChannelKey;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.wallet.reward.service.RewardSettingsService;
 
 public class RewardSuccessTemplateProvider extends TemplateProvider {
 
@@ -41,9 +42,9 @@ public class RewardSuccessTemplateProvider extends TemplateProvider {
 
   private String                       mailTemplatePath = null;
 
-  public RewardSuccessTemplateProvider(PortalContainer container, InitParams initParams) {
+  public RewardSuccessTemplateProvider(PortalContainer container, RewardSettingsService rewardSettingsService, InitParams initParams) {
     super(initParams);
-    builder = new RewardSuccessTemplateBuilder(container, getChannelKey());
+    builder = new RewardSuccessTemplateBuilder(container, rewardSettingsService, getChannelKey());
 
     this.templateBuilders.put(PLUGIN_KEY, builder);
 

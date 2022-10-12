@@ -21,6 +21,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
 import static org.exoplatform.wallet.utils.WalletUtils.formatNumber;
 
 import java.io.Writer;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -37,20 +38,25 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.reward.service.RewardSettingsService;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
 public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
 
   private static final Log LOG = ExoLogger.getLogger(RewardSuccessTemplateBuilder.class);
 
-  private ChannelKey       channelKey;
+  private ChannelKey            channelKey;
 
-  private boolean          pushNotification;
+  private boolean               pushNotification;
 
-  private ExoContainer     container;
+  private ExoContainer          container;
 
-  public RewardSuccessTemplateBuilder(PortalContainer container, ChannelKey channelKey) {
+  private RewardSettingsService rewardSettingsService;
+
+  public RewardSuccessTemplateBuilder(PortalContainer container, RewardSettingsService rewardSettingsService, ChannelKey channelKey) {
     this.container = container;
+    this.rewardSettingsService = rewardSettingsService;
     this.channelKey = channelKey;
     this.pushNotification = StringUtils.equals(channelKey.getId(), "PUSH_CHANNEL");
   }
@@ -65,16 +71,19 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
 
     RequestLifeCycle.begin(container);
     try {
+      RewardSettings rewardSettings = rewardSettingsService.getSettings();
+      ZoneId zoneId = rewardSettings.zoneId();
+
       templateContext.putAll(notification.getOwnerParameter());
       templateContext.put("NOTIFICATION_ID", notification.getId());
       String amount = (String) templateContext.get(AMOUNT);
       templateContext.put(AMOUNT, formatNumber(amount, language));
 
       String rewardStartPeriodDate = (String) templateContext.get(REWARD_START_PERIOD_DATE);
-      templateContext.put(REWARD_START_PERIOD_DATE_FORMATTED, formatTime(rewardStartPeriodDate, language));
+      templateContext.put(REWARD_START_PERIOD_DATE_FORMATTED, formatTime(rewardStartPeriodDate, zoneId, language));
 
       String rewardEndPeriodDate = (String) templateContext.get(REWARD_END_PERIOD_DATE);
-      templateContext.put(REWARD_END_PERIOD_DATE_FORMATTED, formatTime(Long.parseLong(rewardEndPeriodDate) - 1, language));
+      templateContext.put(REWARD_END_PERIOD_DATE_FORMATTED, formatTime(Long.parseLong(rewardEndPeriodDate) - 1, zoneId, language));
 
       String notificationRead = notification.getValueOwnerParameter(NotificationMessageUtils.READ_PORPERTY.getKey());
       templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
