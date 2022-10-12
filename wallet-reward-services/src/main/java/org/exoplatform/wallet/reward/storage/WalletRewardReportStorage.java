@@ -86,7 +86,7 @@ public class WalletRewardReportStorage {
   public RewardReport getRewardReport(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
     RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
-                                                                                                period.getStartDateInSeconds());
+                                                                                                period.getPeriodMedianDateInSeconds());
     if (rewardPeriodEntity == null) {
       return null;
     }
@@ -114,7 +114,7 @@ public class WalletRewardReportStorage {
              period.getEndDateFormatted("en"));
 
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(period.getRewardPeriodType(),
-                                                                                                period.getStartDateInSeconds());
+                                                                                                period.getPeriodMedianDateInSeconds());
     if (rewardPeriodEntity == null) {
       rewardPeriodEntity = new WalletRewardPeriodEntity();
     } else if (rewardPeriodEntity.getStatus() == RewardStatus.SUCCESS) {
