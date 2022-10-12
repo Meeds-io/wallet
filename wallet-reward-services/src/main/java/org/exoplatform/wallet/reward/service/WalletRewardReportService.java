@@ -32,6 +32,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.isUserRewardingAdmin;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -587,17 +588,20 @@ public class WalletRewardReportService implements RewardReportService {
     if (StringUtils.isBlank(label)) {
       return "";
     }
+    RewardSettings rewardSettings = rewardSettingsService.getSettings();
     return label.replace("{0}", wallet.getName())
                 .replace("{1}", formatNumber(walletReward.getTokensToSend(), locale.getLanguage()))
                 .replace("{2}", contractDetail.getSymbol())
-                .replace("{3}", formatTime(periodOfTime.getStartDateInSeconds(), locale.getLanguage()))
-                .replace("{4}", formatTime(periodOfTime.getEndDateInSeconds() - 1, locale.getLanguage()));
+                .replace("{3}", formatTime(periodOfTime.getStartDateInSeconds(), rewardSettings.zoneId(), locale.getLanguage()))
+                .replace("{4}", formatTime(periodOfTime.getEndDateInSeconds() - 1, rewardSettings.zoneId(), locale.getLanguage()));
   }
 
   private String getTransactionMessage(WalletReward walletReward, ContractDetail contractDetail, RewardPeriod periodOfTime) {
     StringBuilder transactionMessage = new StringBuilder();
     Set<WalletPluginReward> walletRewardsByPlugin = walletReward.getRewards();
     Locale locale = getLocale(walletReward.getWallet());
+    RewardSettings rewardSettings = rewardSettingsService.getSettings();
+    ZoneId zoneId = rewardSettings.zoneId();
 
     for (WalletPluginReward walletPluginReward : walletRewardsByPlugin) {// NOSONAR
       String transactionMessagePart = null;
@@ -611,8 +615,8 @@ public class WalletRewardReportService implements RewardReportService {
                                       .replace("{2}", formatNumber(walletPluginReward.getPoints(), locale.getLanguage()))
                                       .replace("{3}", walletPluginReward.getPluginId())
                                       .replace("{4}", walletReward.getPoolName())
-                                      .replace("{5}", formatTime(periodOfTime.getStartDateInSeconds(), locale.getLanguage()))
-                                      .replace("{6}", formatTime(periodOfTime.getEndDateInSeconds() - 1, locale.getLanguage()));
+                                      .replace("{5}", formatTime(periodOfTime.getStartDateInSeconds(), zoneId, locale.getLanguage()))
+                                      .replace("{6}", formatTime(periodOfTime.getEndDateInSeconds() - 1, zoneId, locale.getLanguage()));
 
       } else {
         String label = getResourceBundleKey(locale, REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY);
@@ -623,8 +627,8 @@ public class WalletRewardReportService implements RewardReportService {
                                       .replace("{1}", contractDetail.getSymbol())
                                       .replace("{2}", formatNumber(walletPluginReward.getPoints(), locale.getLanguage()))
                                       .replace("{3}", walletPluginReward.getPluginId())
-                                      .replace("{4}", formatTime(periodOfTime.getStartDateInSeconds(), locale.getLanguage()))
-                                      .replace("{5}", formatTime(periodOfTime.getEndDateInSeconds() - 1, locale.getLanguage()));
+                                      .replace("{4}", formatTime(periodOfTime.getStartDateInSeconds(), zoneId, locale.getLanguage()))
+                                      .replace("{5}", formatTime(periodOfTime.getEndDateInSeconds() - 1, zoneId, locale.getLanguage()));
       }
 
       transactionMessage.append(transactionMessagePart);

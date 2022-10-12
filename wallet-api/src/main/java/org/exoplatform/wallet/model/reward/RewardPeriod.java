@@ -66,15 +66,19 @@ public class RewardPeriod implements Serializable {
   }
 
   public LocalDate getPeriodMedianDate() {
-    return LocalDate.ofInstant(Instant.ofEpochSecond((endDateInSeconds + startDateInSeconds) / 2), zoneId());
+    return LocalDate.ofInstant(Instant.ofEpochSecond(getPeriodMedianDateInSeconds()), zoneId());
+  }
+
+  public long getPeriodMedianDateInSeconds() {
+    return (endDateInSeconds + startDateInSeconds) / 2;
   }
 
   public String getStartDateFormatted(String lang) {
-    return formatTime(startDateInSeconds, lang);
+    return formatTime(startDateInSeconds, zoneId(), lang);
   }
 
   public String getEndDateFormatted(String lang) {
-    return formatTime(endDateInSeconds, lang);
+    return formatTime(endDateInSeconds, zoneId(), lang);
   }
 
 }
