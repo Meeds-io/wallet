@@ -21,7 +21,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -103,15 +102,15 @@ public class RewardUtils {
   private RewardUtils() {
   }
 
-  public static String formatTime(Object timeInSeconds, String lang) {
+  public static String formatTime(Object timeInSeconds, ZoneId zoneId, String lang) {
     Locale userLocale = StringUtils.isBlank(lang) ? Locale.getDefault() : new Locale(lang);
     LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(String.valueOf(timeInSeconds))),
-                                                     TimeZone.getDefault().toZoneId());
+                                                     zoneId);
     return dateTime.format(DATE_FORMATTER.withLocale(userLocale));
   }
 
-  public static LocalDateTime timeFromSeconds(long createdDate) {
-    return LocalDateTime.ofInstant(Instant.ofEpochSecond(createdDate), TimeZone.getDefault().toZoneId());
+  public static LocalDateTime timeFromSeconds(long createdDate, ZoneId zoneId) {
+    return LocalDateTime.ofInstant(Instant.ofEpochSecond(createdDate), zoneId);
   }
 
   public static long timeToSecondsAtDayStart(LocalDate date, ZoneId zoneId) {

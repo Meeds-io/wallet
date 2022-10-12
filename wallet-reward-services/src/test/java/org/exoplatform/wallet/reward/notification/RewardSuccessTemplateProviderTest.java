@@ -27,6 +27,7 @@ import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
+import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 
 public class RewardSuccessTemplateProviderTest extends BaseWalletRewardTest {
 
@@ -35,21 +36,27 @@ public class RewardSuccessTemplateProviderTest extends BaseWalletRewardTest {
    */
   @Test
   public void testGetTemplate() {
-    RewardSuccessTemplateProvider provider = new RewardSuccessTemplateProvider(container, getParams("MAIL_CHANNEL"));
+    RewardSuccessTemplateProvider provider = new RewardSuccessTemplateProvider(container,
+                                                                               getService(WalletRewardSettingsService.class),
+                                                                               getParams("MAIL_CHANNEL"));
     Map<PluginKey, String> templateFilePathConfigs = provider.getTemplateFilePathConfigs();
     assertNotNull(templateFilePathConfigs);
     assertEquals(1, templateFilePathConfigs.size());
     String template = templateFilePathConfigs.values().iterator().next();
     assertEquals(provider.getMailTemplatePath(), template);
 
-    provider = new RewardSuccessTemplateProvider(container, getParams("WEB_CHANNEL"));
+    provider = new RewardSuccessTemplateProvider(container,
+                                                 getService(WalletRewardSettingsService.class),
+                                                 getParams("WEB_CHANNEL"));
     templateFilePathConfigs = provider.getTemplateFilePathConfigs();
     assertNotNull(templateFilePathConfigs);
     assertEquals(1, templateFilePathConfigs.size());
     template = templateFilePathConfigs.values().iterator().next();
     assertEquals(provider.getWebTemplatePath(), template);
 
-    provider = new RewardSuccessTemplateProvider(container, getParams("PUSH_CHANNEL"));
+    provider = new RewardSuccessTemplateProvider(container,
+                                                 getService(WalletRewardSettingsService.class),
+                                                 getParams("PUSH_CHANNEL"));
     templateFilePathConfigs = provider.getTemplateFilePathConfigs();
     assertNotNull(templateFilePathConfigs);
     assertEquals(1, templateFilePathConfigs.size());

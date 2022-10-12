@@ -43,6 +43,7 @@ import org.exoplatform.wallet.model.reward.RewardReport;
 import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
+import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 
 public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
 
@@ -54,7 +55,10 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
     InitParams params = getParams();
     RewardSuccessNotificationPlugin plugin = new RewardSuccessNotificationPlugin(params);
 
-    RewardSuccessTemplateProvider templateProvider = new RewardSuccessTemplateProvider(container, params);
+    RewardSuccessTemplateProvider templateProvider =
+                                                   new RewardSuccessTemplateProvider(container,
+                                                                                     getService(WalletRewardSettingsService.class),
+                                                                                     params);
     templateProvider.setWebTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
 
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
