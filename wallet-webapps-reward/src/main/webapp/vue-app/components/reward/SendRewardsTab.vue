@@ -428,6 +428,17 @@ export default {
         return 0;
       }
     },
+    selectedCompleteDateDate() {
+      if (this.selectedDate.length === 4) {
+        return `${this.selectedDate}-01-01`;
+      } else if (this.selectedDate.length === 7) {
+        return `${this.selectedDate}-01`;
+      } else if (this.selectedDate.length > 10) {
+        return this.selectedDate.substring(0, 10);
+      } else {
+        return this.selectedDate;
+      }
+    },
   },
   mounted() {
     $('.datePickerComponent input').on('click', (e) => {
@@ -447,21 +458,13 @@ export default {
         this.$refs.rewardDetails.open();
       }
     },
-    selectedDate() {
-      if (!this.selectedDate) {
+    selectedCompleteDateDate() {
+      if (!this.selectedCompleteDateDate) {
         return;
       }
       this.loading = true;
       this.lang = eXo.env.portal.language;
-      let selectedDate = this.selectedDate;
-      if (this.selectedDate.length === 4) {
-        selectedDate = `${this.selectedDate}-01-01`;
-      } else if (this.selectedDate.length === 7) {
-        selectedDate = `${this.selectedDate}-01`;
-      } else if (this.selectedDate.length > 10) {
-        selectedDate = this.selectedDate.substring(0, 10);
-      }
-      return this.$rewardService.getRewardDates(selectedDate)
+      return this.$rewardService.getRewardDates(this.selectedCompleteDateDate)
         .then((period) => {
           this.$emit('dates-changed', period);
         })
@@ -491,7 +494,7 @@ export default {
     sendRewards() {
       this.error = null;
       this.sendingRewards = true;
-      this.$rewardService.sendRewards(this.selectedDate)
+      this.$rewardService.sendRewards(this.selectedCompleteDateDate)
         .catch(e => {
           this.error = String(e);
         })
