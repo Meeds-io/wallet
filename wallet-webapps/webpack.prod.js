@@ -22,6 +22,7 @@ const config = merge(webpackCommonConfig, {
   mode: 'production',
   entry: {
     wallet: './src/main/webapp/vue-app/wallet.js',
+    walletAPI: './src/main/webapp/vue-app/walletAPI.js',
     spaceWallet: './src/main/webapp/vue-app/spaceWallet.js',
     walletOverview: './src/main/webapp/vue-app/wallet-overview/main.js',
   },
