@@ -42,6 +42,10 @@ import WalletSettings from './wallet-settings/components/WalletSettings.vue';
 import WalletNotificationAlert from './components/WalletNotificationAlert.vue';
 import MetamaskWarnings from './components/MetamaskWarnings.vue';
 import WalletWelcomeScreen from './components/WalletWelcomeScreen.vue';
+import WalletOverview from '../../../../../wallet-webapps/src/main/webapp/vue-app/wallet-overview/components/WalletOverview.vue';
+import WalletOverviewDrawer from '../../../../../wallet-webapps/src/main/webapp/vue-app/wallet-overview/components/WalletOverviewDrawer.vue';
+import WalletOverviewRewardItem from '../../../../../wallet-webapps/src/main/webapp/vue-app/wallet-overview/components/WalletOverviewRewardItem.vue';
+import WalletOverviewRewardPluginItem from '../../../../../wallet-webapps/src/main/webapp/vue-app/wallet-overview/components/WalletOverviewRewardPluginItem.vue';
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
@@ -85,7 +89,11 @@ export const components = {
   'wallet-settings-jdenticon': WalletSettingsJdenticon,
   'wallet-welcome-screen': WalletWelcomeScreen,
   'wallet-notification-alert': WalletNotificationAlert,
-  'wallet-metamask-warnings': MetamaskWarnings
+  'wallet-metamask-warnings': MetamaskWarnings,
+  'wallet-overview': WalletOverview,
+  'wallet-overview-drawer': WalletOverviewDrawer,
+  'wallet-overview-reward-item': WalletOverviewRewardItem,
+  'wallet-overview-reward-plugin-item': WalletOverviewRewardPluginItem,
 };
 
 for (const key in components) {
@@ -99,4 +107,9 @@ if (extensionRegistry) {
     vueComponent: Vue.options.components['wallet-settings'],
     rank: 10,
   });
+  extensionRegistry.registerComponent('my-rewards-overview', 'my-rewards-item', {
+    id: 'wallet-rewards-overview',
+    vueComponent: Vue.options.components['wallet-overview'],
+    rank: 10,
+  }); 
 }
