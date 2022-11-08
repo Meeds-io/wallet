@@ -9,7 +9,7 @@
     <v-cacheable-dom-app cache-id="WalletOverview_<%=profileOwnerId%>"></v-cacheable-dom-app>
     <script type="text/javascript" defer="defer">
       eXo.env.portal.addOnLoadCallback(() => {
-        require(['PORTLET/wallet/WalletOverview'], app => app.init());
+        require(['PORTLET/wallet-common/WalletOverview'], app => app.init());
       });
     </script>
   </div>
