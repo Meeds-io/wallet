@@ -47,7 +47,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         @click="clickable && openDrawer()">
         <div class="justify-center d-flex flex-no-wrap">
           <template>
-            <div :class="isOverviewDisplay ? 'pe-2' : 'px-2'"
+            <div
+              :class="isOverviewDisplay ? 'pe-2' : 'px-2'"
               class="tertiary-color display-2 text-start font-weight-bold walletOverviewBalance">
               {{ currencySymbol }}
             </div>
@@ -67,7 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import { getCountRewards } from '../../WalletBalanceAPI.js';
+import { getCountRewards } from '../../../../../../../wallet-webapps/src/main/webapp/vue-app/WalletBalanceAPI.js';
 
 export default {
   props: {
