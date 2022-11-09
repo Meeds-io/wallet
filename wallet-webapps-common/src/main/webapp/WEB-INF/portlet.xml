@@ -40,4 +40,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <title>Wallet settings</title>
         </portlet-info>
     </portlet>
+    <portlet>
+      <portlet-name>WalletOverview</portlet-name>
+      <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+      <init-param>
+        <name>portlet-view-dispatched-file-path</name>
+        <value>/jsp/walletOverview.jsp</value>
+      </init-param>
+      <init-param>
+        <description>List of profiles that can be used to enable this portlet</description>
+        <name>exo.profiles</name>
+        <value>wallet</value>
+      </init-param>
+      <supports>
+        <mime-type>text/html</mime-type>
+      </supports>
+      <portlet-info>
+        <title>Wallet overview</title>
+      </portlet-info>
+    </portlet>
 </portlet-app>
