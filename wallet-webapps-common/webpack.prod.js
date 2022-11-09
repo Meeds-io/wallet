@@ -23,6 +23,8 @@ const config = merge(webpackCommonConfig, {
   entry: {
     walletCommon: './src/main/webapp/vue-app/walletCommon.js',
     walletSettings: './src/main/webapp/vue-app/wallet-settings/main.js',
+    walletOverview: './src/main/webapp/vue-app/wallet-overview/main.js',
+
   },
   output: {
     path: path.join(__dirname, 'target/wallet-common/'),
