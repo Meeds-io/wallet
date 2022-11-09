@@ -17,6 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <v-app :class="owner && 'walletOverviewApplication' || 'walletOverviewApplicationOther'">
     <v-toolbar
+      v-if="!isOverviewDisplay"
       color="white"
       height="48"
       flat
@@ -41,11 +42,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       class="walletOverviewCard white"
       flat>
       <v-card-text
-        class="justify-center ma-auto py-5 d-flex flex-no-wrap"
+        :class="isOverviewDisplay ? 'px-0 py-2' : 'py-5'"
+        class="justify-center ma-auto d-flex flex-no-wrap"
         @click="clickable && openDrawer()">
         <div class="justify-center d-flex flex-no-wrap">
           <template>
-            <div class="tertiary-color display-2 text-start font-weight-bold walletOverviewBalance px-2">
+            <div
+              :class="isOverviewDisplay ? 'pe-2' : 'px-2'"
+              class="tertiary-color display-2 text-start font-weight-bold walletOverviewBalance">
               {{ currencySymbol }}
             </div>
             <div
@@ -64,9 +68,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import { getCountRewards } from '../../WalletBalanceAPI.js';
+import { getCountRewards } from '../../js/WalletBalanceAPI.js';
 
 export default {
+  props: {
+    isOverviewDisplay: {
+      type: Boolean,
+      default: () => false,
+    },
+  },
   data: () => ({
     owner: eXo.env.portal.profileOwner === eXo.env.portal.userName,
     currentName: eXo.env.portal.profileOwner,
