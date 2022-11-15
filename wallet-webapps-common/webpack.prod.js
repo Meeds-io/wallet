@@ -24,7 +24,6 @@ const config = merge(webpackCommonConfig, {
     walletCommon: './src/main/webapp/vue-app/walletCommon.js',
     walletSettings: './src/main/webapp/vue-app/wallet-settings/main.js',
     walletOverview: './src/main/webapp/vue-app/wallet-overview/main.js',
-    WalletUserBalance: './src/main/webapp/vue-app/wallet-user-balance/main.js',
 
   },
   output: {
