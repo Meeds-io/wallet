@@ -2,7 +2,7 @@
   <v-app>
     <v-card flat>
       <v-card-text class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
-        <span class="my-2 secondary--text">{{ symbol }}</span>
+        <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span class="text-truncate ma-2 display-1 font-weight-bold">{{ balanceToDisplay }}</span>
       </v-card-text>
     </v-card>
