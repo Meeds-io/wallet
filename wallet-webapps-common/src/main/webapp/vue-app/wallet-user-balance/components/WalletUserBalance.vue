@@ -19,7 +19,7 @@ export default {
       return this.contractDetails?.symbol;
     },
     balance() {
-      return this.wallet?.tokenBalance && this.walletUtils.toFixed(this.wallet?.tokenBalance, 2);
+      return this.wallet?.tokenBalance;
     },
     balanceToDisplay() {
       return this.balance?.toFixed(2);
