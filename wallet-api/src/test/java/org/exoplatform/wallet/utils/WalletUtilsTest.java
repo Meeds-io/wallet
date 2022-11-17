@@ -30,11 +30,11 @@ public class WalletUtilsTest {
     assertEquals("0", WalletUtils.formatBalance(0.0000001d, Locale.ENGLISH, true));
     assertEquals("0,01", WalletUtils.formatBalance(0.01d, Locale.FRENCH, true));
     assertEquals("0.1", WalletUtils.formatBalance(0.1d, Locale.ENGLISH, true));
-    assertEquals("2 222 222 222 222", WalletUtils.formatBalance(2222222222222.0000001d, Locale.FRENCH, true));
+    assertEquals("2 222 222 222 222", WalletUtils.formatBalance(2222222222222.0000001d, Locale.FRENCH, true));
     assertEquals("2,222,222,222,222", WalletUtils.formatBalance(2222222222222.0000001d, Locale.ENGLISH, true));
-    assertEquals("222 222 222", WalletUtils.formatBalance(222222222.0500001d, Locale.FRENCH, true));
+    assertEquals("222 222 222", WalletUtils.formatBalance(222222222.0500001d, Locale.FRENCH, true));
     assertEquals("222,222,222", WalletUtils.formatBalance(222222222.5000001d, Locale.ENGLISH, true));
-    assertEquals("222 222 222,05", WalletUtils.formatBalance(222222222.0500001d, Locale.FRENCH, false));
+    assertEquals("222 222 222,05", WalletUtils.formatBalance(222222222.0500001d, Locale.FRENCH, false));
     assertEquals("222,222,222.5", WalletUtils.formatBalance(222222222.5000001d, Locale.ENGLISH, false));
   }
 
