@@ -9,6 +9,7 @@
   </v-app>
 </template>
 <script>
+import {initSettings} from '../../js/WalletUtils.js';
 export default {
   data: () => ({
     wallet: null,
@@ -26,10 +27,11 @@ export default {
     }
   },
   created() {
-    this.walletUtils.initSettings(false, true, true)
+    initSettings(false, true, true)
       .then(() => {
         this.wallet = Object.assign({}, window.walletSettings.wallet);
         this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
+        document.dispatchEvent(new CustomEvent('balanceAmount', {detail: this.wallet.tokenBalance}));
       });
   }
 };
