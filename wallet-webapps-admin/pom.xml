@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <parent>
     <groupId>org.exoplatform.addons.wallet</groupId>
     <artifactId>wallet</artifactId>
-    <version>2.4.0-exo-20221207</version>
+    <version>2.4.x-exo-SNAPSHOT</version>
   </parent>
   <artifactId>wallet-webapps-admin</artifactId>
   <packaging>war</packaging>
