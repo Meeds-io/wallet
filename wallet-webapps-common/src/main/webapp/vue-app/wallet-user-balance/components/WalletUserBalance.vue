@@ -14,6 +14,10 @@ export default {
   data: () => ({
     wallet: null,
     contractDetails: null,
+    isOverviewDisplay: {
+      type: Boolean,
+      default: () => false,
+    },
   }),
   computed: {
     symbol() {
@@ -23,7 +27,7 @@ export default {
       return this.wallet?.tokenBalance;
     },
     balanceToDisplay() {
-      return this.balance?.toFixed(2);
+      return this.isOverviewDisplay ? Math.trunc(this.balance) : this.balance?.toFixed(2);
     }
   },
   created() {
