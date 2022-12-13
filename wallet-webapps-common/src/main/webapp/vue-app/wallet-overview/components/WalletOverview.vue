@@ -55,7 +55,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <div
               :class="isOverviewDisplay ? 'display-1' : 'display-2'"
               class="text-color text-start font-weight-bold walletOverviewBalance">
-              {{ countReward.toFixed(2) }}
+              {{ isOverviewDisplay ? Math.trunc(countReward) : countReward.toFixed(2) }}
             </div>
           </template>
         </div>
