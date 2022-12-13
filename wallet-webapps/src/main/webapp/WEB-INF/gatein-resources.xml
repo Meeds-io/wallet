@@ -155,7 +155,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   
   <module>
     <name>wallet-api</name>
-    <load-group>wallet-common-overview</load-group>
+    <load-group>reward-overview-group</load-group>
     <script>
       <minify>false</minify>
       <path>/js/walletAPI.bundle.js</path>
