@@ -22,30 +22,36 @@ Vue.use(Vuetify);
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
 
-export function init() {
-  document.addEventListener('exo-wallet-init', () => {
-    if (!window.walletAPIInitialized) {
-      exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-        window.require(['SHARED/Web3', 'SHARED/walletCommon'], (LocalWeb3, WalletCommon) => {
-          Vue.use(WalletCommon);
-          const vuetify = new Vuetify(Object.assign({}, eXo.env.portal.vuetifyPreset));
-          vuetify.theme ={ disable: true };
-  
-          window.LocalWeb3 = LocalWeb3;
-  
-          new Vue({
-            render: (h) => h(WalletAPIApp),
-            i18n,
-            vuetify,
-          }).$mount('#WalletAPIApp');
-        });
+export function initAPI() {
+  if (!window.walletAPIInitialized) {
+    exoi18n.loadLanguageAsync(lang, url).then(i18n => {
+      window.require(['SHARED/Web3', 'SHARED/walletCommon'], (LocalWeb3, WalletCommon) => {
+        Vue.use(WalletCommon);
+        const vuetify = new Vuetify(Object.assign({}, eXo.env.portal.vuetifyPreset));
+        vuetify.theme ={ disable: true };
+
+        window.LocalWeb3 = LocalWeb3;
+
+        new Vue({
+          render: (h) => h(WalletAPIApp),
+          i18n,
+          vuetify,
+        }).$mount('#WalletAPIApp');
       });
-    }
-  });
-  
+    });
+  }
+}
+
+export function init() {
   window.walletAddonInstalled = true;
   
   document.addEventListener('profile-extension-init', () => {
     document.dispatchEvent(new CustomEvent('exo-wallet-init'));
   });
 }
+
+document.addEventListener('exo-wallet-init', () => {
+  initAPI();
+});
+
+document.dispatchEvent(new CustomEvent('exo-wallet-api-initialized'));
