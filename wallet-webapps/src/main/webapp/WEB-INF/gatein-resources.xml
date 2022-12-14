@@ -33,9 +33,47 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <portlet>
     <name>WalletAPI</name>
     <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletAPI.bundle.js</path>
+      </script>
       <depends>
-        <module>wallet-api</module>
-      </depends> 
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>fetchPolyfill</module>
+      </depends>
+      <depends>
+        <module>customEventPolyfill</module>
+      </depends>
+      <depends>
+        <module>iePolyfills</module>
+      </depends>
+      <depends>
+        <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
+      </depends>
+      <depends>
+        <module>vueChart</module>
+        <as>VueChart</as>
+      </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
     </module>
   </portlet>
 
@@ -154,7 +192,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </portlet>
   
   <module>
-    <name>wallet-api</name>
+    <name>WalletAPIBundle</name>
     <load-group>reward-overview-group</load-group>
     <script>
       <minify>false</minify>
