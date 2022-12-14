@@ -53,9 +53,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               {{ currencySymbol }}
             </div>
             <div
-              :class="isOverviewDisplay ? 'display-1' : 'display-2'"
-              class="text-color text-start font-weight-bold walletOverviewBalance">
-              {{ isOverviewDisplay ? Math.trunc(countReward) : countReward.toFixed(2) }}
+              :class="typographyClass"
+              class="text-color font-weight-bold d-flex align-self-center walletOverviewBalance">
+              {{ balanceToDisplay }}
             </div>
           </template>
         </div>
@@ -84,17 +84,37 @@ export default {
     title: null,
     currencyName: null,
     currencySymbol: null,
-    countReward: 0
+    rewardBalance: 0
   }),
   computed: {
     clickable() {
-      return this.owner && this.countReward > 0;
+      return this.owner && this.rewardBalance > 0;
+    },
+    balanceToDisplay() {
+      return Number.isFinite(Number(this.rewardBalance)) ? Math.trunc(this.rewardBalance) : '';
+    },
+    typographyClass() {
+      switch (String(this.balanceToDisplay).length) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+        return 'text-h4';
+      case 6:
+        return 'text-h5';
+      case 7:
+      case 8:
+        return 'text-h6';
+      default:
+        return 'body-1';
+      }
     },
   },
   created() {
     this.refresh();
     getCountRewards(eXo.env.portal.profileOwner).then((resp) => {
-      this.countReward = resp.sumRewards;
+      this.rewardBalance = resp.sumRewards;
     });
   },
   methods: {

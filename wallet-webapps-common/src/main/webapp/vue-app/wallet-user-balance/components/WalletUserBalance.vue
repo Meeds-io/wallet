@@ -3,7 +3,11 @@
     <v-card flat @click="$refs.accountDetail.open()">
       <v-card-text class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
-        <span class="text-truncate ma-2 display-1 font-weight-bold">{{ balanceToDisplay }}</span>
+        <span
+          :class="typographyClass"
+          class="ma-2 text-color font-weight-bold d-flex align-self-center">
+          {{ balanceToDisplay }}
+        </span>
       </v-card-text>
     </v-card>
     <wallet-reward-account-detail
@@ -31,8 +35,25 @@ export default {
       return this.wallet?.tokenBalance;
     },
     balanceToDisplay() {
-      return this.isOverviewDisplay ? Math.trunc(this.balance) : this.balance?.toFixed(2);
-    }
+      return Number.isFinite(Number(this.balance)) ? Math.trunc(this.balance) : '';
+    },
+    typographyClass() {
+      switch (String(this.balanceToDisplay).length) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+        return 'text-h4';
+      case 6:
+        return 'text-h5';
+      case 7:
+      case 8:
+        return 'text-h6';
+      default:
+        return 'body-1';
+      }
+    },
   },
   created() {
     this.walletUtils.initSettings(false, true, true)
