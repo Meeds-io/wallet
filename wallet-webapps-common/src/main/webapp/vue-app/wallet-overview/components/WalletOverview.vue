@@ -40,11 +40,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-card
       :class="clickable && 'clickable' || ''"
       class="walletOverviewCard white"
-      flat>
+      flat
+      @click="clickable && openDrawer()">
       <v-card-text
         :class="isOverviewDisplay ? 'px-0 py-2' : 'py-5'"
-        class="justify-center ma-auto d-flex flex-no-wrap"
-        @click="clickable && openDrawer()">
+        class="justify-center ma-auto d-flex flex-no-wrap">
         <div class="justify-center d-flex flex-no-wrap">
           <template>
             <div
@@ -95,7 +95,6 @@ export default {
     this.refresh();
     getCountRewards(eXo.env.portal.profileOwner).then((resp) => {
       this.countReward = resp.sumRewards;
-      document.dispatchEvent(new CustomEvent('countReward', {detail: this.countReward}));
     });
   },
   methods: {
