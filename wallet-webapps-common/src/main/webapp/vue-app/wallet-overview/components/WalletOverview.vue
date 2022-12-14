@@ -31,10 +31,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         icon
         outlined
         small
-        @click="editWorkExperiences">
-        <i
-          class="uiIconInformation clickable primary--text my-auto pb-2 me-1"
-          @click="openDrawer"></i>
+        @click="openDrawer">
+        <i class="uiIconInformation clickable primary--text my-auto"></i>
       </v-btn>
     </v-toolbar>
     <component
@@ -44,21 +42,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       flat
       @click="clickable && openDrawer()">
       <v-card-text
+        v-show="!loading"
         :class="isOverviewDisplay ? 'px-0 py-2' : 'py-5'"
         class="justify-center ma-auto d-flex flex-no-wrap">
         <div class="justify-center d-flex flex-no-wrap">
-          <template>
-            <div
-              :class="isOverviewDisplay ? 'pe-2 display-1' : 'px-2 display-2'"
-              class="tertiary-color text-start font-weight-bold walletOverviewBalance">
-              {{ currencySymbol }}
-            </div>
-            <div
-              :class="typographyClass"
-              class="text-color font-weight-bold d-flex align-self-center walletOverviewBalance">
-              {{ balanceToDisplay }}
-            </div>
-          </template>
+          <div
+            :class="isOverviewDisplay ? 'pe-2 display-1' : 'px-2 display-2'"
+            class="tertiary-color text-start font-weight-bold walletOverviewBalance">
+            {{ currencySymbol }}
+          </div>
+          <div
+            :class="typographyClass"
+            class="text-color font-weight-bold d-flex align-self-center walletOverviewBalance">
+            {{ balanceToDisplay }}
+          </div>
         </div>
       </v-card-text>
     </component>
@@ -85,14 +82,15 @@ export default {
     title: null,
     currencyName: null,
     currencySymbol: null,
-    rewardBalance: 0
+    rewardBalance: null,
+    loading: true,
   }),
   computed: {
     clickable() {
       return this.owner && this.rewardBalance > 0;
     },
     balanceToDisplay() {
-      return Number.isFinite(Number(this.rewardBalance)) ? Math.trunc(this.rewardBalance) : '';
+      return this.rewardBalance !== null && Number.isFinite(Number(this.rewardBalance)) ? Number(this.rewardBalance).toFixed() : '';
     },
     typographyClass() {
       switch (String(this.balanceToDisplay).length) {
@@ -114,9 +112,7 @@ export default {
   },
   created() {
     this.refresh();
-    getCountRewards(eXo.env.portal.profileOwner).then((resp) => {
-      this.rewardBalance = resp.sumRewards;
-    });
+    this.refreshSettings(window.walletSettings);
   },
   methods: {
     openDrawer() {
@@ -125,7 +121,10 @@ export default {
       }
     },
     refresh() {
-      return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
+      this.loading = true;
+      const earningsPromise = getCountRewards(eXo.env.portal.profileOwner)
+        .then((resp) => this.rewardBalance = resp.sumRewards);
+      const walletDetailsPromise = fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
         .then((resp) => resp && resp.ok && resp.json())
         .then(() => {
           if (!this.currencyName) {
@@ -135,22 +134,31 @@ export default {
               credentials: 'include',
             })
               .then((resp) => resp && resp.ok && resp.json())
-              .then(settings => {
-                const contract = settings && settings.contractDetail;
-                this.currencyName = contract && contract.name;
-                this.currencySymbol = contract && contract.symbol;
-                if (this.currencyName) {
-                  this.title = this.$t('exoplatform.wallet.title.rewardedBalance', {0: this.currencyName});
-                }
-                return this.$nextTick();
-              });
+              .then(this.refreshSettings);
           }
-          return this.$nextTick();
         })
+        .then(() => this.$nextTick())
         .finally(() => {
           this.$root.$emit('application-loaded');
         });
-    }
+      return Promise.all([
+        earningsPromise,
+        walletDetailsPromise,
+      ])
+        .then(() => this.$nextTick())
+        .finally(() => this.loading = false);
+    },
+    refreshSettings(settings) {
+      if (!settings) {
+        return;
+      }
+      const contract = settings && settings.contractDetail;
+      this.currencyName = contract && contract.name;
+      this.currencySymbol = contract && contract.symbol;
+      if (this.currencyName) {
+        this.title = this.$t('exoplatform.wallet.title.rewardedBalance', {0: this.currencyName});
+      }
+    },
   },
 };
 </script>
