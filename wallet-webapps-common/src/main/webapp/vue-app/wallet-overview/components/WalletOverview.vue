@@ -37,11 +37,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           @click="openDrawer"></i>
       </v-btn>
     </v-toolbar>
-    <v-card
+    <div
       :class="clickable && 'clickable' || ''"
       class="walletOverviewCard white"
-      flat>
-      <v-card-text
+      flat
+      @click="clickable && openDrawer()">
+      <div
+        v-show="!loading"
         :class="isOverviewDisplay ? 'px-0 py-2' : 'py-5'"
         class="justify-center ma-auto d-flex flex-no-wrap"
         @click="clickable && openDrawer()">
@@ -59,8 +61,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </div>
           </template>
         </div>
-      </v-card-text>
-    </v-card>
+      </div>
+    </div>
 
     <wallet-overview-drawer
       ref="walletOverviewDrawer"
