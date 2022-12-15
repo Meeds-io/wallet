@@ -1,15 +1,15 @@
 <template>
   <v-app>
-    <v-card flat @click="$refs.accountDetail.open()">
-      <v-card-text class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
+    <div flat @click="$refs.accountDetail.open()" class="clickable">
+      <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span
           :class="typographyClass"
           class="ma-2 text-color font-weight-bold d-flex align-self-center">
           {{ balanceToDisplay }}
         </span>
-      </v-card-text>
-    </v-card>
+      </div>
+    </div>
     <wallet-reward-account-detail
       ref="accountDetail"
       :fiat-symbol="symbol"
