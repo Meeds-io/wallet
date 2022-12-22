@@ -48,7 +48,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <wallet-reward-transactions-list
         id="transactionsList"
         ref="transactionsList"
-        class="lastTransactionsList"
+        class="lastTransactionsList overflow-x-hidden"
         :wallet="wallet"
         :contract-details="contractDetails"
         :fiat-symbol="fiatSymbol"
