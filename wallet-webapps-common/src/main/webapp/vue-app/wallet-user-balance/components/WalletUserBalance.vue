@@ -1,6 +1,9 @@
 <template>
-  <v-app>
-    <div flat @click="$refs.accountDetail.open()" class="clickable">
+  <v-app id="WalletApp" class="ma-0">
+    <div
+      flat
+      @click="$refs.accountDetail.open()"
+      class="clickable">
       <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span
