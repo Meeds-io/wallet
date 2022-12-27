@@ -18,50 +18,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd http://www.exoplatform.org/xml/ns/kernel_1_2.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 
-  <component>
-    <key>org.exoplatform.social.core.space.spi.SpaceService</key>
-    <type>org.exoplatform.wallet.test.mock.SpaceServiceMock</type>
-  </component>
-
-  <component>
-    <key>org.exoplatform.social.core.manager.IdentityManager</key>
-    <type>org.exoplatform.wallet.test.mock.IdentityManagerMock</type>
-  </component>
-
-  <component>
-    <type>org.exoplatform.web.security.codec.CodecInitializer</type>
-    <init-params>
-      <value-param>
-        <name>gatein.conf.dir</name>
-        <value>jar:/conf</value>
-      </value-param>
-    </init-params>
-  </component>
-
-  <component>
-    <key>org.exoplatform.commons.api.persistence.DataInitializer</key>
-    <type>org.exoplatform.commons.persistence.impl.LiquibaseDataInitializer</type>
-    <init-params>
-      <value-param>
-        <name>liquibase.datasource</name>
-        <value>java:/comp/env/exo-jpa_portal</value>
-      </value-param>
-      <value-param>
-        <name>liquibase.contexts</name>
-        <value>${exo.liquibase.contexts}</value>
-      </value-param>
-    </init-params>
-  </component>
-
-  <component>
-      <key>org.exoplatform.commons.api.settings.ExoFeatureService</key>
-      <type>org.exoplatform.settings.impl.ExoFeatureServiceImpl</type>
-  </component>
-
-  <import>jar:/conf/portal/wallet-configuration.xml</import>
-  <import>jar:/conf/portal/test-wallet-reward-configuration.xml</import>
+  <import>jar:/conf/exo.social.component.core-dependencies-configuration.xml</import>
+  <import>jar:/conf/exo.social.component.core-configuration.xml</import>
+  <import>jar:/conf/portal/wallet-services-test-configuration.xml</import>
   <import>jar:/conf/portal/test-organization-configuration.xml</import>
+  <import>jar:/conf/portal/test-wallet-reward-configuration.xml</import>
 
-  <remove-configuration>org.exoplatform.commons.search.index.IndexingOperationProcessor</remove-configuration>
-  <remove-configuration>org.exoplatform.commons.search.rest.IndexingManagementRestServiceV1</remove-configuration>
 </configuration>
