@@ -941,20 +941,24 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       return false;
     }
 
-    byte[] signatureBytes = Numeric.hexStringToByteArray(signedMessage);
-    byte[] r = Arrays.copyOfRange(signatureBytes, 0, 32);
-    byte[] s = Arrays.copyOfRange(signatureBytes, 32, 64);
-    byte v = signatureBytes[64];
-    if (v < 27) {
-      v += 27;
-    }
-
-    BigInteger publicKey = Sign.signedPrefixedMessageToKey(rawMessage.getBytes(), new SignatureData(v, r, s));
-    if (publicKey != null) {
-      String recoveredAddress = "0x" + Keys.getAddress(publicKey);
-      if (recoveredAddress.equalsIgnoreCase(walletAddress)) {
-        return true;
+    try {
+      byte[] signatureBytes = Numeric.hexStringToByteArray(signedMessage);
+      byte[] r = Arrays.copyOfRange(signatureBytes, 0, 32);
+      byte[] s = Arrays.copyOfRange(signatureBytes, 32, 64);
+      byte v = signatureBytes[64];
+      if (v < 27) {
+        v += 27;
       }
+
+      BigInteger publicKey = Sign.signedPrefixedMessageToKey(rawMessage.getBytes(), new SignatureData(v, r, s));
+      if (publicKey != null) {
+        String recoveredAddress = "0x" + Keys.getAddress(publicKey);
+        if (recoveredAddress.equalsIgnoreCase(walletAddress)) {
+          return true;
+        }
+      }
+    } catch (Exception e) {
+      LOG.warn("Error while validating wallet signature. Error: {}", e.getMessage());
     }
     return false;
   }

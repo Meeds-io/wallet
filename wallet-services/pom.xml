@@ -34,26 +34,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.addons.analytics</groupId>
-      <artifactId>analytics-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.ws</groupId>
-      <artifactId>exo.ws.rest.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.core</groupId>
-      <artifactId>exo.core.component.security.core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.commons</groupId>
-      <artifactId>commons-component-common</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.exoplatform.commons</groupId>
       <artifactId>commons-comet-service</artifactId>
       <scope>provided</scope>
@@ -64,13 +44,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>jsr250-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
+      <groupId>org.exoplatform.addons.analytics</groupId>
+      <artifactId>analytics-api</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -116,23 +91,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependency>
     <!-- Test dependencies -->
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.exoplatform.commons</groupId>
-      <artifactId>commons-testing</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
+      <groupId>org.exoplatform.social</groupId>
+      <artifactId>social-component-core</artifactId>
+      <type>test-jar</type>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -182,6 +143,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </artifactItem>
               </artifactItems>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
