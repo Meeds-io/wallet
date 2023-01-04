@@ -273,6 +273,33 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
   }
 
   @Test
+  public void testComputeRewardsByUser() {
+
+    WalletAccountService accountService = getService(WalletAccountService.class);
+    Wallet userWallet = newWallet(1l);
+    userWallet = accountService.saveWallet(userWallet, true);
+    updateWalletBlockchainState(userWallet);
+    accountService.saveWalletBlockchainState(userWallet, WalletUtils.getContractAddress());
+    entitiesToClean.add(userWallet);
+
+    int enabledWalletsCount = 6;
+    for (int i = 1; i < enabledWalletsCount; i++) {
+      Wallet wallet = newWallet(i + 1l);
+      wallet = accountService.saveWallet(wallet, true);
+      updateWalletBlockchainState(wallet);
+      accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+      entitiesToClean.add(wallet);
+    }
+
+    WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
+    LocalDate date = YearMonth.of(2022, 12).atEndOfMonth();
+    RewardReport rewardReport = walletRewardService.computeRewardsByUser(date, userWallet.getTechnicalId());
+    assertNotNull(rewardReport);
+    assertNotNull(rewardReport.getRewards());
+    assertEquals(1, rewardReport.getRewards().size());
+  }
+
+  @Test
   public void testComputeRewardsWithTimeZoneChange() throws Exception {
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
     WalletRewardReportStorage rewardReportStorage = getService(WalletRewardReportStorage.class);
