@@ -105,6 +105,42 @@ public class RewardReportREST implements ResourceContainer {
   }
 
   @GET
+  @Path("compute/user")
+  @RolesAllowed("users")
+  @Operation(
+          summary = "Compute rewards of user wallet per a chosen period of time",
+          method = "GET",
+          description = "returns a wallet reward object")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response computeRewardsByUser(
+                                      @Parameter(description = "A date with format yyyy-MM-dd", required = true)
+                                      @QueryParam("date")
+                                      String date) {
+    if (StringUtils.isBlank(date)) {
+      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+    }
+    try {
+      RewardPeriod rewardPeriod = getRewardPeriod(date);
+      RewardReport rewardReport = rewardReportService.computeRewardsByUser(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserIdentityId());
+      rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
+      return Response.ok(rewardReport).build();
+    } catch (Exception e) {
+      LOG.error("Error getting user's computed reward", e);
+      JSONObject object = new JSONObject();
+      try {
+        object.append(ERROR_PARAM, e.getMessage());
+      } catch (JSONException e1) {
+        // Nothing to do
+      }
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+    }
+  }
+
+  @GET
   @Path("send")
   @RolesAllowed("rewarding")
   @Operation(

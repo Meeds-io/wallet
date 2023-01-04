@@ -140,3 +140,26 @@ export function computeRewards(date) {
     }
   });
 }
+
+export function computeRewardsByUser(date) {
+  return fetch(`/portal/rest/wallet/api/reward/compute/user?date=${date}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }).then((resp) => {
+    if (resp) {
+      try {
+        return resp.json().catch(() => {
+          throw new Error('Error computing rewards');
+        });
+      } catch (e) {
+        throw new Error('Error computing rewards');
+      }
+    } else {
+      throw new Error('Error computing rewards');
+    }
+  });
+}
