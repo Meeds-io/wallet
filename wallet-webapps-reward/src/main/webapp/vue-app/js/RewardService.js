@@ -150,16 +150,10 @@ export function computeRewardsByUser(date) {
       'Content-Type': 'application/json',
     },
   }).then((resp) => {
-    if (resp) {
-      try {
-        return resp.json().catch(() => {
-          throw new Error('Error computing rewards');
-        });
-      } catch (e) {
-        throw new Error('Error computing rewards');
-      }
+    if (resp && resp.ok) {
+      return resp.json();
     } else {
-      throw new Error('Error computing rewards');
+      throw new Error ('Error computing rewards');
     }
   });
 }

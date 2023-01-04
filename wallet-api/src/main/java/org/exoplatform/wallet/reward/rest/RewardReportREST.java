@@ -55,6 +55,7 @@ import org.exoplatform.wallet.utils.WalletUtils;
 @Tag(name = "/wallet/api/reward", description = "Manage wallet rewards")
 public class RewardReportREST implements ResourceContainer {
   private static final String ERROR_PARAM = "error";
+  private static final String ERROR_EMPTY_PARAM_DATE = "Bad request sent to server with empty 'date' parameter";
 
   private static final Log    LOG = ExoLogger.getLogger(RewardReportREST.class);
 
@@ -85,7 +86,7 @@ public class RewardReportREST implements ResourceContainer {
                                  @QueryParam("date")
                                  String date) {
     if (StringUtils.isBlank(date)) {
-      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+      return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
     }
     try {
       RewardPeriod rewardPeriod = getRewardPeriod(date);
@@ -121,7 +122,7 @@ public class RewardReportREST implements ResourceContainer {
                                       @QueryParam("date")
                                       String date) {
     if (StringUtils.isBlank(date)) {
-      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+      return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
     }
     try {
       RewardPeriod rewardPeriod = getRewardPeriod(date);
@@ -158,7 +159,7 @@ public class RewardReportREST implements ResourceContainer {
                               String date) {
     try {
       if (StringUtils.isBlank(date)) {
-        return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+        return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
       }
       RewardPeriod rewardPeriod = getRewardPeriod(date);
       rewardReportService.sendRewards(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserId());
