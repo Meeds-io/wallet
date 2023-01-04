@@ -43,12 +43,11 @@ public interface RewardReportService {
    *
    * @param localDate a {@link LocalDate} inside the period time
    *          that will be retrieved
-   * @param technicalUserId a {@link Long} user identity technical id
-   *          that will be retrieved
+   * @param userIdentityId User technical identifier ({@link Identity#getId()})
    * @return a {@link Set} of {@link WalletReward} with the details of sent
    *         tokens and tokens to send
    */
-  RewardReport computeRewardsByUser(LocalDate localDate, Long technicalUserId);
+  RewardReport computeRewardsByUser(LocalDate localDate, long userIdentityId);
 
   /**
    * Send rewards transactions
