@@ -207,6 +207,14 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public RewardReport computeRewardsByUser(LocalDate date, long userIdentityId) {
+    RewardReport rewardReport = computeRewards(date);
+    Set<WalletReward> rewards = rewardReport.getRewards().stream().filter(reward -> reward.getIdentityId() == userIdentityId).collect(Collectors.toSet());
+    rewardReport.setRewards(rewards);
+    return rewardReport;
+  }
+
+  @Override
   public RewardReport getRewardReport(LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {

@@ -47,6 +47,7 @@ import WalletOverviewDrawer from './wallet-overview/components/WalletOverviewDra
 import WalletOverviewRewardItem from './wallet-overview/components/WalletOverviewRewardItem.vue';
 import WalletOverviewRewardPluginItem from './wallet-overview/components/WalletOverviewRewardPluginItem.vue';
 import WalletUserBalance from './wallet-user-balance/components/WalletUserBalance.vue';
+import WeeklyEarnings from './weekly-earnings/components/weeklyEarnings.vue';
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
@@ -96,6 +97,7 @@ export const components = {
   'wallet-overview-reward-item': WalletOverviewRewardItem,
   'wallet-overview-reward-plugin-item': WalletOverviewRewardPluginItem,
   'wallet-user-balance': WalletUserBalance,
+  'wallet-reward-weekly-earnings': WeeklyEarnings,
 };
 
 for (const key in components) {
@@ -111,7 +113,7 @@ if (extensionRegistry) {
   });
   extensionRegistry.registerComponent('my-rewards-overview', 'my-rewards-item', {
     id: 'wallet-rewards-overview',
-    vueComponent: Vue.options.components['wallet-overview'],
+    vueComponent: Vue.options.components['wallet-reward-weekly-earnings'],
     rank: 10,
   }); 
   extensionRegistry.registerComponent('my-rewards-wallet-overview', 'my-rewards-wallet-item', {
