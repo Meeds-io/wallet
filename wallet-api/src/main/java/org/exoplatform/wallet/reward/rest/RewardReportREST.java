@@ -55,6 +55,7 @@ import org.exoplatform.wallet.utils.WalletUtils;
 @Tag(name = "/wallet/api/reward", description = "Manage wallet rewards")
 public class RewardReportREST implements ResourceContainer {
   private static final String ERROR_PARAM = "error";
+  private static final String ERROR_EMPTY_PARAM_DATE = "Bad request sent to server with empty 'date' parameter";
 
   private static final Log    LOG = ExoLogger.getLogger(RewardReportREST.class);
 
@@ -85,7 +86,7 @@ public class RewardReportREST implements ResourceContainer {
                                  @QueryParam("date")
                                  String date) {
     if (StringUtils.isBlank(date)) {
-      return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+      return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
     }
     try {
       RewardPeriod rewardPeriod = getRewardPeriod(date);
@@ -94,6 +95,42 @@ public class RewardReportREST implements ResourceContainer {
       return Response.ok(rewardReport).build();
     } catch (Exception e) {
       LOG.error("Error getting computed reward", e);
+      JSONObject object = new JSONObject();
+      try {
+        object.append(ERROR_PARAM, e.getMessage());
+      } catch (JSONException e1) {
+        // Nothing to do
+      }
+      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+    }
+  }
+
+  @GET
+  @Path("compute/user")
+  @RolesAllowed("users")
+  @Operation(
+          summary = "Compute rewards of user wallet per a chosen period of time",
+          method = "GET",
+          description = "returns a wallet reward object")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response computeRewardsByUser(
+                                      @Parameter(description = "A date with format yyyy-MM-dd", required = true)
+                                      @QueryParam("date")
+                                      String date) {
+    if (StringUtils.isBlank(date)) {
+      return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
+    }
+    try {
+      RewardPeriod rewardPeriod = getRewardPeriod(date);
+      RewardReport rewardReport = rewardReportService.computeRewardsByUser(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserIdentityId());
+      rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
+      return Response.ok(rewardReport).build();
+    } catch (Exception e) {
+      LOG.error("Error getting user's computed reward", e);
       JSONObject object = new JSONObject();
       try {
         object.append(ERROR_PARAM, e.getMessage());
@@ -122,7 +159,7 @@ public class RewardReportREST implements ResourceContainer {
                               String date) {
     try {
       if (StringUtils.isBlank(date)) {
-        return Response.status(HTTPStatus.BAD_REQUEST).entity("Bad request sent to server with empty 'date' parameter").build();
+        return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
       }
       RewardPeriod rewardPeriod = getRewardPeriod(date);
       rewardReportService.sendRewards(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserId());
