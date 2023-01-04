@@ -77,7 +77,7 @@ export default {
       computeRewardsByUser(this.selectedDate)
         .then(rewardReport => {
           if (rewardReport) {
-            for (let reward of rewardReport.rewards) {
+            for (const reward of rewardReport.rewards) {
               if (reward.wallet.address.toUpperCase() === this.wallet.address.toUpperCase()) {
                 this.weeklyReward = reward.tokensToSend;
               } 
