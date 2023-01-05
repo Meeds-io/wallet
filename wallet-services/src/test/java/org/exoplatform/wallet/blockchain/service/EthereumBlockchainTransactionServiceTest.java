@@ -95,7 +95,9 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
   private EthereumBlockchainTransactionService service;
 
   @Before
-  public void setUp() {
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
     service = new EthereumBlockchainTransactionService(container,
                                                        null,
                                                        settingService,

@@ -31,10 +31,11 @@ import org.exoplatform.services.listener.Event;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransactionSentToBlockchainListenerTest {
+public class TransactionSentToBlockchainListenerTest extends BaseWalletTest {
 
   @Mock
   private WalletTransactionService            walletTransactionService;
@@ -49,7 +50,8 @@ public class TransactionSentToBlockchainListenerTest {
   private TransactionDetail                   transactionDetail = new TransactionDetail();
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     event = new Event<Object, TransactionDetail>(WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT, null, transactionDetail);
     listener = new TransactionSentToBlockchainListener(walletTransactionService, blockchainTransactionService);
   }
