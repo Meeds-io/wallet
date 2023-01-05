@@ -24,9 +24,6 @@ import static org.exoplatform.wallet.utils.RewardUtils.REWARD_TRANSACTION_COUNT;
 import static org.exoplatform.wallet.utils.RewardUtils.REWARD_VALID_MEMBERS_COUNT;
 import static org.exoplatform.wallet.utils.RewardUtils.getRewardSettings;
 import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
