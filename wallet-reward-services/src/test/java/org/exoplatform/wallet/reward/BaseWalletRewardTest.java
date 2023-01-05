@@ -16,40 +16,64 @@
  */
 package org.exoplatform.wallet.reward;
 
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
 import org.mockito.Mockito;
 
 import org.exoplatform.commons.utils.MapResourceBundle;
-import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.component.test.AbstractKernelTest;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.resources.ResourceBundleService;
-import org.exoplatform.wallet.dao.*;
-import org.exoplatform.wallet.entity.*;
-import org.exoplatform.wallet.model.*;
-import org.exoplatform.wallet.model.reward.*;
+import org.exoplatform.social.core.manager.IdentityManager;
+import org.exoplatform.social.core.space.spi.SpaceService;
+import org.exoplatform.wallet.dao.AddressLabelDAO;
+import org.exoplatform.wallet.dao.WalletAccountDAO;
+import org.exoplatform.wallet.dao.WalletBlockchainStateDAO;
+import org.exoplatform.wallet.dao.WalletPrivateKeyDAO;
+import org.exoplatform.wallet.dao.WalletTransactionDAO;
+import org.exoplatform.wallet.entity.AddressLabelEntity;
+import org.exoplatform.wallet.entity.TransactionEntity;
+import org.exoplatform.wallet.entity.WalletEntity;
+import org.exoplatform.wallet.entity.WalletPrivateKeyEntity;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletAddressLabel;
+import org.exoplatform.wallet.model.WalletProvider;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.reward.RewardBudgetType;
+import org.exoplatform.wallet.model.reward.RewardPluginSettings;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.reward.RewardTeam;
+import org.exoplatform.wallet.model.reward.RewardTeamMember;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.api.RewardPlugin;
-import org.exoplatform.wallet.reward.dao.*;
+import org.exoplatform.wallet.reward.dao.RewardDAO;
+import org.exoplatform.wallet.reward.dao.RewardPeriodDAO;
+import org.exoplatform.wallet.reward.dao.RewardPluginDAO;
+import org.exoplatform.wallet.reward.dao.RewardTeamDAO;
 import org.exoplatform.wallet.reward.entity.RewardTeamEntity;
 import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 import org.exoplatform.wallet.reward.service.WalletRewardSettingsServiceTest;
+import org.exoplatform.wallet.reward.test.mock.IdentityManagerMock;
+import org.exoplatform.wallet.reward.test.mock.SpaceServiceMock;
 import org.exoplatform.wallet.service.WalletService;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
-public abstract class BaseWalletRewardTest {
-
-  protected static PortalContainer        container;
+public abstract class BaseWalletRewardTest extends AbstractKernelTest {
 
   private static final Log                LOG                  = ExoLogger.getLogger(BaseWalletRewardTest.class);
 
@@ -104,6 +128,8 @@ public abstract class BaseWalletRewardTest {
                                                                  }
                                                                };
 
+  protected PortalContainer               container;
+
   private static RewardSettings           defaultSettings      = null;
 
   public static Map<Long, Double> getEarnedPoints(Set<Long> identityIds) {
@@ -114,28 +140,32 @@ public abstract class BaseWalletRewardTest {
 
   protected List<Serializable> entitiesToClean = new ArrayList<>();
 
-  @BeforeClass
-  public static void beforeTest() {
-    container = PortalContainer.getInstance();
-    assertNotNull("Container shouldn't be null", container);
-    assertTrue("Container should have been started", container.isStarted());
-
-    ExoContainerContext.setCurrentContainer(container);
-    registerResourceBundleService();
-
-    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    defaultSettings = rewardSettingsService.getSettings();
-    setContractDetails();
-  }
-
+  @Override
   @Before
-  public void beforeMethodTest() {
-    ExoContainerContext.setCurrentContainer(container);
-    RequestLifeCycle.begin(container);
+  public void setUp() throws Exception {
+    super.setUp();
+    if (container == null) {
+      assertNotNull("Container shouldn't be null", getContainer());
+      assertTrue("Container should have been started", getContainer().isStarted());
+      IdentityManager identityManager = getContainer().getComponentInstanceOfType(IdentityManager.class);
+      assertTrue("Identity Manager should be mocked, found: " + identityManager.getClass().getName(), identityManager instanceof IdentityManagerMock);
+      SpaceService spaceService = getContainer().getComponentInstanceOfType(SpaceService.class);
+      assertTrue("SpaceService should be mocked, found: " + spaceService.getClass().getName(), spaceService instanceof SpaceServiceMock);
+
+      container = getContainer();
+      registerResourceBundleService();
+
+      WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+      defaultSettings = rewardSettingsService.getSettings();
+      setContractDetails();
+    }
+    begin();
   }
 
+  @Override
   @After
-  public void afterMethodTest() {
+  public void tearDown() throws Exception {
+    super.tearDown();
     RewardDAO rewardDAO = getService(RewardDAO.class);
     RewardPeriodDAO rewardPeriodDAO = getService(RewardPeriodDAO.class);
     RewardPluginDAO rewardPluginDAO = getService(RewardPluginDAO.class);
@@ -150,10 +180,7 @@ public abstract class BaseWalletRewardTest {
     RewardSettings storedSettings = rewardSettingsService.getSettings();
     assertEquals(defaultSettings, storedSettings);
 
-    RequestLifeCycle.end();
-
-    ExoContainerContext.setCurrentContainer(container);
-    RequestLifeCycle.begin(container);
+    restartTransaction();
 
     rewardPluginDAO.deleteAll();
     rewardDAO.deleteAll();
@@ -219,25 +246,22 @@ public abstract class BaseWalletRewardTest {
                  0,
                  walletTransactionsCount);
 
-    RequestLifeCycle.end();
+    end();
   }
 
-  protected static <T> T getService(Class<T> componentType) {
+  protected <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
   }
 
-  protected static void restartTransaction() {
-    RequestLifeCycle.end();
-    RequestLifeCycle.begin(container);
-  }
-
-  protected static RewardTeam newRewardTeam() {
-    long[] memberIdentityIds = { MEMBER_IDENTITY_ID };
+  protected RewardTeam newRewardTeam() {
+    long[] memberIdentityIds = {
+        MEMBER_IDENTITY_ID
+    };
 
     return newRewardTeam(memberIdentityIds);
   }
 
-  protected static RewardTeam newRewardTeam(long[] memberIdentityIds) {
+  protected RewardTeam newRewardTeam(long[] memberIdentityIds) {
     RewardTeam rewardTeam = new RewardTeam();
     rewardTeam.setBudget(TEAM_BUDGET);
     rewardTeam.setDescription(TEAM_DESCRIPTION);
@@ -300,7 +324,7 @@ public abstract class BaseWalletRewardTest {
     return newSettings;
   }
 
-  private static void registerResourceBundleService() {
+  private void registerResourceBundleService() {
     ResourceBundleService resourceBundleService = Mockito.mock(ResourceBundleService.class);
     MapResourceBundle resourceBundle = new MapResourceBundle(Locale.getDefault());
     resourceBundle.add(RewardUtils.REWARD_TRANSACTION_LABEL_KEY, "{0} is rewarded {1} {2} for period: {3} to {4}");
@@ -315,7 +339,7 @@ public abstract class BaseWalletRewardTest {
     container.registerComponentInstance(ResourceBundleService.class, resourceBundleService);
   }
 
-  private static void setContractDetails() {
+  private void setContractDetails() {
     WalletService walletService = getService(WalletService.class);
     ContractDetail contractDetail = new ContractDetail();
     contractDetail.setName("name");

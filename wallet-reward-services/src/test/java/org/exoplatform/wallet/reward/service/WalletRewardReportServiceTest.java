@@ -16,10 +16,6 @@
  */
 package org.exoplatform.wallet.reward.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.YearMonth;

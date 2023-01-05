@@ -36,9 +36,10 @@ import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PendingEtherTransactionVerifierJobTest {
+public class PendingEtherTransactionVerifierJobTest extends BaseWalletTest {
 
   private static final String        ADDRESS = "address";
 
@@ -54,7 +55,8 @@ public class PendingEtherTransactionVerifierJobTest {
   PendingEtherTransactionVerifierJob etherTransactionVerifierJob;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     etherTransactionVerifierJob = new PendingEtherTransactionVerifierJob();
     etherTransactionVerifierJob.blockchainTransactionService = blockchainTransactionService;
     etherTransactionVerifierJob.walletTransactionService = walletTransactionService;

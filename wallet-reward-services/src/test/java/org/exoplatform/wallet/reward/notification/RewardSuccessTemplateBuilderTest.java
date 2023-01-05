@@ -18,8 +18,6 @@ package org.exoplatform.wallet.reward.notification;
 
 import static org.exoplatform.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
 import static org.exoplatform.wallet.utils.RewardUtils.getRewardSettings;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.HashSet;
 import java.util.Set;
