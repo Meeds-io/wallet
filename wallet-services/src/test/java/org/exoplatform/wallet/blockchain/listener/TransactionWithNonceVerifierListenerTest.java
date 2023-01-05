@@ -39,10 +39,11 @@ import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.BlockchainTransactionService;
 import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransactionWithNonceVerifierListenerTest {
+public class TransactionWithNonceVerifierListenerTest extends BaseWalletTest {
 
   private static final int                     NONCE       = 12;
 
@@ -63,7 +64,8 @@ public class TransactionWithNonceVerifierListenerTest {
   private String                               fromAddress = "fromAddress";
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     listener = new TransactionWithNonceVerifierListener(blockchainTransactionService, transactionService);
     event = new Event<Object, Map<String, Object>>(WalletUtils.TRANSACTION_MINED_EVENT,
                                                    null,

@@ -27,9 +27,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobExecutionException;
 
 import org.exoplatform.wallet.service.BlockchainTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransactionSenderJobTest {
+public class TransactionSenderJobTest extends BaseWalletTest {
 
   @Mock
   BlockchainTransactionService blockchainTransactionService;
