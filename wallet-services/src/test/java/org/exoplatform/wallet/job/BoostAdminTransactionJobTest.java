@@ -27,9 +27,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import org.exoplatform.wallet.service.WalletTokenAdminService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BoostAdminTransactionJobTest {
+public class BoostAdminTransactionJobTest extends BaseWalletTest {
 
   @Mock
   WalletTokenAdminService  walletTokenAdminService;
@@ -37,7 +38,8 @@ public class BoostAdminTransactionJobTest {
   BoostAdminTransactionJob boostAdminTransactionJob;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     boostAdminTransactionJob = new BoostAdminTransactionJob();
     boostAdminTransactionJob.walletTokenAdminService = walletTokenAdminService;
   }

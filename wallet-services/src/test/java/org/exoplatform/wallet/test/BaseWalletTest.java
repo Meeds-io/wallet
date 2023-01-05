@@ -16,130 +16,169 @@
  */
 package org.exoplatform.wallet.test;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.mockito.Mockito;
 
+import org.exoplatform.component.test.AbstractKernelTest;
+import org.exoplatform.component.test.ConfigurationUnit;
+import org.exoplatform.component.test.ConfiguredBy;
+import org.exoplatform.component.test.ContainerScope;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import org.exoplatform.services.security.*;
-import org.exoplatform.wallet.dao.*;
-import org.exoplatform.wallet.entity.*;
-import org.exoplatform.wallet.model.*;
+import org.exoplatform.services.security.Identity;
+import org.exoplatform.services.security.IdentityRegistry;
+import org.exoplatform.services.security.MembershipEntry;
+import org.exoplatform.social.core.manager.IdentityManager;
+import org.exoplatform.social.core.space.spi.SpaceService;
+import org.exoplatform.wallet.dao.AddressLabelDAO;
+import org.exoplatform.wallet.dao.WalletAccountBackupDAO;
+import org.exoplatform.wallet.dao.WalletAccountDAO;
+import org.exoplatform.wallet.dao.WalletBlockchainStateDAO;
+import org.exoplatform.wallet.dao.WalletPrivateKeyDAO;
+import org.exoplatform.wallet.dao.WalletTransactionDAO;
+import org.exoplatform.wallet.entity.AddressLabelEntity;
+import org.exoplatform.wallet.entity.TransactionEntity;
+import org.exoplatform.wallet.entity.WalletBackupEntity;
+import org.exoplatform.wallet.entity.WalletBlockchainStateEntity;
+import org.exoplatform.wallet.entity.WalletEntity;
+import org.exoplatform.wallet.entity.WalletPrivateKeyEntity;
+import org.exoplatform.wallet.model.ContractDetail;
+import org.exoplatform.wallet.model.ContractTransactionEvent;
+import org.exoplatform.wallet.model.Wallet;
+import org.exoplatform.wallet.model.WalletAddressLabel;
+import org.exoplatform.wallet.model.WalletState;
+import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.service.*;
-import org.exoplatform.wallet.storage.*;
+import org.exoplatform.wallet.service.BlockchainTransactionService;
+import org.exoplatform.wallet.service.WalletAccountService;
+import org.exoplatform.wallet.service.WalletService;
+import org.exoplatform.wallet.storage.AddressLabelStorage;
+import org.exoplatform.wallet.storage.TransactionStorage;
+import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.storage.cached.CachedAccountStorage;
 import org.exoplatform.wallet.storage.cached.CachedTransactionStorage;
+import org.exoplatform.wallet.test.mock.IdentityManagerMock;
+import org.exoplatform.wallet.test.mock.SpaceServiceMock;
 import org.exoplatform.wallet.utils.WalletUtils;
 
-public abstract class BaseWalletTest {
+@ConfiguredBy({
+  @ConfigurationUnit(scope = ContainerScope.ROOT, path = "conf/configuration.xml"),
+  @ConfigurationUnit(scope = ContainerScope.PORTAL, path = "conf/portal/configuration.xml"),
+  @ConfigurationUnit(scope = ContainerScope.PORTAL, path = "conf/wallet-services-test-configuration.xml"),
+})
+public abstract class BaseWalletTest extends AbstractKernelTest {
 
-  protected static PortalContainer container;
+  private static final Log       LOG                      = ExoLogger.getLogger(BaseWalletTest.class);
 
-  private static final Log         LOG                      = ExoLogger.getLogger(BaseWalletTest.class);
+  protected static final String  WALLET_ADDRESS_1         = "0x1111111111111111111111111111111111111111";
 
-  protected static final String    WALLET_ADDRESS_1         = "0x1111111111111111111111111111111111111111";
+  protected static final String  WALLET_ADDRESS_2         = "0x2222222222222222222222222222222222222222";
 
-  protected static final String    WALLET_ADDRESS_2         = "0x2222222222222222222222222222222222222222";
+  protected static final String  WALLET_ADDRESS_3         = "0x3333333333333333333333333333333333333333";
 
-  protected static final String    WALLET_ADDRESS_3         = "0x3333333333333333333333333333333333333333";
+  protected static final String  TRANSACTION_LABEL        = "TRANSACTION_LABEL";
 
-  protected static final String    TRANSACTION_LABEL        = "TRANSACTION_LABEL";
+  protected static final String  TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
 
-  protected static final String    TRANSACTION_MESSAGE      = "TRANSACTION_MESSAGE";
+  protected static final int     GAS_USED                 = 160000;
 
-  protected static final int       GAS_USED                 = 160000;
+  protected static final double  GAS_PRICE                = 0.000000006d;
 
-  protected static final double    GAS_PRICE                = 0.000000006d;
+  protected static final double  GAS_PRICE_WEI            = 6000000000l;
 
-  protected static final double    GAS_PRICE_WEI            = 6000000000l;
+  protected static final String  RAW_TRANSACTION          = "RAW_TRANSACTION";
 
-  protected static final String    RAW_TRANSACTION          = "RAW_TRANSACTION";
+  protected static final double  TOKEN_FEE                = (GAS_PRICE * GAS_USED) / 0.001;
 
-  protected static final double    TOKEN_FEE                = (GAS_PRICE * GAS_USED) / 0.001;
+  protected static final long    NONCE                    = 10;
 
-  protected static final long      NONCE                    = 10;
+  protected static final double  ETHER_VALUE              = 0.001;
 
-  protected static final double    ETHER_VALUE              = 0.001;
+  protected static final String  PHRASE                   = "passphrase";
 
-  protected static final String    PHRASE                   = "passphrase";
+  protected static final String  INITIALIZATION_STATE     = WalletState.INITIALIZED.name();
 
-  protected static final String    INITIALIZATION_STATE     = WalletState.INITIALIZED.name();
+  protected static final String  TYPE                     = WalletType.SPACE.name();
 
-  protected static final String    TYPE                     = WalletType.SPACE.name();
+  protected static final boolean IS_ENABLED               = true;
 
-  protected static final boolean   IS_ENABLED               = true;
+  protected static final String  CURRENT_USER             = "root1";
 
-  protected static final String    CURRENT_USER             = "root1";
+  protected static final long    CURRENT_USER_IDENTITY_ID = 1L;
 
-  protected static final long      CURRENT_USER_IDENTITY_ID = 1L;
+  protected static final String  CURRENT_SPACE            = "space1";
 
-  protected static final String    CURRENT_SPACE            = "space1";
+  protected static final long    NETWORK_ID               = 137;
 
-  protected static final long      NETWORK_ID               = 137;
+  protected static final int     CONTRACT_AMOUNT          = 500;
 
-  protected static final int       CONTRACT_AMOUNT          = 500;
+  protected static final String  USER_TEST                = "root9";
 
-  protected static final String    USER_TEST                = "root9";
-
-  protected static final long      USER_TEST_IDENTITY_ID    = 9;
-
-  protected Set<Serializable>      entitiesToClean          = null;
-
-  private Random                   random                   = new Random(1);
+  protected static final long    USER_TEST_IDENTITY_ID    = 9;
 
   @Rule
-  public TestName                  testName                 = new TestName();
+  public TestName                testName                 = new TestName();
 
-  @BeforeClass
-  public static void beforeTest() throws IOException {
-    container = PortalContainer.getInstance();
-    assertNotNull("Container shouldn't be null", container);
-    assertTrue("Container should have been started", container.isStarted());
+  protected Set<Serializable>    entitiesToClean          = null;
 
-    BlockchainTransactionService blockchainTransactionService =
-                                                              container.getComponentInstanceOfType(BlockchainTransactionService.class);
-    if (blockchainTransactionService != null) {
-      container.unregisterComponent(BlockchainTransactionService.class);
-    }
-    blockchainTransactionService = Mockito.mock(BlockchainTransactionService.class);
-    Mockito.lenient().when(blockchainTransactionService.getGasPrice()).thenReturn(GAS_PRICE_WEI);
-    container.registerComponentInstance(BlockchainTransactionService.class, blockchainTransactionService);
+  protected Random               random                   = new Random(1);
 
-    setContractDetails();
+  protected PortalContainer      container;
 
-    setRoot1AsAdmin();
-  }
-
-  private static void setRoot1AsAdmin() {
-    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
-
-    Identity identity = buildUserIdentityAsAdmin(CURRENT_USER);
-    identityRegistry.register(identity);
-  }
-
+  @Override
   @Before
-  public void beforeMethodTest() {
+  public void setUp() throws Exception {
+    super.setUp();
+    if (container == null) {
+      assertNotNull("Container shouldn't be null", getContainer());
+      assertTrue("Container should have been started", getContainer().isStarted());
+      IdentityManager identityManager = getContainer().getComponentInstanceOfType(IdentityManager.class);
+      assertTrue("Identity Manager should be mocked, found: " + identityManager.getClass().getName(), identityManager instanceof IdentityManagerMock);
+      SpaceService spaceService = getContainer().getComponentInstanceOfType(SpaceService.class);
+      assertTrue("SpaceService should be mocked, found: " + spaceService.getClass().getName(), spaceService instanceof SpaceServiceMock);
+
+      container = getContainer();
+
+      BlockchainTransactionService blockchainTransactionService =
+                                                                container.getComponentInstanceOfType(BlockchainTransactionService.class);
+      if (blockchainTransactionService != null) {
+        container.unregisterComponent(BlockchainTransactionService.class);
+      }
+      blockchainTransactionService = Mockito.mock(BlockchainTransactionService.class);
+      Mockito.lenient().when(blockchainTransactionService.getGasPrice()).thenReturn(GAS_PRICE_WEI);
+      container.registerComponentInstance(BlockchainTransactionService.class, blockchainTransactionService);
+
+      setContractDetails();
+
+      setRoot1AsAdmin();
+    }
     entitiesToClean = new HashSet<>();
-    RequestLifeCycle.begin(container);
+    begin();
   }
 
+  @Override
   @After
-  public void afterMethodTest() {
+  public void tearDown() throws Exception {
+    super.tearDown();
     WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
     WalletAccountBackupDAO walletAccountBackupDAO = getService(WalletAccountBackupDAO.class);
     AddressLabelDAO addressLabelDAO = getService(AddressLabelDAO.class);
@@ -149,7 +188,9 @@ public abstract class BaseWalletTest {
 
     LOG.info("Cleaning {} objects after test finished", entitiesToClean.size());
 
+    restartTransaction();
     walletBlockchainStateDAO.deleteAll();
+    restartTransaction();
 
     if (!entitiesToClean.isEmpty()) {
       Iterator<Serializable> iterator = entitiesToClean.iterator();
@@ -160,10 +201,13 @@ public abstract class BaseWalletTest {
           continue;
         }
         try {
-           if (entity instanceof WalletBackupEntity) {
+          if (entity instanceof WalletBackupEntity) {
             WalletBackupEntity walletBackupEntity = (WalletBackupEntity) entity;
             if (walletBackupEntity.getId() > 0) {
-              walletAccountBackupDAO.delete(walletAccountBackupDAO.find(walletBackupEntity.getId()));
+              walletBackupEntity = walletAccountBackupDAO.find(walletBackupEntity.getId());
+              if (walletBackupEntity != null) {
+                walletAccountBackupDAO.delete(walletBackupEntity);
+              }
               iterator.remove();
             }
           }
@@ -260,7 +304,7 @@ public abstract class BaseWalletTest {
                  walletCount);
     assertEquals("The previous test didn't cleaned backupWallets entities correctly, should add entities to clean into 'entitiesToClean' list: ",
                  0,
-            walletBackupCount);
+                 walletBackupCount);
     assertEquals("The previous test didn't cleaned wallet addresses labels correctly, should add entities to clean into 'entitiesToClean' list.",
                  0,
                  walletAddressLabelsCount);
@@ -284,7 +328,7 @@ public abstract class BaseWalletTest {
       ((CachedTransactionStorage) transactionStorage).clearCache();
     }
 
-    RequestLifeCycle.end();
+    end();
   }
 
   protected List<TransactionEntity> generateTransactions(String walletAddress,
@@ -455,11 +499,11 @@ public abstract class BaseWalletTest {
     return hashStringBuffer.toString();
   }
 
-  protected static <T> T getService(Class<T> componentType) {
+  protected <T> T getService(Class<T> componentType) {
     return container.getComponentInstanceOfType(componentType);
   }
 
-  protected static org.exoplatform.services.security.Identity buildUserIdentityAsAdmin(String currentUser) {
+  protected org.exoplatform.services.security.Identity buildUserIdentityAsAdmin(String currentUser) {
     String group = "/platform/rewarding";
     MembershipEntry entry = new MembershipEntry(group, MembershipEntry.ANY_TYPE);
     Set<MembershipEntry> entryTest = new HashSet<>();
@@ -501,7 +545,7 @@ public abstract class BaseWalletTest {
     entitiesToClean.add(wallet);
   }
 
-  private static void setContractDetails() {
+  private void setContractDetails() {
     WalletService walletService = container.getComponentInstanceOfType(WalletService.class);
     ContractDetail contractDetail = new ContractDetail();
     contractDetail.setName("name");
@@ -514,7 +558,7 @@ public abstract class BaseWalletTest {
   }
 
   protected org.web3j.protocol.core.methods.response.Log newLog() {
-    ContractTransactionEvent contractTransactionEvent = newContractTransactionEvent();;
+    ContractTransactionEvent contractTransactionEvent = newContractTransactionEvent();
     org.web3j.protocol.core.methods.response.Log log = mock(org.web3j.protocol.core.methods.response.Log.class);
     when(log.getTopics()).thenReturn(contractTransactionEvent.getTopics());
     when(log.getData()).thenReturn(contractTransactionEvent.getData());
@@ -522,6 +566,13 @@ public abstract class BaseWalletTest {
     when(log.getTransactionHash()).thenReturn(contractTransactionEvent.getTransactionHash());
     when(log.getAddress()).thenReturn(contractTransactionEvent.getContractAddress());
     return log;
+  }
+
+  protected void setRoot1AsAdmin() {
+    IdentityRegistry identityRegistry = getService(IdentityRegistry.class);
+
+    Identity identity = buildUserIdentityAsAdmin(CURRENT_USER);
+    identityRegistry.register(identity);
   }
 
   protected ContractTransactionEvent newContractTransactionEvent() {
