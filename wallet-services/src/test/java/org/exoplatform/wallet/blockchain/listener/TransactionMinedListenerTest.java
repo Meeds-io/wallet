@@ -42,10 +42,11 @@ import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TransactionMinedListenerTest {
+public class TransactionMinedListenerTest extends BaseWalletTest {
 
   @Mock
   private WalletAccountService               accountService;
@@ -71,7 +72,8 @@ public class TransactionMinedListenerTest {
   private String                             byAddress   = "byAddress";
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     listener = new TransactionMinedListener(accountService, walletTransactionService, listenerService);
     event = new Event<Object, Map<String, Object>>(WalletUtils.TRANSACTION_MINED_EVENT,
                                                    null,
