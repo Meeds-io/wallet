@@ -38,10 +38,11 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.service.WalletTransactionService;
+import org.exoplatform.wallet.test.BaseWalletTest;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WalletDeletedListenerTest {
+public class WalletDeletedListenerTest extends BaseWalletTest {
 
   private static final String      ADDRESS = "address";
 
@@ -58,7 +59,8 @@ public class WalletDeletedListenerTest {
   private Wallet                   wallet;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     wallet = new Wallet();
     wallet.setAddress(ADDRESS);
     listener = new WalletDeletedListener(transactionService);

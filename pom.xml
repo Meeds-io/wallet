@@ -126,6 +126,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>wallet-services</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>wallet-reward-services</artifactId>
         <version>${project.version}</version>
       </dependency>
