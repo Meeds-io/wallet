@@ -93,7 +93,9 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   private EthereumClientConnector service;
 
   @Before
-  public void setUp() throws InterruptedException {
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
     when(cacheService.getCacheInstance(any())).thenReturn(new ConcurrentFIFOExoCache<>());
     instantiateService();
     when(webSocketClient.reconnectBlocking()).thenAnswer(invocation -> webSocketConnected = true);
@@ -102,7 +104,9 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @After
-  public void tearDown() {
+  @Override
+  public void tearDown() throws Exception {
+    super.tearDown();
     service.stop();
     setAsDisconnected();
   }
