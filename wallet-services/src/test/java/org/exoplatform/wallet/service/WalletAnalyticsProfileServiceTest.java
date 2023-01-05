@@ -23,12 +23,13 @@ import org.junit.Test;
 
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.RootContainer;
+import org.exoplatform.wallet.test.BaseWalletTest;
 
-public class WalletAnalyticsProfileServiceTest {
+public class WalletAnalyticsProfileServiceTest extends BaseWalletTest {
 
   @Before
-  public void setup() {
-    PortalContainer.getInstance();
+  public void setUp() throws Exception {
+    super.setUp();
   }
 
   @Test
