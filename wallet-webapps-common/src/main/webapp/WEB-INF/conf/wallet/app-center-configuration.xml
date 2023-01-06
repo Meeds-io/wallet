@@ -49,6 +49,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <field name="description">
               <string>Wallet application</string>
             </field>
+            <field name="permissions">
+              <collection type="java.util.ArrayList" item-type="java.lang.String">
+                <value>
+                  <string>*:/platform/users</string>
+                </value>
+                <value>
+                  <string>*:/platform/externals</string>
+                </value>
+              </collection>
+            </field>
             <field name="active">
               <boolean>true</boolean>
             </field>
