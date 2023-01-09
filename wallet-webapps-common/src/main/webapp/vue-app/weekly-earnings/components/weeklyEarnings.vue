@@ -18,7 +18,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <div class="ma-0">
     <div
       flat
-      @click="$refs.accountDetail.open()"
+      @click="openDrawer"
       class="clickable">
       <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
@@ -29,11 +29,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </span>
       </div>
     </div>
-    <wallet-reward-account-detail
-      ref="accountDetail"
-      :fiat-symbol="symbol"
-      :wallet="wallet"
-      :contract-details="contractDetails" />
+    <wallet-overview-drawer
+      ref="walletOverviewDrawer"
+      :symbol="symbol" />
   </div>
 </template>
 
@@ -84,6 +82,9 @@ export default {
             }
           }
         });
+    },
+    openDrawer() {
+      this.$refs.walletOverviewDrawer.open(this.$t('exoplatform.wallet.title.rewardedBalance'));
     }
   },
 };
