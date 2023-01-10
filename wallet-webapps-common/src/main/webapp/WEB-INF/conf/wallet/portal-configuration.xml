@@ -61,7 +61,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <boolean>${exo.wallet.portalConfig.metadata.override:true}</boolean>
             </field>
             <field name="importMode">
-              <string>${exo.wallet.portalConfig.metadata.importmode:insert}</string>
+              <string>${exo.wallet.portalConfig.metadata.importmode:merge}</string>
             </field>
             <field name="predefinedOwner">
               <collection type="java.util.HashSet">
