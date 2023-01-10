@@ -4,7 +4,7 @@
     class="walletSetting"
     flat>
     <template v-if="!hideContent">
-      <v-card-title>
+      <v-card-title class="px-0 pt-2">
         <v-toolbar class="border-box-sizing" flat>
           <v-btn
             class="mx-1"
@@ -22,12 +22,12 @@
           <v-spacer />
         </v-toolbar>
       </v-card-title>
-      <v-card-subtitle class="mx-14">
+      <v-card-subtitle class="mx-12">
         {{ description }}
       </v-card-subtitle>
     </template>
 
-    <v-list class="mx-8">
+    <v-list class="mx-4">
       <wallet-settings-internal-details
         v-if="isInternalWallet"
         :is-space="isSpace"
