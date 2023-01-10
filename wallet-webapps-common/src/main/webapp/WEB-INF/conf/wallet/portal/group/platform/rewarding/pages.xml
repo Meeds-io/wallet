@@ -25,29 +25,35 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <title>Wallet adminsitration</title>
         <access-permissions>*:/platform/rewarding</access-permissions>
         <edit-permission>manager:/platform/rewarding</edit-permission>
-        <portlet-application>
-            <portlet>
-                <application-ref>wallet-admin</application-ref>
-                <portlet-ref>WalletAdmin</portlet-ref>
-            </portlet>
-            <title>Wallet adminsitration</title>
-            <access-permissions>*:/platform/rewarding</access-permissions>
-            <show-info-bar>false</show-info-bar>
-        </portlet-application>
+        <container id="singlePageApplicationContainer" template="system:/groovy/portal/webui/container/UIContainer.gtmpl" cssClass="singlePageApplication">
+          <access-permissions>*:/platform/users</access-permissions>
+          <portlet-application>
+              <portlet>
+                  <application-ref>wallet-admin</application-ref>
+                  <portlet-ref>WalletAdmin</portlet-ref>
+              </portlet>
+              <title>Wallet adminsitration</title>
+              <access-permissions>*:/platform/rewarding</access-permissions>
+              <show-info-bar>false</show-info-bar>
+          </portlet-application>
+        </container>
     </page>
     <page>
         <name>rewardAdministration</name>
         <title>Reward administration</title>
         <access-permissions>*:/platform/rewarding</access-permissions>
         <edit-permission>manager:/platform/rewarding</edit-permission>
-        <portlet-application>
-            <portlet>
-                <application-ref>wallet-reward</application-ref>
-                <portlet-ref>RewardAdmin</portlet-ref>
-            </portlet>
-            <title>Reward administration</title>
-            <access-permissions>*:/platform/rewarding</access-permissions>
-            <show-info-bar>false</show-info-bar>
-        </portlet-application>
+        <container id="singlePageApplicationContainer" template="system:/groovy/portal/webui/container/UIContainer.gtmpl" cssClass="singlePageApplication">
+          <access-permissions>*:/platform/users</access-permissions>
+          <portlet-application>
+              <portlet>
+                  <application-ref>wallet-reward</application-ref>
+                  <portlet-ref>RewardAdmin</portlet-ref>
+              </portlet>
+              <title>Reward administration</title>
+              <access-permissions>*:/platform/rewarding</access-permissions>
+              <show-info-bar>false</show-info-bar>
+          </portlet-application>
+        </container>
     </page>
 </page-set>

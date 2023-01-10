@@ -7,7 +7,6 @@
       :title="detailsTitle"
       :description="detailsDescription"
       :message-digital-key="detailsmessageDigitalKey"
-      :class="walletSettingsClass"
       @back="closeDetail" />
     <v-card
       v-else-if="displayed"
@@ -47,7 +46,7 @@ export default {
       return eXo.env.portal.spaceId !== '' || (this.wallet && this.wallet.spaceId && this.wallet.spaceId !== 0);
     },
     walletSettingsClass() {
-      return eXo.env.portal.spaceName ? '': 'ma-4' ;
+      return eXo.env.portal.spaceName ? '': 'my-3' ;
     },
     metamaskFeatureEnabled() {
       return this.walletSettings && this.walletSettings.metamaskEnabled;
