@@ -22,14 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     flat>
     <main>
       <v-layout column>
-        <v-flex>
-          <v-card class="applicationToolbar mb-3" flat>
-            <v-card-text class="pt-2 pb-2">
-              <strong>{{ $t('exoplatform.wallet.title.rewardAdministration') }}</strong>
-            </v-card-text>
-          </v-card>
-        </v-flex>
-        <v-layout column class="white">
+        <v-layout column class="application-toolbar">
           <v-flex v-if="error && !loading" class="text-center">
             <div class="alert alert-error text-start">
               <i class="uiIconError"></i>{{ error }}
@@ -77,8 +70,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-card>
           </v-dialog>
 
-          <v-tabs v-model="selectedTab" grow>
-            <v-tabs-slider color="primary" />
+          <v-tabs
+            v-model="selectedTab"
+            slider-size="4">
             <v-tab key="SendRewards" href="#SendRewards">
               {{ $t('exoplatform.wallet.title.sendRewardsTab') }}
             </v-tab>
@@ -90,7 +84,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-tab>
           </v-tabs>
       
-          <v-tabs-items v-model="selectedTab">
+          <v-tabs-items v-model="selectedTab" class="tabs-content">
             <v-tab-item
               id="SendRewards"
               value="SendRewards"
