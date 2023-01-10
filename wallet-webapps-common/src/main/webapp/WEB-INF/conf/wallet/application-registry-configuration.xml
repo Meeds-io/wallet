@@ -17,10 +17,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 -->
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/kernel_1_3.xsd http://www.exoplatform.org/xml/ns/kernel_1_3.xsd" xmlns="http://www.exoplatform.org/xml/ns/kernel_1_3.xsd">
-  <component>
-    <type>org.exoplatform.wallet.service.ApplicationRegistrySetupService</type>
-    <description>Used to add wallet application in the application registry when database is already populated</description>
-  </component>
 
   <external-component-plugins>
     <target-component>org.exoplatform.application.registry.ApplicationRegistryService</target-component>
