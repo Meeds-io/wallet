@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.model.reward.*;
 
 /**
@@ -37,6 +38,17 @@ public interface RewardReportService {
    *         tokens and tokens to send
    */
   RewardReport computeRewards(LocalDate localDate);
+
+  /**
+   * Compute rewards By User
+   *
+   * @param localDate a {@link LocalDate} inside the period time
+   *          that will be retrieved
+   * @param userIdentityId User technical identifier ({@link Identity#getId()})
+   * @return a {@link Set} of {@link WalletReward} with the details of sent
+   *         tokens and tokens to send
+   */
+  RewardReport computeRewardsByUser(LocalDate localDate, long userIdentityId);
 
   /**
    * Send rewards transactions
