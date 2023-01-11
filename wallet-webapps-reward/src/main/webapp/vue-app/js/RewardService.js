@@ -140,3 +140,20 @@ export function computeRewards(date) {
     }
   });
 }
+
+export function computeRewardsByUser(date) {
+  return fetch(`/portal/rest/wallet/api/reward/compute/user?date=${date}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }).then((resp) => {
+    if (resp && resp.ok) {
+      return resp.json();
+    } else {
+      throw new Error ('Error computing rewards');
+    }
+  });
+}
