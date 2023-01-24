@@ -26,8 +26,6 @@ import static org.exoplatform.wallet.statistic.StatisticUtils.STATUS_CODE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,21 +35,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import org.exoplatform.analytics.model.StatisticData;
 import org.exoplatform.analytics.model.StatisticData.StatisticStatus;
 import org.exoplatform.analytics.utils.AnalyticsUtils;
-import org.exoplatform.commons.api.settings.ExoFeatureService;
-import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.Wallet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StatisticUtilsTest {
-
-  @Mock
-  ExoFeatureService featureService;
 
   @Test
   public void testParameterValidation() {
@@ -61,9 +53,6 @@ public class StatisticUtilsTest {
 
   @Test
   public void testIsAnalyticsFeatureEnabled() {
-    StatisticUtils.featureService = featureService;
-    when(featureService.isActiveFeature(StatisticUtils.WALLET_ANALYTICS_FEATURE_NAME)).thenReturn(true);
-
     Map<String, Object> parameters = new HashMap<>();
     parameters.put(REMOTE_SERVICE, "REMOTE_SERVICE");
     parameters.put(OPERATION, "OPERATION");
@@ -77,12 +66,9 @@ public class StatisticUtilsTest {
     Wallet byWallet = addWallet(parameters, "byWallet", 1l, "byWallet");
     Wallet wallet = addWallet(parameters, "wallet", 1l, "wallet");
 
-    AtomicInteger logConsumerInvocationCount = new AtomicInteger();
     AtomicReference<StatisticData> statisticDataReference = new AtomicReference<>();
     StatisticUtils.addStatisticEntry(new HashMap<>(parameters),
-                                     logEntry -> logConsumerInvocationCount.incrementAndGet(),
                                      statisticData -> statisticDataReference.set(statisticData));
-    assertEquals(0, logConsumerInvocationCount.get());
 
     StatisticData statisticData = statisticDataReference.get();
     assertNotNull(statisticData);
@@ -107,32 +93,23 @@ public class StatisticUtilsTest {
 
   @Test
   public void testIsAnalyticsFeatureDisabled() {
-    StatisticUtils.featureService = featureService;
-    when(featureService.isActiveFeature(StatisticUtils.WALLET_ANALYTICS_FEATURE_NAME)).thenReturn(false);
-    Log logger = mock(Log.class);
-    StatisticUtils.log = logger;
-    when(logger.isDebugEnabled()).thenReturn(true);
-
     Map<String, Object> parameters = new HashMap<>();
     parameters.put(LOCAL_SERVICE, "REMOTE_SERVICE");
     parameters.put(OPERATION, "OPERATION");
     parameters.put(STATUS, "KO");
     parameters.put(STATUS_CODE, "500");
     parameters.put(ERROR_MSG, "ERROR_MSG");
-    parameters.put(DURATION, "1220");
+    parameters.put(DURATION, 1220l);
 
     addWallet(parameters, "to", 1l, "toWallet");
     addWallet(parameters, "fromWallet", 2l, "fromWallet");
     addWallet(parameters, "byWallet", 1l, "byWallet");
     addWallet(parameters, "wallet", 1l, "wallet");
 
-    AtomicInteger logConsumerInvocationCount = new AtomicInteger();
     AtomicInteger analyticsConsumerInvocationCount = new AtomicInteger();
     StatisticUtils.addStatisticEntry(new HashMap<>(parameters),
-                                     logEntry -> logConsumerInvocationCount.incrementAndGet(),
                                      statisticData -> analyticsConsumerInvocationCount.incrementAndGet());
-    assertEquals(1, logConsumerInvocationCount.get());
-    assertEquals(0, analyticsConsumerInvocationCount.get());
+    assertEquals(1, analyticsConsumerInvocationCount.get());
   }
 
   private Wallet addWallet(Map<String, Object> parameters, String key, long technicalId, String address) {
