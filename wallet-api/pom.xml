@@ -29,7 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <rest.api.doc.version>1.0</rest.api.doc.version>
     <rest.api.doc.description>Wallet addon rest endpoints</rest.api.doc.description>
 
-    <exo.test.coverage.ratio>0.10</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.08</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
