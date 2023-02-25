@@ -20,7 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     :right="!$vuetify.rtl">
     <template slot="title">
       <div>
-        <i class="uiIcon uiArrowBAckIcon" @click="close"></i> 
+        <i class="uiIcon uiArrowBackIcon" @click="close"></i> 
         <span> {{ $t('exoplatform.wallet.button.sendfunds') }} </span>
       </div>
     </template>

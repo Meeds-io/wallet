@@ -428,7 +428,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     right: 20px  ~'!important; /** orientation=rt */ ';
     float: right  ~'!important; /** orientation=rt */ ';
     position: absolute;
-    .uiArrowBAckIcon {
+    .uiArrowBackIcon {
       color: @darkGrey !important;
       font-size: 24px;
     }
@@ -874,14 +874,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   .summaryBalanceLabels{
     font-size: 16px;
   }
-  .uiArrowBAckIcon {
+  .uiArrowBackIcon {
     cursor: pointer;
     color: @btnDisableColor!important;
     margin-left: -4px;
     top: 4px;
     &:before {
-      content: "\e913";
-      font-family: "PLF-FONT-ICONS" !important;
       font-style: normal;
       font-size: 22px;
     }
@@ -901,7 +899,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 }
 
 .uiIconAppSpaceWallet:before, .uiIconWalletMyWallet:before, .uiIconAppwallet:before, .uiIconAppWallet:before, .uiIconExt-wallet:before {
-    content: "\e9ba" !important;
+  &:extend(.fa-wallet:before);
 }
 .uiIconSendFunds:before {
   content: none !important
