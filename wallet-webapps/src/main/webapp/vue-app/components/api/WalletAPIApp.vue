@@ -374,7 +374,7 @@ export default {
     registerExternalExtensions(title) {
       const profileExtensionAction = {
         title: title,
-        icon: 'uiIconLightBlue mdi mdi-send material-icons',
+        icon: 'mdi mdi-send material-icons',
         order: 30,
         enabled: (profile) => profile.enabled && !profile.deleted,
         click: (profile) => {

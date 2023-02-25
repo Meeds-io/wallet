@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-layout
           wrap
           color="transparent"
-          class="WalletSummary">
+          class="WalletSummary align-center">
           <v-flex class="summaryCard mr-3" v-if="!walletReadonly">
             <div class="border-box-sizing" v-if="walletAddress && contractDetails && this.initializationState !== 'DELETED'">
               <button
