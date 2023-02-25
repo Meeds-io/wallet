@@ -64,30 +64,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>wallet-webapps-common</artifactId>
-      <type>war</type>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>wallet-webapps</artifactId>
       <type>war</type>
       <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>wallet-webapps-admin</artifactId>
-      <type>war</type>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>wallet-webapps-reward</artifactId>
-      <type>war</type>
-      <scope>provided</scope>
     </dependency>
 
   </dependencies>
