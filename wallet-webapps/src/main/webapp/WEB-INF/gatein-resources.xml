@@ -51,15 +51,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <as>$</as>
       </depends>
       <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
-      </depends>
-      <depends>
         <module>ethQRCode</module>
         <as>EthereumQRPlugin</as>
       </depends>
@@ -100,15 +91,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <depends>
         <module>walletCommon</module>
         <as>WalletCommon</as>
-      </depends>
-      <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
       </depends>
       <depends>
         <module>vueChart</module>
@@ -161,15 +143,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <as>WalletCommon</as>
       </depends>
       <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
-      </depends>
-      <depends>
         <module>vueChart</module>
         <as>VueChart</as>
       </depends>
@@ -210,15 +183,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <depends>
       <module>jquery</module>
       <as>$</as>
-    </depends>
-    <depends>
-      <module>fetchPolyfill</module>
-    </depends>
-    <depends>
-      <module>customEventPolyfill</module>
-    </depends>
-    <depends>
-      <module>iePolyfills</module>
     </depends>
     <depends>
       <module>ethQRCode</module>
