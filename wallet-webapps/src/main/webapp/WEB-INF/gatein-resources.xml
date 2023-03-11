@@ -16,19 +16,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 -->
 <gatein-resources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.exoplatform.org/xml/ns/gatein_resources_1_4 http://www.exoplatform.org/xml/ns/gatein_resources_1_4" xmlns="http://www.exoplatform.org/xml/ns/gatein_resources_1_4">
-  <portlet>
-    <name>WalletLink</name>
-    <module>
-      <script>
-        <minify>false</minify>
-        <path>/js/walletLink.js</path>
-      </script>
-      <depends>
-        <module>jquery</module>
-        <as>$</as>
-      </depends>
-    </module>
-  </portlet>
+
+  <portal-skin>
+    <skin-name>Enterprise</skin-name>
+    <skin-module>wallet</skin-module>
+    <css-path>/skin/css/wallet.css</css-path>
+    <css-priority>110</css-priority>
+  </portal-skin>
 
   <portlet>
     <name>WalletAPI</name>
@@ -49,15 +43,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <depends>
         <module>jquery</module>
         <as>$</as>
-      </depends>
-      <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
       </depends>
       <depends>
         <module>ethQRCode</module>
@@ -100,15 +85,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <depends>
         <module>walletCommon</module>
         <as>WalletCommon</as>
-      </depends>
-      <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
       </depends>
       <depends>
         <module>vueChart</module>
@@ -161,15 +137,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <as>WalletCommon</as>
       </depends>
       <depends>
-        <module>fetchPolyfill</module>
-      </depends>
-      <depends>
-        <module>customEventPolyfill</module>
-      </depends>
-      <depends>
-        <module>iePolyfills</module>
-      </depends>
-      <depends>
         <module>vueChart</module>
         <as>VueChart</as>
       </depends>
@@ -190,7 +157,228 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </depends>
     </module>
   </portlet>
-  
+  <portlet>
+    <name>WalletAdmin</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletAdmin.bundle.js</path>
+      </script>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>Web3</module>
+        <as>LocalWeb3</as>
+      </depends>
+      <depends>
+        <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
+      </depends>
+      <depends>
+        <module>commons-cometd3</module>
+        <as>cCometd</as>
+      </depends>
+    </module>
+  </portlet>
+
+
+  <portlet>
+    <name>WalletSettings</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletSettings.bundle.js</path>
+      </script>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>commonVueComponents</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
+    </module>
+  </portlet>
+
+  <portlet>
+    <name>WalletOverview</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletOverview.bundle.js</path>
+      </script>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>commonVueComponents</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
+    </module>
+  </portlet>
+
+  <portlet>
+    <name>RewardAdmin</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/rewardApp.bundle.js</path>
+      </script>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>Web3</module>
+        <as>LocalWeb3</as>
+      </depends>
+      <depends>
+        <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
+      </depends>
+      <depends>
+        <module>commons-cometd3</module>
+        <as>cCometd</as>
+      </depends>
+    </module>
+  </portlet>
+
+  <module>
+    <name>walletCommon</name>
+    <script>
+      <minify>false</minify>
+      <adapter>
+        (function() {
+          <include>/js/walletCommon.bundle.js</include>
+          return WalletCommon;
+        })();
+      </adapter>
+    </script>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
+      <module>jquery</module>
+      <as>$</as>
+    </depends>
+    <depends>
+      <module>Web3</module>
+      <as>LocalWeb3</as>
+    </depends>
+    <depends>
+      <module>ethQRCode</module>
+      <as>EthereumQRPlugin</as>
+    </depends>
+    <depends>
+      <module>Jdenticon</module>
+      <as>jdenticon</as>
+    </depends>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+    <depends>
+      <module>commons-cometd3</module>
+      <as>cCometd</as>
+    </depends>
+  </module>
+
+  <module>
+    <name>ethQRCode</name>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/ethereum-qr-code.min.js</path>
+    </script>
+    <depends>
+      <module>vue</module>
+    </depends>
+  </module>
+
+  <module>
+    <name>Jdenticon</name>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/jdenticon.min.js</path>
+    </script>
+  </module>
+
+  <module>
+    <name>Web3</name>
+    <script>
+      <minify>false</minify>
+      <adapter>
+        (function() {
+          <include>/js/lib/web3.min.js</include>
+          return Web3;
+        })();
+      </adapter>
+    </script>
+  </module>
+
   <module>
     <name>WalletAPIBundle</name>
     <load-group>reward-overview-group</load-group>
@@ -212,15 +400,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <as>$</as>
     </depends>
     <depends>
-      <module>fetchPolyfill</module>
-    </depends>
-    <depends>
-      <module>customEventPolyfill</module>
-    </depends>
-    <depends>
-      <module>iePolyfills</module>
-    </depends>
-    <depends>
       <module>ethQRCode</module>
       <as>EthereumQRPlugin</as>
     </depends>
@@ -236,5 +415,34 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <as>WalletCommon</as>
     </depends>
   </module>
-  
+
+  <!-- TODO : Deprecated to use eChart instead  -->
+  <module>
+    <name>vueChart</name>
+    <as>VueChart</as>
+    <script>
+      <minify>false</minify>
+      <adapter>
+        (function() {
+        <include>/js/lib/vue-chartjs.min.js</include>
+        return VueChartJs;
+        })();
+      </adapter>
+    </script>
+    <depends>
+      <module>chart</module>
+      <as>Chart</as>
+    </depends>
+  </module>
+
+  <!-- TODO : Deprecated to use eChart instead  -->
+  <module>
+    <name>chart</name>
+    <as>Chart</as>
+    <script>
+      <minify>false</minify>
+      <path>/js/lib/Chart.bundle.min.js</path>
+    </script>
+  </module>
+
 </gatein-resources>
