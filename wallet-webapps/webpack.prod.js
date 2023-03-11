@@ -21,9 +21,14 @@ const webpackCommonConfig = require('./webpack.common.js');
 const config = merge(webpackCommonConfig, {
   mode: 'production',
   entry: {
-    wallet: './src/main/webapp/vue-app/wallet.js',
-    walletAPI: './src/main/webapp/vue-app/walletAPI.js',
-    spaceWallet: './src/main/webapp/vue-app/spaceWallet.js',
+    wallet: './src/main/webapp/vue-app/wallet-app/wallet.js',
+    walletAPI: './src/main/webapp/vue-app/wallet-app/walletAPI.js',
+    spaceWallet: './src/main/webapp/vue-app/wallet-app/spaceWallet.js',
+    walletAdmin : './src/main/webapp/vue-app/wallet-admin/walletAdmin.js',
+    walletCommon: './src/main/webapp/vue-app/wallet-common/walletCommon.js',
+    walletSettings: './src/main/webapp/vue-app/wallet-common/wallet-settings/main.js',
+    walletOverview: './src/main/webapp/vue-app/wallet-common/wallet-overview/main.js',
+    rewardApp: './src/main/webapp/vue-app/wallet-reward/main.js',
   },
   output: {
     path: path.join(__dirname, 'target/wallet/'),

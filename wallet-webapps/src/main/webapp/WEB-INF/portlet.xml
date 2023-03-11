@@ -23,7 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
-      <value>/walletAPI.html</value>
+      <value>/html/walletAPI.html</value>
     </init-param>
     <expiration-cache>-1</expiration-cache>
     <cache-scope>PUBLIC</cache-scope>
@@ -37,39 +37,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </portlet-info>
   </portlet>
   <portlet>
-    <portlet-name>WalletLink</portlet-name>
-    <display-name xml:lang="EN">Wallet Tip Tip Link Application</display-name>
-    <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
-    <init-param>
-      <name>portlet-view-dispatched-file-path</name>
-      <value>/walletLink.html</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resources</name>
-      <value>true</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resource.rest</name>
-      <value><![CDATA[/portal/rest/wallet/api/settings]]></value>
-    </init-param>
-    <expiration-cache>-1</expiration-cache>
-    <cache-scope>PUBLIC</cache-scope>
-    <supports>
-      <mime-type>text/html</mime-type>
-    </supports>
-    <supported-locale>en</supported-locale>
-    <portlet-info>
-      <title>Wallet Tip Tip Link Application</title>
-      <keywords>Wallet Tip Tip Application</keywords>
-    </portlet-info>
-  </portlet>
-  <portlet>
     <portlet-name>Wallet</portlet-name>
     <display-name xml:lang="EN">Wallet Application</display-name>
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
-      <value>/wallet.jsp</value>
+      <value>/WEB-INF/jsp/wallet.jsp</value>
     </init-param>
     <init-param>
       <name>prefetch.resources</name>
@@ -101,7 +74,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
-      <value>/spaceWallet.html</value>
+      <value>/html/spaceWallet.html</value>
     </init-param>
     <init-param>
       <name>prefetch.resources</name>
@@ -144,5 +117,93 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <portlet-info>
       <title>WalletBalance</title>
     </portlet-info>
+  </portlet>
+  <portlet>
+    <portlet-name>WalletAdmin</portlet-name>
+    <display-name xml:lang="EN">Wallets Administration Application</display-name>
+    <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+    <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/html/walletAdmin.html</value>
+    </init-param>
+    <expiration-cache>-1</expiration-cache>
+    <cache-scope>PUBLIC</cache-scope>
+    <supports>
+      <mime-type>text/html</mime-type>
+    </supports>
+    <supported-locale>en</supported-locale>
+    <portlet-info>
+      <title>Wallets Administration Application</title>
+      <keywords>Wallets Administration Application</keywords>
+    </portlet-info>
+    <security-role-ref>
+      <role-name>admin</role-name>
+      <role-link>admin</role-link>
+    </security-role-ref>
+  </portlet>
+  <portlet>
+    <portlet-name>WalletSettings</portlet-name>
+    <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+    <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/WEB-INF/jsp/walletSettings.jsp</value>
+    </init-param>
+    <init-param>
+      <description>portlet of wallet settings</description>
+      <name>exo.profiles</name>
+      <value>wallet</value>
+    </init-param>
+    <init-param>
+      <name>prefetch.resource.bundles</name>
+      <value>locale.portlet.Portlets</value>
+    </init-param>
+    <supports>
+      <mime-type>text/html</mime-type>
+    </supports>
+    <portlet-info>
+      <title>Wallet settings</title>
+    </portlet-info>
+  </portlet>
+  <portlet>
+    <portlet-name>WalletOverview</portlet-name>
+    <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+    <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/WEB-INF/jsp/walletOverview.jsp</value>
+    </init-param>
+    <init-param>
+      <description>List of profiles that can be used to enable this portlet</description>
+      <name>exo.profiles</name>
+      <value>wallet</value>
+    </init-param>
+    <supports>
+      <mime-type>text/html</mime-type>
+    </supports>
+    <portlet-info>
+      <title>Wallet overview</title>
+    </portlet-info>
+  </portlet>
+  <portlet>
+    <portlet-name>RewardAdmin</portlet-name>
+    <display-name xml:lang="EN">Ethereum Wallet Application Administration</display-name>
+    <portlet-class>org.exoplatform.commons.api.portlet.GenericDispatchedViewPortlet</portlet-class>
+    <init-param>
+      <name>portlet-view-dispatched-file-path</name>
+      <value>/html/rewardAdmin.html</value>
+    </init-param>
+    <expiration-cache>-1</expiration-cache>
+    <cache-scope>PUBLIC</cache-scope>
+    <supports>
+      <mime-type>text/html</mime-type>
+    </supports>
+    <supported-locale>en</supported-locale>
+    <portlet-info>
+      <title>Ethereum Wallet Reward Administration</title>
+      <keywords>Ethereum Wallet Reward Administration</keywords>
+    </portlet-info>
+    <security-role-ref>
+      <role-name>admin</role-name>
+      <role-link>admin</role-link>
+    </security-role-ref>
   </portlet>
 </portlet-app>

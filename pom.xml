@@ -35,10 +35,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <module>wallet-api</module>
     <module>wallet-services</module>
     <module>wallet-reward-services</module>
-    <module>wallet-webapps-common</module>
     <module>wallet-webapps</module>
-    <module>wallet-webapps-admin</module>
-    <module>wallet-webapps-reward</module>
     <module>wallet-packaging</module>
   </modules>
   <scm>
@@ -86,28 +83,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <!-- Current project artifacts -->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>wallet-webapps-common</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
         <artifactId>wallet-webapps</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>wallet-webapps-admin</artifactId>
-        <version>${project.version}</version>
-        <type>war</type>
-      </dependency>
-
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>wallet-webapps-reward</artifactId>
         <version>${project.version}</version>
         <type>war</type>
       </dependency>
