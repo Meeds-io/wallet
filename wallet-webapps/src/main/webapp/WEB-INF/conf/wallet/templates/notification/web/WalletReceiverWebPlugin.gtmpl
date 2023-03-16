@@ -1,0 +1,48 @@
+<!--
+This file is part of the Meeds project (https://meeds.io/).
+Copyright (C) 2020 Meeds Association
+contact@meeds.io
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3 of the License, or (at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software Foundation,
+Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+-->
+<% String openURL = HASH == null ? BASE_URL : BASE_URL + "?hash=" + HASH; %>
+<li class="$READ clearfix" data-id="$NOTIFICATION_ID">
+  <div class="media">
+    <div class="avatarXSmall pull-left">
+      <img src="$AVATAR" onerror="this.src = '/platform-ui/skin/images/avatar/DefaultSpaceAvatar.png'" />
+    </div>
+    <div class="media-body">
+      <div class="contentSmall" data-link="$openURL">
+        <div class="content">
+        </div>
+        <div class="status">
+          <%=
+            ACCOUNT_TYPE.equals("admin") ?
+              _ctx.appRes("Notification.message.AdminFundReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL) :
+              ACCOUNT_TYPE.equals("space") ?
+                _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER_URL, SYMBOL) :
+                _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)
+          %>
+        </div>
+        <% if(org.apache.commons.lang.StringUtils.isNotBlank(MESSAGE)) { %>
+          <div class="content">
+            <%= MESSAGE %>
+          </div>
+        <% } %>
+        <div class="lastUpdatedTime">
+          $LAST_UPDATED_TIME
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="remove-item" data-rest=""><i class="uiIconClose uiIconLightGray"></i></span>
+</li>
