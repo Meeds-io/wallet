@@ -53,6 +53,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.picocontainer.Startable;
@@ -83,6 +84,8 @@ import org.exoplatform.wallet.model.settings.NetworkSettings;
 import org.exoplatform.wallet.model.settings.UserSettings;
 import org.exoplatform.wallet.model.settings.WalletSettings;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
+
+import io.meeds.wallet.lock.Lock;
 
 /**
  * A storage service to save/load information used by users and spaces wallets
@@ -476,7 +479,8 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
   }
 
-  private synchronized double getGasPriceBlocking() throws IOException {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  private double getGasPriceBlocking() throws IOException {
     if (dynamicGasPrice == 0 || (System.currentTimeMillis() - dynamicGasPriceLastUpdateTime) > dynamicGasPriceUpdateInterval) {
       double gasPrice = getBlockchainTransactionService().getGasPrice();
       setGasPrice(gasPrice);
