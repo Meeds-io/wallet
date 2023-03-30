@@ -109,7 +109,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
         <v-flex class="mx-auto text-center title mt-7" xs12>
           <a
-            href="https://www.exoplatform.com/rewarding-program"
+            href="https://www.meeds.io/dapp/portfolio"
             target="_blank"
             rel="noopener noreferrer"
             class="requestFundsLink">
