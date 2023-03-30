@@ -20,9 +20,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     class="mt-8 adminWallet">
     <div class="mx-4">
       <v-btn
-        outlined
-        :href="requestFundsLink"
-        target="_blank">
+        href="https://www.meeds.io/dapp/portfolio"
+        target="_blank"
+        rel="noopener noreferrer"
+        outlined>
         {{ $t('exoplatform.wallet.button.requestFunds') }}
       </v-btn>
     </div>
@@ -117,9 +118,6 @@ export default {
     },
     adminBalanceTooLow() {
       return this.adminBalance < this.initialTokenAmount;
-    },
-    requestFundsLink() {
-      return (this.adminWalletAddress && `https://www.exoplatform.com/rewarding-program?address=${this.adminWalletAddress}`) || '#';
     },
     adminWalletAddress() {
       return (this.adminWallet && this.adminWallet.address) || '';
