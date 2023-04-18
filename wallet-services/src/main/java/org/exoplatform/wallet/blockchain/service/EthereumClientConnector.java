@@ -80,6 +80,7 @@ import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.statistic.ExoWalletStatistic;
 import org.exoplatform.wallet.statistic.ExoWalletStatisticService;
 
+import io.meeds.wallet.lock.Lock;
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
@@ -206,7 +207,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @param transactionHash transaction hash to retrieve
    * @return Web3j Transaction object
    */
-  public synchronized Transaction getTransaction(String transactionHash) {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  public Transaction getTransaction(String transactionHash) {
     return transactionFutureCache.get(null, StringUtils.lowerCase(transactionHash));
   }
 
@@ -229,7 +231,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
    * @param transactionHash transaction hash to retrieve
    * @return Web3j Transaction receipt object
    */
-  public synchronized TransactionReceipt getTransactionReceipt(String transactionHash) {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  public TransactionReceipt getTransactionReceipt(String transactionHash) {
     return receiptFutureCache.get(null, StringUtils.lowerCase(transactionHash));
   }
 
@@ -403,12 +406,14 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return parameters;
   }
 
-  public synchronized Future<Disposable> renewTransactionListeningSubscription(long lastWatchedBlockNumber) {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  public Future<Disposable> renewTransactionListeningSubscription(long lastWatchedBlockNumber) {
     this.setLastWatchedBlockNumber(lastWatchedBlockNumber);
     return renewTransactionListeningSubscription();
   }
 
-  public synchronized void cancelTransactionListeningToBlockchain() {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  public void cancelTransactionListeningToBlockchain() {
     stopListeningToBlockchain();
     stopPeriodicConnectionVerifier();
   }
@@ -453,7 +458,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return connect(false);
   }
 
-  protected synchronized boolean connect(boolean periodicCheck) throws Exception { // NOSONAR
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  protected boolean connect(boolean periodicCheck) throws Exception { // NOSONAR
     if (periodicCheck) {
       startPeriodicConnectionVerifier();
     }
@@ -554,7 +560,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     return connectionVerifierFuture;
   }
 
-  protected synchronized void checkSubscription() {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  protected void checkSubscription() {
     if (this.listeningToBlockchain && !this.subscriptionInProgress) {
       renewSubscriptionWhenDisposed();
     }
@@ -626,7 +633,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     }
   }
 
-  protected synchronized void stopListeningToBlockchain() {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  protected void stopListeningToBlockchain() {
     try {
       if (this.ethFilterSubscribtion != null && !this.ethFilterSubscribtion.isDisposed()) {
         LOG.info("Close mined contract transactions subscription");
@@ -646,7 +654,8 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     this.ethFilterSubscribtion.dispose();
   }
 
-  private synchronized void startPeriodicConnectionVerifier() {
+  @Lock(duration = 30, timeUnit = TimeUnit.SECONDS)
+  protected void startPeriodicConnectionVerifier() {
     if (connectionVerifierFuture == null) {
       LOG.info("Start periodic WebSocket endpoint connection status check");
       // Blockchain connection verifier
