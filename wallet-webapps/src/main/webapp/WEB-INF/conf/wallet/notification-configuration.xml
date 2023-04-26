@@ -221,7 +221,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </value-param>
       </init-params>
     </component-plugin>
-    <component-plugin>
+    <component-plugin profiles="push-notifications">
       <name>push.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
       <type>org.exoplatform.wallet.notification.provider.MobilePushTemplateProvider</type>
@@ -254,7 +254,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </value-param>
       </init-params>
     </component-plugin>
-    <component-plugin>
+    <component-plugin profiles="push-notifications">
       <name>push.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
       <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
