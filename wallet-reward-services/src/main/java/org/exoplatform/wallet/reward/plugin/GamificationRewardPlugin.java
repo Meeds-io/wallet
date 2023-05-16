@@ -33,8 +33,7 @@ public class GamificationRewardPlugin extends RewardPlugin {
 
   private static final Log     LOG                          = ExoLogger.getLogger(GamificationRewardPlugin.class);
 
-  private static final String  GAMIFICATION_SERVICE_FQN     =
-                                                        "org.exoplatform.addons.gamification.service.RealizationService";
+  private static final String  GAMIFICATION_SERVICE_FQN     = "io.meeds.gamification.service.RealizationService";
 
   private static final String  FIND_USER_POINTS_METHOD_NAME = "getScoresByIdentityIdsAndBetweenDates";
 
