@@ -33,10 +33,9 @@ public class GamificationRewardPlugin extends RewardPlugin {
 
   private static final Log     LOG                          = ExoLogger.getLogger(GamificationRewardPlugin.class);
 
-  private static final String  GAMIFICATION_SERVICE_FQN     =
-                                                        "org.exoplatform.addons.gamification.service.effective.GamificationService";
+  private static final String  GAMIFICATION_SERVICE_FQN     = "io.meeds.gamification.service.RealizationService";
 
-  private static final String  FIND_USER_POINTS_METHOD_NAME = "findUsersReputationScoreBetweenDate";
+  private static final String  FIND_USER_POINTS_METHOD_NAME = "getScoresByIdentityIdsAndBetweenDates";
 
   private ConfigurationManager configurationManager;
 
@@ -62,6 +61,7 @@ public class GamificationRewardPlugin extends RewardPlugin {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Map<Long, Double> getEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds) {
     HashMap<Long, Double> earnedPoints = new HashMap<>();
     if (identityIds == null || identityIds.isEmpty()) {
@@ -76,7 +76,7 @@ public class GamificationRewardPlugin extends RewardPlugin {
     Map<Long, Long> points = new HashMap<>();
     try {
       points = (Map<Long, Long>) method.invoke(getService(),
-                                               identityIds.stream().map(Object::toString).collect(Collectors.toList()),
+                                               identityIds.stream().map(Object::toString).toList(),
                                                startDate,
                                                endDate);
     } catch (Exception e) {

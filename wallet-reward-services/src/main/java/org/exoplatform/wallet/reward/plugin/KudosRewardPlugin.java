@@ -17,7 +17,9 @@
 package org.exoplatform.wallet.reward.plugin;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.exoplatform.container.ExoContainer;
@@ -60,6 +62,7 @@ public class KudosRewardPlugin extends RewardPlugin {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public Map<Long, Double> getEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds) {
     HashMap<Long, Double> earnedPoints = new HashMap<>();
     if (identityIds == null || identityIds.isEmpty()) {
@@ -72,7 +75,7 @@ public class KudosRewardPlugin extends RewardPlugin {
     Map<Long, Long> points = new HashMap<>();
     try {
       points = (Map<Long, Long>) method.invoke(getService(),
-                                               identityIds.stream().collect(Collectors.toList()),
+                                               identityIds.stream().toList(),
                                                startDateInSeconds,
                                                endDateInSeconds);
     } catch (Exception e) {
