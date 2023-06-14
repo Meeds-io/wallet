@@ -16,14 +16,11 @@
  */
 package org.exoplatform.wallet.service;
 
+import static org.exoplatform.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZED_SETTING_PARAM;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -40,12 +37,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
@@ -121,6 +123,41 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     String addressTest = storedWallet.getAddress();
     assertEquals("Unexpected wallet address", StringUtils.lowerCase(WALLET_ADDRESS_1), StringUtils.lowerCase(addressTest));
+  }
+
+  @Test
+  public void testSaveWallet() throws IllegalAccessException {
+    String walletAddress = "0x11111111155511111111111111111111111111";
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet userWallet =
+                      walletAccountService.createWalletInstance(WalletProvider.METAMASK, walletAddress, CURRENT_USER_IDENTITY_ID);
+
+    getService(SettingService.class).remove(Context.USER.id(CURRENT_USER),
+                                            WALLET_SCOPE,
+                                            WALLET_INITIALIZED_SETTING_PARAM);
+
+    AtomicInteger increment = new AtomicInteger(0);
+    getService(ListenerService.class).addListener(NEW_ADDRESS_ASSOCIATED_EVENT, new Listener<Object, String>() {
+      @Override
+      public void onEvent(Event<Object, String> event) throws Exception {
+        increment.incrementAndGet();
+      }
+    });
+
+    userWallet = walletAccountService.saveWallet(userWallet, true);
+    entitiesToClean.add(userWallet);
+
+    Wallet storedWallet = walletAccountService.getWalletByAddress(walletAddress);
+    assertNotNull(storedWallet);
+    assertNotNull(storedWallet.getPassPhrase());
+    assertEquals("Unexpected wallet address",
+                 StringUtils.lowerCase(walletAddress),
+                 StringUtils.lowerCase(storedWallet.getAddress()));
+    assertEquals(1, increment.get());
+
+    increment.set(0);
+    walletAccountService.saveWallet(userWallet, true);
+    assertEquals(0, increment.get());
   }
 
   /**
@@ -755,7 +792,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     assertNotNull(wallet);
     assertEquals(WalletProvider.METAMASK.name(), wallet.getProvider());
-    assertEquals(walletAddress, wallet.getAddress());
+    assertEquals(StringUtils.lowerCase(walletAddress), wallet.getAddress());
     assertTrue(wallet.isBackedUp());
     assertTrue(wallet.getIsInitialized());
     assertEquals(WalletState.INITIALIZED.name(), wallet.getInitializationState());
@@ -763,7 +800,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     walletAccountService.switchToInternalWallet(wallet.getTechnicalId());
     wallet = walletAccountService.getWalletByIdentityId(CURRENT_USER_IDENTITY_ID);
     assertNotNull(wallet);
-    assertEquals(internalWalletAddress, wallet.getAddress());
+    assertEquals(StringUtils.lowerCase(internalWalletAddress), wallet.getAddress());
     assertEquals(WalletProvider.INTERNAL_WALLET.name(), wallet.getProvider());
     assertTrue(wallet.isBackedUp());
     assertTrue(wallet.getIsInitialized());
@@ -796,6 +833,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     WalletAccountServiceImpl walletAccountService = new WalletAccountServiceImpl(mock(PortalContainer.class),
                                                                                  accountStorage,
                                                                                  mock(AddressLabelStorage.class),
+                                                                                 mock(SettingService.class),
                                                                                  mock(InitParams.class));
     walletAccountService.setTokenAdminService(tokenAdminService);
     walletAccountService.setListenerService(listenerService);

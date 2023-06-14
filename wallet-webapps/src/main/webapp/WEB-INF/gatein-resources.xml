@@ -416,6 +416,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </depends>
   </module>
 
+  <module>
+    <name>engagementCenterActionsWalletExtensions</name>
+    <load-group>engagement-center-user-actions</load-group>
+    <script>
+      <path>/js/engagementCenterExtensions.bundle.js</path>
+    </script>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+  </module>
+
   <!-- TODO : Deprecated to use eChart instead  -->
   <module>
     <name>vueChart</name>
