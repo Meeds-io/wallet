@@ -62,6 +62,10 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.SettingValue;
+import org.exoplatform.commons.api.settings.data.Context;
+import org.exoplatform.commons.api.settings.data.Scope;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
@@ -108,6 +112,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private WalletTokenAdminService tokenAdminService;
 
+  private SettingService          settingService;
+
   private WalletStorage           accountStorage;
 
   private AddressLabelStorage     labelStorage;
@@ -121,8 +127,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   public WalletAccountServiceImpl(PortalContainer container,
                                   WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
+                                  SettingService settingService,
                                   InitParams params) {
     this.container = container;
+    this.settingService = settingService;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)
@@ -458,18 +466,33 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (!WalletType.isAdmin(wallet.getType())) {
       refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+      String eventName = isNew && !isUserWalletInitialized(wallet.getId()) ? NEW_ADDRESS_ASSOCIATED_EVENT
+                                                                           : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       try {
         getListenerService().broadcast(eventName, wallet.clone(), currentUser);
       } catch (Exception e) {
         LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      } finally {
+        if (isNew) {
+          setUserWalletAsInitialized(wallet.getId());
+        }
       }
     }
   }
 
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
-    return accountStorage.saveWallet(wallet, isNew);
+    wallet = accountStorage.saveWallet(wallet, isNew);
+    if (isNew && !isUserWalletInitialized(wallet.getId())) {
+      try {
+        getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
+      } catch (Exception e) {
+        LOG.error("Error broadcasting event {} for wallet {}", NEW_ADDRESS_ASSOCIATED_EVENT, wallet, e);
+      } finally {
+        setUserWalletAsInitialized(wallet.getId());
+      }
+    }
+    return wallet;
   }
 
   @Override
@@ -507,6 +530,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalStateException("Invalid Signed Message", e);
     }
 
+    Wallet existingWallet = getWalletByIdentityId(identityId);
+
     Wallet wallet = null;
     if (accountStorage.hasWallet(identityId)) {
       accountStorage.switchToWalletProvider(identityId, provider, newAddress);
@@ -526,10 +551,22 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
+    boolean isNew = !isUserWalletInitialized(wallet.getId()) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
     try {
-      getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
+      if (isNew) {
+        getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
+      } else {
+        getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
+      }
     } catch (Exception e) {
-      LOG.error("Error while braodcasting wallet {} provider modification to {}", wallet);
+      LOG.error("Error broadcasting event {} for wallet {}",
+                isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : WALLET_PROVIDER_MODIFIED_EVENT,
+                wallet,
+                e);
+    } finally {
+      if (isNew) {
+        setUserWalletAsInitialized(wallet.getId());
+      }
     }
   }
 
@@ -973,6 +1010,20 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setProvider(provider.name());
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
+  }
+
+  private void setUserWalletAsInitialized(String username) {
+    settingService.set(Context.USER.id(username),
+                       Scope.APPLICATION.id("Wallet"),
+                       "walletInitialized",
+                       SettingValue.create("true"));
+  }
+
+  private boolean isUserWalletInitialized(String username) {
+    SettingValue<?> value = settingService.get(Context.USER.id(username),
+                                               Scope.APPLICATION.id("Wallet"),
+                                               "walletInitialized");
+    return value != null && Boolean.parseBoolean(value.toString());
   }
 
 }

@@ -82,7 +82,10 @@ public class ExoWalletStatisticAspect {
     } finally {
       long duration = System.currentTimeMillis() - startTime;
       try {
-        Map<String, Object> parameters = statisticService.getStatisticParameters(operation, result, point.getArgs());
+        Map<String, Object> parameters = statisticService == null ? null
+                                                                  : statisticService.getStatisticParameters(operation,
+                                                                                                            result,
+                                                                                                            point.getArgs());
         if (parameters != null) {
           if (local) {
             put(parameters, LOCAL_SERVICE, service);
@@ -109,7 +112,9 @@ public class ExoWalletStatisticAspect {
               put(parameters, STATUS_CODE, "200");
             }
           }
-          addStatisticEntry(parameters);
+          if (ExoContainer.hasProfile("analytics")) {
+            addStatisticEntry(parameters);
+          }
         }
       } catch (Throwable e) {
         LOG.warn("Error adding statistic log entry in method '{}' for statistic type '{}'", method.getName(), operation, e);
