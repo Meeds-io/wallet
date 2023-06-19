@@ -108,7 +108,7 @@ public class WalletStorage {
    * @return {@link Wallet} details identified by address
    */
   public Wallet getWalletByAddress(String address, String contractAddress) {
-    WalletEntity walletEntity = walletAccountDAO.findByAddress(address.toLowerCase());
+    WalletEntity walletEntity = walletAccountDAO.findByAddress(address);
     if (walletEntity == null) {
       return null;
     }
@@ -319,7 +319,7 @@ public class WalletStorage {
     String address = walletBackup.getAddress();
 
     WalletEntity walletEntity = walletAccountDAO.find(walletId);
-    walletEntity.setAddress(address);
+    walletEntity.setAddress(StringUtils.lowerCase(address));
     walletEntity.setProvider(WalletProvider.INTERNAL_WALLET);
     walletEntity.setInitializationState(WalletState.MODIFIED);
     walletAccountDAO.update(walletEntity);
@@ -351,7 +351,7 @@ public class WalletStorage {
       }
     }
 
-    walletEntity.setAddress(newAddress);
+    walletEntity.setAddress(StringUtils.lowerCase(newAddress));
     walletEntity.setProvider(provider);
     if(walletEntity.getInitializationState() == WalletState.DELETED){
       walletEntity.setInitializationState(WalletState.MODIFIED);
@@ -389,7 +389,7 @@ public class WalletStorage {
       walletEntity = new WalletEntity();
     }
     walletEntity.setId(wallet.getTechnicalId());
-    walletEntity.setAddress(wallet.getAddress().toLowerCase());
+    walletEntity.setAddress(StringUtils.lowerCase(wallet.getAddress()));
     walletEntity.setEnabled(wallet.isEnabled());
     walletEntity.setInitializationState(WalletState.valueOf(wallet.getInitializationState()));
     walletEntity.setPassPhrase(wallet.getPassPhrase());
