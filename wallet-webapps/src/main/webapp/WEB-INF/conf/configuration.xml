@@ -33,5 +33,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <import>war:/conf/wallet/wallet-portal-configuration.xml</import>
   <import profiles="app-center">war:/conf/wallet/app-center-configuration.xml</import>
   <import>war:/conf/wallet/navigation-categories-configuration.xml</import>
+  <import profiles="gamification">war:/conf/wallet/gamification-configuration.xml</import>
 
 </configuration>
