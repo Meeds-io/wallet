@@ -26,8 +26,10 @@ import static org.exoplatform.wallet.utils.WalletUtils.WALLET_DELETED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_DISABLED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ENABLED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZATION_MODIFICATION_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZED_SETTING_PARAM;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_PROVIDER_MODIFIED_EVENT;
+import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
 import static org.exoplatform.wallet.utils.WalletUtils.canAccessWallet;
 import static org.exoplatform.wallet.utils.WalletUtils.checkUserIsSpaceManager;
 import static org.exoplatform.wallet.utils.WalletUtils.computeWalletFromIdentity;
@@ -62,6 +64,9 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.utils.Numeric;
 
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.SettingValue;
+import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
@@ -108,6 +113,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private WalletTokenAdminService tokenAdminService;
 
+  private SettingService          settingService;
+
   private WalletStorage           accountStorage;
 
   private AddressLabelStorage     labelStorage;
@@ -121,8 +128,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   public WalletAccountServiceImpl(PortalContainer container,
                                   WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
+                                  SettingService settingService,
                                   InitParams params) {
     this.container = container;
+    this.settingService = settingService;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
     if (params != null && params.containsKey(ADMIN_KEY_PARAMETER)
@@ -436,18 +445,17 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     long identityId = wallet.getTechnicalId();
     Wallet oldWallet = accountStorage.getWalletByIdentityId(identityId, getContractAddress());
-    boolean isNew = oldWallet == null;
     checkCanSaveWallet(wallet, oldWallet, currentUser);
-    if (!isNew && StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
+    if (oldWallet != null && StringUtils.equalsIgnoreCase(oldWallet.getAddress(), wallet.getAddress())) {
       throw new IllegalAccessException("Can't modify wallet properties once saved");
     }
 
-    WalletProvider provider = isNew || oldWallet.getProvider() == null ? WalletProvider.INTERNAL_WALLET
-                                                                       : WalletProvider.valueOf(oldWallet.getProvider());
-    computeWalletProperties(wallet, oldWallet, provider, isNew);
-    accountStorage.saveWallet(wallet, isNew);
+    WalletProvider provider = oldWallet == null || oldWallet.getProvider() == null ? WalletProvider.INTERNAL_WALLET
+                                                                                   : WalletProvider.valueOf(oldWallet.getProvider());
+    computeWalletProperties(wallet, oldWallet, provider, oldWallet == null);
+    accountStorage.saveWallet(wallet, oldWallet == null);
 
-    if (!isNew) {
+    if (oldWallet != null) {
       // Automatically Remove old private key when modifying address associated
       // to wallet
       accountStorage.removeWalletPrivateKey(identityId);
@@ -458,18 +466,32 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (!WalletType.isAdmin(wallet.getType())) {
       refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+      boolean isNew = oldWallet == null && !accountStorage.hasWalletBackup(identityId) && !isUserWalletInitialized(wallet.getId());
+      String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
+                               : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       try {
         getListenerService().broadcast(eventName, wallet.clone(), currentUser);
       } catch (Exception e) {
         LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+      } finally {
+        setUserWalletAsInitialized(wallet.getId());
       }
     }
   }
 
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
-    return accountStorage.saveWallet(wallet, isNew);
+    wallet = accountStorage.saveWallet(wallet, isNew);
+    if (isNew && !isUserWalletInitialized(wallet.getId())) {
+      try {
+        getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
+      } catch (Exception e) {
+        LOG.error("Error broadcasting event {} for wallet {}", NEW_ADDRESS_ASSOCIATED_EVENT, wallet, e);
+      } finally {
+        setUserWalletAsInitialized(wallet.getId());
+      }
+    }
+    return wallet;
   }
 
   @Override
@@ -487,6 +509,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       // No internal wallet created by user, so delete wallet information
       accountStorage.removeWallet(identityId);
     }
+    setUserWalletAsInitialized(wallet.getId());
   }
 
   @Override
@@ -507,6 +530,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       throw new IllegalStateException("Invalid Signed Message", e);
     }
 
+    Wallet existingWallet = getWalletByIdentityId(identityId);
+
     Wallet wallet = null;
     if (accountStorage.hasWallet(identityId)) {
       accountStorage.switchToWalletProvider(identityId, provider, newAddress);
@@ -526,10 +551,20 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
+    boolean isNew = !isUserWalletInitialized(wallet.getId()) && !accountStorage.hasWalletBackup(identityId) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
     try {
-      getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
+      if (isNew) {
+        getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
+      } else {
+        getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
+      }
     } catch (Exception e) {
-      LOG.error("Error while braodcasting wallet {} provider modification to {}", wallet);
+      LOG.error("Error broadcasting event {} for wallet {}",
+                isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : WALLET_PROVIDER_MODIFIED_EVENT,
+                wallet,
+                e);
+    } finally {
+      setUserWalletAsInitialized(wallet.getId());
     }
   }
 
@@ -973,6 +1008,20 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     wallet.setProvider(provider.name());
     wallet.setEnabled(isNew || oldWallet.isEnabled());
     setWalletPassPhrase(wallet, oldWallet);
+  }
+
+  private void setUserWalletAsInitialized(String username) {
+    settingService.set(Context.USER.id(username),
+                       WALLET_SCOPE,
+                       WALLET_INITIALIZED_SETTING_PARAM,
+                       SettingValue.create("true"));
+  }
+
+  private boolean isUserWalletInitialized(String username) {
+    SettingValue<?> value = settingService.get(Context.USER.id(username),
+                                               WALLET_SCOPE,
+                                               WALLET_INITIALIZED_SETTING_PARAM);
+    return value != null && Boolean.parseBoolean(value.getValue().toString());
   }
 
 }
