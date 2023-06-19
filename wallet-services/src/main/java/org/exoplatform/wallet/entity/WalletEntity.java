@@ -32,7 +32,7 @@ import org.exoplatform.wallet.model.WalletType;
 @ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_ACCOUNT")
-@NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE w.address = :address")
+@NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE LOWER(w.address) = :address")
 public class WalletEntity implements Serializable {
   private static final long                       serialVersionUID = -1622032986992776281L;
 
