@@ -69,6 +69,7 @@ import org.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
@@ -99,6 +100,9 @@ import org.exoplatform.wallet.storage.WalletStorage;
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable, ExoWalletStatisticService {
   private static final Log                        LOG                                     =
                                                       ExoLogger.getLogger(EthereumWalletTokenAdminService.class);
+
+  private static final String                     ADMIN_WALLET_CHECK_MESSAGE              =
+                                                                             "Can't access admin wallet keys. Please verify that Codec Key File and 'exo.wallet.admin.key' property value remains unchanged between startups";
 
   private static final String                     NO_CONFIGURED_CONTRACT_ADDRESS          = "No configured contract address";
 
@@ -202,7 +206,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     } catch (Exception e) {
       LOG.warn("Error refreshing contract detail from blockchain with address {}", configuredContractAddress, e);
     }
-    createAdminWalletAsync();
+    initAdminWallet();
   }
 
   @Override
@@ -505,22 +509,41 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     return response.send();
   }
 
+  @ExoTransactional
+  public void initAdminWallet() {
+    // Create admin wallet if not exists
+    Wallet adminWallet = getAccountService().getAdminWallet();
+    if (adminWallet == null || StringUtils.isBlank(adminWallet.getAddress())) {
+      createAdminWalletAsync();
+    } else {
+      checkAdminWallet();
+    }
+  }
+
+  private void checkAdminWallet() {
+    Credentials credentials;
+    try {
+      credentials = getAdminCredentials();
+    } catch (Exception e) {
+      throw new IllegalStateException(ADMIN_WALLET_CHECK_MESSAGE, e);
+    }
+    if (credentials == null) {
+      throw new IllegalStateException(ADMIN_WALLET_CHECK_MESSAGE);
+    } else if (StringUtils.isNotBlank(adminPrivateKey)) {
+      LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
+    }
+  }
+
   private void createAdminWalletAsync() {
     CompletableFuture.runAsync(() -> {
       ExoContainerContext.setCurrentContainer(container);
       RequestLifeCycle.begin(container);
       try {
-        // Create admin wallet if not exists
-        Wallet adminWallet = getAccountService().getAdminWallet();
-        if (adminWallet == null || StringUtils.isBlank(adminWallet.getAddress())) {
-          if (StringUtils.isBlank(adminPrivateKey)) {
-            createAdminAccount();
-          } else {
-            createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
-            LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
-          }
-        } else if (StringUtils.isNotBlank(adminPrivateKey)) {
-          LOG.warn("Admin wallet private key has been already imported, you can delete it from property to keep it safe!");
+        if (StringUtils.isBlank(adminPrivateKey)) {
+          createAdminAccount();
+        } else {
+          createAdminAccount(adminPrivateKey, getUserACL().getSuperUser());
+          LOG.warn("Admin wallet private key has been imported, you can delete it from property to keep it safe");
         }
       } catch (Exception e) {
         LOG.warn("Error while creating Admin wallet", e);
