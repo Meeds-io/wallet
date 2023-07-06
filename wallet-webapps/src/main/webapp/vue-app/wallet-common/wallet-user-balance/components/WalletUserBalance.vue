@@ -1,6 +1,7 @@
 <template>
   <v-app id="WalletApp" class="ma-0">
     <div
+      v-show="!loading"
       flat
       @click="$refs.accountDetail.open()"
       class="clickable">
@@ -25,6 +26,7 @@ export default {
   data: () => ({
     wallet: null,
     contractDetails: null,
+    loading: true,
     isOverviewDisplay: {
       type: Boolean,
       default: () => false,
@@ -63,7 +65,8 @@ export default {
       .then(() => {
         this.wallet = Object.assign({}, window.walletSettings.wallet);
         this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
-      });
+      })
+      .finally(() => this.loading = false);
   }
 };
 </script>
