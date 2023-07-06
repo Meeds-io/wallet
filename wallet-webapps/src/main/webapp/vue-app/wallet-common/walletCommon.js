@@ -47,7 +47,7 @@ import WalletOverviewDrawer from './wallet-overview/components/WalletOverviewDra
 import WalletOverviewRewardItem from './wallet-overview/components/WalletOverviewRewardItem.vue';
 import WalletOverviewRewardPluginItem from './wallet-overview/components/WalletOverviewRewardPluginItem.vue';
 import WalletUserBalance from './wallet-user-balance/components/WalletUserBalance.vue';
-import WeeklyEarnings from './weekly-earnings/components/weeklyEarnings.vue';
+import WeeklyEarnings from './weekly-earnings/components/WeeklyEarnings.vue';
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';

@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <div class="ma-0">
+  <div v-show="!loading" class="ma-0">
     <div
       flat
       @click="openDrawer"
@@ -42,7 +42,8 @@ export default {
     return {
       weeklyReward: null,
       wallet: null,
-      contractDetails: null
+      contractDetails: null,
+      loading: true,
     };
   },
   computed: {
@@ -57,8 +58,10 @@ export default {
     }
   },
   created() {
-    this.init();
-    this.refreshRewards();
+    Promise.all([
+      this.init(),
+      this.refreshRewards(),
+    ]).finally(() => this.loading = false);
   },
   methods: {
     init() {
@@ -72,7 +75,7 @@ export default {
         });
     },
     refreshRewards() {
-      computeRewardsByUser(this.selectedDate)
+      return computeRewardsByUser(this.selectedDate)
         .then(rewardReport => {
           if (rewardReport) {
             for (const reward of rewardReport.rewards) {
@@ -81,6 +84,7 @@ export default {
               } 
             }
           }
+          return this.$nextTick();
         });
     },
     openDrawer() {
