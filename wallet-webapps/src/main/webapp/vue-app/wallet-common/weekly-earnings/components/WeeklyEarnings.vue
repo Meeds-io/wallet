@@ -58,10 +58,8 @@ export default {
     }
   },
   created() {
-    Promise.all([
-      this.init(),
-      this.refreshRewards(),
-    ]).finally(() => this.loading = false);
+    this.init()
+      .finally(() => this.loading = false);
   },
   methods: {
     init() {
@@ -72,19 +70,19 @@ export default {
             this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
           }
           return this.$nextTick();
-        });
+        })
+        .then(() => this.refreshRewards());
     },
     refreshRewards() {
-      return computeRewardsByUser(this.selectedDate)
+      return this.wallet?.address?.length && computeRewardsByUser(this.selectedDate)
         .then(rewardReport => {
           if (rewardReport) {
-            for (const reward of rewardReport.rewards) {
-              if (reward.wallet.address.toUpperCase() === this.wallet.address.toUpperCase()) {
-                this.weeklyReward = reward.tokensToSend;
-              } 
-            }
+            const walletAddress = this.wallet.address.toUpperCase();
+            const walletReward = rewardReport.rewards.find(reward.wallet.address.toUpperCase() === walletAddress);
+            this.weeklyReward = walletReward?.tokensToSend || 0;
+          } else {
+            this.weeklyReward = 0;
           }
-          return this.$nextTick();
         });
     },
     openDrawer() {
