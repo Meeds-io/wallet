@@ -145,6 +145,8 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
 
   private long                                    adminBlockchainNonceLastUpdate;
 
+  private boolean                                 checkAdminKey = true;
+
   private FutureCache<String, BigInteger, Object> tokenBalanceFutureCache                 = null;
 
   private FutureCache<String, BigInteger, Object> etherBalanceFutureCache                 = null;
@@ -187,6 +189,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
         return;
       }
       this.adminPrivateKey = System.getProperty("exo.wallet.admin.privateKey", null);
+      this.checkAdminKey = !"false".equals(System.getProperty("exo.wallet.admin.checkAdminKey"));
       this.configuredContractAddress = settings.getContractAddress();
       this.websocketURL = getWebsocketURL();
       this.networkId = getNetworkId();
@@ -515,7 +518,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
     Wallet adminWallet = getAccountService().getAdminWallet();
     if (adminWallet == null || StringUtils.isBlank(adminWallet.getAddress())) {
       createAdminWalletAsync();
-    } else {
+    } else if (this.checkAdminKey){
       checkAdminWallet();
     }
   }
