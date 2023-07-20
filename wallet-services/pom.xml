@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <artifactId>wallet-services</artifactId>
   <name>eXo Add-on:: Wallet - Services</name>
   <properties>
-    <exo.test.coverage.ratio>0.62</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.63</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
