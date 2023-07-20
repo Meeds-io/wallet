@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
@@ -102,10 +101,12 @@ public class WalletUtils {
   }
 
   @SuppressWarnings("all")
-  public static final char[]                          SIMPLE_CHARS                             = new char[] { 'A', 'B', 'C', 'D',
+  public static final char[]                          SIMPLE_CHARS                             = new char[] {
+      'A', 'B', 'C', 'D',
       'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
       'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1',
-      '2', '3', '4', '5', '6', '7', '8', '9' };
+      '2', '3', '4', '5', '6', '7', '8', '9'
+  };
 
   public static final String                          COMETD_CHANNEL                           = "/eXo/Application/Addons/Wallet";
 
@@ -167,6 +168,8 @@ public class WalletUtils {
   public static final String                          WALLET_USER_TRANSACTION_NAME             = "WALLET_USER_TRANSACTION";
 
   public static final String                          WALLET_BROWSER_PHRASE_NAME               = "WALLET_BROWSER_PHRASE";
+
+  public static final String                          WALLET_INITIALIZED_SETTING_PARAM         = "WALLET_INITIALIZED";
 
   public static final String                          ADMIN_KEY_PARAMETER                      = "admin.wallet.key";
 
@@ -365,6 +368,23 @@ public class WalletUtils {
 
   public static final String                          LOGIN_MESSAGE_ATTRIBUTE_NAME             = "login_message";
 
+  public static final String                          GAMIFICATION_BROADCAST_ACTION_EVENT      =
+                                                                                          "exo.gamification.generic.action";
+
+  public static final String                          GAMIFICATION_EVENT_ID                    = "eventId";
+
+  public static final String                          GAMIFICATION_EARNER_ID                   = "senderId";
+
+  public static final String                          GAMIFICATION_RECEIVER_ID                 = "receiverId";
+
+  public static final String                          GAMIFICATION_OBJECT_ID                   = "objectId";
+
+  public static final String                          GAMIFICATION_OBJECT_TYPE                 = "objectType";
+
+  public static final String                          GAMIFICATION_WALLET_OBJECT_TYPE          = "wallet";
+
+  public static final String                          GAMIFICATION_CREATE_WALLET_EVENT         = "createWallet";
+
   public static final Random                          Random                                   = new Random();
 
   public static String                                blockchainUrlSuffix                      = null;                                 // NOSONAR
@@ -394,7 +414,7 @@ public class WalletUtils {
         } else if (StringUtils.isBlank(excludedId)) {
           return Arrays.asList(managers);
         } else {
-          return Arrays.stream(managers).filter(member -> !excludedId.equals(member)).collect(Collectors.toList());
+          return Arrays.stream(managers).filter(member -> !excludedId.equals(member)).toList();
         }
       }
     } else if (WalletType.isUser(wallet.getType())) {
@@ -643,9 +663,9 @@ public class WalletUtils {
   /**
    * Return true if user can access wallet detailed information
    * 
-   * @param wallet wallet details to check
-   * @param currentUser user accessing wallet details
-   * @return true if has access, else false
+   * @param  wallet      wallet details to check
+   * @param  currentUser user accessing wallet details
+   * @return             true if has access, else false
    */
   public static boolean canAccessWallet(Wallet wallet, String currentUser) {
     if (StringUtils.isBlank(currentUser)) {
@@ -938,11 +958,7 @@ public class WalletUtils {
     case ETHER_FUNC_SEND_FUNDS:
       parameters.put("amount_ether", transactionDetail.getValue());
       break;
-    case CONTRACT_FUNC_TRANSFORMTOVESTED:
-    case CONTRACT_FUNC_TRANSFERFROM:
-    case CONTRACT_FUNC_TRANSFER:
-    case CONTRACT_FUNC_APPROVE:
-    case CONTRACT_FUNC_REWARD:
+    case CONTRACT_FUNC_TRANSFORMTOVESTED, CONTRACT_FUNC_TRANSFERFROM, CONTRACT_FUNC_TRANSFER, CONTRACT_FUNC_APPROVE, CONTRACT_FUNC_REWARD:
       parameters.put("amount_token", transactionDetail.getContractAmount());
       break;
     case CONTRACT_FUNC_ADDADMIN:
@@ -978,11 +994,11 @@ public class WalletUtils {
    * Format Wallet Balance amount in currency format, without currency symbol
    * and switch user locale.
    * 
-   * @param balance amount to format
-   * @param locale designated locale to display balance
-   * @param simplified if true, the fractions will be ignored when the balance
-   *          is greater than 100.
-   * @return formatted balance in user locale
+   * @param  balance    amount to format
+   * @param  locale     designated locale to display balance
+   * @param  simplified if true, the fractions will be ignored when the balance
+   *                      is greater than 100.
+   * @return            formatted balance in user locale
    */
   public static final String formatBalance(double balance, Locale locale, boolean simplified) {
     // Avoid to display fractions when the amount of balance is big

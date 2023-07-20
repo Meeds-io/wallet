@@ -20,6 +20,8 @@ import java.util.List;
 
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang.StringUtils;
+
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.entity.WalletEntity;
 
@@ -38,7 +40,7 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
   public WalletEntity findByAddress(String address) {
     TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByAddress",
                                                                          WalletEntity.class);
-    query.setParameter("address", address);
+    query.setParameter("address", StringUtils.lowerCase(address));
     List<WalletEntity> resultList = query.getResultList();
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
