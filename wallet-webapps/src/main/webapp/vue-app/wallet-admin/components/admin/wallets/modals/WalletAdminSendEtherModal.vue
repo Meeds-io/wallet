@@ -130,7 +130,7 @@ export default {
       }
       this.wallet = wallet;
       this.etherAmount = etherAmount;
-      this.transactionLabel = `Send ether for wallet of ${this.wallet.type} ${this.wallet.name}`;
+      this.transactionLabel = `Send ${this.$t('wallet.mainCurrency')} for wallet of ${this.wallet.type} ${this.wallet.name}`;
       this.transactionMessage = initialFundsMessage;
 
       this.error = null;
@@ -156,7 +156,7 @@ export default {
         if (resp && resp.ok) {
           return resp.text();
         } else {
-          throw new Error(`Error sending ether to wallet ${this.wallet.address}`);
+          throw new Error(`Error sending ${this.$t('wallet.mainCurrency')} to wallet ${this.wallet.address}`);
         }
       }).then((hash) => {
         this.$emit('sent', hash);

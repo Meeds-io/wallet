@@ -377,9 +377,9 @@ export default {
     },
     etherAccountDetails() {
       return {
-        title: 'ether',
+        title: this.$t('wallet.mainCurrency'),
         icon: 'ether',
-        symbol: 'ether',
+        symbol: this.$t('wallet.mainCurrencySymbol'),
         isContract: false,
         balance: 10, //  Fake balance to not display unsufficient funds
         address: this.walletAddress,
@@ -532,9 +532,9 @@ export default {
       this.selectedWalletAddress = wallet.address;
       this.selectedWallet = wallet;
       this.selectedWalletDetails = {
-        title: 'ether',
+        title: this.$t('wallet.mainCurrency'),
         icon: 'fab fa-ethereum',
-        symbol: 'ether',
+        symbol: this.$t('wallet.mainCurrencySymbol'),
         address: this.selectedWalletAddress,
         balance: wallet.etherBalance,
         balanceFiat: wallet.fiatBalance,
