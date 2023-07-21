@@ -247,7 +247,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content v-if="item.type === 'ether' && item.value && Number(item.value)" class="transactionDetailActions">
                   <v-list-item-title :class="item.adminIcon ? '' : (item.pending || item.succeeded) ? 'primary--text' : 'red--text'">
                     <span>
-                      {{ toFixed(item.value) }} ether
+                      {{ toFixed(item.value) }} {{ $t('wallet.mainCurrency') }}
                     </span>
                   </v-list-item-title>
                   <v-list-item-subtitle v-if="item.amountFiat">
@@ -269,7 +269,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     v-else-if="item.value && Number(item.value)"
                     :class="(item.pending || item.succeeded) ? 'primary--text' : 'red--text'">
                     <span>
-                      {{ toFixed(item.value) }} ether
+                      {{ toFixed(item.value) }} {{ $t('wallet.mainCurrency') }}
                     </span>
                   </v-list-item-title>
                   <v-list-item-subtitle
@@ -393,7 +393,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   </v-list-item-content>
                   <v-list-item-content class="align-end text-end">
                     <div class="no-wrap">
-                      {{ toFixed(item.value) }} ether
+                      {{ toFixed(item.value) }} {{ $t('wallet.mainCurrency') }}
                     </div>
                   </v-list-item-content>
                 </v-list-item>
@@ -469,8 +469,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     {{ toFixed(item.feeFiat) }} {{ fiatSymbol }}
                     <v-icon
                       v-if="item.noContractFunds"
-                      color="orange"
-                      title="You financed transaction fee with ether instead of Token.">
+                      color="orange">
                       warning
                     </v-icon>
                   </div>
