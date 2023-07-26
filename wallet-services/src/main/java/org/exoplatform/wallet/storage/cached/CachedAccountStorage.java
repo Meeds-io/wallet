@@ -79,7 +79,7 @@ public class CachedAccountStorage extends WalletStorage {
   }
 
   @Override
-  public Wallet saveWallet(Wallet wallet, boolean isNew) {
+  public Wallet saveWallet(Wallet wallet, boolean isNew) throws AddressAlreadyInUseException {
     String oldAddress = null;
     if (!isNew) {
       // Retrieve old wallet address

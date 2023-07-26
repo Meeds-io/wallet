@@ -106,8 +106,11 @@ export default {
           window.walletSettings.wallet.address = selectedAddress;
           window.walletSettings.wallet.provider = 'METAMASK';
         })
-        .catch(() => {
+        .catch(e => {
           this.savingMetamaskAddress = false;
+          if (String(e).includes('wallet.addressConflict')) {
+            this.$root.$emit('alert-message', this.$t('wallet.addressAlreadyInUse'), 'error');
+          }
         });
     },
     retrieveAddress() {

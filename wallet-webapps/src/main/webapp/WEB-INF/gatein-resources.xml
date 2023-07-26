@@ -323,6 +323,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <module>eXoVueI18n</module>
     </depends>
     <depends>
+      <module>commonVueComponents</module>
+    </depends>
+    <depends>
       <module>jquery</module>
       <as>$</as>
     </depends>
