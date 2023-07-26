@@ -17,20 +17,17 @@
 import SpaceWalletApp from './components/SpaceWalletApp.vue';
 import './initComponents.js';
 
-Vue.use(Vuetify);
 Vue.use(WalletCommon);
-
-const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
 
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
 const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    new Vue({
+    Vue.createApp({
       render: (h) => h(SpaceWalletApp),
-      i18n,
-      vuetify,
-    }).$mount('#SpaceWalletApp');
+      vuetify: Vue.prototype.vuetifyOptions,
+      i18n
+    }, '#SpaceWalletApp', 'Space Wallet Application');
   });
 }

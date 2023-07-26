@@ -426,6 +426,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
           }
           transactionDetail.setPending(false);
           transactionDetail.setDropped(true);
+          transactionDetail.setNonce(0);
           transactionService.saveTransactionDetail(transactionDetail, true);
         } catch (Exception e) {
           LOG.warn("Can't boost transaction {} with the new one {}",

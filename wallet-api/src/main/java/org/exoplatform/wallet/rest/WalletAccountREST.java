@@ -300,6 +300,7 @@ public class WalletAccountREST implements ResourceContainer {
       @ApiResponse(responseCode = "200", description = "Request fulfilled"),
       @ApiResponse(responseCode = "400", description = "Invalid query input"),
       @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+      @ApiResponse(responseCode = "409", description = "Conflicted operation"),
       @ApiResponse(responseCode = "500", description = "Internal server error") })
   public Response saveWallet(@Parameter(description = "wallet details to save", required = true) Wallet wallet) {
     if (wallet == null) {
@@ -324,6 +325,11 @@ public class WalletAccountREST implements ResourceContainer {
         accountService.saveWalletAddress(storedWallet, currentUserId);
         return Response.ok(storedWallet.getPassPhrase()).build();
       }
+    } catch (AddressAlreadyInUseException e) {
+      LOG.warn("User '{}' is attempting to add a wallet address {} that is already in use",
+               currentUserId,
+               wallet.getAddress());
+      return Response.status(HTTPStatus.CONFLICT).build();
     } catch (IllegalAccessException e) {
       LOG.warn("User '{}' is not allowed to save wallet {}", currentUserId, wallet, e);
       return Response.status(HTTPStatus.UNAUTHORIZED).build();
@@ -383,6 +389,12 @@ public class WalletAccountREST implements ResourceContainer {
         accountService.switchWalletProvider(currentUserIdentityId, provider, address, rawMessage, signedMessage);
       }
       return Response.noContent().build();
+    } catch (AddressAlreadyInUseException e) {
+      LOG.warn("User '{}' is attempting to add a wallet address {} that is already in use",
+               currentUserIdentityId,
+               address,
+               e);
+      return Response.status(HTTPStatus.CONFLICT).build();
     } catch (Exception e) {
       LOG.warn("Unknown error occurred while switching identity '{}' wallet provider to '{}' ",
                currentUserIdentityId,

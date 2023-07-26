@@ -22,6 +22,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.getIdentityById;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.api.persistence.ExoTransactional;
@@ -143,9 +144,19 @@ public class WalletStorage {
    * @param wallet wallet details to save
    * @param isNew whether this is a new wallet association or not
    * @return saved wallet entity
+   * @throws AddressAlreadyInUseException when the address is already used by another wallet
    */
-  public Wallet saveWallet(Wallet wallet, boolean isNew) {
+  public Wallet saveWallet(Wallet wallet, boolean isNew) throws AddressAlreadyInUseException {
     WalletEntity walletEntity = toEntity(wallet);
+    if (StringUtils.isNotBlank(wallet.getAddress())) {
+      List<WalletEntity> walletEntities = walletAccountDAO.findListByAddress(wallet.getAddress());
+      if (CollectionUtils.isNotEmpty(walletEntities)
+          && walletEntities.stream()
+                           .anyMatch(w -> w.getId() != wallet.getTechnicalId()
+                               && w.getInitializationState() != WalletState.DELETED)) {
+        throw new AddressAlreadyInUseException();
+      }
+    }
     if (isNew) {
       walletEntity = walletAccountDAO.create(walletEntity);
     } else {
