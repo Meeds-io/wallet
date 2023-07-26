@@ -45,4 +45,11 @@ public class WalletAccountDAO extends GenericDAOJPAImpl<WalletEntity, Long> {
     return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
   }
 
+  public List<WalletEntity> findListByAddress(String address) {
+    TypedQuery<WalletEntity> query = getEntityManager().createNamedQuery("Wallet.findByAddress",
+                                                                         WalletEntity.class);
+    query.setParameter("address", StringUtils.lowerCase(address));
+    return query.getResultList();
+  }
+
 }

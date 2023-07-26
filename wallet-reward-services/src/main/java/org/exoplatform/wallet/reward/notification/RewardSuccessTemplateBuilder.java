@@ -38,6 +38,7 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.wallet.model.reward.RewardSettings;
 import org.exoplatform.wallet.reward.service.RewardSettingsService;
 import org.exoplatform.webui.utils.TimeConvertUtils;
@@ -89,6 +90,7 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
 
       setLastModifiedDate(notification, language, templateContext);
+      SocialNotificationUtils.addFooterAndFirstName(notification.getTo(), templateContext);
 
       String body = TemplateUtils.processGroovy(templateContext);
       if (templateContext.getException() != null) {
