@@ -174,9 +174,12 @@ export default {
           this.$root.$emit('wallet-settings-provider-changed', 'METAMASK');
           this.savingMetamaskAddress = false;
         })
-        .catch(() => {
+        .catch(e => {
           this.$root.$emit('wallet-settings-provider-changing', window.walletSettings.wallet.provider);
           this.savingMetamaskAddress = false;
+          if (String(e).includes('wallet.addressConflict')) {
+            this.$root.$emit('alert-message', this.$t('wallet.addressAlreadyInUse'), 'error');
+          }
         });
     },
     retrieveAddress() {

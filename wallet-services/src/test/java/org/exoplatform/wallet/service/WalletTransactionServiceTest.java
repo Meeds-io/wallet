@@ -140,9 +140,11 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertFalse(storedTransactionDetail.isPending());
     assertFalse(storedTransactionDetail.isSucceeded());
+    assertEquals(0, storedTransactionDetail.getNonce());
     assertFalse(listenerInvoked.get());
 
     storedTransactionDetail.setPending(true);
+    storedTransactionDetail.setNonce(storedTransactionDetailReplacement.getNonce());
     walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
     errorReplacingTransaction = storedTransactionDetailReplacement.clone();
     errorReplacingTransaction.setContractAmount(5000);
@@ -150,9 +152,11 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertFalse(storedTransactionDetail.isPending());
     assertFalse(storedTransactionDetail.isSucceeded());
+    assertEquals(0, storedTransactionDetail.getNonce());
     assertFalse(listenerInvoked.get());
 
     storedTransactionDetail.setPending(true);
+    storedTransactionDetail.setNonce(storedTransactionDetailReplacement.getNonce());
     walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
     errorReplacingTransaction = storedTransactionDetailReplacement.clone();
     errorReplacingTransaction.setContractAddress("another address");
@@ -160,9 +164,11 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     storedTransactionDetail = walletTransactionService.getTransactionByHash(transactionDetail.getHash());
     assertFalse(storedTransactionDetail.isPending());
     assertFalse(storedTransactionDetail.isSucceeded());
+    assertEquals(0, storedTransactionDetail.getNonce());
     assertFalse(listenerInvoked.get());
 
     storedTransactionDetail.setPending(true);
+    storedTransactionDetail.setNonce(storedTransactionDetailReplacement.getNonce());
     walletTransactionService.saveTransactionDetail(storedTransactionDetail, true);
     walletTransactionService.cancelTransactionsWithSameNonce(storedTransactionDetailReplacement);
     assertTrue(listenerInvoked.get());

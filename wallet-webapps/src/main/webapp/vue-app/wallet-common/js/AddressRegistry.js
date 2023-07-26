@@ -264,7 +264,11 @@ export function switchProvider(provider, address, rawMessage, signedMessage) {
     body: new URLSearchParams(formData).toString(),
   }).then(resp => {
     if (!resp || !resp.ok) {
-      throw new Error('Error saving new provider label');
+      if (resp.status === 409) {
+        throw new Error('wallet.addressConflict');
+      } else {
+        throw new Error('Error saving new provider label');
+      }
     }
   });
 }

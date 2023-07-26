@@ -40,6 +40,7 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
+import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
@@ -99,9 +100,10 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("MESSAGE", message);
       templateContext.put("AVATAR", avatar != null ? avatar : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
       templateContext.put("NOTIFICATION_ID", notification.getId());
-      templateContext.put("READ", Boolean.valueOf(notificationRead) ? "read" : "unread");
+      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
       templateContext.put("FUNDS_REQUEST_SENT", Boolean.valueOf(fundRequestSent));
       setLastModifiedDate(notification, language, templateContext);
+      SocialNotificationUtils.addFooterAndFirstName(notification.getTo(), templateContext);
 
       String body = TemplateUtils.processGroovy(templateContext);
       // binding the exception throws by processing template

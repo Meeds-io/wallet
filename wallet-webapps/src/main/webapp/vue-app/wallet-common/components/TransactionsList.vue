@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex class="transactionsList">
+  <v-flex class="transactionsList text-start">
     <v-card class="card--flex-toolbar" flat>
       <div v-if="error && !loading" class="alert alert-error">
         <i class="uiIconError"></i>{{ error }}
@@ -361,7 +361,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 <v-list-item-content>
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
-                <v-list-item-content class="align-end text-end paragraph text-truncate">
+                <v-list-item-content class="align-end text-start paragraph">
                   {{ item.message }}
                 </v-list-item-content>
               </v-list-item>

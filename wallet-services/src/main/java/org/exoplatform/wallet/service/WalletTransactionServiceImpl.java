@@ -319,6 +319,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
       transactions.forEach(replacedTransaction -> {
         replacedTransaction.setDropped(true);
         replacedTransaction.setPending(false);
+        replacedTransaction.setNonce(0);
         saveTransactionDetail(replacedTransaction, true);
         broadcastTransactionReplacedEvent(replacedTransaction, replacingTransaction);
       });

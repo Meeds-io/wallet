@@ -42,6 +42,7 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
+import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
@@ -96,13 +97,14 @@ public class TemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("SYMBOL", symbol);
       templateContext.put("CONTRACT_ADDRESS", contractAddress == null ? "" : contractAddress);
       templateContext.put("NOTIFICATION_ID", notification.getId());
-      templateContext.put("READ", Boolean.valueOf(notificationRead) ? "read" : "unread");
+      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
       templateContext.put("MESSAGE", message);
       templateContext.put("HASH", hash);
 
       String absoluteMyWalletLink = getWalletLink(receiverType, receiver);
       templateContext.put("BASE_URL", absoluteMyWalletLink);
       setLastUpdateDate(notification, language, templateContext);
+      SocialNotificationUtils.addFooterAndFirstName(notification.getTo(), templateContext);
 
       String body = TemplateUtils.processGroovy(templateContext);
       // binding the exception throws by processing template
