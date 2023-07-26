@@ -40,6 +40,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <includes>
         <include>*:*:jar</include>
       </includes>
+      <excludes>
+        <exclude>org.bouncycastle:bcprov-jdk15on:jar</exclude>
+      </excludes>
       <scope>compile</scope>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
     </dependencySet>
