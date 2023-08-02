@@ -319,7 +319,14 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public Wallet getAdminWallet() {
-    return getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
+    Wallet adminWallet = getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
+    String contractAddress = getContractAddress();
+    if (adminWallet != null
+        && adminWallet.isEnabled()
+        && StringUtils.isNotBlank(contractAddress)) {
+      accountStorage.retrieveWalletBlockchainState(adminWallet, contractAddress);
+    }
+    return adminWallet;
   }
 
   @Override

@@ -33,32 +33,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                                                 <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;white-space: pre-line;">
                                                   <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
                                                 </p>
-                                                <div style="
-                                                      display: inline-block;
-                                                      text-decoration: none;
-                                                      font-size: 11px;
-                                                      font-family:HelveticaNeue,arial,tahoma,serif;
-                                                      color: #ffffff;
-                                                      text-shadow: 0 -1px 0 rgba(23, 33, 37, .25);
-                                                      background-color: #567ab6;
-                                                      background-image: -moz-linear-gradient(top, #638acd, #426393);
-                                                      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#638acd), to(#426393));
-                                                      background-image: -webkit-linear-gradient(top, #638acd, #426393);
-                                                      background-image: -o-linear-gradient(top, #638acd, #426393);
-                                                      background-image: linear-gradient(to bottom, #638acd, #426393);
-                                                      background-repeat: repeat-x;
-                                                      border-radius: 4px;
-                                                      -moz-border-radius: 4px;
-                                                      padding: 5px 8px;
-                                                      line-height: 100%;
-                                                      text-align: center;
-                                                      border: 1px solid #224886;
-                                                      font-weight: bold;
-                                                      -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                      -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                      box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                      vertical-align: middle;">
-                                                </div>
                                             </td>
                                           </tr><!--end header area-->
                                     </table>

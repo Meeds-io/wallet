@@ -62,6 +62,7 @@ import org.exoplatform.wallet.model.WalletType;
 import org.exoplatform.wallet.storage.AddressLabelStorage;
 import org.exoplatform.wallet.storage.WalletStorage;
 import org.exoplatform.wallet.test.BaseWalletTest;
+import org.exoplatform.wallet.utils.WalletUtils;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
 
@@ -233,6 +234,36 @@ public class WalletAccountServiceTest extends BaseWalletTest {
 
     Wallet walletTest = walletAccountService.getWalletByTypeAndId(WalletType.USER.name(), CURRENT_USER);
     assertNotNull("Shouldn't find wallet with not recognized type and id", walletTest);
+  }
+
+  @Test
+  public void testGetAdminWallet() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = walletAccountService.getAdminWallet();
+    assertNotNull("Shouldn't find null admin wallet", wallet);
+
+    entitiesToClean.add(wallet);
+    wallet.setAddress(WALLET_ADDRESS_3);
+    wallet.setPassPhrase(PHRASE);
+    wallet.setInitializationState(INITIALIZATION_STATE);
+    walletAccountService.saveWallet(wallet, false);
+
+    assertNull(wallet.getEtherBalance());
+
+    restartTransaction();
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    double etherBalance = 5.22d;
+    double tokenBalance = 655.33d;
+    wallet.setEtherBalance(etherBalance);
+    wallet.setTokenBalance(tokenBalance);
+    walletStorage.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+
+    wallet = walletAccountService.getAdminWallet();
+    assertNotNull("Shouldn't find null admin wallet", wallet);
+    assertNotNull(wallet.getEtherBalance());
+    assertEquals(etherBalance, wallet.getEtherBalance());
+    assertNotNull(wallet.getTokenBalance());
+    assertEquals(tokenBalance, wallet.getTokenBalance());
   }
 
   /**
