@@ -21,12 +21,27 @@ import java.util.List;
 
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.model.reward.RewardPeriodType;
 import org.exoplatform.wallet.model.reward.RewardStatus;
 import org.exoplatform.wallet.reward.entity.WalletRewardPeriodEntity;
 
 public class RewardPeriodDAO extends GenericDAOJPAImpl<WalletRewardPeriodEntity, Long> {
+
+  public List<WalletRewardPeriodEntity> findRewardPeriods(int offset, int limit) {
+    TypedQuery<WalletRewardPeriodEntity> query = getEntityManager().createNamedQuery("RewardPeriod.findRewardPeriods",
+                                                                                     WalletRewardPeriodEntity.class);
+    if (offset > 0) {
+      query.setFirstResult(offset);
+    }
+    if (limit > 0) {
+      query.setMaxResults(limit);
+    }
+    List<WalletRewardPeriodEntity> result = query.getResultList();
+    return CollectionUtils.isEmpty(result) ? Collections.emptyList() : result;
+  }
 
   public WalletRewardPeriodEntity findRewardPeriodByTypeAndTime(RewardPeriodType periodType, long periodTime) {
     TypedQuery<WalletRewardPeriodEntity> query = getEntityManager().createNamedQuery("RewardPeriod.findRewardPeriodByTypeAndTime",
