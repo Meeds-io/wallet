@@ -56,7 +56,7 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
-public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
+public class WalletRewardReportServiceTest extends BaseWalletRewardTest { // NOSONAR
 
   /**
    * Check that service is instantiated
@@ -655,6 +655,63 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
 
     RewardReport savedRewardReport = rewardReportService.getRewardReport(date);
     assertEquals(rewardReport, savedRewardReport);
+
+    RewardPeriod rewardPeriod = rewardReportService.getRewardPeriod(period.getRewardPeriodType(), period.getPeriodMedianDate());
+    assertNotNull(rewardPeriod);
+    assertTrue(rewardPeriod.getId() > 0);
+
+    RewardReport report = rewardReportService.getRewardReportByPeriodId(rewardPeriod.getId());
+    assertNotNull(report);
+    assertNotNull(report.getPeriod());
+    assertEquals(rewardPeriod.getId(), report.getPeriod().getId());
+  }
+
+  @Test
+  public void testFindRewardReportPeriods() {
+    RewardReport rewardReport = new RewardReport();
+    LocalDate date = LocalDate.now();
+
+    WalletAccountService accountService = getService(WalletAccountService.class);
+
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    RewardSettings defaultSettings = rewardSettingsService.getSettings();
+
+    RewardPeriod period = defaultSettings.getPeriodType().getPeriodOfTime(date, ZoneId.systemDefault());
+    rewardReport.setPeriod(period);
+    Set<WalletReward> rewards = new HashSet<>();
+    for (int i = 0; i < 20; i++) {
+      Wallet wallet = newWallet(i + 1l);
+      wallet = accountService.saveWallet(wallet, true);
+      updateWalletBlockchainState(wallet);
+      accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+      entitiesToClean.add(wallet);
+
+      WalletReward walletReward = new WalletReward();
+      walletReward.setWallet(wallet);
+      walletReward.setPeriod(period);
+      Set<WalletPluginReward> pluginRewards = new HashSet<>();
+      for (int j = 0; j < 10; j++) {
+        WalletPluginReward pluginReward = new WalletPluginReward();
+        pluginReward.setAmount(5);
+        pluginReward.setIdentityId(wallet.getTechnicalId());
+        pluginReward.setPluginId("plugin" + j);
+        pluginReward.setPoints(5);
+        pluginReward.setPoolsUsed(false);
+        pluginRewards.add(pluginReward);
+      }
+      walletReward.setRewards(pluginRewards);
+      rewards.add(walletReward);
+    }
+    rewardReport.setRewards(rewards);
+
+    RewardReportService rewardReportService = getService(RewardReportService.class);
+    rewardReportService.saveRewardReport(rewardReport);
+
+    restartTransaction();
+
+    List<RewardPeriod> rewardReportPeriods = rewardReportService.findRewardReportPeriods(0, 1);
+    assertNotNull(rewardReportPeriods);
+    assertEquals(1, rewardReportPeriods.size());
   }
 
   @Test
