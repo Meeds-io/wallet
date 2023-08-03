@@ -86,6 +86,15 @@ public interface RewardReportService {
   List<RewardPeriod> getRewardPeriodsNotSent();
 
   /**
+   * Retrieves the list of periods sorted descending by start date
+   * 
+   * @param offset offset of query
+   * @param limit limit of results
+   * @return {@link List} of {@link RewardPeriod}
+   */
+  List<RewardPeriod> findRewardReportPeriods(int offset, int limit);
+
+  /**
    * @param currentUser current user listing his rewards
    * @param limit size limit of items to return
    * @return a {@link List} of {@link WalletReward} of current user

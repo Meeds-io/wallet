@@ -238,6 +238,11 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public List<RewardPeriod> findRewardReportPeriods(int offset, int limit) {
+    return rewardReportStorage.findRewardReportPeriods(offset, limit);
+  }
+
+  @Override
   public List<RewardPeriod> getRewardPeriodsInProgress() {
     return rewardReportStorage.findRewardPeriodsByStatus(RewardStatus.PENDING);
   }
