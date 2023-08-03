@@ -232,6 +232,12 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public RewardReport getRewardReportByPeriodId(long periodId) {
+    RewardSettings rewardSettings = rewardSettingsService.getSettings();
+    return rewardReportStorage.getRewardReportByPeriodId(periodId, rewardSettings.zoneId());
+  }
+  
+  @Override
   public RewardReport getRewardReport(LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
@@ -247,11 +253,22 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date) {
+    RewardSettings rewardSettings = rewardSettingsService.getSettings();
+    return rewardReportStorage.getRewardPeriod(periodType, date, rewardSettings.zoneId());
+  }
+
+  @Override
   public void saveRewardReport(RewardReport rewardReport) {
     if (rewardReport == null) {
       throw new IllegalArgumentException("Reward report to save is null");
     }
     rewardReportStorage.saveRewardReport(rewardReport);
+  }
+
+  @Override
+  public List<RewardPeriod> findRewardReportPeriods(int offset, int limit) {
+    return rewardReportStorage.findRewardReportPeriods(offset, limit);
   }
 
   @Override
