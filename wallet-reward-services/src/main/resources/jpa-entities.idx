@@ -1,0 +1,5 @@
+org.exoplatform.wallet.reward.entity.RewardTeamMemberEntity
+org.exoplatform.wallet.reward.entity.RewardTeamEntity
+org.exoplatform.wallet.reward.entity.WalletRewardPeriodEntity
+org.exoplatform.wallet.reward.entity.WalletRewardEntity
+org.exoplatform.wallet.reward.entity.WalletRewardPluginEntity

@@ -22,10 +22,7 @@ import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
-
 @Entity(name = "Reward")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_REWARD")
 @NamedQueries({
