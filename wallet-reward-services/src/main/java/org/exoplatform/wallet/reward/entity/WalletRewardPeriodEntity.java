@@ -22,14 +22,13 @@ import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
 import org.exoplatform.wallet.model.reward.RewardPeriodType;
 import org.exoplatform.wallet.model.reward.RewardStatus;
 
 @Entity(name = "RewardPeriod")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_REWARD_PERIOD")
+@NamedQuery(name = "RewardPeriod.findRewardPeriods", query = "SELECT rp FROM RewardPeriod rp ORDER BY rp.startTime DESC")
 @NamedQuery(name = "RewardPeriod.findRewardPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime")
 @NamedQuery(name = "RewardPlugin.findRewardPeriodsByStatus", query = "SELECT rp FROM RewardPeriod rp WHERE rp.status = :status")
 public class WalletRewardPeriodEntity implements Serializable {

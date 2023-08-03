@@ -24,11 +24,9 @@ import jakarta.persistence.*;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
 import org.exoplatform.wallet.model.reward.RewardBudgetType;
 
 @Entity(name = "RewardTeam")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_GAM_TEAM")
 @NamedQueries({
