@@ -83,6 +83,11 @@ public class WalletRewardReportStorage {
     this.walletTransactionService = walletTransactionService;
   }
 
+  public List<RewardPeriod> findRewardReportPeriods(int offset, int limit) {
+    List<WalletRewardPeriodEntity> rewardPeriodEntities = rewardPeriodDAO.findRewardPeriods(offset, limit);
+    return rewardPeriodEntities.stream().map(this::toDTO).toList();
+  }
+
   public RewardReport getRewardReport(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
     RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
