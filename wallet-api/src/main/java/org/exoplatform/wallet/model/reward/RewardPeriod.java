@@ -23,15 +23,18 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode.Exclude;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class RewardPeriod implements Serializable {
+
   private static final long serialVersionUID = -4860665131754056537L;
+
+  @Exclude
+  private long              id;
 
   private RewardPeriodType  rewardPeriodType;
 
@@ -43,6 +46,13 @@ public class RewardPeriod implements Serializable {
 
   public RewardPeriod(RewardPeriodType rewardPeriodType) {
     this.rewardPeriodType = rewardPeriodType;
+  }
+
+  public RewardPeriod(RewardPeriodType rewardPeriodType, String timeZone, long startDateInSeconds, long endDateInSeconds) {
+    this.rewardPeriodType = rewardPeriodType;
+    this.timeZone = timeZone;
+    this.startDateInSeconds = startDateInSeconds;
+    this.endDateInSeconds = endDateInSeconds;
   }
 
   public static RewardPeriod getCurrentPeriod(RewardSettings rewardSettings) {
