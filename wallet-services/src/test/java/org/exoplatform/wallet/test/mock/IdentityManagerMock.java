@@ -35,6 +35,8 @@ import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.profile.*;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
+import org.exoplatform.wallet.plugin.WalletAdminIdentityProvider;
+import org.exoplatform.wallet.utils.WalletUtils;
 
 public class IdentityManagerMock implements IdentityManager {
   List<Identity> identities = new ArrayList<>();
@@ -63,6 +65,17 @@ public class IdentityManagerMock implements IdentityManager {
       identity.setProfile(profile);
       identities.add(identity);
     }
+
+    String adminIdentityId = "600";
+    Identity adminIdentity = new Identity(adminIdentityId);
+    adminIdentity.setDeleted(false);
+    adminIdentity.setEnable(true);
+    adminIdentity.setProviderId(WalletAdminIdentityProvider.NAME);
+    adminIdentity.setRemoteId(WalletUtils.WALLET_ADMIN_REMOTE_ID);
+    adminIdentity.setId(adminIdentityId);
+    Profile adminProfile = new Profile(adminIdentity);
+    adminIdentity.setProfile(adminProfile);
+    identities.add(adminIdentity);
   }
 
   @Override
