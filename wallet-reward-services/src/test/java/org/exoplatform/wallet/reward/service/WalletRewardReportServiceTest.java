@@ -531,6 +531,15 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
 
     RewardReport savedRewardReport = rewardReportService.getRewardReport(date);
     assertEquals(rewardReport, savedRewardReport);
+
+    RewardPeriod rewardPeriod = rewardReportService.getRewardPeriod(period.getRewardPeriodType(), period.getPeriodMedianDate());
+    assertNotNull(rewardPeriod);
+    assertTrue(rewardPeriod.getId() > 0);
+
+    RewardReport report = rewardReportService.getRewardReportByPeriodId(rewardPeriod.getId());
+    assertNotNull(report);
+    assertNotNull(report.getPeriod());
+    assertEquals(rewardPeriod.getId(), report.getPeriod().getId());
   }
 
   @Test

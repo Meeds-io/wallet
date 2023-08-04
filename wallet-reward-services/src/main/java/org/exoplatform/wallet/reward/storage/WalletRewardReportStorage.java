@@ -88,15 +88,32 @@ public class WalletRewardReportStorage {
     return rewardPeriodEntities.stream().map(this::toDTO).toList();
   }
 
+  public RewardReport getRewardReportByPeriodId(long id, ZoneId zoneId) {
+    return getRewardReport(rewardPeriodDAO.find(id), zoneId);
+  }
+
   public RewardReport getRewardReport(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
     RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
                                                                                                 period.getPeriodMedianDateInSeconds());
+    return getRewardReport(rewardPeriodEntity, zoneId);
+  }
+
+  public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
+    RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
+    WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
+                                                                                                period.getPeriodMedianDateInSeconds());
+    return toDTO(rewardPeriodEntity);
+  }
+
+  private RewardReport getRewardReport(WalletRewardPeriodEntity rewardPeriodEntity, ZoneId zoneId) {
     if (rewardPeriodEntity == null) {
       return null;
     }
     RewardReport rewardReport = new RewardReport();
-    RewardPeriod periodOfTime = rewardPeriodEntity.getPeriodType().getPeriodOfTime(date, zoneId);
+    RewardPeriod periodOfTime = toDTO(rewardPeriodEntity);
+    periodOfTime = periodOfTime.getRewardPeriodType().getPeriodOfTime(periodOfTime.getPeriodMedianDate(), zoneId);
+    periodOfTime.setId(rewardPeriodEntity.getId());
     rewardReport.setPeriod(periodOfTime);
 
     List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByPeriodId(rewardPeriodEntity.getId());
@@ -249,7 +266,11 @@ public class WalletRewardReportStorage {
   }
 
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
+    if (period == null) {
+      return null;
+    }
     RewardPeriod rewardPeriod = new RewardPeriod(period.getPeriodType());
+    rewardPeriod.setId(period.getId());
     rewardPeriod.setStartDateInSeconds(period.getStartTime());
     rewardPeriod.setEndDateInSeconds(period.getEndTime());
     if (StringUtils.isNotBlank(period.getTimeZone())) {
