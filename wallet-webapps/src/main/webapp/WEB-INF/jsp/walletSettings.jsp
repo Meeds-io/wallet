@@ -1,5 +1,5 @@
-<%@ page import="javax.servlet.http.HttpServletRequest" %>
-<%@ page import="javax.servlet.http.HttpSession" %>
+<%@ page import="jakarta.servlet.http.HttpServletRequest" %>
+<%@ page import="jakarta.servlet.http.HttpSession" %>
 <%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
 <%@ page import="org.exoplatform.web.application.RequestContext" %>
 <%@ page import="org.exoplatform.wallet.utils.WalletUtils" %>
