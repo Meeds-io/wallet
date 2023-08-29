@@ -21,7 +21,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
