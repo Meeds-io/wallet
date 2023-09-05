@@ -93,6 +93,11 @@ public interface RewardReportService {
   void saveRewardReport(RewardReport rewardReport);
 
   /**
+   * @return true if reward sending status storage is in progress, else return false
+   */
+  boolean isRewardSendingInProgress();
+
+  /**
    * @return a {@link List} of {@link RewardPeriod} that are in progress
    */
   List<RewardPeriod> getRewardPeriodsInProgress();

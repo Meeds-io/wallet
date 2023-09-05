@@ -22,6 +22,9 @@ import java.util.List;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.services.log.ExoLogger;
@@ -90,7 +93,19 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
   }
 
   private WalletRewardEntity getFirstItem(List<WalletRewardEntity> resultList) {
-    return resultList == null || resultList.isEmpty() ? null : resultList.get(0);
+    if (CollectionUtils.isEmpty(resultList)) {
+      return null;
+    } else {
+      return resultList.stream().filter(r -> StringUtils.isNotBlank(r.getTransactionHash())).sorted((r1, r2) -> {
+        if (r1.getTokensSent() > r2.getTokensSent()) {
+          return 1;
+        } else if (r2.getTokensSent() > r1.getTokensSent()) {
+          return -1;
+        } else {
+          return 0;
+        }
+      }).findFirst().orElse(resultList.get(0));
+    }
   }
 
 }

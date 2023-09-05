@@ -63,7 +63,7 @@ public class RewardStatusVerifierJob implements Job {
   }
 
   @Override
-  public void execute(JobExecutionContext context) throws JobExecutionException {
+  public void execute(JobExecutionContext context) throws JobExecutionException { // NOSONAR
     ExoContainer currentContainer = ExoContainerContext.getCurrentContainer();
     ExoContainerContext.setCurrentContainer(container);
     RequestLifeCycle.begin(this.container);
@@ -78,15 +78,19 @@ public class RewardStatusVerifierJob implements Job {
         Iterator<RewardPeriod> rewardPeriodsIterator = rewardPeriodsInProgress.iterator();
         while (rewardPeriodsIterator.hasNext()) {
           RewardPeriod rewardPeriod = rewardPeriodsIterator.next();
-          RewardReport rewardReport = getRewardReportService().computeRewards(rewardPeriod.getPeriodMedianDate());
-          if (rewardReport == null) {
-            continue;
+          if (!getRewardReportService().isRewardSendingInProgress()) {
+            // Avoid saving rewards while transaction status storage is in
+            // progress
+            RewardReport rewardReport = getRewardReportService().computeRewards(rewardPeriod.getPeriodMedianDate());
+            if (rewardReport != null) {
+              if (rewardReport.isCompletelyProceeded()) {
+                getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
+                getRewardReportService().saveRewardReport(rewardReport);
+              } else if (rewardReport.getPendingTransactionCount() == 0 && rewardReport.getTokensSent() == 0) {
+                getRewardReportService().saveRewardReport(rewardReport);
+              }
+            }
           }
-          if (rewardReport.isCompletelyProceeded()) {
-            getListenerService().broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
-            rewardPeriodsIterator.remove();
-          }
-          getRewardReportService().saveRewardReport(rewardReport);
         }
       }
     } catch (Exception e) {

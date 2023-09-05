@@ -80,16 +80,10 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
 
   @Test
   public void testSendRewards() throws Exception {
-    WalletAccountService walletAccountService = getService(WalletAccountService.class);
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    RewardTeamService rewardTeamService = getService(RewardTeamService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
-    WalletRewardReportStorage rewardReportStorage = getService(WalletRewardReportStorage.class);
 
-    WalletRewardReportService walletRewardService = new WalletRewardReportService(walletAccountService,
-                                                                                  rewardSettingsService,
-                                                                                  rewardTeamService,
-                                                                                  rewardReportStorage);
+    WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
     WalletTokenAdminService tokenAdminService = Mockito.mock(WalletTokenAdminService.class);
     resetTokenAdminService(walletTransactionService, tokenAdminService, true, false);
 
@@ -189,6 +183,18 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       adminWallet.setTokenBalance(3d);
       adminWallet.setEnabled(true);
 
+      rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
+      assertNotNull(rewardPeriodsInProgress);
+      assertEquals(1, rewardPeriodsInProgress.size());
+
+      walletRewardService.setRewardSendingInProgress(true);
+      rewardReportNotificationJob.execute(null);
+
+      rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();
+      assertNotNull(rewardPeriodsInProgress);
+      assertEquals(1, rewardPeriodsInProgress.size());
+
+      walletRewardService.setRewardSendingInProgress(false);
       rewardReportNotificationJob.execute(null);
 
       rewardPeriodsInProgress = walletRewardService.getRewardPeriodsInProgress();

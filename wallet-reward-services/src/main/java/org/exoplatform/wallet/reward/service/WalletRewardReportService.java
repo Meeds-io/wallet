@@ -73,12 +73,16 @@ import org.exoplatform.wallet.reward.storage.WalletRewardReportStorage;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
 
+import lombok.Setter;
+
 /**
  * A service to manage reward reports
  */
 public class WalletRewardReportService implements RewardReportService {
 
-  private static final Log                LOG = ExoLogger.getLogger(WalletRewardReportService.class);
+  private static final Log                LOG            = ExoLogger.getLogger(WalletRewardReportService.class);
+
+  private static final String             EMPTY_SETTINGS = "Error computing rewards using empty settings";
 
   private final WalletAccountService      walletAccountService;
 
@@ -89,6 +93,9 @@ public class WalletRewardReportService implements RewardReportService {
   private final RewardTeamService         rewardTeamService;
 
   private final WalletRewardReportStorage rewardReportStorage;
+
+  @Setter
+  private boolean                         rewardSendingInProgress;
 
   public WalletRewardReportService(WalletAccountService walletAccountService,
                                    RewardSettingsService rewardSettingsService,
@@ -182,7 +189,17 @@ public class WalletRewardReportService implements RewardReportService {
         LOG.warn("Error while sending reward transaction for user '{}'", walletReward.getWallet().getName(), e);
       }
     }
-    rewardReportStorage.saveRewardReport(rewardReport);
+    this.rewardSendingInProgress = true;
+    try {
+      rewardReportStorage.saveRewardReport(rewardReport);
+    } finally {
+      this.rewardSendingInProgress = false;
+    }
+  }
+
+  @Override
+  public boolean isRewardSendingInProgress() {
+    return rewardSendingInProgress;
   }
 
   @Override
@@ -218,7 +235,7 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardReport getRewardReportByPeriodId(long periodId) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
-      throw new IllegalStateException("Error computing rewards using empty settings");
+      throw new IllegalStateException(EMPTY_SETTINGS);
     }
     if (rewardSettings.getPeriodType() == null) {
       throw new IllegalStateException("Error computing rewards using empty period type");
@@ -231,7 +248,7 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardReport getRewardReport(LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
-      throw new IllegalStateException("Error computing rewards using empty settings");
+      throw new IllegalStateException(EMPTY_SETTINGS);
     }
     if (rewardSettings.getPeriodType() == null) {
       throw new IllegalStateException("Error computing rewards using empty period type");
@@ -246,7 +263,7 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
-      throw new IllegalStateException("Error computing rewards using empty settings");
+      throw new IllegalStateException(EMPTY_SETTINGS);
     }
     return rewardReportStorage.getRewardPeriod(periodType, date, rewardSettings.zoneId());
   }
@@ -581,7 +598,7 @@ public class WalletRewardReportService implements RewardReportService {
         RewardTeamMember rewardTeamMember = new RewardTeamMember();
         rewardTeamMember.setIdentityId(identityId);
         return rewardTeamMember;
-      }).collect(Collectors.toList());
+      }).toList();
       noPoolRewardTeam.setMembers(noPoolRewardTeamList);
       noPoolRewardTeam.setId(0L);
       noPoolRewardTeam.setRewardType(RewardBudgetType.COMPUTED);
