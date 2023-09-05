@@ -235,7 +235,7 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardReport getRewardReportByPeriodId(long periodId) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
-      throw new IllegalStateException("Error computing rewards using empty settings");
+      throw new IllegalStateException(EMPTY_SETTINGS);
     }
     if (rewardSettings.getPeriodType() == null) {
       throw new IllegalStateException("Error computing rewards using empty period type");
@@ -263,7 +263,7 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     if (rewardSettings == null) {
-      throw new IllegalStateException("Error computing rewards using empty settings");
+      throw new IllegalStateException(EMPTY_SETTINGS);
     }
     return rewardReportStorage.getRewardPeriod(periodType, date, rewardSettings.zoneId());
   }
