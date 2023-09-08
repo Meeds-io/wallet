@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -118,9 +119,36 @@ public class WalletRewardReportStorage {
 
     List<WalletRewardEntity> rewardEntities = rewardDAO.findRewardsByPeriodId(rewardPeriodEntity.getId());
     if (rewardEntities != null) {
-      Set<WalletReward> rewards = rewardEntities.stream()
-                                                .map(rewardEntity -> toDTO(rewardEntity, zoneId))
-                                                .collect(Collectors.toSet());
+      List<WalletRewardEntity> walletRewardEntities = new ArrayList<>();
+      rewardEntities.forEach(reward -> {
+        List<WalletRewardEntity> walletRewardList = rewardEntities.stream()
+                                                                  .filter(wr -> wr.getIdentityId() == reward.getIdentityId())
+                                                                  .toList();
+        if (walletRewardList.size() == 1) {
+          walletRewardEntities.add(reward);
+        } else {
+          WalletRewardEntity walletRewardEntity = walletRewardList.stream()
+                                                                  .filter(r -> r.getTransactionHash() != null)
+                                                                  .sorted((r2, r1) -> {
+                                                                    if (r1.getTokensSent() > r2.getTokensSent()) {
+                                                                      return 1;
+                                                                    } else if (r2.getTokensSent() > r1.getTokensSent()) {
+                                                                      return -1;
+                                                                    } else {
+                                                                      return 0;
+                                                                    }
+                                                                  })
+                                                                  .findFirst()
+                                                                  .orElseGet(() -> walletRewardList.get(0));
+          if (walletRewardEntity.getId().longValue() == reward.getId().longValue()) {
+            walletRewardEntities.add(reward);
+          }
+        }
+      });
+
+      Set<WalletReward> rewards = walletRewardEntities.stream()
+                                                       .map(rewardEntity -> toDTO(rewardEntity, zoneId))
+                                                       .collect(Collectors.toSet());
       rewardReport.setRewards(rewards);
     }
     return rewardReport;

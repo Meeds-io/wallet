@@ -92,11 +92,11 @@ public class RewardDAO extends GenericDAOJPAImpl<WalletRewardEntity, Long> {
     return result == null ? 0 : result;
   }
 
-  private WalletRewardEntity getFirstItem(List<WalletRewardEntity> resultList) {
+  private static WalletRewardEntity getFirstItem(List<WalletRewardEntity> resultList) {
     if (CollectionUtils.isEmpty(resultList)) {
       return null;
     } else {
-      return resultList.stream().filter(r -> StringUtils.isNotBlank(r.getTransactionHash())).sorted((r1, r2) -> {
+      return resultList.stream().filter(r -> StringUtils.isNotBlank(r.getTransactionHash())).sorted((r2, r1) -> {
         if (r1.getTokensSent() > r2.getTokensSent()) {
           return 1;
         } else if (r2.getTokensSent() > r1.getTokensSent()) {

@@ -39,11 +39,16 @@ import org.exoplatform.wallet.model.reward.RewardPeriodType;
 import org.exoplatform.wallet.model.reward.RewardPluginSettings;
 import org.exoplatform.wallet.model.reward.RewardReport;
 import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.reward.RewardStatus;
 import org.exoplatform.wallet.model.reward.RewardTeam;
 import org.exoplatform.wallet.model.reward.WalletPluginReward;
 import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
 import org.exoplatform.wallet.reward.BaseWalletRewardTest;
+import org.exoplatform.wallet.reward.dao.RewardDAO;
+import org.exoplatform.wallet.reward.dao.RewardPeriodDAO;
+import org.exoplatform.wallet.reward.entity.WalletRewardEntity;
+import org.exoplatform.wallet.reward.entity.WalletRewardPeriodEntity;
 import org.exoplatform.wallet.reward.storage.WalletRewardReportStorage;
 import org.exoplatform.wallet.service.WalletAccountService;
 import org.exoplatform.wallet.service.WalletTokenAdminService;
@@ -262,6 +267,125 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
                                              .mapToDouble(WalletReward::getTokensToSend)
                                              .sum();
       assertEquals(tokensSentToOtherTeam, tokensSentToTeam6, 0);
+    } finally {
+      rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
+      rewardSettingsService.saveSettings(defaultSettings);
+    }
+  }
+
+  @Test
+  public void testComputeRewardWithDuplication() {
+    WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
+    WalletRewardReportService walletRewardService = getService(WalletRewardReportService.class);
+    LocalDate date = YearMonth.of(2019, 03).atEndOfMonth();
+    RewardReport rewardReport = walletRewardService.computeRewards(date);
+    assertNotNull(rewardReport);
+    assertNotNull(rewardReport.getRewards());
+    assertEquals(0, rewardReport.getRewards().size());
+
+    WalletAccountService accountService = getService(WalletAccountService.class);
+    int enabledWalletsCount = 60;
+    for (int i = 0; i < enabledWalletsCount; i++) {
+      Wallet wallet = newWallet(i + 1l);
+      wallet = accountService.saveWallet(wallet, true);
+      updateWalletBlockchainState(wallet);
+      accountService.saveWalletBlockchainState(wallet, WalletUtils.getContractAddress());
+      entitiesToClean.add(wallet);
+    }
+
+    rewardReport = walletRewardService.computeRewards(date);
+    assertNotNull(rewardReport);
+    assertEquals(enabledWalletsCount, rewardReport.getRewards().size());
+
+    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
+    RewardSettings defaultSettings = rewardSettingsService.getSettings();
+    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
+    try {
+      // Build new settings
+      RewardSettings newSettings = cloneSettings(rewardSettingsService.getSettings());
+
+      Set<RewardPluginSettings> newPluginSettings = newSettings.getPluginSettings();
+      long amount = 3l;
+
+      newSettings.setPeriodType(RewardPeriodType.MONTH);
+
+      RewardPluginSettings customPluginSetting = newPluginSettings.stream()
+                                                                  .filter(plugin -> CUSTOM_PLUGIN_ID.equals(plugin.getPluginId()))
+                                                                  .findFirst()
+                                                                  .orElse(null);
+
+      assertNotNull(customPluginSetting);
+
+      customPluginSetting.setAmount(amount); // NOSONAR
+      customPluginSetting.setBudgetType(RewardBudgetType.FIXED_PER_POINT);
+      customPluginSetting.setThreshold(0);
+      customPluginSetting.setEnabled(true);
+      customPluginSetting.setUsePools(false);
+      rewardSettingsService.saveSettings(newSettings);
+
+      // Check computed amount for plugin per wallet when no teams and with
+      // fixed budget per point
+      double sumOfTokensToSend = checkComputedRewards(walletRewardService,
+                                                      date,
+                                                      enabledWalletsCount,
+                                                      amount);
+      customPluginSetting.setBudgetType(RewardBudgetType.FIXED);
+      customPluginSetting.setAmount(sumOfTokensToSend);
+      rewardSettingsService.saveSettings(newSettings);
+
+      rewardReport = walletRewardService.computeRewards(date);
+
+      // check total budget to send
+      double tokensToSend = rewardReport.getRewards().stream().mapToDouble(WalletReward::getTokensToSend).sum();
+      assertEquals(sumOfTokensToSend, tokensToSend, 0);
+
+      Set<WalletReward> rewards = rewardReport.getRewards();
+      RewardPeriod period = rewardReport.getPeriod();
+      RewardPeriodDAO rewardPeriodDAO = getService(RewardPeriodDAO.class);
+      WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findRewardPeriodByTypeAndTime(period.getRewardPeriodType(),
+                                                                                                  period.getPeriodMedianDateInSeconds());
+      if (rewardPeriodEntity == null) {
+        rewardPeriodEntity = new WalletRewardPeriodEntity();
+        rewardPeriodEntity.setPeriodType(period.getRewardPeriodType());
+        rewardPeriodEntity.setStatus(RewardStatus.PENDING);
+        rewardPeriodEntity.setStartTime(period.getStartDateInSeconds());
+        rewardPeriodEntity.setEndTime(period.getEndDateInSeconds());
+        rewardPeriodEntity.setTimeZone(period.getTimeZone());
+        rewardPeriodEntity = rewardPeriodDAO.create(rewardPeriodEntity);
+      }
+      // Create entity with empty transaction information
+      for (WalletReward walletReward : rewards) {
+        WalletRewardEntity rewardEntity = new WalletRewardEntity();
+        rewardEntity.setEnabled(true);
+        rewardEntity.setIdentityId(walletReward.getIdentityId());
+        rewardEntity.setTokensToSend(walletReward.getTokensToSend());
+        rewardEntity.setPeriod(rewardPeriodEntity);
+        rewardEntity = getService(RewardDAO.class).create(rewardEntity);
+      }
+      restartTransaction();
+
+      rewardReport = walletRewardService.computeRewards(date);
+      assertEquals(0, rewardReport.getTokensSent(), 0);
+      assertFalse(rewardReport.isCompletelyProceeded());
+
+      // Create duplicated entity with sent transaction information
+      // for the same identity and period
+      for (WalletReward walletReward : rewards) {
+        WalletRewardEntity rewardEntity = new WalletRewardEntity();
+        rewardEntity.setEnabled(true);
+        rewardEntity.setIdentityId(walletReward.getIdentityId());
+        rewardEntity.setTokensToSend(walletReward.getTokensToSend());
+        rewardEntity.setPeriod(rewardPeriodEntity);
+        rewardEntity.setTokensSent(tokensToSend);
+        TransactionDetail transactionDetail = createWalltRewardTransaction(walletTransactionService, walletReward);
+        rewardEntity.setTransactionHash(transactionDetail.getHash());
+        rewardEntity = getService(RewardDAO.class).create(rewardEntity);
+      }
+      restartTransaction();
+
+      rewardReport = walletRewardService.computeRewards(date);
+      assertEquals(rewardReport.getTokensToSend(), rewardReport.getTokensSent(), 0);
+      assertTrue(rewardReport.isCompletelyProceeded());
     } finally {
       rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
@@ -660,19 +784,10 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
       @Override
       public TransactionDetail answer(InvocationOnMock invocation) throws Throwable {
         TransactionDetail transactionDetail = invocation.getArgument(0, TransactionDetail.class);
-        transactionDetail.setHash(generateTransactionHash());
-        transactionDetail.setPending(pendingTransactions);
-        transactionDetail.setSucceeded(successTransactions);
-        transactionDetail.setContractMethodName("reward");
-        RequestLifeCycle.begin(container);
-        try {
-          walletTransactionService.saveTransactionDetail(transactionDetail, false);
-        } finally {
-          RequestLifeCycle.end();
-        }
-        entitiesToClean.add(transactionDetail);
+        saveRewardTransaction(walletTransactionService, pendingTransactions, successTransactions, transactionDetail);
         return transactionDetail;
       }
+
     });
   }
 
@@ -722,6 +837,34 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest {
                    0);
     }
     return sumOfTokensToSend;
+  }
+
+  private TransactionDetail createWalltRewardTransaction(WalletTransactionService walletTransactionService,
+                                                         WalletReward walletReward) {
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setFrom("adminWalletAddress");
+    transactionDetail.setTo(walletReward.getWallet().getAddress());
+    transactionDetail.setContractAmount(walletReward.getTokensToSend());
+    transactionDetail.setValue(walletReward.getTokensToSend());
+    saveRewardTransaction(walletTransactionService, false, true, transactionDetail);
+    return transactionDetail;
+  }
+
+  private void saveRewardTransaction(WalletTransactionService walletTransactionService,
+                                     boolean pendingTransactions,
+                                     boolean successTransactions,
+                                     TransactionDetail transactionDetail) {
+    transactionDetail.setHash(generateTransactionHash());
+    transactionDetail.setPending(pendingTransactions);
+    transactionDetail.setSucceeded(successTransactions);
+    transactionDetail.setContractMethodName("reward");
+    RequestLifeCycle.begin(container);
+    try {
+      walletTransactionService.saveTransactionDetail(transactionDetail, false);
+    } finally {
+      RequestLifeCycle.end();
+    }
+    entitiesToClean.add(transactionDetail);
   }
 
 }
