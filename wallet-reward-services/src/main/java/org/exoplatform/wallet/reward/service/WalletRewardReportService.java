@@ -341,11 +341,19 @@ public class WalletRewardReportService implements RewardReportService {
 
     boolean completelyProceeded = rewardReport.isCompletelyProceeded();
     for (Wallet wallet : wallets) {
-      WalletReward walletReward = walletRewards.stream()
-                                               .filter(wr -> wallet != null && wr.getWallet() != null
-                                                   && wr.getIdentityId() == wallet.getTechnicalId())
-                                               .findFirst()
-                                               .orElse(null);
+      List<WalletReward> walletRewardList = walletRewards.stream()
+                                                         .filter(wr -> wallet != null && wr.getWallet() != null
+                                                             && wr.getIdentityId() == wallet.getTechnicalId())
+                                                         .toList();
+      WalletReward walletReward = walletRewardList.stream().filter(r -> r.getTransaction() != null).sorted((r2, r1) -> {
+        if (r1.getTokensSent() > r2.getTokensSent()) {
+          return 1;
+        } else if (r2.getTokensSent() > r1.getTokensSent()) {
+          return -1;
+        } else {
+          return 0;
+        }
+      }).findFirst().orElseGet(() -> walletRewardList.isEmpty() ? null : walletRewardList.get(0));
       if (walletReward == null) {
         walletReward = new WalletReward();
         walletRewards.add(walletReward);
