@@ -200,17 +200,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <external-component-plugins>
     <target-component>org.exoplatform.commons.api.notification.channel.ChannelManager</target-component>
     <component-plugin>
-      <name>web.channel.wallet.template</name>
-      <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.notification.provider.WebTemplateProvider</type>
-      <init-params>
-        <value-param>
-          <name>channel-id</name>
-          <value>WEB_CHANNEL</value>
-        </value-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
       <name>mail.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
       <type>org.exoplatform.wallet.notification.provider.MailTemplateProvider</type>
@@ -229,17 +218,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <value-param>
           <name>channel-id</name>
           <value>PUSH_CHANNEL</value>
-        </value-param>
-      </init-params>
-    </component-plugin>
-    <component-plugin>
-      <name>web.channel.wallet.reward.template</name>
-      <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
-      <init-params>
-        <value-param>
-          <name>channel-id</name>
-          <value>WEB_CHANNEL</value>
         </value-param>
       </init-params>
     </component-plugin>
