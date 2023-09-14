@@ -44,12 +44,12 @@ public class RewardSuccessTemplateProviderTest extends BaseWalletRewardTest {
 
     provider = new RewardSuccessTemplateProvider(container,
                                                  getService(WalletRewardSettingsService.class),
-                                                 getParams("WEB_CHANNEL"));
+                                                 getParams("MAIL_CHANNEL"));
     templateFilePathConfigs = provider.getTemplateFilePathConfigs();
     assertNotNull(templateFilePathConfigs);
     assertEquals(1, templateFilePathConfigs.size());
     template = templateFilePathConfigs.values().iterator().next();
-    assertEquals(provider.getWebTemplatePath(), template);
+    assertEquals(provider.getMailTemplatePath(), template);
 
     provider = new RewardSuccessTemplateProvider(container,
                                                  getService(WalletRewardSettingsService.class),

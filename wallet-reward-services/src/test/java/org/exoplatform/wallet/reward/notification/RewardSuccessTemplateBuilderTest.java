@@ -57,7 +57,7 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
                                                    new RewardSuccessTemplateProvider(container,
                                                                                      getService(WalletRewardSettingsService.class),
                                                                                      params);
-    templateProvider.setWebTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
+    templateProvider.setMailTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
 
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
 
@@ -99,7 +99,7 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
 
     ValueParam valueParam = new ValueParam();
     valueParam.setName("channel-id");
-    valueParam.setValue("WEB_CHANNEL");
+    valueParam.setValue("MAIL_CHANNEL");
     initParams.addParam(valueParam);
     return initParams;
   }
