@@ -430,6 +430,26 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </depends>
   </module>
 
+  <module>
+    <name>walletNotificationExtension</name>
+    <load-group>notificationGRP</load-group>
+    <script>
+      <path>/js/notificationExtension.bundle.js</path>
+    </script>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+  </module>
+
   <!-- TODO : Deprecated to use eChart instead  -->
   <module>
     <name>vueChart</name>
