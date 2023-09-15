@@ -28,7 +28,6 @@ import java.util.Locale;
 import org.apache.commons.codec.binary.StringUtils;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
-import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
 import org.exoplatform.commons.api.notification.model.*;
 import org.exoplatform.commons.api.notification.service.template.TemplateContext;
@@ -85,9 +84,6 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
 
       String rewardEndPeriodDate = (String) templateContext.get(REWARD_END_PERIOD_DATE);
       templateContext.put(REWARD_END_PERIOD_DATE_FORMATTED, formatTime(Long.parseLong(rewardEndPeriodDate) - 1, zoneId, language));
-
-      String notificationRead = notification.getValueOwnerParameter(NotificationMessageUtils.READ_PORPERTY.getKey());
-      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
 
       setLastModifiedDate(notification, language, templateContext);
       SocialNotificationUtils.addFooterAndFirstName(notification.getTo(), templateContext);

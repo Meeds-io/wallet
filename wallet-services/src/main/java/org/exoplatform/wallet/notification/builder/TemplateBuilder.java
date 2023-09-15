@@ -25,7 +25,6 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
-import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
 import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
 import org.exoplatform.commons.api.notification.model.MessageInfo;
@@ -83,7 +82,6 @@ public class TemplateBuilder extends AbstractTemplateBuilder {
     String symbol = notification.getValueOwnerParameter(SYMBOL);
     String message = notification.getValueOwnerParameter(MESSAGE);
     String hash = notification.getValueOwnerParameter(HASH);
-    String notificationRead = notification.getValueOwnerParameter(NotificationMessageUtils.READ_PORPERTY.getKey());
 
     RequestLifeCycle.begin(container);
     try {
@@ -97,7 +95,6 @@ public class TemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("SYMBOL", symbol);
       templateContext.put("CONTRACT_ADDRESS", contractAddress == null ? "" : contractAddress);
       templateContext.put("NOTIFICATION_ID", notification.getId());
-      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
       templateContext.put("MESSAGE", message);
       templateContext.put("HASH", hash);
 
