@@ -29,7 +29,8 @@ const config = merge(webpackCommonConfig, {
     walletSettings: './src/main/webapp/vue-app/wallet-common/wallet-settings/main.js',
     walletOverview: './src/main/webapp/vue-app/wallet-common/wallet-overview/main.js',
     rewardApp: './src/main/webapp/vue-app/wallet-reward/main.js',
-    engagementCenterExtensions: './src/main/webapp/vue-app/engagementCenterExtensions/extensions.js'
+    engagementCenterExtensions: './src/main/webapp/vue-app/engagementCenterExtensions/extensions.js',
+    notificationExtension: './src/main/webapp/vue-app/notification-extension/main.js',
   },
   output: {
     path: path.join(__dirname, 'target/wallet/'),
