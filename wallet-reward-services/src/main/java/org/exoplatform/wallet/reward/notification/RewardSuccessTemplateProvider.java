@@ -36,8 +36,6 @@ public class RewardSuccessTemplateProvider extends TemplateProvider {
 
   private RewardSuccessTemplateBuilder builder          = null;
 
-  private String                       webTemplatePath  = null;
-
   private String                       pushTemplatePath = null;
 
   private String                       mailTemplatePath = null;
@@ -48,7 +46,6 @@ public class RewardSuccessTemplateProvider extends TemplateProvider {
 
     this.templateBuilders.put(PLUGIN_KEY, builder);
 
-    setWebTemplatePath("war:/conf/wallet/templates/notification/web/RewardSuccessWebPlugin.gtmpl");
     setMailTemplatePath("war:/conf/wallet/templates/notification/mail/RewardSuccessMailPlugin.gtmpl");
     setPushTemplatePath("war:/conf/wallet/templates/notification/push/RewardSuccessPushPlugin.gtmpl");
   }
@@ -60,18 +57,8 @@ public class RewardSuccessTemplateProvider extends TemplateProvider {
       return Collections.singletonMap(PLUGIN_KEY, mailTemplatePath);
     } else if (StringUtils.equals(channelKey.getId(), "PUSH_CHANNEL")) {
       return Collections.singletonMap(PLUGIN_KEY, pushTemplatePath);
-    } else if (StringUtils.equals(channelKey.getId(), "WEB_CHANNEL")) {
-      return Collections.singletonMap(PLUGIN_KEY, webTemplatePath);
     }
     return Collections.emptyMap();
-  }
-
-  public String getWebTemplatePath() {
-    return webTemplatePath;
-  }
-
-  public void setWebTemplatePath(String webTemplatePath) {
-    this.webTemplatePath = webTemplatePath;
   }
 
   public String getPushTemplatePath() {
