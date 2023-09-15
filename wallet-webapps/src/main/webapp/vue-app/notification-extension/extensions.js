@@ -26,7 +26,7 @@ extensionRegistry.registerExtension('WebNotification', 'notification-group-exten
     'EtherSenderNotificationPlugin',
     'RewardSuccessNotificationPlugin'
   ],
-  icon: 'fa-wallet',
+  icon: 'fa-money-bill-alt',
 });
 extensionRegistry.registerExtension('WebNotification', 'notification-content-extension', {
   type: 'FundsRequestNotificationPlugin',

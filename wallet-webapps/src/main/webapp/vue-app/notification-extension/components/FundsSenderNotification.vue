@@ -5,7 +5,7 @@
     :actions-class="!content && 'd-none'"
     :url="transactionUrl">
     <template #avatar>
-      <v-icon size="40">fa-wallet</v-icon>
+      <v-icon size="40">fa-money-bill-alt</v-icon>
     </template>
     <template v-if="content" #actions>
       <div class="text-truncate">
