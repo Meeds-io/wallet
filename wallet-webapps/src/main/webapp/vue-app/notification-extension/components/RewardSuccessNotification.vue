@@ -9,7 +9,7 @@
     </template>
     <template #actions>
       <div class="text-truncate">
-        <v-icon size="14" class="me-1">fa-wallet</v-icon>
+        <v-icon size="14" class="me-1">fa-money-bill-alt</v-icon>
         {{ content }}
       </div>
     </template>
