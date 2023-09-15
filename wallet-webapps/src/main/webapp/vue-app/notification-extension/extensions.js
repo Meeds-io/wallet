@@ -17,6 +17,17 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+extensionRegistry.registerExtension('WebNotification', 'notification-group-extension', {
+  rank: 60,
+  name: 'wallet',
+  plugins: [
+    'FundsRequestNotificationPlugin',
+    'EtherReceiverNotificationPlugin',
+    'EtherSenderNotificationPlugin',
+    'RewardSuccessNotificationPlugin'
+  ],
+  icon: 'fa-wallet',
+});
 extensionRegistry.registerExtension('WebNotification', 'notification-content-extension', {
   type: 'FundsRequestNotificationPlugin',
   rank: 10,
