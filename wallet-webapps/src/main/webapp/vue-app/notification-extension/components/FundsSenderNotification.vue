@@ -31,7 +31,11 @@ export default {
       return this.notification?.parameters?.symbol;
     },
     tokenAmount() {
-      return this.notification?.parameters?.amount;
+      return new Intl.NumberFormat(eXo.env.portal.language, {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(this.notification?.parameters?.amount || 0);
     },
     senderDisplayName() {
       return this.notification?.parameters?.sender;
