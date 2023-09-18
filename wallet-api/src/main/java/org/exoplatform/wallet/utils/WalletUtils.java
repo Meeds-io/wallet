@@ -840,7 +840,7 @@ public class WalletUtils {
       lang = Locale.getDefault().getLanguage();
     }
     NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale(lang));
-    numberFormat.setMaximumFractionDigits(3);
+    numberFormat.setMaximumFractionDigits(2);
     return numberFormat.format(Double.parseDouble(amount.toString()));
   }
 
