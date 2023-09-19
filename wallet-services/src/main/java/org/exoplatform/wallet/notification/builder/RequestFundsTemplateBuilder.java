@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
-import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
 import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
 import org.exoplatform.commons.api.notification.model.MessageInfo;
@@ -82,7 +81,6 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
     String userUrl = notification.getValueOwnerParameter(USER_URL);
     String symbol = notification.getValueOwnerParameter(SYMBOL);
     String message = notification.getValueOwnerParameter(MESSAGE);
-    String notificationRead = notification.getValueOwnerParameter(NotificationMessageUtils.READ_PORPERTY.getKey());
     String fundRequestSent = notification.getValueOwnerParameter(FUNDS_REQUEST_SENT);
 
     RequestLifeCycle.begin(container);
@@ -100,7 +98,6 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
       templateContext.put("MESSAGE", message);
       templateContext.put("AVATAR", avatar != null ? avatar : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
       templateContext.put("NOTIFICATION_ID", notification.getId());
-      templateContext.put("READ", Boolean.parseBoolean(notificationRead) ? "read" : "unread");
       templateContext.put("FUNDS_REQUEST_SENT", Boolean.valueOf(fundRequestSent));
       setLastModifiedDate(notification, language, templateContext);
       SocialNotificationUtils.addFooterAndFirstName(notification.getTo(), templateContext);
