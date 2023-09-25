@@ -33,16 +33,26 @@
   </external-component-plugins>
 
   <external-component-plugins>
-    <target-component>io.meeds.gamification.service.RuleRegistry</target-component>
+    <target-component>io.meeds.gamification.service.EventRegistry</target-component>
     <component-plugin>
-      <name>rule.initializeWallet</name>
+      <name>createWallet</name>
       <set-method>addPlugin</set-method>
-      <type>io.meeds.gamification.plugin.RuleConfigPlugin</type>
+      <type>io.meeds.gamification.plugin.EventConfigPlugin</type>
       <init-params>
-        <value-param>
-          <name>rule-event</name>
-          <value>createWallet</value>
-        </value-param>
+        <object-param>
+          <name>event</name>
+          <object type="io.meeds.gamification.model.EventDTO">
+            <field name="title">
+              <string>createWallet</string>
+            </field>
+            <field name="type">
+              <string>meeds</string>
+            </field>
+            <field name="trigger">
+              <string>createWallet</string>
+            </field>
+          </object>
+        </object-param>
       </init-params>
     </component-plugin>
   </external-component-plugins>
