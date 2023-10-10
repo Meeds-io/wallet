@@ -14,34 +14,9 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
-<template>
-  <v-snackbar
-    v-model="snackbar"
-    :left="!$vuetify.rtl"
-    :right="$vuetify.rtl"
-    color="transparent"
-    elevation="0"
-    app>
-    <exo-notification-alert
-      :alert="alert"
-      @dismissed="clear">
-      <template #actions v-if="showTransactionLink">
-        <a
-          :href="transactionHashLink"
-          :title="$t('exoplatform.wallet.message.transactionExplorerLink')"
-          rel="external nofollow noreferrer noopener"
-          class="d-block"
-          target="_blank">
-          {{ transactionLinkLabel }}
-        </a>
-      </template>
-    </exo-notification-alert>
-  </v-snackbar>
-</template>
 <script>
 export default {
   data: () => ({
-    snackbar: false,
     alert: null,
   }),
   computed: {
@@ -55,18 +30,27 @@ export default {
       return this.alert?.transactionHash;
     }
   },
-  watch: {
-    alert() {
-      this.snackbar = !!this.alert;
-    }
-  },
   created() {
-    this.$root.$on('wallet-notification-alert', alert => this.alert = alert);
-  },
-  methods: {
-    clear() {
-      this.alert = null;
-    },
+    this.$root.$on('wallet-notification-alert', alert => {
+      this.alert = alert;
+      this.$nextTick().then(() => {
+        if (this.alert) {
+          const detail = {
+            alertMessage: this.alert.message,
+            alertType: this.alert.type,
+          };
+          if (this.transactionHashLink) {
+            detail.alertLink = this.transactionHashLink;
+            detail.alertLinkText = this.transactionLinkLabel;
+            detail.alertLinkTarget = '_blank';
+            detail.alertLinkTooltip = this.$t('exoplatform.wallet.message.transactionExplorerLink');
+          }
+          document.dispatchEvent(new CustomEvent('alert-message-html', {detail}));
+        } else {
+          document.dispatchEvent(new CustomEvent('close-alert-message'));
+        }
+      });
+    });
   },
 };
 </script>
