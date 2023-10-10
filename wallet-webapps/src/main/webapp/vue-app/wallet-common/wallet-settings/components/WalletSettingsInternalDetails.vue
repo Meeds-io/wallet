@@ -124,9 +124,6 @@ export default {
   },
   data: () => ({
     displayManagePasswordDetails: false,
-    alert: false,
-    type: '',
-    message: '',
     provider: null
   }),
   computed: {

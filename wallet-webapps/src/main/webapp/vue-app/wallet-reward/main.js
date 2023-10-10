@@ -35,10 +35,10 @@ const appId = 'RewardApp';
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    new Vue({
+    Vue.createApp({
       template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
       i18n,
       vuetify,
-    }).$mount(`#${appId}`);
+    }, `#${appId}`, 'Wallet Reward');
   });
 }

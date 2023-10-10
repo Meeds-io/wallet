@@ -32,11 +32,11 @@ export function initAPI() {
 
         window.LocalWeb3 = LocalWeb3;
 
-        new Vue({
+        Vue.createApp({
           render: (h) => h(WalletAPIApp),
           i18n,
           vuetify,
-        }).$mount('#WalletAPIApp');
+        }, '#WalletAPIApp', 'Wallet API');
       });
     });
   }
