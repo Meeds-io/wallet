@@ -26,10 +26,10 @@ const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    new Vue({
+    Vue.createApp({
       render: (h) => h(WalletAdminApp),
       i18n,
       vuetify,
-    }).$mount('#WalletAdminApp');
+    }, '#WalletAdminApp', 'Wallet Administration');
   });
 }
