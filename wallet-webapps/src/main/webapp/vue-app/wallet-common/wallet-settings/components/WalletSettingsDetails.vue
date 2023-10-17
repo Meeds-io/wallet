@@ -1,7 +1,7 @@
 <template>
   <v-card
     v-if="displayed"
-    class="walletSetting"
+    class="walletSetting card-border-radius"
     flat>
     <template v-if="!hideContent">
       <v-card-title class="px-0 pt-2">
