@@ -82,6 +82,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <set-method>initListener</set-method>
       <type>org.exoplatform.portal.config.NewPortalConfigListener</type>
       <description>this listener init the portal configuration</description>
+      <priority>780</priority>
       <init-params>
         <object-param>
           <name>portal.configuration</name>
@@ -103,7 +104,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               <boolean>${exo.wallet.portalConfig.administration.override:true}</boolean>
             </field>
             <field name="importMode">
-              <string>${exo.wallet.portalConfig.administration.importmode:merge}</string>
+              <string>${exo.wallet.portalConfig.administration.importmode:insert}</string>
             </field>
           </object>
         </object-param>
