@@ -72,6 +72,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
           <v-tabs
             v-model="selectedTab"
+            class="card-border-radius overflow-hidden"
             slider-size="4">
             <v-tab key="SendRewards" href="#SendRewards">
               {{ $t('exoplatform.wallet.title.sendRewardsTab') }}
@@ -84,7 +85,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-tab>
           </v-tabs>
       
-          <v-tabs-items v-model="selectedTab" class="tabs-content">
+          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius overflow-hidden">
             <v-tab-item
               id="SendRewards"
               value="SendRewards"

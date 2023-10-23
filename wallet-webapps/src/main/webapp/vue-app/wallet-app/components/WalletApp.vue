@@ -26,10 +26,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <v-app class="mb-4 application-toolbar">
             <v-tabs
               v-model="tab"
-              slider-size="4">
+              slider-size="4"
+              class="card-border-radius overflow-hidden">
               <v-tab>{{ tabName }}</v-tab>
             </v-tabs>
-            <v-tabs-items v-model="tab" class="tabs-content">
+            <v-tabs-items v-model="tab" class="tabs-content card-border-radius overflow-hidden">
               <v-tab-item eager>
                 <v-flex>
                   <v-layout
