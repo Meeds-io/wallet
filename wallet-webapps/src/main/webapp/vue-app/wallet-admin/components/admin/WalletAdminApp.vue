@@ -25,7 +25,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <v-app class="mb-4 application-toolbar">
           <v-tabs
             v-model="selectedTab"
-            slider-size="4">
+            slider-size="4"
+            class="card-border-radius overflow-hidden">
             <v-tab
               key="wallets"
               href="#wallets">
@@ -37,7 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               {{ $t('exoplatform.wallet.title.initialFundsTab') }}
             </v-tab>
           </v-tabs>
-          <v-tabs-items v-model="selectedTab" class="tabs-content">
+          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius overflow-hidden">
             <v-tab-item
               id="wallets"
               value="wallets"
