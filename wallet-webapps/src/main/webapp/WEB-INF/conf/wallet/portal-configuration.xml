@@ -50,31 +50,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </field>
           </object>
         </object-param>
-        <object-param>
-          <name>group.configuration</name>
-          <description>description</description>
-          <object type="org.exoplatform.portal.config.NewPortalConfig">
-            <field name="ownerType">
-              <string>group</string>
-            </field>
-            <field name="override">
-              <boolean>${exo.wallet.portalConfig.metadata.override:true}</boolean>
-            </field>
-            <field name="importMode">
-              <string>${exo.wallet.portalConfig.metadata.importmode:merge}</string>
-            </field>
-            <field name="predefinedOwner">
-              <collection type="java.util.HashSet">
-                <value>
-                  <string>/platform/rewarding</string>
-                </value>
-              </collection>
-            </field>
-            <field name="location">
-              <string>war:/conf/wallet/portal</string>
-            </field>
-          </object>
-        </object-param>
       </init-params>
     </component-plugin>
     <component-plugin>
