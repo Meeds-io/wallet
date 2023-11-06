@@ -80,7 +80,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       :headers="walletTableHeaders"
       :items="displayedWallets"
       :items-per-page="limit"
-      :loading="loadingWallets">
+      :loading="loadingWallets"
+      class="transparent">
       <template slot="item" slot-scope="props">
         <transition name="fade">
           <tr v-show="wallets">

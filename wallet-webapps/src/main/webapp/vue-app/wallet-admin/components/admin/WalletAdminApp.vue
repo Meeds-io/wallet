@@ -38,7 +38,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               {{ $t('exoplatform.wallet.title.initialFundsTab') }}
             </v-tab>
           </v-tabs>
-          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius overflow-hidden">
+          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius">
             <v-tab-item
               id="wallets"
               value="wallets"
