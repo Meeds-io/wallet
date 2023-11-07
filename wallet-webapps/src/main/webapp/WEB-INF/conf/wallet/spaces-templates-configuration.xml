@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   This file is part of the Meeds project (https://meeds.io/).
-  Copyright (C) 2022 Meeds Association
+  Copyright (C) 2023 Meeds Association
   contact@meeds.io
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@
           <description>Space Template</description>
           <object type="org.exoplatform.social.core.space.SpaceTemplate">
             <field name="name">
-		      <string>community</string>
+              <string>community</string>
             </field>
             <field name="applications">
               <collection type="java.util.ArrayList">
