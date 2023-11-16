@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     flat>
     <main>
       <v-layout column>
-        <v-app class="mb-4 application-toolbar">
+        <v-app class="application-toolbar">
           <v-tabs
             v-model="selectedTab"
             slider-size="4"

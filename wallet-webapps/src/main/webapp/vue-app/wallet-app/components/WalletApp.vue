@@ -23,7 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <main v-if="isWalletEnabled" id="walletEnabledContent">
       <v-layout>
         <v-flex>
-          <v-app class="mb-4 application-toolbar">
+          <v-app class="application-toolbar">
             <v-tabs
               v-model="tab"
               slider-size="4"
