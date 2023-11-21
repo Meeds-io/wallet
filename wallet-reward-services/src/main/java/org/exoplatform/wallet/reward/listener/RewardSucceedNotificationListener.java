@@ -21,12 +21,11 @@ import static org.exoplatform.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATI
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
-import org.exoplatform.container.*;
-import org.exoplatform.container.component.RequestLifeCycle;
-import org.exoplatform.services.listener.*;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
+import org.exoplatform.services.listener.Asynchronous;
+import org.exoplatform.services.listener.Event;
+import org.exoplatform.services.listener.Listener;
 import org.exoplatform.wallet.model.reward.RewardReport;
 
 /**
@@ -35,31 +34,14 @@ import org.exoplatform.wallet.model.reward.RewardReport;
  */
 @Asynchronous
 public class RewardSucceedNotificationListener extends Listener<RewardReport, Object> {
-  private static final Log LOG = ExoLogger.getLogger(RewardSucceedNotificationListener.class);
-
-  private ExoContainer     container;
-
-  public RewardSucceedNotificationListener(PortalContainer container) {
-    this.container = container;
-  }
 
   @Override
+  @ExoTransactional
   public void onEvent(Event<RewardReport, Object> event) throws Exception {
     RewardReport rewardReport = event.getSource();
-    ExoContainerContext.setCurrentContainer(container);
-    RequestLifeCycle.begin(container);
-    try {
-      sendNotification(rewardReport);
-    } catch (Exception e) {
-      LOG.error("Error processing transaction notification {}", event.getData(), e);
-    } finally {
-      RequestLifeCycle.end();
-    }
-  }
-
-  private void sendNotification(RewardReport rewardReport) {
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
     ctx.append(REWARD_REPORT_NOTIFICATION_PARAM, rewardReport);
     ctx.getNotificationExecutor().with(ctx.makeCommand(PluginKey.key(REWARD_SUCCESS_NOTIFICATION_ID))).execute(ctx);
   }
+
 }
