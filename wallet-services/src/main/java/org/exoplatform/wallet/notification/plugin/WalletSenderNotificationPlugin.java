@@ -26,12 +26,17 @@ import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.HTMLSanitizer;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionNotificationType;
 
 public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
+
+  private static final Log LOG = ExoLogger.getLogger(WalletSenderNotificationPlugin.class);
 
   public WalletSenderNotificationPlugin(InitParams initParams) {
     super(initParams);
@@ -56,6 +61,14 @@ public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
     double amount = ctx.value(AMOUNT_PARAMETER);
     String message = ctx.value(MESSAGE_PARAMETER);
     String hash = ctx.value(HASH_PARAMETER);
+    if (StringUtils.isNotBlank(message)) {
+      try {
+        message = HTMLSanitizer.sanitize(message);
+      } catch (Exception e) {
+        LOG.warn("error sanitizing wallet transaction message {}. Use empty message", message, e);
+        message = "";
+      }
+    }
 
     // Don't send notifications about Admin wallet sending funds
     if (senderAccountDetail == null || StringUtils.equals(senderAccountDetail.getId(), WALLET_ADMIN_REMOTE_ID)) {

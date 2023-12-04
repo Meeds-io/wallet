@@ -362,7 +362,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                   {{ $t('exoplatform.wallet.label.transactionMessage') }}
                 </v-list-item-content>
                 <v-list-item-content class="align-end text-start paragraph">
-                  {{ item.message }}
+                  <span v-sanitized-html="item.message"></span>
                 </v-list-item-content>
               </v-list-item>
   
