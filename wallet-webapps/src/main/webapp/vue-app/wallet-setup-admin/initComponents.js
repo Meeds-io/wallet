@@ -1,35 +1,32 @@
 /*
  * This file is part of the Meeds project (https://meeds.io/).
- * Copyright (C) 2020 Meeds Association
- * contact@meeds.io
+ * 
+ * Copyright (C) 2023 Meeds Association contact@meeds.io
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import WalletAdminApp from './components/admin/WalletAdminApp.vue';
-import './initComponents.js';
-Vue.use(Vuetify);
-Vue.use(WalletCommon);
+import WalletAdminSetup from './components/WalletAdminSetup.vue';
+import AdminDrawer from './components/settings/AdminDrawer.vue';
+import AdminForm from './components/settings/AdminForm.vue';
 
-const vuetify = new Vuetify(eXo.env.portal.vuetifyPreset);
+const components = {
+  'wallet-admin-setup': WalletAdminSetup,
+  'wallet-admin-drawer': AdminDrawer,
+  'wallet-admin-form': AdminForm,
+};
 
-const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
-const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
-
-export function init() {
-  exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    Vue.createApp({
-      render: (h) => h(WalletAdminApp),
-      i18n,
-      vuetify,
-    }, '#WalletAdminApp', 'Wallet Administration');
-  });
+for (const key in components) {
+  Vue.component(key, components[key]);
 }
