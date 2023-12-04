@@ -196,6 +196,44 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </module>
   </portlet>
 
+  <portlet>
+    <name>WalletSetupAdmin</name>
+    <module>
+      <script>
+        <minify>false</minify>
+        <path>/js/walletSetupAdmin.bundle.js</path>
+      </script>
+      <depends>
+        <module>walletCommon</module>
+        <as>WalletCommon</as>
+      </depends>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>jquery</module>
+        <as>$</as>
+      </depends>
+      <depends>
+        <module>Web3</module>
+        <as>LocalWeb3</as>
+      </depends>
+      <depends>
+        <module>ethQRCode</module>
+        <as>EthereumQRPlugin</as>
+      </depends>
+      <depends>
+        <module>commons-cometd3</module>
+        <as>cCometd</as>
+      </depends>
+    </module>
+  </portlet>
 
   <portlet>
     <name>WalletSettings</name>

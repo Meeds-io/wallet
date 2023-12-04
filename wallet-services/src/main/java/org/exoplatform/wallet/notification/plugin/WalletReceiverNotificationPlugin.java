@@ -16,7 +16,27 @@
  */
 package org.exoplatform.wallet.notification.plugin;
 
-import static org.exoplatform.wallet.utils.WalletUtils.*;
+import static org.exoplatform.wallet.utils.WalletUtils.ACCOUNT_TYPE;
+import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
+import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.AVATAR;
+import static org.exoplatform.wallet.utils.WalletUtils.CONTRACT_ADDRESS;
+import static org.exoplatform.wallet.utils.WalletUtils.CONTRACT_ADDRESS_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.HASH;
+import static org.exoplatform.wallet.utils.WalletUtils.HASH_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.MESSAGE;
+import static org.exoplatform.wallet.utils.WalletUtils.MESSAGE_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_TYPE;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_URL;
+import static org.exoplatform.wallet.utils.WalletUtils.SENDER;
+import static org.exoplatform.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.SENDER_URL;
+import static org.exoplatform.wallet.utils.WalletUtils.SYMBOL;
+import static org.exoplatform.wallet.utils.WalletUtils.SYMBOL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.getNotificationReceiversUsers;
+import static org.exoplatform.wallet.utils.WalletUtils.getPermanentLink;
 
 import java.util.List;
 
@@ -26,12 +46,17 @@ import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.HTMLSanitizer;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.TransactionNotificationType;
 
 public class WalletReceiverNotificationPlugin extends BaseNotificationPlugin {
+
+  private static final Log LOG = ExoLogger.getLogger(WalletReceiverNotificationPlugin.class);
 
   public WalletReceiverNotificationPlugin(InitParams initParams) {
     super(initParams);
@@ -56,6 +81,14 @@ public class WalletReceiverNotificationPlugin extends BaseNotificationPlugin {
     double amount = ctx.value(AMOUNT_PARAMETER);
     String message = ctx.value(MESSAGE_PARAMETER);
     String hash = ctx.value(HASH_PARAMETER);
+    if (StringUtils.isNotBlank(message)) {
+      try {
+        message = HTMLSanitizer.sanitize(message);
+      } catch (Exception e) {
+        LOG.warn("error sanitizing wallet transaction message {}. Use empty message", message, e);
+        message = "";
+      }
+    }
 
     List<String> toList = getNotificationReceiversUsers(receiverAccountDetail, senderAccountDetail.getId());
     if (toList == null || toList.isEmpty()) {
