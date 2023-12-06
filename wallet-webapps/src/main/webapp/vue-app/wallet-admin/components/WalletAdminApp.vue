@@ -20,76 +20,38 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     color="transaprent"
     class="VuetifyApp"
     flat>
-    <main>
-      <v-layout column>
-        <v-app class="application-toolbar">
-          <v-tabs
-            v-model="selectedTab"
-            slider-size="4"
-            class="card-border-radius overflow-hidden">
-            <v-tab
-              key="wallets"
-              href="#wallets">
-              {{ $t('exoplatform.wallet.title.walletAdministrationTab') }}
-            </v-tab>
-            <v-tab
-              key="funds"
-              href="#funds">
-              {{ $t('exoplatform.wallet.title.initialFundsTab') }}
-            </v-tab>
-          </v-tabs>
-          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius">
-            <v-tab-item
-              id="wallets"
-              value="wallets"
-              eager>
-              <v-flex class="white text-center  mt-4" flat>
-                <div v-if="error && !loading" class="alert alert-error v-content">
-                  <i class="uiIconError"></i>{{ error }}
-                </div>
-
-                <v-dialog
-                  v-model="loading"
-                  persistent
-                  hide-overlay
-                  width="300">
-                  <v-card color="primary" dark>
-                    <v-card-text>
-                      {{ $t('exoplatform.wallet.label.loading') }} ...
-                      <v-progress-linear
-                        indeterminate
-                        color="white"
-                        class="mb-0" />
-                    </v-card-text>
-                  </v-card>
-                </v-dialog>
-              </v-flex>
-              <wallet-tab
-                ref="walletsTab"
-                :wallet-address="walletAddress"
-                :loading="loading"
-                :fiat-symbol="fiatSymbol"
-                :refresh-index="refreshIndex"
-                :address-etherscan-link="addressEtherscanLink"
-                :contract-details="contractDetails"
-                @wallets-loaded="wallets = $event" />
-            </v-tab-item>
-            <v-tab-item
-              id="funds"
-              value="funds"
-              eager>
-              <wallet-initial-funds-tab
-                ref="fundsTab"
-                :loading="loading"
-                :settings="settings"
-                :contract-details="contractDetails"
-                @saved="refreshSettings" />
-            </v-tab-item>
-          </v-tabs-items>
-        </v-app>
-      </v-layout>
+    <v-main>
+      <v-flex class="white text-center application-border-radius pa-5" flat>
+        <div v-if="error && !loading" class="alert alert-error v-content">
+          <i class="uiIconError"></i>{{ error }}
+        </div>
+        <v-dialog
+          v-model="loading"
+          persistent
+          hide-overlay
+          width="300">
+          <v-card color="primary" dark>
+            <v-card-text>
+              {{ $t('exoplatform.wallet.label.loading') }} ...
+              <v-progress-linear
+                indeterminate
+                color="white"
+                class="mb-0" />
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+        <wallet-tab
+          ref="walletsTab"
+          :wallet-address="walletAddress"
+          :loading="loading"
+          :fiat-symbol="fiatSymbol"
+          :refresh-index="refreshIndex"
+          :address-etherscan-link="addressEtherscanLink"
+          :contract-details="contractDetails"
+          @wallets-loaded="wallets = $event" />
+      </v-flex>
       <div id="walletDialogsParent"></div>
-    </main>
+    </v-main>
   </v-app>
 </template>
 
@@ -98,7 +60,6 @@ export default {
   data() {
     return {
       loading: false,
-      selectedTab: 'wallets',
       fiatSymbol: '$',
       settings: null,
       wallet: null,
