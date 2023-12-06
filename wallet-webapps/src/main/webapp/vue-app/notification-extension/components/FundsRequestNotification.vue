@@ -9,7 +9,7 @@
     <template v-if="content" #actions>
       <div class="text-truncate">
         <v-icon size="14" class="me-1">far fa-comment</v-icon>
-        {{ content }}
+        {{ contentText }}
       </div>
       <div class="text-truncate mt-2">
         <v-btn
@@ -53,6 +53,9 @@ export default {
     },
     content() {
       return this.notification?.parameters?.message || this.notification?.parameters?.label;
+    },
+    contentText() {
+      return this.content && this.$utils.htmlToText(this.content) || '';
     },
     tokenSymbol() {
       return this.notification?.parameters?.symbol;
