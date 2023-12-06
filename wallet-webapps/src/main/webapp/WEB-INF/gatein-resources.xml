@@ -341,6 +341,43 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </portlet>
 
   <module>
+    <name>WalletSpaceSettingExtension</name>
+    <load-group>SpaceSettingExtensions</load-group>
+    <script>
+      <minify>false</minify>
+      <path>/js/walletAPI.bundle.js</path>
+    </script>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
+      <module>jquery</module>
+      <as>$</as>
+    </depends>
+    <depends>
+      <module>ethQRCode</module>
+      <as>EthereumQRPlugin</as>
+    </depends>
+    <depends>
+      <module>vueChart</module>
+      <as>VueChart</as>
+    </depends>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+    <depends>
+      <module>walletCommon</module>
+      <as>WalletCommon</as>
+    </depends>
+  </module>
+
+  <module>
     <name>walletCommon</name>
     <script>
       <minify>false</minify>
