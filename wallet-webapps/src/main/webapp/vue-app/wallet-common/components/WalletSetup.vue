@@ -50,24 +50,26 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <div v-if="displayWalletNotExistingYet" class="alert alert-info">
       <i class="uiIconInfo"></i> {{ $t('exoplatform.wallet.info.spaceWalletNotCreatedYet') }}
     </div>
-    <wallet-welcome-screen
-      v-if="displayWelcomeScreen && !displayWalletBrowserSetup && !isSpace && metamaskFeatureEnabled"
-      @create-internal-wallet="displayWalletBrowserSetup = true"
-      @configured="refresh()" />
-    <wallet-reward-browser-setup
-      v-if="displayWalletBrowserSetup || isSpace || !metamaskFeatureEnabled"
-      ref="walletBrowserSetup"
-      :is-space="isSpace"
-      :is-space-administrator="isSpaceAdministrator"
-      :wallet="wallet"
-      :refresh-index="refreshIndex"
-      :is-administration="isAdministration"
-      :loading="loading"
-      :initialization-state="initializationState"
-      @configured="refresh()"
-      @loading="$emit('loading')"
-      @end-loading="$emit('end-loading')"
-      @error="$emit('error', $event)" />
+    <template v-else>
+      <wallet-welcome-screen
+        v-if="displayWelcomeScreen && !displayWalletBrowserSetup && !isSpace && metamaskFeatureEnabled"
+        @create-internal-wallet="displayWalletBrowserSetup = true"
+        @configured="refresh()" />
+      <wallet-reward-browser-setup
+        v-if="displayWalletBrowserSetup || isSpace || !metamaskFeatureEnabled"
+        ref="walletBrowserSetup"
+        :is-space="isSpace"
+        :is-space-administrator="isSpaceAdministrator"
+        :wallet="wallet"
+        :refresh-index="refreshIndex"
+        :is-administration="isAdministration"
+        :loading="loading"
+        :initialization-state="initializationState"
+        @configured="refresh()"
+        @loading="$emit('loading')"
+        @end-loading="$emit('end-loading')"
+        @error="$emit('error', $event)" />
+    </template>
   </v-flex>
 </template>
 
