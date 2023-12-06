@@ -20,17 +20,24 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.HTMLSanitizer;
 import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.services.log.ExoLogger;
+import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.model.transaction.FundsRequest;
 import org.exoplatform.wallet.utils.WalletUtils;
 
 public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
+
+  private static final Log LOG = ExoLogger.getLogger(FundsRequestNotificationPlugin.class);
 
   public FundsRequestNotificationPlugin(InitParams initParams) {
     super(initParams);
@@ -66,6 +73,16 @@ public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
     ContractDetail contractDetail = WalletUtils.getContractDetail();
     String symbol = contractDetail == null ? null : contractDetail.getSymbol();
 
+    String message = fundsRequest.getMessage() == null ? "" : fundsRequest.getMessage();
+    if (StringUtils.isNotBlank(message)) {
+      try {
+        message = HTMLSanitizer.sanitize(message);
+      } catch (Exception e) {
+        LOG.warn("error sanitizing wallet transaction message {}. Use empty message", message, e);
+        message = "";
+      }
+    }
+
     return NotificationInfo.instance()
                            .to(toList)
                            .with(AMOUNT, String.valueOf(fundsRequest.getAmount()))
@@ -79,7 +96,7 @@ public class FundsRequestNotificationPlugin extends BaseNotificationPlugin {
                            .with(SENDER, requestSenderAccountDetail.getName())
                            .with(RECEIVER, requestReceiverAccountDetail.getName())
                            .with(SYMBOL, symbol)
-                           .with(MESSAGE, fundsRequest.getMessage() == null ? "" : fundsRequest.getMessage())
+                           .with(MESSAGE, message)
                            .key(getKey())
                            .end();
   }

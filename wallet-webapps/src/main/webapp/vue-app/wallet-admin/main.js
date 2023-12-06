@@ -17,20 +17,20 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import WalletAdminApp from './components/WalletAdminApp.vue';
-import WalletAdminSendEtherModal from './components/wallets/modals/WalletAdminSendEtherModal.vue';
-import WalletAdminSendTokenModal from './components/wallets/modals/WalletAdminSendTokenModal.vue';
-import AdminWallet from './components/wallets/AdminWallet.vue';
-import WalletAdminWalletsTab from './components/wallets/WalletAdminWalletsTab.vue';
+import './initComponents.js';
 
-const components = {
-  'wallet-admin-app': WalletAdminApp,
-  'wallet-send-ether-modal': WalletAdminSendEtherModal,
-  'wallet-send-token-modal': WalletAdminSendTokenModal,
-  'wallet-admin-wallet': AdminWallet,
-  'wallet-tab': WalletAdminWalletsTab,
-};
+const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
+const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
+const appId = 'WalletAdminApp';
 
-for (const key in components) {
-  Vue.component(key, components[key]);
+Vue.use(WalletCommon);
+
+export function init() {
+  exoi18n.loadLanguageAsync(lang, url).then(i18n => {
+    Vue.createApp({
+      template: `<wallet-admin-app id="${appId}" />`,
+      vuetify: Vue.prototype.vuetifyOptions,
+      i18n,
+    }, `#${appId}`, 'Wallet Administration');
+  });
 }

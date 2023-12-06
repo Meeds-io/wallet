@@ -10,7 +10,7 @@
     <template v-if="content" #actions>
       <div class="text-truncate">
         <v-icon size="14" class="me-1">far fa-comment</v-icon>
-        {{ content }}
+        {{ contentText }}
       </div>
     </template>
   </user-notification-template>
@@ -26,6 +26,9 @@ export default {
   computed: {
     content() {
       return this.notification?.parameters?.message || this.notification?.parameters?.label;
+    },
+    contentText() {
+      return this.content && this.$utils.htmlToText(this.content) || '';
     },
     tokenSymbol() {
       return this.notification?.parameters?.symbol;
