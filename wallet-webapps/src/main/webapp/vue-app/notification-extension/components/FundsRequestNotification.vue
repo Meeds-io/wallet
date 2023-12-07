@@ -4,10 +4,9 @@
     :notification="notification"
     :avatar-url="userAvatarUrl"
     :message="message"
-    :actions-class="!content && 'd-none'"
     :url="userUrl">
-    <template v-if="content" #actions>
-      <div class="text-truncate">
+    <template #actions>
+      <div v-if="content" class="text-truncate">
         <v-icon size="14" class="me-1">far fa-comment</v-icon>
         {{ contentText }}
       </div>

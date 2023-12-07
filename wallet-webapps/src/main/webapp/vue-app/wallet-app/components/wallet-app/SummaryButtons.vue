@@ -98,7 +98,10 @@ export default {
           }
           this.open();
           this.$nextTick(() => {
-            this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
+            this.$refs.sendTokensModal.openSendTokenDrawer();
+            window.setTimeout(() => {
+              this.$refs.sendTokensModal.prepareSendForm(parameters.receiver, parameters.receiver_type, parameters.amount, parameters.id);
+            }, 50);
           });
         }
       }
