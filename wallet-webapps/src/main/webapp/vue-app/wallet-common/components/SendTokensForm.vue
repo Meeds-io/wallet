@@ -17,12 +17,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <exo-drawer
     ref="sendTokensForm"
-    :right="!$vuetify.rtl">
+    :right="!$vuetify.rtl"
+    go-back-button>
     <template slot="title">
-      <div>
-        <i class="uiIcon uiArrowBackIcon" @click="close"></i> 
-        <span> {{ $t('exoplatform.wallet.button.sendfunds') }} </span>
-      </div>
+      {{ $t('exoplatform.wallet.button.sendfunds') }}
     </template>
     <template slot="content">
       <v-card
@@ -55,7 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 recipient = $event.address;
                 $emit('receiver-selected', $event);
               " />
-            <p class="amountLabel mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
+            <p class="amountLabel text-start mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
             <v-text-field
               v-model.number="amount"
               ref="amount"
@@ -67,8 +65,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
               validate-on-blur
               class="mt-n4"
               @input="$emit('amount-selected', amount)" />
-            <p v-if="!storedPassword && isInternalWallet" class="amountLabel mb-0 mt-2">{{ $t('exoplatform.wallet.label.walletPassword') }}</p>
-            <p v-else-if="!isInternalWallet" class="amountLabel mb-0 mt-2">{{ $t('exoplatform.wallet.label.settings.internal') }}</p>
+            <p v-if="!storedPassword && isInternalWallet" class="amountLabel text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.walletPassword') }}</p>
+            <p v-else-if="!isInternalWallet" class="amountLabel text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.settings.internal') }}</p>
             <v-row class="pl-5" v-if="!isInternalWallet">
               <v-col
                 cols="12"
