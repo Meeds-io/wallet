@@ -114,7 +114,6 @@ public class SpaceServiceMock implements SpaceService {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public Space createSpace(Space space, String creatorUserId, List<Identity> identitiesToInvite) throws SpaceException {
     throw new UnsupportedOperationException();
   }
@@ -574,18 +573,6 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public boolean isSuperManager(String userId) {
-    throw new UnsupportedOperationException();
-  }
-
-  public List<MembershipEntry> getSuperManagersMemberships() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void addSuperManagersMembership(String permissionExpression) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void removeSuperManagersMembership(String permissionExpression) {
     throw new UnsupportedOperationException();
   }
 
