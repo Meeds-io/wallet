@@ -567,16 +567,4 @@ public class SpaceServiceMock implements SpaceService {
     throw new UnsupportedOperationException();
   }
 
-  public List<MembershipEntry> getSuperManagersMemberships() {
-    throw new UnsupportedOperationException();
-  }
-
-  public void addSuperManagersMembership(String permissionExpression) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void removeSuperManagersMembership(String permissionExpression) {
-    throw new UnsupportedOperationException();
-  }
-
 }
