@@ -19,7 +19,7 @@ package org.exoplatform.wallet.reward.dao;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 
 import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.wallet.reward.entity.RewardTeamEntity;
