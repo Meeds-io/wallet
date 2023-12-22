@@ -39,7 +39,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                                                 <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;">
                                                   <%= ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)%>
                                                 </p>
-                                                <% if(org.apache.commons.lang.StringUtils.isNotBlank(MESSAGE)) { %>
+                                                <% if(org.apache.commons.lang3.StringUtils.isNotBlank(MESSAGE)) { %>
                                                   <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height: 18px; margin-bottom: 15px;">
                                                       <tbody>
                                                           <tr>

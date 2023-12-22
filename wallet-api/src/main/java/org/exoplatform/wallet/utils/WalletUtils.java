@@ -43,7 +43,7 @@ import java.util.Set;
 
 import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -631,7 +631,7 @@ public class WalletUtils {
     spaceUrl = CommonsUtils.getCurrentDomain() + spaceUrl;
     return new StringBuilder("<a href=\"").append(spaceUrl)
                                           .append("\" target=\"_blank\">")
-                                          .append(StringEscapeUtils.escapeHtml(space.getDisplayName()))
+                                          .append(StringEscapeUtils.escapeHtml4(space.getDisplayName()))
                                           .append("</a>")
                                           .toString();
   }

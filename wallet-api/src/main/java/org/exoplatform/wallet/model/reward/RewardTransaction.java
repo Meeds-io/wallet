@@ -20,7 +20,7 @@ import static org.exoplatform.wallet.utils.WalletUtils.*;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.model.WalletType;

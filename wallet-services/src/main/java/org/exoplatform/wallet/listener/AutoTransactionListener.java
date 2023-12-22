@@ -1,6 +1,6 @@
 package org.exoplatform.wallet.listener;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.Asynchronous;
