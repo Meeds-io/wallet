@@ -19,7 +19,7 @@ package org.exoplatform.wallet.entity;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import org.exoplatform.wallet.model.WalletProvider;
 import org.exoplatform.wallet.model.WalletState;
