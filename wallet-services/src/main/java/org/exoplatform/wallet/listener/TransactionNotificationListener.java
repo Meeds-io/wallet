@@ -18,7 +18,7 @@ package org.exoplatform.wallet.listener;
 
 import static org.exoplatform.wallet.utils.WalletUtils.*;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;

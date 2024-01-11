@@ -55,7 +55,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.picocontainer.Startable;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
