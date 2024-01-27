@@ -38,6 +38,7 @@ public class RewardPeriodWithFullDate extends RewardPeriod {
     ZonedDateTime endZonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(rewardPeriod.getEndDateInSeconds() - 1), zoneId);
     this.startDate = RewardUtils.formatDateTime(startZonedDateTime);
     this.endDate = RewardUtils.formatDateTime(endZonedDateTime);
+    this.setId(rewardPeriod.getId());
     this.setRewardPeriodType(rewardPeriod.getRewardPeriodType());
     this.setStartDateInSeconds(rewardPeriod.getStartDateInSeconds());
     this.setEndDateInSeconds(rewardPeriod.getEndDateInSeconds());
