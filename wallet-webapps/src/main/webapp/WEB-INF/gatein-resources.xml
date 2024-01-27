@@ -160,6 +160,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <portlet>
     <name>WalletAdmin</name>
     <module>
+      <!-- Module Extension Names Suffix: ...WalletAdministrationExtension -->
+      <load-group>wallet-administration</load-group>
       <script>
         <minify>false</minify>
         <path>/js/walletAdmin.bundle.js</path>
@@ -304,6 +306,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <portlet>
     <name>RewardAdmin</name>
     <module>
+      <!-- Module Extension Names Suffix: ...WalletRewardingExtension -->
+      <load-group>wallet-rewarding</load-group>
       <script>
         <minify>false</minify>
         <path>/js/rewardApp.bundle.js</path>
