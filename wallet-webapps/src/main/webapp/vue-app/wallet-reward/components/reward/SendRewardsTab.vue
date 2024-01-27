@@ -89,6 +89,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </v-flex>
       </v-layout>
     </v-container>
+    <v-container v-if="rewardReport" class="border-box-sizing">
+      <v-layout>
+        <v-flex xs12>
+          <extension-registry-components
+            :params="{rewardReport}"
+            name="WalletRewarding"
+            type="wallet-reward-send-header-extensions"
+            parent-element="div"
+            element="div" />
+        </v-flex>
+      </v-layout>
+    </v-container>
     <v-container class="border-box-sizing">
       <v-layout>
         <v-flex md4 xs12>

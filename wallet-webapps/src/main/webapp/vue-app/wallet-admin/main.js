@@ -26,11 +26,13 @@ const appId = 'WalletAdminApp';
 Vue.use(WalletCommon);
 
 export function init() {
-  exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    Vue.createApp({
-      template: `<wallet-admin-app id="${appId}" />`,
-      vuetify: Vue.prototype.vuetifyOptions,
-      i18n,
-    }, `#${appId}`, 'Wallet Administration');
-  });
+  exoi18n.loadLanguageAsync(lang, url)
+    .then(i18n => {
+      Vue.createApp({
+        template: `<wallet-admin-app id="${appId}" />`,
+        vuetify: Vue.prototype.vuetifyOptions,
+        i18n,
+      }, `#${appId}`, 'Wallet Administration');
+    })
+    .finally(() => Vue.prototype.$utils?.includeExtensions?.('WalletAdministrationExtension'));
 }
