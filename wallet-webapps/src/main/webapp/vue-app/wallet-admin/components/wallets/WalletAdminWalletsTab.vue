@@ -432,6 +432,7 @@ export default {
     },
   },
   created() {
+    document.addEventListener('wallet-admin-refresh', this.refreshAdminWallet);
     this.newsFilterLabel = this.$t('exoplatform.wallet.label.All');
   },
   methods: {
@@ -517,6 +518,9 @@ export default {
             || wallet.address.toLowerCase().indexOf(this.search.toLowerCase()) >= 0);
       }
 
+    },
+    refreshAdminWallet() {
+      this.refreshWallet(this.walletAdmin, true);
     },
     refreshWallet(wallet, refreshOnBlockchain) {
       wallet.loading = true;
