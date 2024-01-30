@@ -25,6 +25,7 @@ import static org.exoplatform.wallet.statistic.StatisticUtils.transformCapitalWi
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -613,7 +614,7 @@ public class WalletUtils {
 
   public static String getMyWalletLink() {
     UserPortalConfigService userPortalConfigService = CommonsUtils.getService(UserPortalConfigService.class);
-    return "/" + PortalContainer.getInstance().getName() + "/" + userPortalConfigService.getDefaultPortal() + "/wallet";
+    return "/" + PortalContainer.getInstance().getName() + "/" + userPortalConfigService.getMetaPortal() + "/wallet";
   }
 
   public static String getPermanentLink(Space space) {
@@ -795,8 +796,10 @@ public class WalletUtils {
   }
 
   public static final double convertFromDecimals(BigInteger amount, int decimals) {
-    return amount == null ? 0
-                          : BigDecimal.valueOf(amount.doubleValue()).divide(BigDecimal.valueOf(10).pow(decimals)).doubleValue();
+    return amount == null ? 0 :
+                          BigDecimal.valueOf(amount.doubleValue())
+                                    .divide(BigDecimal.valueOf(10).pow(decimals), MathContext.DECIMAL128)
+                                    .doubleValue();
   }
 
   public static final GlobalSettings getSettings() {
