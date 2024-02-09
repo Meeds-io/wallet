@@ -155,8 +155,7 @@ export function searchUsers(filter, includeCurrentUserInResults) {
   const params = $.param({
     nameToSearch: filter,
     typeOfRelation: 'mention_activity_stream',
-    currentUser: includeCurrentUserInResults ? '' : eXo.env.portal.userName,
-    spaceURL: null
+    currentUser: includeCurrentUserInResults ? '' : eXo.env.portal.userName
   });
   return fetch(`/portal/rest/social/people/suggest.json?${params}`, {credentials: 'include'})
     .then((resp) => {
