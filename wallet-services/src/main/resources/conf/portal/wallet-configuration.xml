@@ -174,11 +174,6 @@
         <description>Default used gas for transactions</description>
         <value>${exo.wallet.transaction.gas.fastPrice:80000000000}</value>
       </value-param>
-      <value-param>
-        <name>accessPermission</name>
-        <description>Default access permission for wallet extension</description>
-        <value>${exo.wallet.accessPermission:}</value>
-      </value-param>
     </init-params>
   </component>
 

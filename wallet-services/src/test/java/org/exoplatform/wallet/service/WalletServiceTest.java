@@ -73,7 +73,6 @@ public class WalletServiceTest extends BaseWalletTest {
 
     GlobalSettings settings = walletService.getSettings();
     assertNotNull("Default settings shouldn't be null", settings);
-    assertTrue("Default permission should be null", StringUtils.isBlank(settings.getAccessPermission()));
     assertNotNull("Contract ABI should have been computed after container startup", settings.getContractAbi());
     assertNotNull("Contract BIN should have been computed after container startup", settings.getContractBin());
     assertNotNull("Default contract address shouldn't be null", settings.getContractAddress());
@@ -167,7 +166,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("User settings shouldn't be null", userSettings);
     assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
     assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
-    assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
 
     NetworkSettings networkSettings = userSettings.getNetwork();
     assertNotNull("Default blockchain network settings shouldn't be null", networkSettings);
@@ -188,7 +186,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Contract address shouldn't be null", userSettings.getContractAddress());
     assertNotNull("Contract bin shouldn't be null", userSettings.getContractBin());
     assertNull("Initial funds should be null when user doesn't belong to rewarding group", userSettings.getInitialFunds());
-    assertNotNull("Access permission shouldn't be null", userSettings.getAccessPermission());
 
     // Add user to admin group
     org.exoplatform.services.security.Identity identity = buildUserIdentityAsAdmin(currentUser);
@@ -213,7 +210,6 @@ public class WalletServiceTest extends BaseWalletTest {
     assertNotNull("Global settings shouldn't be null", globalSettings);
     assertNotNull("Contract address shouldn't be null", globalSettings.getContractAddress());
     assertNotNull("Contract bin shouldn't be null", globalSettings.getContractBin());
-    assertNotNull("Access permission shouldn't be null", globalSettings.getAccessPermission());
   }
 
   /**
