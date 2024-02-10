@@ -40,8 +40,6 @@ public class GlobalSettings implements Serializable, Cloneable {
 
   private String               contractAddress  = null;
 
-  private String               accessPermission = null;
-
   private boolean              enabled;
 
   @Exclude
