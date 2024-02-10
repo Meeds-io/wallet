@@ -155,8 +155,7 @@ export function searchUsers(filter, includeCurrentUserInResults) {
   const params = $.param({
     nameToSearch: filter,
     typeOfRelation: 'mention_activity_stream',
-    currentUser: includeCurrentUserInResults ? '' : eXo.env.portal.userName,
-    spaceURL: isOnlySpaceMembers() ? getAccessPermission() : null,
+    currentUser: includeCurrentUserInResults ? '' : eXo.env.portal.userName
   });
   return fetch(`/portal/rest/social/people/suggest.json?${params}`, {credentials: 'include'})
     .then((resp) => {
@@ -233,19 +232,8 @@ export function saveAddressLabel(labelDetails) {
 }
 
 /*
- * Determins whether the suggested users should belong to a specific space or
- * not
- */
-function isOnlySpaceMembers() {
-  return window.walletSettings.accessPermission && window.walletSettings.accessPermission.length;
-}
-
-/*
  * Determins the specific space from where the users could be suggested
  */
-function getAccessPermission() {
-  return window.walletSettings.accessPermission;
-}
 
 
 export function switchProvider(provider, address, rawMessage, signedMessage) {
