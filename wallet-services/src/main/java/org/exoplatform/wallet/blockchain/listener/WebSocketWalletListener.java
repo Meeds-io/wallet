@@ -22,14 +22,19 @@ import org.exoplatform.services.listener.Listener;
 import org.exoplatform.wallet.model.Wallet;
 import org.exoplatform.wallet.service.WalletWebSocketService;
 
-public class WebSocketWalletListener extends Listener<Object, Wallet> {
+public class WebSocketWalletListener extends Listener<Object, Object> {
 
   private WalletWebSocketService webSocketService;
 
   @Override
-  public void onEvent(Event<Object, Wallet> event) throws Exception {
-    Wallet wallet = event.getData();
-    getWebSocketService().sendMessage(event.getEventName(), null, true, wallet.getAddress());
+  public void onEvent(Event<Object, Object> event) throws Exception {
+    Wallet wallet = event.getData() instanceof Wallet walletData ? walletData : null;
+    if (wallet == null) {
+      wallet = event.getSource() instanceof Wallet walletSource ? walletSource : null;
+    }
+    if (wallet != null) {
+      getWebSocketService().sendMessage(event.getEventName(), null, true, wallet.getAddress());
+    }
   }
 
   private WalletWebSocketService getWebSocketService() {
