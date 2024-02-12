@@ -56,7 +56,7 @@ public class GamificationWalletInitializationListenerTest {
   private Wallet                wallet;
 
   @Mock
-  private Event<Object, String> event;
+  private Event<Object, Object> event;
 
   @Test
   public void testInitializeWallet() throws Exception {
