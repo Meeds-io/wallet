@@ -186,8 +186,6 @@ public class WalletUtils {
 
   public static final String                          WALLET_MODIFIED_EVENT                    = "exo.wallet.modified";
 
-  public static final String                          WALLET_PROVIDER_MODIFIED_EVENT           = "exo.wallet.provider.modified";
-
   public static final String                          CONTRACT_MODIFIED_EVENT                  = "exo.wallet.contract.modified";
 
   public static final String                          TRANSACTION_MINED_AND_UPDATED_EVENT      =

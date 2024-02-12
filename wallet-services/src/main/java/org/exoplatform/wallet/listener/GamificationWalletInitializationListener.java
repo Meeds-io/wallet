@@ -36,7 +36,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.model.Wallet;
 
 @Asynchronous
-public class GamificationWalletInitializationListener extends Listener<Object, String> {
+public class GamificationWalletInitializationListener extends Listener<Object, Object> {
 
   private ListenerService listenerService;
 
@@ -45,8 +45,14 @@ public class GamificationWalletInitializationListener extends Listener<Object, S
   }
 
   @Override
-  public void onEvent(Event<Object, String> event) throws Exception {
-    Wallet wallet = (Wallet) event.getSource();
+  public void onEvent(Event<Object, Object> event) throws Exception {
+    Wallet wallet = event.getData() instanceof Wallet walletData ? walletData : null;
+    if (wallet == null) {
+      wallet = event.getSource() instanceof Wallet walletSource ? walletSource : null;
+      if (wallet == null) {
+        return;
+      }
+    }
     Map<String, String> gam = new HashMap<>();
     gam.put(GAMIFICATION_EVENT_ID, GAMIFICATION_CREATE_WALLET_EVENT);
     gam.put(GAMIFICATION_EARNER_ID, String.valueOf(wallet.getTechnicalId()));
