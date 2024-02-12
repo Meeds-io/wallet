@@ -28,7 +28,6 @@ import static org.exoplatform.wallet.utils.WalletUtils.WALLET_ENABLED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZATION_MODIFICATION_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_INITIALIZED_SETTING_PARAM;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
-import static org.exoplatform.wallet.utils.WalletUtils.WALLET_PROVIDER_MODIFIED_EVENT;
 import static org.exoplatform.wallet.utils.WalletUtils.WALLET_SCOPE;
 import static org.exoplatform.wallet.utils.WalletUtils.canAccessWallet;
 import static org.exoplatform.wallet.utils.WalletUtils.checkUserIsSpaceManager;
@@ -89,6 +88,8 @@ import org.exoplatform.wallet.storage.AddressLabelStorage;
 import org.exoplatform.wallet.storage.WalletStorage;
 
 public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService, Startable {
+
+  private static final String     ERROR_BROADCASTING_EVENT_FOR_WALLET     = "Error broadcasting event {} for wallet {}";
 
   private static final Log        LOG                                     =
                                       ExoLogger.getLogger(WalletAccountServiceImpl.class);
@@ -479,7 +480,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       try {
         getListenerService().broadcast(eventName, wallet.clone(), currentUser);
       } catch (Exception e) {
-        LOG.error("Error broadcasting event {} for wallet {}", eventName, wallet, e);
+        LOG.error(ERROR_BROADCASTING_EVENT_FOR_WALLET, eventName, wallet, e);
       } finally {
         setUserWalletAsInitialized(wallet.getId());
       }
@@ -493,7 +494,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       try {
         getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
       } catch (Exception e) {
-        LOG.error("Error broadcasting event {} for wallet {}", NEW_ADDRESS_ASSOCIATED_EVENT, wallet, e);
+        LOG.error(ERROR_BROADCASTING_EVENT_FOR_WALLET, NEW_ADDRESS_ASSOCIATED_EVENT, wallet, e);
       } finally {
         setUserWalletAsInitialized(wallet.getId());
       }
@@ -559,15 +560,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
     boolean isNew = !isUserWalletInitialized(wallet.getId()) && !accountStorage.hasWalletBackup(identityId) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
+    String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
+                             : MODIFY_ADDRESS_ASSOCIATED_EVENT;
     try {
-      if (isNew) {
-        getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
-      } else {
-        getListenerService().broadcast(WALLET_PROVIDER_MODIFIED_EVENT, provider, wallet);
-      }
+      getListenerService().broadcast(eventName, wallet.clone(), wallet.getId());
     } catch (Exception e) {
-      LOG.error("Error broadcasting event {} for wallet {}",
-                isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : WALLET_PROVIDER_MODIFIED_EVENT,
+      LOG.error(ERROR_BROADCASTING_EVENT_FOR_WALLET,
+                isNew ? NEW_ADDRESS_ASSOCIATED_EVENT : MODIFY_ADDRESS_ASSOCIATED_EVENT,
                 wallet,
                 e);
     } finally {
