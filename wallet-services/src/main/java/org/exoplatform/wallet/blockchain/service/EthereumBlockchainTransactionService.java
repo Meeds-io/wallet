@@ -433,6 +433,14 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
         || transaction.getBlockNumber() == null;
   }
 
+  private boolean canCheckPendingTransactionValidity(TransactionDetail transactionDetail) {
+    boolean isPending = transactionDetail.isPending();
+    boolean maxSendingTentativesReached = isMaxSendingTentativesReached(transactionDetail);
+    boolean isTimedOut = isTransactionTimedOut(transactionDetail);
+
+    return isPending && (isTimedOut || maxSendingTentativesReached);
+  }
+
   private boolean canSendPendingTransactionToBlockchain(TransactionDetail transactionDetail) {
     boolean isPending = transactionDetail.isPending();
     boolean maxSendingTentativesReached = isMaxSendingTentativesReached(transactionDetail);
@@ -665,6 +673,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
 
   private TransactionDetail sendTransactionToBlockchain(TransactionDetail transactionDetail) {
     if (!canSendPendingTransactionToBlockchain(transactionDetail)) {
+      if (canCheckPendingTransactionValidity(transactionDetail)) {
+        checkPendingTransactionValidity(transactionDetail);
+      }
       return null;
     }
 
