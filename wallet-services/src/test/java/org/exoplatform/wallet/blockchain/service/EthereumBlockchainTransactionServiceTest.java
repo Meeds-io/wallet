@@ -19,11 +19,7 @@ package org.exoplatform.wallet.blockchain.service;
 import static org.exoplatform.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
 import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
 import static org.exoplatform.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -468,14 +464,17 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     assertNotNull(sentTransactions);
     assertEquals(0, sentTransactions.size());
 
-    verify(transactionService, never()).saveTransactionDetail(any(), anyBoolean());
     verify(ethereumClientConnector, never()).sendTransactionToBlockchain(any());
+    verify(transactionService).saveTransactionDetail(argThat(t -> {
+      return !t.isPending() && !t.isSucceeded();
+    }), anyBoolean());
 
     transactionDetail.setTimestamp(System.currentTimeMillis());
+    transactionDetail.setPending(true);
 
     service.sendPendingTransactionsToBlockchain();
 
-    verify(ethereumClientConnector, times(1)).sendTransactionToBlockchain(any());
+    verify(ethereumClientConnector).sendTransactionToBlockchain(any());
   }
 
   @SuppressWarnings("unchecked")
