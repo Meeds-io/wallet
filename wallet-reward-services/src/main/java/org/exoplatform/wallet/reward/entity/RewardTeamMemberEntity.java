@@ -20,10 +20,7 @@ import java.io.Serializable;
 
 import jakarta.persistence.*;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
-
 @Entity(name = "RewardTeamMember")
-@ExoEntity
 @Table(name = "ADDONS_WALLET_GAM_TEAM_MEMBER")
 public class RewardTeamMemberEntity implements Serializable {
 

@@ -71,6 +71,23 @@ public interface RewardReportService {
   RewardReport getRewardReport(LocalDate localDate);
 
   /**
+   * Return the stored reward period associated to select period type and date
+   * 
+   * @param periodType {@link RewardPeriodType}
+   * @param date {@link LocalDate}
+   * @return {@link RewardPeriod}
+   */
+  RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date);
+
+  /**
+   * Retrieve a {@link RewardReport} corresponding to a period identified by its id
+   * 
+   * @param periodId technical identifier of {@link RewardPeriod}
+   * @return {@link RewardReport}
+   */
+  RewardReport getRewardReportByPeriodId(long periodId);
+
+  /**
    * @param rewardReport save generated reward report
    */
   void saveRewardReport(RewardReport rewardReport);
@@ -89,6 +106,15 @@ public interface RewardReportService {
    * Return list of reward reports not sent yet
    */
   List<RewardPeriod> getRewardPeriodsNotSent();
+
+  /**
+   * Retrieves the list of periods sorted descending by start date
+   * 
+   * @param offset offset of query
+   * @param limit limit of results
+   * @return {@link List} of {@link RewardPeriod}
+   */
+  List<RewardPeriod> findRewardReportPeriods(int offset, int limit);
 
   /**
    * @param currentUser current user listing his rewards

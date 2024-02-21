@@ -34,11 +34,13 @@ const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale
 const appId = 'RewardApp';
 
 export function init() {
-  exoi18n.loadLanguageAsync(lang, url).then(i18n => {
-    Vue.createApp({
-      template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
-      i18n,
-      vuetify,
-    }, `#${appId}`, 'Wallet Reward');
-  });
+  exoi18n.loadLanguageAsync(lang, url)
+    .then(i18n => {
+      Vue.createApp({
+        template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
+        i18n,
+        vuetify,
+      }, `#${appId}`, 'Wallet Reward');
+    })
+    .finally(() => Vue.prototype.$utils?.includeExtensions?.('WalletRewardingExtension'));
 }
