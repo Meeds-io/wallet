@@ -109,7 +109,7 @@ if (extensionRegistry) {
   extensionRegistry.registerComponent('SpaceSettings', 'space-settings-components', {
     id: 'wallet-space-settings',
     vueComponent: Vue.options.components['wallet-settings'],
-    rank: 10,
+    rank: 20,
   });
   extensionRegistry.registerComponent('my-rewards-overview', 'my-rewards-item', {
     id: 'wallet-rewards-overview',
