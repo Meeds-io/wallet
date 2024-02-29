@@ -110,6 +110,11 @@ if (extensionRegistry) {
     id: 'wallet-space-settings',
     vueComponent: Vue.options.components['wallet-settings'],
     rank: 10,
+    isEnabled: (params) => {
+      return params.spaceApplications != null && params.spaceApplications.some( item => {
+        return item.id === 'SpaceWallet';
+      });
+    },
   });
   extensionRegistry.registerComponent('my-rewards-overview', 'my-rewards-item', {
     id: 'wallet-rewards-overview',
