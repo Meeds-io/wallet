@@ -105,7 +105,7 @@ public class WalletTransactionServiceTest extends BaseWalletTest {
     TransactionDetail transactionDetailReplacement = storedTransactionDetail.clone();
     transactionDetailReplacement.setHash(generateTransactionHash());
     transactionDetailReplacement.setId(0);
-    transactionDetailReplacement.setPending(false);
+    transactionDetailReplacement.setPending(true);
     walletTransactionService.saveTransactionDetail(transactionDetailReplacement, true);
     TransactionDetail storedTransactionDetailReplacement = walletTransactionService.getTransactionByHash(transactionDetailReplacement.getHash());
 
