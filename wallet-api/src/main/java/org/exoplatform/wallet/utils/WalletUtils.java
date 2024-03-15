@@ -1021,7 +1021,7 @@ public class WalletUtils {
     String oldHash = "";
     String newHash = "";
     try {
-      if (oldTransaction == null || newTransaction == null || oldTransaction.isPending() || newTransaction.isPending()) {
+      if (oldTransaction == null || newTransaction == null || oldTransaction.isPending() || !(newTransaction.isPending())) {
         return;
       }
       oldHash = oldTransaction.getHash();
