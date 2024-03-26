@@ -117,6 +117,17 @@ public interface RewardReportService {
   List<RewardPeriod> findRewardReportPeriods(int offset, int limit);
 
   /**
+   * Retrieves the list of periods by interval sorted descending by start date
+   *
+   * @param from from date
+   * @param to to date
+   * @param offset offset of query
+   * @param limit limit of results
+   * @return {@link List} of {@link RewardPeriod}
+   */
+  List<RewardPeriod> findRewardPeriodsByInterval(long from, long to, int offset, int limit);
+
+  /**
    * @param currentUser current user listing his rewards
    * @param limit size limit of items to return
    * @return a {@link List} of {@link WalletReward} of current user
