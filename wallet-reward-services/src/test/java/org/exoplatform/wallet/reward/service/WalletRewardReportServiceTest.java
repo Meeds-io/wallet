@@ -56,6 +56,8 @@ import org.exoplatform.wallet.service.WalletTransactionService;
 import org.exoplatform.wallet.utils.RewardUtils;
 import org.exoplatform.wallet.utils.WalletUtils;
 
+import static org.exoplatform.wallet.utils.RewardUtils.timeToSecondsAtDayStart;
+
 public class WalletRewardReportServiceTest extends BaseWalletRewardTest { // NOSONAR
 
   /**
@@ -710,6 +712,12 @@ public class WalletRewardReportServiceTest extends BaseWalletRewardTest { // NOS
     restartTransaction();
 
     List<RewardPeriod> rewardReportPeriods = rewardReportService.findRewardReportPeriods(0, 1);
+    assertNotNull(rewardReportPeriods);
+    assertEquals(1, rewardReportPeriods.size());
+
+    long from = timeToSecondsAtDayStart(LocalDate.now(), ZoneId.systemDefault());
+    long to = timeToSecondsAtDayStart(LocalDate.now().plusMonths(1), ZoneId.systemDefault());
+    rewardReportPeriods = rewardReportService.findRewardPeriodsBetween(from, to, 0, 10);
     assertNotNull(rewardReportPeriods);
     assertEquals(1, rewardReportPeriods.size());
   }
