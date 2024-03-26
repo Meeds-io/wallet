@@ -241,6 +241,27 @@ public class RewardReportREST implements ResourceContainer {
     }
   }
 
+  @GET
+  @Path("periods")
+  @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed("rewarding")
+  @Operation(summary = "Retrieves the list of periods sorted descending by start date", method = "GET", description = "returns the list of periods sorted descending by start date")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public Response getRewardReportPeriods(@Parameter(description = "Offset of results to retrieve") @QueryParam("from") @DefaultValue("0") long from,
+                                         @Parameter(description = "Offset of results to retrieve") @QueryParam("to") @DefaultValue("0") long to,
+                                         @Parameter(description = "Offset of results to retrieve") @QueryParam("offset") @DefaultValue("0") int offset,
+                                         @Parameter(description = "Limit of results to retrieve") @QueryParam("limit") @DefaultValue("0") int limit) {
+    if (offset < 0) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("Offset must be 0 or positive").build();
+    }
+    List<RewardPeriod> rewardPeriods = rewardReportService.findRewardPeriodsByInterval(from, to, offset, limit);
+    return Response.ok(rewardPeriods).build();
+  }
+
   private RewardPeriod getRewardPeriod(String date) {
     RewardSettings settings = rewardSettingsService.getSettings();
     ZoneId zoneId = settings.zoneId();
