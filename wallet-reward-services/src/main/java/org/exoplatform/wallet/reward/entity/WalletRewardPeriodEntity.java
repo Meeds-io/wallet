@@ -29,7 +29,7 @@ import org.exoplatform.wallet.model.reward.RewardStatus;
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_REWARD_PERIOD")
 @NamedQuery(name = "RewardPeriod.findRewardPeriods", query = "SELECT rp FROM RewardPeriod rp ORDER BY rp.startTime DESC")
-@NamedQuery(name = "RewardPeriod.findRewardPeriodsByInterval", query = "SELECT rp FROM RewardPeriod rp WHERE (rp.startTime > :startDate AND rp.startTime < :endDate) OR (rp.endTime > :startDate AND rp.endTime < :endDate) ORDER BY rp.startTime DESC")
+@NamedQuery(name = "RewardPeriod.findRewardPeriodsByInterval", query = "SELECT rp FROM RewardPeriod rp WHERE (rp.startTime >= :startDate AND rp.startTime <= :endDate) OR (rp.endTime >= :startDate AND rp.endTime <= :endDate) ORDER BY rp.startTime DESC")
 @NamedQuery(name = "RewardPeriod.findRewardPeriodByTypeAndTime", query = "SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime")
 @NamedQuery(name = "RewardPlugin.findRewardPeriodsByStatus", query = "SELECT rp FROM RewardPeriod rp WHERE rp.status = :status")
 public class WalletRewardPeriodEntity implements Serializable {
