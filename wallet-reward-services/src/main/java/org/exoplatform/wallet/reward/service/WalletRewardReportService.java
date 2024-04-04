@@ -272,6 +272,11 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public List<RewardPeriod> findRewardPeriodsBetween(long from, long to, int offset, int limit) {
+    return rewardReportStorage.findRewardPeriodsBetween(from, to, offset, limit);
+  }
+
+  @Override
   public List<RewardPeriod> getRewardPeriodsInProgress() {
     return rewardReportStorage.findRewardPeriodsByStatus(RewardStatus.PENDING);
   }
