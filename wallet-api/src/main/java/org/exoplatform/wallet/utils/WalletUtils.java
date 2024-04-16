@@ -130,8 +130,6 @@ public class WalletUtils {
 
   public static final String                          NETWORK_WS_URL                           = "networkWSURL";
 
-  public static final String                          ACCESS_PERMISSION                        = "accessPermission";
-
   public static final String                          TOKEN_ADDRESS                            = "tokenAddress";
 
   public static final String                          DEFAULT_INITIAL_USER_FUND                = "defaultInitialFunds";
@@ -554,16 +552,6 @@ public class WalletUtils {
 
   public static final boolean isUserRewardingAdmin(String username) {
     return isUserMemberOfGroupOrUser(username, REWARDINGS_GROUP);
-  }
-
-  public static final boolean isUserMemberOfSpaceOrGroupOrUser(String username, String accessPermission) {
-    boolean isMember = true;
-    if (StringUtils.isNotBlank(accessPermission)) {
-      Space space = getSpace(accessPermission);
-      isMember = (space != null && getSpaceService().isMember(space, username))
-          || isUserMemberOfGroupOrUser(username, accessPermission);
-    }
-    return isMember;
   }
 
   public static final boolean isUserMemberOfGroupOrUser(String username, String permissionExpression) {

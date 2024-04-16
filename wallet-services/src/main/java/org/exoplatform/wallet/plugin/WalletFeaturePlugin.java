@@ -59,11 +59,7 @@ public class WalletFeaturePlugin extends FeaturePlugin {
     if (settings == null) {
       return false;
     }
-    String accessPermission = settings.getAccessPermission();
-    if (StringUtils.isBlank(accessPermission)) {
-      return true;
-    }
-    boolean walletEnabled = WalletUtils.isUserMemberOfSpaceOrGroupOrUser(username, accessPermission);
+    boolean walletEnabled = true;
     for (StateKey stateKey : stateKeys) {
       ConversationState state = getConversationRegistry().getState(stateKey);
       state.setAttribute("wallet.enabled", walletEnabled);

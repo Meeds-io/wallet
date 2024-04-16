@@ -16,7 +16,6 @@
  */
 package org.exoplatform.wallet.service;
 
-import static org.exoplatform.wallet.utils.WalletUtils.ACCESS_PERMISSION;
 import static org.exoplatform.wallet.utils.WalletUtils.DEFAULT_INITIAL_USER_FUND;
 import static org.exoplatform.wallet.utils.WalletUtils.DEFAULT_MIN_GAS_PRICE;
 import static org.exoplatform.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
@@ -46,7 +45,6 @@ import static org.exoplatform.wallet.utils.WalletUtils.convertFromDecimals;
 import static org.exoplatform.wallet.utils.WalletUtils.fromJsonString;
 import static org.exoplatform.wallet.utils.WalletUtils.hideWalletOwnerPrivateInformation;
 import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfGroupOrUser;
-import static org.exoplatform.wallet.utils.WalletUtils.isUserMemberOfSpaceOrGroupOrUser;
 import static org.exoplatform.wallet.utils.WalletUtils.isUserSpaceMember;
 import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
@@ -189,11 +187,6 @@ public class WalletServiceImpl implements WalletService, Startable {
     }
     network.setMaxGasPrice(maxGasPrice);
 
-    if (params.containsKey(ACCESS_PERMISSION)) {
-      String defaultAccessPermission = params.getValueParam(ACCESS_PERMISSION).getValue();
-      this.configuredGlobalSettings.setAccessPermission(defaultAccessPermission);
-    }
-
     if (params.containsKey(TOKEN_ADDRESS)) {
       String contractAddress = params.getValueParam(TOKEN_ADDRESS).getValue();
       this.configuredGlobalSettings.setContractAddress(contractAddress);
@@ -272,16 +265,7 @@ public class WalletServiceImpl implements WalletService, Startable {
 
     UserSettings userSettings = new UserSettings(globalSettings);
     userSettings.setEnabled(isEnabled());
-
-    String accessPermission = globalSettings.getAccessPermission();
-    boolean walletEnabled = isUserMemberOfSpaceOrGroupOrUser(currentUser, accessPermission);
-    userSettings.setWalletEnabled(walletEnabled);
-    if (!walletEnabled) {
-      LOG.debug("Wallet is disabled for user {} because he's not member of permission expression {}",
-                currentUser,
-                accessPermission);
-      return userSettings;
-    }
+    userSettings.setWalletEnabled(true);
 
     Wallet wallet = null;
     if (StringUtils.isNotBlank(spaceId)) {
