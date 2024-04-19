@@ -23,9 +23,15 @@ export function init() {
     type: 'wallet',
     rewardPeriods: [],
     init(from, to) {
-      getRewardReportPeriods(from, to, 0, -1).then(period => {
-        this.rewardPeriods = period;
-      });
+      if (from && to) {
+        getRewardReportPeriods(from, to, 0, -1).then(periods => {
+          this.rewardPeriods = periods;
+        });
+      } else {
+        getRewardReportPeriods(null, null, 0, -1).then(periods => {
+          this.rewardPeriods = periods;
+        });
+      }
     },
     canUpdateStatus(createdDate) {
       return this.rewardPeriods.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
