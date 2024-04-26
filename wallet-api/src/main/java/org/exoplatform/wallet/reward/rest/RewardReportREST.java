@@ -258,7 +258,12 @@ public class RewardReportREST implements ResourceContainer {
     if (offset < 0) {
       return Response.status(Response.Status.BAD_REQUEST).entity("Offset must be 0 or positive").build();
     }
-    List<RewardPeriod> rewardPeriods = rewardReportService.findRewardPeriodsBetween(from, to, offset, limit);
+    List<RewardPeriod> rewardPeriods;
+    if (from >= 0 && to > 0) {
+      rewardPeriods = rewardReportService.findRewardPeriodsBetween(from, to, offset, limit);
+    } else {
+      rewardPeriods = rewardReportService.findRewardReportPeriods(offset, limit);
+    }
     return Response.ok(rewardPeriods).build();
   }
 
