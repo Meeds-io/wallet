@@ -32,6 +32,7 @@ const config = merge(webpackCommonConfig, {
     rewardApp: './src/main/webapp/vue-app/wallet-reward/main.js',
     engagementCenterExtensions: './src/main/webapp/vue-app/engagementCenterExtensions/extensions.js',
     connectorEventExtensions: './src/main/webapp/vue-app/connectorEventExtensions/extensions.js',
+    achievementsExtensions: './src/main/webapp/vue-app/achievementsExtensions/extensions.js',
     notificationExtension: './src/main/webapp/vue-app/notification-extension/main.js',
   },
   output: {
