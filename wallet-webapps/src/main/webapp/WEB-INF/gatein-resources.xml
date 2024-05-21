@@ -533,6 +533,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </module>
 
   <module>
+    <name>engagementCenterAchievementsWalletExtensions</name>
+    <load-group>engagement-center-achievements-extensions</load-group>
+    <script>
+      <path>/js/achievementsExtensions.bundle.js</path>
+    </script>
+    <depends>
+      <module>vue</module>
+    </depends>
+    <depends>
+      <module>vuetify</module>
+    </depends>
+    <depends>
+      <module>eXoVueI18n</module>
+    </depends>
+    <depends>
+      <module>extensionRegistry</module>
+    </depends>
+    <depends>
+      <module>commonVueComponents</module>
+    </depends>
+  </module>
+
+  <module>
     <name>walletNotificationExtension</name>
     <load-group>notificationGRP</load-group>
     <script>

@@ -89,6 +89,11 @@ public class WalletRewardReportStorage {
     return rewardPeriodEntities.stream().map(this::toDTO).toList();
   }
 
+  public List<RewardPeriod> findRewardPeriodsBetween(long from, long to, int offset, int limit) {
+    List<WalletRewardPeriodEntity> rewardPeriodEntities = rewardPeriodDAO.findRewardPeriodsBetween(from, to, offset, limit);
+    return rewardPeriodEntities.stream().map(this::toDTO).toList();
+  }
+
   public RewardReport getRewardReportByPeriodId(long id, ZoneId zoneId) {
     return getRewardReport(rewardPeriodDAO.find(id), zoneId);
   }
