@@ -1,0 +1,24 @@
+{
+  "descriptors":[
+    {
+      "nameId":"SpaceWallet",
+      "categoryNameId":"spaces",
+      "portletName":"SpaceWallet",
+      "names":{
+        "en":"layout.portletInstance.SpaceWallet.name"
+      },
+      "descriptions":{
+        "en":"layout.portletInstance.SpaceWallet.description"
+      },
+      "preferences":[
+        
+      ],
+      "permissions":[
+        "Everyone"
+      ],
+      "illustrationPath":"war:/../skin/DefaultSkin/portletIcons/SpaceWallet.png",
+      "system":true,
+      "spaceApplication":true
+    }
+  ]
+}
