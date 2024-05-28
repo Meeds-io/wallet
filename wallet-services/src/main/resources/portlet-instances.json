@@ -10,15 +10,27 @@
       "descriptions":{
         "en":"layout.portletInstance.SpaceWallet.description"
       },
-      "preferences":[
-        
-      ],
       "permissions":[
         "Everyone"
       ],
       "illustrationPath":"war:/../skin/DefaultSkin/portletIcons/SpaceWallet.png",
       "system":true,
       "spaceApplication":true
+    },
+    {
+      "nameId":"WalletSettings",
+      "categoryNameId":"userSettings",
+      "portletName":"WalletSettings",
+      "names":{
+        "en":"layout.portletInstance.WalletSettings.name"
+      },
+      "descriptions":{
+        "en":"layout.portletInstance.WalletSettings.description"
+      },
+      "permissions":[
+        "*:/platform/users"
+      ],
+      "system":true
     }
   ]
 }
