@@ -11,11 +11,10 @@
         "en":"layout.portletInstance.SpaceWallet.description"
       },
       "permissions":[
-        "Everyone"
+        "*:/platform/users"
       ],
       "illustrationPath":"war:/../skin/DefaultSkin/portletIcons/SpaceWallet.png",
-      "system":true,
-      "spaceApplication":true
+      "system":true
     },
     {
       "nameId":"WalletSettings",
@@ -28,7 +27,8 @@
         "en":"layout.portletInstance.WalletSettings.description"
       },
       "permissions":[
-        "*:/platform/users"
+        "*:/platform/administrators",
+        "*:/platform/web-contributors"
       ],
       "system":true
     }
