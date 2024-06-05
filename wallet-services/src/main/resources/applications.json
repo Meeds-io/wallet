@@ -1,0 +1,22 @@
+{
+    "descriptors": [
+        {
+            "name": "Wallet",
+            "imagePath": "war:/../images/wallet.png",
+            "override": false,
+            "enabled": true,
+            "application": {
+                "title": "Wallet",
+                "description": "Wallet application",
+                "url": "./wallet",
+                "active": true,
+                "mandatory": false,
+                "mobile": true,
+                "permissions": [
+                    "*:/platform/users",
+                    "*:/platform/externals"
+                ]
+            }
+        }
+    ]
+}
