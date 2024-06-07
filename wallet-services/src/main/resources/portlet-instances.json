@@ -1,0 +1,36 @@
+{
+  "descriptors":[
+    {
+      "nameId":"SpaceWallet",
+      "categoryNameId":"spaces",
+      "portletName":"SpaceWallet",
+      "names":{
+        "en":"layout.portletInstance.SpaceWallet.name"
+      },
+      "descriptions":{
+        "en":"layout.portletInstance.SpaceWallet.description"
+      },
+      "permissions":[
+        "*:/platform/users"
+      ],
+      "illustrationPath":"war:/../skin/DefaultSkin/portletIcons/SpaceWallet.png",
+      "system":true
+    },
+    {
+      "nameId":"WalletSettings",
+      "categoryNameId":"userSettings",
+      "portletName":"WalletSettings",
+      "names":{
+        "en":"layout.portletInstance.WalletSettings.name"
+      },
+      "descriptions":{
+        "en":"layout.portletInstance.WalletSettings.description"
+      },
+      "permissions":[
+        "*:/platform/administrators",
+        "*:/platform/web-contributors"
+      ],
+      "system":true
+    }
+  ]
+}
