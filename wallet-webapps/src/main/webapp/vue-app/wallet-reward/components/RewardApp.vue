@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     flat>
     <main>
       <v-layout column>
-        <v-layout column class="application-toolbar">
+        <v-layout column class="application-toolbar app-background-color">
           <v-flex v-if="error && !loading" class="text-center">
             <div class="alert alert-error text-start">
               <i class="uiIconError"></i>{{ error }}
@@ -85,7 +85,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </v-tab>
           </v-tabs>
       
-          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius overflow-hidden">
+          <v-tabs-items v-model="selectedTab" class="tabs-content card-border-radius app-background-color overflow-hidden">
             <v-tab-item
               id="SendRewards"
               value="SendRewards"
