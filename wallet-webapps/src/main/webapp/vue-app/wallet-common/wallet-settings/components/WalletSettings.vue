@@ -1,5 +1,5 @@
 <template>
-  <v-app class="card-border-radius overflow-hidden">
+  <v-app class="card-border-radius app-background-color overflow-hidden">
     <wallet-settings-details
       v-if="displayDetails"
       :wallet-settings="walletSettings"
@@ -10,7 +10,7 @@
       @back="closeDetail" />
     <v-card
       v-else-if="displayed"
-      class="card-border-radius"
+      class="card-border-radius app-background-color"
       flat>
       <v-list>
         <v-list-item>
