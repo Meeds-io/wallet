@@ -18,10 +18,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-app :class="owner && 'walletOverviewApplication' || 'walletOverviewApplicationOther'">
     <v-toolbar
       v-if="!isOverviewDisplay"
-      color="white"
       height="48"
       flat
-      class="border-box-sizing py-3">
+      class="border-box-sizing app-background-color py-3">
       <div class="text-header-title text-sub-title text-no-wrap">
         {{ title || '' }}
       </div>
@@ -37,7 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </v-toolbar>
     <div
       :class="clickable && 'clickable' || ''"
-      class="walletOverviewCard white"
+      class="walletOverviewCard app-background-color"
       flat
       @click="clickable && openDrawer()">
       <div
