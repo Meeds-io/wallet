@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.analytics.model.StatisticData;
-import org.exoplatform.analytics.model.StatisticData.StatisticStatus;
-import org.exoplatform.analytics.utils.AnalyticsUtils;
+import io.meeds.analytics.model.StatisticData;
+import io.meeds.analytics.model.StatisticData.StatisticStatus;
+import io.meeds.analytics.utils.AnalyticsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.security.ConversationState;
