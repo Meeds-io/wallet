@@ -49,7 +49,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.addons.analytics</groupId>
+      <groupId>io.meeds.analytics</groupId>
       <artifactId>analytics-api</artifactId>
       <scope>provided</scope>
     </dependency>

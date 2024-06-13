@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.exoplatform.analytics.model.StatisticData;
-import org.exoplatform.analytics.utils.AnalyticsUtils;
+import io.meeds.analytics.model.StatisticData;
+import io.meeds.analytics.utils.AnalyticsUtils;
 import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;

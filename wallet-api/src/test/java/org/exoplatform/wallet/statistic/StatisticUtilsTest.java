@@ -37,9 +37,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import org.exoplatform.analytics.model.StatisticData;
-import org.exoplatform.analytics.model.StatisticData.StatisticStatus;
-import org.exoplatform.analytics.utils.AnalyticsUtils;
+import io.meeds.analytics.model.StatisticData;
+import io.meeds.analytics.model.StatisticData.StatisticStatus;
+import io.meeds.analytics.utils.AnalyticsUtils;
 import org.exoplatform.wallet.model.Wallet;
 
 @RunWith(MockitoJUnitRunner.class)
