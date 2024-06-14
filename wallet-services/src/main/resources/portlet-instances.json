@@ -13,7 +13,7 @@
       "permissions":[
         "*:/platform/users"
       ],
-      "illustrationPath":"war:/../skin/DefaultSkin/portletIcons/SpaceWallet.png",
+      "illustrationPath":"war:/../images/portlets/walletApp.webp",
       "system":true
     },
     {
@@ -26,6 +26,7 @@
       "descriptions":{
         "en":"layout.portletInstance.WalletSettings.description"
       },
+      "illustrationPath":"war:/../images/portlets/walletSettings.webp",
       "permissions":[
         "*:/platform/administrators",
         "*:/platform/web-contributors"
