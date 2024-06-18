@@ -34,7 +34,7 @@ public class KudosRewardPlugin extends RewardPlugin {
 
   private static final Log     LOG                           = ExoLogger.getLogger(KudosRewardPlugin.class);
 
-  private static final String  KUDOS_SERVICE_FQN             = "org.exoplatform.kudos.service.KudosService";
+  private static final String  KUDOS_SERVICE_FQN             = "io.meeds.kudos.service.KudosService";
 
   private static final String  COUNT_USERS_KUDOS_METHOD_NAME = "countKudosByPeriodAndReceivers";
 
