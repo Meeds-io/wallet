@@ -21,8 +21,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>addons-parent-pom</artifactId>
-    <groupId>org.exoplatform.addons</groupId>
-    <version>18-M03</version>
+    <groupId>io.meeds.addons</groupId>
+    <version>18-M04</version>
     <relativePath/>
   </parent>
   <groupId>io.meeds.wallet</groupId>
