@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <version>18-M03</version>
     <relativePath/>
   </parent>
-  <groupId>io.meeds.addons.wallet</groupId>
+  <groupId>io.meeds.wallet</groupId>
   <artifactId>wallet</artifactId>
   <version>7.0.x-SNAPSHOT</version>
   <packaging>pom</packaging>
