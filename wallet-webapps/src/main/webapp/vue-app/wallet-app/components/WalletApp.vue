@@ -20,17 +20,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     color="transaprent"
     class="VuetifyApp"
     flat>
-    <main v-if="isWalletEnabled" id="walletEnabledContent">
+    <main
+      v-if="isWalletEnabled"
+      id="walletEnabledContent"
+      class="application-body">
       <v-layout>
         <v-flex>
-          <v-app class="application-toolbar">
+          <div class="application-toolbar">
             <v-tabs
               v-model="tab"
-              slider-size="4"
-              class="card-border-radius overflow-hidden">
+              slider-size="4">
               <v-tab>{{ tabName }}</v-tab>
             </v-tabs>
-            <v-tabs-items v-model="tab" class="tabs-content card-border-radius overflow-hidden">
+            <v-tabs-items v-model="tab" class="tabs-content">
               <v-tab-item eager>
                 <v-flex>
                   <v-layout
@@ -85,7 +87,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 </v-flex>
               </v-tab-item>
             </v-tabs-items>
-          </v-app>
+          </div>
         </v-flex>
       </v-layout>
       <!-- The selected account detail -->

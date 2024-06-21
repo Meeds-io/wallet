@@ -18,7 +18,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <v-app>
     <template v-if="displayed">
       <v-card
-        class="walletManagePassword app-background-color"
+        class="walletManagePassword application-body"
         flat>
         <v-card-title class="px-0">
           <div class="d-flex flex-row border-box-sizing">
