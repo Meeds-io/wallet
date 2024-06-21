@@ -21,7 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     class="VuetifyApp"
     flat>
     <v-main>
-      <v-flex class="text-center application-border-radius app-background-color pa-5" flat>
+      <v-flex class="text-center application-body pa-5" flat>
         <div v-if="error && !loading" class="alert alert-error v-content">
           <i class="uiIconError"></i>{{ error }}
         </div>
