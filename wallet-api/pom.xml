@@ -18,12 +18,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons.wallet</groupId>
+    <groupId>io.meeds.wallet</groupId>
     <artifactId>wallet</artifactId>
     <version>7.0.x-SNAPSHOT</version>
   </parent>
   <artifactId>wallet-api</artifactId>
-  <name>eXo Add-on:: Wallet - API</name>
+  <name>Meeds:: Add-on:: Wallet - API</name>
   <properties>
     <rest.api.doc.title>Wallet Rest Api</rest.api.doc.title>
     <rest.api.doc.version>1.0</rest.api.doc.version>
@@ -33,7 +33,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.exoplatform.social</groupId>
+      <groupId>io.meeds.social</groupId>
       <artifactId>social-component-core</artifactId>
       <scope>provided</scope>
     </dependency>
