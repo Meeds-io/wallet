@@ -18,12 +18,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons.wallet</groupId>
+    <groupId>io.meeds.wallet</groupId>
     <artifactId>wallet</artifactId>
     <version>7.0.x-exo-SNAPSHOT</version>
   </parent>
   <artifactId>wallet-services</artifactId>
-  <name>eXo Add-on:: Wallet - Services</name>
+  <name>Meeds:: Add-on:: Wallet - Services</name>
   <properties>
     <exo.test.coverage.ratio>0.62</exo.test.coverage.ratio>
   </properties>
@@ -34,12 +34,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.commons</groupId>
+      <groupId>io.meeds.commons</groupId>
       <artifactId>commons-comet-service</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.social</groupId>
+      <groupId>io.meeds.social</groupId>
       <artifactId>social-component-notification</artifactId>
       <scope>provided</scope>
     </dependency>
@@ -97,7 +97,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </dependency>
     <!-- Test dependencies -->
     <dependency>
-      <groupId>org.exoplatform.social</groupId>
+      <groupId>io.meeds.social</groupId>
       <artifactId>social-component-notification</artifactId>
       <type>test-jar</type>
       <scope>test</scope>

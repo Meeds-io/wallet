@@ -18,16 +18,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons.wallet</groupId>
+    <groupId>io.meeds.wallet</groupId>
     <artifactId>wallet</artifactId>
     <version>7.0.x-exo-SNAPSHOT</version>
   </parent>
   <artifactId>wallet-webapps</artifactId>
   <packaging>war</packaging>
-  <name>eXo Add-on:: Wallet - Application</name>
+  <name>Meeds:: Add-on:: Wallet - Application</name>
   <dependencies>
     <dependency>
-      <groupId>org.exoplatform.platform-ui</groupId>
+      <groupId>io.meeds.platform-ui</groupId>
       <artifactId>platform-ui-skin</artifactId>
       <classifier>sources</classifier>
       <scope>provided</scope>

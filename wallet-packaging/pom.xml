@@ -19,14 +19,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons.wallet</groupId>
+    <groupId>io.meeds.wallet</groupId>
     <artifactId>wallet</artifactId>
     <version>7.0.x-exo-SNAPSHOT</version>
   </parent>
   <artifactId>wallet-packaging</artifactId>
   <packaging>pom</packaging>
-  <name>eXo Add-on:: Wallet - Packaging</name>
-  <description>eXo Add-on:: Wallet - Packaging</description>
+  <name>Meeds:: Add-on:: Wallet - Packaging</name>
+  <description>Meeds Add-on:: Wallet - Packaging</description>
   <dependencies>
     <dependency>
       <groupId>org.exoplatform.wallet</groupId>
