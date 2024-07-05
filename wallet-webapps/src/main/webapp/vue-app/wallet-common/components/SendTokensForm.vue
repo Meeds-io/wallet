@@ -53,20 +53,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 recipient = $event.address;
                 $emit('receiver-selected', $event);
               " />
-            <p class="amountLabel text-start mb-0 mt-2"> {{ $t('exoplatform.wallet.label.amount') }} </p>
             <v-text-field
               v-model.number="amount"
               ref="amount"
               :disabled="loading || transaction"
+              :label="$t('exoplatform.wallet.label.amount')"
               :placeholder="$t('exoplatform.wallet.label.amountPlaceholder')"
               type="number"
               name="amount"
               required
               validate-on-blur
-              class="mt-n4"
+              class="mt-4"
               @input="$emit('amount-selected', amount)" />
-            <p v-if="!storedPassword && isInternalWallet" class="amountLabel text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.walletPassword') }}</p>
-            <p v-else-if="!isInternalWallet" class="amountLabel text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.settings.internal') }}</p>
+            <p v-if="!storedPassword && isInternalWallet" class="text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.walletPassword') }}</p>
+            <p v-else-if="!isInternalWallet" class="text-start mb-0 mt-2">{{ $t('exoplatform.wallet.label.settings.internal') }}</p>
             <v-row class="pl-5" v-if="!isInternalWallet">
               <v-col
                 cols="12"

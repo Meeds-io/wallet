@@ -17,8 +17,8 @@
  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-app v-if="!isEditing">
-    <div class="subtitle-1 font-weight-bold mb-2">
+  <div v-if="!isEditing">
+    <div class="text-header mb-2">
       {{ $t('gamification.event.display.goThere') }}
     </div>
     <div class="d-flex justify-center">
@@ -29,7 +29,7 @@
         {{ $t('gamification.event.display.yourWallet') }}
       </v-btn>
     </div>
-  </v-app>
+  </div>
 </template>
 <script>
 export default {

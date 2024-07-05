@@ -1,7 +1,7 @@
 <template>
   <v-card
     v-if="displayed"
-    class="walletSetting card-border-radius"
+    class="walletSetting"
     flat>
     <template v-if="!hideContent">
       <v-card-title class="px-0 pt-2">
@@ -13,10 +13,10 @@
             width="36"
             @click="$emit('back')">
             <v-icon size="20">
-              {{ $vuetify.rtl && 'mdi-arrow-right' || 'mdi-arrow-left' }}
+              {{ $vuetify.rtl && 'fa-arrow-right' || 'fa-arrow-left' }}
             </v-icon>
           </v-btn>
-          <v-toolbar-title class="ps-0">
+          <v-toolbar-title class="ps-0 text-title">
             {{ title }}
           </v-toolbar-title>
           <v-spacer />
