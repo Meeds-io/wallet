@@ -22,7 +22,50 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <skin-module>wallet</skin-module>
     <css-path>/skin/css/wallet.css</css-path>
     <css-priority>110</css-priority>
+    <filtered>true</filtered>
   </portal-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>WalletAPI</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>Wallet</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>SpaceWallet</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>WalletSettings</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>WalletOverview</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
+  <portlet-skin>
+    <application-name>wallet</application-name>
+    <portlet-name>RewardAdmin</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
 
   <portlet>
     <name>WalletAPI</name>
