@@ -20,7 +20,7 @@
 import './initComponents.js';
 
 const lang = window.eXo?.env?.portal?.language || 'en';
-const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
+const url = `/wallet/i18n/locale.addon.Wallet?lang=${lang}`;
 const appId = 'WalletSetupAdmin';
 
 Vue.use(WalletCommon);
