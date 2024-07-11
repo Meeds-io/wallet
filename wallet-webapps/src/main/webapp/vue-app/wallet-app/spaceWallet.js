@@ -20,7 +20,7 @@ import './initComponents.js';
 Vue.use(WalletCommon);
 
 const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
-const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.addon.Wallet-${lang}.json`;
+const url = `/wallet/i18n/locale.addon.Wallet?lang=${lang}`;
 
 export function init() {
   exoi18n.loadLanguageAsync(lang, url).then(i18n => {

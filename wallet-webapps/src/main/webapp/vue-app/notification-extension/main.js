@@ -21,7 +21,7 @@ import './initComponents.js';
 import './extensions.js';
 
 const lang = eXo.env.portal.language;
-const url = `${eXo.env.portal.context}/${eXo.env.portal.rest}/i18n/bundle/locale.notification.WalletNotification-${lang}.json`;
+const url = `/wallet/i18n/locale.notification.WalletNotification?lang=${lang}`;
 
 export function init() {
   return exoi18n.loadLanguageAsync(lang, url)
