@@ -21,14 +21,18 @@ import {getRewardReportPeriods} from './js/service';
 export function init() {
   extensionRegistry.registerExtension('engagementCenterAchievements', 'achievements-extensions', {
     type: 'wallet',
-    rewardPeriods: [],
-    init(from, to) {
-      getRewardReportPeriods(from, to, 0, -1).then(period => {
-        this.rewardPeriods = period;
-      });
-    },
+    computedCanUpdateStatus: {},
     canUpdateStatus(createdDate) {
-      return this.rewardPeriods.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
+      if (createdDate in this.computedCanUpdateStatus) {
+        return this.computedCanUpdateStatus[createdDate];
+      } else {
+        this.computedCanUpdateStatus[createdDate] = getRewardReportPeriods(from, to, 0, -1)
+          .then(period => {
+            this.computedCanUpdateStatus[createdDate] = period.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
+            return this.computedCanUpdateStatus[createdDate];
+          });
+        return this.computedCanUpdateStatus[createdDate];
+      }
     },
     isInPeriod(period, timestamp) {
       return timestamp >= period?.startDateInSeconds && timestamp <= period?.endDateInSeconds;
