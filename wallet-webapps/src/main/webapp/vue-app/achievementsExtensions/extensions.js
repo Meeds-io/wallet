@@ -21,17 +21,27 @@ import {getRewardReportPeriods} from './js/service';
 export function init() {
   extensionRegistry.registerExtension('engagementCenterAchievements', 'achievements-extensions', {
     type: 'wallet',
-    rewardPeriods: [],
+    computedCanUpdateStatus: {},
+    rewardReportPeriods: null,
     init(from, to) {
-      getRewardReportPeriods(from, to, 0, -1).then(period => {
-        this.rewardPeriods = period;
-      });
+      this.rewardReportPeriods = getRewardReportPeriods(from, to, 0, -1);
     },
-    canUpdateStatus(createdDate) {
-      return this.rewardPeriods.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
-    },
-    isInPeriod(period, timestamp) {
-      return timestamp >= period?.startDateInSeconds && timestamp <= period?.endDateInSeconds;
+    canUpdateStatus(createdDate, updateStatusExtension) {
+      if (typeof this.computedCanUpdateStatus !== 'undefined' && createdDate in this.computedCanUpdateStatus) {
+        return this.computedCanUpdateStatus[createdDate];
+      } else {
+        this.computedCanUpdateStatus = {};
+        if (updateStatusExtension !== null && typeof updateStatusExtension !== 'undefined') {
+          this.rewardReportPeriods = updateStatusExtension?.rewardReportPeriods;
+        }
+        this.rewardReportPeriods = (this.rewardReportPeriods === null || typeof this.rewardReportPeriods === 'undefined') ? getRewardReportPeriods(null, null, 0, -1) : this.rewardReportPeriods;
+        this.computedCanUpdateStatus[createdDate] = this.rewardReportPeriods
+          .then(period => {
+            this.computedCanUpdateStatus[createdDate] = period.filter(rewardPeriod => createdDate >= rewardPeriod?.startDateInSeconds && createdDate <= rewardPeriod?.endDateInSeconds).length === 0;
+            return this.computedCanUpdateStatus[createdDate];
+          });
+        return this.computedCanUpdateStatus[createdDate];
+      }
     },
     cannotUpdateStatusLabel: 'gamification.achievement.cannotUpdateStatus.tooltip',
   });
