@@ -26,7 +26,7 @@ export function init() {
       if (createdDate in this.computedCanUpdateStatus) {
         return this.computedCanUpdateStatus[createdDate];
       } else {
-        this.computedCanUpdateStatus[createdDate] = getRewardReportPeriods(from, to, 0, -1)
+        this.computedCanUpdateStatus[createdDate] = getRewardReportPeriods(0, -1)
           .then(period => {
             this.computedCanUpdateStatus[createdDate] = period.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
             return this.computedCanUpdateStatus[createdDate];
