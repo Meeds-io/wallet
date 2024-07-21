@@ -99,7 +99,9 @@ public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
                            .with(SENDER_URL, getPermanentLink(senderAccountDetail))
                            .with(RECEIVER_URL, getPermanentLink(receiverAccountDetail))
                            .with(SENDER, senderAccountDetail.getName())
+                           .with(SENDER_ID, String.valueOf(senderAccountDetail.getTechnicalId()))
                            .with(RECEIVER, receiverAccountDetail.getName())
+                           .with(RECEIVER_ID, String.valueOf(receiverAccountDetail.getTechnicalId()))
                            .key(getKey())
                            .end();
   }
