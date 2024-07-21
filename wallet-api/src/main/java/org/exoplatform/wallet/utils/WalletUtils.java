@@ -273,6 +273,8 @@ public class WalletUtils {
 
   public static final String                          AVATAR                                   = "avatar";
 
+  public static final String                          SENDER_ID                                = "senderIdentityId";
+
   public static final String                          SENDER                                   = "sender";
 
   public static final String                          USER                                     = "userFullname";
@@ -282,6 +284,8 @@ public class WalletUtils {
   public static final String                          SENDER_URL                               = "senderUrl";
 
   public static final String                          RECEIVER                                 = "receiver";
+
+  public static final String                          RECEIVER_ID                              = "receiverIdentityId";
 
   public static final String                          RECEIVER_URL                             = "receiverUrl";
 
