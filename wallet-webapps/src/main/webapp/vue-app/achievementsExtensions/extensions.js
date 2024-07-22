@@ -22,20 +22,20 @@ export function init() {
   extensionRegistry.registerExtension('engagementCenterAchievements', 'achievements-extensions', {
     type: 'wallet',
     computedCanUpdateStatus: {},
+    rewardReportPeriods: null,
     canUpdateStatus(createdDate) {
-      if (createdDate in this.computedCanUpdateStatus) {
+      if (typeof this.computedCanUpdateStatus !== 'undefined' && createdDate in this.computedCanUpdateStatus) {
         return this.computedCanUpdateStatus[createdDate];
       } else {
-        this.computedCanUpdateStatus[createdDate] = getRewardReportPeriods(0, -1)
+        this.computedCanUpdateStatus = {};
+        this.rewardReportPeriods = (this.rewardReportPeriods === null || typeof this.rewardReportPeriods === 'undefined') ? getRewardReportPeriods(null, null, 0, -1) : this.rewardReportPeriods;
+        this.computedCanUpdateStatus[createdDate] = this.rewardReportPeriods
           .then(period => {
-            this.computedCanUpdateStatus[createdDate] = period.filter(rewardPeriod => this.isInPeriod(rewardPeriod, createdDate)).length === 0;
+            this.computedCanUpdateStatus[createdDate] = period.filter(rewardPeriod => createdDate >= rewardPeriod?.startDateInSeconds && createdDate <= rewardPeriod?.endDateInSeconds).length === 0;
             return this.computedCanUpdateStatus[createdDate];
           });
         return this.computedCanUpdateStatus[createdDate];
       }
-    },
-    isInPeriod(period, timestamp) {
-      return timestamp >= period?.startDateInSeconds && timestamp <= period?.endDateInSeconds;
     },
     cannotUpdateStatusLabel: 'gamification.achievement.cannotUpdateStatus.tooltip',
   });
