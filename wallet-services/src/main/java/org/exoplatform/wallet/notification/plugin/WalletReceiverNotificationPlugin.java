@@ -28,10 +28,12 @@ import static org.exoplatform.wallet.utils.WalletUtils.MESSAGE;
 import static org.exoplatform.wallet.utils.WalletUtils.MESSAGE_PARAMETER;
 import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER;
 import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_TYPE;
 import static org.exoplatform.wallet.utils.WalletUtils.RECEIVER_URL;
 import static org.exoplatform.wallet.utils.WalletUtils.SENDER;
 import static org.exoplatform.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
+import static org.exoplatform.wallet.utils.WalletUtils.SENDER_ID;
 import static org.exoplatform.wallet.utils.WalletUtils.SENDER_URL;
 import static org.exoplatform.wallet.utils.WalletUtils.SYMBOL;
 import static org.exoplatform.wallet.utils.WalletUtils.SYMBOL_PARAMETER;
@@ -114,7 +116,9 @@ public class WalletReceiverNotificationPlugin extends BaseNotificationPlugin {
                            .with(SENDER_URL, getPermanentLink(senderAccountDetail))
                            .with(RECEIVER_URL, getPermanentLink(receiverAccountDetail))
                            .with(SENDER, senderAccountDetail.getName())
+                           .with(SENDER_ID, String.valueOf(senderAccountDetail.getTechnicalId()))
                            .with(RECEIVER, receiverAccountDetail.getName())
+                           .with(RECEIVER_ID, String.valueOf(receiverAccountDetail.getTechnicalId()))
                            .key(getKey())
                            .end();
   }
