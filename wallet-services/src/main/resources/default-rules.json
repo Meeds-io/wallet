@@ -1,0 +1,12 @@
+{
+  "rules": [
+    {
+      "event": "createWallet",
+      "score": 10,
+      "appendEmoji": "\uD83D\uDCB3",
+      "programTitle": "Getting Started",
+      "recurrence": "ONCE",
+      "defaultRealizationStatus": "ACCEPTED"
+    }
+  ]
+}
