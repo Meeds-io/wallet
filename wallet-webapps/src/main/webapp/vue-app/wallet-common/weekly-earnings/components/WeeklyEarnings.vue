@@ -25,7 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <span
           :class="typographyClass"
           class="ma-2 text-color font-weight-bold d-flex align-self-center">
-          {{ weeklyRewardToDisplay }}
+          {{ weeklyRewardToDisplay || '-' }}
         </span>
       </div>
     </div>
