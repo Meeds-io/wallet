@@ -10,7 +10,7 @@
         <span
           :class="typographyClass"
           class="ma-2 text-color font-weight-bold d-flex align-self-center">
-          {{ balanceToDisplay }}
+          {{ balanceToDisplay || '-' }}
         </span>
       </div>
     </div>
