@@ -2,14 +2,13 @@
   <v-app id="WalletApp" class="ma-0">
     <div
       v-show="!loading"
-      flat
-      @click="$refs.accountDetail.open()"
-      class="clickable">
-      <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
+      class="clickable"
+      @click="$refs.accountDetail.open()">
+      <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span
           :class="typographyClass"
-          class="ma-2 text-color font-weight-bold d-flex align-self-center">
+          class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
           {{ balanceToDisplay || '-' }}
         </span>
       </div>
