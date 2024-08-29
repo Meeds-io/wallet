@@ -1,0 +1,19 @@
+{
+  "descriptors": [
+    {
+      "nameId": "createWallet",
+      "names": {
+        "en": "gamification.defaultProgram.rule.createWallet.title"
+      },
+      "descriptions": {
+        "en": "gamification.defaultProgram.rule.createWallet.description"
+      },
+      "event": "createWallet",
+      "score": 10,
+      "appendEmoji": "\uD83D\uDCB3",
+      "programNameId": "gettingStarted",
+      "recurrence": "ONCE",
+      "defaultRealizationStatus": "ACCEPTED"
+    }
+  ]
+}
