@@ -17,14 +17,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <template>
   <div v-show="!loading" class="ma-0">
     <div
-      flat
-      @click="openDrawer"
-      class="clickable">
-      <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
+      class="clickable"
+      @click="openDrawer">
+      <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span
           :class="typographyClass"
-          class="ma-2 text-color font-weight-bold d-flex align-self-center">
+          class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
           {{ weeklyRewardToDisplay || '-' }}
         </span>
       </div>
