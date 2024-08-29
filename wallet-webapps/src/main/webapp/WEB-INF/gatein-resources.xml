@@ -67,6 +67,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <additional-module>wallet</additional-module>
   </portlet-skin>
 
+  <portlet-skin>
+    <application-name>gamification-portlets</application-name>
+    <portlet-name>myRewards</portlet-name>
+    <skin-name>Enterprise</skin-name>
+    <additional-module>wallet</additional-module>
+  </portlet-skin>
+
   <portlet>
     <name>WalletAPI</name>
     <module>
