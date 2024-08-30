@@ -57,7 +57,7 @@ export default {
   },
   created() {
     this.timeZone = this.value;
-    this.timeZones = this.$rewardService.getTimeZones();
+    this.timeZones = this.$walletTimezoneUtils.getTimeZones();
   },
 };
 </script>

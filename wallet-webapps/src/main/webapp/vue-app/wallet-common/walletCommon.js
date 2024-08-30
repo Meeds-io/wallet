@@ -48,11 +48,13 @@ import WalletOverviewRewardItem from './wallet-overview/components/WalletOvervie
 import WalletOverviewRewardPluginItem from './wallet-overview/components/WalletOverviewRewardPluginItem.vue';
 import WalletUserBalance from './wallet-user-balance/components/WalletUserBalance.vue';
 import WeeklyEarnings from './weekly-earnings/components/WeeklyEarnings.vue';
+
 import * as constants from './js/Constants.js';
 import * as addressRegistry from './js/AddressRegistry.js';
 import * as walletUtils from './js/WalletUtils.js';
 import * as tokenUtils from './js/TokenUtils.js';
 import * as transactionUtils from './js/TransactionUtils.js';
+import * as rewardService from './js/RewardService.js';
 
 const WalletCommon = {
   install: (Vue) => {
@@ -63,6 +65,13 @@ const WalletCommon = {
     Vue.prototype.transactionUtils = transactionUtils;
   },
 };
+
+if (!Vue.prototype.$rewardService) {
+  window.Object.defineProperty(Vue.prototype, '$rewardService', {
+    value: rewardService,
+  });
+}
+
 export const components = {
   'wallet-reward-account-detail': AccountDetail,
   'wallet-reward-address-auto-complete': AddressAutoComplete,
