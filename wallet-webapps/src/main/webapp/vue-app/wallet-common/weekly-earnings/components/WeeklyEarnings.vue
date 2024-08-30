@@ -15,25 +15,19 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <div v-show="!loading" class="ma-0">
-    <div
-      class="clickable"
-      @click="openDrawer">
-      <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
-        <span class="my-2 tertiary-color">{{ symbol }}</span>
-        <span
-          :class="typographyClass"
-          class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
-          {{ lastRewardToDisplay || '-' }}
-        </span>
-      </div>
+  <v-card
+    v-show="!loading"
+    flat>
+    <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
+      <span class="my-2 tertiary-color">{{ symbol }}</span>
+      <span
+        :class="typographyClass"
+        class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
+        {{ lastRewardToDisplay || '-' }}
+      </span>
     </div>
-    <wallet-overview-drawer
-      ref="walletOverviewDrawer"
-      :symbol="symbol" />
-  </div>
+  </v-card>
 </template>
-
 <script>
 export default {
   data: () => ({
@@ -50,6 +44,15 @@ export default {
     lastRewardToDisplay() {
       return Number.isFinite(Number(this.lastReward)) ? Math.trunc(this.lastReward) : 0;
     },
+    balanceToDisplay() {
+      return Number.isFinite(Number(this.balance))
+        ? new Intl.NumberFormat(eXo.env.portal.language, {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(Math.trunc(this.balance))
+        : 0;
+    },
   },
   watch: {
     lastReward() {
@@ -65,8 +68,12 @@ export default {
       return this.walletUtils.initSettings(false, true, true)
         .then(() => {
           if (window.walletSettings) {
-            this.wallet = Object.assign({}, window.walletSettings.wallet);    
-            this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
+            this.wallet = window.walletSettings.wallet
+              && {...window.walletSettings.wallet}
+              || {};
+            this.contractDetails = window.walletSettings.contractDetail
+              && {...window.walletSettings.contractDetail}
+              || {};
           }
           return this.$nextTick();
         })
@@ -77,9 +84,6 @@ export default {
         .then(rewards => rewards.find(r => r.transaction && r.status === 'success'))
         .then(reward => this.lastReward = reward?.tokensToSend || 0);
     },
-    openDrawer() {
-      this.$refs.walletOverviewDrawer.open(this.$t('exoplatform.wallet.title.rewardedBalance'));
-    }
   },
 };
 </script>

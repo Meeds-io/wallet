@@ -19,17 +19,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <v-list-item>
       <v-list-item-content class="align-end text-start">
         <v-list-item-title :title="period">
-          <i class="fa fa-trophy px-2 tertiary--text"></i>
+          <v-icon class="me-2 tertiary--text">fa-calendar</v-icon>
           {{ periodShort }}
         </v-list-item-title>
-        <v-list-item-subtitle class="ps-10">
+        <v-list-item-subtitle class="ps-8">
           {{ $t('exoplatform.wallet.label.sentDate') }}: {{ sentDate }}
         </v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-icon class="my-auto">
-        <span class="primary--text">
-          {{ rewardAmount }}
-        </span>
+      <v-list-item-icon class="d-flex flex-row justify-center align-center mt-3 mb-auto font-weight-bold">
+        <span class="tertiary-color me-2 ">{{ symbol }}</span>
+        <span>{{ rewardAmount }}</span>
       </v-list-item-icon>
     </v-list-item>
 
