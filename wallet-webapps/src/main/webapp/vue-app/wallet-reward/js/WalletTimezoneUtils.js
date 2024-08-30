@@ -18,24 +18,26 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import './initComponents.js';
-import './services.js';
+import TIMEZONE_IDS from '../json/timezones.json';
 
-Vue.use(Vuetify);
-Vue.use(WalletCommon);
+export const TIMEZONES = [];
 
-const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
-const url = `/wallet/i18n/locale.addon.Wallet?lang=${lang}`;
-const appId = 'RewardApp';
-
-export function init() {
-  exoi18n.loadLanguageAsync(lang, url)
-    .then(i18n => {
-      Vue.createApp({
-        template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
-        i18n,
-        vuetify: Vue.prototype.vuetifyOptions,
-      }, `#${appId}`, 'Wallet Reward');
-    })
-    .finally(() => Vue.prototype.$utils?.includeExtensions?.('WalletRewardingExtension'));
+export function getTimeZones() {
+  if (TIMEZONES.length) {
+    return TIMEZONES;
+  }
+  const dateObj = new Date(0);
+  TIMEZONE_IDS.forEach((timeZone) => {
+    const dateFormat = new Intl.DateTimeFormat(eXo.env.portal.language, {
+      timeZoneName: 'long',
+      second: 'numeric',
+      timeZone: timeZone,
+    });
+    const timeZoneName = dateFormat.format(dateObj);
+    TIMEZONES.push({
+      value: timeZone,
+      text: `${timeZoneName.charAt(2).toUpperCase() + timeZoneName.substring(3, timeZoneName.length)  } (${timeZone})`,
+    });
+  });
+  return TIMEZONES;
 }
