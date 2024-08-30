@@ -16,8 +16,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
   <exo-drawer
-    ref="rewardsOverviewDrawer"
+    ref="drawer"
     :right="!$vuetify.rtl"
+    :loading="loading"
     class="rewardsOverviewDrawer">
     <template slot="title">
       {{ title }}
@@ -59,6 +60,7 @@ export default {
     pageSize: 20,
     limit: 20,
     rewardsList: [],
+    loading: false,
   }),
   computed: {
     hasMore() {
@@ -75,19 +77,15 @@ export default {
       this.title = title;
       this.reset();
       this.retrieveList();
-      this.$refs.rewardsOverviewDrawer.open();
+      this.$refs.drawer.open();
     },
     loadMore() {
       this.limit += this.pageSize;
       this.retrieveList();
     },
     retrieveList() {
-      this.$refs.rewardsOverviewDrawer.startLoading();
-      return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/reward/list?limit=${this.limit}`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-        .then((resp) => resp && resp.ok && resp.json())
+      this.loading = true;
+      return this.$rewardService.getRewardsByUser(this.limit)
         .then(data => {
           if (data && data.length) {
             this.rewardsList = data.filter(reward => reward.transaction && reward.status === 'success');
@@ -95,9 +93,7 @@ export default {
             this.rewardsList = [];
           }
         })
-        .finally(() => {
-          this.$refs.rewardsOverviewDrawer.endLoading();
-        });
+        .finally(() => this.loading = false);
     },
   }
 };
