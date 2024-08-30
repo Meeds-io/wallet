@@ -24,7 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <span
           :class="typographyClass"
           class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
-          {{ weeklyRewardToDisplay || '-' }}
+          {{ lastRewardToDisplay || '-' }}
         </span>
       </div>
     </div>
@@ -35,26 +35,26 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 </template>
 
 <script>
-import {computeRewardsByUser} from '../../../wallet-reward/js/RewardService.js';
 export default {
-  data() {
-    return {
-      weeklyReward: null,
-      wallet: null,
-      contractDetails: null,
-      loading: true,
-    };
-  },
+  data: () => ({
+    lastReward: null,
+    wallet: null,
+    contractDetails: null,
+    loading: true,
+    limit: 10,
+  }),
   computed: {
-    selectedDate() {
-      return new Date().toISOString().substring(0, 10);
-    },
     symbol() {
       return this.contractDetails?.symbol;
     },
-    weeklyRewardToDisplay() {
-      return Number.isFinite(Number(this.weeklyReward)) ? Math.trunc(this.weeklyReward) : '';
-    }
+    lastRewardToDisplay() {
+      return Number.isFinite(Number(this.lastReward)) ? Math.trunc(this.lastReward) : 0;
+    },
+  },
+  watch: {
+    lastReward() {
+      this.$root.$emit('wallet-last-reward', this.lastReward);
+    },
   },
   created() {
     this.init()
@@ -73,16 +73,9 @@ export default {
         .then(() => this.refreshRewards());
     },
     refreshRewards() {
-      return this.wallet?.address?.length && computeRewardsByUser(this.selectedDate)
-        .then(rewardReport => {
-          if (rewardReport) {
-            const walletAddress = this.wallet.address.toUpperCase();
-            const walletReward = rewardReport.rewards.find(reward => reward.wallet.address.toUpperCase() === walletAddress);
-            this.weeklyReward = walletReward?.tokensToSend || 0;
-          } else {
-            this.weeklyReward = 0;
-          }
-        });
+      return this.wallet?.address?.length && this.$rewardService.getRewardsByUser(this.limit)
+        .then(rewards => rewards.find(r => r.transaction && r.status === 'success'))
+        .then(reward => this.lastReward = reward?.tokensToSend || 0);
     },
     openDrawer() {
       this.$refs.walletOverviewDrawer.open(this.$t('exoplatform.wallet.title.rewardedBalance'));
