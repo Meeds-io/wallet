@@ -18,24 +18,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import './initComponents.js';
-import './services.js';
+import * as walletTimezoneUtils from './js/WalletTimezoneUtils.js';
 
-Vue.use(Vuetify);
-Vue.use(WalletCommon);
-
-const lang = (eXo && eXo.env && eXo.env.portal && eXo.env.portal.language) || 'en';
-const url = `/wallet/i18n/locale.addon.Wallet?lang=${lang}`;
-const appId = 'RewardApp';
-
-export function init() {
-  exoi18n.loadLanguageAsync(lang, url)
-    .then(i18n => {
-      Vue.createApp({
-        template: `<wallet-reward-app id="${appId}"></wallet-reward-app>`,
-        i18n,
-        vuetify: Vue.prototype.vuetifyOptions,
-      }, `#${appId}`, 'Wallet Reward');
-    })
-    .finally(() => Vue.prototype.$utils?.includeExtensions?.('WalletRewardingExtension'));
+if (!Vue.prototype.$walletTimezoneUtils) {
+  window.Object.defineProperty(Vue.prototype, '$walletTimezoneUtils', {
+    value: walletTimezoneUtils,
+  });
 }

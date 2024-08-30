@@ -14,28 +14,6 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import TIMEZONE_IDS from '../json/timezones.json';
-export const TIMEZONES = [];
-
-export function getTimeZones() {
-  if (TIMEZONES.length) {
-    return TIMEZONES;
-  }
-  const dateObj = new Date(0);
-  TIMEZONE_IDS.forEach((timeZone) => {
-    const dateFormat = new Intl.DateTimeFormat(eXo.env.portal.language, {
-      timeZoneName: 'long',
-      second: 'numeric',
-      timeZone: timeZone,
-    });
-    const timeZoneName = dateFormat.format(dateObj);
-    TIMEZONES.push({
-      value: timeZone,
-      text: `${timeZoneName.charAt(2).toUpperCase() + timeZoneName.substring(3, timeZoneName.length)  } (${timeZone})`,
-    });
-  });
-  return TIMEZONES;
-}
 
 export function getRewardSettings() {
   return fetch('/portal/rest/wallet/api/reward/settings', {
@@ -154,6 +132,19 @@ export function computeRewardsByUser(date) {
       return resp.json();
     } else {
       throw new Error ('Error computing rewards');
+    }
+  });
+}
+
+export function getRewardsByUser(limit) {
+  return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/reward/list?limit=${limit || 10}`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then(resp => {
+    if (!resp?.ok) {
+      throw new Error('Error while getting user rewards', resp);
+    } else {
+      return resp.json();
     }
   });
 }
