@@ -15,22 +15,17 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-list-item v-if="pluginEarnedAmount" dense>
-    <v-list-item-icon class="my-auto" />
+  <v-list-item v-if="pluginName === 'Gamification'" dense>
+    <v-list-item-icon class="me-2">
+      <v-icon size="18">fa-trophy</v-icon>
+    </v-list-item-icon>
     <v-list-item-content class="align-end text-start">
       <v-list-item-subtitle>
-        <span class="text-sub-title caption uiIcon" :class="iconClass"></span>
-        <span class="text-sub-title caption">{{ plugin.points }} {{ pluginName }}</span>
+        <span class="text-sub-title caption">{{ plugin.points }} {{ $t('wallet.overview.points') }}</span>
       </v-list-item-subtitle>
     </v-list-item-content>
-    <v-list-item-icon class="my-auto">
-      <span class="text-sub-title caption">
-        {{ pluginAmount }}
-      </span>
-    </v-list-item-icon>
   </v-list-item>
 </template>
-
 <script>
 export default {
   props: {
@@ -51,14 +46,8 @@ export default {
     pluginName() {
       return this.plugin.pluginId.charAt(0).toUpperCase() + this.plugin.pluginId.slice(1);
     },
-    iconClass() {
-      return `uiIconReward${this.pluginName}`;
-    },
     pluginEarnedAmount() {
       return parseInt(this.plugin.amount * 100) / 100;
-    },
-    pluginAmount() {
-      return `${this.pluginEarnedAmount} ${this.symbol}`;
     },
   },
 };

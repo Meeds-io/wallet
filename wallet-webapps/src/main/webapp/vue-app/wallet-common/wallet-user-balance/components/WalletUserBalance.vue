@@ -1,24 +1,20 @@
 <template>
-  <v-app id="WalletApp" class="ma-0">
-    <div
+  <div>
+    <v-card
       v-show="!loading"
-      class="clickable"
-      @click="$refs.accountDetail.open()">
+      flat>
       <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
         <span class="my-2 tertiary-color">{{ symbol }}</span>
         <span
-          :class="typographyClass"
           class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
           {{ balanceToDisplay || '-' }}
         </span>
       </div>
-    </div>
-    <wallet-reward-account-detail
-      ref="accountDetail"
-      :fiat-symbol="symbol"
-      :wallet="wallet"
-      :contract-details="contractDetails" />
-  </v-app>
+    </v-card>
+    <wallet-overview-drawer
+      ref="walletOverviewDrawer"
+      :symbol="currencySymbol" />
+  </div>
 </template>
 <script>
 export default {
@@ -26,10 +22,6 @@ export default {
     wallet: null,
     contractDetails: null,
     loading: true,
-    isOverviewDisplay: {
-      type: Boolean,
-      default: () => false,
-    },
   }),
   computed: {
     symbol() {
@@ -39,31 +31,25 @@ export default {
       return this.wallet?.tokenBalance;
     },
     balanceToDisplay() {
-      return Number.isFinite(Number(this.balance)) ? Math.trunc(this.balance) : '';
-    },
-    typographyClass() {
-      switch (String(this.balanceToDisplay).length) {
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-        return 'text-h4';
-      case 6:
-        return 'text-h5';
-      case 7:
-      case 8:
-        return 'text-h6';
-      default:
-        return 'body-1';
-      }
+      return Number.isFinite(Number(this.balance))
+        ? new Intl.NumberFormat(eXo.env.portal.language, {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(Math.trunc(this.balance))
+        : 0;
     },
   },
   created() {
     this.walletUtils.initSettings(false, true, true)
       .then(() => {
-        this.wallet = Object.assign({}, window.walletSettings.wallet);
-        this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
+        this.wallet = window.walletSettings.wallet
+          && {...window.walletSettings.wallet}
+          || {};
+        this.contractDetails = window.walletSettings.contractDetail
+          && {...window.walletSettings.contractDetail}
+          || {};
+        this.$root.$emit('wallet-loaded', this.wallet?.tokenBalance);
       })
       .finally(() => this.loading = false);
   }
