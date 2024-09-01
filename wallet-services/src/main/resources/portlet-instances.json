@@ -32,6 +32,25 @@
         "*:/platform/web-contributors"
       ],
       "system":true
+    },
+    {
+      "nameId":"myRewards",
+      "categoryNameId":"contributions",
+      "portletName":"myRewards",
+      "names":{
+        "en":"layout.portletInstance.myRewards.name"
+      },
+      "descriptions":{
+        "en":"layout.portletInstance.myRewards.description"
+      },
+      "illustrationPath":"war:/../images/portlets/myRewards.webp",
+      "preferences":[
+        
+      ],
+      "permissions":[
+        "*:/platform/users"
+      ],
+      "system":true
     }
   ]
 }
