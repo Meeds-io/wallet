@@ -68,7 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </portlet-skin>
 
   <portlet-skin>
-    <application-name>gamification-portlets</application-name>
+    <application-name>wallet</application-name>
     <portlet-name>myRewards</portlet-name>
     <skin-name>Enterprise</skin-name>
     <additional-module>wallet</additional-module>
@@ -316,6 +316,38 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </depends>
       <depends>
         <module>extensionRegistry</module>
+      </depends>
+    </module>
+  </portlet>
+
+  <portlet>
+    <name>myRewards</name>
+    <module>
+      <load-group>reward-overview-group</load-group>
+      <script>
+        <minify>false</minify>
+        <path>/js/myRewards.bundle.js</path>
+      </script>
+      <depends>
+        <module>vue</module>
+      </depends>
+      <depends>
+        <module>vuetify</module>
+      </depends>
+      <depends>
+        <module>eXoVueI18n</module>
+      </depends>
+      <depends>
+        <module>commonVueComponents</module>
+      </depends>
+      <depends>
+        <module>extensionRegistry</module>
+      </depends>
+      <depends>
+        <module>gamificationCommon</module>
+      </depends>
+      <depends>
+        <module>ruleExtensions</module>
       </depends>
     </module>
   </portlet>
