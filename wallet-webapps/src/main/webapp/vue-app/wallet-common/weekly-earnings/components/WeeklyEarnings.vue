@@ -15,47 +15,49 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <div v-show="!loading" class="ma-0">
-    <div
-      flat
-      @click="openDrawer"
-      class="clickable">
-      <div class="pa-0 d-flex justify-center flex-nowrap text-color display-1 font-weight-bold big-number">
-        <span class="my-2 tertiary-color">{{ symbol }}</span>
-        <span
-          :class="typographyClass"
-          class="ma-2 text-color font-weight-bold d-flex align-self-center">
-          {{ weeklyRewardToDisplay }}
-        </span>
-      </div>
+  <v-card
+    v-show="!loading"
+    flat>
+    <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
+      <span class="my-2 tertiary-color">{{ symbol }}</span>
+      <span
+        :class="typographyClass"
+        class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
+        {{ lastRewardToDisplay || '-' }}
+      </span>
     </div>
-    <wallet-overview-drawer
-      ref="walletOverviewDrawer"
-      :symbol="symbol" />
-  </div>
+  </v-card>
 </template>
-
 <script>
-import {computeRewardsByUser} from '../../../wallet-reward/js/RewardService.js';
 export default {
-  data() {
-    return {
-      weeklyReward: null,
-      wallet: null,
-      contractDetails: null,
-      loading: true,
-    };
-  },
+  data: () => ({
+    lastReward: null,
+    wallet: null,
+    contractDetails: null,
+    loading: true,
+    limit: 10,
+  }),
   computed: {
-    selectedDate() {
-      return new Date().toISOString().substring(0, 10);
-    },
     symbol() {
       return this.contractDetails?.symbol;
     },
-    weeklyRewardToDisplay() {
-      return Number.isFinite(Number(this.weeklyReward)) ? Math.trunc(this.weeklyReward) : '';
-    }
+    lastRewardToDisplay() {
+      return Number.isFinite(Number(this.lastReward)) ? Math.trunc(this.lastReward) : 0;
+    },
+    balanceToDisplay() {
+      return Number.isFinite(Number(this.balance))
+        ? new Intl.NumberFormat(eXo.env.portal.language, {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(Math.trunc(this.balance))
+        : 0;
+    },
+  },
+  watch: {
+    lastReward() {
+      this.$root.$emit('wallet-last-reward', this.lastReward);
+    },
   },
   created() {
     this.init()
@@ -66,28 +68,22 @@ export default {
       return this.walletUtils.initSettings(false, true, true)
         .then(() => {
           if (window.walletSettings) {
-            this.wallet = Object.assign({}, window.walletSettings.wallet);    
-            this.contractDetails = Object.assign({},window.walletSettings.contractDetail); 
+            this.wallet = window.walletSettings.wallet
+              && {...window.walletSettings.wallet}
+              || {};
+            this.contractDetails = window.walletSettings.contractDetail
+              && {...window.walletSettings.contractDetail}
+              || {};
           }
           return this.$nextTick();
         })
         .then(() => this.refreshRewards());
     },
     refreshRewards() {
-      return this.wallet?.address?.length && computeRewardsByUser(this.selectedDate)
-        .then(rewardReport => {
-          if (rewardReport) {
-            const walletAddress = this.wallet.address.toUpperCase();
-            const walletReward = rewardReport.rewards.find(reward => reward.wallet.address.toUpperCase() === walletAddress);
-            this.weeklyReward = walletReward?.tokensToSend || 0;
-          } else {
-            this.weeklyReward = 0;
-          }
-        });
+      return this.wallet?.address?.length && this.$rewardService.getRewardsByUser(this.limit)
+        .then(rewards => rewards.find(r => r.transaction && r.status === 'success'))
+        .then(reward => this.lastReward = reward?.tokensToSend || 0);
     },
-    openDrawer() {
-      this.$refs.walletOverviewDrawer.open(this.$t('exoplatform.wallet.title.rewardedBalance'));
-    }
   },
 };
 </script>
