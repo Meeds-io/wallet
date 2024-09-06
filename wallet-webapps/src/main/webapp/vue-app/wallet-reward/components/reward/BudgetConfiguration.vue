@@ -19,18 +19,25 @@
 
 -->
 <template>
-  <v-app
-    id="RewardApp"
+  <v-card
+    class="border-radius border-color my-5 me-5"
+    width="60%"
     flat>
-    <div class="d-flex flex-row">
-      <v-card
-        class="d-flex flex-column justify-space-between"
-        width="40%"
-        flat>
-        <wallet-current-balance />
-      </v-card>
-      <wallet-budget-configuration />
+    <div class="d-flex flex-column flex-grow-1">
+      <div class="text-header text-wrap px-4 pb-0 pt-3 mt-auto mb-2">
+        {{ $t('wallet.administration.budgetConfiguration') }}
+      </div>
+      <v-spacer />
+      <div class="d-flex flex-column align-center justify-center full-width full-height pt-5">
+        <v-icon color="orange darken-2" size="50">fas fa-coins</v-icon>
+        <span class="mt-5">{{ $t('wallet.administration.budgetConfiguration.setUp') }}</span>
+      </div>
+      <v-btn
+        class="btn btn-primary align-self-center my-4 px-2">
+        <span class="mx-2">
+          {{ $t('wallet.administration.budgetConfiguration.setBudget') }}
+        </span>
+      </v-btn>
     </div>
-    <wallet-reward-management />
-  </v-app>
+  </v-card>
 </template>
