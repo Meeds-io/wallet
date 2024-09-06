@@ -19,18 +19,19 @@
 
 -->
 <template>
-  <v-app
-    id="RewardApp"
-    flat>
-    <div class="d-flex flex-row">
-      <v-card
-        class="d-flex flex-column justify-space-between"
-        width="40%"
-        flat>
-        <wallet-current-balance />
-      </v-card>
-      <wallet-budget-configuration />
+  <div class="mx-5">
+    <div class="pt-6 text-title">{{ $t('wallet.administration.rewardManagement') }}</div>
+    <div class="pt-8 d-flex align-center justify-center">
+      <v-icon
+        color="orange darken-2"
+        size="50">
+        fa-money-bill
+      </v-icon>
     </div>
-    <wallet-reward-management />
-  </v-app>
+    <div class="d-flex flex-column justify-center align-center pb-8 pt-3 col-sm-8 mx-auto">
+      <p class="text-header mb-8">
+        {{ $t('wallet.administration.rewardManagement.noContributionsYet') }}
+      </p>
+    </div>
+  </div>
 </template>
