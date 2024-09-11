@@ -22,27 +22,25 @@ import static org.exoplatform.wallet.utils.WalletUtils.toJsonString;
 
 import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.wallet.model.reward.*;
-import org.exoplatform.wallet.reward.api.RewardPlugin;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 
 /**
  * A storage service to save/load reward transactions
  */
+@Service
+@Primary
 public class WalletRewardSettingsService implements RewardSettingsService {
 
+  @Autowired
   private SettingService            settingService;
 
   private RewardSettings            configuredRewardSettings;
 
-  private Map<String, RewardPlugin> rewardPlugins = new HashMap<>();
-
-  public WalletRewardSettingsService(SettingService settingService) {
-    this.settingService = settingService;
-  }
 
   @Override
   public RewardSettings getSettings() { // NOSONAR
@@ -57,42 +55,13 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
                                                                                            : settingsValue.getValue().toString();
 
-    RewardSettings rewardSettings = null;
+    RewardSettings rewardSettings;
     if (settingsValueString == null) {
       rewardSettings = new RewardSettings();
+      rewardSettings.setStoredSetting(false);
     } else {
       rewardSettings = fromJsonString(settingsValueString, RewardSettings.class);
-    }
-
-    Set<RewardPluginSettings> pluginSettings = rewardSettings.getPluginSettings();
-    if (pluginSettings == null) {
-      pluginSettings = new HashSet<>();
-      rewardSettings.setPluginSettings(pluginSettings);
-    }
-
-    // Add configured plugin settings if not already stored
-    Set<String> configuredPluginIds = rewardPlugins.keySet();
-    if (!configuredPluginIds.isEmpty()) {
-      for (String configuredPluginId : configuredPluginIds) {
-        if (pluginSettings.stream().noneMatch(plugin -> StringUtils.equals(plugin.getPluginId(), configuredPluginId))) {
-          RewardPluginSettings emptyRewardSettings = new RewardPluginSettings();
-          emptyRewardSettings.setPluginId(configuredPluginId);
-          pluginSettings.add(emptyRewardSettings);
-        }
-      }
-    }
-
-    // Check enabled plugins
-    for (RewardPluginSettings rewardPluginSettings : pluginSettings) {
-      if (rewardPluginSettings != null) {
-        String pluginId = rewardPluginSettings.getPluginId();
-        RewardPlugin rewardPlugin = getRewardPlugin(pluginId);
-        boolean enabled = false;
-        if (rewardPlugin != null) {
-          enabled = rewardPlugin.isEnabled();
-        }
-        rewardPluginSettings.setEnabled(enabled);
-      }
+      Objects.requireNonNull(rewardSettings).setStoredSetting(true);
     }
 
     // Cache reward settings
@@ -106,46 +75,10 @@ public class WalletRewardSettingsService implements RewardSettingsService {
       throw new IllegalArgumentException("Empty settings to save");
     }
 
-    // Check using pool only if not budget is of type 'points reward'
-    Set<RewardPluginSettings> pluginSettings = rewardSettingsToStore.getPluginSettings();
-    if (pluginSettings != null && !pluginSettings.isEmpty()) {
-      for (RewardPluginSettings rewardPluginSettings : pluginSettings) {
-        if (rewardPluginSettings.getBudgetType() == RewardBudgetType.FIXED_PER_POINT) {
-          rewardPluginSettings.setUsePools(false);
-        }
-      }
-    }
     String settingsString = toJsonString(rewardSettingsToStore);
     settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME, SettingValue.create(settingsString));
 
     // Purge cached settings
     this.configuredRewardSettings = null;
   }
-
-  @Override
-  public void registerPlugin(RewardPlugin rewardPlugin) {
-    rewardPlugins.put(rewardPlugin.getPluginId(), rewardPlugin);
-
-    // Purge cached settings
-    this.configuredRewardSettings = null;
-  }
-
-  @Override
-  public void unregisterPlugin(String pluginId) {
-    rewardPlugins.remove(pluginId);
-
-    // Purge cached settings
-    this.configuredRewardSettings = null;
-  }
-
-  @Override
-  public Collection<RewardPlugin> getRewardPlugins() {
-    return rewardPlugins.values();
-  }
-
-  @Override
-  public RewardPlugin getRewardPlugin(String pluginId) {
-    return rewardPlugins.get(pluginId);
-  }
-
 }
