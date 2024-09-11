@@ -31,8 +31,17 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.model.ContractDetail;
 import org.exoplatform.wallet.model.reward.RewardPeriod;
 import org.exoplatform.wallet.model.reward.RewardReport;
+import org.exoplatform.wallet.model.settings.GlobalSettings;
+import org.exoplatform.wallet.service.WalletService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RewardSuccessNotificationPlugin extends BaseNotificationPlugin {
+
+  @Autowired
+  protected WalletService walletService;
+
   private static final Log LOG = ExoLogger.getLogger(RewardSuccessNotificationPlugin.class);
 
   public RewardSuccessNotificationPlugin(InitParams initParams) {
@@ -60,11 +69,15 @@ public class RewardSuccessNotificationPlugin extends BaseNotificationPlugin {
       LOG.error("Error making notification of reward report " + rewardReport, e);
       return null;
     }
-    if (recipients == null || recipients.isEmpty()) {
+    if (recipients.isEmpty()) {
       return null;
     }
 
-    ContractDetail contractDetail = getContractDetail();
+    GlobalSettings globalSettings = walletService.getSettings();
+    if (globalSettings == null || globalSettings.getContractDetail() == null) {
+      return null;
+    }
+    ContractDetail contractDetail = globalSettings.getContractDetail();
     RewardPeriod period = rewardReport.getPeriod();
 
     return NotificationInfo.instance()
