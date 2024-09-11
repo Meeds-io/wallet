@@ -109,25 +109,6 @@ public abstract class BaseWalletRewardTest extends AbstractKernelTest {
 
   protected static final String           PROVIDER             = WalletProvider.INTERNAL_WALLET.name();
 
-  protected static final RewardPlugin     CUSTOM_REWARD_PLUGIN = new RewardPlugin() {
-                                                                 @Override
-                                                                 public String getName() {
-                                                                   return CUSTOM_PLUGIN_NAME;
-                                                                 }
-
-                                                                 @Override
-                                                                 public String getPluginId() {
-                                                                   return CUSTOM_PLUGIN_ID;
-                                                                 }
-
-                                                                 @Override
-                                                                 public Map<Long, Double> getEarnedPoints(Set<Long> identityIds,
-                                                                                                          long startDateInSeconds,
-                                                                                                          long endDateInSeconds) {
-                                                                   return WalletRewardSettingsServiceTest.getEarnedPoints(identityIds);
-                                                                 }
-                                                               };
-
   protected PortalContainer               container;
 
   private static RewardSettings           defaultSettings      = null;
@@ -311,17 +292,6 @@ public abstract class BaseWalletRewardTest extends AbstractKernelTest {
       hashStringBuffer.append(Integer.toHexString(random.nextInt(16)));
     }
     return hashStringBuffer.toString();
-  }
-
-  protected RewardSettings cloneSettings(RewardSettings defaultSettings) {
-    RewardSettings newSettings = defaultSettings.clone();
-    HashSet<RewardPluginSettings> defaultPluginSettings = new HashSet<>(newSettings.getPluginSettings());
-    Set<RewardPluginSettings> pluginSettings = new HashSet<>();
-    for (RewardPluginSettings rewardPluginSetting : defaultPluginSettings) {
-      pluginSettings.add(rewardPluginSetting.clone());
-    }
-    newSettings.setPluginSettings(pluginSettings);
-    return newSettings;
   }
 
   private void registerResourceBundleService() {
