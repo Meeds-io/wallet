@@ -24,7 +24,7 @@
     class="border-radius border-color ma-5"
     flat>
     <div class="d-flex flex-column flex-grow-1">
-      <v-list-item dense>
+      <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-header text-wrap">
             {{ $t('exoplatform.wallet.label.currentBalance') }}
