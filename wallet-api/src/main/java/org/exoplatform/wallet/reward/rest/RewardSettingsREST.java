@@ -77,7 +77,7 @@ public class RewardSettingsREST implements ResourceContainer {
   public Response getSettings() {
     try {
       RewardSettings settings = rewardSettingsService.getSettings();
-      return Response.ok(settings == null ? new RewardSettings() : settings).build();
+      return Response.ok(settings).build();
     } catch (Exception e) {
       LOG.error("Error getting reward settings", e);
       return Response.serverError().build();
