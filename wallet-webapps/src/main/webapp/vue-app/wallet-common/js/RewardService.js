@@ -20,8 +20,7 @@ export function getRewardSettings() {
     method: 'GET',
     credentials: 'include',
   })
-    .then((resp) => resp && resp.ok && resp.json())
-    .then((settings) => (window.walletRewardSettings = settings));
+    .then((resp) => resp && resp.ok && resp.json());
 }
 
 export function saveRewardSettings(settings) {
