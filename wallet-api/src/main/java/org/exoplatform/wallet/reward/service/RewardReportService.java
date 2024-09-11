@@ -20,12 +20,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.stereotype.Service;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.model.reward.*;
 
 /**
  * A storage service to save/load reward settings
  */
+@Service
 public interface RewardReportService {
 
   /**

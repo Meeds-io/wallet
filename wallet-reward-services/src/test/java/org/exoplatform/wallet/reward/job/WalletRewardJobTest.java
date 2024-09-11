@@ -60,23 +60,6 @@ import org.exoplatform.wallet.utils.WalletUtils;
 public class WalletRewardJobTest extends BaseWalletRewardTest {
 
   @Test
-  public void testGetRewardPlugins() {
-    WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
-    Collection<RewardPlugin> rewardPlugins = rewardSettingsService.getRewardPlugins();
-    assertEquals(2, rewardPlugins.size());
-
-    RewardPeriod period = RewardPeriodType.WEEK.getPeriodOfTime(LocalDate.now(), ZoneId.systemDefault());
-    for (RewardPlugin rewardPlugin : rewardPlugins) {
-      try {
-        rewardPlugin.getEarnedPoints(Collections.singleton(1l), period.getStartDateInSeconds(), period.getEndDateInSeconds());
-        // Submodules aren't loaded yet
-      } catch (Exception e) {
-        // Expected
-      }
-    }
-  }
-
-  @Test
   public void testSendRewards() throws Exception {
     WalletRewardSettingsService rewardSettingsService = getService(WalletRewardSettingsService.class);
     WalletTransactionService walletTransactionService = getService(WalletTransactionService.class);
@@ -89,23 +72,16 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     LocalDate date = YearMonth.of(2019, 07).atEndOfMonth();
 
     RewardSettings defaultSettings = rewardSettingsService.getSettings();
-    rewardSettingsService.registerPlugin(CUSTOM_REWARD_PLUGIN);
     try {
       // Build new settings
-      RewardSettings newSettings = cloneSettings(rewardSettingsService.getSettings());
-      Set<RewardPluginSettings> newPluginSettings = newSettings.getPluginSettings();
+      RewardSettings newSettings = defaultSettings.clone();
 
       newSettings.setPeriodType(RewardPeriodType.MONTH);
-      RewardPluginSettings customPluginSetting = newPluginSettings.stream()
-                                                                  .filter(plugin -> CUSTOM_PLUGIN_ID.equals(plugin.getPluginId()))
-                                                                  .findFirst()
-                                                                  .orElse(null);
+
       double sumOfTokensToSend = 5490d;
-      customPluginSetting.setUsePools(true); // NOSONAR
-      customPluginSetting.setBudgetType(RewardBudgetType.FIXED);
-      customPluginSetting.setAmount(sumOfTokensToSend);
-      customPluginSetting.setThreshold(0);
-      customPluginSetting.setEnabled(true);
+      newSettings.setBudgetType(RewardBudgetType.FIXED);
+      newSettings.setAmount(sumOfTokensToSend);
+      newSettings.setThreshold(0);
       rewardSettingsService.saveSettings(newSettings);
 
       WalletStorage walletStorage = getService(WalletStorage.class);
@@ -199,7 +175,6 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
       assertNotNull(rewardPeriodsInProgress);
       assertEquals(0, rewardPeriodsInProgress.size());
     } finally {
-      rewardSettingsService.unregisterPlugin(CUSTOM_PLUGIN_ID);
       rewardSettingsService.saveSettings(defaultSettings);
     }
   }
@@ -234,10 +209,7 @@ public class WalletRewardJobTest extends BaseWalletRewardTest {
     });
   }
 
-  private RewardTeam createTeamWithMembers(int startInclusive,
-                                           int endInclusive,
-                                           RewardBudgetType budgetType,
-                                           boolean disabled) {
+  private RewardTeam createTeamWithMembers(int startInclusive, int endInclusive, RewardBudgetType budgetType, boolean disabled) {
     WalletRewardTeamService rewardTeamService = getService(WalletRewardTeamService.class);
     long[] memberIds = LongStream.rangeClosed(startInclusive, endInclusive).toArray();
     RewardTeam rewardTeam = newRewardTeam(memberIds);
