@@ -32,9 +32,6 @@ public class WalletPluginReward implements Serializable {
   private long              identityId;
 
   @Exclude
-  private boolean           poolsUsed;
-
-  @Exclude
   private double            points;
 
   @Exclude

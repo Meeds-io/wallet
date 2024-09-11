@@ -250,15 +250,12 @@ public class WalletRewardReportStorage {
 
       for (WalletPluginReward rewardPlugin : rewardPlugins) {
         WalletRewardPluginEntity rewardPluginEntity =
-                                                    rewardPluginDAO.getRewardPluginsByRewardIdAndPluginId(rewardEntity.getId(),
-                                                                                                          rewardPlugin.getPluginId());
+                                                    rewardPluginDAO.getRewardPluginsByRewardId(rewardEntity.getId()).getFirst();
         if (rewardPluginEntity == null) {
           rewardPluginEntity = new WalletRewardPluginEntity();
         }
         rewardPluginEntity.setAmount(rewardPlugin.getAmount());
         rewardPluginEntity.setPoints(rewardPlugin.getPoints());
-        rewardPluginEntity.setPluginId(rewardPlugin.getPluginId());
-        rewardPluginEntity.setPoolUsed(rewardPlugin.isPoolsUsed());
         rewardPluginEntity.setReward(rewardEntity);
 
         if (rewardPluginEntity.getId() == null) {
@@ -343,8 +340,6 @@ public class WalletRewardReportStorage {
   private WalletPluginReward toDTO(WalletRewardPluginEntity rewardPluginEntity) {
     WalletPluginReward pluginReward = new WalletPluginReward();
     pluginReward.setIdentityId(rewardPluginEntity.getReward().getIdentityId());
-    pluginReward.setPluginId(rewardPluginEntity.getPluginId());
-    pluginReward.setPoolsUsed(rewardPluginEntity.isPoolUsed());
     pluginReward.setPoints(rewardPluginEntity.getPoints());
     pluginReward.setAmount(rewardPluginEntity.getAmount());
     return pluginReward;
