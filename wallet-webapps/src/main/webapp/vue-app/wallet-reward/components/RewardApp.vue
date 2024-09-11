@@ -29,8 +29,65 @@
         flat>
         <wallet-current-balance />
       </v-card>
-      <wallet-budget-configuration />
+      <wallet-budget-configuration
+        :loading="loading"
+        :reward-settings="rewardSettings"
+        :reward-report="rewardReport"
+        @openConfiguration="openBudgetConfigurationDrawer" />
     </div>
     <wallet-reward-management />
+    <wallet-budget-configuration-drawer
+      :reward-settings="rewardSettings"
+      :reward-report="rewardReport"
+      @setting-updated="refreshRewardSettings"
+      ref="budgetConfiguration" />
   </v-app>
 </template>
+
+<script>
+
+export default {
+  data: () => ({
+    rewardSettings: {},
+    loading: false,
+    rewardReport: null,
+  }),
+  computed: {
+    rewardPeriod() {
+      return this.rewardReport?.period;
+    },
+    selectedDate() {
+      return this.rewardPeriod?.startDate.substring(0, 10) || new Date().toISOString().substring(0, 10);
+    },
+  },
+  created() {
+    this.refreshRewardSettings();
+  },
+  methods: {
+    openBudgetConfigurationDrawer() {
+      this.$refs.budgetConfiguration.open();
+    },
+    refreshRewardSettings() {
+      this.loading = true;
+      return this.$rewardService.getRewardSettings()
+        .then(settings => {
+          this.rewardSettings = settings || {};
+        })
+        .then(() => this.refreshRewards())
+        .finally(() => this.loading = false);
+    },
+    refreshRewards(period) {
+      if (period) {
+        this.period = period;
+      }
+      this.loading = true;
+      return this.$rewardService.computeRewards(this.selectedDate)
+        .then(rewardReport => {
+          this.rewardReport = rewardReport;
+          return this.$nextTick();
+        })
+        .finally(() => this.loading = false);
+    },
+  },
+};
+</script>
