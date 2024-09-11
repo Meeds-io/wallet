@@ -24,7 +24,7 @@
     class="border-radius border-color ma-5"
     flat>
     <div class="d-flex flex-column flex-grow-1">
-      <v-list-item dense>
+      <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-header text-wrap">
             {{ $t('exoplatform.wallet.label.currentBalance') }}
@@ -39,7 +39,6 @@
                 <v-btn
                   :href="walletAdminUri"
                   :aria-label="$t('wallet.administration.manageWallet')"
-                  target="_blank"
                   small
                   icon>
                   <v-icon size="18">fas fa-credit-card</v-icon>
@@ -59,17 +58,17 @@
         </span>
       </v-btn>
       <template v-else>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ tokenName }}
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action class="d-inline-block ma-auto pe-1">
-            <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
+            <span class="fundsLabels"> MEED {{ tokenBalance }} </span>
           </v-list-item-action>
         </v-list-item>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ $t('wallet.administration.gas') }}

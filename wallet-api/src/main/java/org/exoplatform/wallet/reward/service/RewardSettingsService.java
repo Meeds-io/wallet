@@ -16,51 +16,26 @@
  */
 package org.exoplatform.wallet.reward.service;
 
-import java.util.Collection;
 
+import org.springframework.stereotype.Service;
 import org.exoplatform.wallet.model.reward.RewardSettings;
-import org.exoplatform.wallet.reward.api.RewardPlugin;
 
 /**
  * A storage service to save/load reward transactions
  */
+@Service
 public interface RewardSettingsService {
 
   /**
    * @return the reward settings
    */
-  public RewardSettings getSettings();
+  RewardSettings getSettings();
 
   /**
    * Save reward settings
    * 
    * @param rewardSettingsToStore reward settings object
    */
-  public void saveSettings(RewardSettings rewardSettingsToStore);
-
-  /**
-   * @return configured reward settings plugins
-   */
-  public Collection<RewardPlugin> getRewardPlugins();
-
-  /**
-   * @param pluginId reward plugin id
-   * @return configured reward plugin identified by an id
-   */
-  public RewardPlugin getRewardPlugin(String pluginId);
-
-  /**
-   * Registers a reward plugin
-   * 
-   * @param rewardPlugin reward component plugin
-   */
-  public void registerPlugin(RewardPlugin rewardPlugin);
-
-  /**
-   * Removes a previously registered reward plugin
-   * 
-   * @param pluginId
-   */
-  void unregisterPlugin(String pluginId);
+  void saveSettings(RewardSettings rewardSettingsToStore);
 
 }

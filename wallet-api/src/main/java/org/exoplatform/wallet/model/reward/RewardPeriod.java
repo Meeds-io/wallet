@@ -62,7 +62,7 @@ public class RewardPeriod implements Serializable {
 
   public static RewardPeriod getPeriodOfTime(RewardSettings rewardSettings, LocalDate date) {
     ZoneId zoneId = rewardSettings == null ? ZoneId.systemDefault() : rewardSettings.zoneId();
-    RewardPeriodType rewardPeriodType = null;
+    RewardPeriodType rewardPeriodType;
     if (rewardSettings == null || rewardSettings.getPeriodType() == null) {
       rewardPeriodType = RewardPeriodType.DEFAULT;
     } else {

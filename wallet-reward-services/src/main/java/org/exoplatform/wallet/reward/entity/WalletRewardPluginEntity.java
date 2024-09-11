@@ -27,7 +27,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Table(name = "ADDONS_WALLET_REWARD_PLUGIN")
 @NamedQueries({
     @NamedQuery(name = "RewardPlugin.getRewardPluginsByRewardId", query = "SELECT rp FROM RewardPlugin rp WHERE rp.reward.id = :rewardId"),
-    @NamedQuery(name = "RewardPlugin.getRewardPluginsByRewardIdAndPluginId", query = "SELECT rp FROM RewardPlugin rp WHERE rp.reward.id = :rewardId AND rp.pluginId = :pluginId"),
 })
 public class WalletRewardPluginEntity implements Serializable {
 
@@ -38,12 +37,6 @@ public class WalletRewardPluginEntity implements Serializable {
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_REWARD_PLUGIN_ID")
   @Column(name = "REWARD_PLUGIN_ID")
   private Long               id;
-
-  @Column(name = "PLUGIN_ID")
-  private String             pluginId;
-
-  @Column(name = "POOL_USED")
-  private boolean            poolUsed;
 
   @Column(name = "POINTS")
   private double             points;
@@ -61,22 +54,6 @@ public class WalletRewardPluginEntity implements Serializable {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public String getPluginId() {
-    return pluginId;
-  }
-
-  public void setPluginId(String pluginId) {
-    this.pluginId = pluginId;
-  }
-
-  public boolean isPoolUsed() {
-    return poolUsed;
-  }
-
-  public void setPoolUsed(boolean poolUsed) {
-    this.poolUsed = poolUsed;
   }
 
   public double getPoints() {
