@@ -1,28 +1,35 @@
 /*
  * This file is part of the Meeds project (https://meeds.io/).
- * Copyright (C) 2020 Meeds Association
- * contact@meeds.io
+ *
+ * Copyright (C) 2020 - 2024 Meeds Lab contact@meedslab.com
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 3 of the License, or (at your option) any later version.
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 package org.exoplatform.wallet.reward.notification;
 
 import static org.exoplatform.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
-import static org.exoplatform.wallet.utils.RewardUtils.getRewardSettings;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.wallet.model.reward.RewardSettings;
+import org.exoplatform.wallet.model.settings.GlobalSettings;
+import org.exoplatform.wallet.reward.BaseRewardTest;
+import org.exoplatform.wallet.reward.service.RewardSettingsService;
+import org.exoplatform.wallet.service.WalletService;
+import org.junit.jupiter.api.Test;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.channel.ChannelManager;
@@ -32,7 +39,6 @@ import org.exoplatform.commons.api.notification.plugin.config.PluginConfig;
 import org.exoplatform.commons.api.notification.service.setting.PluginContainer;
 import org.exoplatform.commons.api.notification.service.setting.PluginSettingService;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
-import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ObjectParameter;
 import org.exoplatform.container.xml.ValueParam;
@@ -40,29 +46,41 @@ import org.exoplatform.wallet.model.reward.RewardPeriod;
 import org.exoplatform.wallet.model.reward.RewardReport;
 import org.exoplatform.wallet.model.reward.WalletReward;
 import org.exoplatform.wallet.model.transaction.TransactionDetail;
-import org.exoplatform.wallet.reward.BaseWalletRewardTest;
-import org.exoplatform.wallet.reward.service.WalletRewardSettingsService;
 
-public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-  /**
-   * Check that provider returns templates correctly
-   */
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+
+@SpringJUnitConfig(BaseRewardTest.class)
+public class RewardSuccessTemplateBuilderTest extends BaseRewardTest {
+
+  @Mock
+  private WalletService               walletService;
+
+  @Mock
+  private RewardSettingsService       rewardSettingsService;
+
   @Test
   public void testBuildMessage() {
+    PortalContainer container = PortalContainer.getInstance();
+    GlobalSettings globalSettings = new GlobalSettings();
+    when(walletService.getSettings()).thenReturn(globalSettings);
+    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
     InitParams params = getParams();
     RewardSuccessNotificationPlugin plugin = new RewardSuccessNotificationPlugin(params);
+    plugin.walletService = walletService;
 
-    RewardSuccessTemplateProvider templateProvider =
-                                                   new RewardSuccessTemplateProvider(container,
-                                                                                     getService(WalletRewardSettingsService.class),
-                                                                                     params);
+    RewardSuccessTemplateProvider templateProvider = new RewardSuccessTemplateProvider(container, rewardSettingsService, params);
     templateProvider.setMailTemplatePath("jar:/template/RewardSuccessReward.gtmpl");
 
     NotificationContext ctx = NotificationContextImpl.cloneInstance();
 
     RewardReport rewardReport = new RewardReport();
-    RewardPeriod rewardPeriod = RewardPeriod.getCurrentPeriod(getRewardSettings());
+    RewardSettings rewardSettings = new RewardSettings();
+    RewardPeriod rewardPeriod = RewardPeriod.getCurrentPeriod(rewardSettings);
     rewardReport.setPeriod(rewardPeriod);
 
     Set<WalletReward> rewards = new HashSet<>();
@@ -79,9 +97,9 @@ public class RewardSuccessTemplateBuilderTest extends BaseWalletRewardTest {
     ctx.setNotificationInfo(notification);
     notification.to(notification.getSendToUserIds().get(0));
 
-    CommonsUtils.getService(PluginSettingService.class).registerPluginConfig(getPluginConfig());
-    CommonsUtils.getService(PluginContainer.class).addPlugin(plugin);
-    CommonsUtils.getService(ChannelManager.class).registerOverrideTemplateProvider(templateProvider);
+    container.getComponentInstanceOfType(PluginSettingService.class).registerPluginConfig(getPluginConfig());
+    container.getComponentInstanceOfType(PluginContainer.class).addPlugin(plugin);
+    container.getComponentInstanceOfType(ChannelManager.class).registerOverrideTemplateProvider(templateProvider);
 
     MessageInfo message = templateProvider.getBuilder().buildMessage(ctx);
     assertNotNull(message);
