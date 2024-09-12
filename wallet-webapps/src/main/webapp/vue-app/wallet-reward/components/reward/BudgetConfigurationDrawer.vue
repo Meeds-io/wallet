@@ -32,7 +32,7 @@
       <v-card-title class="pb-2">
         {{ $t('wallet.administration.budgetConfigurationDrawer.periodType') }}
       </v-card-title>
-      <v-list-item dense>
+      <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-wrap">
             {{ $t('wallet.administration.budgetConfigurationDrawer.periodType.title') }}
@@ -57,7 +57,7 @@
       <v-card-title class="pb-2">
         {{ $t('wallet.administration.budgetConfigurationDrawer.timeZone') }}
       </v-card-title>
-      <v-list-item dense>
+      <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="text-wrap">
             {{ $t('wallet.administration.budgetConfigurationDrawer.timeZone.title') }}
@@ -73,9 +73,15 @@
           v-model="settingsToSave.threshold"
           :step="1"
           :max="1000"
-          class="me-n1 my-0 pa-0"/>
+          :width="40"
+          editable
+          class="me-n1 pa-0 ma-0"
+          @valid="invalidThreshold = !$event" />
         <div class="ps-4">{{ $t('wallet.administration.budgetConfiguration.points') }}</div>
       </div>
+      <span v-if="invalidThreshold" class="error-color d-flex px-4">{{ $t('wallet.administration.budgetConfigurationDrawer.invalidThreshold', {
+        0: maxValueFormatted(1000),
+      }) }}</span>
       <v-card-title class="pb-2">
         {{ $t('wallet.administration.budgetConfigurationDrawer.amount.title') }}
       </v-card-title>
@@ -94,9 +100,15 @@
           v-model="settingsToSave.amount"
           :step="1"
           :max="5000"
-          class="me-n1 my-0 pa-0"/>
+          editable
+          class="me-n1 my-0 pa-0"
+          @valid="invalidAmount = !$event" />
         <div class="ps-4">Meeds</div>
       </div>
+      <span v-if="invalidAmount" class="error-color d-flex px-4">{{ $t('wallet.administration.budgetConfigurationDrawer.invalidAmount', {
+        0: maxValueFormatted(5000),
+      }) }}</span>
+      <wallet-budget-distribution-forecast :reward-report="rewardReport" :settings-to-save="settingsToSave" />
     </template>
     <template #footer>
       <div class="d-flex">
@@ -125,11 +137,17 @@ export default {
       type: Object,
       default: null
     },
+    rewardReport: {
+      type: Object,
+      default: null
+    },
   },
   data: () => ({
     drawer: false,
     settingsToSave: {},
     loading: false,
+    invalidThreshold: false,
+    invalidAmount: false,
   }),
   computed: {
     hasConfiguredBudget() {
@@ -159,7 +177,7 @@ export default {
           || this.periodType !== (this.settingsToSave?.periodType?.value || this.settingsToSave?.periodType);
     },
     disableApply() {
-      return !this.settingsToSave?.timeZone || !this.configurationChanged;
+      return this.invalidThreshold || this.invalidAmount || !this.settingsToSave?.timeZone || !this.configurationChanged;
     },
     periods() {
       return [
@@ -176,7 +194,7 @@ export default {
           value: 'QUARTER',
         },
       ];
-    }
+    },
   },
   methods: {
     open() {
@@ -206,6 +224,13 @@ export default {
           this.loading = false;
           this.close();
         });
+    },
+    maxValueFormatted(max) {
+      return new Intl.NumberFormat(eXo.env.portal.language, {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(max);
     },
   },
 };

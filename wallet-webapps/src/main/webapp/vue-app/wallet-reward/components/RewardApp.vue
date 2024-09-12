@@ -38,6 +38,7 @@
     <wallet-reward-management />
     <wallet-budget-configuration-drawer
       :reward-settings="rewardSettings"
+      :reward-report="rewardReport"
       @setting-updated="refreshRewardSettings"
       ref="budgetConfiguration" />
   </v-app>
