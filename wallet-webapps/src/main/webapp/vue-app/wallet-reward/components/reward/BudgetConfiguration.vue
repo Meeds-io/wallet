@@ -53,7 +53,7 @@
       </v-list-item>
       <v-spacer />
       <template v-if="!loading && hasConfiguredBudget">
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ $t('wallet.administration.budgetConfiguration.periodType.title') }}
@@ -63,7 +63,7 @@
             {{ periodTypeLabel }}
           </v-list-item-action>
         </v-list-item>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ $t('wallet.administration.budgetConfiguration.timeZone.title') }}
@@ -73,7 +73,7 @@
             {{ periodDatesDisplay }}
           </v-list-item-action>
         </v-list-item>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ $t('wallet.administration.budgetConfiguration.threshold.title') }}
@@ -83,7 +83,7 @@
             {{ threshold }} {{ $t('wallet.administration.budgetConfiguration.points') }}
           </v-list-item-action>
         </v-list-item>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ budgetTypeLabel }}
@@ -169,10 +169,10 @@ export default {
       return this.rewardPeriod?.timeZone || this.rewardSettings?.timeZone;
     },
     amount() {
-      return this.rewardSettings?.amount;
+      return this.valueFormatted(this.rewardSettings?.amount);
     },
     threshold() {
-      return this.rewardSettings?.threshold;
+      return this.valueFormatted(this.rewardSettings?.threshold);
     },
     budgetType() {
       return this.rewardSettings?.budgetType;
@@ -187,6 +187,13 @@ export default {
   methods: {
     openConfigurationDrawer() {
       this.$emit('openConfiguration');
+    },
+    valueFormatted(max) {
+      return new Intl.NumberFormat(eXo.env.portal.language, {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(max);
     },
   },
 };
