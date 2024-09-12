@@ -59,7 +59,7 @@
         </span>
       </v-btn>
       <template v-else>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ tokenName }}
@@ -69,7 +69,7 @@
             <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
           </v-list-item-action>
         </v-list-item>
-        <v-list-item dense>
+        <v-list-item>
           <v-list-item-content>
             <v-list-item-title class="text-wrap">
               {{ $t('wallet.administration.gas') }}
