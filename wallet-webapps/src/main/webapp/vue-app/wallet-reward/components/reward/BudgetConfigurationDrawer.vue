@@ -73,7 +73,6 @@
           v-model="settingsToSave.threshold"
           :step="1"
           :max="1000"
-          :width="40"
           editable
           class="me-n1 pa-0 ma-0"
           @valid="invalidThreshold = !$event" />
