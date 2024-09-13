@@ -39,7 +39,6 @@
                 <v-btn
                   :href="walletAdminUri"
                   :aria-label="$t('wallet.administration.manageWallet')"
-                  target="_blank"
                   small
                   icon>
                   <v-icon size="18">fas fa-credit-card</v-icon>
@@ -66,7 +65,7 @@
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action class="d-inline-block ma-auto pe-1">
-            <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> <span class="fundsLabels"> {{ tokenBalance }} </span>
+            <span class="fundsLabels"> MEED {{ tokenBalance }} </span>
           </v-list-item-action>
         </v-list-item>
         <v-list-item>
