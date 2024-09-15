@@ -483,11 +483,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
     }
 
     if (WalletType.isSpace(senderWallet.getType())) {
-      if (getSpaceService().isSuperManager(currentUserId)) {
-        return true;
-      }
-      Space space = getSpace(accountId);
-      return space != null && getSpaceService().isManager(space, currentUserId);
+      return getSpaceService().canManageSpace(getSpace(accountId), currentUserId);
     } else {
       return StringUtils.equalsIgnoreCase(accountId, currentUserId);
     }
