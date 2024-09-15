@@ -681,8 +681,7 @@ public class WalletUtils {
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
-    return spaceService.isSuperManager(accesssor) || spaceService.isMember(space, accesssor)
-        || spaceService.isManager(space, accesssor);
+    return spaceService.canViewSpace(space, accesssor);
   }
 
   public static boolean checkUserIsSpaceManager(String spaceId,
@@ -693,7 +692,7 @@ public class WalletUtils {
       throw new IllegalStateException("Space not found with id '" + spaceId + "'");
     }
     SpaceService spaceService = CommonsUtils.getService(SpaceService.class);
-    if (!spaceService.isManager(space, modifier) && !spaceService.isSuperManager(modifier)) {
+    if (!spaceService.canManageSpace(space, modifier)) {
       if (throwException) {
         LOG.error("User '{}' attempts to access wallet address of space '{}'", modifier, space.getDisplayName());
         throw new IllegalAccessException();
