@@ -119,11 +119,11 @@ public class SpaceServiceMock implements SpaceService {
     throw new UnsupportedOperationException();
   }
 
-  public Space updateSpaceAvatar(Space existingSpace) {
+  public Space updateSpaceAvatar(Space existingSpace, String username) {
     throw new UnsupportedOperationException();
   }
 
-  public Space updateSpaceBanner(Space existingSpace) {
+  public Space updateSpaceBanner(Space existingSpace, String username) {
     throw new UnsupportedOperationException();
   }
 
@@ -296,7 +296,7 @@ public class SpaceServiceMock implements SpaceService {
 
   }
 
-  public void renameSpace(String remoteId, Space space, String newDisplayName) throws SpaceException {
+  public void renameSpace(Space space, String newDisplayName, String remoteId) throws SpaceException {
     throw new UnsupportedOperationException();
 
   }
@@ -549,14 +549,6 @@ public class SpaceServiceMock implements SpaceService {
   public void unregisterSpaceLifeCycleListener(SpaceLifeCycleListener listener) {
     throw new UnsupportedOperationException();
 
-  }
-
-  public void setPortletsPrefsRequired(PortletPreferenceRequiredPlugin portletPrefsRequiredPlugin) {
-    // Nothing to change
-  }
-
-  public String[] getPortletsPrefsRequired() {
-    throw new UnsupportedOperationException();
   }
 
   public ListAccess<Space> getVisitedSpaces(String remoteId, String appId) {
