@@ -4,15 +4,15 @@
 <%@ page import="org.exoplatform.webui.application.WebuiRequestContext"%>
 <%@ page import="org.exoplatform.web.application.RequestContext"%>
 <%@ page import="org.exoplatform.container.ExoContainerContext"%>
-<%@ page import="org.exoplatform.wallet.service.WalletService"%>
-<%@ page import="org.exoplatform.wallet.service.WalletAccountService"%>
+<%@ page import="io.meeds.wallet.service.wallet.WalletService"%>
+<%@ page import="io.meeds.wallet.service.wallet.WalletAccountService"%>
 <%@ page import="org.exoplatform.services.resources.ResourceBundleService"%>
-<%@ page import="org.exoplatform.wallet.model.settings.GlobalSettings"%>
-<%@ page import="org.exoplatform.wallet.model.ContractDetail"%>
-<%@ page import="org.exoplatform.wallet.model.Wallet"%>
-<%@ page import="org.exoplatform.wallet.model.WalletType"%>
+<%@ page import="io.meeds.wallet.settings.model.wallet.GlobalSettings"%>
+<%@ page import="io.meeds.wallet.model.wallet.ContractDetail"%>
+<%@ page import="io.meeds.wallet.model.wallet.Wallet"%>
+<%@ page import="io.meeds.wallet.model.wallet.WalletType"%>
 <%@ page import="org.exoplatform.social.core.service.LinkProvider"%>
-<%@ page import="org.exoplatform.wallet.utils.WalletUtils"%>
+<%@ page import="io.meeds.wallet.utils.wallet.WalletUtils"%>
 
 <%
   String title = "Wallet";
