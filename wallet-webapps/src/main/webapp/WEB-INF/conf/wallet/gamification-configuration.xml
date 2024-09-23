@@ -28,12 +28,12 @@
     <component-plugin>
       <name>exo.wallet.addressAssociation.new</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.listener.GamificationWalletInitializationListener</type>
+      <type>io.meeds.wallet.listener.GamificationWalletInitializationListener</type>
     </component-plugin>
     <component-plugin>
       <name>exo.wallet.addressAssociation.modification</name>
       <set-method>addListener</set-method>
-      <type>org.exoplatform.wallet.listener.GamificationWalletInitializationListener</type>
+      <type>io.meeds.wallet.listener.GamificationWalletInitializationListener</type>
     </component-plugin>
   </external-component-plugins>
 
