@@ -1,6 +1,6 @@
-org.exoplatform.wallet.entity.AddressLabelEntity
-org.exoplatform.wallet.entity.TransactionEntity
-org.exoplatform.wallet.entity.WalletBackupEntity
-org.exoplatform.wallet.entity.WalletBlockchainStateEntity
-org.exoplatform.wallet.entity.WalletEntity
-org.exoplatform.wallet.entity.WalletPrivateKeyEntity
+io.meeds.wallet.entity.AddressLabelEntity
+io.meeds.wallet.entity.TransactionEntity
+io.meeds.wallet.entity.WalletBackupEntity
+io.meeds.wallet.entity.WalletBlockchainStateEntity
+io.meeds.wallet.entity.WalletEntity
+io.meeds.wallet.entity.WalletPrivateKeyEntity
