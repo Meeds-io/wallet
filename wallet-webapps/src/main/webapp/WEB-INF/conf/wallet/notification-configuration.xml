@@ -52,7 +52,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.wallet.notification.plugin.WalletReceiverNotificationPlugin</type>
+      <type>io.meeds.wallet.notification.plugin.WalletReceiverNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.WalletReceiverNotificationPlugin</name>
@@ -89,7 +89,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.wallet.notification.plugin.WalletSenderNotificationPlugin</type>
+      <type>io.meeds.wallet.notification.plugin.WalletSenderNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.WalletSenderNotificationPlugin</name>
@@ -126,7 +126,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.wallet.notification.plugin.FundsRequestNotificationPlugin</type>
+      <type>io.meeds.wallet.notification.plugin.FundsRequestNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.FundsRequestNotificationPlugin</name>
@@ -163,7 +163,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>notification.plugins</name>
       <set-method>addPlugin</set-method>
-      <type>org.exoplatform.wallet.reward.notification.RewardSuccessNotificationPlugin</type>
+      <type>io.meeds.wallet.reward.notification.RewardSuccessNotificationPlugin</type>
       <init-params>
         <object-param>
           <name>template.RewardSuccessNotificationPlugin</name>
@@ -202,7 +202,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>mail.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.notification.provider.MailTemplateProvider</type>
+      <type>io.meeds.wallet.notification.provider.MailTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -213,7 +213,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin profiles="push-notifications">
       <name>push.channel.wallet.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.notification.provider.MobilePushTemplateProvider</type>
+      <type>io.meeds.wallet.notification.provider.MobilePushTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -224,7 +224,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin>
       <name>mail.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <type>io.meeds.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
@@ -235,7 +235,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <component-plugin profiles="push-notifications">
       <name>push.channel.wallet.reward.template</name>
       <set-method>registerTemplateProvider</set-method>
-      <type>org.exoplatform.wallet.reward.notification.RewardSuccessTemplateProvider</type>
+      <type>io.meeds.wallet.reward.notification.RewardSuccessTemplateProvider</type>
       <init-params>
         <value-param>
           <name>channel-id</name>
