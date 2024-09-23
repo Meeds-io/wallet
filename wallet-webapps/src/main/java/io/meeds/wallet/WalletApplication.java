@@ -24,6 +24,7 @@ import org.springframework.context.annotation.PropertySource;
 
 import io.meeds.spring.AvailableIntegration;
 import io.meeds.spring.kernel.PortalApplicationContextInitializer;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = { 
         WalletApplication.MODULE_NAME,
@@ -34,6 +35,7 @@ import io.meeds.spring.kernel.PortalApplicationContextInitializer;
 exclude = {
         LiquibaseAutoConfiguration.class,
 })
+@EnableJpaRepositories(basePackages = WalletApplication.MODULE_NAME)
 @PropertySource("classpath:application.properties")
 @PropertySource("classpath:application-common.properties")
 public class WalletApplication extends PortalApplicationContextInitializer {
