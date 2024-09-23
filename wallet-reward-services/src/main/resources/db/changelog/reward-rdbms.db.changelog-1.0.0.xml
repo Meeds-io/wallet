@@ -185,4 +185,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-15">
+    <addColumn tableName="ADDONS_WALLET_REWARD">
+      <column name="POINTS" type="DOUBLE" />
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="reward" author="1.0.0-16">
+    <sql>UPDATE ADDONS_WALLET_REWARD
+         SET POINTS=(SELECT POINTS FROM ADDONS_WALLET_REWARD_PLUGIN WHERE ADDONS_WALLET_REWARD.REWARD_ID = ADDONS_WALLET_REWARD_PLUGIN.REWARD_ID LIMIT 1)
+    </sql>
+
+  </changeSet>
+
 </databaseChangeLog>

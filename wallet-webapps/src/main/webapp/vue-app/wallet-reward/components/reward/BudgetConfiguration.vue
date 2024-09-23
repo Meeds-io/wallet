@@ -39,11 +39,29 @@
               <div v-on="on">
                 <v-btn
                   :aria-label="$t('wallet.administration.budgetConfiguration.editConfiguration')"
-                  target="_blank"
                   small
                   icon
                   @click="openConfigurationDrawer">
                   <v-icon size="18">fas fa-edit</v-icon>
+                </v-btn>
+              </div>
+            </template>
+            <span>{{ $t('wallet.administration.budgetConfiguration.editConfiguration') }}</span>
+          </v-tooltip>
+        </v-list-item-action>
+        <v-list-item-action v-if="!loading && hasConfiguredBudget" class="ma-auto">
+          <v-tooltip
+            :disabled="$root.isMobile"
+            bottom>
+            <template #activator="{ on }">
+              <div v-on="on">
+                <v-btn
+                  :aria-label="$t('wallet.administration.budgetConfiguration.deleteConfiguration')"
+                  color="error"
+                  small
+                  icon
+                  @click="deleteConfirmDialog">
+                  <v-icon size="18">fas fa-trash</v-icon>
                 </v-btn>
               </div>
             </template>
@@ -108,10 +126,18 @@
         </v-btn>
       </template>
     </div>
+    <exo-confirm-dialog
+      ref="deleteConfirmDialog"
+      :message="$t('wallet.administration.budgetConfiguration.message.confirmDeleteConfiguration')"
+      :title="$t('wallet.administration.budgetConfiguration.confirmDeleteConfiguration')"
+      :ok-label="$t('wallet.administration.confirm.label')"
+      :cancel-label="$t('wallet.administration.cancel.label')"
+      @ok="$emit('deleteSetting')" />
   </v-card>
 </template>
 
 <script>
+
 export default {
   props: {
     loading: {
@@ -187,6 +213,9 @@ export default {
   methods: {
     openConfigurationDrawer() {
       this.$emit('openConfiguration');
+    },
+    deleteConfirmDialog() {
+      this.$refs.deleteConfirmDialog.open();
     },
     valueFormatted(max) {
       return new Intl.NumberFormat(eXo.env.portal.language, {
