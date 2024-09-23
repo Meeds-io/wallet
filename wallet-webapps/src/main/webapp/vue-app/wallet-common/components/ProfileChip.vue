@@ -37,9 +37,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <template v-else-if="!enabled">
       <del class="red--text">{{ displayName }}</del> ({{ $t('exoplatform.wallet.label.disabledWallet') }})
     </template>
-    <template v-else-if="disabledInRewardPool">
-      {{ displayName }} <span class="red--text">({{ $t('exoplatform.wallet.label.disabledPool') }})</span>
-    </template>
     <template v-else-if="isNotInitialized">
       {{ displayName }} <span class="orange--text">({{ $t('exoplatform.wallet.label.notInitialized') }})</span>
     </template>
@@ -92,12 +89,6 @@ export default {
       type: Boolean,
       default: function() {
         return true;
-      },
-    },
-    disabledInRewardPool: {
-      type: Boolean,
-      default: function() {
-        return false;
       },
     },
     displayNoAddress: {
