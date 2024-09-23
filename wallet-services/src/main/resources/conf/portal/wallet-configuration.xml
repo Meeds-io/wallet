@@ -37,45 +37,45 @@
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.dao.AddressLabelDAO</type>
+    <type>io.meeds.wallet.dao.AddressLabelDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.dao.WalletAccountDAO</type>
+    <type>io.meeds.wallet.dao.WalletAccountDAO</type>
   </component>
   <component>
-    <type>org.exoplatform.wallet.dao.WalletAccountBackupDAO</type>
-  </component>
-
-  <component>
-    <type>org.exoplatform.wallet.dao.WalletTransactionDAO</type>
+    <type>io.meeds.wallet.dao.WalletAccountBackupDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.dao.WalletPrivateKeyDAO</type>
+    <type>io.meeds.wallet.dao.WalletTransactionDAO</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.dao.WalletBlockchainStateDAO</type>
+    <type>io.meeds.wallet.dao.WalletPrivateKeyDAO</type>
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.storage.WalletStorage</key>
-    <type>org.exoplatform.wallet.storage.cached.CachedAccountStorage</type>
+    <type>io.meeds.wallet.dao.WalletBlockchainStateDAO</type>
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.storage.TransactionStorage</key>
-    <type>org.exoplatform.wallet.storage.cached.CachedTransactionStorage</type>
+    <key>io.meeds.wallet.storage.WalletStorage</key>
+    <type>io.meeds.wallet.storage.cached.CachedAccountStorage</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.storage.AddressLabelStorage</type>
+    <key>io.meeds.wallet.storage.TransactionStorage</key>
+    <type>io.meeds.wallet.storage.cached.CachedTransactionStorage</type>
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.service.WalletAccountService</key>
-    <type>org.exoplatform.wallet.service.WalletAccountServiceImpl</type>
+    <type>io.meeds.wallet.storage.AddressLabelStorage</type>
+  </component>
+
+  <component>
+    <key>io.meeds.wallet.wallet.service.WalletAccountService</key>
+    <type>io.meeds.wallet.service.WalletAccountServiceImpl</type>
     <init-params>
       <value-param>
         <name>admin.wallet.key</name>
@@ -86,8 +86,8 @@
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.service.WalletTransactionService</key>
-    <type>org.exoplatform.wallet.service.WalletTransactionServiceImpl</type>
+    <key>io.meeds.wallet.wallet.service.WalletTransactionService</key>
+    <type>io.meeds.wallet.service.WalletTransactionServiceImpl</type>
     <init-params>
       <value-param>
         <name>transaction.pending.maxDays</name>
@@ -108,8 +108,8 @@
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.service.WalletContractService</key>
-    <type>org.exoplatform.wallet.service.WalletContractServiceImpl</type>
+    <key>io.meeds.wallet.wallet.service.WalletContractService</key>
+    <type>io.meeds.wallet.service.WalletContractServiceImpl</type>
     <init-params>
       <value-param>
         <name>contract.abi.path</name>
@@ -125,8 +125,8 @@
   </component>
 
   <component>
-    <key>org.exoplatform.wallet.service.WalletService</key>
-    <type>org.exoplatform.wallet.service.WalletServiceImpl</type>
+    <key>io.meeds.wallet.wallet.service.WalletService</key>
+    <type>io.meeds.wallet.service.WalletServiceImpl</type>
     <init-params>
       <value-param>
         <name>networkId</name>
@@ -182,31 +182,31 @@
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.service.WalletWebSocketService</type>
+    <type>io.meeds.wallet.service.WalletWebSocketService</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.rest.WalletSettingsREST</type>
+    <type>io.meeds.wallet.wallet.rest.WalletSettingsREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.rest.WalletAccountREST</type>
+    <type>io.meeds.wallet.wallet.rest.WalletAccountREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.rest.WalletContractREST</type>
+    <type>io.meeds.wallet.wallet.rest.WalletContractREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.rest.WalletTransactionREST</type>
+    <type>io.meeds.wallet.wallet.rest.WalletTransactionREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.rest.WalletAdminTransactionREST</type>
+    <type>io.meeds.wallet.wallet.rest.WalletAdminTransactionREST</type>
   </component>
 
   <component>
-    <type>org.exoplatform.wallet.plugin.WalletAdminIdentityProvider</type>
+    <type>io.meeds.wallet.wallet.plugin.WalletAdminIdentityProvider</type>
   </component>
 
   <external-component-plugins>
@@ -218,7 +218,7 @@
       <init-params>
         <values-param>
           <name>providers</name>
-          <value>org.exoplatform.wallet.plugin.WalletAdminIdentityProvider</value>
+          <value>io.meeds.wallet.wallet.plugin.WalletAdminIdentityProvider</value>
         </values-param>
       </init-params>
     </component-plugin>
@@ -229,7 +229,7 @@
     <component-plugin>
       <name>wallet</name>
       <set-method>addFeaturePlugin</set-method>
-      <type>org.exoplatform.wallet.plugin.WalletFeaturePlugin</type>
+      <type>io.meeds.wallet.plugin.WalletFeaturePlugin</type>
     </component-plugin>
   </external-component-plugins>
 
