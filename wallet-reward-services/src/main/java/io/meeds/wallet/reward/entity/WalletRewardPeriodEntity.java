@@ -1,0 +1,66 @@
+/*
+ * This file is part of the Meeds project (https://meeds.io/).
+ * Copyright (C) 2020 Meeds Association
+ * contact@meeds.io
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+package io.meeds.wallet.reward.entity;
+
+import java.io.Serializable;
+
+import jakarta.persistence.*;
+
+import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
+
+import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
+import io.meeds.wallet.wallet.model.reward.RewardStatus;
+
+@Entity(name = "RewardPeriod")
+@DynamicUpdate
+@Table(name = "ADDONS_WALLET_REWARD_PERIOD")
+@Data
+public class WalletRewardPeriodEntity implements Serializable {
+
+  private static final long serialVersionUID = -6286934482105645678L;
+
+  @Id
+  @SequenceGenerator(name = "SEQ_WALLET_REWARD_PERIOD_ID", sequenceName = "SEQ_WALLET_REWARD_PERIOD_ID", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_REWARD_PERIOD_ID")
+  @Column(name = "REWARD_PERIOD_ID")
+  private Long              id;
+
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "PERIOD_TYPE", nullable = false)
+  private RewardPeriodType  periodType;
+
+  @Column(name = "START_TIME", nullable = false)
+  private Long              startTime;
+
+  @Column(name = "END_TIME", nullable = false)
+  private Long              endTime;
+
+  @Column(name = "TIME_ZONE")
+  private String            timeZone;
+
+  @Enumerated(EnumType.ORDINAL)
+  @Column(name = "STATUS", nullable = false)
+  private RewardStatus      status;
+
+  @Override
+  public String toString() {
+    return "WalletRewardPeriodEntity [id=" + id + ", periodType=" + periodType + ", startTime=" + startTime + ", endTime="
+        + endTime + ", status=" + status + "]";
+  }
+
+}
