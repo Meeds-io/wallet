@@ -2,7 +2,7 @@
 <%@ page import="jakarta.servlet.http.HttpSession" %>
 <%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
 <%@ page import="org.exoplatform.web.application.RequestContext" %>
-<%@ page import="org.exoplatform.wallet.utils.WalletUtils" %>
+<%@ page import="io.meeds.wallet.wallet.utils.WalletUtils" %>
 <%
 /*
 This file is part of the Meeds project (https://meeds.io/).

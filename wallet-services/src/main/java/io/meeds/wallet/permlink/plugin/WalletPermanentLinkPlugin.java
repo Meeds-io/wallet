@@ -23,10 +23,10 @@ import org.exoplatform.portal.config.UserPortalConfigService;
 import org.exoplatform.services.security.Identity;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import org.exoplatform.wallet.model.Wallet;
-import org.exoplatform.wallet.model.WalletType;
-import org.exoplatform.wallet.service.WalletAccountService;
-import org.exoplatform.wallet.utils.WalletUtils;
+import io.meeds.wallet.wallet.model.Wallet;
+import io.meeds.wallet.wallet.model.WalletType;
+import io.meeds.wallet.wallet.service.WalletAccountService;
+import io.meeds.wallet.wallet.utils.WalletUtils;
 
 import io.meeds.portal.permlink.model.PermanentLinkObject;
 import io.meeds.portal.permlink.plugin.PermanentLinkPlugin;
