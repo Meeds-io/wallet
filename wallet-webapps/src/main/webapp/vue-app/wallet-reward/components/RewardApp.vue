@@ -22,25 +22,36 @@
   <v-app
     id="RewardApp"
     flat>
-    <div class="d-flex flex-row">
-      <v-card
-        class="d-flex flex-column justify-space-between"
-        width="40%"
-        flat>
-        <wallet-current-balance />
-      </v-card>
-      <wallet-budget-configuration
-        :loading="loading"
+    <temlate v-if="!showRewardDetails">
+      <div class="d-flex flex-row">
+        <v-card
+          class="d-flex flex-column justify-space-between"
+          width="40%"
+          flat>
+          <wallet-current-balance />
+        </v-card>
+        <wallet-budget-configuration
+          :loading="loading"
+          :reward-settings="rewardSettings"
+          :reward-report="rewardReport"
+          @openConfiguration="openBudgetConfigurationDrawer"
+          @deleteSetting="deleteRewardSettings" />
+      </div>
+      <wallet-reward-management
+        v-if="!loading"
+        :reward-reports="rewardReports"
+        :reward-settings="rewardSettings"
+        @openDetails="openDetails"
+        @loadMore="loadMore" />
+      <wallet-budget-configuration-drawer
         :reward-settings="rewardSettings"
         :reward-report="rewardReport"
-        @openConfiguration="openBudgetConfigurationDrawer" />
-    </div>
-    <wallet-reward-management />
-    <wallet-budget-configuration-drawer
-      :reward-settings="rewardSettings"
-      :reward-report="rewardReport"
-      @setting-updated="refreshRewardSettings"
-      ref="budgetConfiguration" />
+        @setting-updated="settingUpdated"
+        ref="budgetConfiguration" />
+    </temlate>
+    <template v-else>
+      <wallet-reward-details :reward-report="selectedRewardReport" @back="showRewardDetails = false" />
+    </template>
   </v-app>
 </template>
 
@@ -50,9 +61,16 @@ export default {
   data: () => ({
     rewardSettings: {},
     loading: false,
-    rewardReport: null,
+    rewardReports: [],
+    selectedRewardReport: null,
+    showRewardDetails: false,
+    rewardsPage: 0,
+    rewardsPageSize: 12,
   }),
   computed: {
+    rewardReport() {
+      return this.rewardReports[0];
+    },
     rewardPeriod() {
       return this.rewardReport?.period;
     },
@@ -80,14 +98,30 @@ export default {
       if (period) {
         this.period = period;
       }
-      this.loading = true;
-      return this.$rewardService.computeRewards(this.selectedDate)
-        .then(rewardReport => {
-          this.rewardReport = rewardReport;
+      return this.$rewardService.computeRewards(this.rewardsPage, this.rewardsPageSize)
+        .then(rewardReports => {
+          this.rewardReports.push(...rewardReports);
           return this.$nextTick();
-        })
-        .finally(() => this.loading = false);
+        });
     },
+    deleteRewardSettings() {
+      return this.$rewardService.deleteRewardSettings()
+        .then(() => {
+          return this.refreshRewardSettings();
+        });
+    },
+    openDetails(rewardReport) {
+      this.showRewardDetails = true;
+      this.selectedRewardReport = rewardReport;
+    },
+    loadMore() {
+      this.rewardsPage += 1;
+      this.refreshRewards();
+    },
+    settingUpdated() {
+      this.rewardReports = [];
+      this.refreshRewardSettings();
+    }
   },
 };
 </script>

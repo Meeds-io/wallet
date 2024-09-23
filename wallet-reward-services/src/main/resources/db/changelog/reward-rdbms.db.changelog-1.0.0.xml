@@ -185,4 +185,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-15">
+    <addColumn tableName="ADDONS_WALLET_REWARD">
+      <column name="POINTS" type="DOUBLE" />
+    </addColumn>
+  </changeSet>
+
 </databaseChangeLog>
