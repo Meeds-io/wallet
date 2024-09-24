@@ -45,7 +45,7 @@
         </v-icon>
         <span class="text-header font-weight-light">{{ rangeDateTimeTitle }}</span>
       </v-card-title>
-      <template v-if="hasConfiguredBudget">
+      <template v-if="hasConfiguredBudget || completelyProceeded">
         <v-card-title class="px-2 py-1">
           <v-icon
             :class="statusIconClass"
@@ -209,8 +209,17 @@ export default {
     tokensToSend() {
       return this.rewardReport?.tokensToSend;
     },
-    budget() {
+    tokensSent() {
+      return this.rewardReport?.tokensSent;
+    },
+    formatedTokensToSend() {
       return Number.isFinite(Number(this.tokensToSend)) ? Math.trunc(this.tokensToSend) : 0;
+    },
+    formatedTokensSent() {
+      return Number.isFinite(Number(this.tokensSent)) ? Math.trunc(this.tokensSent) : 0;
+    },
+    budget() {
+      return this.completelyProceeded ? this.formatedTokensSent : this.formatedTokensToSend;
     },
     period() {
       return this.rewardReport?.period;

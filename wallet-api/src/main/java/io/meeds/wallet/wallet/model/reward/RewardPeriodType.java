@@ -20,15 +20,14 @@ import static io.meeds.wallet.wallet.utils.RewardUtils.timeToSecondsAtDayStart;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public enum RewardPeriodType {
-  WEEK, MONTH, QUARTER, SEMESTER, YEAR;
+  WEEK, MONTH, QUARTER;
 
-  public static final RewardPeriodType DEFAULT = MONTH;
+  public static final RewardPeriodType DEFAULT = WEEK;
 
   public RewardPeriod getPeriodOfTime(LocalDate date, ZoneId zoneId) {
     ZonedDateTime zonedDateTime = date.atStartOfDay(zoneId);
@@ -49,9 +48,8 @@ public enum RewardPeriodType {
       rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(firstDayOfNextWeek.toLocalDate(), zoneId));
       break;
     case MONTH:
-      YearMonth currentMonth = yearMonth;
-      YearMonth nextMonth = currentMonth.plusMonths(1);
-      rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(currentMonth.atDay(1), zoneId));
+      YearMonth nextMonth = yearMonth.plusMonths(1);
+      rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(yearMonth.atDay(1), zoneId));
       rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(nextMonth.atDay(1), zoneId));
       break;
     case QUARTER:
@@ -61,18 +59,6 @@ public enum RewardPeriodType {
       YearMonth endQuarterMonth = startQuarterMonth.plusMonths(3);
       rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(startQuarterMonth.atDay(1), zoneId));
       rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(endQuarterMonth.atDay(1), zoneId));
-      break;
-    case SEMESTER:
-      int monthSemesterIndex = ((yearMonth.getMonthValue() - 1) / 6) * 6 + 1;
-
-      YearMonth startSemesterMonth = YearMonth.of(yearMonth.getYear(), monthSemesterIndex);
-      YearMonth endSemesterMonth = startSemesterMonth.plusMonths(6);
-      rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(startSemesterMonth.atDay(1), zoneId));
-      rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(endSemesterMonth.atDay(1), zoneId));
-      break;
-    case YEAR:
-      rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(Year.from(zonedDateTime).atDay(1), zoneId));
-      rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(Year.from(zonedDateTime).plusYears(1).atDay(1), zoneId));
       break;
     }
     return rewardPeriod;

@@ -63,6 +63,7 @@ import io.meeds.wallet.wallet.service.WalletAccountService;
 import io.meeds.wallet.wallet.service.WalletTokenAdminService;
 
 import lombok.Setter;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -198,23 +199,34 @@ public class WalletRewardReportService implements RewardReportService {
     if (date == null) {
       throw new IllegalArgumentException("date is mandatory");
     }
-
-    RewardReport rewardReport = getRewardReport(date);
-    if (rewardReport == null) {
-      rewardReport = new RewardReport();
-      rewardReport.setPeriod(getRewardPeriod(date));
-    }
-
     RewardPeriod rewardPeriod = getRewardPeriod(date);
     Date start = new Date(rewardPeriod.getStartDateInSeconds() * 1000L);
     Date end = new Date(rewardPeriod.getEndDateInSeconds() * 1000L);
-    List<Long> participants = realizationService.getParticipantsBetweenDates(start, end);
+
     RealizationFilter realizationFilter = new RealizationFilter();
     realizationFilter.setEarnerType(IdentityType.USER);
     realizationFilter.setFromDate(start);
     realizationFilter.setToDate(end);
+
+    int participationsCount = realizationService.countRealizationsByFilter(realizationFilter);
+
+    if (participationsCount == 0) {
+      RewardReport rewardReport = new RewardReport();
+      rewardReport.setPeriod(getRewardPeriod(date));
+      rewardReport.setParticipationsCount(0);
+      return rewardReport;
+    }
+
+    RewardReport rewardReport = getRewardReport(date);
+    if (rewardReport != null) {
+      rewardReport.setParticipationsCount(realizationService.countRealizationsByFilter(realizationFilter));
+      return rewardReport;
+    }
+    rewardReport = new RewardReport();
+    rewardReport.setPeriod(getRewardPeriod(date));
     rewardReport.setParticipationsCount(realizationService.countRealizationsByFilter(realizationFilter));
 
+    List<Long> participants = realizationService.getParticipantsBetweenDates(start, end);
     // Only user wallets benefits from rewards
     Set<Wallet> wallets = walletAccountService.listWalletsByIdentityIds(participants)
                                               .stream()
