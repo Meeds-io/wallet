@@ -63,7 +63,7 @@ public class RewardReport {
 
   public Set<WalletReward> getValidRewards() {
     return rewards.stream()
-                  .filter(rewardItem -> rewardItem.getAmount() > 0)
+                  .filter(rewardItem -> rewardItem.getAmount() > 0 || rewardItem.getTokensSent() > 0)
                   .collect(Collectors.toSet());
   }
 
@@ -75,7 +75,7 @@ public class RewardReport {
 
   public long getValidRewardCount() {
     return rewards.stream()
-                  .filter(rewardItem -> rewardItem.getAmount() > 0)
+                  .filter(rewardItem -> rewardItem.getAmount() > 0 || rewardItem.getTokensSent() > 0)
                   .count();
   }
 
