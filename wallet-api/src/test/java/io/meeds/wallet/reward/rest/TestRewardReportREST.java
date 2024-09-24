@@ -123,6 +123,37 @@ class TestRewardReportREST {
   }
 
   @Test
+  void computeRewardsByPeriodAnonymously() throws Exception {
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/period/compute").content(asJsonString(rewardPeriod()))
+                                                                                .contentType(MediaType.APPLICATION_JSON)
+                                                                                .accept(MediaType.APPLICATION_JSON));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void computeRewardsByPeriodSimpleUser() throws Exception {
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/period/compute").content(asJsonString(rewardPeriod()))
+                                                                                .contentType(MediaType.APPLICATION_JSON)
+                                                                                .accept(MediaType.APPLICATION_JSON)
+                                                                                .with(testSimpleUser()));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void computeRewardsByPeriodAdmin() throws Exception {
+    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
+    RewardPeriod rewardPeriod = new RewardPeriod();
+    RewardReport rewardReport = new RewardReport();
+    rewardReport.setPeriod(rewardPeriod);
+    when(rewardReportService.computeRewards(any(LocalDate.class))).thenReturn(rewardReport);
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/period/compute").content(asJsonString(rewardPeriod))
+                                                                                .contentType(MediaType.APPLICATION_JSON)
+                                                                                .accept(MediaType.APPLICATION_JSON)
+                                                                                .with(testAdminUser()));
+    response.andExpect(status().isOk());
+  }
+
+  @Test
   void computeRewardsAdmin() throws Exception {
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
     RewardPeriod rewardPeriod = new RewardPeriod();
@@ -148,7 +179,7 @@ class TestRewardReportREST {
 
   @Test
   void sendRewardsAnonymously() throws Exception {
-    ResultActions response = mockMvc.perform(post(REST_PATH + "/send").param("date", "2024-09-10").content(asJsonString(rewardPeriod()))
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isForbidden());
@@ -156,7 +187,7 @@ class TestRewardReportREST {
 
   @Test
   void sendRewardsSimpleUser() throws Exception {
-    ResultActions response = mockMvc.perform(post(REST_PATH + "/send").param("date", "2024-09-10").content(asJsonString(rewardPeriod()))
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON).with(testSimpleUser()));
     response.andExpect(status().isForbidden());
@@ -182,15 +213,6 @@ class TestRewardReportREST {
     ResultActions response = mockMvc.perform(get(REST_PATH + "/list").param("limit", "10").with(testSimpleUser()));
     response.andExpect(status().isOk());
   }
-
-  /*
-   * @Test void countRewardsAnonymously() throws Exception { ResultActions
-   * response = mockMvc.perform(get(REST_PATH + "/countRewards").param("userId",
-   * "root")); response.andExpect(status().isForbidden()); }
-   * @Test void countRewardsSimpleUser() throws Exception { ResultActions response
-   * = mockMvc.perform(get(REST_PATH + "/countRewards").param("userId",
-   * "root").with(testSimpleUser())); response.andExpect(status().isOk()); }
-   */
 
   @Test
   void getRewardReportPeriodsAnonymously() throws Exception {

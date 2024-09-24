@@ -66,7 +66,7 @@ public class WalletRewardSettingsServiceTest {
     long amount = 1L;
     long threshold = 2L;
     RewardBudgetType budgetType = RewardBudgetType.FIXED_PER_POINT;
-    RewardPeriodType periodType = RewardPeriodType.SEMESTER;
+    RewardPeriodType periodType = RewardPeriodType.MONTH;
 
     newSettings.setPeriodType(periodType);
     newSettings.setAmount(amount);

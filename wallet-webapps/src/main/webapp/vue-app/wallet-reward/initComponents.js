@@ -2,6 +2,7 @@ import RewardApp from './components/RewardApp.vue';
 import RewardManagement from './components/reward/RewardManagement.vue';
 import RewardCard from './components/reward/RewardCard.vue';
 import RewardDetails from './components/reward/RewardDetails.vue';
+import RewardDetailsItem from './components/reward/RewardDetailsItem.vue';
 import CurrentBalance from './components/reward/CurrentBalance.vue';
 import BudgetConfiguration from './components/reward/BudgetConfiguration.vue';
 import BudgetConfigurationDrawer from './components/reward/BudgetConfigurationDrawer.vue';
@@ -14,6 +15,7 @@ const components = {
   'wallet-reward-management': RewardManagement,
   'wallet-reward-card': RewardCard,
   'wallet-reward-details': RewardDetails,
+  'wallet-reward-details-item': RewardDetailsItem,
   'wallet-current-balance': CurrentBalance,
   'wallet-budget-configuration': BudgetConfiguration,
   'wallet-budget-configuration-drawer': BudgetConfigurationDrawer,

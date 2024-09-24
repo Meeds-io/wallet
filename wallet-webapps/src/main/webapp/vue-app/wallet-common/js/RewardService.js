@@ -117,6 +117,36 @@ export function computeRewards(page, size) {
   });
 }
 
+export function computeRewardsByPeriod(period) {
+  return fetch('/wallet/rest/reward/period/compute', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: period?.id,
+      rewardPeriodType: period?.rewardPeriodType,
+      timeZone: period?.timeZone,
+      startDateInSeconds: period?.startDateInSeconds,
+      endDateInSeconds: period?.endDateInSeconds
+    })
+  }).then((resp) => {
+    if (resp) {
+      try {
+        return resp.json().catch(() => {
+          throw new Error('Error computing rewards');
+        });
+      } catch (e) {
+        throw new Error('Error computing rewards');
+      }
+    } else {
+      throw new Error('Error computing rewards');
+    }
+  });
+}
+
 export function computeRewardsByUser(date) {
   return fetch(`/wallet/rest/reward/compute/user?date=${date}`, {
     method: 'GET',
