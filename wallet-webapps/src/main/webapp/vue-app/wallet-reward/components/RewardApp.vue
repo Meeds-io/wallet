@@ -22,7 +22,7 @@
   <v-app
     id="RewardApp"
     flat>
-    <temlate v-if="!showRewardDetails">
+    <template v-if="!showRewardDetails">
       <div class="d-flex flex-row">
         <v-card
           class="d-flex flex-column justify-space-between"
@@ -38,7 +38,7 @@
           @deleteSetting="deleteRewardSettings" />
       </div>
       <wallet-reward-management
-        v-if="!loading"
+        :loading="loadingRewards"
         :reward-reports="rewardReports"
         :reward-settings="rewardSettings"
         @openDetails="openDetails"
@@ -48,9 +48,11 @@
         :reward-report="rewardReport"
         @setting-updated="settingUpdated"
         ref="budgetConfiguration" />
-    </temlate>
+    </template>
     <template v-else>
-      <wallet-reward-details :reward-report="selectedRewardReport" @back="showRewardDetails = false" />
+      <wallet-reward-details
+        :reward-report="selectedRewardReport"
+        @back="showRewardDetails = false" />
     </template>
   </v-app>
 </template>
@@ -61,6 +63,7 @@ export default {
   data: () => ({
     rewardSettings: {},
     loading: false,
+    loadingRewards: false,
     rewardReports: [],
     selectedRewardReport: null,
     showRewardDetails: false,
@@ -98,11 +101,13 @@ export default {
       if (period) {
         this.period = period;
       }
+      this.loadingRewards = true;
+
       return this.$rewardService.computeRewards(this.rewardsPage, this.rewardsPageSize)
         .then(rewardReports => {
           this.rewardReports.push(...rewardReports);
           return this.$nextTick();
-        });
+        }).finally(() => this.loadingRewards = false);
     },
     deleteRewardSettings() {
       return this.$rewardService.deleteRewardSettings()
