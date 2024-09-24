@@ -21,20 +21,11 @@
 <template>
   <div class="mx-5">
     <div class="py-6 text-title">{{ $t('wallet.administration.rewardManagement') }}</div>
-    <template v-if="rewardReportsCount === 0">
-      <div class="pt-8 d-flex align-center justify-center">
-        <v-icon
-          color="orange darken-2"
-          size="50">
-          fa-money-bill
-        </v-icon>
-      </div>
-      <div class="d-flex flex-column justify-center align-center pb-8 pt-3 col-sm-8 mx-auto">
-        <p class="text-header mb-8">
-          {{ $t('wallet.administration.rewardManagement.noContributionsYet') }}
-        </p>
-      </div>
-    </template>
+    <v-progress-linear
+      v-if="rewardReportsCount === 0 && loading"
+      indeterminate
+      height="2"
+      color="primary" />
     <v-container v-else class="pa-0 ma-0">
       <v-row class="mx-n3">
         <v-col
@@ -49,6 +40,7 @@
     </v-container>
     <div class="d-flex justify-center py-4">
       <v-btn
+        v-if="rewardReportsCount > 0"
         :loading="loading"
         min-width="95%"
         class="btn"

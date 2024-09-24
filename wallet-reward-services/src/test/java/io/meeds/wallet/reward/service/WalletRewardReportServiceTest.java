@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
+import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
 import io.meeds.wallet.wallet.model.WalletState;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,7 @@ public class WalletRewardReportServiceTest { // NOSONAR
     assertEquals(0, rewardReport.getRewards().size());
 
     when(realizationService.getParticipantsBetweenDates(any(Date.class), any(Date.class))).thenReturn(List.of(1L, 4L, 5L));
+    when(realizationService.countRealizationsByFilter(any(RealizationFilter.class))).thenReturn(10);
     Set<Wallet> participantsWallet = new HashSet<>();
     participantsWallet.add(newWallet(1L));
     participantsWallet.add(newWallet(4L));

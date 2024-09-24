@@ -112,6 +112,24 @@ public class RewardReportREST {
     return rewardReports;
   }
 
+  @PostMapping(path = "period/compute")
+  @Secured("rewarding")
+  @Operation(
+          summary = "Compute rewards of wallets per a chosen period of time",
+          method = "GET",
+          description = "returns a set of wallet reward object")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public RewardReport computeRewardsByPeriod(@RequestBody
+                                             RewardPeriod rewardPeriod) {
+    RewardReport rewardReport = rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate());
+    rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
+    return rewardReport;
+  }
+
   @GetMapping(path = "compute/user")
   @Secured("users")
   @Operation(

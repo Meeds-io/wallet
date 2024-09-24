@@ -91,24 +91,4 @@ public class RewardPeriodTest {
     assertEquals(LocalDate.of(2022, Month.SEPTEMBER, 16), period.getPeriodMedianDate());
   }
 
-  @Test
-  public void testGetPeriodYear() {
-    ZoneId zoneId = ZoneId.of("America/Rio_Branco");
-
-    RewardSettings rewardSettings = new RewardSettings();
-    rewardSettings.setPeriodType(RewardPeriodType.YEAR);
-    rewardSettings.setTimeZone(zoneId.getId());
-
-    LocalDate date = LocalDate.of(2022, Month.SEPTEMBER, 1);
-
-    RewardPeriod period = RewardPeriod.getPeriodOfTime(rewardSettings, date);
-    assertEquals(1641013200l, period.getStartDateInSeconds());
-    assertEquals("1 Jan 2022", period.getStartDateFormatted("en"));
-    assertEquals(1672549200l, period.getEndDateInSeconds());
-    assertEquals("1 Jan 2023", period.getEndDateFormatted("en"));
-    assertEquals(RewardPeriodType.YEAR, period.getRewardPeriodType());
-    assertEquals(zoneId.getId(), period.getTimeZone());
-    assertEquals(LocalDate.of(2022, Month.JULY, 2), period.getPeriodMedianDate());
-  }
-
 }

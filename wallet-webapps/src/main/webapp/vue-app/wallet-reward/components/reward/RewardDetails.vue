@@ -40,6 +40,7 @@
         </v-card-title>
       </v-card>
       <v-spacer />
+      <span v-if="sendingInProgress" class="text-subtitle pe-2"> Sending in progress... </span>
       <v-tooltip
         v-if="!completelyProceeded"
         bottom
@@ -47,8 +48,9 @@
         <template #activator="{ on }">
           <div v-on="on" class="d-inline-block">
             <v-btn
+              :loading="loadingSending"
+              :disabled="isNotPastPeriod || sendingInProgress"
               class="btn btn-primary"
-              :disabled="isNotPastPeriod"
               @click="sendRewards">
               Reward
             </v-btn>
@@ -64,10 +66,10 @@
       }"
       :right-text-filter="{
         minCharacters: 3,
-        placeholder: 'Filter by name',
+        placeholder: this.$t('wallet.administration.rewardDetails.searchLabel'),
+        tooltip: this.$t('wallet.administration.rewardDetails.searchLabel')
       }"
-      @filter-text-input-end-typing="term = $event" />
-
+      @filter-text-input-end-typing="search = $event" />
     <v-data-table
       :headers="identitiesHeaders"
       :items="filteredIdentitiesList"
@@ -76,79 +78,12 @@
       item-key="identityId"
       hide-default-footer
       sortable>
-      <template slot="item" slot-scope="props">
-        <tr :active="props.selected">
-          <td class="text-start">
-            <v-avatar size="36px">
-              <img
-                :src="props.item.wallet.avatar"
-                onerror="this.src = '/platform-ui/skin/images/avatar/DefaultSpaceAvatar.png'"
-                alt="">
-            </v-avatar>
-            <wallet-reward-profile-chip
-              :address="props.item.wallet.address"
-              :profile-id="props.item.wallet.id"
-              :profile-technical-id="props.item.wallet.technicalId"
-              :space-id="props.item.wallet.spaceId"
-              :profile-type="props.item.wallet.type"
-              :display-name="props.item.wallet.name"
-              :enabled="props.item.wallet.enabled"
-              :disabled-in-reward-pool="props.item.disabledPool"
-              :deleted-user="props.item.wallet.deletedUser"
-              :disabled-user="props.item.wallet.disabledUser"
-              :avatar="props.item.wallet.avatar"
-              :initialization-state="props.item.wallet.initializationState"
-              display-no-address />
-          </td>
-          <td class="text-center">
-            <span>
-              {{ props.item.points }}
-            </span>
-          </td>
-          <td class="text-center">
-            <template v-if="!props.item.status">
-              <v-icon
-                v-if="!props.item.wallet.address"
-                :title="$t('exoplatform.wallet.label.noAddress')"
-                color="warning">
-                warning
-              </v-icon>
-              <v-icon
-                v-else-if="!props.item.amount"
-                :title="$t('exoplatform.wallet.label.noEnoughEarnedPoints')"
-                color="warning">
-                warning
-              </v-icon>
-              <div v-else>
-                -
-              </div>
-            </template>
-            <v-progress-circular
-              v-else-if="props.item.status === 'pending'"
-              color="primary"
-              indeterminate
-              size="20" />
-            <v-icon
-              v-else
-              :color="props.item.status === 'success' ? 'success' : 'error'"
-              :title="props.item.status === 'success' ? 'Successfully proceeded' : props.item.status === 'pending' ? 'Transaction in progress' : 'Transaction error'"
-              v-text="props.item.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'" />
-          </td>
-          <td class="text-center">
-            <span
-              v-if="props.item.amount"
-              :title="$t('exoplatform.wallet.label.amountSent')"
-              class="grey--text text--darken-1">
-              <span class="symbol fundsLabels"> {{ tokenSymbol }} </span>{{ walletUtils.toFixed(props.item.amount) }}
-            </span>
-            <span
-              v-else
-              :title="$t('exoplatform.wallet.label.noRewardsForPeriod')"
-              class="grey--text text--darken-1">
-              <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> 0
-            </span>
-          </td>
-        </tr>
+      <template #item="{item}">
+        <wallet-reward-details-item
+          :key="item.wallet.id"
+          :reward="item"
+          :token-symbol="tokenSymbol"
+          :completely-proceeded="completelyProceeded" />
       </template>
     </v-data-table>
   </v-card>
@@ -167,7 +102,8 @@ export default {
     }
   },
   data: () => ({
-    term: null,
+    search: null,
+    loadingSending: false,
     currentTimeInSeconds: Date.now() / 1000,
     lang: eXo.env.portal.language,
     dateFormat: {
@@ -238,37 +174,35 @@ export default {
     tokenSymbol() {
       return window.walletSettings.contractDetail?.symbol;
     },
+    sendingInProgress() {
+      return this.rewardReport?.rewards?.some(item => item.status === 'pending');
+    }
   },
   methods: {
-    openDetails() {
-      this.$emit('openDetails');
-    },
     filterItemFromList(walletReward, searchText) {
       if (!searchText || !searchText.length) {
         return true;
       }
       searchText = searchText.trim().toLowerCase();
-      const name = walletReward && walletReward.wallet && walletReward.wallet.name && walletReward.wallet.name.toLowerCase();
+      const name = walletReward?.wallet?.name?.toLowerCase();
       if (name.indexOf(searchText) > -1) {
         return true;
       }
-      const address = walletReward && walletReward.wallet && walletReward.wallet.address && walletReward.wallet.address.toLowerCase();
+      const address = walletReward?.wallet?.address?.toLowerCase();
       if (address.indexOf(searchText) > -1) {
         return true;
       }
-      const poolName = walletReward && walletReward.poolName && walletReward.poolName.toLowerCase();
-      return searchText === '-' || (poolName.indexOf(searchText) > -1);
-
     },
     sendRewards() {
-      this.error = null;
-      return this.$rewardService.sendRewards(this.period)
-        .catch(e => {
-          this.error = String(e);
-        })
-        .finally(() => {
-          this.$emit('refresh');
-        });
+      this.loadingSending = true;
+      return this.$rewardService.sendRewards(this.period).then(() => {
+        this.$rewardService.computeRewardsByPeriod(this.period)
+          .then(rewardReport => {
+            this.rewardReport = rewardReport;
+          }).finally(() => {
+            this.loadingSending = false;
+          });
+      });
     },
   },
 };
