@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -104,8 +105,8 @@ public class RewardReportREST {
     List<RewardPeriod> periods = generatePreviousPeriods(numberOfPeriods);
 
     List<RewardReport> rewardReports = periods.stream()
-                                              .skip((long) page * size) // Skip periods to get the correct page
-                                              .limit(size) // Limit the results to the specified size
+                                              .skip((long) page * size)
+                                              .limit(size)
                                               .map(rewardPeriod -> rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate()))
                                               .toList();
     rewardReports.forEach(rewardReport -> rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod())));
@@ -292,7 +293,7 @@ public class RewardReportREST {
     RewardPeriodType rewardPeriodType = settings.getPeriodType();
 
     ZonedDateTime zonedDateTime = RewardUtils.parseRFC3339ToZonedDateTime(date, zoneId);
-    return rewardPeriodType.getPeriodOfTime(zonedDateTime);
+    return rewardPeriodType.getPeriodOfTime(Objects.requireNonNull(zonedDateTime));
   }
 
   private List<RewardPeriod> generatePreviousPeriods(int count) {
@@ -316,17 +317,17 @@ public class RewardReportREST {
         end = start.plusMonths(1);
       }
       case QUARTER -> {
-        int currentQuarter = (currentDateTime.getMonthValue() - 1) / 3;
-        start = currentDateTime.minusMonths(i * 3L)
-                               .withMonth(currentQuarter * 3 + 1)
-                               .with(TemporalAdjusters.firstDayOfMonth())
-                               .truncatedTo(ChronoUnit.DAYS);
+        ZonedDateTime zonedDateTime = currentDateTime.minusMonths(i * 3L);
+        start = zonedDateTime.with(zonedDateTime.getMonth().firstMonthOfQuarter())
+                             .with(TemporalAdjusters.firstDayOfMonth())
+                             .truncatedTo(ChronoUnit.DAYS);
         end = start.plusMonths(3);
       }
       default -> throw new UnsupportedOperationException("Unknown period type");
       }
 
       RewardPeriod rewardPeriod = new RewardPeriod();
+      rewardPeriod.setRewardPeriodType(periodType);
       rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(LocalDate.from(start), currentDateTime.getZone()));
       rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(LocalDate.from(end), currentDateTime.getZone()));
 
