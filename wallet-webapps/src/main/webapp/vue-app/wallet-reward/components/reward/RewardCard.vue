@@ -32,7 +32,6 @@
       </div>
     </div>
     <v-card
-      :class="!isValid && 'filter-blur-3'"
       class="d-flex flex-column full-height"
       width="300"
       flat
@@ -45,28 +44,30 @@
         </v-icon>
         <span class="text-header font-weight-light">{{ rangeDateTimeTitle }}</span>
       </v-card-title>
-      <template v-if="hasConfiguredBudget || completelyProceeded">
-        <v-card-title class="px-2 py-1">
+      <template v-if="isValid">
+        <template v-if="hasConfiguredBudget || completelyProceeded">
+          <v-card-title class="px-2 py-1">
+            <v-icon
+              :class="statusIconClass"
+              :color="statusIconColor"
+              size="32"
+              left>
+              {{ statusIcon }}
+            </v-icon>
+            <span class="text-body font-weight-bold">{{ statusMessage }}</span>
+          </v-card-title>
+        </template>
+        <v-card-title v-else class="px-2 py-1">
           <v-icon
-            :class="statusIconClass"
-            :color="statusIconColor"
-            size="32"
+            color="error"
+            size="30"
             left>
-            {{ statusIcon }}
+            fas fa-times
           </v-icon>
-          <span class="text-body font-weight-bold">{{ statusMessage }}</span>
+          <span class="text-body font-weight-bold">{{ $t('wallet.administration.rewardCard.status.setYourBudget') }}</span>
         </v-card-title>
       </template>
-      <v-card-title v-else class="px-2 py-1">
-        <v-icon
-          color="error"
-          size="30"
-          left>
-          fas fa-times
-        </v-icon>
-        <span class="font-weight-bold">{{ $t('wallet.administration.rewardCard.status.setYourBudget') }}</span>
-      </v-card-title>
-      <v-card-actions>
+      <v-card-actions class="mt-auto">
         <v-list-item class="px-0">
           <div class="d-flex row no-gutters">
             <div class="col-12 col-sm-4 mb-2">
@@ -103,7 +104,7 @@
                 size="20">
                 fas fa-coins
               </v-icon>
-              <span class="subheading">{{ budget }} MEED</span>
+              <span class="subheading">{{ budget }}</span>
             </div>
           </div>
         </v-list-item>
@@ -204,7 +205,7 @@ export default {
       return this.rewardReport?.rewards?.length;
     },
     participationsCount() {
-      return this.rewardReport?.participationsCount;
+      return this.rewardReport?.participationsCount < 1000 ? this.rewardReport?.participationsCount : `${(this.rewardReport?.participationsCount / 1000).toFixed(1)}K`;
     },
     tokensToSend() {
       return this.rewardReport?.tokensToSend;
@@ -216,10 +217,10 @@ export default {
       return Number.isFinite(Number(this.tokensToSend)) ? Math.trunc(this.tokensToSend) : 0;
     },
     formatedTokensSent() {
-      return Number.isFinite(Number(this.tokensSent)) ? Math.trunc(this.tokensSent) : 0;
+      return Number.isFinite(Number(this.tokensSent)) ? Math.round(this.tokensSent) : 0;
     },
     budget() {
-      return this.completelyProceeded ? this.formatedTokensSent : this.formatedTokensToSend;
+      return this.completelyProceeded ? `${this.formatedTokensSent} MEED` : (this.hasConfiguredBudget ? `${this.formatedTokensToSend} MEED` : '-');
     },
     period() {
       return this.rewardReport?.period;
