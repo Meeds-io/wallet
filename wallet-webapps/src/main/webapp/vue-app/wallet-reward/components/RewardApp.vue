@@ -112,6 +112,7 @@ export default {
     deleteRewardSettings() {
       return this.$rewardService.deleteRewardSettings()
         .then(() => {
+          this.rewardReports = [];
           return this.refreshRewardSettings();
         });
     },

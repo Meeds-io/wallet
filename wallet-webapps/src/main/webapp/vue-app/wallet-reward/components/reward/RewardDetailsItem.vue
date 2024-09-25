@@ -48,18 +48,34 @@
     </td>
     <td class="text-center">
       <template v-if="!status">
-        <v-icon
+        <v-tooltip
           v-if="!walletAddress"
-          :title="$t('exoplatform.wallet.label.noAddress')"
-          color="warning">
-          warning
-        </v-icon>
-        <v-icon
+          bottom>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="orange darken-2"
+              size="16"
+              v-bind="attrs"
+              v-on="on">
+              fas fa-exclamation-triangle
+            </v-icon>
+          </template>
+          <span>{{ $t('exoplatform.wallet.label.noAddress') }}</span>
+        </v-tooltip>
+        <v-tooltip
           v-else-if="!amount"
-          :title="$t('exoplatform.wallet.label.noEnoughEarnedPoints')"
-          color="warning">
-          warning
-        </v-icon>
+          bottom>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="orange darken-2"
+              size="16"
+              v-bind="attrs"
+              v-on="on">
+              fas fa-exclamation-triangle
+            </v-icon>
+          </template>
+          <span>{{ $t('exoplatform.wallet.label.noEnoughEarnedPoints') }}</span>
+        </v-tooltip>
         <div v-else>
           -
         </div>
@@ -69,12 +85,20 @@
         color="primary"
         indeterminate
         size="20" />
-      <v-icon
+      <v-tooltip
         v-else
-        :color="statusIconColor"
-        :title="statusIconTitle">
-        {{ statusIcon }}
-      </v-icon>
+        bottom>
+        <template #activator="{ on, attrs }">
+          <v-icon
+            :color="statusIconColor"
+            size="16"
+            v-bind="attrs"
+            v-on="on">
+            {{ statusIcon }}
+          </v-icon>
+        </template>
+        <span>{{ statusIconTitle }}</span>
+      </v-tooltip>
     </td>
     <td class="text-center">
       <span
@@ -89,6 +113,48 @@
         class="grey--text text--darken-1">
         <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> 0
       </span>
+    </td>
+    <td class="text-center">
+      <v-menu
+        v-model="showMenu"
+        :close-on-content-click="false"
+        :nudge-left="0"
+        :max-width="300"
+        attach
+        transition="scale-transition"
+        offset-y
+        allow-overflow
+        eager>
+        <template #activator="{ on }">
+          <v-btn
+            icon
+            class="ml-2"
+            v-on="on"
+            @blur="closeMenu()">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+        <v-list class="pa-0">
+          <v-list-item
+            dense
+            @mousedown="$event.preventDefault()"
+            @click="openTransaction">
+            <v-list-item-icon class="me-2 my-auto">
+              <v-icon size="14" class="icon-default-color">fas fa-external-link-alt</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.openTransaction') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            dense
+            @mousedown="$event.preventDefault()"
+            @click="seeHistory">
+            <v-list-item-icon class="me-2 my-auto">
+              <v-icon size="14" class="icon-default-color">fas fa-history</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.seeHistory') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </td>
   </tr>
 </template>
@@ -111,6 +177,7 @@ export default {
   },
   data: () => ({
     term: null,
+    showMenu: false,
     currentTimeInSeconds: Date.now() / 1000,
     lang: eXo.env.portal.language,
     dateFormat: {
@@ -179,6 +246,18 @@ export default {
     amount() {
       return this.completelyProceeded ? this.reward?.tokensSent : this.reward?.amount;
     },
-  }};
+  },
+  methods: {
+    closeMenu(){
+      this.showMenu = false;
+    },
+    openTransaction() {
+      // TO DO
+    },
+    seeHistory() {
+      // TO DO
+    }
+  }
+};
 
 </script>
