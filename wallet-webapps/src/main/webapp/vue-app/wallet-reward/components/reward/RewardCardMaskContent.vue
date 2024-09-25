@@ -19,24 +19,18 @@
 
 -->
 <template>
-  <div>
-    <v-card-title class="px-2 py-1">
-      <v-icon
-        class="secondary--text"
-        left>
-        fas fa-calendar
-      </v-icon>
-      <span class="text-header font-weight-light">{{ rangeDate }}</span>
-    </v-card-title>
-    <v-card-title class="px-2 py-1">
-      <v-icon
-        class="white--text"
-        size="32"
-        left>
-        fas fa-slash
-      </v-icon>
+  <div class="d-flex flex-column full-width full-height align-center">
+    <v-list-item class="px-2 py-1">
+      <v-list-item-icon class="align-self-center ma-1">
+        <v-icon
+          class="white--text"
+          size="32"
+          left>
+          fas fa-slash
+        </v-icon>
+      </v-list-item-icon>
       <span class="text-body white--text font-weight-bold">{{ $t('wallet.administration.rewardCard.status.noParticipant') }}</span>
-    </v-card-title>
+    </v-list-item>
   </div>
 </template>
 <script >
