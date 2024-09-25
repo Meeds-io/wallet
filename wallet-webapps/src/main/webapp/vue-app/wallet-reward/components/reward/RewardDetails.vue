@@ -36,11 +36,11 @@
             left>
             fas fa-calendar
           </v-icon>
-          <span class="text-header font-weight-light">{{ rangeDateTimeTitle }}</span>
+          <span class="font-weight-bold">{{ rangeDateTimeTitle }}</span>
         </v-card-title>
       </v-card>
       <v-spacer />
-      <span v-if="sendingInProgress" class="text-subtitle pe-2"> Sending in progress... </span>
+      <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
       <v-tooltip
         v-if="!completelyProceeded"
         bottom
@@ -116,28 +116,29 @@ export default {
     identitiesHeaders() {
       return [
         {
-          text: this.$t('exoplatform.wallet.label.name'),
+          text: this.$t('wallet.administration.rewardDetails.label.name'),
           align: 'start',
-          sortable: true,
-          value: 'wallet.name',
+          sortable: false,
         },
         {
-          text: 'Points',
+          text: this.$t('wallet.administration.rewardDetails.label.points'),
           align: 'center',
-          sortable: true,
-          value: 'points',
+          sortable: false,
         },
         {
-          text: this.$t('exoplatform.wallet.label.status'),
+          text: this.$t('wallet.administration.rewardDetails.label.status'),
           align: 'center',
-          sortable: true,
-          value: 'status',
+          sortable: false,
         },
         {
-          text: 'Rewards',
+          text: this.$t('wallet.administration.rewardDetails.label.rewards'),
           align: 'center',
-          sortable: true,
-          value: 'tokensToSend',
+          sortable: false,
+        },
+        {
+          text: this.$t('wallet.administration.rewardDetails.label.actions'),
+          align: 'center',
+          sortable: false,
         },
       ];
     },
