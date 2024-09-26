@@ -196,7 +196,7 @@ export default {
       return this.rewardSettings?.storedSetting;
     },
     eligibleContributorsCount() {
-      return this.rewardReport?.validRewards?.length;
+      return this.hasConfiguredBudget ? this.rewardReport?.validRewards?.length : this.participants;
     },
     walletRewards() {
       return this.rewardReport?.rewards;
