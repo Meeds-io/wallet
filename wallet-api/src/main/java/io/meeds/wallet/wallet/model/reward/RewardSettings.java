@@ -36,7 +36,7 @@ public class RewardSettings implements Serializable, Cloneable {
 
   private RewardBudgetType  budgetType       = RewardBudgetType.DEFAULT;;
 
-  private double            threshold;
+  private double            threshold        = 0;
 
   private double            amount;
 
