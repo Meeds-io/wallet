@@ -107,10 +107,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <finalName>wallet-services</finalName>
     <plugins>
       <plugin>
-        <groupId>com.jcabi</groupId>
-        <artifactId>jcabi-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
@@ -153,16 +149,24 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <configuration>
+          <aspectLibraries>
+            <aspectLibrary>
+              <groupId>io.meeds.portal</groupId>
+              <artifactId>portal.component.common</artifactId>
+            </aspectLibrary>
+            <aspectLibrary>
+              <groupId>io.meeds.social</groupId>
+              <artifactId>social-component-api</artifactId>
+            </aspectLibrary>
+            <aspectLibrary>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>wallet-api</artifactId>
+            </aspectLibrary>
+          </aspectLibraries>
+        </configuration>
       </plugin>
     </plugins>
   </build>
