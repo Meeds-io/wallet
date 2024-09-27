@@ -68,10 +68,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           </swaggerConfig>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.jcabi</groupId>
-        <artifactId>jcabi-maven-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
 </project>
