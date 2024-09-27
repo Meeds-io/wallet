@@ -44,10 +44,6 @@ export function initAPI() {
 
 export function init() {
   window.walletAddonInstalled = true;
-  
-  document.addEventListener('profile-extension-init', () => {
-    document.dispatchEvent(new CustomEvent('exo-wallet-init'));
-  });
 }
 
 document.addEventListener('exo-wallet-init', () => {
