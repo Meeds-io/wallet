@@ -118,12 +118,8 @@
       <v-menu
         v-model="showMenu"
         :close-on-content-click="false"
-        :nudge-left="0"
-        :max-width="300"
-        attach
         transition="scale-transition"
         offset-y
-        allow-overflow
         eager>
         <template #activator="{ on }">
           <v-btn
@@ -135,15 +131,30 @@
           </v-btn>
         </template>
         <v-list class="pa-0">
-          <v-list-item
-            dense
-            @mousedown="$event.preventDefault()"
-            @click="openTransaction">
-            <v-list-item-icon class="me-2 my-auto">
-              <v-icon size="14" class="icon-default-color">fas fa-external-link-alt</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.openTransaction') }}</v-list-item-title>
-          </v-list-item>
+          <v-tooltip
+            bottom
+            :disabled="status">
+            <template #activator="{ on }">
+              <div v-on="on" class="d-inline-block">
+                <v-list-item
+                  :disabled="!status"
+                  dense
+                  @mousedown="$event.preventDefault()"
+                  @click="openTransaction">
+                  <v-list-item-icon class="me-2 my-auto">
+                    <v-icon
+                      :disabled="!status"
+                      size="14"
+                      class="icon-default-color">
+                      fas fa-external-link-alt
+                    </v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.openTransaction') }}</v-list-item-title>
+                </v-list-item>
+              </div>
+            </template>
+            <span>{{ $t('wallet.administration.rewardDetails.label.notSentYet') }}</span>
+          </v-tooltip>
           <v-list-item
             dense
             @mousedown="$event.preventDefault()"
