@@ -100,14 +100,15 @@ public class RewardReportREST {
                                            @Parameter(description = "Page size")
                                            @RequestParam(value = "size", defaultValue = "12", required = false)
                                            int size) {
-
-    int numberOfPeriods = (page + 1) * size;
-    List<RewardPeriod> periods = generatePreviousPeriods(numberOfPeriods);
-
-    List<RewardReport> rewardReports = periods.stream()
-                                              .skip((long) page * size)
-                                              .limit(size)
-                                              .map(rewardPeriod -> rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate()))
+    int skip = page * size;
+    List<RewardPeriod> periods = generatePreviousPeriods(skip + size).subList(skip, skip + size);
+    List<RewardReport> rewardReports = periods.parallelStream()
+                                              .map(period -> {
+                                                RewardReport rewardReport =
+                                                                          rewardReportService.computeRewards(period.getPeriodMedianDate());
+                                                rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
+                                                return rewardReport;
+                                              })
                                               .toList();
     rewardReports.forEach(rewardReport -> rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod())));
     return rewardReports;
