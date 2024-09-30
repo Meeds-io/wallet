@@ -65,7 +65,7 @@
                 </v-btn>
               </div>
             </template>
-            <span>{{ $t('wallet.administration.budgetConfiguration.editConfiguration') }}</span>
+            <span>{{ $t('wallet.administration.budgetConfiguration.deleteConfiguration') }}</span>
           </v-tooltip>
         </v-list-item-action>
       </v-list-item>
