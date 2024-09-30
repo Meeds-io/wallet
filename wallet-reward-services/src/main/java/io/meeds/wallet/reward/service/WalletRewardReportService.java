@@ -41,8 +41,10 @@ import java.util.stream.Collectors;
 import io.meeds.gamification.constant.IdentityType;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -63,7 +65,6 @@ import io.meeds.wallet.wallet.service.WalletAccountService;
 import io.meeds.wallet.wallet.service.WalletTokenAdminService;
 
 import lombok.Setter;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -195,6 +196,7 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  @ExoTransactional
   public RewardReport computeRewards(LocalDate date) {
     if (date == null) {
       throw new IllegalArgumentException("date is mandatory");
@@ -228,11 +230,10 @@ public class WalletRewardReportService implements RewardReportService {
 
     List<Long> participants = realizationService.getParticipantsBetweenDates(start, end);
     // Only user wallets benefits from rewards
-    Set<Wallet> wallets = walletAccountService.listWalletsByIdentityIds(participants)
-                                              .stream()
-                                              .filter(wallet -> WalletType.isUser(wallet.getType()))
-                                              .collect(Collectors.toSet());
-    computeRewardDetails(rewardReport, wallets);
+    if (CollectionUtils.isNotEmpty(participants)) {
+      Set<Wallet> wallets = walletAccountService.listWalletsByIdentityIds(participants);
+      computeRewardDetails(rewardReport, wallets);
+    }
     return rewardReport;
   }
 

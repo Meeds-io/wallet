@@ -41,23 +41,28 @@
       </v-card>
       <v-spacer />
       <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
-      <v-tooltip
-        v-if="!completelyProceeded"
-        bottom
-        :disabled="!isNotPastPeriod">
-        <template #activator="{ on }">
-          <div v-on="on" class="d-inline-block">
-            <v-btn
-              :loading="loadingSending"
-              :disabled="isNotPastPeriod || sendingInProgress"
-              class="btn btn-primary"
-              @click="sendRewards">
-              Reward
-            </v-btn>
-          </div>
-        </template>
-        <span>{{ $t('wallet.administration.rewardCard.status.inPeriod') }}</span>
-      </v-tooltip>
+      <template v-if="!completelyProceeded">
+        <div v-if="tokensToSend > 0" class="text-sub-title pe-2">{{ rewardsToSend }}</div>
+        <v-tooltip
+          bottom
+          :disabled="!isNotPastPeriod">
+          <template #activator="{ on }">
+            <div v-on="on" class="d-inline-block">
+              <v-btn
+                :loading="loadingSending"
+                :disabled="isNotPastPeriod || sendingInProgress"
+                class="btn btn-primary"
+                @click="sendRewards">
+                Reward
+              </v-btn>
+            </div>
+          </template>
+          <span>{{ $t('wallet.administration.rewardCard.status.inPeriod') }}</span>
+        </v-tooltip>
+      </template>
+      <div v-else>
+        {{ $t('wallet.administration.rewardDetails.label.latestRewardsSent') }} {{ sendDate }}
+      </div>
     </v-toolbar>
     <application-toolbar
       :left-button="{
@@ -148,6 +153,11 @@ export default {
     period() {
       return this.rewardReport?.period;
     },
+    sendDate() {
+      const reward = this.rewardReport?.rewards?.find(reward => reward?.transaction?.succeeded);
+      const sentDate = new Date(reward?.transaction?.timestamp);
+      return sentDate?.toLocaleString(this.lang, this.dateFormat);
+    },
     startDate() {
       return new Date(this.period?.startDate);
     },
@@ -169,6 +179,9 @@ export default {
     walletRewards() {
       return (this.rewardReport && this.rewardReport.rewards) || [];
     },
+    validRewards() {
+      return (this.rewardReport && this.rewardReport.validRewards) || [];
+    },
     filteredIdentitiesList() {
       return (this.walletRewards && this.walletRewards.filter((wallet) => (wallet.enabled || wallet.tokensSent || wallet.tokensToSend) && this.filterItemFromList(wallet, this.search))) || [];
     },
@@ -177,6 +190,21 @@ export default {
     },
     sendingInProgress() {
       return this.rewardReport?.rewards?.some(item => item.status === 'pending');
+    },
+    tokensToSend() {
+      return this.rewardReport?.tokensToSend;
+    },
+    formattedTokensToSend() {
+      return this.valueFormatted(this.tokensToSend);
+    },
+    points() {
+      return this.valueFormatted(this.validRewards?.map(x => x?.points || 0).reduce((x, y) => x + y, 0), 0);
+    },
+    rewardsToSend() {
+      return this.$t('wallet.administration.rewardDetails.label.rewardsToSend', {
+        0: this.formattedTokensToSend,
+        1: this.points
+      });
     }
   },
   methods: {
@@ -193,6 +221,13 @@ export default {
       if (address.indexOf(searchText) > -1) {
         return true;
       }
+    },
+    valueFormatted(max) {
+      return new Intl.NumberFormat(this.lang, {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(max);
     },
     sendRewards() {
       this.loadingSending = true;
