@@ -42,7 +42,7 @@
       <v-spacer />
       <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
       <template v-if="!completelyProceeded">
-        <div v-if="tokensToSend > 0" class="text-sub-title pe-2">{{ rewardsToSend }}</div>
+        <div v-if="tokensToSend > 0" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
         <v-tooltip
           bottom
           :disabled="!isNotPastPeriod">
