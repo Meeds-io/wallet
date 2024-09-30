@@ -53,7 +53,7 @@
                 :disabled="isNotPastPeriod || sendingInProgress"
                 class="btn btn-primary"
                 @click="sendRewards">
-                Reward
+                {{ $t('wallet.administration.rewardDetails.label.reward') }}
               </v-btn>
             </div>
           </template>

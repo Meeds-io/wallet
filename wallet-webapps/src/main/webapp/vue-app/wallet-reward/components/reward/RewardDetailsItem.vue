@@ -153,7 +153,7 @@
                 </v-list-item>
               </div>
             </template>
-            <span>Not sent yet</span>
+            <span>{{ $t('wallet.administration.rewardDetails.label.notSentYet') }}</span>
           </v-tooltip>
           <v-list-item
             dense
