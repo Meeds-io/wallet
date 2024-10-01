@@ -42,7 +42,7 @@
       <v-spacer />
       <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
       <template v-if="!completelyProceeded">
-        <div v-if="tokensToSend > 0" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
+        <div v-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
         <v-tooltip
           bottom
           :disabled="!isNotPastPeriod">
@@ -60,9 +60,13 @@
           <span>{{ $t('wallet.administration.rewardCard.status.inPeriod') }}</span>
         </v-tooltip>
       </template>
-      <div v-else>
-        {{ $t('wallet.administration.rewardDetails.label.latestRewardsSent') }} {{ sendDate }}
-      </div>
+      <extension-registry-components
+        v-else
+        :params="{rewardReport}"
+        name="WalletRewarding"
+        type="wallet-reward-send-header-extensions"
+        parent-element="div"
+        element="div" />
     </v-toolbar>
     <application-toolbar
       :left-button="{
