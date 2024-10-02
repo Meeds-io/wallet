@@ -42,7 +42,16 @@
       <v-spacer />
       <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
       <template v-if="!completelyProceeded">
-        <div v-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
+        <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center">
+          <v-icon
+            color="orange darken-2"
+            class="pe-2"
+            size="16">
+            fas fa-exclamation-triangle
+          </v-icon>
+          {{ $t('wallet.administration.rewardDetails.sendingError') }}
+        </div>
+        <div v-else-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
         <v-tooltip
           bottom
           :disabled="!isNotPastPeriod">
@@ -157,11 +166,6 @@ export default {
     period() {
       return this.rewardReport?.period;
     },
-    sendDate() {
-      const reward = this.rewardReport?.rewards?.find(reward => reward?.transaction?.succeeded);
-      const sentDate = new Date(reward?.transaction?.timestamp);
-      return sentDate?.toLocaleString(this.lang, this.dateFormat);
-    },
     startDate() {
       return new Date(this.period?.startDate);
     },
@@ -193,7 +197,10 @@ export default {
       return window.walletSettings.contractDetail?.symbol;
     },
     sendingInProgress() {
-      return this.rewardReport?.rewards?.some(item => item.status === 'pending');
+      return this.walletRewards?.some(item => item.status === 'pending');
+    },
+    hasErrorTransactions() {
+      return this.rewardReport?.failedTransactionCount > 0;
     },
     tokensToSend() {
       return this.rewardReport?.tokensToSend;
