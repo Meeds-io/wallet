@@ -21,7 +21,7 @@
 <template>
   <v-card
     :loading="loading"
-    class="border-radius border-color ma-5"
+    class="border-radius border-color ma-5 mb-2"
     flat>
     <div class="d-flex flex-column flex-grow-1">
       <v-list-item>
