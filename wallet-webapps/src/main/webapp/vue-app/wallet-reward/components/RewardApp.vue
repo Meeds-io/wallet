@@ -29,6 +29,9 @@
           width="40%"
           flat>
           <wallet-current-balance />
+          <extension-registry-components
+            name="WalletRewardingCard"
+            type="wallet-reward-cards-extensions" />
         </v-card>
         <wallet-budget-configuration
           :loading="loading"
