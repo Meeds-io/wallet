@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 
 import javax.ws.rs.core.*;
 
+import io.meeds.wallet.wallet.model.reward.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,12 +44,6 @@ import org.json.JSONObject;
 import org.exoplatform.common.http.HTTPStatus;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodWithFullDate;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
-import io.meeds.wallet.wallet.model.reward.WalletReward;
 import io.meeds.wallet.reward.service.RewardReportService;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 import io.meeds.wallet.wallet.utils.RewardUtils;
@@ -130,6 +125,22 @@ public class RewardReportREST {
     RewardReport rewardReport = rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate());
     rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
     return rewardReport;
+  }
+
+  @PostMapping(path = "forecast")
+  @Secured("rewarding")
+  @Operation(
+          summary = "Compute a distribution forecast corresponding to a chosen reward settings",
+          method = "POST",
+          description = "returns a distribution forecast corresponding to a chosen reward settings")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public DistributionForecast computeDistributionForecast(@RequestBody
+                                             RewardSettings rewardSettings) {
+    return rewardReportService.computeDistributionForecast(rewardSettings);
   }
 
   @GetMapping(path = "compute/user")
