@@ -70,6 +70,7 @@
       </v-card-title>
       <div class="d-flex align-center px-4">
         <number-input
+          v-if="settingsToSave.threshold"
           v-model="settingsToSave.threshold"
           :step="1"
           :max="1000"
@@ -107,7 +108,10 @@
       <span v-if="invalidAmount" class="error-color d-flex px-4">{{ $t('wallet.administration.budgetConfigurationDrawer.invalidAmount', {
         0: maxValueFormatted(5000),
       }) }}</span>
-      <wallet-budget-distribution-forecast :reward-report="rewardReport" :settings-to-save="settingsToSave" />
+      <wallet-budget-distribution-forecast
+        v-if="distributionForecast"
+        :distribution-forecast="distributionForecast"
+        :loading-forecast="loadingForecast" />
     </template>
     <template #footer>
       <div class="d-flex">
@@ -147,6 +151,9 @@ export default {
     loading: false,
     invalidThreshold: false,
     invalidAmount: false,
+    distributionForecast: null,
+    loadingForecast: false,
+    timeoutId: null
   }),
   computed: {
     hasConfiguredBudget() {
@@ -195,6 +202,21 @@ export default {
       ];
     },
   },
+  watch: {
+    settingsToSave: {
+      handler() {
+        if (this.timeoutId) {
+          clearTimeout(this.timeoutId);
+        }
+        if (!this.disableApply) {
+          this.timeoutId = setTimeout(() => {
+            this.computeDistributionForecast();
+          }, 1000);
+        }
+      },
+      deep: true,
+    },
+  },
   methods: {
     open() {
       if (this.rewardSettings) {
@@ -203,12 +225,14 @@ export default {
         this.settingsToSave.amount = this.hasConfiguredBudget ? this.settingsToSave?.amount : 1000;
         this.settingsToSave.threshold = this.hasConfiguredBudget ? this.settingsToSave?.threshold : 50;
         this.settingsToSave.budgetType = this.hasConfiguredBudget ? this.settingsToSave?.budgetType : 'FIXED';
+        this.computeDistributionForecast();
       } else {
         this.settingsToSave = {};
       }
       this.$refs.drawer.open();
     },
     close() {
+      this.settingsToSave = {};
       this.$refs.drawer.close();
     },
     apply() {
@@ -230,6 +254,18 @@ export default {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
       }).format(max);
+    },
+    computeDistributionForecast() {
+      this.loadingForecast = true;
+      if (this.settingsToSave?.periodType?.value) {
+        this.settingsToSave.periodType = this.settingsToSave.periodType.value;
+      }
+      return this.$rewardService.computeDistributionForecast(this.settingsToSave)
+        .then(distributionForecast => {
+          this.distributionForecast = distributionForecast;
+        }).finally(() => {
+          this.loadingForecast = false;
+        });
     },
   },
 };
