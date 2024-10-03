@@ -20,10 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
-import io.meeds.wallet.wallet.model.reward.WalletReward;
+import io.meeds.wallet.wallet.model.reward.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -98,6 +95,14 @@ public interface RewardReportService {
    * @param rewardReport save generated reward report
    */
   void saveRewardReport(RewardReport rewardReport);
+
+  /**
+   * Compute a {@link DistributionForecast} corresponding to a {@link RewardSettings}
+   *
+   * @param rewardSettings {@link RewardSettings}
+   * @return {@link RewardReport}
+   */
+  DistributionForecast computeDistributionForecast(RewardSettings rewardSettings);
 
   /**
    * @return true if reward sending status storage is in progress, else return false
