@@ -94,6 +94,30 @@ export function sendRewards(period) {
   });
 }
 
+export function computeDistributionForecast(rewardSettings) {
+  return fetch('/wallet/rest/reward/forecast', {
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      periodType: rewardSettings?.periodType,
+      timeZone: rewardSettings?.timeZone,
+      budgetType: rewardSettings?.budgetType,
+      threshold: rewardSettings?.threshold,
+      amount: rewardSettings?.amount
+    })
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error when computing Distribution Forecast');
+    }
+  });
+}
+
 export function computeRewards(page, size) {
   return fetch(`/wallet/rest/reward/compute?page=${page}&size=${size}`, {
     method: 'GET',
