@@ -18,6 +18,7 @@
  */
 package io.meeds.wallet.reward.service;
 
+import static io.meeds.wallet.wallet.model.reward.RewardBudgetType.FIXED_PER_MEMBER;
 import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_TRANSACTION_LABEL_KEY;
 import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY;
 import static io.meeds.wallet.wallet.utils.RewardUtils.TRANSACTION_STATUS_PENDING;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import io.meeds.gamification.constant.IdentityType;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
+import io.meeds.wallet.wallet.model.reward.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,13 +54,6 @@ import org.exoplatform.social.core.identity.model.Identity;
 import io.meeds.wallet.wallet.model.ContractDetail;
 import io.meeds.wallet.wallet.model.Wallet;
 import io.meeds.wallet.wallet.model.WalletType;
-import io.meeds.wallet.wallet.model.reward.RewardBudgetType;
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
-import io.meeds.wallet.wallet.model.reward.RewardStatus;
-import io.meeds.wallet.wallet.model.reward.WalletReward;
 import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
 import io.meeds.wallet.reward.storage.WalletRewardReportStorage;
 import io.meeds.wallet.wallet.service.WalletAccountService;
@@ -282,6 +277,48 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public DistributionForecast computeDistributionForecast(RewardSettings rewardSettings) {
+
+    RewardPeriod rewardPeriod = RewardPeriod.getCurrentPeriod(rewardSettings);
+    Date start = new Date(rewardPeriod.getStartDateInSeconds() * 1000L);
+    Date end = new Date(rewardPeriod.getEndDateInSeconds() * 1000L);
+
+    RealizationFilter realizationFilter = new RealizationFilter();
+    realizationFilter.setEarnerType(IdentityType.USER);
+    realizationFilter.setFromDate(start);
+    realizationFilter.setToDate(end);
+
+    List<Long> participants = realizationService.getParticipantsBetweenDates(start, end);
+
+    Set<Wallet> wallets = walletAccountService.listWalletsByIdentityIds(participants)
+                                              .stream()
+                                              .filter(Wallet::isEnabled)
+                                              .collect(Collectors.toSet());
+
+    Map<Long, Double> earnedPoints = getEarnedPoints(wallets.stream().map(Wallet::getTechnicalId).collect(Collectors.toSet()),
+                                                     rewardPeriod.getStartDateInSeconds(),
+                                                     rewardPeriod.getEndDateInSeconds());
+    double acceptedContributions = earnedPoints.values().stream().mapToDouble(Double::doubleValue).sum();
+
+    earnedPoints.entrySet().removeIf(entry -> entry.getValue() < rewardSettings.getThreshold());
+
+    double totalBudget = rewardSettings.getAmount();
+
+    if (FIXED_PER_MEMBER.equals(rewardSettings.getBudgetType())) {
+      double totalEligibleMembersCount = earnedPoints.size();
+      totalBudget = rewardSettings.getAmount() * totalEligibleMembersCount;
+    }
+
+    DistributionForecast distributionForecast = new DistributionForecast();
+    distributionForecast.setBudget(totalBudget);
+    distributionForecast.setAcceptedContributions(acceptedContributions);
+    distributionForecast.setParticipantsCount(participants.size());
+    distributionForecast.setEligibleContributorsCount(earnedPoints.size());
+
+    return distributionForecast;
+  }
+
+  @Override
   public Page<RewardPeriod> findRewardReportPeriods(Pageable pageable) {
     return rewardReportStorage.findRewardReportPeriods(pageable);
   }
@@ -362,7 +399,7 @@ public class WalletRewardReportService implements RewardReportService {
     } catch (Exception e) {
       LOG.warn("Error getting points for user with ids {}", identityIds, e);
     }
-    return points.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().doubleValue()));
+    return points.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().doubleValue()));
   }
 
   private Set<WalletReward> retrieveWalletRewards(RewardReport rewardReport, Set<Wallet> wallets) {
@@ -468,7 +505,7 @@ public class WalletRewardReportService implements RewardReportService {
 
     Iterator<Entry<Long, Double>> identitiesPointsIterator = identitiesPointsEntries.iterator();
     while (identitiesPointsIterator.hasNext()) {
-      Map.Entry<java.lang.Long, java.lang.Double> entry = identitiesPointsIterator.next();
+      Entry<Long, Double> entry = identitiesPointsIterator.next();
       Long identityId = entry.getKey();
       Double points = entry.getValue();
       points = points == null ? 0 : points;
