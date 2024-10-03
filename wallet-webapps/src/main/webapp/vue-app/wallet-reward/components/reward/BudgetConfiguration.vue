@@ -114,7 +114,7 @@
       </template>
       <template v-else-if="!loading">
         <div class="d-flex flex-column align-center justify-center full-width full-height pt-5">
-          <v-icon color="orange darken-2" size="50">fas fa-coins</v-icon>
+          <v-icon color="tertiary" size="50">fas fa-coins</v-icon>
           <span class="mt-5">{{ $t('wallet.administration.budgetConfiguration.setUp') }}</span>
         </div>
         <v-btn
