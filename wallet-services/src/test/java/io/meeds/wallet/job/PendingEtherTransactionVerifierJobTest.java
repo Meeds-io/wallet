@@ -31,11 +31,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
 import io.meeds.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)

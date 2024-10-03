@@ -16,9 +16,9 @@
  */
 package io.meeds.wallet.reward.notification;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.*;
-import static io.meeds.wallet.wallet.utils.WalletUtils.AMOUNT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.formatNumber;
+import static io.meeds.wallet.utils.RewardUtils.*;
+import static io.meeds.wallet.utils.WalletUtils.AMOUNT;
+import static io.meeds.wallet.utils.WalletUtils.formatNumber;
 
 import java.io.Writer;
 import java.time.ZoneId;
@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Locale;
 
 import io.meeds.common.ContainerTransactional;
+import io.meeds.wallet.model.RewardSettings;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 import org.apache.commons.codec.binary.StringUtils;
 
@@ -38,7 +39,6 @@ import org.exoplatform.container.ExoContainer;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
 public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {

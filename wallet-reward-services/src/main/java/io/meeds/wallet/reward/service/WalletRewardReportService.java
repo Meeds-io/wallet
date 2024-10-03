@@ -18,82 +18,105 @@
  */
 package io.meeds.wallet.reward.service;
 
-import static io.meeds.wallet.wallet.model.reward.RewardBudgetType.FIXED_PER_MEMBER;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_TRANSACTION_LABEL_KEY;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY;
-import static io.meeds.wallet.wallet.utils.RewardUtils.TRANSACTION_STATUS_PENDING;
-import static io.meeds.wallet.wallet.utils.RewardUtils.TRANSACTION_STATUS_SUCCESS;
-import static io.meeds.wallet.wallet.utils.RewardUtils.formatTime;
-import static io.meeds.wallet.wallet.utils.WalletUtils.convertFromDecimals;
-import static io.meeds.wallet.wallet.utils.WalletUtils.formatNumber;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getContractDetail;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getIdentityByTypeAndId;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getLocale;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getResourceBundleKey;
-import static io.meeds.wallet.wallet.utils.WalletUtils.isUserRewardingAdmin;
+import static io.meeds.wallet.model.RewardBudgetType.FIXED_PER_MEMBER;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_TRANSACTION_LABEL_KEY;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSAGE_KEY;
+import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_PENDING;
+import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_SUCCESS;
+import static io.meeds.wallet.utils.RewardUtils.formatTime;
+import static io.meeds.wallet.utils.WalletUtils.convertFromDecimals;
+import static io.meeds.wallet.utils.WalletUtils.formatNumber;
+import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
+import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static io.meeds.wallet.utils.WalletUtils.getLocale;
+import static io.meeds.wallet.utils.WalletUtils.getResourceBundleKey;
+import static io.meeds.wallet.utils.WalletUtils.isUserRewardingAdmin;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.meeds.gamification.constant.IdentityType;
-import io.meeds.gamification.model.filter.RealizationFilter;
-import io.meeds.gamification.service.RealizationService;
-import io.meeds.wallet.wallet.model.reward.*;
+
+import io.meeds.wallet.wallet.model.reward.DistributionForecast;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletType;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
+
+import io.meeds.gamification.constant.IdentityType;
+import io.meeds.gamification.model.filter.RealizationFilter;
+import io.meeds.gamification.service.RealizationService;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.RewardBudgetType;
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.RewardSettings;
+import io.meeds.wallet.model.RewardStatus;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletReward;
+import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.reward.storage.WalletRewardReportStorage;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTokenAdminService;
 
 import lombok.Setter;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 
 /**
  * A service to manage reward reports
  */
 @Primary
-@Service
+@Service("rewardReportService")
 public class WalletRewardReportService implements RewardReportService {
 
   private static final Log          LOG            = ExoLogger.getLogger(WalletRewardReportService.class);
 
   private static final String       EMPTY_SETTINGS = "Error computing rewards using empty settings";
 
-  @Autowired
   private WalletAccountService      walletAccountService;
 
-  @Autowired
   private WalletTokenAdminService   walletTokenAdminService;
 
-  @Autowired
   private RewardSettingsService     rewardSettingsService;
 
-  @Autowired
   private WalletRewardReportStorage rewardReportStorage;
 
-  @Autowired
   private RealizationService        realizationService;
 
   @Setter
   private boolean                   rewardSendingInProgress;
+
+  public WalletRewardReportService(WalletAccountService walletAccountService,
+                                   WalletTokenAdminService walletTokenAdminService,
+                                   RewardSettingsService rewardSettingsService,
+                                   WalletRewardReportStorage rewardReportStorage,
+                                   RealizationService realizationService) {
+    this.walletAccountService = walletAccountService;
+    this.walletTokenAdminService = walletTokenAdminService;
+    this.rewardSettingsService = rewardSettingsService;
+    this.rewardReportStorage = rewardReportStorage;
+    this.realizationService = realizationService;
+  }
 
   @Override
   public void sendRewards(LocalDate date, String username) throws Exception { // NOSONAR
@@ -112,8 +135,8 @@ public class WalletRewardReportService implements RewardReportService {
     if (rewardReport.getPendingTransactionCount() > 0) {
       String startDateFormatted = rewardReport.getPeriod().getStartDateFormatted(Locale.getDefault().getLanguage());
       String endDateFormatted = rewardReport.getPeriod().getEndDateFormatted(Locale.getDefault().getLanguage());
-      throw new IllegalStateException("There are some pending transactions for rewards of period between " + startDateFormatted
-          + " and " + endDateFormatted + ", thus no reward sending is allowed until the transactions finishes");
+      throw new IllegalStateException("There are some pending transactions for rewards of period between " + startDateFormatted +
+          " and " + endDateFormatted + ", thus no reward sending is allowed until the transactions finishes");
     }
 
     String adminWalletAddress = getTokenAdminService().getAdminWalletAddress();
@@ -125,7 +148,8 @@ public class WalletRewardReportService implements RewardReportService {
     Iterator<WalletReward> rewardedWalletsIterator = rewards.iterator();
     while (rewardedWalletsIterator.hasNext()) {
       WalletReward walletReward = rewardedWalletsIterator.next();
-      if (walletReward == null || !walletReward.isEnabled() || walletReward.getAmount() == 0
+      if (walletReward == null || !walletReward.isEnabled()
+          || walletReward.getAmount() == 0
           || (walletReward.getTransaction() != null
               && (walletReward.getTransaction().isPending() || walletReward.getTransaction().isSucceeded()))) {
         rewardedWalletsIterator.remove();
@@ -133,8 +157,8 @@ public class WalletRewardReportService implements RewardReportService {
       }
 
       if (walletReward.getAmount() < 0) {
-        throw new IllegalStateException("Can't send reward transaction for wallet of " + walletReward.getWallet().getType() + " "
-            + walletReward.getWallet().getId() + " with a negative amount" + walletReward.getAmount());
+        throw new IllegalStateException("Can't send reward transaction for wallet of " + walletReward.getWallet().getType() +
+            " " + walletReward.getWallet().getId() + " with a negative amount" + walletReward.getAmount());
       }
       // If the tokens are already sent, then ignore sending rewards to user
       // If the sent transaction is pending, an exception is thrown ate the
@@ -412,7 +436,7 @@ public class WalletRewardReportService implements RewardReportService {
     for (Wallet wallet : wallets) {
       List<WalletReward> walletRewardList = walletRewards.stream()
                                                          .filter(wr -> wallet != null && wr.getWallet() != null
-                                                             && wr.getIdentityId() == wallet.getTechnicalId())
+                                                                       && wr.getIdentityId() == wallet.getTechnicalId())
                                                          .toList();
       WalletReward walletReward =
                                 walletRewardList.stream()

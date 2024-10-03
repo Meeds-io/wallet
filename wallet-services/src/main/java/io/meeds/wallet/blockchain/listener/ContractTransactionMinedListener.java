@@ -21,10 +21,11 @@ import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletTransactionService;
 
 /**
  * Triggered when a contract transaction is mined. This listener will not be

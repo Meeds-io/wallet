@@ -17,14 +17,14 @@
  */
 package io.meeds.wallet.listener;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_BROADCAST_ACTION_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_CREATE_WALLET_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_EARNER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_EVENT_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_TYPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_RECEIVER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_WALLET_OBJECT_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_BROADCAST_ACTION_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_CREATE_WALLET_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_EARNER_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_EVENT_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_RECEIVER_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_WALLET_OBJECT_TYPE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +33,8 @@ import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.Wallet;
+
+import io.meeds.wallet.model.Wallet;
 
 @Asynchronous
 public class GamificationWalletInitializationListener extends Listener<Object, Object> {

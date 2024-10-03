@@ -16,8 +16,8 @@
  */
 package io.meeds.wallet.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getWalletService;
+import static io.meeds.wallet.utils.WalletUtils.FUNDS_REQUEST_NOTIFICATION_ID;
+import static io.meeds.wallet.utils.WalletUtils.getWalletService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,10 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletContractService;
-import io.meeds.wallet.wallet.service.WalletService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
 import org.junit.Test;
 import org.picocontainer.Startable;
 
@@ -37,13 +33,18 @@ import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.api.notification.service.storage.WebNotificationStorage;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.settings.GlobalSettings;
-import io.meeds.wallet.wallet.model.settings.InitialFundsSettings;
-import io.meeds.wallet.wallet.model.settings.NetworkSettings;
-import io.meeds.wallet.wallet.model.settings.UserSettings;
-import io.meeds.wallet.wallet.model.settings.WalletSettings;
-import io.meeds.wallet.wallet.model.transaction.FundsRequest;
+
+import io.meeds.wallet.model.FundsRequest;
+import io.meeds.wallet.model.GlobalSettings;
+import io.meeds.wallet.model.InitialFundsSettings;
+import io.meeds.wallet.model.NetworkSettings;
+import io.meeds.wallet.model.UserSettings;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletSettings;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletContractService;
+import io.meeds.wallet.service.WalletService;
+import io.meeds.wallet.service.WalletTransactionService;
 import io.meeds.wallet.test.BaseWalletTest;
 import io.meeds.wallet.test.mock.IdentityManagerMock;
 
