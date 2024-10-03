@@ -21,6 +21,7 @@
 <template>
   <v-app
     id="RewardApp"
+    class="application-body position-static"
     flat>
     <template v-if="!showRewardDetails">
       <div class="d-flex flex-row">

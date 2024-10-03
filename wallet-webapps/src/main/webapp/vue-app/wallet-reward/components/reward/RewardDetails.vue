@@ -19,7 +19,7 @@
 
 -->
 <template>
-  <v-card flat>
+  <v-card class="application-body position-static pb-5" flat>
     <v-toolbar flat>
       <v-card
         class="d-flex align-center"
@@ -44,7 +44,7 @@
       <template v-if="!completelyProceeded">
         <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center">
           <v-icon
-            color="orange darken-2"
+            color="warning"
             class="pe-2"
             size="16">
             fas fa-exclamation-triangle
