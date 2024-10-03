@@ -20,6 +20,7 @@
 -->
 <template>
   <v-card
+    :loading="loadingForecast"
     class="ma-5"
     flat
     outlined>
@@ -43,13 +44,13 @@
 
 export default {
   props: {
-    rewardReport: {
+    distributionForecast: {
       type: Object,
       default: null
     },
-    settingsToSave: {
-      type: Object,
-      default: null
+    loadingForecast: {
+      type: Boolean,
+      default: false
     },
   },
   data: () => ({
@@ -58,47 +59,32 @@ export default {
   computed: {
     forecast() {
       return [
-        { title: this.$t('wallet.administration.distributionForecast.participants'), value: this.participants },
+        { title: this.$t('wallet.administration.distributionForecast.participants'), value: this.participantsCount },
         { title: this.$t('wallet.administration.distributionForecast.eligibleContributors'), value: this.eligibleContributorsCount },
-        { title: this.$t('wallet.administration.distributionForecast.acceptedContributions'), value: `${this.totalRewardsToDisplay} ${this.$t('wallet.administration.budgetConfiguration.points')}` },
+        { title: this.$t('wallet.administration.distributionForecast.acceptedContributions'), value: `${this.acceptedContributionsToDisplay} ${this.$t('wallet.administration.budgetConfiguration.points')}` },
         { title: this.$t('wallet.administration.distributionForecast.budget'), value: this.budgetToDisplay , class: 'font-weight-bold' , unit: this.tokenSymbol, unitClass: 'symbol fundsLabels'},
       ];
     },
     eligibleContributorsCount() {
-      return this.rewardReport?.validRewards?.length;
+      return this.distributionForecast?.eligibleContributorsCount;
     },
-    walletRewards() {
-      return this.rewardReport?.rewards;
-    },
-    participants() {
-      return this.rewardReport?.rewards?.length;
+    participantsCount() {
+      return this.distributionForecast?.participantsCount;
     },
     tokenSymbol() {
       return window.walletSettings?.contractDetail?.symbol;
     },
-    budgetType() {
-      return this.settingsToSave?.budgetType;
-    },
-    amount() {
-      return this.settingsToSave?.amount;
-    },
     budget() {
-      return this.budgetType === 'FIXED' ? this.amount : this.amount * this.eligibleContributorsCount;
+      return this.distributionForecast?.budget;
     },
     budgetToDisplay() {
       return this.valueFormatted(this.budget);
     },
-    totalRewards() {
-      let totalRewards = 0;
-      this.walletRewards.forEach(walletReward => {
-        if (walletReward && walletReward.rewards) {
-          walletReward.rewards.forEach(rewardDetail => totalRewards += rewardDetail.points);
-        }
-      });
-      return totalRewards;
+    acceptedContributions() {
+      return this.distributionForecast?.acceptedContributions;
     },
-    totalRewardsToDisplay() {
-      return this.valueFormatted(this.totalRewards);
+    acceptedContributionsToDisplay() {
+      return this.valueFormatted(this.acceptedContributions);
     },
   },
   methods: {
