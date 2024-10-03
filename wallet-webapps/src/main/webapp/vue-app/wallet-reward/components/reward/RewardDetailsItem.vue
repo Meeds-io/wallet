@@ -49,21 +49,7 @@
     <td class="text-center">
       <template v-if="!status">
         <v-tooltip
-          v-if="!walletAddress"
-          bottom>
-          <template #activator="{ on, attrs }">
-            <v-icon
-              color="orange darken-2"
-              size="16"
-              v-bind="attrs"
-              v-on="on">
-              fas fa-exclamation-triangle
-            </v-icon>
-          </template>
-          <span>{{ $t('exoplatform.wallet.label.noAddress') }}</span>
-        </v-tooltip>
-        <v-tooltip
-          v-else-if="!amount"
+          v-if="!amount"
           bottom>
           <template #activator="{ on, attrs }">
             <v-icon
