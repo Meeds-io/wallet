@@ -67,18 +67,29 @@
           bottom>
           <template #activator="{ on, attrs }">
             <v-icon
-              color="orange darken-2"
+              color="grey"
+              size="16"
+              v-bind="attrs"
+              v-on="on">
+              fas fa-slash
+            </v-icon>
+          </template>
+          <span>{{ $t('exoplatform.wallet.label.noEnoughEarnedPoints') }}</span>
+        </v-tooltip>
+        <v-tooltip
+          v-else
+          bottom>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="warning"
               size="16"
               v-bind="attrs"
               v-on="on">
               fas fa-exclamation-triangle
             </v-icon>
           </template>
-          <span>{{ $t('exoplatform.wallet.label.noEnoughEarnedPoints') }}</span>
+          <span>{{ $t('wallet.administration.rewardCard.status.toReward') }}</span>
         </v-tooltip>
-        <div v-else>
-          -
-        </div>
       </template>
       <v-progress-circular
         v-else-if="status === 'pending'"
