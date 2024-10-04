@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
+import io.meeds.wallet.service.WalletTokenAdminService;
 import io.meeds.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -32,19 +32,21 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
-import io.meeds.wallet.wallet.model.reward.RewardStatus;
-import io.meeds.wallet.wallet.model.reward.WalletReward;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
+
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.RewardStatus;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletReward;
 import io.meeds.wallet.reward.dao.RewardDAO;
 import io.meeds.wallet.reward.dao.RewardPeriodDAO;
 import io.meeds.wallet.reward.entity.WalletRewardEntity;
 import io.meeds.wallet.reward.entity.WalletRewardPeriodEntity;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

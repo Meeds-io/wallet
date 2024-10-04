@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import io.meeds.wallet.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletAddressLabel;
 import io.meeds.wallet.test.BaseWalletTest;
 
 public class AddressLabelStorageTest extends BaseWalletTest {

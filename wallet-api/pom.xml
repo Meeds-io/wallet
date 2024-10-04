@@ -25,11 +25,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <artifactId>wallet-api</artifactId>
   <name>Meeds:: Add-on:: Wallet - API</name>
   <properties>
-    <rest.api.doc.title>Wallet Rest Api</rest.api.doc.title>
-    <rest.api.doc.version>1.0</rest.api.doc.version>
-    <rest.api.doc.description>Wallet addon rest endpoints</rest.api.doc.description>
-
-    <exo.test.coverage.ratio>0.12</exo.test.coverage.ratio>
+    <exo.test.coverage.ratio>0.21</exo.test.coverage.ratio>
   </properties>
   <dependencies>
     <dependency>
@@ -55,31 +51,4 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </exclusions>
     </dependency>
   </dependencies>
-  <build>
-    <finalName>wallet-api</finalName>
-    <plugins>
-      <plugin>
-        <groupId>io.openapitools.swagger</groupId>
-        <artifactId>swagger-maven-plugin</artifactId>
-        <configuration>
-          <useResourcePackagesChildren>true</useResourcePackagesChildren>
-          <resourcePackages>
-            <locations>io.meeds.wallet.wallet.rest</locations>
-            <locations>io.meeds.wallet.reward.rest</locations>
-          </resourcePackages>
-          <swaggerConfig>
-            <info>
-              <title>${rest.api.doc.title}</title>
-              <version>${rest.api.doc.version}</version>
-              <description>${rest.api.doc.description}</description>
-              <license>
-                <url>https://www.gnu.org/licenses/lgpl-3.0.en.html</url>
-                <name>LGPL</name>
-              </license>
-            </info>
-          </swaggerConfig>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
