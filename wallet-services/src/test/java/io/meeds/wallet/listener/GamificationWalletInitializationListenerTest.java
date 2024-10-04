@@ -17,14 +17,14 @@
  */
 package io.meeds.wallet.listener;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_BROADCAST_ACTION_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_CREATE_WALLET_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_EARNER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_EVENT_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_TYPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_RECEIVER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GAMIFICATION_WALLET_OBJECT_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_BROADCAST_ACTION_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_CREATE_WALLET_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_EARNER_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_EVENT_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_OBJECT_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_RECEIVER_ID;
+import static io.meeds.wallet.utils.WalletUtils.GAMIFICATION_WALLET_OBJECT_TYPE;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -34,6 +34,8 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 
 import io.meeds.wallet.listener.GamificationWalletInitializationListener;
+import io.meeds.wallet.model.Wallet;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -41,7 +43,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.Wallet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GamificationWalletInitializationListenerTest {

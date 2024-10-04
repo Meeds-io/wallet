@@ -19,9 +19,10 @@
  */
 package io.meeds.wallet.reward;
 
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.service.WalletService;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.service.WalletService;
+import io.meeds.wallet.utils.WalletUtils;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
