@@ -16,10 +16,10 @@
  */
 package io.meeds.wallet.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_INITIALIZED_SETTING_PARAM;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static io.meeds.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_INITIALIZED_SETTING_PARAM;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_MODIFIED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_SCOPE;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
@@ -55,16 +53,18 @@ import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
 import io.meeds.wallet.dao.AddressLabelDAO;
 import io.meeds.wallet.entity.AddressLabelEntity;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletAddressLabel;
-import io.meeds.wallet.wallet.model.WalletProvider;
-import io.meeds.wallet.wallet.model.WalletState;
-import io.meeds.wallet.wallet.model.WalletType;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletState;
+import io.meeds.wallet.model.WalletType;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTokenAdminService;
 import io.meeds.wallet.storage.AddressLabelStorage;
 import io.meeds.wallet.storage.WalletStorage;
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
 

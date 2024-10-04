@@ -26,7 +26,7 @@ import java.util.List;
 import org.junit.Test;
 
 import io.meeds.wallet.entity.WalletEntity;
-import io.meeds.wallet.wallet.model.WalletType;
+import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.test.BaseWalletTest;
 
 public class WalletAccountDAOTest extends BaseWalletTest {

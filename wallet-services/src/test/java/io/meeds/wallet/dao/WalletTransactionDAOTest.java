@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import io.meeds.wallet.entity.TransactionEntity;
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletTransactionDAOTest extends BaseWalletTest {
 

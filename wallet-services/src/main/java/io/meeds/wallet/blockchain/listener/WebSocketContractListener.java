@@ -19,7 +19,8 @@ package io.meeds.wallet.blockchain.listener;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
-import io.meeds.wallet.wallet.model.ContractDetail;
+
+import io.meeds.wallet.model.ContractDetail;
 import io.meeds.wallet.service.WalletWebSocketService;
 
 public class WebSocketContractListener extends Listener<Object, ContractDetail> {

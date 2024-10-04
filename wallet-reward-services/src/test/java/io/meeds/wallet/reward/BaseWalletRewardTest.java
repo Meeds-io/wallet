@@ -30,6 +30,10 @@ import io.meeds.wallet.reward.dao.RewardDAO;
 import io.meeds.wallet.reward.dao.RewardPeriodDAO;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 import io.meeds.wallet.reward.service.WalletRewardSettingsService;
+import io.meeds.wallet.service.WalletService;
+import io.meeds.wallet.utils.RewardUtils;
+import io.meeds.wallet.utils.WalletUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -51,19 +55,16 @@ import io.meeds.wallet.entity.AddressLabelEntity;
 import io.meeds.wallet.entity.TransactionEntity;
 import io.meeds.wallet.entity.WalletEntity;
 import io.meeds.wallet.entity.WalletPrivateKeyEntity;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletAddressLabel;
-import io.meeds.wallet.wallet.model.WalletProvider;
-import io.meeds.wallet.wallet.model.WalletState;
-import io.meeds.wallet.wallet.model.reward.RewardBudgetType;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
-import io.meeds.wallet.wallet.model.reward.RewardTeam;
-import io.meeds.wallet.wallet.model.reward.RewardTeamMember;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.WalletService;
-import io.meeds.wallet.wallet.utils.RewardUtils;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.RewardBudgetType;
+import io.meeds.wallet.model.RewardSettings;
+import io.meeds.wallet.model.RewardTeam;
+import io.meeds.wallet.model.RewardTeamMember;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletState;
 
 public abstract class BaseWalletRewardTest extends AbstractKernelTest {
 
