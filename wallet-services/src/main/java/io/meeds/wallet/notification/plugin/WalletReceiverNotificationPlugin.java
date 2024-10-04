@@ -16,29 +16,29 @@
  */
 package io.meeds.wallet.notification.plugin;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.ACCOUNT_TYPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.AMOUNT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.AMOUNT_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.AVATAR;
-import static io.meeds.wallet.wallet.utils.WalletUtils.CONTRACT_ADDRESS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.CONTRACT_ADDRESS_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.HASH;
-import static io.meeds.wallet.wallet.utils.WalletUtils.HASH_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.MESSAGE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.MESSAGE_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.RECEIVER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.RECEIVER_ACCOUNT_DETAIL_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.RECEIVER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.RECEIVER_TYPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.RECEIVER_URL;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SENDER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SENDER_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SENDER_URL;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SYMBOL;
-import static io.meeds.wallet.wallet.utils.WalletUtils.SYMBOL_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getNotificationReceiversUsers;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getPermanentLink;
+import static io.meeds.wallet.utils.WalletUtils.ACCOUNT_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.AMOUNT;
+import static io.meeds.wallet.utils.WalletUtils.AMOUNT_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.AVATAR;
+import static io.meeds.wallet.utils.WalletUtils.CONTRACT_ADDRESS;
+import static io.meeds.wallet.utils.WalletUtils.CONTRACT_ADDRESS_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.HASH;
+import static io.meeds.wallet.utils.WalletUtils.HASH_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.MESSAGE;
+import static io.meeds.wallet.utils.WalletUtils.MESSAGE_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.RECEIVER;
+import static io.meeds.wallet.utils.WalletUtils.RECEIVER_ACCOUNT_DETAIL_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.RECEIVER_ID;
+import static io.meeds.wallet.utils.WalletUtils.RECEIVER_TYPE;
+import static io.meeds.wallet.utils.WalletUtils.RECEIVER_URL;
+import static io.meeds.wallet.utils.WalletUtils.SENDER;
+import static io.meeds.wallet.utils.WalletUtils.SENDER_ACCOUNT_DETAIL_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.SENDER_ID;
+import static io.meeds.wallet.utils.WalletUtils.SENDER_URL;
+import static io.meeds.wallet.utils.WalletUtils.SYMBOL;
+import static io.meeds.wallet.utils.WalletUtils.SYMBOL_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.getNotificationReceiversUsers;
+import static io.meeds.wallet.utils.WalletUtils.getPermanentLink;
 
 import java.util.List;
 
@@ -53,8 +53,9 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionNotificationType;
+
+import io.meeds.wallet.model.TransactionNotificationType;
+import io.meeds.wallet.model.Wallet;
 
 public class WalletReceiverNotificationPlugin extends BaseNotificationPlugin {
 
