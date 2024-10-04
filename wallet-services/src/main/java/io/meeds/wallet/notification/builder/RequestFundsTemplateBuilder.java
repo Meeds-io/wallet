@@ -16,6 +16,8 @@
  */
 package io.meeds.wallet.notification.builder;
 
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import java.io.Writer;
 import java.util.Calendar;
 import java.util.Locale;
@@ -38,10 +40,9 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
-import io.meeds.wallet.wallet.model.WalletType;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
+import io.meeds.wallet.model.WalletType;
 
 public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
 

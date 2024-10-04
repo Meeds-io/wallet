@@ -16,7 +16,7 @@
  */
 package io.meeds.wallet.blockchain.listener;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -38,12 +38,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionMinedListenerTest extends BaseWalletTest {

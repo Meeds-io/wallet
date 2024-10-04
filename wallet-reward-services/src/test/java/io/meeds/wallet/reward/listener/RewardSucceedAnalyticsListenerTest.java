@@ -21,9 +21,6 @@ package io.meeds.wallet.reward.listener;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.WalletReward;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
@@ -34,10 +31,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
 
 import io.meeds.analytics.model.StatisticData;
 import io.meeds.analytics.utils.AnalyticsUtils;
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.WalletReward;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
