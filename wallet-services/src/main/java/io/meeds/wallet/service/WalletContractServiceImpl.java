@@ -16,19 +16,21 @@
  */
 package io.meeds.wallet.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.ABI_PATH_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.BIN_PATH_PARAMETER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_CONTEXT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_SCOPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.fromJsonString;
-import static io.meeds.wallet.wallet.utils.WalletUtils.toJsonString;
+import static io.meeds.wallet.utils.WalletUtils.ABI_PATH_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.BIN_PATH_PARAMETER;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_CONTEXT;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static io.meeds.wallet.utils.WalletUtils.fromJsonString;
+import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-import io.meeds.wallet.wallet.service.WalletContractService;
-import io.meeds.wallet.wallet.service.WalletService;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.service.WalletContractService;
+import io.meeds.wallet.service.WalletService;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -43,7 +45,6 @@ import org.exoplatform.container.configuration.ConfigurationManager;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.ContractDetail;
 
 public class WalletContractServiceImpl implements WalletContractService, Startable {
 

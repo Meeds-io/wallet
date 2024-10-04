@@ -16,13 +16,13 @@
  */
 package io.meeds.wallet.reward.notification;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE_FORMATTED;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE_FORMATTED;
-import static io.meeds.wallet.wallet.utils.RewardUtils.formatTime;
-import static io.meeds.wallet.wallet.utils.WalletUtils.AMOUNT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.formatNumber;
+import static io.meeds.wallet.utils.WalletUtils.AMOUNT;
+import static io.meeds.wallet.utils.WalletUtils.formatNumber;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE_FORMATTED;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE_FORMATTED;
+import static io.meeds.wallet.utils.RewardUtils.formatTime;
 
 import java.io.Writer;
 import java.time.ZoneId;
@@ -45,8 +45,8 @@ import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
 import io.meeds.common.ContainerTransactional;
+import io.meeds.wallet.model.RewardSettings;
 import io.meeds.wallet.reward.service.RewardSettingsService;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
 
 public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
 

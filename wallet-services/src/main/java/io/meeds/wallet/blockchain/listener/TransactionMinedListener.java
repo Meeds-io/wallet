@@ -16,8 +16,8 @@
  */
 package io.meeds.wallet.blockchain.listener;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.ETHER_FUNC_SEND_FUNDS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.ETHER_FUNC_SEND_FUNDS;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_MINED_AND_UPDATED_EVENT;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,10 +31,11 @@ import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
 
 /**
  * A listener that is triggered once a transaction is mined. It will update the
