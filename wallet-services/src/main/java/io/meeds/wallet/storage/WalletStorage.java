@@ -16,8 +16,8 @@
  */
 package io.meeds.wallet.storage;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.computeWalletFromIdentity;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getIdentityById;
+import static io.meeds.wallet.utils.WalletUtils.computeWalletFromIdentity;
+import static io.meeds.wallet.utils.WalletUtils.getIdentityById;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +30,8 @@ import io.meeds.wallet.entity.WalletBackupEntity;
 import io.meeds.wallet.entity.WalletBlockchainStateEntity;
 import io.meeds.wallet.entity.WalletEntity;
 import io.meeds.wallet.entity.WalletPrivateKeyEntity;
-import io.meeds.wallet.wallet.model.*;
+import io.meeds.wallet.model.*;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
