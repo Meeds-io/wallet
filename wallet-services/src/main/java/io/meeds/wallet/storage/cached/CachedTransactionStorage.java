@@ -22,7 +22,7 @@ import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.services.listener.ListenerService;
 import io.meeds.wallet.dao.WalletTransactionDAO;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
+import io.meeds.wallet.model.TransactionDetail;
 import io.meeds.wallet.storage.TransactionStorage;
 
 public class CachedTransactionStorage extends TransactionStorage {

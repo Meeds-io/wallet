@@ -27,7 +27,8 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
+
+import io.meeds.wallet.service.WalletTokenAdminService;
 
 @DisallowConcurrentExecution
 public class BoostAdminTransactionJob implements Job {

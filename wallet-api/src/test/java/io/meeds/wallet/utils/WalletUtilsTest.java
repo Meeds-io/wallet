@@ -20,8 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
-import io.meeds.wallet.wallet.utils.WalletUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class WalletUtilsTest {
 

@@ -16,7 +16,7 @@
  */
 package io.meeds.wallet.reward.notification;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
 
 import java.util.Collections;
 import java.util.Map;

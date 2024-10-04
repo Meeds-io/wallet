@@ -16,6 +16,9 @@
  */
 package io.meeds.wallet.reward.notification;
 
+import static io.meeds.wallet.utils.RewardUtils.*;
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -25,12 +28,10 @@ import org.exoplatform.commons.api.notification.plugin.BaseNotificationPlugin;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.*;
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardReport;
 
 public class RewardSuccessNotificationPlugin extends BaseNotificationPlugin {
     private static final Log LOG = ExoLogger.getLogger(RewardSuccessNotificationPlugin.class);

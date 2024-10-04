@@ -23,8 +23,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
 
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardStatus;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardStatus;
 
 @Entity(name = "RewardPeriod")
 @DynamicUpdate

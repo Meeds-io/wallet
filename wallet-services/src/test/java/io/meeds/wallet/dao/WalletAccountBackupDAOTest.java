@@ -28,8 +28,8 @@ import org.junit.Test;
 
 import io.meeds.wallet.entity.WalletBackupEntity;
 import io.meeds.wallet.entity.WalletEntity;
-import io.meeds.wallet.wallet.model.WalletProvider;
-import io.meeds.wallet.wallet.model.WalletType;
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.test.BaseWalletTest;
 
 public class WalletAccountBackupDAOTest extends BaseWalletTest {
