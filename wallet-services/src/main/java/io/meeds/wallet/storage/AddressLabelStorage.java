@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import io.meeds.wallet.dao.AddressLabelDAO;
 import io.meeds.wallet.entity.AddressLabelEntity;
-import io.meeds.wallet.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletAddressLabel;
 
 public class AddressLabelStorage {
 

@@ -26,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobExecutionException;
 
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.BlockchainTransactionService;
 import io.meeds.wallet.test.BaseWalletTest;
 
 @RunWith(MockitoJUnitRunner.class)

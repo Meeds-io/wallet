@@ -17,7 +17,7 @@
  */
 package io.meeds.wallet.reward.scheduling.task;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
 
 import java.util.List;
 
@@ -25,11 +25,13 @@ import io.meeds.common.ContainerTransactional;
 import org.quartz.DisallowConcurrentExecution;
 
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.reward.RewardPeriod;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
+
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.Wallet;
 import io.meeds.wallet.reward.service.RewardReportService;
-import io.meeds.wallet.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletAccountService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
