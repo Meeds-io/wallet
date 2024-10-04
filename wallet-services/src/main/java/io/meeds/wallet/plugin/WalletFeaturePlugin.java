@@ -22,8 +22,9 @@ import org.exoplatform.commons.api.settings.ExoFeatureService;
 import org.exoplatform.commons.api.settings.FeaturePlugin;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.security.*;
-import io.meeds.wallet.wallet.model.settings.GlobalSettings;
-import io.meeds.wallet.wallet.service.WalletService;
+
+import io.meeds.wallet.model.GlobalSettings;
+import io.meeds.wallet.service.WalletService;
 
 /**
  * A plugin added to {@link ExoFeatureService} that determines if 'wallet' is
