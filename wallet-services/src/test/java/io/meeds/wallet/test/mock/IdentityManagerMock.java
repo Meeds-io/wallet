@@ -35,8 +35,9 @@ import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.profile.*;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.storage.api.IdentityStorage;
-import io.meeds.wallet.wallet.plugin.WalletAdminIdentityProvider;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+
+import io.meeds.wallet.plugin.WalletAdminIdentityProvider;
+import io.meeds.wallet.utils.WalletUtils;
 
 public class IdentityManagerMock implements IdentityManager {
   List<Identity> identities = new ArrayList<>();

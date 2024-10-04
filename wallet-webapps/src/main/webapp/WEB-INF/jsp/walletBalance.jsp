@@ -4,14 +4,14 @@
 <%@ page import="org.exoplatform.webui.application.WebuiRequestContext"%>
 <%@ page import="org.exoplatform.web.application.RequestContext"%>
 <%@ page import="org.exoplatform.container.ExoContainerContext"%>
-<%@ page import="io.meeds.wallet.wallet.service.WalletService"%>
-<%@ page import="io.meeds.wallet.wallet.service.WalletAccountService"%>
+<%@ page import="io.meeds.wallet.service.WalletService"%>
+<%@ page import="io.meeds.wallet.service.WalletAccountService"%>
 <%@ page import="org.exoplatform.services.resources.ResourceBundleService"%>
-<%@ page import="io.meeds.wallet.wallet.model.settings.GlobalSettings"%>
-<%@ page import="io.meeds.wallet.wallet.model.ContractDetail"%>
-<%@ page import="io.meeds.wallet.wallet.model.Wallet"%>
-<%@ page import="io.meeds.wallet.wallet.model.WalletType"%>
-<%@ page import="io.meeds.wallet.wallet.utils.WalletUtils"%>
+<%@ page import="io.meeds.wallet.model.settings.GlobalSettings"%>
+<%@ page import="io.meeds.wallet.model.ContractDetail"%>
+<%@ page import="io.meeds.wallet.model.Wallet"%>
+<%@ page import="io.meeds.wallet.model.WalletType"%>
+<%@ page import="io.meeds.wallet.utils.WalletUtils"%>
 <%@ page import="org.exoplatform.social.core.service.LinkProvider"%>
 
 <%
