@@ -30,11 +30,11 @@ import org.junit.Test;
 import io.meeds.wallet.dao.WalletAccountBackupDAO;
 import io.meeds.wallet.entity.WalletBackupEntity;
 import io.meeds.wallet.entity.WalletEntity;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletProvider;
-import io.meeds.wallet.wallet.model.WalletState;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletStorageTest extends BaseWalletTest {
   private static final String WALLET_PRIVATE_KEY_CONTENT = "Wallet-Private-Key-Encrypted-With-Password";

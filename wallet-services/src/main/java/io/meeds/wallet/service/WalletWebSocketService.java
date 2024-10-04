@@ -16,8 +16,8 @@
  */
 package io.meeds.wallet.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.COMETD_CHANNEL;
-import static io.meeds.wallet.wallet.utils.WalletUtils.toJsonString;
+import static io.meeds.wallet.utils.WalletUtils.COMETD_CHANNEL;
+import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
 import java.util.Collection;
 
@@ -26,8 +26,9 @@ import org.mortbay.cometd.continuation.EXoContinuationBayeux;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.WebSocketMessage;
 import org.exoplatform.ws.frameworks.cometd.ContinuationService;
+
+import io.meeds.wallet.model.WebSocketMessage;
 
 public class WalletWebSocketService {
 

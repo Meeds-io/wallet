@@ -20,9 +20,10 @@ package io.meeds.wallet.reward.dao;
 
 import java.util.List;
 
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardStatus;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardStatus;
 import io.meeds.wallet.reward.entity.WalletRewardPeriodEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

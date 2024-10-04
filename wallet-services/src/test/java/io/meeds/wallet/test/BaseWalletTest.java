@@ -61,16 +61,16 @@ import io.meeds.wallet.entity.WalletBackupEntity;
 import io.meeds.wallet.entity.WalletBlockchainStateEntity;
 import io.meeds.wallet.entity.WalletEntity;
 import io.meeds.wallet.entity.WalletPrivateKeyEntity;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletAddressLabel;
-import io.meeds.wallet.wallet.model.WalletState;
-import io.meeds.wallet.wallet.model.WalletType;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletService;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletState;
+import io.meeds.wallet.model.WalletType;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletService;
 import io.meeds.wallet.storage.AddressLabelStorage;
 import io.meeds.wallet.storage.TransactionStorage;
 import io.meeds.wallet.storage.WalletStorage;
@@ -78,7 +78,7 @@ import io.meeds.wallet.storage.cached.CachedAccountStorage;
 import io.meeds.wallet.storage.cached.CachedTransactionStorage;
 import io.meeds.wallet.test.mock.IdentityManagerMock;
 import io.meeds.wallet.test.mock.SpaceServiceMock;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 @ConfiguredBy({
   @ConfigurationUnit(scope = ContainerScope.ROOT, path = "conf/configuration.xml"),
