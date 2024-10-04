@@ -18,24 +18,28 @@
  */
 package io.meeds.wallet.reward.service;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.*;
-import static io.meeds.wallet.wallet.utils.WalletUtils.fromJsonString;
-import static io.meeds.wallet.wallet.utils.WalletUtils.toJsonString;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_CONTEXT;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SCOPE;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SETTINGS_KEY_NAME;
+import static io.meeds.wallet.utils.WalletUtils.fromJsonString;
+import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
-import java.util.*;
+import java.util.Objects;
 
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
-import org.exoplatform.commons.api.settings.SettingService;
-import org.exoplatform.commons.api.settings.SettingValue;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
+
+import org.exoplatform.commons.api.settings.SettingService;
+import org.exoplatform.commons.api.settings.SettingValue;
+
+import io.meeds.wallet.model.RewardSettings;
 
 /**
  * A storage service to save/load reward transactions
  */
-@Service
 @Primary
+@Service("rewardSettingsService")
 public class WalletRewardSettingsService implements RewardSettingsService {
 
   @Autowired

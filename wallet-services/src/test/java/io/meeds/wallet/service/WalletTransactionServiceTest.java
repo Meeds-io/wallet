@@ -16,8 +16,8 @@
  */
 package io.meeds.wallet.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -26,16 +26,17 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.meeds.wallet.wallet.service.WalletTransactionService;
 import org.junit.Test;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.model.transaction.TransactionStatistics;
+
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.TransactionStatistics;
+import io.meeds.wallet.service.WalletTransactionService;
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletTransactionServiceTest extends BaseWalletTest {
 
