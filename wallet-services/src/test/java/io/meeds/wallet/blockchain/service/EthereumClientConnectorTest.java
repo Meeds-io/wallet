@@ -16,7 +16,7 @@
  */
 package io.meeds.wallet.blockchain.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -60,8 +60,9 @@ import org.web3j.protocol.websocket.WebSocketService;
 import org.exoplatform.services.cache.CacheService;
 import org.exoplatform.services.cache.concurrent.ConcurrentFIFOExoCache;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
+
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
 import io.meeds.wallet.test.BaseWalletTest;
 
 import io.reactivex.Flowable;

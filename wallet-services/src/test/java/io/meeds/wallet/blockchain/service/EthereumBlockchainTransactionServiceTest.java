@@ -16,9 +16,9 @@
  */
 package io.meeds.wallet.blockchain.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -61,14 +61,16 @@ import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.services.listener.ListenerService;
 import io.meeds.wallet.blockchain.BlockchainRequestException;
 import io.meeds.wallet.blockchain.MaxRequestRateReachedException;
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
+
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
 import io.meeds.wallet.test.BaseWalletTest;
-import io.meeds.wallet.wallet.utils.WalletUtils;
+import io.meeds.wallet.utils.WalletUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {

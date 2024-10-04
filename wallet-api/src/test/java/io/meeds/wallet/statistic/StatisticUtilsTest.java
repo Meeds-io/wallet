@@ -16,13 +16,13 @@
  */
 package io.meeds.wallet.statistic;
 
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.DURATION;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.ERROR_MSG;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.LOCAL_SERVICE;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.OPERATION;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.REMOTE_SERVICE;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.STATUS;
-import static io.meeds.wallet.wallet.statistic.StatisticUtils.STATUS_CODE;
+import static io.meeds.wallet.statistic.StatisticUtils.DURATION;
+import static io.meeds.wallet.statistic.StatisticUtils.ERROR_MSG;
+import static io.meeds.wallet.statistic.StatisticUtils.LOCAL_SERVICE;
+import static io.meeds.wallet.statistic.StatisticUtils.OPERATION;
+import static io.meeds.wallet.statistic.StatisticUtils.REMOTE_SERVICE;
+import static io.meeds.wallet.statistic.StatisticUtils.STATUS;
+import static io.meeds.wallet.statistic.StatisticUtils.STATUS_CODE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
@@ -33,17 +33,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.meeds.wallet.wallet.statistic.StatisticUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.meeds.analytics.model.StatisticData;
 import io.meeds.analytics.model.StatisticData.StatisticStatus;
 import io.meeds.analytics.utils.AnalyticsUtils;
-import io.meeds.wallet.wallet.model.Wallet;
+import io.meeds.wallet.model.Wallet;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StatisticUtilsTest {
 
   @Test

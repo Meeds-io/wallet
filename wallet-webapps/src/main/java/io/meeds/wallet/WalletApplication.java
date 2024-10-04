@@ -27,13 +27,13 @@ import io.meeds.spring.kernel.PortalApplicationContextInitializer;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = { 
-        WalletApplication.MODULE_NAME,
-        AvailableIntegration.KERNEL_MODULE,
-        AvailableIntegration.JPA_MODULE, 
-        AvailableIntegration.WEB_MODULE, 
+  WalletApplication.MODULE_NAME,
+  AvailableIntegration.KERNEL_MODULE,
+  AvailableIntegration.JPA_MODULE, 
+  AvailableIntegration.WEB_MODULE, 
 }, 
 exclude = {
-        LiquibaseAutoConfiguration.class,
+  LiquibaseAutoConfiguration.class,
 })
 @EnableJpaRepositories(basePackages = WalletApplication.MODULE_NAME)
 @PropertySource("classpath:application.properties")

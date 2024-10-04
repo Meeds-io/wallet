@@ -18,8 +18,8 @@
  */
 package io.meeds.wallet.reward.listener;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
 import static org.mockito.Mockito.*;
 
 import org.exoplatform.commons.api.notification.command.NotificationCommand;
@@ -37,7 +37,8 @@ import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.notification.impl.NotificationContextImpl;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
+
+import io.meeds.wallet.model.RewardReport;
 
 @SpringBootTest(classes = { RewardSucceedNotificationListener.class })
 class RewardSucceedNotificationListenerTest {
