@@ -30,26 +30,26 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
 
-import io.meeds.wallet.reward.service.WalletRewardReportService;
+import io.meeds.wallet.reward.service.RewardReportService;
 
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = {TransactionReplacedListener.class})
+@SpringBootTest(classes = { TransactionReplacedListener.class })
 class TransactionReplacedListenerTest {
 
-  private static final String EVENT_NAME = "exo.wallet.transaction.replaced";
+  private static final String                EVENT_NAME = "exo.wallet.transaction.replaced";
 
   @MockBean
-  private ListenerService listenerService;
+  private ListenerService                    listenerService;
 
   @MockBean
-  private WalletRewardReportService walletRewardReportService;
+  private RewardReportService                rewardReportService;
 
   @MockBean
   private Event<Object, Map<String, String>> event;
 
   @Autowired
-  private TransactionReplacedListener transactionReplacedListener;
+  private TransactionReplacedListener        transactionReplacedListener;
 
   @BeforeEach
   void setUp() {
@@ -73,8 +73,6 @@ class TransactionReplacedListenerTest {
     transactionReplacedListener.onEvent(event);
 
     // Then
-    verify(walletRewardReportService).replaceRewardTransactions("oldHashValue", "newHashValue");
+    verify(rewardReportService).replaceRewardTransactions("oldHashValue", "newHashValue");
   }
 }
-
-

@@ -20,10 +20,11 @@ import io.meeds.wallet.dao.WalletAccountBackupDAO;
 import io.meeds.wallet.dao.WalletAccountDAO;
 import io.meeds.wallet.dao.WalletBlockchainStateDAO;
 import io.meeds.wallet.dao.WalletPrivateKeyDAO;
-import io.meeds.wallet.wallet.model.AddressAlreadyInUseException;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletCacheKey;
-import io.meeds.wallet.wallet.model.WalletProvider;
+import io.meeds.wallet.model.AddressAlreadyInUseException;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletCacheKey;
+import io.meeds.wallet.model.WalletProvider;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.cache.future.FutureExoCache;

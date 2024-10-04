@@ -30,11 +30,12 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
 
 /**
  * A job that will refresh periodically ether transactions sent by admin wallet

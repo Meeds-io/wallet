@@ -16,23 +16,23 @@
  */
 package io.meeds.wallet.blockchain.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.GWEI_TO_WEI_DECIMALS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_ETHER_BALANCE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_FILTER_CHANGES;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_FILTER_LOGS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_GAS_PRICE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_LAST_BLOCK_NUMBER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_COUNT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_RECEIPT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_NEW_FILTER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_SEND_TRANSACTION;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_UNINSTALL_FILTER;
-import static io.meeds.wallet.wallet.utils.WalletUtils.convertFromDecimals;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getContractAddress;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getNetworkId;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getWebsocketURL;
+import static io.meeds.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.GWEI_TO_WEI_DECIMALS;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_ETHER_BALANCE;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_FILTER_CHANGES;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_FILTER_LOGS;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_GAS_PRICE;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_LAST_BLOCK_NUMBER;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_COUNT;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_GET_TRANSACTION_RECEIPT;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_NEW_FILTER;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_SEND_TRANSACTION;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_UNINSTALL_FILTER;
+import static io.meeds.wallet.utils.WalletUtils.convertFromDecimals;
+import static io.meeds.wallet.utils.WalletUtils.getContractAddress;
+import static io.meeds.wallet.utils.WalletUtils.getNetworkId;
+import static io.meeds.wallet.utils.WalletUtils.getWebsocketURL;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -75,12 +75,13 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.statistic.ExoWalletStatistic;
-import io.meeds.wallet.wallet.statistic.ExoWalletStatisticService;
 
 import io.meeds.wallet.lock.Lock;
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.statistic.ExoWalletStatistic;
+import io.meeds.wallet.statistic.ExoWalletStatisticService;
+
 import io.reactivex.Flowable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;

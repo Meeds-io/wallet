@@ -24,12 +24,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </component>
 
   <component>
-    <key>io.meeds.wallet.wallet.service.BlockchainTransactionService</key>
+    <key>io.meeds.wallet.service.BlockchainTransactionService</key>
     <type>io.meeds.wallet.blockchain.service.EthereumBlockchainTransactionService</type>
   </component>
 
   <component>
-    <key>io.meeds.wallet.wallet.service.WalletTokenAdminService</key>
+    <key>io.meeds.wallet.service.WalletTokenAdminService</key>
     <type>io.meeds.wallet.blockchain.service.EthereumWalletTokenAdminService</type>
   </component>
 

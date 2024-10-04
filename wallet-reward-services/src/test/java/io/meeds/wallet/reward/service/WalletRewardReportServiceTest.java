@@ -24,15 +24,17 @@ import java.util.*;
 
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
-import io.meeds.wallet.wallet.model.WalletState;
+
 import org.junit.jupiter.api.Test;
 
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.RewardSettings;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.reward.storage.WalletRewardReportStorage;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTokenAdminService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,7 +54,7 @@ public class WalletRewardReportServiceTest { // NOSONAR
   private WalletTokenAdminService   walletTokenAdminService;
 
   @MockBean
-  private RewardSettingsService rewardSettingsService;
+  private RewardSettingsService     rewardSettingsService;
 
   @MockBean
   private WalletRewardReportStorage rewardReportStorage;
@@ -61,7 +63,7 @@ public class WalletRewardReportServiceTest { // NOSONAR
   private RealizationService        realizationService;
 
   @Autowired
-  private RewardReportService rewardReportService;
+  private RewardReportService       rewardReportService;
 
   @Test
   public void testComputeRewards() {
