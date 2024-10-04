@@ -21,16 +21,17 @@ package io.meeds.wallet.reward.service;
 import com.google.javascript.jscomp.jarjar.com.google.common.base.Objects;
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
-import org.junit.jupiter.api.Test;
 
-import io.meeds.wallet.wallet.model.reward.RewardBudgetType;
-import io.meeds.wallet.wallet.model.reward.RewardPeriodType;
-import io.meeds.wallet.wallet.model.reward.RewardSettings;
+import io.meeds.wallet.model.RewardBudgetType;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardSettings;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.toJsonString;
+import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;

@@ -16,6 +16,8 @@
  */
 package io.meeds.wallet.notification.provider;
 
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import org.exoplatform.commons.api.notification.annotation.TemplateConfig;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfigs;
 import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
@@ -24,8 +26,6 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
 import io.meeds.wallet.notification.builder.RequestFundsTemplateBuilder;
 import io.meeds.wallet.notification.builder.TemplateBuilder;
-
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
 
 @TemplateConfigs(templates = {
     @TemplateConfig(pluginId = WALLET_SENDER_NOTIFICATION_ID, template = "war:/conf/wallet/templates/notification/mail/WalletSenderMailPlugin.gtmpl"),

@@ -16,16 +16,16 @@
  */
 package io.meeds.wallet.blockchain.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.EMPTY_HASH;
-import static io.meeds.wallet.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_CONTEXT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_SCOPE;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getContractDetail;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getNetworkId;
-import static io.meeds.wallet.wallet.utils.WalletUtils.isWalletEmpty;
+import static io.meeds.wallet.utils.WalletUtils.EMPTY_HASH;
+import static io.meeds.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
+import static io.meeds.wallet.utils.WalletUtils.LAST_BLOCK_NUMBER_KEY_NAME;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_EFFECTIVELY_SENT_CODE;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_CONTEXT;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_SCOPE;
+import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
+import static io.meeds.wallet.utils.WalletUtils.getNetworkId;
+import static io.meeds.wallet.utils.WalletUtils.isWalletEmpty;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -71,15 +71,16 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import io.meeds.wallet.blockchain.BlockchainRequestException;
 import io.meeds.wallet.blockchain.MaxRequestRateReachedException;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.ContractTransactionEvent;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletService;
+import io.meeds.wallet.service.WalletTransactionService;
+
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.ContractTransactionEvent;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
 
 public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 

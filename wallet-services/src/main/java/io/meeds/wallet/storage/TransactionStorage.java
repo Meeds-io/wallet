@@ -16,9 +16,9 @@
  */
 package io.meeds.wallet.storage;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
-import static io.meeds.wallet.wallet.utils.WalletUtils.formatTransactionHash;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_CREATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.TRANSACTION_MODIFIED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.formatTransactionHash;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -32,8 +32,8 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import io.meeds.wallet.dao.WalletTransactionDAO;
 import io.meeds.wallet.entity.TransactionEntity;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
 
 public class TransactionStorage {
 
