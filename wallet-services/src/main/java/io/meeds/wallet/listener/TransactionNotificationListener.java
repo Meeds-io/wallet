@@ -16,6 +16,8 @@
  */
 package io.meeds.wallet.listener;
 
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
@@ -28,14 +30,13 @@ import org.exoplatform.services.listener.*;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.model.transaction.TransactionNotificationType;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.TransactionNotificationType;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletTransactionService;
 
 /**
  * A listener that is triggered when a watched transaction by the addon is mined

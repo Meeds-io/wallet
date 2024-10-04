@@ -25,9 +25,10 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
+
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.service.BlockchainTransactionService;
+import io.meeds.wallet.service.WalletTransactionService;
 
 /**
  * This listener will be triggered when a transaction is mined and updated on

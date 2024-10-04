@@ -26,12 +26,14 @@ import jakarta.annotation.PostConstruct;
 
 import io.meeds.analytics.model.StatisticData;
 import io.meeds.analytics.utils.AnalyticsUtils;
+import io.meeds.wallet.model.RewardReport;
+
 import org.exoplatform.commons.api.persistence.ExoTransactional;
 import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

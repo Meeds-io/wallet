@@ -21,12 +21,13 @@ import java.util.Collection;
 
 import jakarta.persistence.*;
 
-import io.meeds.wallet.wallet.model.WalletProvider;
-import io.meeds.wallet.wallet.model.WalletState;
 import org.hibernate.annotations.DynamicUpdate;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
-import io.meeds.wallet.wallet.model.WalletType;
+
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletState;
+import io.meeds.wallet.model.WalletType;
 
 @Entity(name = "Wallet")
 @ExoEntity
