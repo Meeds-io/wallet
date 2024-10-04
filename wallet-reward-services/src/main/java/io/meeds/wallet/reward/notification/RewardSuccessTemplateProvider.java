@@ -16,7 +16,7 @@
  */
 package io.meeds.wallet.reward.notification;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,7 +24,8 @@ import java.util.Map;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.codec.binary.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
 import org.exoplatform.commons.api.notification.model.ChannelKey;

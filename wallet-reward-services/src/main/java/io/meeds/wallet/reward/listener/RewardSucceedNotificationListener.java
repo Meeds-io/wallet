@@ -16,9 +16,6 @@
  */
 package io.meeds.wallet.reward.listener;
 
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
-import static io.meeds.wallet.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
-
 import jakarta.annotation.PostConstruct;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
@@ -28,7 +25,12 @@ import org.exoplatform.services.listener.Asynchronous;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
 import org.exoplatform.services.listener.ListenerService;
-import io.meeds.wallet.wallet.model.reward.RewardReport;
+
+import io.meeds.wallet.model.RewardReport;
+
+import static io.meeds.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
+import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_NOTIFICATION_ID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

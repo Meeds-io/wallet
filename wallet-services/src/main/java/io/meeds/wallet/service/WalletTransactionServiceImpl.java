@@ -16,18 +16,14 @@
  */
 package io.meeds.wallet.service;
 
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import java.time.*;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletType;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletContractService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,13 +34,19 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.core.space.spi.SpaceService;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.model.transaction.TransactionStatistics;
+
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.TransactionStatistics;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletType;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletContractService;
+import io.meeds.wallet.service.WalletTransactionService;
 import io.meeds.wallet.storage.TransactionStorage;
+
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
 
 public class WalletTransactionServiceImpl implements WalletTransactionService {
 

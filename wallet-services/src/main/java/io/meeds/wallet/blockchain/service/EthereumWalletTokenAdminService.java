@@ -16,18 +16,18 @@
  */
 package io.meeds.wallet.blockchain.service;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
-import static io.meeds.wallet.wallet.utils.WalletUtils.OPERATION_READ_FROM_TOKEN;
-import static io.meeds.wallet.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
-import static io.meeds.wallet.wallet.utils.WalletUtils.convertFromDecimals;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getContractDetail;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getGasLimit;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getIdentityByTypeAndId;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getNetworkId;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getSettings;
-import static io.meeds.wallet.wallet.utils.WalletUtils.getWebsocketURL;
-import static io.meeds.wallet.wallet.utils.WalletUtils.isUserRewardingAdmin;
-import static io.meeds.wallet.wallet.utils.WalletUtils.toJsonString;
+import static io.meeds.wallet.utils.WalletUtils.ETHER_TO_WEI_DECIMALS;
+import static io.meeds.wallet.utils.WalletUtils.OPERATION_READ_FROM_TOKEN;
+import static io.meeds.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
+import static io.meeds.wallet.utils.WalletUtils.convertFromDecimals;
+import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
+import static io.meeds.wallet.utils.WalletUtils.getGasLimit;
+import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static io.meeds.wallet.utils.WalletUtils.getNetworkId;
+import static io.meeds.wallet.utils.WalletUtils.getSettings;
+import static io.meeds.wallet.utils.WalletUtils.getWebsocketURL;
+import static io.meeds.wallet.utils.WalletUtils.isUserRewardingAdmin;
+import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -83,18 +83,19 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.wallet.contract.MeedsToken;
-import io.meeds.wallet.wallet.model.ContractDetail;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.WalletType;
-import io.meeds.wallet.wallet.model.settings.GlobalSettings;
-import io.meeds.wallet.wallet.model.transaction.TransactionDetail;
-import io.meeds.wallet.wallet.service.WalletAccountService;
-import io.meeds.wallet.wallet.service.WalletContractService;
-import io.meeds.wallet.wallet.service.WalletService;
-import io.meeds.wallet.wallet.service.WalletTokenAdminService;
-import io.meeds.wallet.wallet.service.WalletTransactionService;
-import io.meeds.wallet.wallet.statistic.ExoWalletStatistic;
-import io.meeds.wallet.wallet.statistic.ExoWalletStatisticService;
+
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.GlobalSettings;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletType;
+import io.meeds.wallet.service.WalletAccountService;
+import io.meeds.wallet.service.WalletContractService;
+import io.meeds.wallet.service.WalletService;
+import io.meeds.wallet.service.WalletTokenAdminService;
+import io.meeds.wallet.service.WalletTransactionService;
+import io.meeds.wallet.statistic.ExoWalletStatistic;
+import io.meeds.wallet.statistic.ExoWalletStatisticService;
 import io.meeds.wallet.storage.WalletStorage;
 
 public class EthereumWalletTokenAdminService implements WalletTokenAdminService, Startable, ExoWalletStatisticService {
