@@ -16,6 +16,8 @@
  */
 package io.meeds.wallet.notification.plugin;
 
+import static io.meeds.wallet.utils.WalletUtils.*;
+
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,10 +31,9 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.service.LinkProvider;
-import io.meeds.wallet.wallet.model.Wallet;
-import io.meeds.wallet.wallet.model.transaction.TransactionNotificationType;
 
-import static io.meeds.wallet.wallet.utils.WalletUtils.*;
+import io.meeds.wallet.model.TransactionNotificationType;
+import io.meeds.wallet.model.Wallet;
 
 public class WalletSenderNotificationPlugin extends BaseNotificationPlugin {
 

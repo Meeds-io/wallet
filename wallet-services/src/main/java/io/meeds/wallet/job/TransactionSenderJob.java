@@ -27,7 +27,8 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
-import io.meeds.wallet.wallet.service.BlockchainTransactionService;
+
+import io.meeds.wallet.service.BlockchainTransactionService;
 
 @DisallowConcurrentExecution
 public class TransactionSenderJob implements Job {
