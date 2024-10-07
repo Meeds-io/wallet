@@ -56,6 +56,8 @@
     <template v-else>
       <wallet-reward-details
         :reward-report="selectedRewardReport"
+        :transaction-ether-scan-link="transactionEtherScanLink"
+        :contract-details="contractDetails"
         @back="showRewardDetails = false" />
     </template>
   </v-app>
@@ -73,6 +75,8 @@ export default {
     showRewardDetails: false,
     rewardsPage: 0,
     rewardsPageSize: 12,
+    transactionEtherScanLink: null,
+    contractDetails: null
   }),
   computed: {
     rewardReport() {
@@ -86,11 +90,38 @@ export default {
     },
   },
   created() {
-    this.refreshRewardSettings();
+    this.init()
+      .then(() => {
+        this.transactionEtherScanLink = this.walletUtils.getTransactionEtherscanlink();
+      });
   },
   methods: {
     openBudgetConfigurationDrawer() {
       this.$refs.budgetConfiguration.open();
+    },
+    init() {
+      this.loading = true;
+
+      this.error = null;
+      return this.walletUtils.initSettings(false, true, true)
+        .then(() => {
+          this.contractDetails = window.walletSettings.contractDetail;
+        })
+        .then(() => this.walletUtils.initWeb3(false, true))
+        .then(() => {
+          if (this.contractDetails) {
+            return this.tokenUtils.reloadContractDetails(this.walletAddress).then(result => this.contractDetails = result);
+          } else {
+            this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
+          }
+        })
+        .then(() => this.refreshRewardSettings())
+        .catch((e) => {
+          this.error = e ? String(e) : this.$t('exoplatform.wallet.error.unknownError');
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
     refreshRewardSettings() {
       this.loading = true;
