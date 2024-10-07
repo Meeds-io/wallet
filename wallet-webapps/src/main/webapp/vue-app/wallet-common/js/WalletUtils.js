@@ -436,6 +436,8 @@ export function getTransactionEtherscanlink() {
     return 'https://polygonscan.com/tx/';
   case 80001:
     return 'https://mumbai.polygonscan.com/tx/';
+  case 80002:
+    return 'https://amoy.polygonscan.com/tx/';
   default:
     return '#';
   }
