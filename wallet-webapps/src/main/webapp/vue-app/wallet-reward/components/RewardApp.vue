@@ -29,7 +29,7 @@
           class="d-flex flex-column justify-space-between"
           width="40%"
           flat>
-          <wallet-current-balance />
+          <wallet-current-balance :loading="loading" :reward-settings="rewardSettings" />
           <extension-registry-components
             name="WalletRewardingCard"
             type="wallet-reward-cards-extensions" />
@@ -93,7 +93,7 @@ export default {
     this.init()
       .then(() => {
         this.transactionEtherScanLink = this.walletUtils.getTransactionEtherscanlink();
-      });
+      }).then(this.refreshRewardSettings());
   },
   methods: {
     openBudgetConfigurationDrawer() {
@@ -115,7 +115,6 @@ export default {
             this.contractDetails = this.tokenUtils.getContractDetails(this.walletAddress);
           }
         })
-        .then(() => this.refreshRewardSettings())
         .catch((e) => {
           this.error = e ? String(e) : this.$t('exoplatform.wallet.error.unknownError');
         })
