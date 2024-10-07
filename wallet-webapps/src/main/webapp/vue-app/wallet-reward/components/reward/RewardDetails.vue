@@ -32,7 +32,7 @@
         </v-btn>
         <v-card-title class="px-2 py-1">
           <v-icon
-            class="secondary--text"
+            color="tertiary"
             left>
             fas fa-calendar
           </v-icon>
