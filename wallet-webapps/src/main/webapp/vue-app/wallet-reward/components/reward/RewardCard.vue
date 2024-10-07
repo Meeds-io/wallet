@@ -177,7 +177,7 @@ export default {
         icon: 'fas fa-check-circle',
         iconClass: null,
         iconColor: 'success',
-        message: this.$t('wallet.administration.rewardCard.status.rewardsSent'),
+        message: this.$t('wallet.administration.rewardCard.status.rewardsSent', {0: this.rewardSentDate}),
       };
     },
     statusIcon() {
@@ -240,7 +240,11 @@ export default {
     endDate() {
       return new Date(this.period?.endDate);
     },
-
+    rewardSentDate() {
+      const reward = this.rewardReport?.rewards?.find(reward => reward?.transaction?.succeeded);
+      const sentDate = new Date(reward?.transaction?.timestamp);
+      return sentDate?.toLocaleString(this.lang, this.dateFormat);
+    },
   },
   methods: {
     openDetails() {
