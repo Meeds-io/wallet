@@ -100,8 +100,10 @@
         <wallet-reward-details-item
           :key="item.wallet.id"
           :reward="item"
+          :contract-details="contractDetails"
           :token-symbol="tokenSymbol"
-          :completely-proceeded="completelyProceeded" />
+          :completely-proceeded="completelyProceeded"
+          :transaction-ether-scan-link="transactionEtherScanLink" />
       </template>
     </v-data-table>
   </v-card>
@@ -117,6 +119,16 @@ export default {
     rewardReport: {
       type: Object,
       default: null
+    },
+    contractDetails: {
+      type: Object,
+      default: null
+    },
+    transactionEtherScanLink: {
+      type: String,
+      default: function () {
+        return null;
+      },
     }
   },
   data: () => ({
