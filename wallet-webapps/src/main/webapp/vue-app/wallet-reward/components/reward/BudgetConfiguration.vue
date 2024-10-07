@@ -153,9 +153,6 @@ export default {
       default: null
     }
   },
-  data: () => ({
-
-  }),
   computed: {
     periodType() {
       return this.rewardSettings?.periodType;
