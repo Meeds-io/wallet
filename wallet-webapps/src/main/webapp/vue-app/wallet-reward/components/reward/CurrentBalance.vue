@@ -20,7 +20,7 @@
 -->
 <template>
   <v-card
-    :loading="loading"
+    :loading="loading || loadingWallet"
     class="border-radius border-color ma-5 mb-2"
     flat>
     <div class="d-flex flex-column flex-grow-1">
@@ -30,7 +30,23 @@
             {{ $t('exoplatform.wallet.label.currentBalance') }}
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action v-if="useWalletAdmin" class="ma-auto">
+        <v-list-item-action v-if="!loading && balanceBelowBudget" class="ma-auto">
+          <v-tooltip
+            :disabled="$root.isMobile"
+            bottom>
+            <template #activator="{ on }">
+              <div class="d-flex me-2" v-on="on">
+                <v-icon
+                  color="warning"
+                  size="18">
+                  fas fa-exclamation-triangle
+                </v-icon>
+              </div>
+            </template>
+            <span>{{ balanceBelowBudgetLabel }}</span>
+          </v-tooltip>
+        </v-list-item-action>
+        <v-list-item-action v-if="!loading && useWalletAdmin" class="ma-auto">
           <v-tooltip
             :disabled="$root.isMobile"
             bottom>
@@ -84,20 +100,28 @@
 </template>
 <script>
 export default {
+  props: {
+    rewardSettings: {
+      type: Object,
+      default: null
+    },
+    loading: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data () {
     return {
-      loading: false,
+      loadingWallet: false,
       adminWallet: null,
       contractDetails: null,
       walletAdminUri: '/portal/administration/home/rewards/wallet',
+      configuredBudget: null
     };
   },
   computed: {
     tokenName() {
       return this.contractDetails?.name;
-    },
-    tokenSymbol() {
-      return this.contractDetails?.symbol;
     },
     tokenBalance() {
       return this.adminWallet?.tokenBalance || 0;
@@ -111,13 +135,30 @@ export default {
     useWalletAdmin() {
       return this.etherBalance && Number(this.etherBalance) >= 0.002 && this.tokenBalance && Number(this.tokenBalance) >= 0.02;
     },
+    lowEtherBalance() {
+      return this.etherBalance < 1;
+    },
+    lowTokenBalance() {
+      return this.configuredBudget > 1000;
+    },
+    balanceBelowBudget() {
+      return this.lowEtherBalance || this.lowTokenBalance;
+    },
+    balanceBelowBudgetLabel() {
+      return this.lowEtherBalance ? this.$t('wallet.administration.lowEtherBalance') : this.$t('wallet.administration.lowTokenBalance');
+    }
+  },
+  watch: {
+    rewardSettings() {
+      this.computeDistributionForecast();
+    }
   },
   created() {
     this.init();
   },
   methods: {
     init() {
-      this.loading = true;
+      this.loadingWallet = true;
       this.error = null;
       return this.walletUtils.initSettings(false, true)
         .then(() => {
@@ -125,8 +166,19 @@ export default {
           return this.addressRegistry.searchWalletByTypeAndId('admin', 'admin');
         })
         .then((adminWallet) => this.adminWallet = adminWallet)
+        .then(() => {
+          this.$nextTick().then(() => {
+            this.computeDistributionForecast();
+          });
+        })
         .finally(() => {
-          this.loading = false;
+          this.loadingWallet = false;
+        });
+    },
+    computeDistributionForecast() {
+      return this.$rewardService.computeDistributionForecast(this.rewardSettings)
+        .then(distributionForecast => {
+          this.configuredBudget = distributionForecast?.budget || 0;
         });
     },
   }
