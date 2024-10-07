@@ -38,7 +38,6 @@
         :deleted-user="deletedUser"
         :disabled-user="disabledUser"
         :avatar="walletAvatar"
-        :initialization-state="initializationState"
         display-no-address />
     </td>
     <td class="text-center">
@@ -135,9 +134,10 @@
               <div v-on="on" class="d-inline-block">
                 <v-list-item
                   :disabled="!status"
+                  :href="`${transactionEtherScanLink}${transactionHash}`"
+                  target="_blank"
                   dense
-                  @mousedown="$event.preventDefault()"
-                  @click="openTransaction">
+                  @mousedown="$event.preventDefault()">
                   <v-list-item-icon class="me-2 my-auto">
                     <v-icon
                       :disabled="!status"
@@ -163,6 +163,14 @@
           </v-list-item>
         </v-list>
       </v-menu>
+      <wallet-reward-account-detail
+        ref="accountDetail"
+        :fiat-symbol="fiatSymbol"
+        :contract-details="contractDetails"
+        :wallet="wallet"
+        is-read-only
+        is-display-only
+        is-administration />
     </td>
   </tr>
 </template>
@@ -174,6 +182,10 @@ export default {
       type: Object,
       default: null
     },
+    contractDetails: {
+      type: Object,
+      default: null
+    },
     tokenSymbol: {
       type: String,
       default: ''
@@ -182,6 +194,12 @@ export default {
       type: Boolean,
       default: false
     },
+    transactionEtherScanLink: {
+      type: String,
+      default: function () {
+        return null;
+      },
+    }
   },
   data: () => ({
     term: null,
@@ -193,7 +211,7 @@ export default {
       month: 'short',
       day: 'numeric',
     },
-    sendingInProgress: false
+    sendingInProgress: false,
   }),
   computed: {
     walletAvatar() {
@@ -202,8 +220,11 @@ export default {
     walletAddress() {
       return this.reward?.wallet?.address;
     },
+    wallet() {
+      return this.reward?.wallet;
+    },
     walletId() {
-      return this.reward?.wallet?.id;
+      return this.wallet?.id;
     },
     walletTechnicalId() {
       return this.reward?.wallet?.technicalId;
@@ -254,16 +275,19 @@ export default {
     amount() {
       return this.completelyProceeded ? this.reward?.tokensSent : this.reward?.amount;
     },
+    transactionHash() {
+      return this.reward?.transaction?.hash;
+    },
+    fiatSymbol() {
+      return window.walletSettings.fiatSymbol || '$';
+    }
   },
   methods: {
     closeMenu(){
       this.showMenu = false;
     },
-    openTransaction() {
-      // TO DO
-    },
     seeHistory() {
-      // TO DO
+      this.$refs.accountDetail.open();
     }
   }
 };
