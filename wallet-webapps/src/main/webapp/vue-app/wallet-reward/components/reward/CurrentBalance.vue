@@ -139,7 +139,7 @@ export default {
       return this.etherBalance < 1;
     },
     lowTokenBalance() {
-      return this.configuredBudget > 1000;
+      return this.configuredBudget > this.tokenBalance;
     },
     balanceBelowBudget() {
       return this.lowEtherBalance || this.lowTokenBalance;
