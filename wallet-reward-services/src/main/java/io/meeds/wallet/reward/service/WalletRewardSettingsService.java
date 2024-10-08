@@ -27,7 +27,6 @@ import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import org.exoplatform.commons.api.settings.SettingService;
@@ -38,8 +37,7 @@ import io.meeds.wallet.model.RewardSettings;
 /**
  * A storage service to save/load reward transactions
  */
-@Primary
-@Service("rewardSettingsService")
+@Service
 public class WalletRewardSettingsService implements RewardSettingsService {
 
   @Autowired
@@ -56,8 +54,8 @@ public class WalletRewardSettingsService implements RewardSettingsService {
 
     SettingValue<?> settingsValue = settingService.get(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME);
 
-    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
-                                                                                           : settingsValue.getValue().toString();
+    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null :
+                                                                                           settingsValue.getValue().toString();
 
     RewardSettings rewardSettings;
     if (settingsValueString == null) {

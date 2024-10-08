@@ -257,7 +257,7 @@ export default {
       return this.$rewardService.sendRewards(this.period).then(() => {
         this.$rewardService.computeRewardsByPeriod(this.period)
           .then(rewardReport => {
-            this.rewardReport = rewardReport;
+            this.$emit('reward-report-updated', rewardReport);
           }).finally(() => {
             this.loadingSending = false;
           });
