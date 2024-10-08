@@ -17,14 +17,11 @@
 package io.meeds.wallet.reward.service;
 
 
-import org.springframework.stereotype.Service;
-
 import io.meeds.wallet.model.RewardSettings;
 
 /**
  * A storage service to save/load reward transactions
  */
-@Service("rewardSettingsService")
 public interface RewardSettingsService {
 
   /**
