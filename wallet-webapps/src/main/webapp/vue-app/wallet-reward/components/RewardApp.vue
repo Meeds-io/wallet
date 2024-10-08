@@ -58,6 +58,7 @@
         :reward-report="selectedRewardReport"
         :transaction-ether-scan-link="transactionEtherScanLink"
         :contract-details="contractDetails"
+        @reward-report-updated="rewardReportUpdated"
         @back="showRewardDetails = false" />
     </template>
   </v-app>
@@ -101,7 +102,6 @@ export default {
     },
     init() {
       this.loading = true;
-
       this.error = null;
       return this.walletUtils.initSettings(false, true, true)
         .then(() => {
@@ -161,6 +161,12 @@ export default {
     settingUpdated() {
       this.rewardReports = [];
       this.refreshRewardSettings();
+    },
+    rewardReportUpdated(rewardReport) {
+      const index = this.rewardReports.findIndex(r => r?.period === rewardReport?.period);
+      if (index !== -1) {
+        this.rewardReports[index] = rewardReport;
+      }
     }
   },
 };
