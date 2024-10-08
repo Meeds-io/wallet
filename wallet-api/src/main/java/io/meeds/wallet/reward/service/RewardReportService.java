@@ -20,17 +20,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import io.meeds.wallet.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import org.exoplatform.social.core.identity.model.Identity;
+
+import io.meeds.wallet.model.DistributionForecast;
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.RewardSettings;
+import io.meeds.wallet.model.WalletReward;
 
 /**
  * A storage service to save/load reward settings
  */
-@Service("rewardReportService")
 public interface RewardReportService {
 
   /**
