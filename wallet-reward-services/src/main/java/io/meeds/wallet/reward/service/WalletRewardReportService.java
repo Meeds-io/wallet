@@ -47,11 +47,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-import io.meeds.wallet.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -65,6 +62,18 @@ import org.exoplatform.social.core.identity.model.Identity;
 import io.meeds.gamification.constant.IdentityType;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.DistributionForecast;
+import io.meeds.wallet.model.RewardBudgetType;
+import io.meeds.wallet.model.RewardPeriod;
+import io.meeds.wallet.model.RewardPeriodType;
+import io.meeds.wallet.model.RewardReport;
+import io.meeds.wallet.model.RewardSettings;
+import io.meeds.wallet.model.RewardStatus;
+import io.meeds.wallet.model.TransactionDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletReward;
+import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.reward.storage.WalletRewardReportStorage;
 import io.meeds.wallet.service.WalletAccountService;
 import io.meeds.wallet.service.WalletTokenAdminService;
@@ -74,8 +83,7 @@ import lombok.Setter;
 /**
  * A service to manage reward reports
  */
-@Primary
-@Service("rewardReportService")
+@Service
 public class WalletRewardReportService implements RewardReportService {
 
   private static final Log          LOG            = ExoLogger.getLogger(WalletRewardReportService.class);
