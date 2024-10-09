@@ -87,7 +87,7 @@ class RewardSucceedNotificationListenerTest {
 
       rewardSucceedNotificationListener.onEvent(event);
 
-      verify(notificationContext).append(eq(REWARD_REPORT_NOTIFICATION_PARAM), eq(rewardReport));
+      verify(notificationContext).append(REWARD_REPORT_NOTIFICATION_PARAM, rewardReport);
 
       // Verify that the notification command was created and executed
       verify(notificationExecutor).with(notificationCommand);
