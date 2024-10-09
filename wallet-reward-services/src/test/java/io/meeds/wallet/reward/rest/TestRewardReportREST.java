@@ -18,11 +18,8 @@
  */
 package io.meeds.wallet.reward.rest;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,9 +29,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
+import io.meeds.wallet.utils.WalletUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -130,6 +130,34 @@ class TestRewardReportREST {
   }
 
   @Test
+  void computeRewardsAdmin() throws Exception {
+    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
+    RewardPeriod rewardPeriod = new RewardPeriod();
+    RewardReport rewardReport = new RewardReport();
+    rewardReport.setPeriod(rewardPeriod);
+    when(rewardReportService.computeRewards(any(LocalDate.class))).thenReturn(rewardReport);
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testAdminUser()));
+    verify(rewardSettingsService, times(1)).getSettings();
+    response.andExpect(status().isOk());
+
+    RewardSettings rewardSettings = new RewardSettings();
+    rewardSettings.setPeriodType(RewardPeriodType.MONTH);
+    when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+
+    response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testAdminUser()));
+    response.andExpect(status().isOk());
+
+
+    rewardSettings = new RewardSettings();
+    rewardSettings.setPeriodType(RewardPeriodType.QUARTER);
+    when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+
+    response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testAdminUser()));
+    response.andExpect(status().isOk());
+
+  }
+
+  @Test
   void computeRewardsByPeriodAnonymously() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/period/compute").content(asJsonString(rewardPeriod()))
                                                                                 .contentType(MediaType.APPLICATION_JSON)
@@ -161,14 +189,33 @@ class TestRewardReportREST {
   }
 
   @Test
-  void computeRewardsAdmin() throws Exception {
+  void computeDistributionForecastAnonymously() throws Exception {
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/forecast").content(asJsonString(rewardPeriod()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void computeDistributionForecastSimpleUser() throws Exception {
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/forecast").content(asJsonString(rewardPeriod()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .with(testSimpleUser()));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void computeDistributionForecastAdmin() throws Exception {
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
     RewardPeriod rewardPeriod = new RewardPeriod();
     RewardReport rewardReport = new RewardReport();
     rewardReport.setPeriod(rewardPeriod);
     when(rewardReportService.computeRewards(any(LocalDate.class))).thenReturn(rewardReport);
-    ResultActions response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testAdminUser()));
-    verify(rewardSettingsService, times(1)).getSettings();
+    ResultActions response = mockMvc.perform(post(REST_PATH + "/forecast").content(asJsonString(rewardPeriod))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .with(testAdminUser()));
     response.andExpect(status().isOk());
   }
 
@@ -180,8 +227,20 @@ class TestRewardReportREST {
 
   @Test
   void computeRewardsByUserSimpleUser() throws Exception {
-    ResultActions response = mockMvc.perform(get(REST_PATH + "/compute/user").param("date", "2024-09-10").with(testSimpleUser()));
-    response.andExpect(status().isOk());
+    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
+    RewardPeriod rewardPeriod = new RewardPeriod();
+    RewardReport rewardReport = new RewardReport();
+    rewardReport.setPeriod(rewardPeriod);
+    when(rewardReportService.computeRewardsByUser(any(LocalDate.class) , anyLong())).thenReturn(rewardReport);
+
+    try (MockedStatic<WalletUtils> walletUtilsMockedStatic = Mockito.mockStatic(WalletUtils.class)) {
+      walletUtilsMockedStatic.when(WalletUtils::getCurrentUserIdentityId).thenReturn(1L);
+      ResultActions response = mockMvc.perform(get(REST_PATH + "/compute/user").param("date", "2024-09-10").with(testSimpleUser()));
+      response.andExpect(status().isOk());
+      response = mockMvc.perform(get(REST_PATH + "/compute/user").param("date", "").with(testSimpleUser()));
+      response.andExpect(status().isBadRequest());
+
+    }
   }
 
   @Test
@@ -207,6 +266,14 @@ class TestRewardReportREST {
             .accept(MediaType.APPLICATION_JSON).with(testAdminUser()));
     verify(rewardReportService, times(1)).sendRewards(any(LocalDate.class), anyString());
     response.andExpect(status().isOk());
+
+    // When
+    doThrow(new IllegalAccessException()).when(rewardReportService).sendRewards(any(LocalDate.class), anyString());
+    response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON).with(testAdminUser()));
+    response.andExpect(status().isUnauthorized());
+
   }
 
   @Test
@@ -238,10 +305,28 @@ class TestRewardReportREST {
   @Test
   void getRewardReportPeriodsAdmin() throws Exception {
     when(rewardReportService.findRewardReportPeriods(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
+    when(rewardReportService.findRewardPeriodsBetween(anyLong(), anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
 
     ResultActions response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "0")
             .param("to", "0")
                                                                     .with(testAdminUser()));
+    response.andExpect(status().isOk());
+
+    response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "11211")
+            .param("to", "225255")
+            .with(testAdminUser()));
+    response.andExpect(status().isOk());
+  }
+
+  @Test
+  void countRewardsAnonymously() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/countRewards").param("userId", "1"));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void countRewardsSimpleUser() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/countRewards").param("userId", "1").with(testSimpleUser()));
     response.andExpect(status().isOk());
   }
 

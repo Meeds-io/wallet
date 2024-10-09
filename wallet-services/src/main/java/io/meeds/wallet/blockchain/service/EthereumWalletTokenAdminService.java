@@ -303,7 +303,7 @@ public class EthereumWalletTokenAdminService implements WalletTokenAdminService,
   }
 
   @Override
-  public final BigInteger getTokenBalanceOf(String address) throws Exception {
+  public final BigInteger getTokenBalanceOf(String address) {
     return tokenBalanceFutureCache.get(null, address.toLowerCase());
   }
 
