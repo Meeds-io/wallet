@@ -61,7 +61,7 @@ public interface RewardReportService {
    * @param localDate a {@link LocalDate} inside the period time
    *          that will be retrieved
    * @param username current username sending rewards
-   * @throws Exception if an error occurs while sending the rewards transactions
+   * @throws IllegalAccessException if an error occurs while sending the rewards transactions
    *           on blockchain
    */
   void sendRewards(LocalDate localDate, String username) throws IllegalAccessException; // NOSONAR
