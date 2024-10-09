@@ -25,7 +25,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
 @Entity(name = "Label")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_LABEL")
 public class AddressLabelEntity implements Serializable {
