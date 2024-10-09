@@ -76,48 +76,48 @@ class WalletRewardReportStorageTest {
   private WalletRewardReportStorage walletRewardReportStorage;
 
   @BeforeEach
-    void setup() {
-        when(rewardDAO.save(any())).thenAnswer(invocation -> {
-            WalletRewardEntity rewardEntity = invocation.getArgument(0);
-            if (rewardEntity.getId() == null) {
-                rewardEntity.setId(REWARD_ID);
-            }
-            when(rewardDAO.findById(REWARD_ID)).thenReturn(Optional.of(rewardEntity));
-            when(rewardDAO.findWalletRewardEntitiesByIdentityId(IDENTITY_ID, PAGEABLE)).thenReturn(List.of(rewardEntity));
-            when(rewardDAO.findAll(PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
-            when(rewardDAO.count()).thenReturn(1L);
-            when(rewardDAO.countWalletRewardEntitiesByIdentityId(IDENTITY_ID)).thenReturn(1.0);
-            when(rewardDAO.findRewardsByPeriodId(REWARD_ID)).thenReturn(List.of(rewardEntity));
-            return rewardEntity;
-        });
-        doAnswer(invocation -> {
-            WalletRewardEntity entity = invocation.getArgument(0);
-            when(rewardDAO.findById(entity.getId())).thenReturn(Optional.empty());
-            return null;
-        }).when(rewardDAO).delete(any());
+  void setup() {
+    when(rewardDAO.save(any())).thenAnswer(invocation -> {
+      WalletRewardEntity rewardEntity = invocation.getArgument(0);
+      if (rewardEntity.getId() == null) {
+        rewardEntity.setId(REWARD_ID);
+      }
+      when(rewardDAO.findById(REWARD_ID)).thenReturn(Optional.of(rewardEntity));
+      when(rewardDAO.findWalletRewardEntitiesByIdentityId(IDENTITY_ID, PAGEABLE)).thenReturn(List.of(rewardEntity));
+      when(rewardDAO.findAll(PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
+      when(rewardDAO.count()).thenReturn(1L);
+      when(rewardDAO.countWalletRewardEntitiesByIdentityId(IDENTITY_ID)).thenReturn(1.0);
+      when(rewardDAO.findRewardsByPeriodId(REWARD_ID)).thenReturn(List.of(rewardEntity));
+      return rewardEntity;
+    });
+    doAnswer(invocation -> {
+      WalletRewardEntity entity = invocation.getArgument(0);
+      when(rewardDAO.findById(entity.getId())).thenReturn(Optional.empty());
+      return null;
+    }).when(rewardDAO).delete(any());
 
-      when(rewardPeriodDAO.save(any())).thenAnswer(invocation -> {
-          WalletRewardPeriodEntity entity = invocation.getArgument(0);
-          if (entity.getId() == null) {
-              entity.setId(REWARD_PERIOD_ID);
-          }
-          if (entity.getPeriodType() == null) {
-              entity.setPeriodType(RewardPeriodType.WEEK);
-          }
-          when(rewardPeriodDAO.findById(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
-          when(rewardPeriodDAO.findRewardPeriodsBetween(12125, 222125 ,PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
-          when(rewardPeriodDAO.findAll(PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
-          when(rewardPeriodDAO.findRewardPeriodByTypeAndTime(any(RewardPeriodType.class), anyLong())).thenReturn(entity);
-          when(rewardPeriodDAO.findWalletRewardPeriodEntitiesByStatus(any(RewardStatus.class))).thenReturn(List.of(entity));
-          when(rewardPeriodDAO.count()).thenReturn(1L);
-          return entity;
-      });
-      doAnswer(invocation -> {
-          WalletRewardPeriodEntity entity = invocation.getArgument(0);
-          when(rewardPeriodDAO.findById(entity.getId())).thenReturn(Optional.empty());
-          return null;
-      }).when(rewardPeriodDAO).delete(any());
-    }
+    when(rewardPeriodDAO.save(any())).thenAnswer(invocation -> {
+      WalletRewardPeriodEntity entity = invocation.getArgument(0);
+      if (entity.getId() == null) {
+        entity.setId(REWARD_PERIOD_ID);
+      }
+      if (entity.getPeriodType() == null) {
+        entity.setPeriodType(RewardPeriodType.WEEK);
+      }
+      when(rewardPeriodDAO.findById(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
+      when(rewardPeriodDAO.findRewardPeriodsBetween(12125, 222125, PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
+      when(rewardPeriodDAO.findAll(PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
+      when(rewardPeriodDAO.findRewardPeriodByTypeAndTime(any(RewardPeriodType.class), anyLong())).thenReturn(entity);
+      when(rewardPeriodDAO.findWalletRewardPeriodEntitiesByStatus(any(RewardStatus.class))).thenReturn(List.of(entity));
+      when(rewardPeriodDAO.count()).thenReturn(1L);
+      return entity;
+    });
+    doAnswer(invocation -> {
+      WalletRewardPeriodEntity entity = invocation.getArgument(0);
+      when(rewardPeriodDAO.findById(entity.getId())).thenReturn(Optional.empty());
+      return null;
+    }).when(rewardPeriodDAO).delete(any());
+  }
 
   @Test
   void countRewards() {
@@ -146,33 +146,32 @@ class WalletRewardReportStorageTest {
     assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
   }
 
-    @Test
-    void getRewardReport() {
+  @Test
+  void getRewardReport() {
+    assertNull(walletRewardReportStorage.getRewardReport(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
 
-        assertNull(walletRewardReportStorage.getRewardReport(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
+    // Given
+    RewardReport rewardReport = createRewardReportInstance();
 
-        // Given
-        RewardReport rewardReport = createRewardReportInstance();
+    // When
+    walletRewardReportStorage.saveRewardReport(rewardReport);
 
-        // When
-        walletRewardReportStorage.saveRewardReport(rewardReport);
+    // Then
+    assertNotNull(walletRewardReportStorage.getRewardReportByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault()));
+    assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
+  }
 
-        // Then
-        assertNotNull(walletRewardReportStorage.getRewardReportByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault()));
-        assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
-    }
+  @Test
+  void findRewardPeriodsByStatus() {
+    // Given
+    RewardReport rewardReport = createRewardReportInstance();
 
-    @Test
-    void findRewardPeriodsByStatus() {
-        // Given
-        RewardReport rewardReport = createRewardReportInstance();
+    // When
+    walletRewardReportStorage.saveRewardReport(rewardReport);
 
-        // When
-        walletRewardReportStorage.saveRewardReport(rewardReport);
-
-        // Then
-        assertNotNull(walletRewardReportStorage.findRewardPeriodsByStatus(RewardStatus.SUCCESS));
-    }
+    // Then
+    assertNotNull(walletRewardReportStorage.findRewardPeriodsByStatus(RewardStatus.SUCCESS));
+  }
 
   protected RewardReport createRewardReportInstance() {
     Wallet wallet = newWallet(IDENTITY_ID);
