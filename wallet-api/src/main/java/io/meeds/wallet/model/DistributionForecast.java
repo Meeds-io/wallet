@@ -29,5 +29,5 @@ public class DistributionForecast {
 
   private double acceptedContributions;
 
-  private double Budget;
+  private double budget;
 }

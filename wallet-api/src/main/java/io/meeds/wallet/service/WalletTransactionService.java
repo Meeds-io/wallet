@@ -19,8 +19,6 @@ package io.meeds.wallet.service;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.stereotype.Service;
-
 import io.meeds.wallet.model.TransactionDetail;
 import io.meeds.wallet.model.TransactionStatistics;
 import io.meeds.wallet.model.Wallet;
@@ -37,7 +35,7 @@ public interface WalletTransactionService {
    * @param address {@link Wallet} address
    * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingWalletTransactionsNotSent(String address);
+  List<TransactionDetail> getPendingWalletTransactionsNotSent(String address);
 
   /**
    * Retrieves the list of pending transactions of a given wallet from database
@@ -46,14 +44,14 @@ public interface WalletTransactionService {
    * @param address {@link Wallet} address
    * @return {@link List} of pending {@link TransactionDetail}
    */
-  public List<TransactionDetail> getPendingWalletTransactionsSent(String address);
+  List<TransactionDetail> getPendingWalletTransactionsSent(String address);
 
   /**
    * @param address {@link Wallet} address
    * @return {@link List} of pending {@link TransactionDetail} of type ether
    *         sending marked as pending in database
    */
-  public List<TransactionDetail> getPendingEtherTransactions(String address);
+  List<TransactionDetail> getPendingEtherTransactions(String address);
 
   /**
    * @return pending contract transactions already sent to blockchain
@@ -207,7 +205,7 @@ public interface WalletTransactionService {
    * @param transactionDetail of type {@link TransactionDetail} that boosted a
    *          previous {@link TransactionDetail} having the same nonce
    */
-  public void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
+  void cancelTransactionsWithSameNonce(TransactionDetail transactionDetail);
 
   /**
    * Count the number of transactions sent from the same Wallet and having same
@@ -219,11 +217,11 @@ public interface WalletTransactionService {
    * @return {@link Long} for transactions having same nonce but the designated
    *         transactionHash
    */
-  public long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce);
+  long countPendingTransactionsWithSameNonce(String transactionHash, String fromAddress, long nonce);
 
   /**
    * @return count of transactions present in database
    */
-  public long countTransactions();
+  long countTransactions();
 
 }

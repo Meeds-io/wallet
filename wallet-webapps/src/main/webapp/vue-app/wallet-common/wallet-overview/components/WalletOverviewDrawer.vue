@@ -143,8 +143,8 @@ export default {
       this.loading = true;
       return this.$rewardService.getRewardsByUser(this.limit)
         .then(data => {
-          if (data && data.length) {
-            this.rewardsList = data.filter(reward => reward.transaction && reward.status === 'success');
+          if (data && data.entity?.length) {
+            this.rewardsList = data?.entity?.filter(reward => reward.transaction && reward.status === 'success');
           } else {
             this.rewardsList = [];
           }
