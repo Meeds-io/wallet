@@ -199,6 +199,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </changeSet>
 
   <changeSet id="reward" author="1.0.0-17">
+    <preConditions>
+      <tableExists tableName="ADDONS_WALLET_GAM_TEAM"/>
+      <tableExists tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
+      <tableExists tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+      <foreignKeyConstraintExists foreignKeyTableName="ADDONS_WALLET_GAM_TEAM_MEMBER"
+                                  foreignKeyName="FK_WALLET_GAM_01"/>
+      <foreignKeyConstraintExists foreignKeyTableName="ADDONS_WALLET_REWARD" foreignKeyName="FK_WALLET_GAM_02"/>
+    </preConditions>
+    <dropForeignKeyConstraint
+            baseTableName="ADDONS_WALLET_GAM_TEAM_MEMBER"
+            constraintName="FK_WALLET_GAM_01"/>
+    <dropForeignKeyConstraint
+            baseTableName="ADDONS_WALLET_REWARD"
+            constraintName="FK_WALLET_GAM_02"/>
     <dropTable tableName="ADDONS_WALLET_GAM_TEAM"/>
     <dropTable tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
     <dropTable tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
