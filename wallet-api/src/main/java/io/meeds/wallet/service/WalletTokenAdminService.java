@@ -107,7 +107,7 @@ public interface WalletTokenAdminService {
    *         blockchain
    * @throws Exception
    */
-  BigInteger getTokenBalanceOf(String address) throws Exception;// NOSONAR
+  BigInteger getTokenBalanceOf(String address);// NOSONAR
 
   /**
    * Get ether balance of a wallet address (on blockchain)

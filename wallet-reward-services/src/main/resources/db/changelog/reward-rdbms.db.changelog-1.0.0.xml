@@ -198,4 +198,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
   </changeSet>
 
+  <changeSet id="reward" author="1.0.0-17">
+    <dropTable tableName="ADDONS_WALLET_GAM_TEAM"/>
+    <dropTable tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
+    <dropTable tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+  </changeSet>
+
 </databaseChangeLog>

@@ -48,6 +48,7 @@ import io.meeds.spring.AvailableIntegration;
   @ConfigurationUnit(scope = ContainerScope.ROOT, path = "conf/configuration.xml"),
   @ConfigurationUnit(scope = ContainerScope.PORTAL, path = "conf/portal/configuration.xml"),
   @ConfigurationUnit(scope = ContainerScope.PORTAL, path = "conf/test-wallet-reward-configuration.xml"),
+  @ConfigurationUnit(scope = ContainerScope.PORTAL, path = "conf/test-organization-configuration.xml"),
 })
 public abstract class BaseRewardTest extends AbstractSpringTest {
 

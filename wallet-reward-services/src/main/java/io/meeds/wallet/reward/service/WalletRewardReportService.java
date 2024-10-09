@@ -108,7 +108,7 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
-  public void sendRewards(LocalDate date, String username) throws Exception { // NOSONAR
+  public void sendRewards(LocalDate date, String username) throws IllegalAccessException { // NOSONAR
     if (!isUserRewardingAdmin(username)) {
       throw new IllegalAccessException("User " + username + " is not allowed to send rewards");
     }
@@ -455,13 +455,8 @@ public class WalletRewardReportService implements RewardReportService {
     // Filter non-eligible users switch threshold
     filterEligibleMembers(earnedPoints.entrySet(), enabledRewards, rewardSettings);
 
-    double amountPerPoint;
     double totalFixedBudget;
     switch (budgetType) {
-    case FIXED_PER_POINT:
-      amountPerPoint = configuredPluginAmount;
-      addRewardsSwitchPointAmount(enabledRewards, earnedPoints.entrySet(), amountPerPoint);
-      break;
     case FIXED:
       totalFixedBudget = configuredPluginAmount;
       addTeamMembersReward(earnedPoints, totalFixedBudget, enabledRewards);
