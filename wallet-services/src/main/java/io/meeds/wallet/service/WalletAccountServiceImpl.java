@@ -46,13 +46,17 @@ import static io.meeds.wallet.utils.WalletUtils.isUserSpaceManager;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.SignatureException;
-import java.util.*;
-
-import jakarta.servlet.ServletContext;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.picocontainer.Startable;
+import org.springframework.stereotype.Service;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
@@ -78,14 +82,16 @@ import io.meeds.wallet.model.WalletAddressLabel;
 import io.meeds.wallet.model.WalletProvider;
 import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.model.WalletType;
-import io.meeds.wallet.service.WalletAccountService;
-import io.meeds.wallet.service.WalletTokenAdminService;
 import io.meeds.wallet.statistic.ExoWalletStatistic;
 import io.meeds.wallet.statistic.ExoWalletStatisticService;
 import io.meeds.wallet.storage.AddressLabelStorage;
 import io.meeds.wallet.storage.WalletStorage;
 
-public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService, Startable {
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.ServletContext;
+
+@Service
+public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService {
 
   private static final String     ERROR_BROADCASTING_EVENT_FOR_WALLET     = "Error broadcasting event {} for wallet {}";
 
@@ -139,7 +145,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     }
   }
 
-  @Override
+  @PostConstruct
   public void start() {
     // Ensure to make initialization after starting all other services of Wallet
     PortalContainer.addInitTask(container.getPortalContext(), new RootContainer.PortalContainerPostInitTask() {
@@ -157,11 +163,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         }
       }
     });
-  }
-
-  @Override
-  public void stop() {
-    // Nothing to stop
   }
 
   @Override

@@ -22,16 +22,16 @@ import java.util.Set;
 
 import org.exoplatform.social.core.identity.model.Identity;
 
-import io.meeds.wallet.model.*;
-
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
+import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.Wallet;
+import io.meeds.wallet.model.WalletAddressLabel;
+import io.meeds.wallet.model.WalletProvider;
+import io.meeds.wallet.model.WalletState;
+import io.meeds.wallet.model.WalletType;
 
 /**
  * A service to manage wallets of different types: user, space, admin
  */
-@Service
-@Primary
 public interface WalletAccountService {
 
   /**
