@@ -30,7 +30,6 @@ import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.model.WalletType;
 
 @Entity(name = "Wallet")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_ACCOUNT")
 @NamedQuery(name = "Wallet.findByAddress", query = "SELECT w FROM Wallet w WHERE LOWER(w.address) = :address")

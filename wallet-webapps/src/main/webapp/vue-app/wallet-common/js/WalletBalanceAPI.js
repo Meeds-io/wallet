@@ -28,7 +28,7 @@ export function getWalletAccount() {
 }
 
 export  function getCountRewards(userId) {
-  return fetch(`/portal/rest/wallet/api/reward/countRewards?userId=${userId}`, {
+  return fetch(`/wallet/rest/reward/countRewards?userId=${userId}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

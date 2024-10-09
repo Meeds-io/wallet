@@ -25,7 +25,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
 @Entity(name = "WalletKey")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_KEY")
 @NamedQueries({
