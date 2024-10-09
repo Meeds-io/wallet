@@ -17,7 +17,7 @@
  *
  */
 export function getRewardReportPeriods(from, to, offset, limit) {
-  return fetch(`/portal/rest/wallet/api/reward/periods?from=${from || 0}&to=${to || 0}&offset=${offset || 0}&limit=${limit|| 10}`, {
+  return fetch(`/wallet/rest/reward/periods?from=${from || 0}&to=${to || 0}&offset=${offset || 0}&limit=${limit|| 10}`, {
     method: 'GET',
     credentials: 'include',
     headers: {

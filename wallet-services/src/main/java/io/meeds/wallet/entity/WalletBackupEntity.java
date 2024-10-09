@@ -23,7 +23,6 @@ import jakarta.persistence.*;
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
 @Entity(name = "WalletBackupEntity")
-@ExoEntity
 @Table(name = "ADDONS_WALLET_ACCOUNT_BACKUP")
 @NamedQuery(name = "WalletBackupEntity.findByWalletId", query = "SELECT wb FROM WalletBackupEntity wb WHERE wb.wallet.id = :walletId")
 public class WalletBackupEntity implements Serializable {
