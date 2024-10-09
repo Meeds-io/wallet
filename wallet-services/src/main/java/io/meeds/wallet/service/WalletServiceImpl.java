@@ -84,10 +84,6 @@ import io.meeds.wallet.model.UserSettings;
 import io.meeds.wallet.model.Wallet;
 import io.meeds.wallet.model.WalletSettings;
 import io.meeds.wallet.model.WalletType;
-import io.meeds.wallet.service.BlockchainTransactionService;
-import io.meeds.wallet.service.WalletAccountService;
-import io.meeds.wallet.service.WalletContractService;
-import io.meeds.wallet.service.WalletService;
 
 /**
  * A storage service to save/load information used by users and spaces wallets
