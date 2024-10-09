@@ -77,14 +77,9 @@ public class RewardSettingsREST {
                           @ApiResponse(responseCode = "400", description = "Invalid query input"),
                           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
                           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public Response saveSettings(@RequestBody
-  RewardSettings rewardSettings) {
-    try {
-      rewardSettingsService.saveSettings(rewardSettings);
-      return Response.noContent().build();
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
+  public void saveSettings(@RequestBody
+                           RewardSettings rewardSettings) {
+    rewardSettingsService.saveSettings(rewardSettings);
   }
 
   @DeleteMapping

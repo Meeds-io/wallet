@@ -59,8 +59,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @RestController
@@ -160,23 +163,13 @@ public class RewardReportREST {
                                        @RequestParam("date")
                                        String date) {
     if (StringUtils.isBlank(date)) {
-      return Response.status(HTTPStatus.BAD_REQUEST).entity(ERROR_EMPTY_PARAM_DATE).build();
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ERROR_EMPTY_PARAM_DATE);
     }
-    try {
-      RewardPeriod rewardPeriod = getRewardPeriod(date);
-      RewardReport rewardReport = rewardReportService.computeRewardsByUser(rewardPeriod.getPeriodMedianDate(), WalletUtils.getCurrentUserIdentityId());
-      rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
-      return Response.ok(rewardReport).build();
-    } catch (Exception e) {
-      LOG.error("Error getting user's computed reward", e);
-      JSONObject object = new JSONObject();
-      try {
-        object.append(ERROR_PARAM, e.getMessage());
-      } catch (JSONException e1) {
-        // Nothing to do
-      }
-      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
-    }
+    RewardPeriod rewardPeriod = getRewardPeriod(date);
+    RewardReport rewardReport = rewardReportService.computeRewardsByUser(rewardPeriod.getPeriodMedianDate(),
+                                                                         WalletUtils.getCurrentUserIdentityId());
+    rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
+    return Response.ok(rewardReport).build();
   }
 
 
@@ -191,21 +184,13 @@ public class RewardReportREST {
       @ApiResponse(responseCode = "400", description = "Invalid query input"),
       @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
       @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public Response sendRewards(HttpServletRequest request,
-                              @RequestBody
-                              RewardPeriod rewardPeriod) {
+  public void sendRewards(HttpServletRequest request,
+                          @RequestBody
+                          RewardPeriod rewardPeriod) {
     try {
       rewardReportService.sendRewards(rewardPeriod.getPeriodMedianDate(), request.getRemoteUser());
-      return Response.noContent().build();
-    } catch (Exception e) {
-      LOG.error("Error getting computed reward", e);
-      JSONObject object = new JSONObject();
-      try {
-        object.append(ERROR_PARAM, e.getMessage());
-      } catch (JSONException e1) {
-        // Nothing to do
-      }
-      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+    } catch (IllegalAccessException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -222,20 +207,9 @@ public class RewardReportREST {
   public Response listRewards(@Parameter(description = "limit of items to load", required = true)
                               @RequestParam("limit")
                               int limit) {
-    try {
-      List<WalletReward> rewards = rewardReportService.listRewards(WalletUtils.getCurrentUserId(), limit);
-      rewards.forEach(reward -> reward.setPeriod(new RewardPeriodWithFullDate(reward.getPeriod())));
-      return Response.ok(rewards).build();
-    } catch (Exception e) {
-      LOG.error("Error getting list of reward for current user", e);
-      JSONObject object = new JSONObject();
-      try {
-        object.append(ERROR_PARAM, e.getMessage());
-      } catch (JSONException e1) {
-        // Nothing to do
-      }
-      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
-    }
+    List<WalletReward> rewards = rewardReportService.listRewards(WalletUtils.getCurrentUserId(), limit);
+    rewards.forEach(reward -> reward.setPeriod(new RewardPeriodWithFullDate(reward.getPeriod())));
+    return Response.ok(rewards).build();
   }
 
   @GetMapping(path = "countRewards")
@@ -248,31 +222,18 @@ public class RewardReportREST {
           @ApiResponse(responseCode = "200", description = "Request fulfilled"),
           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public Response countRewards(@Context Request request,
-                               @Parameter(description = "user id", required = true)
-                               @RequestParam("userId")
-                               String userId) {
-    try {
-      Double sumRewards = rewardReportService.countRewards(userId);
-      EntityTag eTag = new EntityTag(String.valueOf(sumRewards));
-      Response.ResponseBuilder builder = request.evaluatePreconditions(eTag);
-      if (builder == null) {
-        JSONObject result = new JSONObject();
-        result.put("sumRewards", sumRewards);
-        builder = Response.ok(result.toString(), MediaType.APPLICATION_JSON);
-        builder.tag(eTag);
-      }
-      return builder.build();
-    } catch (Exception e) {
-      LOG.error("Error getting sum of reward for current user", e);
-      JSONObject object = new JSONObject();
-      try {
-        object.append(ERROR_PARAM, e.getMessage());
-      } catch (JSONException e1) {
-        // Nothing to do
-      }
-      return Response.status(HTTPStatus.INTERNAL_ERROR).type(MediaType.APPLICATION_JSON).entity(object.toString()).build();
+  public ResponseEntity<Double> countRewards(HttpServletRequest request,
+                                             @Parameter(description = "user id", required = true)
+                                             @RequestParam("userId")
+                                             String userId) {
+    Double sumRewards = rewardReportService.countRewards(userId);
+    String eTagValue = String.valueOf(sumRewards.hashCode());
+
+    String requestETag = request.getHeader(HttpHeaders.IF_NONE_MATCH);
+    if (requestETag != null && requestETag.equals(eTagValue)) {
+      return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
     }
+    return ResponseEntity.ok().eTag(eTagValue).body(sumRewards);
   }
 
   @GetMapping(path = "periods")
