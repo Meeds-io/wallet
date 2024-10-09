@@ -32,8 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static io.meeds.wallet.utils.WalletUtils.toJsonString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -101,5 +100,11 @@ public class WalletRewardSettingsServiceTest {
     } finally {
       rewardSettingsService.saveSettings(defaultSettings);
     }
+  }
+
+  @Test
+  public void testDeleteSettings() {
+    rewardSettingsService.deleteSettings();
+    verify(settingService, times(1)).remove(any(), any(), any());
   }
 }

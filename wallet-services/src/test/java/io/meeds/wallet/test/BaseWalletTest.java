@@ -583,11 +583,6 @@ public abstract class BaseWalletTest extends AbstractKernelTest {
                                         "0x0000000000000000000000002b7e115f52171d164529fdb1ac72571e608a474e",
                                         "0x0000000000000000000000001d94f732223996e9f773261e82340889934a6c03");
     long blockNumber = 28047704;
-    ContractTransactionEvent contractTransactionEvent = new ContractTransactionEvent(hash,
-                                                                                     contractAddress,
-                                                                                     data,
-                                                                                     topics,
-                                                                                     blockNumber);
-    return contractTransactionEvent;
+    return new ContractTransactionEvent(hash, contractAddress, data, topics, blockNumber);
   }
 }

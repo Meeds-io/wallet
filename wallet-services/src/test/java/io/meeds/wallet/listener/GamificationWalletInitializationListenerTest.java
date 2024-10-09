@@ -33,7 +33,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import io.meeds.wallet.listener.GamificationWalletInitializationListener;
 import io.meeds.wallet.model.Wallet;
 
 import org.junit.Test;

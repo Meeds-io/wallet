@@ -119,7 +119,7 @@ export default {
     refresh() {
       this.loading = true;
       const earningsPromise = getCountRewards(eXo.env.portal.profileOwner)
-        .then((resp) => this.rewardBalance = resp.sumRewards);
+        .then((sum) => this.rewardBalance = sum);
       const walletDetailsPromise = fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/account/detailsById?id=${this.currentName}&type=user`, {credentials: 'include'})
         .then((resp) => resp && resp.ok && resp.json())
         .then(() => {

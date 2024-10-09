@@ -59,8 +59,6 @@ import io.meeds.wallet.model.WalletAddressLabel;
 import io.meeds.wallet.model.WalletProvider;
 import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.model.WalletType;
-import io.meeds.wallet.service.WalletAccountService;
-import io.meeds.wallet.service.WalletTokenAdminService;
 import io.meeds.wallet.storage.AddressLabelStorage;
 import io.meeds.wallet.storage.WalletStorage;
 import io.meeds.wallet.test.BaseWalletTest;
@@ -129,7 +127,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   }
 
   @Test
-  public void testSaveWallet() throws IllegalAccessException {
+  public void testSaveWallet() {
     String walletAddress = "0x11111111155511111111111111111111111111";
     WalletAccountService walletAccountService = getService(WalletAccountService.class);
     Wallet userWallet =

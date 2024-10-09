@@ -45,7 +45,6 @@ import WalletWelcomeScreen from './components/WalletWelcomeScreen.vue';
 import WalletOverview from './wallet-overview/components/WalletOverview.vue';
 import WalletOverviewDrawer from './wallet-overview/components/WalletOverviewDrawer.vue';
 import WalletOverviewRewardItem from './wallet-overview/components/WalletOverviewRewardItem.vue';
-import WalletOverviewRewardPluginItem from './wallet-overview/components/WalletOverviewRewardPluginItem.vue';
 import WalletUserBalance from './wallet-user-balance/components/WalletUserBalance.vue';
 import WeeklyEarnings from './weekly-earnings/components/WeeklyEarnings.vue';
 
@@ -104,7 +103,6 @@ export const components = {
   'wallet-overview': WalletOverview,
   'wallet-overview-drawer': WalletOverviewDrawer,
   'wallet-overview-reward-item': WalletOverviewRewardItem,
-  'wallet-overview-reward-plugin-item': WalletOverviewRewardPluginItem,
   'wallet-user-balance': WalletUserBalance,
   'wallet-reward-weekly-earnings': WeeklyEarnings,
 };
