@@ -81,8 +81,10 @@ export default {
     },
     refreshRewards() {
       return this.wallet?.address?.length && this.$rewardService.getRewardsByUser(this.limit)
-        .then(rewards => rewards.find(r => r.transaction && r.status === 'success'))
-        .then(reward => this.lastReward = reward?.tokensToSend || 0);
+        .then(rewards => {
+          const reward = rewards?.entity?.find(r => r.transaction && r.status === 'success');
+          this.lastReward = reward?.amount || 0;
+        });
     },
   },
 };

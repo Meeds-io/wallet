@@ -15,7 +15,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <div v-if="rewards && rewards.length">
+  <div v-if="rewards">
     <v-list-item>
       <v-list-item-content class="align-end text-start">
         <v-list-item-title :title="period">
@@ -31,14 +31,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <span>{{ rewardAmount }}</span>
       </v-list-item-icon>
     </v-list-item>
-
-    <wallet-overview-reward-plugin-item
-      v-for="(plugin, i) in rewards"
-      :id="`plugin-${plugin.pluginId}`"
-      :key="i"
-      :reward-item="rewardItem"
-      :plugin="plugin"
-      :symbol="symbol" />
+    <v-list-item dense>
+      <v-list-item-icon class="me-2">
+        <v-icon size="18">fa-trophy</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content class="align-end text-start">
+        <v-list-item-subtitle>
+          <span class="text-sub-title caption">{{ points }} {{ $t('wallet.overview.points') }}</span>
+        </v-list-item-subtitle>
+      </v-list-item-content>
+    </v-list-item>
   </div>
 </template>
 <script>
@@ -61,7 +63,10 @@ export default {
   }),
   computed: {
     rewards() {
-      return this.rewardItem && this.rewardItem.rewards && this.rewardItem.rewards.length && this.rewardItem.rewards.filter(plugin => plugin.amount);
+      return this.rewardItem?.amount;
+    },
+    points() {
+      return this.rewardItem?.points;
     },
     rewardEarnedAmount() {
       return parseInt(this.rewardItem.tokensSent * 100) / 100;

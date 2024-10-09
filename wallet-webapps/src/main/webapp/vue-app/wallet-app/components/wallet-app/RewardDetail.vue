@@ -211,29 +211,10 @@ export default {
   methods: {
     init() {
       this.loading = true;
-      this.listRewards(this.limit)
+      this.$rewardService.getRewardsByUser(this.limit)
         .then(rewards => this.walletRewards = rewards)
         .catch(e => this.error = String(e))
         .finally(() => this.loading = false);
-    },
-    listRewards(limit) {
-      return fetch(`/portal/rest/wallet/api/reward/list?limit=${limit || 10}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      }).then((resp) => {
-        if (resp && resp.ok) {
-          return resp.json();
-        } else {
-          throw new Error('Error listing rewards');
-        }
-      }).catch((error) => {
-        console.error(error);
-        this.error = this.$t('exoplatform.wallet.error.errorListingRewards');
-      });
     },
     formatDate(timeInSeconds, seconds) {
       if (!timeInSeconds) {
