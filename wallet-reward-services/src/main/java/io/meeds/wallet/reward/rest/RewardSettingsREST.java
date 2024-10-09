@@ -21,8 +21,6 @@ import java.time.ZonedDateTime;
 
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 
 import io.meeds.wallet.model.RewardPeriod;
 import io.meeds.wallet.model.RewardPeriodType;
@@ -46,8 +44,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("settings/reward")
 @Tag(name = "reward/settings", description = "Manage reward module settings") // NOSONAR
 public class RewardSettingsREST {
-
-  private static final Log      LOG = ExoLogger.getLogger(RewardSettingsREST.class);
 
   @Autowired
   private RewardSettingsService rewardSettingsService;
@@ -77,14 +73,9 @@ public class RewardSettingsREST {
                           @ApiResponse(responseCode = "400", description = "Invalid query input"),
                           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
                           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public Response saveSettings(@RequestBody
-  RewardSettings rewardSettings) {
-    try {
-      rewardSettingsService.saveSettings(rewardSettings);
-      return Response.noContent().build();
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
+  public void saveSettings(@RequestBody
+                           RewardSettings rewardSettings) {
+    rewardSettingsService.saveSettings(rewardSettings);
   }
 
   @DeleteMapping

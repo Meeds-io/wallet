@@ -34,7 +34,7 @@ public class RewardSettings implements Serializable, Cloneable {
 
   private String            timeZone         = ZoneId.systemDefault().getId();
 
-  private RewardBudgetType  budgetType       = RewardBudgetType.DEFAULT;;
+  private RewardBudgetType  budgetType       = RewardBudgetType.DEFAULT;
 
   private double            threshold        = 0;
 

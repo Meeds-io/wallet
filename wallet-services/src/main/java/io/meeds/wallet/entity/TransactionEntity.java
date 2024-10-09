@@ -25,7 +25,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
 @Entity(name = "WalletTransaction")
-@ExoEntity
 @DynamicUpdate
 @Table(name = "ADDONS_WALLET_TRANSACTION")
 @NamedQuery(name = "WalletTransaction.countReceivedContractAmount", query = "SELECT SUM(tx.contractAmount) FROM WalletTransaction tx WHERE tx.contractAddress = :contractAddress AND tx.toAddress = :address AND (tx.contractMethodName = 'reward' OR tx.contractMethodName = 'initializeAccount' OR tx.contractMethodName = 'transfer' OR tx.contractMethodName = 'transferFrom') AND tx.createdDate >= :startDate AND tx.createdDate < :endDate")
