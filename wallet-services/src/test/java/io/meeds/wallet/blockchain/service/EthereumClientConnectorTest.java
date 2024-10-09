@@ -17,12 +17,7 @@
 package io.meeds.wallet.blockchain.service;
 
 import static io.meeds.wallet.utils.WalletUtils.CONTRACT_TRANSACTION_MINED_EVENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -133,7 +128,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @Test
-  public void testServiceStop() throws Exception {
+  public void testServiceStop() {
     service.start();
     assertFalse(service.isConnected());
     setAsConnected();
@@ -201,7 +196,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @Test
-  public void testGetNotFoundTransaction() throws Exception {
+  public void testGetNotFoundTransaction() {
     assertNull(service.getTransaction("test"));
   }
 
@@ -221,7 +216,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
-  public void testGetTransactionTwiceWhenNullUsingCache() throws Exception {
+  public void testGetTransactionTwiceWhenNullUsingCache() {
     String transactionHash = "test";
     Request request = mock(Request.class);
     when(web3j.ethGetTransactionByHash(transactionHash)).thenReturn(request);
@@ -255,7 +250,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @Test
-  public void testGetNotFoundTransactionReceipt() throws Exception {
+  public void testGetNotFoundTransactionReceipt() {
     assertNull(service.getTransactionReceipt("test"));
   }
 
@@ -275,7 +270,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Test
-  public void testGetTransactionReceiptTwiceWhenNullUsingCache() throws Exception {
+  public void testGetTransactionReceiptTwiceWhenNullUsingCache() {
     String transactionHash = "test";
     Request request = mock(Request.class);
     when(web3j.ethGetTransactionReceipt(transactionHash)).thenReturn(request);
@@ -398,24 +393,24 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @Test
-  public void testSetPollingIntervalWhenLowerThanMinimum() throws Exception {
+  public void testSetPollingIntervalWhenLowerThanMinimum() {
     assertThrows(IllegalStateException.class, () -> service.setPollingInterval(EthereumClientConnector.MINIMUM_POLLING_TIME - 1));
   }
 
   @Test
-  public void testSetPollingIntervalWhenGreaterThanMinimum() throws Exception {
+  public void testSetPollingIntervalWhenGreaterThanMinimum() {
     int pollingInterval = EthereumClientConnector.MINIMUM_POLLING_TIME + 1;
     service.setPollingInterval(pollingInterval);
     assertEquals(pollingInterval, service.getPollingInterval());
   }
 
   @Test
-  public void testGetPollingIntervalDefaultValue() throws Exception {
+  public void testGetPollingIntervalDefaultValue() {
     assertEquals(EthereumClientConnector.DEFAULT_POLLING_TIME, service.getPollingInterval());
   }
 
   @Test
-  public void testSetLastWatchedBlockNumberGreaterThanExisting() throws Exception {
+  public void testSetLastWatchedBlockNumberGreaterThanExisting() {
     long blockNumber = 12l;
     service.setLastWatchedBlockNumber(blockNumber);
     assertEquals(blockNumber, service.getLastWatchedBlockNumber());
@@ -426,7 +421,7 @@ public class EthereumClientConnectorTest extends BaseWalletTest {
   }
 
   @Test
-  public void testSetLastWatchedBlockNumberLowerThanExisting() throws Exception {
+  public void testSetLastWatchedBlockNumberLowerThanExisting() {
     long blockNumber = 12l;
     service.setLastWatchedBlockNumber(blockNumber);
     assertEquals(blockNumber, service.getLastWatchedBlockNumber());
