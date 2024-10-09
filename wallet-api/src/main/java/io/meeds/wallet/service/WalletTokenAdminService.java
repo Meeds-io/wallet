@@ -105,9 +105,8 @@ public interface WalletTokenAdminService {
    * @param address
    * @return {@link TransactionDetail} with the hash of the transaction sent in
    *         blockchain
-   * @throws Exception
    */
-  BigInteger getTokenBalanceOf(String address) throws Exception;// NOSONAR
+  BigInteger getTokenBalanceOf(String address);// NOSONAR
 
   /**
    * Get ether balance of a wallet address (on blockchain)

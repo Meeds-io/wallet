@@ -129,27 +129,33 @@ class TestRewardSettingsREST {
   @Test
   void saveSettingsAnonymously() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH).content(asJsonString(rewardSettings()))
-                                                                      .contentType(MediaType.APPLICATION_JSON)
-                                                                      .accept(MediaType.APPLICATION_JSON));
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isForbidden());
   }
 
   @Test
   void saveSettingsSimpleUser() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH).content(asJsonString(rewardSettings()))
-                                                                      .with(testSimpleUser())
-                                                                      .contentType(MediaType.APPLICATION_JSON)
-                                                                      .accept(MediaType.APPLICATION_JSON));
+                                                            .with(testSimpleUser())
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isForbidden());
   }
 
   @Test
   void saveSettingsAdmin() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH).content(asJsonString(rewardSettings()))
-                                                                      .with(testAdminUser())
-                                                                      .contentType(MediaType.APPLICATION_JSON)
-                                                                      .accept(MediaType.APPLICATION_JSON));
+                                                            .with(testAdminUser())
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isOk());
+
+    response = mockMvc.perform(post(REST_PATH).content(asJsonString(null))
+                                              .with(testAdminUser())
+                                              .contentType(MediaType.APPLICATION_JSON)
+                                              .accept(MediaType.APPLICATION_JSON));
+    response.andExpect(status().isBadRequest());
   }
 
   @Test
