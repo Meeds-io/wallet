@@ -53,7 +53,7 @@ public class WalletRewardEntity implements Serializable {
   private double                   tokensToSend;
 
   @Column(name = "POINTS")
-  private double                   points;
+  private Double                   points;
 
   @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "REWARD_PERIOD_ID", referencedColumnName = "REWARD_PERIOD_ID")
