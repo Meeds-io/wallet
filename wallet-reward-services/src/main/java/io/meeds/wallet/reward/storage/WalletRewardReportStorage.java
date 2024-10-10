@@ -264,7 +264,7 @@ public class WalletRewardReportStorage {
   private WalletReward toDTO(WalletRewardEntity rewardEntity, ZoneId zoneId) {
     WalletReward walletReward = new WalletReward();
     walletReward.setAmount(rewardEntity.getTokensSent());
-    walletReward.setPoints(rewardEntity.getPoints());
+    walletReward.setPoints(rewardEntity.getPoints() == null ? 0d : rewardEntity.getPoints());
     retrieveWallet(rewardEntity, walletReward);
     retrieveTransaction(rewardEntity, walletReward);
     WalletRewardPeriodEntity periodEntity = rewardEntity.getPeriod();
