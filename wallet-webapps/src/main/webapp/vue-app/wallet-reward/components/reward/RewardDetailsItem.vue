@@ -269,8 +269,10 @@ export default {
       return this.success ? 'success' : 'error';
     },
     statusIconTitle() {
-      return this.success ? this.$t('wallet.administration.rewardDetails.successfullyProceeded') :
-        this.pending ? this.$t('wallet.administration.rewardDetails.transactionInProgress') : this.$t('wallet.administration.rewardDetails.transactionError');
+      if (this.success) {
+        return this.$t('wallet.administration.rewardDetails.successfullyProceeded');
+      }
+      return this.pending ? this.$t('wallet.administration.rewardDetails.transactionInProgress') : this.$t('wallet.administration.rewardDetails.transactionError');
     },
     amount() {
       return this.completelyProceeded ? this.reward?.tokensSent : this.reward?.amount;
