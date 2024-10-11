@@ -54,19 +54,19 @@
         <div v-else-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
         <v-tooltip
           bottom
-          :disabled="!isNotPastPeriod">
+          :disabled="!disabledSendButton">
           <template #activator="{ on }">
             <div v-on="on" class="d-inline-block">
               <v-btn
                 :loading="loadingSending"
-                :disabled="isNotPastPeriod || sendingInProgress"
+                :disabled="disabledSendButton || sendingInProgress"
                 class="btn btn-primary"
                 @click="sendRewards">
                 {{ $t('wallet.administration.rewardDetails.label.reward') }}
               </v-btn>
             </div>
           </template>
-          <span>{{ $t('wallet.administration.rewardCard.status.inPeriod') }}</span>
+          <span> {{ disabledSendButtonLabel }} </span>
         </v-tooltip>
       </template>
       <extension-registry-components
@@ -120,9 +120,17 @@ export default {
       type: Object,
       default: null
     },
+    adminWallet: {
+      type: Object,
+      default: null
+    },
     contractDetails: {
       type: Object,
       default: null
+    },
+    configuredBudget: {
+      type: Number,
+      default: 0
     },
     transactionEtherScanLink: {
       type: String,
@@ -228,6 +236,30 @@ export default {
         0: this.formattedTokensToSend,
         1: this.points
       });
+    },
+    tokenBalance() {
+      return this.adminWallet?.tokenBalance || 0;
+    },
+    etherBalance() {
+      return this.adminWallet?.etherBalance || 0;
+    },
+    lowEtherBalance() {
+      return this.etherBalance < 1;
+    },
+    lowTokenBalance() {
+      return this.configuredBudget > this.tokenBalance;
+    },
+    balanceBelowBudget() {
+      return this.lowEtherBalance || this.lowTokenBalance;
+    },
+    balanceBelowBudgetLabel() {
+      return this.lowEtherBalance ? this.$t('wallet.administration.lowEtherBalance') : this.$t('wallet.administration.lowTokenBalance');
+    },
+    disabledSendButton() {
+      return this.isNotPastPeriod || this.balanceBelowBudget;
+    },
+    disabledSendButtonLabel() {
+      return this.isNotPastPeriod ? this.$t('wallet.administration.rewardCard.status.inPeriod') : this.balanceBelowBudgetLabel;
     }
   },
   methods: {
