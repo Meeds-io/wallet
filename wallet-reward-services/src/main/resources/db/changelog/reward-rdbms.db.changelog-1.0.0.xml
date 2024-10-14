@@ -218,4 +218,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <dropTable tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-18">
+    <validCheckSum>ANY</validCheckSum>
+    <sql dbms="mysql">
+      ALTER TABLE ADDONS_WALLET_REWARD CHANGE COLUMN `POINTS` `POINTS` DOUBLE DEFAULT 0;
+    </sql>
+  </changeSet>
+
 </databaseChangeLog>
