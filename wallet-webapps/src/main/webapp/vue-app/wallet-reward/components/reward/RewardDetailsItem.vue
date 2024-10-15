@@ -41,9 +41,9 @@
         display-no-address />
     </td>
     <td class="text-center">
-      <span>
+      <v-btn icon @click="openContributionDetails">
         {{ points }}
-      </span>
+      </v-btn>
     </td>
     <td class="text-center">
       <template v-if="!status">
@@ -290,6 +290,9 @@ export default {
     },
     seeHistory() {
       this.$refs.accountDetail.open();
+    },
+    openContributionDetails() {
+      this.$emit('open-contribution-details', this.walletTechnicalId);
     }
   }
 };
