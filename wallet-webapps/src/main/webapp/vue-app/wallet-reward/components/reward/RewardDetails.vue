@@ -103,9 +103,16 @@
           :contract-details="contractDetails"
           :token-symbol="tokenSymbol"
           :completely-proceeded="completelyProceeded"
-          :transaction-ether-scan-link="transactionEtherScanLink" />
+          :transaction-ether-scan-link="transactionEtherScanLink"
+          @open-contribution-details="openContributionDetails" />
       </template>
     </v-data-table>
+    <users-leaderboard-profile-achievements-drawer
+      ref="profileStatsDrawer"
+      :from-date-in-second="startDateInSeconds"
+      :to-date-in-second="endDateInSeconds"
+      go-back-button
+      relative />
   </v-card>
 </template>
 
@@ -201,8 +208,17 @@ export default {
     completelyProceeded() {
       return this.rewardReport?.completelyProceeded;
     },
+    endDateInSeconds() {
+      return this.period?.endDateInSeconds;
+    },
+    startDateInSeconds() {
+      return this.period?.startDateInSeconds;
+    },
+    rewardPeriodType() {
+      return this.period?.rewardPeriodType;
+    },
     isNotPastPeriod() {
-      return !this.period || this.period.endDateInSeconds > this.currentTimeInSeconds;
+      return !this.period || this.endDateInSeconds > this.currentTimeInSeconds;
     },
     walletRewards() {
       return (this.rewardReport && this.rewardReport.rewards) || [];
@@ -295,6 +311,9 @@ export default {
           });
       });
     },
+    openContributionDetails(userId) {
+      this.$refs?.profileStatsDrawer?.openByIdentityId(userId, this.rewardPeriodType);
+    }
   },
 };
 </script>
