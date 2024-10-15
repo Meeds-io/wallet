@@ -402,6 +402,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <module>applicationToolbarComponent</module>
       </depends>
       <depends>
+        <module>usersLeaderboardCommon</module>
+      </depends>
+      <depends>
+        <module>ruleExtensions</module>
+      </depends>
+      <depends>
         <module>vue</module>
       </depends>
       <depends>
