@@ -291,11 +291,6 @@ public class SpaceServiceMock implements SpaceService {
 
   }
 
-  public void renameSpace(Space space, String newDisplayName) throws SpaceException {
-    throw new UnsupportedOperationException();
-
-  }
-
   public void renameSpace(Space space, String newDisplayName, String remoteId) throws SpaceException {
     throw new UnsupportedOperationException();
 
@@ -317,16 +312,6 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public void deInitApps(Space space) throws SpaceException {
-    throw new UnsupportedOperationException();
-
-  }
-
-  public void addMember(String spaceId, String userId) throws SpaceException {
-    throw new UnsupportedOperationException();
-
-  }
-
-  public void removeMember(String spaceId, String userId) throws SpaceException {
     throw new UnsupportedOperationException();
 
   }
@@ -368,11 +353,6 @@ public class SpaceServiceMock implements SpaceService {
 
   public boolean isOnlyLeader(String spaceId, String userId) throws SpaceException {
     throw new UnsupportedOperationException();
-  }
-
-  public boolean isMember(String spaceId, String userId) throws SpaceException {
-    throw new UnsupportedOperationException();
-
   }
 
   public boolean hasAccessPermission(String spaceId, String userId) throws SpaceException {
@@ -440,11 +420,6 @@ public class SpaceServiceMock implements SpaceService {
   }
 
   public void removeApplication(String spaceId, String appId, String appName) throws SpaceException {
-    throw new UnsupportedOperationException();
-
-  }
-
-  public void updateSpaceAccessed(String remoteId, Space space) throws SpaceException {
     throw new UnsupportedOperationException();
 
   }
