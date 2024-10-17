@@ -26,6 +26,7 @@ import io.meeds.wallet.model.RewardBudgetType;
 import io.meeds.wallet.model.RewardPeriodType;
 import io.meeds.wallet.model.RewardSettings;
 
+import org.exoplatform.services.listener.ListenerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +43,9 @@ public class WalletRewardSettingsServiceTest {
 
   @MockBean
   private SettingService        settingService;
+
+  @MockBean
+  private ListenerService       listenerService;
 
   @Autowired
   private RewardSettingsService rewardSettingsService;

@@ -21,6 +21,7 @@ package io.meeds.wallet.reward.service;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 
 import io.meeds.gamification.model.filter.RealizationFilter;
@@ -44,6 +45,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,6 +56,8 @@ import static org.mockito.Mockito.*;
 public class WalletRewardReportServiceTest { // NOSONAR
 
   private static final String       ADMIN_USER = "root";
+
+  private static final Pageable     PAGEABLE   = Pageable.ofSize(2);
 
   @MockBean
   private WalletAccountService      walletAccountService;
@@ -152,6 +156,56 @@ public class WalletRewardReportServiceTest { // NOSONAR
     // Then
     verify(rewardReportStorage, times(1)).getRewardReportByPeriodId(1, rewardSettings.zoneId());
 
+  }
+
+  @Test
+    void testGetReportStatus() {
+        when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
+
+        RewardPeriod rewardPeriod = new RewardPeriod(RewardPeriodType.WEEK, ZoneId.systemDefault().getId(), 1725832800, 1726437600);
+        // When
+        rewardReportService.getReport(rewardPeriod);
+        // Then
+        verify(realizationService, times(1)).countParticipantsBetweenDates(any(Date.class), any(Date.class));
+        verify(realizationService, times(1)).countRealizationsByFilter(any(RealizationFilter.class));
+    }
+
+  @Test
+  void testFindRewardReportPeriods() {
+        rewardReportService.findRewardReportPeriods(PAGEABLE);
+        verify(rewardReportStorage, times(1)).findRewardReportPeriods(PAGEABLE);
+
+    }
+
+  @Test
+  void testFindRewardPeriodsBetween() {
+    rewardReportService.findRewardPeriodsBetween(1725832800, 1726437600, PAGEABLE);
+    verify(rewardReportStorage, times(1)).findRewardPeriodsBetween(1725832800, 1726437600, PAGEABLE);
+
+  }
+
+  @Test
+  void testGetRewardPeriodsInProgress() {
+    rewardReportService.getRewardPeriodsInProgress();
+    verify(rewardReportStorage, times(1)).findRewardPeriodsByStatus(RewardStatus.PENDING);
+
+  }
+
+  @Test
+  void testFindWalletRewardsByPeriodIdAndStatus() {
+    RewardSettings rewardSettings = new RewardSettings();
+
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, "VALID", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage, times(1)).findWalletRewardsByPeriodIdAndStatus(1, true, rewardSettings.zoneId(), PAGEABLE);
+
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, "INVALID", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage, times(1)).findWalletRewardsByPeriodIdAndStatus(1, false, rewardSettings.zoneId(), PAGEABLE);
+  }
+
+  @Test
+  void testGetRewardPeriodsNotSent() {
+    rewardReportService.getRewardPeriodsNotSent();
+    verify(rewardReportStorage, times(1)).findRewardPeriodsByStatus(RewardStatus.ESTIMATION);
   }
 
   @Test

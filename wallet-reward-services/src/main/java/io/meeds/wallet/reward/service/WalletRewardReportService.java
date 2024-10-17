@@ -35,18 +35,12 @@ import static io.meeds.wallet.utils.WalletUtils.isUserRewardingAdmin;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.meeds.gamification.constant.RealizationStatus;
+import io.meeds.wallet.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -62,18 +56,6 @@ import org.exoplatform.social.core.identity.model.Identity;
 import io.meeds.gamification.constant.IdentityType;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
-import io.meeds.wallet.model.ContractDetail;
-import io.meeds.wallet.model.DistributionForecast;
-import io.meeds.wallet.model.RewardBudgetType;
-import io.meeds.wallet.model.RewardPeriod;
-import io.meeds.wallet.model.RewardPeriodType;
-import io.meeds.wallet.model.RewardReport;
-import io.meeds.wallet.model.RewardSettings;
-import io.meeds.wallet.model.RewardStatus;
-import io.meeds.wallet.model.TransactionDetail;
-import io.meeds.wallet.model.Wallet;
-import io.meeds.wallet.model.WalletReward;
-import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.reward.storage.WalletRewardReportStorage;
 import io.meeds.wallet.service.WalletAccountService;
 import io.meeds.wallet.service.WalletTokenAdminService;
@@ -213,6 +195,14 @@ public class WalletRewardReportService implements RewardReportService {
 
   @Override
   @ExoTransactional
+  public RewardReportStatus getReport(RewardPeriod rewardPeriod) {
+    RewardReport rewardReport = getRewardReport(rewardPeriod.getPeriodMedianDate());
+    return buildReportStatus(rewardReport , rewardPeriod);
+  }
+
+
+  @Override
+  @ExoTransactional
   public RewardReport computeRewards(LocalDate date) {
     if (date == null) {
       throw new IllegalArgumentException("date is mandatory");
@@ -236,12 +226,10 @@ public class WalletRewardReportService implements RewardReportService {
     }
 
     RewardReport rewardReport = getRewardReport(date);
-    if (rewardReport != null) {
-      rewardReport.setParticipationsCount(realizationService.countRealizationsByFilter(realizationFilter));
-      return rewardReport;
+    if (rewardReport == null) {
+      rewardReport = new RewardReport();
+      rewardReport.setPeriod(getRewardPeriod(date));
     }
-    rewardReport = new RewardReport();
-    rewardReport.setPeriod(getRewardPeriod(date));
     rewardReport.setParticipationsCount(realizationService.countRealizationsByFilter(realizationFilter));
 
     List<Long> participants = realizationService.getParticipantsBetweenDates(start, end);
@@ -383,6 +371,12 @@ public class WalletRewardReportService implements RewardReportService {
   @Override
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardReportStorage.replaceRewardTransactions(oldHash, newHash);
+  }
+
+  @Override
+  public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable) {
+    boolean isValid = !status.equals("INVALID");
+    return rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, zoneId, pageable);
   }
 
   private RewardPeriod getRewardPeriod(LocalDate date) {
@@ -599,6 +593,44 @@ public class WalletRewardReportService implements RewardReportService {
       walletTokenAdminService = CommonsUtils.getService(WalletTokenAdminService.class);
     }
     return walletTokenAdminService;
+  }
+
+  private RewardReportStatus buildReportStatus(RewardReport rewardReport, RewardPeriod rewardPeriod) {
+    Date fromDate = new Date(rewardPeriod.getStartDateInSeconds() * 1000L);
+    Date toDate = new Date(rewardPeriod.getEndDateInSeconds() * 1000L);
+
+    long participantsCount = realizationService.countParticipantsBetweenDates(fromDate, toDate);
+
+    RealizationFilter realizationFilter = new RealizationFilter();
+    realizationFilter.setFromDate(fromDate);
+    realizationFilter.setToDate(toDate);
+    realizationFilter.setEarnerType(IdentityType.USER);
+    realizationFilter.setStatus(RealizationStatus.ACCEPTED);
+    int achievementsCount = realizationService.countRealizationsByFilter(realizationFilter);
+    if (rewardReport == null ) {
+      if (participantsCount > 0) {
+        rewardReport = computeRewards(rewardPeriod.getPeriodMedianDate());
+        saveRewardReport(rewardReport);
+      } else {
+        rewardReport = new RewardReport();
+        rewardReport.setPeriod(rewardPeriod);
+      }
+    }
+    WalletReward succeededTransaction = rewardReport.getRewards()
+                                                    .stream()
+                                                    .filter(reward -> reward.getTransaction() != null
+                                                        && reward.getTransaction().isSucceeded())
+                                                    .findFirst()
+                                                    .orElse(null);
+
+    return new RewardReportStatus(succeededTransaction != null ? succeededTransaction.getTransaction().getSentTimestamp() : 0,
+                                  rewardReport.getPeriod(),
+                                  participantsCount,
+                                  rewardReport.getValidRewardCount(),
+                                  achievementsCount,
+                                  rewardReport.getTokensSent(),
+                                  rewardReport.getTokensToSend(),
+                                  CollectionUtils.isNotEmpty(rewardReport.getRewards()) && rewardReport.isCompletelyProceeded());
   }
 
 }
