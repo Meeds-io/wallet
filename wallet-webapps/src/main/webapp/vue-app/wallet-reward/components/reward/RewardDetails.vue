@@ -82,20 +82,22 @@
         icon: 'fa-file-excel',
         text: 'Export',
       }"
-      :right-text-filter="{
-        minCharacters: 3,
-        placeholder: this.$t('wallet.administration.rewardDetails.searchLabel'),
-        tooltip: this.$t('wallet.administration.rewardDetails.searchLabel')
+      :right-select-box="{
+        selected: status,
+        items: walletRewardStatus,
       }"
-      @filter-text-input-end-typing="search = $event" />
+      @filter-select-change="status = $event" />
     <v-data-table
       :headers="identitiesHeaders"
       :items="filteredIdentitiesList"
       :items-per-page="1000"
       :loading="loading"
+      :sort-desc.sync="sortDescending"
+      :sort-by.sync="sortBy"
       item-key="identityId"
+      disable-pagination
       hide-default-footer
-      sortable>
+      must-sort>
       <template #item="{item}">
         <wallet-reward-details-item
           :key="item.wallet.id"
@@ -107,6 +109,23 @@
           @open-contribution-details="openContributionDetails" />
       </template>
     </v-data-table>
+    <v-toolbar
+      v-if="hasMore"
+      color="transparent"
+      flat>
+      <v-col class="fill-width border-box-sizing">
+        <v-btn
+          class="btn"
+          :loading="loading"
+          :disabled="loading"
+          block
+          @click="loadMore">
+          <span class="ms-2 d-inline">
+            {{ $t("realization.label.loadMore") }}
+          </span>
+        </v-btn>
+      </v-col>
+    </v-toolbar>
     <users-leaderboard-profile-achievements-drawer
       ref="profileStatsDrawer"
       :from-date-in-second="startDateInSeconds"
@@ -119,10 +138,6 @@
 <script>
 export default {
   props: {
-    loading: {
-      type: Boolean,
-      default: false,
-    },
     rewardReport: {
       type: Object,
       default: null
@@ -147,8 +162,8 @@ export default {
     }
   },
   data: () => ({
-    search: null,
     loadingSending: false,
+    loading: false,
     currentTimeInSeconds: Date.now() / 1000,
     lang: eXo.env.portal.language,
     dateFormat: {
@@ -156,32 +171,53 @@ export default {
       month: 'short',
       day: 'numeric',
     },
+    walletRewards: [],
+    status: 'VALID',
+    sortBy: 'tokensToSend',
+    sortDescending: true,
+    walletRewardsCount: 0,
+    pageSize: 100,
+    page: 0,
   }),
   computed: {
+    walletRewardStatus() {
+      return [{
+        text: 'Eligible Members',
+        value: 'VALID',
+      },{
+        text: 'Non Eligible',
+        value: 'INVALID',
+      }];
+    },
     identitiesHeaders() {
       return [
         {
           text: this.$t('wallet.administration.rewardDetails.label.name'),
+          value: 'name',
           align: 'start',
           sortable: false,
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.points'),
+          value: 'points',
           align: 'center',
-          sortable: false,
+          sortable: true,
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.status'),
+          value: 'status',
           align: 'center',
           sortable: false,
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.rewards'),
+          value: 'tokensToSend',
           align: 'center',
-          sortable: false,
+          sortable: true,
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.actions'),
+          value: 'actions',
           align: 'center',
           sortable: false,
         },
@@ -193,17 +229,12 @@ export default {
     period() {
       return this.rewardReport?.period;
     },
-    startDate() {
-      return new Date(this.period?.startDate);
-    },
-    endDate() {
-      return new Date(this.period?.endDate);
-    },
     starDateFormat() {
-      return this.startDate?.toLocaleString(this.lang, this.dateFormat);
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.startDateInSeconds * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
     toDateFormat() {
-      return this.endDate?.toLocaleString(this.lang, this.dateFormat);
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat)
+        .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
     completelyProceeded() {
       return this.rewardReport?.completelyProceeded;
@@ -220,14 +251,8 @@ export default {
     isNotPastPeriod() {
       return !this.period || this.endDateInSeconds > this.currentTimeInSeconds;
     },
-    walletRewards() {
-      return (this.rewardReport && this.rewardReport.rewards) || [];
-    },
-    validRewards() {
-      return (this.rewardReport && this.rewardReport.validRewards) || [];
-    },
     filteredIdentitiesList() {
-      return (this.walletRewards && this.walletRewards.filter((wallet) => (wallet.enabled || wallet.tokensSent || wallet.tokensToSend) && this.filterItemFromList(wallet, this.search))) || [];
+      return this.walletRewards?.filter((wallet) => (wallet.enabled || wallet.tokensSent || wallet.tokensToSend)) || [];
     },
     tokenSymbol() {
       return window.walletSettings.contractDetail?.symbol;
@@ -276,23 +301,45 @@ export default {
     },
     disabledSendButtonLabel() {
       return this.isNotPastPeriod ? this.$t('wallet.administration.rewardCard.status.inPeriod') : this.balanceBelowBudgetLabel;
-    }
+    },
+    walletRewardsFilter() {
+      return {
+        page: this.page,
+        size: this.pageSize,
+        periodId: this.period.id,
+        status: this.status,
+        sortField: this.sortBy,
+        sortDir: this.sortDescending ? 'desc' : 'asc',
+      };
+    },
+    hasMore() {
+      return this.walletRewards.length < this.walletRewardsCount;
+    },
   },
-  methods: {
-    filterItemFromList(walletReward, searchText) {
-      if (!searchText || !searchText.length) {
-        return true;
-      }
-      searchText = searchText.trim().toLowerCase();
-      const name = walletReward?.wallet?.name?.toLowerCase();
-      if (name.indexOf(searchText) > -1) {
-        return true;
-      }
-      const address = walletReward?.wallet?.address?.toLowerCase();
-      if (address.indexOf(searchText) > -1) {
-        return true;
+  watch: {
+    status() {
+      this.page = 0;
+      this.walletRewards = [];
+      this.getWalletRewards();
+    },
+    sortBy(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        if (this.sortDescending){
+          this.sortDescending = false;
+        }
+        this.sortUpdated();
       }
     },
+    sortDescending(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.sortUpdated();
+      }
+    },
+  },
+  created() {
+    this.getWalletRewards();
+  },
+  methods: {
     valueFormatted(max) {
       return new Intl.NumberFormat(this.lang, {
         style: 'decimal',
@@ -306,6 +353,10 @@ export default {
         this.$rewardService.computeRewardsByPeriod(this.period)
           .then(rewardReport => {
             this.$emit('reward-report-updated', rewardReport);
+          }).then(() => {
+            this.status = 'VALID';
+            this.walletRewards = [];
+            this.getWalletRewards();
           }).finally(() => {
             this.loadingSending = false;
           });
@@ -313,7 +364,30 @@ export default {
     },
     openContributionDetails(userId) {
       this.$refs?.profileStatsDrawer?.openByIdentityId(userId, this.rewardPeriodType);
-    }
+    },
+    sortUpdated() {
+      if (!this.loading) {
+        this.loading = true;
+        this.page = 0;
+        this.walletRewards = [];
+        this.getWalletRewards();
+      }
+    },
+    getWalletRewards() {
+      this.loading = true;
+      return this.$rewardService.getWalletRewards(this.walletRewardsFilter).then(data => {
+        const newRewards = data?._embedded?.walletRewardList || [];
+        this.walletRewards = [...this.walletRewards, ...newRewards];
+        this.walletRewardsCount = data?.page?.totalElements || 0;
+      }).finally(() => {
+        this.loading = false;
+        this.$root.$applicationLoaded();
+      });
+    },
+    loadMore() {
+      this.page++;
+      this.getWalletRewards();
+    },
   },
 };
 </script>
