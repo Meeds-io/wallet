@@ -144,10 +144,6 @@ public class WalletRewardReportStorage {
       throw new IllegalArgumentException("reward report is null");
     }
     RewardPeriod period = rewardReport.getPeriod();
-    LOG.info("Saving reward report for period from {} to {}",
-             period.getStartDateFormatted("en"),
-             period.getEndDateFormatted("en"));
-
     WalletRewardPeriodEntity rewardPeriodEntity =
                                                 rewardPeriodDAO.findRewardPeriodByTypeAndTime(period.getRewardPeriodType(),
                                                                                               period.getPeriodMedianDateInSeconds());
@@ -245,6 +241,11 @@ public class WalletRewardReportStorage {
 
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardDAO.replaceRewardTransactions(oldHash, newHash);
+  }  
+  
+  public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, boolean isValid, ZoneId zoneId, Pageable pageable) {
+    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, pageable);
+    return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
 
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
@@ -263,7 +264,7 @@ public class WalletRewardReportStorage {
 
   private WalletReward toDTO(WalletRewardEntity rewardEntity, ZoneId zoneId) {
     WalletReward walletReward = new WalletReward();
-    walletReward.setAmount(rewardEntity.getTokensSent());
+    walletReward.setAmount(rewardEntity.getTokensToSend());
     walletReward.setPoints(rewardEntity.getPoints() == null ? 0d : rewardEntity.getPoints());
     retrieveWallet(rewardEntity, walletReward);
     retrieveTransaction(rewardEntity, walletReward);

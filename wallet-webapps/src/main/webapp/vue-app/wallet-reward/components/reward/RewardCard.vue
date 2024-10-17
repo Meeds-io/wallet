@@ -77,7 +77,7 @@
                 size="20">
                 fas fa-users
               </v-icon>
-              <span class="subheading mr-2">{{ participants }}</span>
+              <span class="subheading mr-2">{{ participantsCount }}</span>
             </div>
             <div class="col-12 col-sm-8 mb-2">
               <v-icon
@@ -86,7 +86,7 @@
                 size="20">
                 fas fa-trophy
               </v-icon>
-              <span class="subheading">{{ participationsCount }} {{ $t('wallet.administration.rewardCard.label.contributions') }}</span>
+              <span class="subheading">{{ achievementsCount }} {{ $t('wallet.administration.rewardCard.label.contributions') }}</span>
             </div>
             <div class="col-12 col-sm-4">
               <v-icon
@@ -196,16 +196,13 @@ export default {
       return this.rewardSettings?.storedSetting;
     },
     eligibleContributorsCount() {
-      return this.hasConfiguredBudget ? this.rewardReport?.validRewards?.length : this.participants;
+      return this.hasConfiguredBudget ? this.rewardReport?.recipientsCount : this.participantsCount;
     },
-    walletRewards() {
-      return this.rewardReport?.rewards;
+    participantsCount() {
+      return this.rewardReport?.participantsCount;
     },
-    participants() {
-      return this.rewardReport?.rewards?.length;
-    },
-    participationsCount() {
-      return this.rewardReport?.participationsCount < 1000 ? this.rewardReport?.participationsCount : `${(this.rewardReport?.participationsCount / 1000).toFixed(1)}K`;
+    achievementsCount() {
+      return this.rewardReport?.achievementsCount < 1000 ? this.rewardReport?.achievementsCount : `${(this.rewardReport?.achievementsCount / 1000).toFixed(1)}K`;
     },
     tokensToSend() {
       return this.rewardReport?.tokensToSend;
@@ -226,24 +223,26 @@ export default {
       return this.rewardReport?.period;
     },
     rangeDateTimeTitle() {
-      return `${this.starDateFormat} ${this.$t('exoplatform.wallet.label.to')} ${this.toDateFormat}`;
+      return `${this.startDateFormat} ${this.$t('exoplatform.wallet.label.to')} ${this.endDateFormat}`;
     },
-    starDateFormat() {
-      return this.startDate?.toLocaleString(this.lang, this.dateFormat);
+    startDateFormat() {
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.startDateInSeconds * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
-    toDateFormat() {
-      return this.endDate?.toLocaleString(this.lang, this.dateFormat);
+    endDateFormat() {
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat)
+        .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
-    startDate() {
-      return new Date(this.period?.startDate);
+    startDateInSeconds() {
+      return this.period?.startDateInSeconds;
     },
-    endDate() {
-      return new Date(this.period?.endDate);
+    endDateInSeconds() {
+      return this.period?.endDateInSeconds;
+    },
+    sentDate() {
+      return this.rewardReport?.sentDate;
     },
     rewardSentDate() {
-      const reward = this.rewardReport?.rewards?.find(reward => reward?.transaction?.succeeded);
-      const sentDate = new Date(reward?.transaction?.timestamp);
-      return sentDate?.toLocaleString(this.lang, this.dateFormat);
+      return new window.Intl.DateTimeFormat(this.lang, this.dateFormat).format(new Date(this.sentDate));
     },
   },
   methods: {

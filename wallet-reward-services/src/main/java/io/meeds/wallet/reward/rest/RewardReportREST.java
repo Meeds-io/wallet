@@ -49,7 +49,9 @@ import io.meeds.wallet.utils.WalletUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
@@ -75,32 +77,23 @@ public class RewardReportREST {
   @GetMapping(path = "compute")
   @Secured("rewarding")
   @Operation(
-          summary = "Compute rewards of wallets per a chosen period of time",
+          summary = "Gets rewards report per a chosen period of time",
           method = "GET",
-          description = "returns a set of wallet reward object")
+          description = "returns a list of reward report")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Request fulfilled"),
           @ApiResponse(responseCode = "400", description = "Invalid query input"),
           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public List<RewardReport> computeRewards(@Parameter(description = "Page")
-                                           @RequestParam(value = "page", defaultValue = "0", required = false)
-                                           int page,
-                                           @Parameter(description = "Page size")
-                                           @RequestParam(value = "size", defaultValue = "12", required = false)
-                                           int size) {
+  public List<RewardReportStatus> getReportsStatus(@Parameter(description = "Page")
+                                                 @RequestParam(value = "page", defaultValue = "0", required = false)
+                                                 int page,
+                                                 @Parameter(description = "Page size")
+                                                 @RequestParam(value = "size", defaultValue = "12", required = false)
+                                                 int size) {
     int skip = page * size;
     List<RewardPeriod> periods = generatePreviousPeriods(skip + size).subList(skip, skip + size);
-    List<RewardReport> rewardReports = periods.parallelStream()
-                                              .map(period -> {
-                                                RewardReport rewardReport =
-                                                                          rewardReportService.computeRewards(period.getPeriodMedianDate());
-                                                rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
-                                                return rewardReport;
-                                              })
-                                              .toList();
-    rewardReports.forEach(rewardReport -> rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod())));
-    return rewardReports;
+    return periods.parallelStream().map(period -> rewardReportService.getReport(period)).toList();
   }
 
   @PostMapping(path = "period/compute")
@@ -119,6 +112,39 @@ public class RewardReportREST {
     RewardReport rewardReport = rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate());
     rewardReport.setPeriod(new RewardPeriodWithFullDate(rewardReport.getPeriod()));
     return rewardReport;
+  }
+
+  @GetMapping(path = "rewards")
+  @Secured("rewarding")
+  @Operation(summary = "Gets rewards of wallets per a chosen period of time", method = "GET", description = "returns the list of wallets per a chosen period of time")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
+          @ApiResponse(responseCode = "500", description = "Internal server error") })
+  public PagedModel<EntityModel<WalletReward>> getWalletRewards(Pageable pageable,
+                                                                PagedResourcesAssembler<WalletReward> assembler,
+                                                                @Parameter(description = "Period id", required = true)
+                                                                @RequestParam("periodId")
+                                                                long periodId,
+                                                                @Parameter(description = "Wallet reward status filtering, possible values: VALId and INVALID. Default value = VALId.")
+                                                                @RequestParam(value = "status", defaultValue = "VALID")
+                                                                String status,
+                                                                @Parameter(description = "Field to sort by. Possible values: 'tokensSent', 'points'. Default is 'tokensSent'.")
+                                                                @RequestParam(value = "sortField", defaultValue = "tokensSent") String sortField,
+                                                                @Parameter(description = "Sort direction for tokensToSend field. Possible values: 'asc' (ascending) or 'desc' (descending). Default value = asc.")
+                                                                @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir) {
+
+    Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortField).descending() : Sort.by(sortField).ascending();
+
+    Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+    Page<WalletReward> walletRewards;
+    walletRewards = rewardReportService.findWalletRewardsByPeriodIdAndStatus(periodId,
+                                                                             status,
+                                                                             rewardSettingsService.getSettings().zoneId(),
+                                                                             sortedPageable);
+    return assembler.toModel(walletRewards);
   }
 
   @PostMapping(path = "forecast")
@@ -268,8 +294,8 @@ public class RewardReportREST {
     ZonedDateTime currentDateTime = ZonedDateTime.now(zoneId);
 
     return IntStream.range(0, count).mapToObj(i -> {
-      ZonedDateTime start;
-      ZonedDateTime end;
+      ZonedDateTime start = null;
+      ZonedDateTime end = null;
 
       switch (periodType) {
       case WEEK -> {
@@ -287,16 +313,14 @@ public class RewardReportREST {
                              .truncatedTo(ChronoUnit.DAYS);
         end = start.plusMonths(3);
       }
-      default -> throw new UnsupportedOperationException("Unknown period type");
       }
-
       RewardPeriod rewardPeriod = new RewardPeriod();
       rewardPeriod.setRewardPeriodType(periodType);
       rewardPeriod.setStartDateInSeconds(timeToSecondsAtDayStart(LocalDate.from(start), currentDateTime.getZone()));
       rewardPeriod.setEndDateInSeconds(timeToSecondsAtDayStart(LocalDate.from(end), currentDateTime.getZone()));
 
       return rewardPeriod;
-    }).collect(Collectors.toList());
+    }).toList();
   }
 
 }
