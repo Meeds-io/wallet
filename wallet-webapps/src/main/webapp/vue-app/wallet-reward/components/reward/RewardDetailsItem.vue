@@ -41,9 +41,9 @@
         display-no-address />
     </td>
     <td class="text-center">
-      <span>
+      <v-btn icon @click="openContributionDetails">
         {{ points }}
-      </span>
+      </v-btn>
     </td>
     <td class="text-center">
       <template v-if="!status">
@@ -269,8 +269,10 @@ export default {
       return this.success ? 'success' : 'error';
     },
     statusIconTitle() {
-      return this.success ? this.$t('wallet.administration.rewardDetails.successfullyProceeded') :
-        this.pending ? this.$t('wallet.administration.rewardDetails.transactionInProgress') : this.$t('wallet.administration.rewardDetails.transactionError');
+      if (this.success) {
+        return this.$t('wallet.administration.rewardDetails.successfullyProceeded');
+      }
+      return this.pending ? this.$t('wallet.administration.rewardDetails.transactionInProgress') : this.$t('wallet.administration.rewardDetails.transactionError');
     },
     amount() {
       return this.completelyProceeded ? this.reward?.tokensSent : this.reward?.amount;
@@ -288,6 +290,9 @@ export default {
     },
     seeHistory() {
       this.$refs.accountDetail.open();
+    },
+    openContributionDetails() {
+      this.$emit('open-contribution-details', this.walletTechnicalId);
     }
   }
 };

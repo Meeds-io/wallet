@@ -29,7 +29,12 @@
           class="d-flex flex-column justify-space-between"
           width="40%"
           flat>
-          <wallet-current-balance :loading="loading" :reward-settings="rewardSettings" />
+          <wallet-current-balance
+            :loading="loading"
+            :reward-settings="rewardSettings"
+            :configured-budget="configuredBudget"
+            :admin-wallet="adminWallet"
+            :contract-details="contractDetails" />
           <extension-registry-components
             name="WalletRewardingCard"
             type="wallet-reward-cards-extensions" />
@@ -58,6 +63,8 @@
         :reward-report="selectedRewardReport"
         :transaction-ether-scan-link="transactionEtherScanLink"
         :contract-details="contractDetails"
+        :admin-wallet="adminWallet"
+        :configured-budget="configuredBudget"
         @reward-report-updated="rewardReportUpdated"
         @back="showRewardDetails = false" />
     </template>
@@ -77,7 +84,9 @@ export default {
     rewardsPage: 0,
     rewardsPageSize: 12,
     transactionEtherScanLink: null,
-    contractDetails: null
+    contractDetails: null,
+    distributionForecast: null,
+    adminWallet: null,
   }),
   computed: {
     rewardReport() {
@@ -88,6 +97,9 @@ export default {
     },
     selectedDate() {
       return this.rewardPeriod?.startDate.substring(0, 10) || new Date().toISOString().substring(0, 10);
+    },
+    configuredBudget() {
+      return this.distributionForecast?.budget;
     },
   },
   created() {
@@ -106,7 +118,9 @@ export default {
       return this.walletUtils.initSettings(false, true, true)
         .then(() => {
           this.contractDetails = window.walletSettings.contractDetail;
+          return this.addressRegistry.searchWalletByTypeAndId('admin', 'admin');
         })
+        .then((adminWallet) => this.adminWallet = adminWallet)
         .then(() => this.walletUtils.initWeb3(false, true))
         .then(() => {
           if (this.contractDetails) {
@@ -129,6 +143,7 @@ export default {
           this.rewardSettings = settings || {};
         })
         .then(() => this.refreshRewards())
+        .then(() => this.computeDistributionForecast())
         .finally(() => this.loading = false);
     },
     refreshRewards(period) {
@@ -167,7 +182,13 @@ export default {
       if (index !== -1) {
         this.rewardReports[index] = rewardReport;
       }
-    }
+    },
+    computeDistributionForecast() {
+      return this.$rewardService.computeDistributionForecast(this.rewardSettings)
+        .then(distributionForecast => {
+          this.distributionForecast = distributionForecast;
+        });
+    },
   },
 };
 </script>

@@ -70,7 +70,6 @@
       </v-card-title>
       <div class="d-flex align-center px-4">
         <number-input
-          v-if="settingsToSave.threshold"
           v-model="settingsToSave.threshold"
           :step="1"
           :max="1000"

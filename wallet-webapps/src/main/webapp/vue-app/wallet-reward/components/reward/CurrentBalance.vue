@@ -20,7 +20,7 @@
 -->
 <template>
   <v-card
-    :loading="loading || loadingWallet"
+    :loading="loading"
     class="border-radius border-color ma-5 mb-2"
     flat>
     <div class="d-flex flex-column flex-grow-1">
@@ -105,6 +105,18 @@ export default {
       type: Object,
       default: null
     },
+    adminWallet: {
+      type: Object,
+      default: null
+    },
+    contractDetails: {
+      type: Object,
+      default: null
+    },
+    configuredBudget: {
+      type: Number,
+      default: 0
+    },
     loading: {
       type: Boolean,
       default: false,
@@ -112,11 +124,7 @@ export default {
   },
   data () {
     return {
-      loadingWallet: false,
-      adminWallet: null,
-      contractDetails: null,
       walletAdminUri: '/portal/administration/home/rewards/wallet',
-      configuredBudget: null
     };
   },
   computed: {
@@ -148,39 +156,5 @@ export default {
       return this.lowEtherBalance ? this.$t('wallet.administration.lowEtherBalance') : this.$t('wallet.administration.lowTokenBalance');
     }
   },
-  watch: {
-    rewardSettings() {
-      this.computeDistributionForecast();
-    }
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    init() {
-      this.loadingWallet = true;
-      this.error = null;
-      return this.walletUtils.initSettings(false, true)
-        .then(() => {
-          this.contractDetails = window.walletSettings.contractDetail;
-          return this.addressRegistry.searchWalletByTypeAndId('admin', 'admin');
-        })
-        .then((adminWallet) => this.adminWallet = adminWallet)
-        .then(() => {
-          this.$nextTick().then(() => {
-            this.computeDistributionForecast();
-          });
-        })
-        .finally(() => {
-          this.loadingWallet = false;
-        });
-    },
-    computeDistributionForecast() {
-      return this.$rewardService.computeDistributionForecast(this.rewardSettings)
-        .then(distributionForecast => {
-          this.configuredBudget = distributionForecast?.budget || 0;
-        });
-    },
-  }
 };
 </script>
