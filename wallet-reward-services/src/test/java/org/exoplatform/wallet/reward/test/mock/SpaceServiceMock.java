@@ -206,16 +206,6 @@ public class SpaceServiceMock implements SpaceService {
 
   }
 
-  public void setSpaceApplicationConfigPlugin(SpaceApplicationConfigPlugin spaceApplicationConfigPlugin) {
-    throw new UnsupportedOperationException();
-
-  }
-
-  public SpaceApplicationConfigPlugin getSpaceApplicationConfigPlugin() {
-    throw new UnsupportedOperationException();
-
-  }
-
   public List<Space> getAllSpaces() throws SpaceException {
     throw new UnsupportedOperationException();
 
