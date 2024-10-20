@@ -76,12 +76,7 @@ public class WalletPermanentLinkPlugin implements PermanentLinkPlugin {
   }
 
   public String getSpaceUrl(Space space) {
-    StringBuilder spaceUrl = new StringBuilder("/portal/g/");
-    spaceUrl.append(space.getGroupId().replace("/", ":"))
-            .append("/")
-            .append(space.getPrettyName())
-            .append("/SpaceWallet");
-    return spaceUrl.toString();
+    return String.format("/portal/s/%s/SpaceWallet", space.getId());
   }
 
   public String getProfileUrl() {
