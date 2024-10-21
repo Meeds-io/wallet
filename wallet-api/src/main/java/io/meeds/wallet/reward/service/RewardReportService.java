@@ -17,25 +17,29 @@
 package io.meeds.wallet.reward.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import io.meeds.wallet.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import org.exoplatform.social.core.identity.model.Identity;
 
-import io.meeds.wallet.model.DistributionForecast;
-import io.meeds.wallet.model.RewardPeriod;
-import io.meeds.wallet.model.RewardPeriodType;
-import io.meeds.wallet.model.RewardReport;
-import io.meeds.wallet.model.RewardSettings;
-import io.meeds.wallet.model.WalletReward;
-
 /**
  * A storage service to save/load reward settings
  */
 public interface RewardReportService {
+
+  /**
+   * Gets rewards report switch {@link RewardPeriod}
+   *
+   * @param rewardPeriod a {@link RewardPeriod}
+   * @return a {@link RewardReportStatus}
+   */
+  RewardReportStatus getReport(RewardPeriod rewardPeriod);
 
   /**
    * Compute rewards swicth configurations for the list of identities passed in
@@ -87,6 +91,14 @@ public interface RewardReportService {
    * @return {@link RewardPeriod}
    */
   RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date);
+
+  /**
+   * Return the stored reward period by id
+   *
+   * @param rewardPeriodId reward period id
+   * @return {@link RewardPeriod}
+   */
+  RewardPeriod getRewardPeriodById(long rewardPeriodId);
 
   /**
    * Retrieve a {@link RewardReport} corresponding to a period identified by its id
@@ -164,4 +176,28 @@ public interface RewardReportService {
    */
   void replaceRewardTransactions(String oldHash, String newHash);
 
+  /**
+   * Gets wallet rewards by PeriodId and status
+   * first one
+   *
+   * @param periodId Reward Period id
+   * @param status Wallet reward status
+   * @param zoneId Wallet reward status
+   */
+  Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable);
+
+
+  /**
+   * Set isChanged data map for periods not sent
+   *
+   * @param updatedSettings map of isChanged data for periods not sent
+   *
+   */
+  void setRewardSettingChanged(Map<Long, Boolean> updatedSettings);
+
+  /**
+   * Gets isChanged data map for periods not sent
+   *
+   */
+  Map<Long, Boolean> getRewardSettingChanged();
 }

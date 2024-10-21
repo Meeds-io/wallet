@@ -103,7 +103,7 @@ public class RewardReport {
     return getFailedTransactionCount() > 0;
   }
 
-  public boolean isCompletelyProceeded() {
+  public boolean isCompletelyProcessed() {
     // Can be greater if in the mean time of transaction confirmation, a member
     // has been invalidated / disabled / deleted
     return getTransactionsCount() > 0 && getSuccessTransactionCount() >= getValidRewardCount();
