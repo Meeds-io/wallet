@@ -190,7 +190,7 @@ export default {
       type: String,
       default: ''
     },
-    completelyProceeded: {
+    completelyProcessed: {
       type: Boolean,
       default: false
     },
@@ -275,7 +275,7 @@ export default {
       return this.pending ? this.$t('wallet.administration.rewardDetails.transactionInProgress') : this.$t('wallet.administration.rewardDetails.transactionError');
     },
     amount() {
-      return this.completelyProceeded ? this.reward?.tokensSent : this.reward?.amount;
+      return this.completelyProcessed ? this.reward?.tokensSent : this.reward?.amount;
     },
     transactionHash() {
       return this.reward?.transaction?.hash;
