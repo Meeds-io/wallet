@@ -210,7 +210,7 @@ public class WalletRewardReportService implements RewardReportService {
       rewardSettingChangedMap.put(storedRewardPeriod.getId(), false);
       setRewardSettingChanged(rewardSettingChangedMap);
     }
-    return buildReportStatus(rewardReport, rewardPeriod);
+    return buildReportStatus(rewardReport, storedRewardPeriod != null ? storedRewardPeriod : rewardPeriod);
   }
 
   @Override
@@ -394,6 +394,11 @@ public class WalletRewardReportService implements RewardReportService {
   public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable) {
     boolean isValid = !status.equals("INVALID");
     return rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, zoneId, pageable);
+  } 
+  
+  @Override
+  public double countWalletRewardsPointsByPeriodIdAndStatus(long periodId, boolean isValid) {
+    return rewardReportStorage.countWalletRewardsPointsByPeriodIdAndStatus(periodId, isValid);
   }
 
   public void setRewardSettingChanged(Map<Long, Boolean> updatedSettings) {
@@ -632,6 +637,7 @@ public class WalletRewardReportService implements RewardReportService {
       if (participantsCount > 0) {
         rewardReport = computeRewards(rewardPeriod.getPeriodMedianDate());
         saveRewardReport(rewardReport);
+        rewardPeriod = getRewardPeriod(rewardPeriod.getRewardPeriodType(), rewardPeriod.getPeriodMedianDate());
       } else {
         rewardReport = new RewardReport();
         rewardReport.setPeriod(rewardPeriod);
@@ -644,11 +650,14 @@ public class WalletRewardReportService implements RewardReportService {
                                                     .findFirst()
                                                     .orElse(null);
 
+    double points = rewardPeriod.getId() > 0 ? countWalletRewardsPointsByPeriodIdAndStatus(rewardPeriod.getId(), true) : 0;
+
     return new RewardReportStatus(succeededTransaction != null ? succeededTransaction.getTransaction().getSentTimestamp() : 0,
                                   rewardReport.getPeriod(),
                                   participantsCount,
                                   rewardReport.getValidRewardCount(),
                                   achievementsCount,
+                                  points,
                                   rewardReport.getTokensSent(),
                                   rewardReport.getTokensToSend(),
                                   CollectionUtils.isNotEmpty(rewardReport.getRewards()) && rewardReport.isCompletelyProcessed());
