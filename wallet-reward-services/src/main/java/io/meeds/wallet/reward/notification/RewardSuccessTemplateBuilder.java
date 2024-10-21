@@ -38,9 +38,6 @@ import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.service.template.TemplateContext;
 import org.exoplatform.commons.notification.template.TemplateUtils;
-import org.exoplatform.container.ExoContainer;
-import org.exoplatform.services.log.ExoLogger;
-import org.exoplatform.services.log.Log;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.webui.utils.TimeConvertUtils;
 
@@ -50,13 +47,9 @@ import io.meeds.wallet.reward.service.RewardSettingsService;
 
 public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
 
-  private static final Log      LOG = ExoLogger.getLogger(RewardSuccessTemplateBuilder.class);
-
   private ChannelKey            channelKey;
 
   private boolean               pushNotification;
-
-  private ExoContainer          container;
 
   private RewardSettingsService rewardSettingsService;
 

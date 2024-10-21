@@ -34,7 +34,7 @@ import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = { RewardStatusVerifierTask.class })
-public class RewardStatusVerifierTaskTest {
+class RewardStatusVerifierTaskTest {
 
   @MockBean
   private RewardReportService      rewardReportService;
@@ -49,7 +49,7 @@ public class RewardStatusVerifierTaskTest {
   private RewardStatusVerifierTask rewardStatusVerifierTask;
 
   @Test
-  public void testSendRewards_NoAdminWallet() {
+  void testSendRewards_NoAdminWallet() {
     // No admin wallet or admin wallet has zero balance
     when(walletAccountService.getAdminWallet()).thenReturn(null);
     when(walletAccountService.isAdminAccountEnabled()).thenReturn(true);
@@ -62,7 +62,7 @@ public class RewardStatusVerifierTaskTest {
     }
 
   @Test
-  public void testSendRewards_RewardPeriodsInProgress() {
+  void testSendRewards_RewardPeriodsInProgress() {
     // When
     Wallet adminWallet = new Wallet();
     adminWallet.setEtherBalance(100.0);
@@ -76,7 +76,7 @@ public class RewardStatusVerifierTaskTest {
     when(rewardReportService.getRewardPeriodsInProgress()).thenReturn(rewardPeriodsInProgress);
 
     RewardReport rewardReport = mock(RewardReport.class);
-    when(rewardReport.isCompletelyProceeded()).thenReturn(true);
+    when(rewardReport.isCompletelyProcessed()).thenReturn(true);
 
     when(rewardReportService.computeRewards(any())).thenReturn(rewardReport);
 
