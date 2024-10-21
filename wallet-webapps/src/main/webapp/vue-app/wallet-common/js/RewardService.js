@@ -225,3 +225,28 @@ export function getRewardReportPeriods(paramsObj) {
     }
   });
 }
+
+export function getWalletRewards(paramsObj) {
+  const formData = new FormData();
+  if (paramsObj) {
+    Object.keys(paramsObj).forEach(key => {
+      const value = paramsObj[key];
+      if (window.Array && Array.isArray && Array.isArray(value)) {
+        value.forEach(val => formData.append(key, val));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  }
+  const params = new URLSearchParams(formData).toString();
+  return fetch(`/wallet/rest/reward/rewards?${params}`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error when getting wallet rewards');
+    }
+  });
+}

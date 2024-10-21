@@ -100,8 +100,8 @@ public class RewardSettingsREST {
                           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
                           @ApiResponse(responseCode = "500", description = "Internal server error") })
   public Response getRewardDates(@Parameter(description = "A date with format yyyy-MM-dd", required = true)
-  @RequestParam("date")
-  String date) {
+                                 @RequestParam("date")
+                                 String date) {
     if (StringUtils.isBlank(date)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request sent to server with empty 'date' parameter");
     }
