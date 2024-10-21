@@ -36,6 +36,8 @@ public class RewardReportStatus {
 
   private int          achievementsCount;
 
+  private double       points;
+
   private double       tokensSent;
 
   private double       tokensToSend;
