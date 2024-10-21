@@ -270,7 +270,7 @@ export default {
       return this.valueFormatted(this.tokensToSend);
     },
     points() {
-      return this.valueFormatted(this.validRewards?.map(x => x?.points || 0).reduce((x, y) => x + y, 0), 0);
+      return this.rewardReport?.points;
     },
     rewardsToSend() {
       return this.$t('wallet.administration.rewardDetails.label.rewardsToSend', {
