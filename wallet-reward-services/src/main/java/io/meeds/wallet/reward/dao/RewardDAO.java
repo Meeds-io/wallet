@@ -22,6 +22,7 @@ import java.util.List;
 
 import jakarta.transaction.Transactional;
 import io.meeds.wallet.reward.entity.WalletRewardEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -36,6 +37,14 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
           SELECT rw FROM Reward rw WHERE rw.period.id = :periodId
       """)
   List<WalletRewardEntity> findRewardsByPeriodId(@Param("periodId") long periodId);
+
+  @Query("""
+          SELECT rw FROM Reward rw WHERE rw.period.id = :periodId AND
+          (:isValid = TRUE AND (rw.tokensSent > 0 OR rw.tokensToSend > 0) OR :isValid = FALSE AND (rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
+      """)
+  Page<WalletRewardEntity> findWalletRewardsByPeriodIdAndStatus(@Param("periodId") long periodId,
+                                                                @Param("isValid") boolean isValid,
+                                                                Pageable pageable);
 
   List<WalletRewardEntity> findWalletRewardEntitiesByIdentityId(long identityId, Pageable pageable);
 
