@@ -26,6 +26,7 @@ import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
 import java.util.Objects;
 
+import org.exoplatform.services.listener.ListenerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,10 +41,15 @@ import io.meeds.wallet.model.RewardSettings;
 @Service
 public class WalletRewardSettingsService implements RewardSettingsService {
 
-  @Autowired
-  private SettingService settingService;
+  public static final String REWARD_SETTINGS_UPDATED = "reward.settings.updated";
 
-  private RewardSettings configuredRewardSettings;
+  @Autowired
+  private SettingService     settingService;
+
+  @Autowired
+  private ListenerService    listenerService;
+
+  private RewardSettings     configuredRewardSettings;
 
   @Override
   public RewardSettings getSettings() { // NOSONAR
@@ -54,8 +60,8 @@ public class WalletRewardSettingsService implements RewardSettingsService {
 
     SettingValue<?> settingsValue = settingService.get(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME);
 
-    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null :
-                                                                                           settingsValue.getValue().toString();
+    String settingsValueString = settingsValue == null || settingsValue.getValue() == null ? null
+                                                                                           : settingsValue.getValue().toString();
 
     RewardSettings rewardSettings;
     if (settingsValueString == null) {
@@ -82,6 +88,7 @@ public class WalletRewardSettingsService implements RewardSettingsService {
 
     // Purge cached settings
     this.configuredRewardSettings = null;
+    listenerService.broadcast(REWARD_SETTINGS_UPDATED, this, null);
   }
 
   @Override
@@ -90,5 +97,6 @@ public class WalletRewardSettingsService implements RewardSettingsService {
 
     // Purge cached settings
     this.configuredRewardSettings = null;
+    listenerService.broadcast(REWARD_SETTINGS_UPDATED, this, null);
   }
 }
