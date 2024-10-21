@@ -186,6 +186,14 @@ public interface RewardReportService {
    */
   Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable);
 
+  /**
+   * Count wallet rewards points by PeriodId and status
+   *
+   * @param periodId Reward Period id
+   * @param isValid Wallet reward status
+   */
+  double countWalletRewardsPointsByPeriodIdAndStatus(long periodId, boolean isValid);
+
 
   /**
    * Set isChanged data map for periods not sent

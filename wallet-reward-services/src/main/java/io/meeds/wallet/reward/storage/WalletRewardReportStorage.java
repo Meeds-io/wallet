@@ -253,6 +253,11 @@ public class WalletRewardReportStorage {
     return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
 
+  public double countWalletRewardsPointsByPeriodIdAndStatus(long periodId, boolean isValid) {
+    Double countWalletRewardsPoints =  rewardDAO.countWalletRewardsPointsByPeriodIdAndStatus(periodId, isValid);
+    return countWalletRewardsPoints != null ? countWalletRewardsPoints : 0;
+  }
+
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
     if (period == null) {
       return null;
