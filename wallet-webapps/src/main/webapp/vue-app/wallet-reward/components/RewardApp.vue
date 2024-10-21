@@ -42,7 +42,7 @@
         <wallet-budget-configuration
           :loading="loading"
           :reward-settings="rewardSettings"
-          :reward-report="rewardReport"
+          :settings-updated="settingsUpdated"
           @openConfiguration="openBudgetConfigurationDrawer"
           @deleteSetting="deleteRewardSettings" />
       </div>
@@ -78,6 +78,7 @@ export default {
     rewardSettings: {},
     loading: false,
     loadingRewards: false,
+    loadingRewardSettings: false,
     rewardReports: [],
     selectedRewardReport: null,
     showRewardDetails: false,
@@ -87,6 +88,7 @@ export default {
     contractDetails: null,
     distributionForecast: null,
     adminWallet: null,
+    settingsUpdated: false,
   }),
   computed: {
     rewardReport() {
@@ -137,21 +139,18 @@ export default {
         });
     },
     refreshRewardSettings() {
-      this.loading = true;
       return this.$rewardService.getRewardSettings()
         .then(settings => {
           this.rewardSettings = settings || {};
         })
         .then(() => this.refreshRewards())
-        .then(() => this.computeDistributionForecast())
-        .finally(() => this.loading = false);
+        .then(() => this.computeDistributionForecast());
     },
     refreshRewards(period) {
       if (period) {
         this.period = period;
       }
       this.loadingRewards = true;
-
       return this.$rewardService.computeRewards(this.rewardsPage, this.rewardsPageSize)
         .then(rewardReports => {
           this.rewardReports.push(...rewardReports);
@@ -174,8 +173,9 @@ export default {
       this.refreshRewards();
     },
     settingUpdated() {
+      this.settingsUpdated = true;
       this.rewardReports = [];
-      this.refreshRewardSettings();
+      this.refreshRewardSettings().then(() => this.settingsUpdated = false);
     },
     rewardReportUpdated(rewardReport) {
       const index = this.rewardReports.findIndex(r => r?.period === rewardReport?.period);

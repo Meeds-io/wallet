@@ -148,11 +148,14 @@ export default {
       type: Object,
       default: null
     },
-    rewardReport: {
-      type: Object,
-      default: null
+    settingsUpdated: {
+      type: Boolean,
+      default: false,
     }
   },
+  data: () => ({
+    rewardPeriod: null
+  }),
   computed: {
     periodType() {
       return this.rewardSettings?.periodType;
@@ -160,16 +163,22 @@ export default {
     periodTypeLabel() {
       return this.$t(`wallet.administration.periodType.label.${this.periodType?.toLowerCase()}`) || '';
     },
-    rewardPeriod() {
-      return this.rewardReport?.period;
+    startDateInSeconds() {
+      return this.rewardPeriod?.startDateInSeconds;
+    },
+    endDateInSeconds() {
+      return this.rewardPeriod?.endDateInSeconds;
     },
     periodDatesDisplay() {
       if (!this.rewardPeriod) {
         return '';
       }
-      const startDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.rewardPeriod.startDateInSeconds * 1000), this.dateformat, eXo.env.portal.language);
-      const endDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.rewardPeriod.endDateInSeconds * 1000 - 1), this.dateformat, eXo.env.portal.language);
+      const startDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.startDateInSeconds * 1000), this.dateformat, eXo.env.portal.language);
+      const endDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.endDateInSeconds * 1000 - 1), this.dateformat, eXo.env.portal.language);
       return `${startDateFormatted} ${this.$t('exoplatform.wallet.label.to')} ${endDateFormatted}`;
+    },
+    currentDate() {
+      return this.$dateUtil.getISODate(new Date());
     },
     dateformat() {
       return this.timeZone && {
@@ -207,6 +216,23 @@ export default {
       return this.rewardSettings?.storedSetting;
     },
   },
+  watch: {
+    loading() {
+      if (!this.rewardPeriod) {
+        this.getRewardDates();
+      }
+    },
+    settingsUpdated() {
+      if (this.settingsUpdated) {
+        this.getRewardDates();
+      }
+    },
+  },
+  created() {
+    if (!this.rewardPeriod) {
+      this.getRewardDates();
+    }
+  },
   methods: {
     openConfigurationDrawer() {
       this.$emit('openConfiguration');
@@ -221,6 +247,12 @@ export default {
         maximumFractionDigits: 0,
       }).format(max);
     },
+    getRewardDates() {
+      return this.$rewardService.getRewardDates(this.currentDate)
+        .then(rewardPeriod => {
+          this.rewardPeriod = rewardPeriod?.entity;
+        });
+    }
   },
 };
 </script>

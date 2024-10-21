@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
+import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,10 +62,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.meeds.spring.web.security.PortalAuthenticationManager;
 import io.meeds.spring.web.security.WebSecurityConfiguration;
-import io.meeds.wallet.model.RewardPeriod;
-import io.meeds.wallet.model.RewardPeriodType;
-import io.meeds.wallet.model.RewardReport;
-import io.meeds.wallet.model.RewardSettings;
 import io.meeds.wallet.reward.service.RewardReportService;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 
@@ -125,7 +122,9 @@ class TestRewardReportREST {
 
   @Test
   void computeRewardsSimpleUser() throws Exception {
-    ResultActions response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testSimpleUser()));
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0")
+                                                                        .param("size", "12")
+                                                                        .with(testSimpleUser()));
     response.andExpect(status().isForbidden());
   }
 
@@ -155,6 +154,38 @@ class TestRewardReportREST {
     response = mockMvc.perform(get(REST_PATH + "/compute").param("page", "0").param("size", "12").with(testAdminUser()));
     response.andExpect(status().isOk());
 
+  }
+
+  @Test
+  void getWalletRewardsAnonymously() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/rewards").param("periodId", "1")
+                                                                        .param("status", "VALID")
+                                                                        .param("sortField", "tokensSent")
+                                                                        .param("sortDir", "desc"));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void getWalletRewardsSimpleUser() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/rewards").param("periodId", "1")
+                                                                        .param("status", "VALID")
+                                                                        .param("sortField", "tokensSent")
+                                                                        .param("sortDir", "desc")
+                                                                        .with(testSimpleUser()));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void getWalletRewardsAdmin() throws Exception {
+    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
+
+    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
+
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/rewards").param("periodId", "1")
+                                                                                  .param("status", "VALID")
+                                                                                  .param("sortField", "tokensSent")
+                                                                                  .param("sortDir", "desc").with(testAdminUser()));
+    response.andExpect(status().isOk());
   }
 
   @Test
@@ -191,17 +222,17 @@ class TestRewardReportREST {
   @Test
   void computeDistributionForecastAnonymously() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/forecast").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+                                                                          .contentType(MediaType.APPLICATION_JSON)
+                                                                          .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isForbidden());
   }
 
   @Test
   void computeDistributionForecastSimpleUser() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/forecast").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .with(testSimpleUser()));
+                                                                          .contentType(MediaType.APPLICATION_JSON)
+                                                                          .accept(MediaType.APPLICATION_JSON)
+                                                                          .with(testSimpleUser()));
     response.andExpect(status().isForbidden());
   }
 
@@ -246,32 +277,35 @@ class TestRewardReportREST {
   @Test
   void sendRewardsAnonymously() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON));
+                                                                      .contentType(MediaType.APPLICATION_JSON)
+                                                                      .accept(MediaType.APPLICATION_JSON));
     response.andExpect(status().isForbidden());
   }
 
   @Test
   void sendRewardsSimpleUser() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).with(testSimpleUser()));
+                                                                      .contentType(MediaType.APPLICATION_JSON)
+                                                                      .accept(MediaType.APPLICATION_JSON)
+                                                                      .with(testSimpleUser()));
     response.andExpect(status().isForbidden());
   }
 
   @Test
   void sendRewardsAdmin() throws Exception {
     ResultActions response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).with(testAdminUser()));
+                                                                      .contentType(MediaType.APPLICATION_JSON)
+                                                                      .accept(MediaType.APPLICATION_JSON)
+                                                                      .with(testAdminUser()));
     verify(rewardReportService, times(1)).sendRewards(any(LocalDate.class), anyString());
     response.andExpect(status().isOk());
 
     // When
     doThrow(new IllegalAccessException()).when(rewardReportService).sendRewards(any(LocalDate.class), anyString());
     response = mockMvc.perform(post(REST_PATH + "/send").content(asJsonString(rewardPeriod()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON).with(testAdminUser()));
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .accept(MediaType.APPLICATION_JSON)
+                                                        .with(testAdminUser()));
     response.andExpect(status().isUnauthorized());
 
   }
@@ -344,6 +378,10 @@ class TestRewardReportREST {
 
   private RewardPeriod rewardPeriod() {
     return new RewardPeriod(RewardPeriodType.WEEK, ZoneId.systemDefault().getId(), 1725832800, 1726437600);
+  }
+
+  private WalletReward walletReward() {
+    return new WalletReward(new Wallet(), new TransactionDetail(), 1L, 100.0, 40.0, rewardPeriod());
   }
 
   @SneakyThrows
