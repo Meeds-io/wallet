@@ -192,16 +192,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
-  <changeSet id="reward" author="1.0.0-16">
+  <changeSet author="reward" id="1.0.0-16" onValidationFail="MARK_RAN">
     <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+    </preConditions>
     <sql>UPDATE ADDONS_WALLET_REWARD
-         SET POINTS=(SELECT SUM(POINTS) FROM ADDONS_WALLET_REWARD_PLUGIN WHERE ADDONS_WALLET_REWARD.REWARD_ID = ADDONS_WALLET_REWARD_PLUGIN.REWARD_ID)
+         SET POINTS=(SELECT SUM(POINTS)
+                     FROM ADDONS_WALLET_REWARD_PLUGIN
+                     WHERE ADDONS_WALLET_REWARD.REWARD_ID = ADDONS_WALLET_REWARD_PLUGIN.REWARD_ID)
     </sql>
-
   </changeSet>
 
-  <changeSet id="reward" author="1.0.0-17">
-    <preConditions>
+  <changeSet author="reward" id="1.0.0-17" onValidationFail="MARK_RAN">
+    <preConditions onFail="MARK_RAN">
       <tableExists tableName="ADDONS_WALLET_GAM_TEAM"/>
       <tableExists tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
       <tableExists tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
