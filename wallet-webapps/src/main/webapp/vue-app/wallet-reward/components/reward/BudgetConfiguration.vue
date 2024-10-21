@@ -87,9 +87,21 @@
               {{ $t('wallet.administration.budgetConfiguration.timeZone.title') }}
             </v-list-item-title>
           </v-list-item-content>
-          <v-list-item-action class="ma-auto font-weight-bold pe-1">
-            {{ periodDatesDisplay }}
-          </v-list-item-action>
+
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <div
+                v-bind="attrs"
+                v-on="on">
+                <v-list-item-action class="ma-auto font-weight-bold pe-1">
+                  {{ periodDatesDisplay }}
+                </v-list-item-action>
+              </div>
+            </template>
+            <span>
+              {{ periodDatesDisplayTooltip }}
+            </span>
+          </v-tooltip>
         </v-list-item>
         <v-list-item>
           <v-list-item-content>
@@ -172,15 +184,27 @@ export default {
     periodDatesDisplay() {
       if (!this.rewardPeriod) {
         return '';
+      } else {
+        return this.$t(`wallet.administration.budgetConfiguration.${this.periodType.toLowerCase()}.periodDates`);
       }
-      const startDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.startDateInSeconds * 1000), this.dateformat, eXo.env.portal.language);
-      const endDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.endDateInSeconds * 1000 - 1), this.dateformat, eXo.env.portal.language);
-      return `${startDateFormatted} ${this.$t('exoplatform.wallet.label.to')} ${endDateFormatted}`;
+    },
+    periodDatesDisplayTooltip() {
+      if (!this.rewardPeriod) {
+        return '';
+      } else {
+        const dateFormat =  this.periodType === 'WEEK' ? this.weekDateformat : this.dateformat;
+        const startDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.startDateInSeconds * 1000), dateFormat, eXo.env.portal.language);
+        const endDateFormatted = this.$dateUtil.formatDateObjectToDisplay(new Date(this.endDateInSeconds * 1000 - 1), dateFormat, eXo.env.portal.language);
+        return this.$t(`wallet.administration.budgetConfiguration.${this.periodType.toLowerCase()}.periodDatesTooltip`, {
+          0: startDateFormatted,
+          1: endDateFormatted,
+        });
+      }
     },
     currentDate() {
       return this.$dateUtil.getISODate(new Date());
     },
-    dateformat() {
+    weekDateformat() {
       return this.timeZone && {
         year: 'numeric',
         month: 'short',
@@ -193,6 +217,17 @@ export default {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      };
+    },
+    dateformat() {
+      return this.timeZone && {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short',
+        timeZone: this.timeZone,
+      } || {
         hour: '2-digit',
         minute: '2-digit',
       };
