@@ -491,10 +491,7 @@ public class WalletUtils {
       if (space == null) {
         space = spaceService.getSpaceByDisplayName(id);
         if (space == null) {
-          space = spaceService.getSpaceByUrl(id);
-          if (space == null) {
-            space = spaceService.getSpaceById(id);
-          }
+          space = spaceService.getSpaceById(id);
         }
       }
     }
