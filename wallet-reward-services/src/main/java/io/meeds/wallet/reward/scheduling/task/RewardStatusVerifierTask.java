@@ -70,7 +70,7 @@ public class RewardStatusVerifierTask {
           // progress
           RewardReport rewardReport = rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate());
           if (rewardReport != null) {
-            if (rewardReport.isCompletelyProceeded()) {
+            if (rewardReport.isCompletelyProcessed()) {
               listenerService.broadcast(REWARD_SUCCESS_EVENT_NAME, rewardReport, null);
               rewardReportService.saveRewardReport(rewardReport);
             } else if (rewardReport.getPendingTransactionCount() == 0 && rewardReport.getTokensSent() == 0) {

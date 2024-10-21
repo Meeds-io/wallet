@@ -88,6 +88,7 @@ class WalletRewardReportStorageTest {
       when(rewardDAO.count()).thenReturn(1L);
       when(rewardDAO.countWalletRewardEntitiesByIdentityId(IDENTITY_ID)).thenReturn(1.0);
       when(rewardDAO.findRewardsByPeriodId(REWARD_ID)).thenReturn(List.of(rewardEntity));
+      when(rewardDAO.findWalletRewardsByPeriodIdAndStatus(REWARD_PERIOD_ID, true, PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
       return rewardEntity;
     });
     doAnswer(invocation -> {
@@ -122,7 +123,7 @@ class WalletRewardReportStorageTest {
   @Test
   void countRewards() {
     // Given
-    RewardReport rewardReport = createRewardReportInstance();
+    RewardReport rewardReport = createRewardReportInstance(true);
 
     // When
     walletRewardReportStorage.saveRewardReport(rewardReport);
@@ -134,7 +135,7 @@ class WalletRewardReportStorageTest {
   @Test
   void listRewards() {
     // Given
-    RewardReport rewardReport = createRewardReportInstance();
+    RewardReport rewardReport = createRewardReportInstance(true);
 
     // When
     walletRewardReportStorage.saveRewardReport(rewardReport);
@@ -151,7 +152,17 @@ class WalletRewardReportStorageTest {
     assertNull(walletRewardReportStorage.getRewardReport(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
 
     // Given
-    RewardReport rewardReport = createRewardReportInstance();
+    RewardReport rewardReport = createRewardReportInstance(true);
+
+    // When
+    walletRewardReportStorage.saveRewardReport(rewardReport);
+
+    // Then
+    assertNotNull(walletRewardReportStorage.getRewardReportByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault()));
+    assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
+
+    // Given
+    rewardReport = createRewardReportInstance(false);
 
     // When
     walletRewardReportStorage.saveRewardReport(rewardReport);
@@ -164,7 +175,7 @@ class WalletRewardReportStorageTest {
   @Test
   void findRewardPeriodsByStatus() {
     // Given
-    RewardReport rewardReport = createRewardReportInstance();
+    RewardReport rewardReport = createRewardReportInstance(true);
 
     // When
     walletRewardReportStorage.saveRewardReport(rewardReport);
@@ -173,7 +184,18 @@ class WalletRewardReportStorageTest {
     assertNotNull(walletRewardReportStorage.findRewardPeriodsByStatus(RewardStatus.SUCCESS));
   }
 
-  protected RewardReport createRewardReportInstance() {
+  @Test
+  void findWalletRewardsByPeriodIdAndStatus() {
+    // Given
+    RewardReport rewardReport = createRewardReportInstance(false);
+
+    walletRewardReportStorage.saveRewardReport(rewardReport);
+
+    // Then
+    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodIdAndStatus(REWARD_PERIOD_ID, true, ZoneId.systemDefault(), PAGEABLE));
+  }
+
+  protected RewardReport createRewardReportInstance(boolean isSucceeded) {
     Wallet wallet = newWallet(IDENTITY_ID);
     Wallet wallet4 = newWallet(4L);
     Wallet wallet5 = newWallet(5L);
@@ -184,7 +206,7 @@ class WalletRewardReportStorageTest {
     rewardReport.setParticipationsCount(10);
     Set<WalletReward> walletRewards = new HashSet<>();
     TransactionDetail transactionDetail = new TransactionDetail();
-    transactionDetail.setSucceeded(true);
+    transactionDetail.setSucceeded(isSucceeded);
     walletRewards.add(new WalletReward(wallet, transactionDetail, 1L, 100, 10, rewardPeriod));
     walletRewards.add(new WalletReward(wallet4, transactionDetail, 4L, 200, 50, rewardPeriod));
     walletRewards.add(new WalletReward(wallet5, transactionDetail, 5L, 300, 40, rewardPeriod));
