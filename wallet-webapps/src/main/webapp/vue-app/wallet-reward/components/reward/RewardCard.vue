@@ -45,7 +45,7 @@
         <span class="text-header font-weight-light">{{ rangeDateTimeTitle }}</span>
       </v-card-title>
       <template v-if="isValid">
-        <template v-if="hasConfiguredBudget || completelyProceeded">
+        <template v-if="hasConfiguredBudget || completelyProcessed">
           <v-card-title class="px-2 py-1">
             <v-icon
               :class="statusIconClass"
@@ -139,8 +139,8 @@ export default {
     },
   }),
   computed: {
-    completelyProceeded() {
-      return this.rewardReport?.completelyProceeded;
+    completelyProcessed() {
+      return this.rewardReport?.completelyProcessed;
     },
     isNotPastPeriod() {
       return !this.period || this.period.endDateInSeconds > this.currentTimeInSeconds;
@@ -157,7 +157,7 @@ export default {
           message: this.$t('wallet.administration.rewardCard.status.inPeriod'),
         };
       }
-      if (!this.completelyProceeded) {
+      if (!this.completelyProcessed) {
         return {
           icon: 'fas fa-exclamation-triangle',
           iconClass: null,
@@ -217,7 +217,7 @@ export default {
       return Number.isFinite(Number(this.tokensSent)) ? Math.round(this.tokensSent) : 0;
     },
     budget() {
-      return this.completelyProceeded ? `${this.formatedTokensSent} MEED` : (this.hasConfiguredBudget ? `${this.formatedTokensToSend} MEED` : '-');
+      return this.completelyProcessed ? `${this.formatedTokensSent} MEED` : (this.hasConfiguredBudget ? `${this.formatedTokensToSend} MEED` : '-');
     },
     period() {
       return this.rewardReport?.period;

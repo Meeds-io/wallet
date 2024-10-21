@@ -40,6 +40,6 @@ public class RewardReportStatus {
 
   private double       tokensToSend;
 
-  private boolean      completelyProceeded;
+  private boolean      completelyProcessed;
 
 }

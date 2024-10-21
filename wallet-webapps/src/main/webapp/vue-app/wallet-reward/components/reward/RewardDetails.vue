@@ -41,7 +41,7 @@
       </v-card>
       <v-spacer />
       <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
-      <template v-if="!completelyProceeded">
+      <template v-if="!completelyProcessed">
         <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center">
           <v-icon
             color="warning"
@@ -104,7 +104,7 @@
           :reward="item"
           :contract-details="contractDetails"
           :token-symbol="tokenSymbol"
-          :completely-proceeded="completelyProceeded"
+          :completely-processed="completelyProcessed"
           :transaction-ether-scan-link="transactionEtherScanLink"
           @open-contribution-details="openContributionDetails" />
       </template>
@@ -236,8 +236,8 @@ export default {
       return new window.Intl.DateTimeFormat(this.lang, this.dateFormat)
         .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
     },
-    completelyProceeded() {
-      return this.rewardReport?.completelyProceeded;
+    completelyProcessed() {
+      return this.rewardReport?.completelyProcessed;
     },
     endDateInSeconds() {
       return this.period?.endDateInSeconds;

@@ -31,7 +31,6 @@ import java.util.List;
 
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
-import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

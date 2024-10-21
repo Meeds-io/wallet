@@ -165,7 +165,7 @@ public class WalletRewardReportStorage {
     rewardPeriodEntity.setEndTime(period.getEndDateInSeconds());
     rewardPeriodEntity.setTimeZone(period.getTimeZone());
 
-    if (rewardReport.isCompletelyProceeded()) {
+    if (rewardReport.isCompletelyProcessed()) {
       rewardPeriodEntity.setStatus(RewardStatus.SUCCESS);
     } else if (rewardReport.getPendingTransactionCount() > 0) { // Always
                                                                 // pending if

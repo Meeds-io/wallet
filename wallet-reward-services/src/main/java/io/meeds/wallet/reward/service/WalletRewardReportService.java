@@ -651,7 +651,7 @@ public class WalletRewardReportService implements RewardReportService {
                                   achievementsCount,
                                   rewardReport.getTokensSent(),
                                   rewardReport.getTokensToSend(),
-                                  CollectionUtils.isNotEmpty(rewardReport.getRewards()) && rewardReport.isCompletelyProceeded());
+                                  CollectionUtils.isNotEmpty(rewardReport.getRewards()) && rewardReport.isCompletelyProcessed());
   }
 
 }

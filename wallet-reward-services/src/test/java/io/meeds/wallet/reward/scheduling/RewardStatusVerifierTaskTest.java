@@ -76,7 +76,7 @@ class RewardStatusVerifierTaskTest {
     when(rewardReportService.getRewardPeriodsInProgress()).thenReturn(rewardPeriodsInProgress);
 
     RewardReport rewardReport = mock(RewardReport.class);
-    when(rewardReport.isCompletelyProceeded()).thenReturn(true);
+    when(rewardReport.isCompletelyProcessed()).thenReturn(true);
 
     when(rewardReportService.computeRewards(any())).thenReturn(rewardReport);
 
