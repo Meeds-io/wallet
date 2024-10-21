@@ -18,19 +18,13 @@
  */
 package io.meeds.wallet.reward.listener;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import io.meeds.wallet.model.*;
-import io.meeds.wallet.reward.service.RewardReportService;
 import io.meeds.wallet.reward.service.RewardSettingsService;
+import io.meeds.wallet.reward.service.WalletRewardReportService;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,11 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
 
-import io.meeds.analytics.model.StatisticData;
-import io.meeds.analytics.utils.AnalyticsUtils;
-
 import static io.meeds.wallet.reward.service.WalletRewardSettingsService.REWARD_SETTINGS_UPDATED;
-import static io.meeds.wallet.utils.RewardUtils.REWARD_REPORT_NOTIFICATION_PARAM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -50,7 +40,7 @@ import static org.mockito.Mockito.*;
 class RewardReportUpdateListenerTest {
 
   @MockBean
-  private RewardReportService                rewardReportService;
+  private WalletRewardReportService          rewardReportService;
 
   @MockBean
   private RewardSettingsService              rewardSettingsService;
@@ -66,27 +56,50 @@ class RewardReportUpdateListenerTest {
 
   @Test
   void onEvent() {
-    RewardPeriod rewardPeriod = mock(RewardPeriod.class);
-    when(rewardPeriod.getStartDateInSeconds()).thenReturn(1609459200L);
-    when(rewardPeriod.getEndDateInSeconds()).thenReturn(1612137600L);
-    when(rewardPeriod.getTimeZone()).thenReturn("UTC");
-    when(rewardPeriod.getRewardPeriodType()).thenReturn(RewardPeriodType.WEEK);
-    when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
-
     when(event.getEventName()).thenReturn(REWARD_SETTINGS_UPDATED);
-    when(rewardReportService.getRewardPeriodsNotSent()).thenReturn(List.of(rewardPeriod));
-    RewardReport rewardReport = mock(RewardReport.class);
 
-    when(rewardReport.getParticipationsCount()).thenReturn(0);
-    when(rewardReportService.computeRewards(rewardPeriod.getPeriodMedianDate())).thenReturn(rewardReport);
+    RewardPeriod rewardPeriod1 = mock(RewardPeriod.class);
+    RewardPeriod rewardPeriod2 = mock(RewardPeriod.class);
+    when(rewardPeriod1.getId()).thenReturn(1L);
+    when(rewardPeriod2.getId()).thenReturn(2L);
+    List<RewardPeriod> rewardPeriods = Arrays.asList(rewardPeriod1, rewardPeriod2);
+    when(rewardReportService.getRewardPeriodsNotSent()).thenReturn(rewardPeriods);
+
+    Map<Long, Boolean> rewardSettingChangedMap = new HashMap<>();
+    when(rewardReportService.getRewardSettingChanged()).thenReturn(rewardSettingChangedMap);
 
     rewardReportUpdateListener.onEvent(event);
-    verify(rewardReportService, times(0)).saveRewardReport(rewardReport);
 
+    Map<Long, Boolean> expectedMap = new HashMap<>();
+    expectedMap.put(1L, true);
+    expectedMap.put(2L, true);
 
+    verify(rewardReportService).getRewardPeriodsNotSent();
+    verify(rewardReportService).getRewardSettingChanged();
+    assertEquals(expectedMap, rewardSettingChangedMap);
 
-    when(rewardReport.getParticipationsCount()).thenReturn(5);
-    rewardReportUpdateListener.onEvent(event);
-    verify(rewardReportService, times(1)).saveRewardReport(rewardReport);
+    when(event.getEventName()).thenReturn("OTHER_EVENT");
+
+    RewardSettings rewardSettings = mock(RewardSettings.class);
+    when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+    RewardPeriod rewardPeriod = mock(RewardPeriod.class);
+    when(rewardPeriod.getId()).thenReturn(3L);
+    try (MockedStatic<RewardPeriod> mockedRewardPeriod = mockStatic(RewardPeriod.class)) {
+      mockedRewardPeriod.when(() -> RewardPeriod.getCurrentPeriod(rewardSettings)).thenReturn(rewardPeriod);
+
+      rewardSettingChangedMap = new HashMap<>();
+      when(rewardReportService.getRewardSettingChanged()).thenReturn(rewardSettingChangedMap);
+
+      rewardReportUpdateListener.onEvent(event);
+
+      rewardSettingChangedMap.put(3L, true);
+
+      expectedMap = new HashMap<>();
+      expectedMap.put(3L, true);
+
+      verify(rewardSettingsService).getSettings();
+      verify(rewardReportService, times(2)).getRewardSettingChanged();
+      assertEquals(expectedMap, rewardSettingChangedMap);
+    }
   }
 }

@@ -19,6 +19,7 @@ package io.meeds.wallet.reward.service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import io.meeds.wallet.model.*;
@@ -90,6 +91,14 @@ public interface RewardReportService {
    * @return {@link RewardPeriod}
    */
   RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date);
+
+  /**
+   * Return the stored reward period by id
+   *
+   * @param rewardPeriodId reward period id
+   * @return {@link RewardPeriod}
+   */
+  RewardPeriod getRewardPeriodById(long rewardPeriodId);
 
   /**
    * Retrieve a {@link RewardReport} corresponding to a period identified by its id
@@ -176,4 +185,19 @@ public interface RewardReportService {
    * @param zoneId Wallet reward status
    */
   Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable);
+
+
+  /**
+   * Set isChanged data map for periods not sent
+   *
+   * @param updatedSettings map of isChanged data for periods not sent
+   *
+   */
+  void setRewardSettingChanged(Map<Long, Boolean> updatedSettings);
+
+  /**
+   * Gets isChanged data map for periods not sent
+   *
+   */
+  Map<Long, Boolean> getRewardSettingChanged();
 }

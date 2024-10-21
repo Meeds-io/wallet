@@ -37,10 +37,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import io.meeds.gamification.constant.RealizationStatus;
 import io.meeds.wallet.model.*;
+import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -85,6 +87,9 @@ public class WalletRewardReportService implements RewardReportService {
   @Setter
   private boolean                   rewardSendingInProgress;
 
+  @Getter
+  public Map<Long, Boolean>         rewardSettingChanged = new ConcurrentHashMap<>();
+
   public WalletRewardReportService(WalletAccountService walletAccountService,
                                    WalletTokenAdminService walletTokenAdminService,
                                    RewardSettingsService rewardSettingsService,
@@ -114,8 +119,8 @@ public class WalletRewardReportService implements RewardReportService {
     if (rewardReport.getPendingTransactionCount() > 0) {
       String startDateFormatted = rewardReport.getPeriod().getStartDateFormatted(Locale.getDefault().getLanguage());
       String endDateFormatted = rewardReport.getPeriod().getEndDateFormatted(Locale.getDefault().getLanguage());
-      throw new IllegalStateException("There are some pending transactions for rewards of period between " + startDateFormatted +
-          " and " + endDateFormatted + ", thus no reward sending is allowed until the transactions finishes");
+      throw new IllegalStateException("There are some pending transactions for rewards of period between " + startDateFormatted
+          + " and " + endDateFormatted + ", thus no reward sending is allowed until the transactions finishes");
     }
 
     String adminWalletAddress = getTokenAdminService().getAdminWalletAddress();
@@ -127,8 +132,7 @@ public class WalletRewardReportService implements RewardReportService {
     Iterator<WalletReward> rewardedWalletsIterator = rewards.iterator();
     while (rewardedWalletsIterator.hasNext()) {
       WalletReward walletReward = rewardedWalletsIterator.next();
-      if (walletReward == null || !walletReward.isEnabled()
-          || walletReward.getAmount() == 0
+      if (walletReward == null || !walletReward.isEnabled() || walletReward.getAmount() == 0
           || (walletReward.getTransaction() != null
               && (walletReward.getTransaction().isPending() || walletReward.getTransaction().isSucceeded()))) {
         rewardedWalletsIterator.remove();
@@ -136,8 +140,8 @@ public class WalletRewardReportService implements RewardReportService {
       }
 
       if (walletReward.getAmount() < 0) {
-        throw new IllegalStateException("Can't send reward transaction for wallet of " + walletReward.getWallet().getType() +
-            " " + walletReward.getWallet().getId() + " with a negative amount" + walletReward.getAmount());
+        throw new IllegalStateException("Can't send reward transaction for wallet of " + walletReward.getWallet().getType() + " "
+            + walletReward.getWallet().getId() + " with a negative amount" + walletReward.getAmount());
       }
       // If the tokens are already sent, then ignore sending rewards to user
       // If the sent transaction is pending, an exception is thrown ate the
@@ -197,9 +201,17 @@ public class WalletRewardReportService implements RewardReportService {
   @ExoTransactional
   public RewardReportStatus getReport(RewardPeriod rewardPeriod) {
     RewardReport rewardReport = getRewardReport(rewardPeriod.getPeriodMedianDate());
-    return buildReportStatus(rewardReport , rewardPeriod);
+    RewardPeriod storedRewardPeriod = getRewardPeriod(rewardPeriod.getRewardPeriodType(), rewardPeriod.getPeriodMedianDate());
+    if (storedRewardPeriod != null && storedRewardPeriod.getId() > 0 && getRewardSettingChanged() != null
+        && Boolean.TRUE.equals(getRewardSettingChanged().get(storedRewardPeriod.getId()))) {
+      rewardReport = computeRewards(rewardPeriod.getPeriodMedianDate());
+      saveRewardReport(rewardReport);
+      Map<Long, Boolean> rewardSettingChangedMap = getRewardSettingChanged();
+      rewardSettingChangedMap.put(storedRewardPeriod.getId(), false);
+      setRewardSettingChanged(rewardSettingChangedMap);
+    }
+    return buildReportStatus(rewardReport, rewardPeriod);
   }
-
 
   @Override
   @ExoTransactional
@@ -275,6 +287,11 @@ public class WalletRewardReportService implements RewardReportService {
   public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     return rewardReportStorage.getRewardPeriod(periodType, date, rewardSettings.zoneId());
+  } 
+  
+  @Override
+  public RewardPeriod getRewardPeriodById(long rewardPeriodId) {
+    return rewardReportStorage.getRewardPeriodById(rewardPeriodId);
   }
 
   @Override
@@ -379,6 +396,10 @@ public class WalletRewardReportService implements RewardReportService {
     return rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, zoneId, pageable);
   }
 
+  public void setRewardSettingChanged(Map<Long, Boolean> updatedSettings) {
+    rewardSettingChanged.putAll(updatedSettings);
+  }
+
   private RewardPeriod getRewardPeriod(LocalDate date) {
     RewardSettings rewardSettings = rewardSettingsService.getSettings();
     RewardPeriodType periodType = rewardSettings.getPeriodType();
@@ -427,7 +448,7 @@ public class WalletRewardReportService implements RewardReportService {
     for (Wallet wallet : wallets) {
       List<WalletReward> walletRewardList = walletRewards.stream()
                                                          .filter(wr -> wallet != null && wr.getWallet() != null
-                                                                       && wr.getIdentityId() == wallet.getTechnicalId())
+                                                             && wr.getIdentityId() == wallet.getTechnicalId())
                                                          .toList();
       WalletReward walletReward =
                                 walletRewardList.stream()
@@ -607,7 +628,7 @@ public class WalletRewardReportService implements RewardReportService {
     realizationFilter.setEarnerType(IdentityType.USER);
     realizationFilter.setStatus(RealizationStatus.ACCEPTED);
     int achievementsCount = realizationService.countRealizationsByFilter(realizationFilter);
-    if (rewardReport == null ) {
+    if (rewardReport == null) {
       if (participantsCount > 0) {
         rewardReport = computeRewards(rewardPeriod.getPeriodMedianDate());
         saveRewardReport(rewardReport);

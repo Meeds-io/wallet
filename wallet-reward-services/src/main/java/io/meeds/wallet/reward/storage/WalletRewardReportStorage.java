@@ -100,6 +100,11 @@ public class WalletRewardReportStorage {
     return toDTO(rewardPeriodEntity);
   }
 
+  public RewardPeriod getRewardPeriodById(long rewardPeriodId) {
+    WalletRewardPeriodEntity rewardPeriodEntity = rewardPeriodDAO.findById(rewardPeriodId).orElse(null);
+    return toDTO(rewardPeriodEntity);
+  }
+
   private RewardReport getRewardReport(WalletRewardPeriodEntity rewardPeriodEntity, ZoneId zoneId) {
     if (rewardPeriodEntity == null) {
       return null;
