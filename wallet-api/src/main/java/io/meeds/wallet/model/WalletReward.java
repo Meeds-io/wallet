@@ -30,23 +30,26 @@ import lombok.EqualsAndHashCode.Exclude;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WalletReward implements Serializable {
-  private static final long       serialVersionUID = -4328398843364453949L;
+  private static final long serialVersionUID = -4328398843364453949L;
 
-  private Wallet                  wallet;
-
-  @Exclude
-  private TransactionDetail       transaction;
-
-  private long                    identityId;
+  private Wallet            wallet;
 
   @Exclude
-  private double                  points;
+  private TransactionDetail transaction;
+
+  private long              identityId;
 
   @Exclude
-  private double                  amount;
+  private double            points;
 
   @Exclude
-  private RewardPeriod            period;
+  private double            amount;
+
+  @Exclude
+  private RewardPeriod      period;
+
+  @Exclude
+  private int               rank;
 
   public long getIdentityId() {
     return wallet == null ? 0 : wallet.getTechnicalId();
