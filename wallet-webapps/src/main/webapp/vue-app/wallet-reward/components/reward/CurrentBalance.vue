@@ -81,7 +81,7 @@
             </v-list-item-title>
           </v-list-item-content>
           <v-list-item-action class="d-inline-block ma-auto pe-1">
-            <span class="fundsLabels"> MEED {{ tokenBalance }} </span>
+            <span class="fundsLabels"> MEED {{ tokenBalanceLabel }} </span>
           </v-list-item-action>
         </v-list-item>
         <v-list-item>
@@ -134,11 +134,14 @@ export default {
     tokenBalance() {
       return this.adminWallet?.tokenBalance || 0;
     },
+    tokenBalanceLabel() {
+      return this.walletUtils?.toFixed(this.tokenBalance, 2);
+    },
     etherBalance() {
       return this.adminWallet?.etherBalance || 0;
     },
     etherBalanceLabel() {
-      return `${this.contractDetails?.cryptocurrency} ${this.walletUtils?.toFixed(this.etherBalance)}`;
+      return `${this.contractDetails?.cryptocurrency} ${this.walletUtils?.toFixed(this.etherBalance, 2)}`;
     },
     useWalletAdmin() {
       return this.etherBalance && Number(this.etherBalance) >= 0.002 && this.tokenBalance && Number(this.tokenBalance) >= 0.02;

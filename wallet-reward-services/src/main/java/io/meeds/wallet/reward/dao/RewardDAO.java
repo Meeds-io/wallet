@@ -68,4 +68,10 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
       UPDATE Reward rw SET rw.transactionHash = :newHash WHERE rw.transactionHash = :oldHash
       """)
   void replaceRewardTransactions(@Param("oldHash") String oldHash, @Param("newHash") String newHash);
+
+  @Query(value = "SELECT Ranked_Reward.reward_rank FROM ( " +
+          "   SELECT rw.id AS reward_id, RANK() OVER(ORDER BY rw.points DESC) AS reward_rank " +
+          "   FROM Reward rw WHERE rw.period.id = :periodId" +
+          ") Ranked_Reward WHERE Ranked_Reward.reward_id = :id")
+  Integer findRankById(@Param("id") long id, @Param("periodId") long periodId);
 }
