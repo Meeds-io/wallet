@@ -106,7 +106,8 @@
           :token-symbol="tokenSymbol"
           :completely-processed="completelyProcessed"
           :transaction-ether-scan-link="transactionEtherScanLink"
-          @open-contribution-details="openContributionDetails" />
+          @open-contribution-details="openContributionDetails"
+          @open-rewards-details="openRewardsDetails" />
       </template>
     </v-data-table>
     <v-toolbar
@@ -132,6 +133,10 @@
       :to-date-in-second="endDateInSeconds"
       go-back-button
       relative />
+    <wallet-rewards-details-drawer
+      ref="rewardsDetailsDrawer"
+      :wallet-reward="selectedWalletReward"
+      :token-symbol="tokenSymbol" />
   </v-card>
 </template>
 
@@ -172,6 +177,7 @@ export default {
       day: 'numeric',
     },
     walletRewards: [],
+    selectedWalletReward: null,
     status: 'VALID',
     sortBy: 'tokensToSend',
     sortDescending: true,
@@ -364,6 +370,10 @@ export default {
     },
     openContributionDetails(userId) {
       this.$refs?.profileStatsDrawer?.openByIdentityId(userId, this.rewardPeriodType);
+    },
+    openRewardsDetails(walletReward) {
+      this.selectedWalletReward = walletReward;
+      this.$refs?.rewardsDetailsDrawer?.open();
     },
     sortUpdated() {
       if (!this.loading) {
