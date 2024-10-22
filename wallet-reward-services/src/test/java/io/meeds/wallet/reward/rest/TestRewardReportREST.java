@@ -381,7 +381,7 @@ class TestRewardReportREST {
   }
 
   private WalletReward walletReward() {
-    return new WalletReward(new Wallet(), new TransactionDetail(), 1L, 100.0, 40.0, rewardPeriod());
+    return new WalletReward(new Wallet(), new TransactionDetail(), 1L, 100.0, 40.0, rewardPeriod(), 1);
   }
 
   @SneakyThrows
