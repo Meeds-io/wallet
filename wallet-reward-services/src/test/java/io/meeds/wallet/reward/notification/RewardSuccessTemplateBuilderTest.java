@@ -81,7 +81,7 @@ public class RewardSuccessTemplateBuilderTest extends BaseExoTestCase {
         transaction.setHash("hash");
         transaction.setContractAmount(2);
         transaction.setPending(true);
-        rewards.add(new WalletReward(null, transaction, 0, 0, 0, null));
+        rewards.add(new WalletReward(null, transaction, 0, 0, 0, null, 1));
       }
       rewardReport.setRewards(rewards);
       ctx.append(REWARD_REPORT_NOTIFICATION_PARAM, rewardReport);
