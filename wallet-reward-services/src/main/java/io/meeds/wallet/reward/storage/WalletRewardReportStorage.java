@@ -283,6 +283,8 @@ public class WalletRewardReportStorage {
       RewardPeriodType rewardPeriodType = periodEntity.getPeriodType();
       ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(periodEntity.getStartTime()), zoneId);
       walletReward.setPeriod(rewardPeriodType.getPeriodOfTime(zonedDateTime));
+      Integer rank = rewardDAO.findRankById(rewardEntity.getId(), periodEntity.getId());
+      walletReward.setRank(rank != null ? rank : 0);
     }
     return walletReward;
   }
