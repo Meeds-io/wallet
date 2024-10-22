@@ -66,7 +66,7 @@ public class RewardSuccessNotificationPluginTest {
         transaction.setHash("hash");
         transaction.setContractAmount(2);
         transaction.setPending(true);
-        rewards.add(new WalletReward(null, transaction, 0, 0, 0, null));
+        rewards.add(new WalletReward(null, transaction, 0, 0, 0, null, 1));
       }
       rewardReport.setRewards(rewards);
 
