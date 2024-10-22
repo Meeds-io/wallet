@@ -41,7 +41,9 @@
         display-no-address />
     </td>
     <td class="text-center">
-      <v-btn icon @click="openContributionDetails">
+      <v-btn
+        text
+        @click="openContributionDetails">
         {{ points }}
       </v-btn>
     </td>
@@ -97,12 +99,16 @@
       </v-tooltip>
     </td>
     <td class="text-center">
-      <span
+      <v-btn
         v-if="amount"
-        :title="$t('exoplatform.wallet.label.amountSent')"
-        class="grey--text text--darken-1">
-        <span class="symbol fundsLabels"> {{ tokenSymbol }} </span>{{ walletUtils.toFixed(amount) }}
-      </span>
+        text
+        @click="openRewardsDetails">
+        <span
+          :title="$t('exoplatform.wallet.label.amountSent')"
+          class="grey--text text--darken-1">
+          <span class="symbol fundsLabels"> {{ tokenSymbol }} </span>{{ walletUtils.toFixed(amount) }}
+        </span>
+      </v-btn>
       <span
         v-else
         :title="$t('exoplatform.wallet.label.noRewardsForPeriod')"
@@ -293,6 +299,9 @@ export default {
     },
     openContributionDetails() {
       this.$emit('open-contribution-details', this.walletTechnicalId);
+    },
+    openRewardsDetails() {
+      this.$emit('open-rewards-details', this.reward);
     }
   }
 };
