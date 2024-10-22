@@ -9,6 +9,7 @@ import BudgetConfigurationDrawer from './components/reward/BudgetConfigurationDr
 import DistributionForecast from './components/reward/DistributionForecast.vue';
 import TimeZoneSelectBox from './components/reward/TimeZoneSelectBox.vue';
 import RewardCardMaskContent from './components/reward/RewardCardMaskContent.vue';
+import RewardsDetailsDrawer from './components/reward/RewardsDetailsDrawer.vue';
 
 const components = {
   'wallet-reward-app': RewardApp,
@@ -16,6 +17,7 @@ const components = {
   'wallet-reward-card': RewardCard,
   'wallet-reward-details': RewardDetails,
   'wallet-reward-details-item': RewardDetailsItem,
+  'wallet-rewards-details-drawer': RewardsDetailsDrawer,
   'wallet-current-balance': CurrentBalance,
   'wallet-budget-configuration': BudgetConfiguration,
   'wallet-budget-configuration-drawer': BudgetConfigurationDrawer,
