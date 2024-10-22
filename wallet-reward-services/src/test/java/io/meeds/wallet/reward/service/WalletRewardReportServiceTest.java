@@ -300,9 +300,9 @@ public class WalletRewardReportServiceTest { // NOSONAR
       Set<WalletReward> walletRewards = new HashSet<>();
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setSucceeded(true);
-      walletRewards.add(new WalletReward(wallet, transactionDetail, 1L, 100, 10, rewardPeriod));
-      walletRewards.add(new WalletReward(wallet4, transactionDetail, 4L, 200, 50, rewardPeriod));
-      walletRewards.add(new WalletReward(wallet5, transactionDetail, 5L, 300, 40, rewardPeriod));
+      walletRewards.add(new WalletReward(wallet, transactionDetail, 1L, 100, 10, rewardPeriod, 3));
+      walletRewards.add(new WalletReward(wallet4, transactionDetail, 4L, 200, 50, rewardPeriod, 2));
+      walletRewards.add(new WalletReward(wallet5, transactionDetail, 5L, 300, 40, rewardPeriod, 1));
       rewardReport.setRewards(walletRewards);
       when(rewardReportStorage.getRewardReport(newSettings.getPeriodType(), date, newSettings.zoneId())).thenReturn(rewardReport);
 
