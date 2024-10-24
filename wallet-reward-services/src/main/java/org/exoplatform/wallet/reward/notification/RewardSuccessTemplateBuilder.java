@@ -16,7 +16,11 @@
  */
 package org.exoplatform.wallet.reward.notification;
 
-import static org.exoplatform.wallet.utils.RewardUtils.*;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_END_PERIOD_DATE_FORMATTED;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE;
+import static org.exoplatform.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE_FORMATTED;
+import static org.exoplatform.wallet.utils.RewardUtils.formatTime;
 import static org.exoplatform.wallet.utils.WalletUtils.AMOUNT;
 import static org.exoplatform.wallet.utils.WalletUtils.formatNumber;
 
@@ -29,7 +33,9 @@ import org.apache.commons.codec.binary.StringUtils;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
-import org.exoplatform.commons.api.notification.model.*;
+import org.exoplatform.commons.api.notification.model.ChannelKey;
+import org.exoplatform.commons.api.notification.model.MessageInfo;
+import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.service.template.TemplateContext;
 import org.exoplatform.commons.notification.template.TemplateUtils;
 import org.exoplatform.container.ExoContainer;
