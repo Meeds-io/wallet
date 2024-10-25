@@ -48,7 +48,8 @@
         
       ],
       "permissions":[
-        "*:/platform/users"
+        "*:/platform/administrators",
+        "*:/platform/web-contributors"
       ],
       "system":true
     }
