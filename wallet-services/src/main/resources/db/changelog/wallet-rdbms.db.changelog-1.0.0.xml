@@ -24,6 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <property name="autoIncrement" value="false" dbms="oracle,postgresql"/>
 
   <changeSet author="wallet" id="1.3.0-1">
+    <validCheckSum>9:65b7b289fe5ce39c87dbcc00daa99f7d</validCheckSum>
     <createTable tableName="ADDONS_WALLET_ACCOUNT">
       <column name="IDENTITY_ID" type="BIGINT">
         <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_IDENTITY_ID"/>
@@ -40,13 +41,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <column name="ENABLED" type="BOOLEAN"/>
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
   <changeSet author="wallet" id="1.3.0-2">
     <validCheckSum>7:1b92fcacd4904402b5fc850db10ea561</validCheckSum>
     <validCheckSum>7:f4f8b6ffb1575004cfcb4ac607382fa9</validCheckSum>
+    <validCheckSum>9:e38b6eab36e9fae4925574c37f623651</validCheckSum>
     <createTable tableName="ADDONS_WALLET_TRANSACTION">
       <column name="TRANSACTION_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
         <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_TRANSACTION_ID"/>
@@ -74,7 +76,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <column name="CREATED_DATE" type="BIGINT" />
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
@@ -108,6 +110,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </changeSet>
 
   <changeSet author="wallet" id="1.3.0-6">
+    <validCheckSum>9:5446a1e5b198106a5ba38ebfdeef39a2</validCheckSum>
     <createTable tableName="ADDONS_WALLET_LABEL">
       <column name="LABEL_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
         <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_LABEL_ID"/>
@@ -121,7 +124,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </column>
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
@@ -130,6 +133,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </changeSet>
 
   <changeSet author="wallet" id="1.3.0-8">
+    <validCheckSum>9:f7ac6241876aa72fe66d6bd909b8036b</validCheckSum>
     <createTable tableName="ADDONS_WALLET_KEY">
       <column name="KEY_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
         <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_KEY_ID"/>
@@ -142,7 +146,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </column>
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
@@ -169,6 +173,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </changeSet>
 
   <changeSet author="wallet" id="1.3.0-15">
+    <validCheckSum>9:22beb2437192333c6b9d1d21aa3b73d2</validCheckSum>
     <createTable tableName="ADDONS_WALLET_BLOCKCHAIN_STATE">
       <column name="BLOCKCHAIN_STATE_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
         <constraints nullable="false" primaryKey="true" primaryKeyName="PK_WALLET_BLOCKCHAIN_STATE_ID"/>
@@ -188,7 +193,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <column name="IS_INITIALIZED" type="BOOLEAN" defaultValueBoolean="false" />
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
@@ -280,6 +285,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   </changeSet>
 
   <changeSet author="wallet" id="1.3.0-30">
+    <validCheckSum>9:75d2d43de293219b3c3eb0f7eef4a5d0</validCheckSum>
     <createTable tableName="ADDONS_WALLET_ACCOUNT_BACKUP">
       <column name="WALLET_BACKUP_ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
         <constraints primaryKey="true" nullable="false" primaryKeyName="PK_WALLET_ACCOUNT_BACKUP_ID" />
@@ -296,7 +302,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       </column>
     </createTable>
     <modifySql dbms="mysql">
-      <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+      <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
     </modifySql>
   </changeSet>
 
@@ -305,5 +311,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <column name="DROPPED" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
   </changeSet>
-
+  <changeSet author="wallet" id="1.3.0-32">
+    <sql dbms="mysql">
+      ALTER TABLE ADDONS_WALLET_ACCOUNT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      ALTER TABLE ADDONS_WALLET_TRANSACTION CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      ALTER TABLE ADDONS_WALLET_LABEL CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      ALTER TABLE ADDONS_WALLET_KEY CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      ALTER TABLE ADDONS_WALLET_BLOCKCHAIN_STATE CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      ALTER TABLE ADDONS_WALLET_ACCOUNT_BACKUP CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+    </sql>
+  </changeSet>
 </databaseChangeLog>
