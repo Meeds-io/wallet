@@ -52,8 +52,10 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
       """)
   Double countWalletRewardsPointsByPeriodIdAndStatus(@Param("periodId") long periodId,
                                                      @Param("isValid") boolean isValid);
-
-  List<WalletRewardEntity> findWalletRewardEntitiesByIdentityId(long identityId, Pageable pageable);
+ @Query("""
+          SELECT rw FROM Reward rw JOIN rw.period WHERE rw.identityId = :identityId ORDER BY rw.period.startTime DESC, rw.period.endTime ASC
+      """)
+  List<WalletRewardEntity> findWalletRewardEntitiesByIdentityId(@Param("identityId") long identityId, Pageable pageable);
 
   double countWalletRewardEntitiesByIdentityId(long identityId);
 
