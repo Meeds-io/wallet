@@ -188,6 +188,22 @@ export function computeRewardsByUser(date) {
   });
 }
 
+export function exportXlsxUrl(paramsObj) {
+  const formData = new FormData();
+  if (paramsObj) {
+    Object.keys(paramsObj).forEach(key => {
+      const value = paramsObj[key];
+      if (window.Array && Array.isArray && Array.isArray(value)) {
+        value.forEach(val => formData.append(key, val));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  }
+  const params = new URLSearchParams(formData).toString();
+  return `/wallet/rest/reward/export?${params}`;
+}
+
 export function getRewardsByUser(limit) {
   return fetch(`/wallet/rest/reward/list?limit=${limit || 10}`, {
     method: 'GET',
