@@ -44,6 +44,8 @@ public class RewardPeriod implements Serializable {
 
   private long              endDateInSeconds;
 
+  private RewardStatus      status;
+
   public RewardPeriod(RewardPeriodType rewardPeriodType) {
     this.rewardPeriodType = rewardPeriodType;
   }
