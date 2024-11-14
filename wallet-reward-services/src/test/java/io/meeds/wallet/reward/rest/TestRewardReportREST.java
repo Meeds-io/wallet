@@ -25,9 +25,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
@@ -185,6 +187,38 @@ class TestRewardReportREST {
                                                                                   .param("status", "VALID")
                                                                                   .param("sortField", "tokensSent")
                                                                                   .param("sortDir", "desc").with(testAdminUser()));
+    response.andExpect(status().isOk());
+  }
+
+  @Test
+  void exportXlsxAnonymously() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/export").param("periodId", "1")
+                                                                       .param("status", "VALID")
+                                                                       .param("fileName", "fileName"));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void exportXlsxSimpleUser() throws Exception {
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/export").param("periodId", "1")
+                                                                       .param("status", "VALID")
+                                                                       .param("fileName", "fileName")
+                                                                       .with(testSimpleUser()));
+    response.andExpect(status().isForbidden());
+  }
+
+  @Test
+  void exportXlsxAdmin() throws Exception {
+    RewardSettings rewardSettings = new RewardSettings();
+    when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+    InputStream inputStream = mock(InputStream.class);
+
+    when(rewardReportService.exportXlsx(1, "VALID", rewardSettings.zoneId(), "fileName", Locale.ENGLISH)).thenReturn(inputStream);
+
+    ResultActions response = mockMvc.perform(get(REST_PATH + "/export").param("periodId", "1")
+                                                                       .param("status", "VALID")
+                                                                       .param("fileName", "fileName")
+                                                                       .with(testAdminUser()));
     response.andExpect(status().isOk());
   }
 
