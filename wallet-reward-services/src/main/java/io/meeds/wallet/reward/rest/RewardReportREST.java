@@ -18,6 +18,7 @@ package io.meeds.wallet.reward.rest;
 
 import static io.meeds.wallet.utils.RewardUtils.timeToSecondsAtDayStart;
 
+import java.io.InputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -26,7 +27,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.ws.rs.core.*;
@@ -48,6 +48,8 @@ import io.meeds.wallet.utils.WalletUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -145,6 +147,40 @@ public class RewardReportREST {
                                                                              rewardSettingsService.getSettings().zoneId(),
                                                                              sortedPageable);
     return assembler.toModel(walletRewards);
+  }
+
+  @GetMapping(path = "export")
+  @Secured("rewarding")
+  @Operation(
+          summary = "Exports wallet rewards for a specified period as an XLSX file",
+          method = "GET",
+          description = "Generates and returns an XLSX file containing wallet rewards data for the specified period.")
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200", description = "Request fulfilled, file download initiated"),
+          @ApiResponse(responseCode = "400", description = "Invalid query input"),
+          @ApiResponse(responseCode = "401", description = "Unauthorized access to export data"),
+          @ApiResponse(responseCode = "500", description = "Internal server error, file export failed")})
+  public ResponseEntity<Resource> exportXlsx(HttpServletRequest request,
+                                             @Parameter(description = "Period id", required = true)
+                                             @RequestParam("periodId")
+                                             long periodId,
+                                             @Parameter(description = "Wallet reward status filtering, possible values: VALId and INVALID. Default value = VALId.")
+                                             @RequestParam(value = "status", defaultValue = "VALID")
+                                             String status,
+                                             @Parameter(description = "Wallet reward exported file name")
+                                             @RequestParam(value = "fileName")
+                                             String fileName) {
+
+    InputStream inputStream = rewardReportService.exportXlsx(periodId,
+                                                             status,
+                                                             rewardSettingsService.getSettings().zoneId(),
+                                                             fileName,
+                                                             request.getLocale());
+    InputStreamResource resource = new InputStreamResource(inputStream);
+    return ResponseEntity.ok()
+                         .header("Content-Disposition", "attachment; filename=" + fileName + ".xlsx")
+                         .header("Content-Type", "application/vnd.ms-excel")
+                         .body(resource);
   }
 
   @PostMapping(path = "forecast")

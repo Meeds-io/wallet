@@ -16,9 +16,11 @@
  */
 package io.meeds.wallet.reward.service;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -208,4 +210,17 @@ public interface RewardReportService {
    *
    */
   Map<Long, Boolean> getRewardSettingChanged();
+
+  /**
+   * Export wallet rewards into an {@link InputStream} containing a file of format
+   * XLS
+   *
+   * @param periodId Reward Period id
+   * @param status Wallet reward status
+   * @param zoneId Wallet reward status
+   * @param fileName fileName to export
+   * @param locale locale
+   * @return {@link InputStream} of a file of format XLS
+   */
+  InputStream exportXlsx(long periodId, String status, ZoneId zoneId, String fileName, Locale locale);
 }
