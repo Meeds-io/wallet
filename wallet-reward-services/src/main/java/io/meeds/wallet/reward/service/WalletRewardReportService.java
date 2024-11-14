@@ -24,13 +24,7 @@ import static io.meeds.wallet.utils.RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSA
 import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_PENDING;
 import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_SUCCESS;
 import static io.meeds.wallet.utils.RewardUtils.formatTime;
-import static io.meeds.wallet.utils.WalletUtils.convertFromDecimals;
-import static io.meeds.wallet.utils.WalletUtils.formatNumber;
-import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
-import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
-import static io.meeds.wallet.utils.WalletUtils.getLocale;
-import static io.meeds.wallet.utils.WalletUtils.getResourceBundleKey;
-import static io.meeds.wallet.utils.WalletUtils.isUserRewardingAdmin;
+import static io.meeds.wallet.utils.WalletUtils.*;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -53,9 +47,8 @@ import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.exoplatform.services.resources.ResourceBundleService;
 import org.springframework.data.domain.Page;
@@ -420,10 +413,7 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
-  public InputStream exportXlsx(long periodId,
-                                String status,
-                                ZoneId zoneId,
-                                String fileName, Locale locale) {
+  public InputStream exportXlsx(long periodId, String status, ZoneId zoneId, String fileName, Locale locale) {
     File temp = null;
     try { // NOSONAR
       temp = createTempFile(fileName);
@@ -488,7 +478,9 @@ public class WalletRewardReportService implements RewardReportService {
       row.createCell(cellIndex++).setCellValue(Utils.getUserFullName(String.valueOf(walletReward.getIdentityId())));
       row.createCell(cellIndex++).setCellValue(walletReward.getWallet().getAddress());
       row.createCell(cellIndex++).setCellValue(walletReward.getPoints());
-      row.createCell(cellIndex++).setCellValue(walletReward.getAmount());
+      double amount = walletReward.getAmount();
+      String amountText = (amount % 1 == 0) ? String.format("MEED %.0f", amount) : String.format("MEED %.2f", amount);
+      row.createCell(cellIndex++).setCellValue(amountText);
       row.createCell(cellIndex++).setCellValue(walletReward.getStatus());
       appendTransactionCells(row, cellIndex, helper, walletReward.getTransaction());
     } catch (Exception e) {
@@ -499,7 +491,12 @@ public class WalletRewardReportService implements RewardReportService {
   private void appendTransactionCells(Row row, int cellIndex, CreationHelper helper, TransactionDetail transaction) {
     if (transaction != null) {
       row.createCell(cellIndex++).setCellValue(helper.createRichTextString(String.valueOf(new Date(transaction.getSentTimestamp()))));
-      row.createCell(cellIndex).setCellValue(transaction.getHash());
+      Cell hashCell = row.createCell(cellIndex);
+      String hashUrl = getTransactionEtherScanLink() + transaction.getHash();
+      hashCell.setCellValue(transaction.getHash());
+      Hyperlink link = helper.createHyperlink(HyperlinkType.URL);
+      link.setAddress(hashUrl);
+      hashCell.setHyperlink(link);
     }
   }
 
