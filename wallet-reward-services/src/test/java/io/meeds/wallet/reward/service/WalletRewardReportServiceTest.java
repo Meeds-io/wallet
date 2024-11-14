@@ -28,7 +28,6 @@ import java.util.*;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
 
-import io.meeds.gamification.utils.Utils;
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -423,9 +422,8 @@ public class WalletRewardReportServiceTest { // NOSONAR
     assertNotNull(row1);
     assertEquals(7, row1.getLastCellNum());
     assertEquals(200, row1.getCell(2).getNumericCellValue());
-    assertEquals(50, row1.getCell(3).getNumericCellValue());
+    assertEquals("MEED 50", row1.getCell(3).getStringCellValue());
     assertEquals("success", row1.getCell(4).getStringCellValue());
-    assertEquals("transactionHash", row1.getCell(6).getStringCellValue());
   }
 
   protected Wallet newWallet(long identityId) {

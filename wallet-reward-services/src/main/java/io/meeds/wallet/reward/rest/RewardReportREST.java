@@ -149,7 +149,7 @@ public class RewardReportREST {
     return assembler.toModel(walletRewards);
   }
 
-  @GetMapping(path = "/export")
+  @GetMapping(path = "export")
   @Secured("rewarding")
   @Operation(
           summary = "Exports wallet rewards for a specified period as an XLSX file",

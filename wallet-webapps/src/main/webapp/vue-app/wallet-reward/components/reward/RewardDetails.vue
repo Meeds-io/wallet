@@ -86,8 +86,7 @@
       <template v-if="!$vuetify.breakpoint.mobile" #left>
         <v-btn
           :href="exportFileLink"
-          download="rewards-detail.xlsx"
-          class="ma-2"
+          :download="fileName"
           color="primary"
           outlined>
           <v-icon
@@ -188,6 +187,11 @@ export default {
       month: 'short',
       day: 'numeric',
     },
+    dateNumericFormat: {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    },
     walletRewards: [],
     selectedWalletReward: null,
     status: 'VALID',
@@ -253,6 +257,19 @@ export default {
     toDateFormat() {
       return new window.Intl.DateTimeFormat(this.lang, this.dateFormat)
         .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+    },
+    starDateNumericFormat() {
+      const formattedDate = new window.Intl.DateTimeFormat(this.lang, this.dateNumericFormat).format(new Date(this.startDateInSeconds * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+      return formattedDate.replace(/\//g, '-');
+    },
+    toDateNumericFormat() {
+      const formattedDate = new window.Intl.DateTimeFormat(this.lang, this.dateNumericFormat)
+        .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+      return formattedDate.replace(/\//g, '-');
+    },
+    fileName() {
+      console.warn(this.starDateNumericFormat);
+      return `rewards-detail-from ${this.starDateNumericFormat} to ${this.toDateNumericFormat}`;
     },
     completelyProcessed() {
       return this.rewardReport?.completelyProcessed;
@@ -335,7 +352,7 @@ export default {
     },
     exportFileLink() {
       return this.$rewardService.exportXlsxUrl({periodId: this.period.id,
-        status: this.status, fileName: 'rewards-detail'});
+        status: this.status, fileName: this.fileName});
     },
   },
   watch: {
