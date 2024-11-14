@@ -28,6 +28,7 @@ import java.util.*;
 import io.meeds.gamification.model.filter.RealizationFilter;
 import io.meeds.gamification.service.RealizationService;
 
+import io.meeds.gamification.utils.Utils;
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
 import org.apache.commons.lang3.StringUtils;
