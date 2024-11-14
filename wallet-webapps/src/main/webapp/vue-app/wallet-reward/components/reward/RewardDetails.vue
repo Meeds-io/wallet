@@ -78,15 +78,25 @@
         element="div" />
     </v-toolbar>
     <application-toolbar
-      :left-button="{
-        icon: 'fa-file-excel',
-        text: 'Export',
-      }"
       :right-select-box="{
         selected: status,
         items: walletRewardStatus,
       }"
-      @filter-select-change="status = $event" />
+      @filter-select-change="status = $event">
+      <template v-if="!$vuetify.breakpoint.mobile" #left>
+        <v-btn
+          :href="exportFileLink"
+          :download="fileName"
+          color="primary"
+          outlined>
+          <v-icon
+            left>
+            fa-file-excel
+          </v-icon>
+          {{ $t('wallet.administration.rewardDetails.label.export') }}
+        </v-btn>
+      </template>
+    </application-toolbar>
     <v-data-table
       :headers="identitiesHeaders"
       :items="filteredIdentitiesList"
@@ -141,6 +151,7 @@
 </template>
 
 <script>
+
 export default {
   props: {
     rewardReport: {
@@ -174,6 +185,11 @@ export default {
     dateFormat: {
       year: 'numeric',
       month: 'short',
+      day: 'numeric',
+    },
+    dateNumericFormat: {
+      year: 'numeric',
+      month: 'numeric',
       day: 'numeric',
     },
     walletRewards: [],
@@ -241,6 +257,19 @@ export default {
     toDateFormat() {
       return new window.Intl.DateTimeFormat(this.lang, this.dateFormat)
         .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+    },
+    starDateNumericFormat() {
+      const formattedDate = new window.Intl.DateTimeFormat(this.lang, this.dateNumericFormat).format(new Date(this.startDateInSeconds * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+      return formattedDate.replace(/\//g, '-');
+    },
+    toDateNumericFormat() {
+      const formattedDate = new window.Intl.DateTimeFormat(this.lang, this.dateNumericFormat)
+        .format(new Date(this.endDateInSeconds * 1000 - 86400 * 1000 - new Date().getTimezoneOffset() * 60 * 1000));
+      return formattedDate.replace(/\//g, '-');
+    },
+    fileName() {
+      console.warn(this.starDateNumericFormat);
+      return `rewards-detail-from ${this.starDateNumericFormat} to ${this.toDateNumericFormat}`;
     },
     completelyProcessed() {
       return this.rewardReport?.completelyProcessed;
@@ -320,6 +349,10 @@ export default {
     },
     hasMore() {
       return this.walletRewards.length < this.walletRewardsCount;
+    },
+    exportFileLink() {
+      return this.$rewardService.exportXlsxUrl({periodId: this.period.id,
+        status: this.status, fileName: this.fileName});
     },
   },
   watch: {

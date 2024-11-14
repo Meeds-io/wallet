@@ -818,6 +818,18 @@ public class WalletUtils {
     return settings == null || settings.getNetwork() == null ? 0 : settings.getNetwork().getId();
   }
 
+  public static String getTransactionEtherScanLink() {
+    return switch (Math.toIntExact(getNetworkId())) {
+    case 1 -> "https://etherscan.io/tx/";
+    case 3 -> "https://ropsten.etherscan.io/tx/";
+    case 5 -> "https://goerli.etherscan.io/tx/";
+    case 137 -> "https://polygonscan.com/tx/";
+    case 80001 -> "https://mumbai.polygonscan.com/tx/";
+    case 80002 -> "https://amoy.polygonscan.com/tx/";
+    default -> "#";
+    };
+  }
+
   public static final String getWebsocketURL() {
     GlobalSettings settings = getSettings();
     return settings == null || settings.getNetwork() == null ? null : settings.getNetwork().getWebsocketProviderURL();
