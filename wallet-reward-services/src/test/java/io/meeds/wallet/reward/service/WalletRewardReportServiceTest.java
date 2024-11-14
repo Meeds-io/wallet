@@ -18,6 +18,7 @@
  */
 package io.meeds.wallet.reward.service;
 
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -29,7 +30,13 @@ import io.meeds.gamification.service.RealizationService;
 
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.utils.WalletUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.services.resources.ResourceBundleService;
 import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
@@ -45,6 +52,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import static org.junit.Assert.assertThrows;
@@ -73,6 +81,9 @@ public class WalletRewardReportServiceTest { // NOSONAR
 
   @MockBean
   private RealizationService        realizationService;
+
+  @MockBean
+  private ResourceBundleService     resourceBundleService;
 
   @Autowired
   private RewardReportService       rewardReportService;
@@ -366,6 +377,53 @@ public class WalletRewardReportServiceTest { // NOSONAR
     // Then
     verify(rewardReportStorage, times(1)).listRewards(1, rewardSettings.zoneId(), 10);
     verify(rewardReportStorage, times(1)).countRewards(1);
+  }
+
+  @Test
+  void testExportRewards() throws Exception {
+    RewardSettings newSettings = new RewardSettings();
+
+    WalletReward walletReward = new WalletReward();
+    walletReward.setIdentityId(1);
+    walletReward.setPoints(200);
+    walletReward.setAmount(50);
+    Wallet wallet = new Wallet();
+    wallet.setAddress("address1");
+    walletReward.setWallet(new Wallet());
+    TransactionDetail transactionDetail = new TransactionDetail();
+    transactionDetail.setSucceeded(true);
+    transactionDetail.setHash("transactionHash");
+    transactionDetail.setSentTimestamp(new Date().getTime());
+    walletReward.setTransaction(transactionDetail);
+
+    when(rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(1,
+                                                                  true,
+                                                                  newSettings.zoneId(),
+                                                                  null)).thenReturn(new PageImpl<>(List.of(walletReward)));
+    ResourceBundle resourceBundle = mock(ResourceBundle.class);
+    when(resourceBundle.getString(anyString())).thenReturn("header");
+    when(resourceBundleService.getResourceBundle(anyString(), any(Locale.class))).thenReturn(resourceBundle);
+
+    InputStream exportInputStream = rewardReportService.exportXlsx(1, "VALID", newSettings.zoneId(), "file-name", Locale.ENGLISH);
+    assertNotNull(exportInputStream);
+
+    Workbook workbook = WorkbookFactory.create(exportInputStream);
+    assertNotNull(workbook);
+    Sheet sheet = workbook.getSheetAt(0);
+    assertNotNull(sheet);
+    assertEquals(1, sheet.getLastRowNum());
+    Row header = sheet.getRow(0);
+    assertNotNull(header);
+    assertEquals(7, header.getLastCellNum());
+    assertTrue(StringUtils.isNotBlank(header.getCell(header.getFirstCellNum()).getStringCellValue()));
+    assertTrue(StringUtils.isNotBlank(header.getCell(header.getLastCellNum() - 1).getStringCellValue()));
+
+    Row row1 = sheet.getRow(1);
+    assertNotNull(row1);
+    assertEquals(7, row1.getLastCellNum());
+    assertEquals(200, row1.getCell(2).getNumericCellValue());
+    assertEquals("MEED 50", row1.getCell(3).getStringCellValue());
+    assertEquals("success", row1.getCell(4).getStringCellValue());
   }
 
   protected Wallet newWallet(long identityId) {
