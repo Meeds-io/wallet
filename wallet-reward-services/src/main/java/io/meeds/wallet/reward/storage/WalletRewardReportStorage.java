@@ -269,6 +269,7 @@ public class WalletRewardReportStorage {
     if (StringUtils.isNotBlank(period.getTimeZone())) {
       rewardPeriod.setTimeZone(period.getTimeZone());
     }
+    rewardPeriod.setStatus(period.getStatus());
     return rewardPeriod;
   }
 
