@@ -78,15 +78,26 @@
         element="div" />
     </v-toolbar>
     <application-toolbar
-      :left-button="{
-        icon: 'fa-file-excel',
-        text: 'Export',
-      }"
       :right-select-box="{
         selected: status,
         items: walletRewardStatus,
       }"
-      @filter-select-change="status = $event" />
+      @filter-select-change="status = $event">
+      <template v-if="!$vuetify.breakpoint.mobile" #left>
+        <v-btn
+          :href="exportFileLink"
+          download="rewards-detail.xlsx"
+          class="ma-2"
+          color="primary"
+          outlined>
+          <v-icon
+            left>
+            fa-file-excel
+          </v-icon>
+          {{ $t('wallet.administration.rewardDetails.label.export') }}
+        </v-btn>
+      </template>
+    </application-toolbar>
     <v-data-table
       :headers="identitiesHeaders"
       :items="filteredIdentitiesList"
@@ -141,6 +152,7 @@
 </template>
 
 <script>
+
 export default {
   props: {
     rewardReport: {
@@ -320,6 +332,10 @@ export default {
     },
     hasMore() {
       return this.walletRewards.length < this.walletRewardsCount;
+    },
+    exportFileLink() {
+      return this.$rewardService.exportXlsxUrl({periodId: this.period.id,
+        status: this.status, fileName: 'rewards-detail'});
     },
   },
   watch: {
