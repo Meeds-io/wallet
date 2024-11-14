@@ -24,15 +24,15 @@ import static io.meeds.wallet.utils.RewardUtils.REWARD_TRANSACTION_NO_POOL_MESSA
 import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_PENDING;
 import static io.meeds.wallet.utils.RewardUtils.TRANSACTION_STATUS_SUCCESS;
 import static io.meeds.wallet.utils.RewardUtils.formatTime;
-import static io.meeds.wallet.utils.WalletUtils.convertFromDecimals;
-import static io.meeds.wallet.utils.WalletUtils.formatNumber;
-import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
-import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
-import static io.meeds.wallet.utils.WalletUtils.getLocale;
-import static io.meeds.wallet.utils.WalletUtils.getResourceBundleKey;
-import static io.meeds.wallet.utils.WalletUtils.isUserRewardingAdmin;
+import static io.meeds.wallet.utils.WalletUtils.*;
 
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -41,10 +41,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import io.meeds.gamification.constant.RealizationStatus;
+import io.meeds.gamification.utils.Utils;
 import io.meeds.wallet.model.*;
 import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.exoplatform.services.resources.ResourceBundleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,6 +80,12 @@ public class WalletRewardReportService implements RewardReportService {
 
   private static final String       EMPTY_SETTINGS = "Error computing rewards using empty settings";
 
+  // File header
+  private static final String[] COLUMNS                       = new String[] { "fullName", "address", "points", "rewards",
+          "status", "sentDate", "transactionHash" };
+
+  private static final String   SHEET_NAME                     = "reward-detail";
+
   private WalletAccountService      walletAccountService;
 
   private WalletTokenAdminService   walletTokenAdminService;
@@ -83,6 +95,8 @@ public class WalletRewardReportService implements RewardReportService {
   private WalletRewardReportStorage rewardReportStorage;
 
   private RealizationService        realizationService;
+
+  private ResourceBundleService     resourceBundleService;
 
   @Setter
   private boolean                   rewardSendingInProgress;
@@ -94,12 +108,14 @@ public class WalletRewardReportService implements RewardReportService {
                                    WalletTokenAdminService walletTokenAdminService,
                                    RewardSettingsService rewardSettingsService,
                                    WalletRewardReportStorage rewardReportStorage,
-                                   RealizationService realizationService) {
+                                   RealizationService realizationService,
+                                   ResourceBundleService resourceBundleService) {
     this.walletAccountService = walletAccountService;
     this.walletTokenAdminService = walletTokenAdminService;
     this.rewardSettingsService = rewardSettingsService;
     this.rewardReportStorage = rewardReportStorage;
     this.realizationService = realizationService;
+    this.resourceBundleService = resourceBundleService;
   }
 
   @Override
@@ -394,7 +410,33 @@ public class WalletRewardReportService implements RewardReportService {
   public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable) {
     boolean isValid = !status.equals("INVALID");
     return rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, zoneId, pageable);
-  } 
+  }
+
+  @Override
+  public InputStream exportXlsx(long periodId, String status, ZoneId zoneId, String fileName, Locale locale) {
+    File temp = null;
+    try { // NOSONAR
+      temp = createTempFile(fileName);
+      Page<WalletReward> walletRewardPage = findWalletRewardsByPeriodIdAndStatus(periodId, status, zoneId, null);
+      try (XSSFWorkbook workbook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(temp)) {
+        int rowIndex = 0;
+        CreationHelper helper = workbook.getCreationHelper();
+        Sheet sheet = workbook.createSheet(SHEET_NAME);
+        appendRewardsHeaderRow(sheet, rowIndex++, helper, locale);
+        for (WalletReward walletReward : walletRewardPage.getContent()) {
+          appendWalletRewardRow(sheet, rowIndex++, helper, walletReward);
+        }
+        workbook.write(outputStream);
+      }
+      return new FileInputStream(temp);
+    } catch (IOException e) {
+      throw new IllegalStateException("Error exporting XLSX file for wallet rewards ", e);
+    } finally {
+      if (temp != null && temp.exists()) {
+        temp.deleteOnExit();
+      }
+    }
+  }
   
   @Override
   public double countWalletRewardsPointsByPeriodIdAndStatus(long periodId, boolean isValid) {
@@ -403,6 +445,59 @@ public class WalletRewardReportService implements RewardReportService {
 
   public void setRewardSettingChanged(Map<Long, Boolean> updatedSettings) {
     rewardSettingChanged.putAll(updatedSettings);
+  }
+
+  private File createTempFile(String fileName) throws IOException {
+    SimpleDateFormat formatter = new SimpleDateFormat("yy-MM-dd_HH-mm-ss");
+    fileName += formatter.format(new Date());
+    if (SystemUtils.IS_OS_UNIX) {
+      FileAttribute<Set<PosixFilePermission>> tempFileAttributes =
+              PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
+      return Files.createTempFile(fileName, ".xlsx", tempFileAttributes).toFile();
+    } else {
+      File temp = Files.createTempFile(fileName, ".xlsx").toFile();
+      if (!temp.setReadable(true, true) || !temp.setWritable(true, true)) {
+        throw new IllegalStateException("Can't write a temp file to export XLS achievements file");
+      }
+      return temp;
+    }
+  }
+
+  private void appendRewardsHeaderRow(Sheet sheet, int rowIndex, CreationHelper helper, Locale locale) {
+    Row row = sheet.createRow(rowIndex);
+    ResourceBundle resourceBundle = resourceBundleService.getResourceBundle("locale.addon.Wallet", locale);
+    for (int i = 0; i < COLUMNS.length; i++) {
+      row.createCell(i).setCellValue(helper.createRichTextString(resourceBundle.getString("wallet.administration.rewardDetails.label." + COLUMNS[i])));
+    }
+  }
+
+  private void appendWalletRewardRow(Sheet sheet, int rowIndex, CreationHelper helper, WalletReward walletReward) {
+    Row row = sheet.createRow(rowIndex);
+    try {
+      int cellIndex = 0;
+      row.createCell(cellIndex++).setCellValue(Utils.getUserFullName(String.valueOf(walletReward.getIdentityId())));
+      row.createCell(cellIndex++).setCellValue(walletReward.getWallet().getAddress());
+      row.createCell(cellIndex++).setCellValue(walletReward.getPoints());
+      double amount = walletReward.getAmount();
+      String amountText = (amount % 1 == 0) ? String.format("MEED %.0f", amount) : String.format("MEED %.2f", amount);
+      row.createCell(cellIndex++).setCellValue(amountText);
+      row.createCell(cellIndex++).setCellValue(walletReward.getStatus());
+      appendTransactionCells(row, cellIndex, helper, walletReward.getTransaction());
+    } catch (Exception e) {
+      LOG.error("Error when computing to XLSX ", e);
+    }
+  }
+
+  private void appendTransactionCells(Row row, int cellIndex, CreationHelper helper, TransactionDetail transaction) {
+    if (transaction != null) {
+      row.createCell(cellIndex++).setCellValue(helper.createRichTextString(String.valueOf(new Date(transaction.getSentTimestamp()))));
+      Cell hashCell = row.createCell(cellIndex);
+      String hashUrl = getTransactionEtherScanLink() + transaction.getHash();
+      hashCell.setCellValue(transaction.getHash());
+      Hyperlink link = helper.createHyperlink(HyperlinkType.URL);
+      link.setAddress(hashUrl);
+      hashCell.setHyperlink(link);
+    }
   }
 
   private RewardPeriod getRewardPeriod(LocalDate date) {
