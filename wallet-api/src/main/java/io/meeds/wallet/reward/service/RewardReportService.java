@@ -184,10 +184,10 @@ public interface RewardReportService {
    *
    * @param periodId    Reward Period id
    * @param identityIds array of identity Ids
-   * @param status      Wallet reward status
-   * @param zoneId      Wallet reward status
+   * @param walletRewardStatus {@link WalletRewardStatus} Wallet reward status
+   * @param zoneId Zone Id
    */
-  Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, List<Long> identityIds, String status, ZoneId zoneId, Pageable pageable);
+  Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, List<Long> identityIds, WalletRewardStatus walletRewardStatus, ZoneId zoneId, Pageable pageable);
 
   /**
    * Count wallet rewards points by PeriodId and status
@@ -217,11 +217,11 @@ public interface RewardReportService {
    * XLS
    *
    * @param periodId Reward Period id
-   * @param status Wallet reward status
-   * @param zoneId Wallet reward status
+   * @param walletRewardStatus {@link WalletRewardStatus} Wallet reward status
+   * @param zoneId Zone Id
    * @param fileName fileName to export
    * @param locale locale
    * @return {@link InputStream} of a file of format XLS
    */
-  InputStream exportXlsx(long periodId, String status, ZoneId zoneId, String fileName, Locale locale);
+  InputStream exportXlsx(long periodId, WalletRewardStatus walletRewardStatus, ZoneId zoneId, String fileName, Locale locale);
 }
