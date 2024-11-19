@@ -20,6 +20,7 @@ import static io.meeds.wallet.statistic.StatisticUtils.OPERATION;
 import static io.meeds.wallet.utils.WalletUtils.ADMIN_KEY_PARAMETER;
 import static io.meeds.wallet.utils.WalletUtils.MODIFY_ADDRESS_ASSOCIATED_EVENT;
 import static io.meeds.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
+import static io.meeds.wallet.utils.WalletUtils.EVM_HOLD_ACTION_EVENT;
 import static io.meeds.wallet.utils.WalletUtils.SIMPLE_CHARS;
 import static io.meeds.wallet.utils.WalletUtils.WALLET_ADMIN_REMOTE_ID;
 import static io.meeds.wallet.utils.WalletUtils.WALLET_DELETED_EVENT;
@@ -569,6 +570,13 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     boolean isNew = !isUserWalletInitialized(wallet.getId()) && !accountStorage.hasWalletBackup(identityId) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
     String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
                              : MODIFY_ADDRESS_ASSOCIATED_EVENT;
+    try {
+      Map<String, String> walletDetails = new HashMap<>();
+      walletDetails.put("walletAddress", wallet.getAddress());
+      getListenerService().broadcast(EVM_HOLD_ACTION_EVENT, walletDetails, "");
+    } catch (Exception e) {
+      LOG.error("Cannot broadcast evm event", e);
+    }
     try {
       getListenerService().broadcast(eventName, wallet.clone(), wallet.getId());
     } catch (Exception e) {

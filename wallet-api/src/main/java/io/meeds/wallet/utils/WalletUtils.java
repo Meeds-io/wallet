@@ -231,6 +231,8 @@ public class WalletUtils {
   public static final String                          MODIFY_ADDRESS_ASSOCIATED_EVENT          =
                                                                                       "exo.wallet.addressAssociation.modification";
 
+  public static final String                          EVM_HOLD_ACTION_EVENT                    = "evm.hold.action.event";                                                                                  
+
   public static final String                          NEW_BLOCK_MINED_EVENT                    = "exo.wallet.block.mined";
 
   public static final String                          TRANSACTION_MINED_EVENT                  = "exo.wallet.transaction.mined";
