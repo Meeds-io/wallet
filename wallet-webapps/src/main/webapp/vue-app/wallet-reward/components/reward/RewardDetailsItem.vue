@@ -134,6 +134,24 @@
         </template>
         <v-list class="pa-0">
           <v-list-item
+            dense
+            @mousedown="$event.preventDefault()"
+            @click="openContributionDetails">
+            <v-list-item-icon class="me-2 my-auto">
+              <v-icon size="14" class="icon-default-color">fas fa-trophy</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.reviewContributions') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
+            dense
+            @mousedown="$event.preventDefault()"
+            @click="openRewardsDetails">
+            <v-list-item-icon class="me-2 my-auto">
+              <v-icon size="14" class="icon-default-color">fas fa-coins</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.detailRewards') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item
             v-if="status"
             :href="`${transactionEtherScanLink}${transactionHash}`"
             target="_blank"
