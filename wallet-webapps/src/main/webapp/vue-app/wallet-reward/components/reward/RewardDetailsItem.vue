@@ -133,31 +133,21 @@
           </v-btn>
         </template>
         <v-list class="pa-0">
-          <v-tooltip
-            bottom
-            :disabled="status">
-            <template #activator="{ on }">
-              <div v-on="on" class="d-inline-block">
-                <v-list-item
-                  :disabled="!status"
-                  :href="`${transactionEtherScanLink}${transactionHash}`"
-                  target="_blank"
-                  dense
-                  @mousedown="$event.preventDefault()">
-                  <v-list-item-icon class="me-2 my-auto">
-                    <v-icon
-                      :disabled="!status"
-                      size="14"
-                      class="icon-default-color">
-                      fas fa-external-link-alt
-                    </v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.openTransaction') }}</v-list-item-title>
-                </v-list-item>
-              </div>
-            </template>
-            <span>{{ $t('wallet.administration.rewardDetails.label.notSentYet') }}</span>
-          </v-tooltip>
+          <v-list-item
+            v-if="status"
+            :href="`${transactionEtherScanLink}${transactionHash}`"
+            target="_blank"
+            dense
+            @mousedown="$event.preventDefault()">
+            <v-list-item-icon class="me-2 my-auto">
+              <v-icon
+                size="14"
+                class="icon-default-color">
+                fas fa-external-link-alt
+              </v-icon>
+            </v-list-item-icon>
+            <v-list-item-title class="d-flex">{{ $t('wallet.administration.rewardDetails.label.openTransaction') }}</v-list-item-title>
+          </v-list-item>
           <v-list-item
             dense
             @mousedown="$event.preventDefault()"
