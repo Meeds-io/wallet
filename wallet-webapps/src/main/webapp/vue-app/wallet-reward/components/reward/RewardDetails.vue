@@ -78,10 +78,11 @@
         element="div" />
     </v-toolbar>
     <application-toolbar
-      :right-select-box="{
-        selected: status,
-        items: walletRewardStatus,
+      :right-filter-button="{
+        text: $t('wallet.administration.rewardDetails.label.filter'),
       }"
+      :filters-count="filtersCount"
+      @filter-button-click="$root.$emit('reward-open-filter-drawer')"
       @filter-select-change="status = $event">
       <template v-if="!$vuetify.breakpoint.mobile" #left>
         <v-btn
@@ -147,6 +148,9 @@
       ref="rewardsDetailsDrawer"
       :wallet-reward="selectedWalletReward"
       :token-symbol="tokenSymbol" />
+    <wallet-reward-filter
+      ref="filterRewardDrawer"
+      @selectionConfirmed="filter" />
   </v-card>
 </template>
 
@@ -194,7 +198,8 @@ export default {
     },
     walletRewards: [],
     selectedWalletReward: null,
-    status: 'VALID',
+    status: 'ALL',
+    contributorIds: [],
     sortBy: 'tokensToSend',
     sortDescending: true,
     walletRewardsCount: 0,
@@ -202,15 +207,6 @@ export default {
     page: 0,
   }),
   computed: {
-    walletRewardStatus() {
-      return [{
-        text: 'Eligible Members',
-        value: 'VALID',
-      },{
-        text: 'Non Eligible',
-        value: 'INVALID',
-      }];
-    },
     identitiesHeaders() {
       return [
         {
@@ -268,7 +264,6 @@ export default {
       return formattedDate.replace(/\//g, '-');
     },
     fileName() {
-      console.warn(this.starDateNumericFormat);
       return `rewards-detail-from ${this.starDateNumericFormat} to ${this.toDateNumericFormat}`;
     },
     completelyProcessed() {
@@ -337,6 +332,9 @@ export default {
     disabledSendButtonLabel() {
       return this.isNotPastPeriod ? this.$t('wallet.administration.rewardCard.status.inPeriod') : this.balanceBelowBudgetLabel;
     },
+    contributorIdsToRetrieve() {
+      return this.contributorIds?.length && this.contributorIds || [];
+    },
     walletRewardsFilter() {
       return {
         page: this.page,
@@ -345,6 +343,7 @@ export default {
         status: this.status,
         sortField: this.sortBy,
         sortDir: this.sortDescending ? 'desc' : 'asc',
+        identityIds: this.contributorIdsToRetrieve
       };
     },
     hasMore() {
@@ -354,13 +353,12 @@ export default {
       return this.$rewardService.exportXlsxUrl({periodId: this.period.id,
         status: this.status, fileName: this.fileName});
     },
+    filtersCount() {
+      return (this.contributorIds?.length && 1 || 0)
+          + (this.status !== null && this.status !== 'ALL'? 1 : 0)  ;
+    },
   },
   watch: {
-    status() {
-      this.page = 0;
-      this.walletRewards = [];
-      this.getWalletRewards();
-    },
     sortBy(newVal, oldVal) {
       if (newVal !== oldVal) {
         if (this.sortDescending){
@@ -393,7 +391,7 @@ export default {
           .then(rewardReport => {
             this.$emit('reward-report-updated', rewardReport);
           }).then(() => {
-            this.status = 'VALID';
+            this.status = 'ALL';
             this.walletRewards = [];
             this.getWalletRewards();
           }).finally(() => {
@@ -429,6 +427,13 @@ export default {
     },
     loadMore() {
       this.page++;
+      this.getWalletRewards();
+    },
+    filter(status, grantees) {
+      this.status = status;
+      this.contributorIds = grantees.map(grantee => grantee.identity.identityId);
+      this.page = 0;
+      this.walletRewards = [];
       this.getWalletRewards();
     },
   },

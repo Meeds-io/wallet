@@ -406,10 +406,45 @@ public class WalletRewardReportService implements RewardReportService {
     rewardReportStorage.replaceRewardTransactions(oldHash, newHash);
   }
 
-  @Override
-  public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable) {
-    boolean isValid = !status.equals("INVALID");
-    return rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, zoneId, pageable);
+  public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId,
+                                                                 List<Long> identityIds,
+                                                                 String status,
+                                                                 ZoneId zoneId,
+                                                                 Pageable pageable) {
+    Boolean ineligibleCondition = null;
+    Boolean validCondition = null;
+    Boolean estimatedCondition = null;
+    switch (status.toUpperCase()) {
+    case "ALL":
+      break;
+    case "REWARDED":
+      validCondition = true;
+      break;
+    case "TO_REWARD":
+      estimatedCondition = true;
+      break;
+    case "NOT_ELIGIBLE":
+      ineligibleCondition = true;
+      break;
+    default:
+      throw new IllegalArgumentException("Invalid status: " + status);
+    }
+    if (identityIds == null || identityIds.isEmpty()) {
+      return rewardReportStorage.findWalletRewardsByPeriodId(periodId,
+                                                             zoneId,
+                                                             ineligibleCondition,
+                                                             validCondition,
+                                                             estimatedCondition,
+                                                             pageable);
+    } else {
+      return rewardReportStorage.findWalletRewardsByPeriodIdAndIdentityIds(periodId,
+                                                                           identityIds,
+                                                                           zoneId,
+                                                                           ineligibleCondition,
+                                                                           validCondition,
+                                                                           estimatedCondition,
+                                                                           pageable);
+    }
   }
 
   @Override
@@ -417,7 +452,7 @@ public class WalletRewardReportService implements RewardReportService {
     File temp = null;
     try { // NOSONAR
       temp = createTempFile(fileName);
-      Page<WalletReward> walletRewardPage = findWalletRewardsByPeriodIdAndStatus(periodId, status, zoneId, null);
+      Page<WalletReward> walletRewardPage = findWalletRewardsByPeriodIdAndStatus(periodId, null, status, zoneId, null);
       try (XSSFWorkbook workbook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(temp)) {
         int rowIndex = 0;
         CreationHelper helper = workbook.getCreationHelper();

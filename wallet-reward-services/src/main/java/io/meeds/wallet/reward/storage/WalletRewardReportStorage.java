@@ -246,10 +246,37 @@ public class WalletRewardReportStorage {
 
   public void replaceRewardTransactions(String oldHash, String newHash) {
     rewardDAO.replaceRewardTransactions(oldHash, newHash);
-  }  
-  
-  public Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, boolean isValid, ZoneId zoneId, Pageable pageable) {
-    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodIdAndStatus(periodId, isValid, pageable);
+  }
+
+  public Page<WalletReward> findWalletRewardsByPeriodIdAndIdentityIds(long periodId,
+                                                                      List<Long> identityIds,
+                                                                      ZoneId zoneId,
+                                                                      Boolean ineligibleCondition,
+                                                                      Boolean validCondition,
+                                                                      Boolean estimatedCondition,
+                                                                      Pageable pageable) {
+    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodIdAndIdentityIds(periodId,
+                                                                                          identityIds,
+                                                                                          ineligibleCondition,
+                                                                                          validCondition,
+                                                                                          estimatedCondition,
+                                                                                          pageable);
+
+    return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
+  }
+
+  public Page<WalletReward> findWalletRewardsByPeriodId(long periodId,
+                                                                      ZoneId zoneId,
+                                                                      Boolean ineligibleCondition,
+                                                                      Boolean validCondition,
+                                                                      Boolean estimatedCondition,
+                                                                      Pageable pageable) {
+    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodId(periodId,
+            ineligibleCondition,
+            validCondition,
+            estimatedCondition,
+            pageable);
+
     return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
 

@@ -182,11 +182,12 @@ public interface RewardReportService {
    * Gets wallet rewards by PeriodId and status
    * first one
    *
-   * @param periodId Reward Period id
-   * @param status Wallet reward status
-   * @param zoneId Wallet reward status
+   * @param periodId    Reward Period id
+   * @param identityIds array of identity Ids
+   * @param status      Wallet reward status
+   * @param zoneId      Wallet reward status
    */
-  Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, String status, ZoneId zoneId, Pageable pageable);
+  Page<WalletReward> findWalletRewardsByPeriodIdAndStatus(long periodId, List<Long> identityIds, String status, ZoneId zoneId, Pageable pageable);
 
   /**
    * Count wallet rewards points by PeriodId and status

@@ -10,6 +10,8 @@ import DistributionForecast from './components/reward/DistributionForecast.vue';
 import TimeZoneSelectBox from './components/reward/TimeZoneSelectBox.vue';
 import RewardCardMaskContent from './components/reward/RewardCardMaskContent.vue';
 import RewardsDetailsDrawer from './components/reward/RewardsDetailsDrawer.vue';
+import RewardFilter from './components/reward/RewardFilter.vue';
+import GranteeAttendeeItem from './components/reward/GranteeAttendeeItem.vue';
 
 const components = {
   'wallet-reward-app': RewardApp,
@@ -24,6 +26,8 @@ const components = {
   'wallet-budget-distribution-forecast': DistributionForecast,
   'wallet-reward-timezone-selectbox': TimeZoneSelectBox,
   'wallet-reward-card-mask-content': RewardCardMaskContent,
+  'wallet-reward-filter': RewardFilter,
+  'wallet-reward-grantee-attendee-item': GranteeAttendeeItem,
 };
 
 for (const key in components) {
