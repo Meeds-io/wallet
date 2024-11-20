@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -179,7 +180,7 @@ class TestRewardReportREST {
 
   @Test
   void getWalletRewardsAdmin() throws Exception {
-    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
+    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyList(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
 
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
 
