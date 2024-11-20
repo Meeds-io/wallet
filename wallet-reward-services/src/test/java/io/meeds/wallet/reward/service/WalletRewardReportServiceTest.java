@@ -203,11 +203,21 @@ public class WalletRewardReportServiceTest { // NOSONAR
   void testFindWalletRewardsByPeriodIdAndStatus() {
     RewardSettings rewardSettings = new RewardSettings();
 
-    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, "VALID", rewardSettings.zoneId(), PAGEABLE);
-    verify(rewardReportStorage, times(1)).findWalletRewardsByPeriodIdAndStatus(1, true, rewardSettings.zoneId(), PAGEABLE);
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, null, "ALL", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage,
+           times(1)).findWalletRewardsByPeriodId(1, rewardSettings.zoneId(), null, null, null, PAGEABLE);
 
-    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, "INVALID", rewardSettings.zoneId(), PAGEABLE);
-    verify(rewardReportStorage, times(1)).findWalletRewardsByPeriodIdAndStatus(1, false, rewardSettings.zoneId(), PAGEABLE);
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, null, "REWARDED", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage,
+           times(1)).findWalletRewardsByPeriodId(1, rewardSettings.zoneId(), null, true, null, PAGEABLE);
+
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, null, "TO_REWARD", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage,
+           times(1)).findWalletRewardsByPeriodId(1, rewardSettings.zoneId(), null, null, true, PAGEABLE);
+
+    rewardReportService.findWalletRewardsByPeriodIdAndStatus(1, null, "NOT_ELIGIBLE", rewardSettings.zoneId(), PAGEABLE);
+    verify(rewardReportStorage,
+           times(1)).findWalletRewardsByPeriodId(1, rewardSettings.zoneId(), true, null, null, PAGEABLE);
   }
 
   @Test
@@ -396,15 +406,17 @@ public class WalletRewardReportServiceTest { // NOSONAR
     transactionDetail.setSentTimestamp(new Date().getTime());
     walletReward.setTransaction(transactionDetail);
 
-    when(rewardReportStorage.findWalletRewardsByPeriodIdAndStatus(1,
-                                                                  true,
-                                                                  newSettings.zoneId(),
-                                                                  null)).thenReturn(new PageImpl<>(List.of(walletReward)));
+    when(rewardReportStorage.findWalletRewardsByPeriodId(1,
+                                                         newSettings.zoneId(),
+                                                         null,
+                                                         null,
+                                                         null,
+                                                         null)).thenReturn(new PageImpl<>(List.of(walletReward)));
     ResourceBundle resourceBundle = mock(ResourceBundle.class);
     when(resourceBundle.getString(anyString())).thenReturn("header");
     when(resourceBundleService.getResourceBundle(anyString(), any(Locale.class))).thenReturn(resourceBundle);
 
-    InputStream exportInputStream = rewardReportService.exportXlsx(1, "VALID", newSettings.zoneId(), "file-name", Locale.ENGLISH);
+    InputStream exportInputStream = rewardReportService.exportXlsx(1, "ALL", newSettings.zoneId(), "file-name", Locale.ENGLISH);
     assertNotNull(exportInputStream);
 
     Workbook workbook = WorkbookFactory.create(exportInputStream);
