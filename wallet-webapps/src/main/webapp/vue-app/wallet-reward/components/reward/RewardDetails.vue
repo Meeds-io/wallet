@@ -81,6 +81,7 @@
       :right-filter-button="{
         text: $t('wallet.administration.rewardDetails.label.filter'),
       }"
+      :filters-count="filtersCount"
       @filter-button-click="$root.$emit('reward-open-filter-drawer')"
       @filter-select-change="status = $event">
       <template v-if="!$vuetify.breakpoint.mobile" #left>
@@ -351,6 +352,10 @@ export default {
     exportFileLink() {
       return this.$rewardService.exportXlsxUrl({periodId: this.period.id,
         status: this.status, fileName: this.fileName});
+    },
+    filtersCount() {
+      return (this.contributorIds?.length && 1 || 0)
+          + (this.status !== null && this.status !== 'ALL'? 1 : 0)  ;
     },
   },
   watch: {
