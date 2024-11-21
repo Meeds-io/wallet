@@ -41,32 +41,38 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
   @Query("""
           SELECT rw
           FROM Reward rw
+          LEFT JOIN WalletTransaction te ON rw.transactionHash = te.hash
           WHERE rw.period.id = :periodId
-            AND (:ineligible IS NULL OR (:ineligible = true AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
-            AND (:valid IS NULL OR (:valid = true AND rw.tokensSent > 0))
-            AND (:estimated IS NULL OR (:estimated = true AND rw.tokensToSend > 0 AND rw.tokensSent <= 0))
+            AND (
+                :status = 'ALL'
+                OR (:status = 'INELIGIBLE' AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0)
+                OR (:status = 'VALID' AND rw.tokensSent > 0 AND te.isSuccess = true)
+                OR (:status = 'ESTIMATED' AND rw.tokensToSend > 0 AND rw.tokensSent <= 0)
+                OR (:status = 'FAILED' AND rw.transactionHash IS NOT NULL AND te.isPending = false AND te.isSuccess = false)
+            )
       """)
   Page<WalletRewardEntity> findWalletRewardsByPeriodId(@Param("periodId") long periodId,
-                                                       @Param("ineligible") Boolean ineligible,
-                                                       @Param("valid") Boolean valid,
-                                                       @Param("estimated") Boolean estimated,
+                                                       @Param("status") String status,
                                                        Pageable pageable);
 
   @Query("""
           SELECT rw
           FROM Reward rw
+          LEFT JOIN WalletTransaction te ON rw.transactionHash = te.hash
           WHERE rw.period.id = :periodId
             AND (rw.identityId IN :identityIds)
-            AND (:ineligible IS NULL OR (:ineligible = true AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
-            AND (:valid IS NULL OR (:valid = true AND rw.tokensSent > 0))
-            AND (:estimated IS NULL OR (:estimated = true AND rw.tokensToSend > 0 AND rw.tokensSent <= 0))
+            AND (
+                :status = 'ALL'
+                OR (:status = 'INELIGIBLE' AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0)
+                OR (:status = 'VALID' AND rw.tokensSent > 0 AND te.isSuccess = true)
+                OR (:status = 'ESTIMATED' AND rw.tokensToSend > 0 AND rw.tokensSent <= 0)
+                OR (:status = 'FAILED' AND rw.transactionHash IS NOT NULL AND te.isPending = false AND te.isSuccess = false)
+            )
       """)
   Page<WalletRewardEntity> findWalletRewardsByPeriodIdAndIdentityIds(@Param("periodId") long periodId,
-                                                       @Param("identityIds") List<Long> identityIds,
-                                                       @Param("ineligible") Boolean ineligible,
-                                                       @Param("valid") Boolean valid,
-                                                       @Param("estimated") Boolean estimated,
-                                                       Pageable pageable);
+                                                                     @Param("identityIds") List<Long> identityIds,
+                                                                     @Param("status") String status,
+                                                                     Pageable pageable);
 
   @Query("""
           SELECT SUM(rw.points) FROM Reward rw WHERE rw.period.id = :periodId AND
