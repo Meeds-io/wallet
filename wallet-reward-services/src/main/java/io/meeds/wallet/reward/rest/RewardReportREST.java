@@ -25,6 +25,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -129,23 +130,28 @@ public class RewardReportREST {
                                                                 @Parameter(description = "Period id", required = true)
                                                                 @RequestParam("periodId")
                                                                 long periodId,
-                                                                @Parameter(description = "Wallet reward status filtering, possible values: VALId and INVALID. Default value = VALId.")
-                                                                @RequestParam(value = "status", defaultValue = "VALID")
+                                                                @Parameter(description = "Wallet reward status filtering, possible values: ALL, REWARDED, TO_REWARD and NOT_ELIGIBLE. Default value = ALL.")
+                                                                @RequestParam(value = "status", defaultValue = "ALL")
                                                                 String status,
                                                                 @Parameter(description = "Field to sort by. Possible values: 'tokensSent', 'points'. Default is 'tokensSent'.")
                                                                 @RequestParam(value = "sortField", defaultValue = "tokensSent") String sortField,
                                                                 @Parameter(description = "Sort direction for tokensToSend field. Possible values: 'asc' (ascending) or 'desc' (descending). Default value = asc.")
-                                                                @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir) {
+                                                                @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir,
+                                                                @Parameter(description = "List of identity IDs to filter. Optional.")
+                                                                @RequestParam(value = "identityIds", required = false)
+                                                                List<Long> identityIds) {
 
     Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortField).descending() : Sort.by(sortField).ascending();
 
     Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
     Page<WalletReward> walletRewards;
-    walletRewards = rewardReportService.findWalletRewardsByPeriodIdAndStatus(periodId,
-                                                                             status,
-                                                                             rewardSettingsService.getSettings().zoneId(),
-                                                                             sortedPageable);
+    walletRewards =
+                  rewardReportService.findWalletRewardsByPeriodIdAndStatus(periodId,
+                                                                           identityIds != null ? identityIds : new ArrayList<>(),
+                                                                           status,
+                                                                           rewardSettingsService.getSettings().zoneId(),
+                                                                           sortedPageable);
     return assembler.toModel(walletRewards);
   }
 
