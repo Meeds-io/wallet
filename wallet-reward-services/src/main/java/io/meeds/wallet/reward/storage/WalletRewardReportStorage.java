@@ -24,22 +24,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.meeds.wallet.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-import io.meeds.wallet.model.RewardPeriod;
-import io.meeds.wallet.model.RewardPeriodType;
-import io.meeds.wallet.model.RewardReport;
-import io.meeds.wallet.model.RewardStatus;
-import io.meeds.wallet.model.TransactionDetail;
-import io.meeds.wallet.model.Wallet;
-import io.meeds.wallet.model.WalletReward;
 import io.meeds.wallet.reward.dao.RewardDAO;
 import io.meeds.wallet.reward.dao.RewardPeriodDAO;
 import io.meeds.wallet.reward.entity.WalletRewardEntity;
@@ -120,7 +115,7 @@ public class WalletRewardReportStorage {
       List<WalletRewardEntity> walletRewardEntities = new ArrayList<>();
       rewardEntities.forEach(reward -> {
         List<WalletRewardEntity> walletRewardList = rewardEntities.stream()
-                                                                  .filter(wr -> wr.getIdentityId() == reward.getIdentityId())
+                                                                  .filter(wr -> Objects.equals(wr.getIdentityId(), reward.getIdentityId()))
                                                                   .toList();
         if (walletRewardList.size() == 1) {
           walletRewardEntities.add(reward);
@@ -221,7 +216,7 @@ public class WalletRewardReportStorage {
 
   public List<RewardPeriod> findRewardPeriodsByStatus(RewardStatus rewardStatus) {
     List<WalletRewardPeriodEntity> rewardPeriodEntities = rewardPeriodDAO.findWalletRewardPeriodEntitiesByStatus(rewardStatus);
-    return rewardPeriodEntities.stream().map(this::toDTO).collect(Collectors.toList());
+    return rewardPeriodEntities.stream().map(this::toDTO).toList();
   }
 
   public List<WalletReward> listRewards(long identityId, ZoneId zoneId, int limit) {
@@ -229,7 +224,7 @@ public class WalletRewardReportStorage {
     List<WalletRewardEntity> rewardEntities = rewardDAO.findWalletRewardEntitiesByIdentityId(identityId, pageable);
     List<WalletReward> walletRewards = rewardEntities.stream()
                                                      .map(rewardEntity -> toDTO(rewardEntity, zoneId))
-                                                     .collect(Collectors.toList());
+                                                     .toList();
     if (!walletRewards.isEmpty()) {
       WalletReward walletReward = walletRewards.getFirst();
       Wallet wallet = walletReward.getWallet();
@@ -251,31 +246,21 @@ public class WalletRewardReportStorage {
   public Page<WalletReward> findWalletRewardsByPeriodIdAndIdentityIds(long periodId,
                                                                       List<Long> identityIds,
                                                                       ZoneId zoneId,
-                                                                      Boolean ineligibleCondition,
-                                                                      Boolean validCondition,
-                                                                      Boolean estimatedCondition,
+                                                                      WalletRewardStatus walletRewardStatus,
                                                                       Pageable pageable) {
     Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodIdAndIdentityIds(periodId,
-                                                                                          identityIds,
-                                                                                          ineligibleCondition,
-                                                                                          validCondition,
-                                                                                          estimatedCondition,
-                                                                                          pageable);
+                                                                                                        identityIds,
+                                                                                                        walletRewardStatus.name(),
+                                                                                                        pageable);
 
     return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
 
   public Page<WalletReward> findWalletRewardsByPeriodId(long periodId,
                                                                       ZoneId zoneId,
-                                                                      Boolean ineligibleCondition,
-                                                                      Boolean validCondition,
-                                                                      Boolean estimatedCondition,
-                                                                      Pageable pageable) {
-    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodId(periodId,
-            ineligibleCondition,
-            validCondition,
-            estimatedCondition,
-            pageable);
+                                                                      WalletRewardStatus walletRewardStatus,
+                                                        Pageable pageable) {
+    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodId(periodId, walletRewardStatus.name(), pageable);
 
     return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
