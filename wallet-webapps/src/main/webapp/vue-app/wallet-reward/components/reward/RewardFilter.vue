@@ -55,9 +55,10 @@
           <span>{{ $t('wallet.administration.rewardDetails.label.status') }}</span>
           <v-radio-group v-model="status" class="mt-1">
             <v-radio :label="$t('wallet.administration.rewardDetails.label.all')" value="ALL" />
-            <v-radio :label="$t('wallet.administration.rewardDetails.label.rewarded')" value="REWARDED" />
-            <v-radio :label="$t('wallet.administration.rewardDetails.label.toReward')" value="TO_REWARD" />
-            <v-radio :label="$t('wallet.administration.rewardDetails.label.notEligible')" value="NOT_ELIGIBLE" />
+            <v-radio :label="$t('wallet.administration.rewardDetails.label.rewarded')" value="VALID" />
+            <v-radio :label="$t('wallet.administration.rewardDetails.label.transactionError')" value="FAILED" />
+            <v-radio :label="$t('wallet.administration.rewardDetails.label.toReward')" value="ESTIMATED" />
+            <v-radio :label="$t('wallet.administration.rewardDetails.label.notEligible')" value="INELIGIBLE" />
           </v-radio-group>
         </v-card-text>
       </form>
