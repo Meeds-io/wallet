@@ -39,12 +39,34 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
   List<WalletRewardEntity> findRewardsByPeriodId(@Param("periodId") long periodId);
 
   @Query("""
-          SELECT rw FROM Reward rw WHERE rw.period.id = :periodId AND
-          (:isValid = TRUE AND (rw.tokensSent > 0 OR rw.tokensToSend > 0) OR :isValid = FALSE AND (rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
+          SELECT rw
+          FROM Reward rw
+          WHERE rw.period.id = :periodId
+            AND (:ineligible IS NULL OR (:ineligible = true AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
+            AND (:valid IS NULL OR (:valid = true AND rw.tokensSent > 0))
+            AND (:estimated IS NULL OR (:estimated = true AND rw.tokensToSend > 0 AND rw.tokensSent <= 0))
       """)
-  Page<WalletRewardEntity> findWalletRewardsByPeriodIdAndStatus(@Param("periodId") long periodId,
-                                                                @Param("isValid") boolean isValid,
-                                                                Pageable pageable);
+  Page<WalletRewardEntity> findWalletRewardsByPeriodId(@Param("periodId") long periodId,
+                                                       @Param("ineligible") Boolean ineligible,
+                                                       @Param("valid") Boolean valid,
+                                                       @Param("estimated") Boolean estimated,
+                                                       Pageable pageable);
+
+  @Query("""
+          SELECT rw
+          FROM Reward rw
+          WHERE rw.period.id = :periodId
+            AND (rw.identityId IN :identityIds)
+            AND (:ineligible IS NULL OR (:ineligible = true AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0))
+            AND (:valid IS NULL OR (:valid = true AND rw.tokensSent > 0))
+            AND (:estimated IS NULL OR (:estimated = true AND rw.tokensToSend > 0 AND rw.tokensSent <= 0))
+      """)
+  Page<WalletRewardEntity> findWalletRewardsByPeriodIdAndIdentityIds(@Param("periodId") long periodId,
+                                                       @Param("identityIds") List<Long> identityIds,
+                                                       @Param("ineligible") Boolean ineligible,
+                                                       @Param("valid") Boolean valid,
+                                                       @Param("estimated") Boolean estimated,
+                                                       Pageable pageable);
 
   @Query("""
           SELECT SUM(rw.points) FROM Reward rw WHERE rw.period.id = :periodId AND
@@ -52,7 +74,8 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
       """)
   Double countWalletRewardsPointsByPeriodIdAndStatus(@Param("periodId") long periodId,
                                                      @Param("isValid") boolean isValid);
- @Query("""
+
+  @Query("""
           SELECT rw FROM Reward rw JOIN rw.period WHERE rw.identityId = :identityId ORDER BY rw.period.startTime DESC, rw.period.endTime ASC
       """)
   List<WalletRewardEntity> findWalletRewardEntitiesByIdentityId(@Param("identityId") long identityId, Pageable pageable);
@@ -62,18 +85,27 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
   @Query("""
           SELECT rw FROM Reward rw WHERE rw.identityId = :identityId AND rw.period.id = :periodId
       """)
-  List<WalletRewardEntity> findRewardByIdentityIdAndPeriodId(@Param("identityId") long identityId, @Param("periodId") long periodId);
+  List<WalletRewardEntity> findRewardByIdentityIdAndPeriodId(@Param("identityId") long identityId,
+                                                             @Param("periodId") long periodId);
 
   @Modifying
   @Transactional
   @Query("""
       UPDATE Reward rw SET rw.transactionHash = :newHash WHERE rw.transactionHash = :oldHash
       """)
-  void replaceRewardTransactions(@Param("oldHash") String oldHash, @Param("newHash") String newHash);
+  void replaceRewardTransactions(@Param("oldHash") String oldHash,
+                                 @Param("newHash") String newHash);
 
-  @Query(value = "SELECT Ranked_Reward.reward_rank FROM ( " +
-          "   SELECT rw.id AS reward_id, RANK() OVER(ORDER BY rw.points DESC) AS reward_rank " +
-          "   FROM Reward rw WHERE rw.period.id = :periodId" +
-          ") Ranked_Reward WHERE Ranked_Reward.reward_id = :id")
-  Integer findRankById(@Param("id") long id, @Param("periodId") long periodId);
+  @Query(""" 
+        SELECT COUNT(*) + 1 AS reward_rank
+        FROM Reward rw
+        WHERE rw.period.id = :periodId
+          AND rw.points > (
+              SELECT rw2.points
+              FROM Reward rw2
+              WHERE rw2.id = :id
+          )
+      """)
+  Integer findRankById(@Param("id") long id,
+                       @Param("periodId") long periodId);
 }
