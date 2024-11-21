@@ -179,7 +179,7 @@ class TestRewardReportREST {
 
   @Test
   void getWalletRewardsAdmin() throws Exception {
-    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyList(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
+    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyList(), any(WalletRewardStatus.class), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
 
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
 
@@ -213,10 +213,10 @@ class TestRewardReportREST {
     when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
     InputStream inputStream = mock(InputStream.class);
 
-    when(rewardReportService.exportXlsx(1, "VALID", rewardSettings.zoneId(), "fileName", Locale.ENGLISH)).thenReturn(inputStream);
+    when(rewardReportService.exportXlsx(1, WalletRewardStatus.ALL, rewardSettings.zoneId(), "fileName", Locale.ENGLISH)).thenReturn(inputStream);
 
     ResultActions response = mockMvc.perform(get(REST_PATH + "/export").param("periodId", "1")
-                                                                       .param("status", "VALID")
+                                                                       .param("status", "ALL")
                                                                        .param("fileName", "fileName")
                                                                        .with(testAdminUser()));
     response.andExpect(status().isOk());
