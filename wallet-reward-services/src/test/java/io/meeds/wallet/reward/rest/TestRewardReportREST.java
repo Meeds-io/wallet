@@ -179,7 +179,7 @@ class TestRewardReportREST {
 
   @Test
   void getWalletRewardsAdmin() throws Exception {
-    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
+    when(rewardReportService.findWalletRewardsByPeriodIdAndStatus(anyLong(), anyList(), anyString(), any(ZoneId.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(walletReward())));
 
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
 

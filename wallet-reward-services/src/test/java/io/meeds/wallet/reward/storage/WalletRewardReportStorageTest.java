@@ -88,7 +88,13 @@ class WalletRewardReportStorageTest {
       when(rewardDAO.count()).thenReturn(1L);
       when(rewardDAO.countWalletRewardEntitiesByIdentityId(IDENTITY_ID)).thenReturn(1.0);
       when(rewardDAO.findRewardsByPeriodId(REWARD_ID)).thenReturn(List.of(rewardEntity));
-      when(rewardDAO.findWalletRewardsByPeriodIdAndStatus(REWARD_PERIOD_ID, true, PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
+      when(rewardDAO.findWalletRewardsByPeriodId(REWARD_PERIOD_ID, null, null, null, PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
+      when(rewardDAO.findWalletRewardsByPeriodIdAndIdentityIds(REWARD_PERIOD_ID,
+                                                               List.of(IDENTITY_ID),
+                                                               null,
+                                                               null,
+                                                               null,
+                                                               PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
       return rewardEntity;
     });
     doAnswer(invocation -> {
@@ -192,7 +198,13 @@ class WalletRewardReportStorageTest {
     walletRewardReportStorage.saveRewardReport(rewardReport);
 
     // Then
-    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodIdAndStatus(REWARD_PERIOD_ID, true, ZoneId.systemDefault(), PAGEABLE));
+    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodIdAndIdentityIds(REWARD_PERIOD_ID,
+                                                                        List.of(IDENTITY_ID),
+                                                                        ZoneId.systemDefault(),
+                                                                        null,
+                                                                        null,
+                                                                        null,
+                                                                        PAGEABLE));
   }
 
   protected RewardReport createRewardReportInstance(boolean isSucceeded) {
