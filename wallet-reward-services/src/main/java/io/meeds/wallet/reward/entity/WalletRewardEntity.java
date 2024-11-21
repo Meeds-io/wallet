@@ -38,7 +38,7 @@ public class WalletRewardEntity implements Serializable {
   private Long                     id;
 
   @Column(name = "IDENTITY_ID", nullable = false)
-  private long                     identityId;
+  private Long                     identityId;
 
   @Column(name = "TRANSACTION_HASH")
   private String                   transactionHash;
