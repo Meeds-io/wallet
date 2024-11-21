@@ -46,7 +46,7 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
             AND (
                 :status = 'ALL'
                 OR (:status = 'INELIGIBLE' AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0)
-                OR (:status = 'VALID' AND rw.tokensSent > 0)
+                OR (:status = 'VALID' AND rw.tokensSent > 0 AND te.isSuccess = true)
                 OR (:status = 'ESTIMATED' AND rw.tokensToSend > 0 AND rw.tokensSent <= 0)
                 OR (:status = 'FAILED' AND rw.transactionHash IS NOT NULL AND te.isPending = false AND te.isSuccess = false)
             )
@@ -64,7 +64,7 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
             AND (
                 :status = 'ALL'
                 OR (:status = 'INELIGIBLE' AND rw.tokensSent <= 0 AND rw.tokensToSend <= 0)
-                OR (:status = 'VALID' AND rw.tokensSent > 0)
+                OR (:status = 'VALID' AND rw.tokensSent > 0 AND te.isSuccess = true)
                 OR (:status = 'ESTIMATED' AND rw.tokensToSend > 0 AND rw.tokensSent <= 0)
                 OR (:status = 'FAILED' AND rw.transactionHash IS NOT NULL AND te.isPending = false AND te.isSuccess = false)
             )
