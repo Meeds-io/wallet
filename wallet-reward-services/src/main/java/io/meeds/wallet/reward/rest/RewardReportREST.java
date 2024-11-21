@@ -132,7 +132,7 @@ public class RewardReportREST {
                                                                 long periodId,
                                                                 @Parameter(description = "Wallet reward status filtering, possible values: ALL, REWARDED, TO_REWARD and NOT_ELIGIBLE. Default value = ALL.")
                                                                 @RequestParam(value = "status", defaultValue = "ALL")
-                                                                String status,
+                                                                WalletRewardStatus status,
                                                                 @Parameter(description = "Field to sort by. Possible values: 'tokensSent', 'points'. Default is 'tokensSent'.")
                                                                 @RequestParam(value = "sortField", defaultValue = "tokensSent") String sortField,
                                                                 @Parameter(description = "Sort direction for tokensToSend field. Possible values: 'asc' (ascending) or 'desc' (descending). Default value = asc.")
@@ -170,9 +170,9 @@ public class RewardReportREST {
                                              @Parameter(description = "Period id", required = true)
                                              @RequestParam("periodId")
                                              long periodId,
-                                             @Parameter(description = "Wallet reward status filtering, possible values: VALId and INVALID. Default value = VALId.")
-                                             @RequestParam(value = "status", defaultValue = "VALID")
-                                             String status,
+                                             @Parameter(description = "Wallet reward status filtering, possible values: ALL, REWARDED, TO_REWARD and NOT_ELIGIBLE. Default value = ALL.")
+                                             @RequestParam(value = "status", defaultValue = "ALL")
+                                             WalletRewardStatus status,
                                              @Parameter(description = "Wallet reward exported file name")
                                              @RequestParam(value = "fileName")
                                              String fileName) {
