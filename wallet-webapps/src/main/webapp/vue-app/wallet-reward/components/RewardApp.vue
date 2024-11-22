@@ -24,27 +24,34 @@
     class="application-body position-static"
     flat>
     <template v-if="!showRewardDetails">
-      <div class="d-flex flex-row">
+      <div class="d-md-flex flex-column flex-md-row no-gutters">
         <v-card
-          class="d-flex flex-column justify-space-between"
-          width="40%"
+          class="d-flex flex-column flex-sm-row flex-md-column col-md-4 no-gutters"
           flat>
-          <wallet-current-balance
+          <div class="d-sm-flex flex-sm-column d-md-block col-sm-6 col-md">
+            <wallet-current-balance
+              :loading="loading"
+              :reward-settings="rewardSettings"
+              :configured-budget="configuredBudget"
+              :admin-wallet="adminWallet"
+              :contract-details="contractDetails" />
+          </div>
+          <div class="d-sm-flex flex-sm-column d-md-block col-sm-6 col-md">
+            <extension-registry-components
+              name="WalletRewardingCard"
+              type="wallet-reward-cards-extensions" />
+          </div>
+        </v-card>
+        <v-card
+          class="d-flex flex-column col-md-8"
+          flat>
+          <wallet-budget-configuration
             :loading="loading"
             :reward-settings="rewardSettings"
-            :configured-budget="configuredBudget"
-            :admin-wallet="adminWallet"
-            :contract-details="contractDetails" />
-          <extension-registry-components
-            name="WalletRewardingCard"
-            type="wallet-reward-cards-extensions" />
+            :settings-updated="settingsUpdated"
+            @openConfiguration="openBudgetConfigurationDrawer"
+            @deleteSetting="deleteRewardSettings" />
         </v-card>
-        <wallet-budget-configuration
-          :loading="loading"
-          :reward-settings="rewardSettings"
-          :settings-updated="settingsUpdated"
-          @openConfiguration="openBudgetConfigurationDrawer"
-          @deleteSetting="deleteRewardSettings" />
       </div>
       <wallet-reward-management
         :loading="loadingRewards"
