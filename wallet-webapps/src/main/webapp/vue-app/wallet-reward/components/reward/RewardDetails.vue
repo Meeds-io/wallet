@@ -106,6 +106,7 @@
       :sort-desc.sync="sortDescending"
       :sort-by.sync="sortBy"
       item-key="identityId"
+      mobile-breakpoint="0"
       disable-pagination
       hide-default-footer
       must-sort>
@@ -222,6 +223,7 @@ export default {
           align: 'center',
           sortable: true,
           width: '50',
+          enabled: !this.isMobile
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.status'),
@@ -244,7 +246,7 @@ export default {
           sortable: false,
           width: '50',
         },
-      ];
+      ].filter(filter => filter.enabled == null || filter.enabled === true);
     },
     rangeDateTimeTitle() {
       return `${this.starDateFormat} to ${this.toDateFormat}`;
@@ -361,6 +363,9 @@ export default {
     filtersCount() {
       return (this.contributorIds?.length && 1 || 0)
           + (this.status !== null && this.status !== 'ALL'? 1 : 0)  ;
+    },
+    isMobile() {
+      return this.$vuetify.breakpoint.mobile;
     },
   },
   watch: {
