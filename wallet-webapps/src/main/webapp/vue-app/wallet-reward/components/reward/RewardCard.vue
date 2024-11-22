@@ -70,7 +70,7 @@
       <v-card-actions class="mt-auto">
         <v-list-item class="px-0">
           <div class="d-flex row no-gutters">
-            <div class="col-12 col-sm-4 mb-2">
+            <div class="col-4 mb-2">
               <v-icon
                 color="primary"
                 class="mr-1"
@@ -79,7 +79,7 @@
               </v-icon>
               <span class="subheading mr-2">{{ participantsCount }}</span>
             </div>
-            <div class="col-12 col-sm-8 mb-2">
+            <div class="col-8 mb-2">
               <v-icon
                 color="primary"
                 class="mr-1"
@@ -88,7 +88,7 @@
               </v-icon>
               <span class="subheading">{{ achievementsCount }} {{ $t('wallet.administration.rewardCard.label.contributions') }}</span>
             </div>
-            <div class="col-12 col-sm-4">
+            <div class="col-4">
               <v-icon
                 color="primary"
                 class="mr-1"
@@ -97,7 +97,7 @@
               </v-icon>
               <span class="subheading mr-2">{{ eligibleContributorsCount }}</span>
             </div>
-            <div class="col-12 col-sm-8">
+            <div class="col-8">
               <v-icon
                 color="primary"
                 class="mr-1"
