@@ -214,30 +214,35 @@ export default {
           value: 'name',
           align: 'start',
           sortable: false,
+          width: '150'
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.points'),
           value: 'points',
           align: 'center',
           sortable: true,
+          width: '50',
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.status'),
           value: 'status',
           align: 'center',
           sortable: false,
+          width: '50',
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.rewards'),
           value: 'tokensToSend',
           align: 'center',
           sortable: true,
+          width: '70',
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.actions'),
           value: 'actions',
           align: 'center',
           sortable: false,
+          width: '50',
         },
       ];
     },
