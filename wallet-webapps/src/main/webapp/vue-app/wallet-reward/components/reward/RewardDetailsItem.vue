@@ -40,7 +40,7 @@
         :avatar="walletAvatar"
         display-no-address />
     </td>
-    <td class="text-center">
+    <td class="text-center d-sm-block d-none">
       <v-btn
         text
         @click="openContributionDetails">
