@@ -20,7 +20,7 @@
 -->
 <template>
   <tr>
-    <td class="text-start">
+    <td class="text-start px-0 px-sm-4">
       <v-avatar size="36px">
         <img
           :src="walletAvatar"
@@ -47,7 +47,7 @@
         {{ points }}
       </v-btn>
     </td>
-    <td class="text-center">
+    <td class="text-center px-0 px-sm-4">
       <template v-if="!status">
         <v-tooltip
           v-if="!amount"
@@ -98,7 +98,7 @@
         <span>{{ statusIconTitle }}</span>
       </v-tooltip>
     </td>
-    <td class="text-center">
+    <td class="text-center px-0 px-sm-4">
       <v-btn
         v-if="amount"
         text
@@ -116,7 +116,7 @@
         <span class="symbol fundsLabels"> {{ tokenSymbol }} </span> 0
       </span>
     </td>
-    <td class="text-center">
+    <td class="text-center px-0 px-sm-4">
       <v-menu
         v-model="showMenu"
         :close-on-content-click="false"
