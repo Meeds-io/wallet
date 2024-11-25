@@ -39,7 +39,7 @@
           <span class="font-weight-bold">{{ rangeDateTimeTitle }}</span>
         </v-card-title>
       </v-card>
-      <div class="d-flex flex-row">
+      <div class="d-flex flex-row ms-0 ms-sm-auto">
         <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
         <template v-if="!completelyProcessed">
           <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center me-auto me-sm-0 ms-sm-auto">
