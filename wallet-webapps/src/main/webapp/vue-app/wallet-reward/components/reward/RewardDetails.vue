@@ -20,9 +20,9 @@
 -->
 <template>
   <v-card class="application-body position-static pb-5" flat>
-    <v-toolbar flat>
+    <div class="d-flex flex-column px-4 pt-1">
       <v-card
-        class="d-flex align-center"
+        class="d-flex align-center width-fit-content"
         flat
         @click="$emit('back')">
         <v-btn
@@ -39,44 +39,45 @@
           <span class="font-weight-bold">{{ rangeDateTimeTitle }}</span>
         </v-card-title>
       </v-card>
-      <v-spacer />
-      <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
-      <template v-if="!completelyProcessed">
-        <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center">
-          <v-icon
-            color="warning"
-            class="pe-2"
-            size="16">
-            fas fa-exclamation-triangle
-          </v-icon>
-          {{ $t('wallet.administration.rewardDetails.sendingError') }}
-        </div>
-        <div v-else-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2">{{ rewardsToSend }}</div>
-        <v-tooltip
-          bottom
-          :disabled="!disabledSendButton">
-          <template #activator="{ on }">
-            <div v-on="on" class="d-inline-block">
-              <v-btn
-                :loading="loadingSending"
-                :disabled="disabledSendButton || sendingInProgress"
-                class="btn btn-primary"
-                @click="sendRewards">
-                {{ $t('wallet.administration.rewardDetails.label.reward') }}
-              </v-btn>
-            </div>
-          </template>
-          <span> {{ disabledSendButtonLabel }} </span>
-        </v-tooltip>
-      </template>
-      <extension-registry-components
-        v-else
-        :params="{rewardReport}"
-        name="WalletRewarding"
-        type="wallet-reward-send-header-extensions"
-        parent-element="div"
-        element="div" />
-    </v-toolbar>
+      <div class="d-flex flex-row">
+        <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
+        <template v-if="!completelyProcessed">
+          <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center me-auto me-sm-0 ms-sm-auto">
+            <v-icon
+              color="warning"
+              class="pe-2"
+              size="16">
+              fas fa-exclamation-triangle
+            </v-icon>
+            {{ $t('wallet.administration.rewardDetails.sendingError') }}
+          </div>
+          <div v-else-if="tokensToSend > 0 && !sendingInProgress" class="text-subtitle pe-2 align-self-center me-auto me-sm-0 ms-sm-auto">{{ rewardsToSend }}</div>
+          <v-tooltip
+            bottom
+            :disabled="!disabledSendButton">
+            <template #activator="{ on }">
+              <div v-on="on" class="d-inline-block">
+                <v-btn
+                  :loading="loadingSending"
+                  :disabled="disabledSendButton || sendingInProgress"
+                  class="btn btn-primary"
+                  @click="sendRewards">
+                  {{ $t('wallet.administration.rewardDetails.label.reward') }}
+                </v-btn>
+              </div>
+            </template>
+            <span> {{ disabledSendButtonLabel }} </span>
+          </v-tooltip>
+        </template>
+        <extension-registry-components
+          v-else
+          :params="{rewardReport}"
+          name="WalletRewarding"
+          type="wallet-reward-send-header-extensions"
+          parent-element="div"
+          element="div" />
+      </div>
+    </div>
     <application-toolbar
       :right-filter-button="{
         text: $t('wallet.administration.rewardDetails.label.filter'),
@@ -215,7 +216,8 @@ export default {
           value: 'name',
           align: 'start',
           sortable: false,
-          width: '150'
+          width: this.isMobile ? '100' : '150',
+          class: this.isMobile ? 'px-0 px-sm-4': ''
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.points'),
@@ -231,6 +233,7 @@ export default {
           align: 'center',
           sortable: false,
           width: '50',
+          class: this.isMobile ? 'px-0 px-sm-4': ''
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.rewards'),
@@ -238,6 +241,7 @@ export default {
           align: 'center',
           sortable: true,
           width: '70',
+          class: this.isMobile ? 'px-0 px-sm-4': ''
         },
         {
           text: this.$t('wallet.administration.rewardDetails.label.actions'),
@@ -245,6 +249,7 @@ export default {
           align: 'center',
           sortable: false,
           width: '50',
+          class: this.isMobile ? 'px-0 px-sm-4': ''
         },
       ].filter(filter => filter.enabled == null || filter.enabled === true);
     },
