@@ -20,7 +20,7 @@
 -->
 <template>
   <v-card class="application-body position-static pb-5" flat>
-    <div class="d-flex flex-column px-4 pt-1">
+    <div class="d-flex flex-column flex-sm-row px-4 pt-2">
       <v-card
         class="d-flex align-center width-fit-content"
         flat
@@ -39,7 +39,7 @@
           <span class="font-weight-bold">{{ rangeDateTimeTitle }}</span>
         </v-card-title>
       </v-card>
-      <div class="d-flex flex-row ms-0 ms-sm-auto">
+      <div class="d-flex align-center flex-row ms-0 ms-sm-auto">
         <span v-if="sendingInProgress" class="text-subtitle pe-2"> {{ $t('wallet.administration.rewardDetails.sendingProgress') }}... </span>
         <template v-if="!completelyProcessed">
           <div v-if="hasErrorTransactions" class="text-subtitle pe-2 align-self-center me-auto me-sm-0 ms-sm-auto">
