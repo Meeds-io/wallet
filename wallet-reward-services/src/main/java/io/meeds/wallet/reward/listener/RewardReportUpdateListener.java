@@ -21,8 +21,12 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import io.meeds.gamification.model.Announcement;
+import io.meeds.gamification.model.RealizationDTO;
+import io.meeds.gamification.service.RealizationService;
 import io.meeds.wallet.model.RewardPeriod;
 import io.meeds.wallet.model.RewardSettings;
 import io.meeds.wallet.reward.service.RewardReportService;
@@ -41,6 +45,7 @@ import jakarta.annotation.PostConstruct;
 
 import static io.meeds.gamification.utils.Utils.*;
 import static io.meeds.wallet.reward.service.WalletRewardSettingsService.REWARD_SETTINGS_UPDATED;
+import static io.meeds.wallet.utils.RewardUtils.parseRFC3339ToZonedDateTime;
 import static io.meeds.wallet.utils.WalletUtils.MODIFY_ADDRESS_ASSOCIATED_EVENT;
 import static io.meeds.wallet.utils.WalletUtils.NEW_ADDRESS_ASSOCIATED_EVENT;
 
@@ -71,6 +76,9 @@ public class RewardReportUpdateListener extends Listener<Object, Map<String, Str
   @Autowired
   private ListenerService           listenerService;
 
+  @Autowired
+  private RealizationService        realizationService;
+
   @PostConstruct
   public void init() {
     EVENT_NAMES.forEach(name -> listenerService.addListener(name, this));
@@ -86,12 +94,31 @@ public class RewardReportUpdateListener extends Listener<Object, Map<String, Str
       updatedSettings = rewardPeriods.stream().collect(Collectors.toMap(RewardPeriod::getId, rewardPeriod -> true));
     } else {
       RewardSettings rewardSettings = rewardSettingsService.getSettings();
-      RewardPeriod rewardPeriod = rewardReportService.getRewardPeriod(rewardSettings.getPeriodType(), LocalDate.now());
+      RewardPeriod rewardPeriod;
+      RealizationDTO realization = getRealization(event.getSource());
+      if (realization != null) {
+        rewardPeriod =
+                     rewardReportService.getRewardPeriod(rewardSettings.getPeriodType(),
+                                                         Objects.requireNonNull(parseRFC3339ToZonedDateTime(realization.getCreatedDate(),
+                                                                                                            rewardSettings.zoneId()))
+                                                                .toLocalDate());
+      } else {
+        rewardPeriod = rewardReportService.getRewardPeriod(rewardSettings.getPeriodType(), LocalDate.now());
+      }
       if (rewardPeriod == null) {
         return;
       }
       updatedSettings.put(rewardPeriod.getId(), true);
     }
     rewardReportService.setRewardSettingChanged(updatedSettings);
+  }
+
+  private RealizationDTO getRealization(Object object) {
+    if (object instanceof RealizationDTO realization) {
+      return realization;
+    } else if (object instanceof Announcement announcement) {
+      return realizationService.getRealizationById(announcement.getId());
+    }
+    return null;
   }
 }
