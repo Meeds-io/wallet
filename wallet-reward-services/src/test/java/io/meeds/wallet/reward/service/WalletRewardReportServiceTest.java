@@ -118,6 +118,15 @@ public class WalletRewardReportServiceTest { // NOSONAR
     assertNotNull(rewardReport);
     // Even if settings are null, the returned rewards shouldn't be empty
     assertEquals(participantsWallet.size(), rewardReport.getRewards().size());
+
+    when(realizationService.getParticipantsBetweenDates(any(Date.class), any(Date.class))).thenReturn(new ArrayList<>());
+    RewardPeriod rewardPeriod = new RewardPeriod();
+    rewardPeriod.setId(1);
+    when(rewardReportService.getRewardPeriod(rewardSettings.getPeriodType(), date)).thenReturn(rewardPeriod);
+
+    rewardReportService.computeRewards(date);
+
+    verify(rewardReportStorage, times(1)).deleteRewardsByPeriodId(1);
   }
 
   @Test
@@ -341,9 +350,9 @@ public class WalletRewardReportServiceTest { // NOSONAR
       Set<WalletReward> walletRewards = new HashSet<>();
       TransactionDetail transactionDetail = new TransactionDetail();
       transactionDetail.setSucceeded(true);
-      walletRewards.add(new WalletReward(wallet, transactionDetail, 1L, 100, 10, rewardPeriod, 3));
-      walletRewards.add(new WalletReward(wallet4, transactionDetail, 4L, 200, 50, rewardPeriod, 2));
-      walletRewards.add(new WalletReward(wallet5, transactionDetail, 5L, 300, 40, rewardPeriod, 1));
+      walletRewards.add(new WalletReward(1, wallet, transactionDetail, 1L, 100, 10, rewardPeriod, 3));
+      walletRewards.add(new WalletReward(2, wallet4, transactionDetail, 4L, 200, 50, rewardPeriod, 2));
+      walletRewards.add(new WalletReward(3, wallet5, transactionDetail, 5L, 300, 40, rewardPeriod, 1));
       rewardReport.setRewards(walletRewards);
       when(rewardReportStorage.getRewardReport(newSettings.getPeriodType(), date, newSettings.zoneId())).thenReturn(rewardReport);
 
@@ -454,6 +463,18 @@ public class WalletRewardReportServiceTest { // NOSONAR
     assertEquals(200, row1.getCell(2).getNumericCellValue());
     assertEquals("MEED 50", row1.getCell(3).getStringCellValue());
     assertEquals("success", row1.getCell(4).getStringCellValue());
+  }
+
+  @Test
+  void testCountWalletRewardsPointsByPeriodIdAndStatus() {
+    rewardReportService.countWalletRewardsPointsByPeriodIdAndStatus(1, true);
+    verify(rewardReportStorage, times(1)).countWalletRewardsPointsByPeriodIdAndStatus(1, true);
+  }
+
+  @Test
+  void testReplaceRewardTransactions() {
+    rewardReportService.replaceRewardTransactions("oldHash", "newHash");
+    verify(rewardReportStorage, times(1)).replaceRewardTransactions("oldHash", "newHash");
   }
 
   protected Wallet newWallet(long identityId) {

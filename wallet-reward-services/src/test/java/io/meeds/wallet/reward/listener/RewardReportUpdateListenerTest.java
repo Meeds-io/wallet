@@ -19,9 +19,13 @@
 package io.meeds.wallet.reward.listener;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.meeds.gamification.model.RealizationDTO;
+import io.meeds.gamification.service.RealizationService;
+import io.meeds.gamification.utils.Utils;
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.reward.service.RewardSettingsService;
 import io.meeds.wallet.reward.service.WalletRewardReportService;
@@ -50,6 +54,9 @@ class RewardReportUpdateListenerTest {
   private ListenerService                    listenerService;
 
   @MockBean
+  private RealizationService                 realizationService;
+
+  @MockBean
   private Event<Object, Map<String, String>> event;
 
   @Autowired
@@ -65,10 +72,7 @@ class RewardReportUpdateListenerTest {
     when(rewardPeriod2.getId()).thenReturn(2L);
 
     // Given
-    List<RewardPeriod> rewardPeriodsNotSent = List.of(
-            rewardPeriod1,
-            rewardPeriod2
-    );
+    List<RewardPeriod> rewardPeriodsNotSent = List.of(rewardPeriod1, rewardPeriod2);
     when(rewardReportService.getRewardPeriodsNotSent()).thenReturn(rewardPeriodsNotSent);
 
     Map<Long, Boolean> initialSettings = new HashMap<>();
@@ -79,9 +83,9 @@ class RewardReportUpdateListenerTest {
 
     // Then
     Map<Long, Boolean> expectedUpdatedSettings = rewardPeriodsNotSent.stream()
-            .collect(Collectors.toMap(RewardPeriod::getId, rewardPeriod -> true));
+                                                                     .collect(Collectors.toMap(RewardPeriod::getId,
+                                                                                               rewardPeriod -> true));
     verify(rewardReportService, times(1)).setRewardSettingChanged(expectedUpdatedSettings);
-
 
     List<RewardPeriod> rewardPeriods = Arrays.asList(rewardPeriod1, rewardPeriod2);
     when(rewardReportService.getRewardPeriodsNotSent()).thenReturn(rewardPeriods);
@@ -117,6 +121,41 @@ class RewardReportUpdateListenerTest {
       // Then
       expectedUpdatedSettings = new HashMap<>();
       expectedUpdatedSettings.put(1L, true);
+      verify(rewardReportService, times(1)).setRewardSettingChanged(expectedUpdatedSettings);
+    }
+  }
+
+  @Test
+  void onRealizationUpdateEvent() {
+    when(event.getEventName()).thenReturn(REWARD_SETTINGS_UPDATED);
+
+    RewardPeriod rewardPeriod1 = mock(RewardPeriod.class);
+    RewardPeriod rewardPeriod2 = mock(RewardPeriod.class);
+    when(rewardPeriod1.getId()).thenReturn(1L);
+    when(rewardPeriod2.getId()).thenReturn(2L);
+
+    when(event.getEventName()).thenReturn("OTHER_EVENT");
+    RealizationDTO realizationDTO = new RealizationDTO();
+    realizationDTO.setId(1L);
+    realizationDTO.setCreatedDate(Utils.toRFC3339Date(new Date(System.currentTimeMillis())));
+    when(event.getSource()).thenReturn(realizationDTO);
+
+    RewardSettings rewardSettings = mock(RewardSettings.class);
+    when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+    RewardPeriod rewardPeriod = mock(RewardPeriod.class);
+    when(rewardPeriod.getId()).thenReturn(2L);
+    when(rewardReportService.getRewardPeriod(any(RewardPeriodType.class), any(LocalDate.class))).thenReturn(rewardPeriod);
+    try (MockedStatic<RewardPeriod> mockedRewardPeriod = mockStatic(RewardPeriod.class)) {
+      mockedRewardPeriod.when(() -> RewardPeriod.getCurrentPeriod(rewardSettings)).thenReturn(rewardPeriod);
+      // Given
+      when(rewardSettingsService.getSettings()).thenReturn(rewardSettings);
+      when(rewardSettings.getPeriodType()).thenReturn(RewardPeriodType.MONTH);
+      when(rewardSettings.zoneId()).thenReturn(ZoneId.systemDefault());
+
+      // When
+      rewardReportUpdateListener.onEvent(event);
+      Map<Long, Boolean> expectedUpdatedSettings = new HashMap<>();
+      expectedUpdatedSettings.put(2L, true);
       verify(rewardReportService, times(1)).setRewardSettingChanged(expectedUpdatedSettings);
     }
   }
