@@ -47,6 +47,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class WalletRewardReportStorage {
@@ -270,6 +271,16 @@ public class WalletRewardReportStorage {
     return countWalletRewardsPoints != null ? countWalletRewardsPoints : 0;
   }
 
+  @Transactional
+  public void deleteRewardById(long rewardId) {
+    rewardDAO.deleteById(rewardId);
+  }
+
+  @Transactional
+  public void deleteRewardsByPeriodId(long periodId) {
+    rewardDAO.deleteRewardsByPeriodId(periodId);
+  }
+
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
     if (period == null) {
       return null;
@@ -287,6 +298,7 @@ public class WalletRewardReportStorage {
 
   private WalletReward toDTO(WalletRewardEntity rewardEntity, ZoneId zoneId) {
     WalletReward walletReward = new WalletReward();
+    walletReward.setId(rewardEntity.getId());
     walletReward.setAmount(rewardEntity.getTokensToSend());
     walletReward.setPoints(rewardEntity.getPoints() == null ? 0d : rewardEntity.getPoints());
     retrieveWallet(rewardEntity, walletReward);

@@ -95,6 +95,9 @@ class WalletRewardReportStorageTest {
                                                                List.of(IDENTITY_ID),
                                                                WalletRewardStatus.ALL.name(),
                                                                PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
+      when(rewardDAO.findWalletRewardsByPeriodId(REWARD_PERIOD_ID,
+                                                 WalletRewardStatus.ESTIMATED.name(),
+                                                 PAGEABLE)).thenReturn(new PageImpl<>(List.of(rewardEntity)));
       return rewardEntity;
     });
     doAnswer(invocation -> {
@@ -151,6 +154,7 @@ class WalletRewardReportStorageTest {
     assertNotNull(walletRewardReportStorage.findRewardReportPeriods(PAGEABLE));
     assertNotNull(walletRewardReportStorage.findRewardPeriodsBetween(12125, 222125, PAGEABLE));
     assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
+    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault(), WalletRewardStatus.ESTIMATED, PAGEABLE));
   }
 
   @Test
@@ -217,9 +221,9 @@ class WalletRewardReportStorageTest {
     Set<WalletReward> walletRewards = new HashSet<>();
     TransactionDetail transactionDetail = new TransactionDetail();
     transactionDetail.setSucceeded(isSucceeded);
-    walletRewards.add(new WalletReward(wallet, transactionDetail, 1L, 100, 10, rewardPeriod, 3));
-    walletRewards.add(new WalletReward(wallet4, transactionDetail, 4L, 200, 50, rewardPeriod, 2));
-    walletRewards.add(new WalletReward(wallet5, transactionDetail, 5L, 300, 40, rewardPeriod, 1));
+    walletRewards.add(new WalletReward(1, wallet, transactionDetail, 1L, 100, 10, rewardPeriod, 3));
+    walletRewards.add(new WalletReward(2, wallet4, transactionDetail, 4L, 200, 50, rewardPeriod, 2));
+    walletRewards.add(new WalletReward(3, wallet5, transactionDetail, 5L, 300, 40, rewardPeriod, 1));
     rewardReport.setRewards(walletRewards);
 
     return rewardReport;

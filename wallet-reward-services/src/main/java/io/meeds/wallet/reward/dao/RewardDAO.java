@@ -114,4 +114,10 @@ public interface RewardDAO extends JpaRepository<WalletRewardEntity, Long> {
       """)
   Integer findRankById(@Param("id") long id,
                        @Param("periodId") long periodId);
+
+  @Modifying
+  @Query("""
+      DELETE FROM Reward wr WHERE wr.period.id = :periodId
+      """)
+  void deleteRewardsByPeriodId(@Param("periodId") long periodId);
 }
