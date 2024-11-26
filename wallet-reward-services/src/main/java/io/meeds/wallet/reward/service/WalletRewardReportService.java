@@ -265,6 +265,10 @@ public class WalletRewardReportService implements RewardReportService {
     if (CollectionUtils.isNotEmpty(participants)) {
       Set<Wallet> wallets = walletAccountService.listWalletsByIdentityIds(participants);
       computeRewardDetails(rewardReport, wallets);
+    } else {
+      RewardPeriod period = getRewardPeriod(rewardPeriod.getRewardPeriodType(), date);
+      rewardReportStorage.deleteRewardsByPeriodId(period.getId());
+      rewardReport.setRewards(new HashSet<>());
     }
     return rewardReport;
   }
@@ -528,6 +532,7 @@ public class WalletRewardReportService implements RewardReportService {
     Map<Long, Double> earnedPoints = getEarnedPoints(identityIds, period.getStartDateInSeconds(), period.getEndDateInSeconds());
 
     computeReward(rewardSettings, earnedPoints, enabledRewards);
+    rewardReport.setRewards(enabledRewards);
   }
 
   private Map<Long, Double> getEarnedPoints(Set<Long> identityIds, long startDateInSeconds, long endDateInSeconds) {
@@ -620,6 +625,20 @@ public class WalletRewardReportService implements RewardReportService {
   private void addRewardsSwitchPointAmount(Set<WalletReward> enabledRewards,
                                            Set<Entry<Long, Double>> identitiesPointsEntries,
                                            double amountPerPoint) {
+
+    Set<Long> identityIds = identitiesPointsEntries.stream().map(Entry::getKey).collect(Collectors.toSet());
+
+    // Iterate over enabledRewards and delete rewards not in
+    // identitiesPointsEntries.
+    Iterator<WalletReward> iterator = enabledRewards.iterator();
+    while (iterator.hasNext()) {
+      WalletReward walletReward = iterator.next();
+      if (!identityIds.contains(walletReward.getIdentityId())) {
+        rewardReportStorage.deleteRewardById(walletReward.getId());
+        iterator.remove();
+      }
+    }
+
     for (Entry<Long, Double> identitiyPointsEntry : identitiesPointsEntries) {
       Long identityId = identitiyPointsEntry.getKey();
       Double points = identitiyPointsEntry.getValue();

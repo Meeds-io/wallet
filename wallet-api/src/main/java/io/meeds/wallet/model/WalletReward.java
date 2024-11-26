@@ -32,6 +32,8 @@ import lombok.EqualsAndHashCode.Exclude;
 public class WalletReward implements Serializable {
   private static final long serialVersionUID = -4328398843364453949L;
 
+  private long              id;
+
   private Wallet            wallet;
 
   @Exclude
