@@ -22,13 +22,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.meeds.wallet.model.*;
+import io.meeds.wallet.reward.dao.RewardPeriodSummaryDAO;
+import io.meeds.wallet.reward.entity.WalletRewardPeriodSummaryEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -59,6 +58,9 @@ public class WalletRewardReportStorage {
 
   @Autowired
   private RewardPeriodDAO          rewardPeriodDAO;
+
+  @Autowired
+  private RewardPeriodSummaryDAO rewardPeriodSummaryDAO;
 
   @Autowired
   private WalletAccountService     walletAccountService;
@@ -116,7 +118,8 @@ public class WalletRewardReportStorage {
       List<WalletRewardEntity> walletRewardEntities = new ArrayList<>();
       rewardEntities.forEach(reward -> {
         List<WalletRewardEntity> walletRewardList = rewardEntities.stream()
-                                                                  .filter(wr -> Objects.equals(wr.getIdentityId(), reward.getIdentityId()))
+                                                                  .filter(wr -> Objects.equals(wr.getIdentityId(),
+                                                                                               reward.getIdentityId()))
                                                                   .toList();
         if (walletRewardList.size() == 1) {
           walletRewardEntities.add(reward);
@@ -223,9 +226,7 @@ public class WalletRewardReportStorage {
   public List<WalletReward> listRewards(long identityId, ZoneId zoneId, int limit) {
     Pageable pageable = PageRequest.of(0, limit);
     List<WalletRewardEntity> rewardEntities = rewardDAO.findWalletRewardEntitiesByIdentityId(identityId, pageable);
-    List<WalletReward> walletRewards = rewardEntities.stream()
-                                                     .map(rewardEntity -> toDTO(rewardEntity, zoneId))
-                                                     .toList();
+    List<WalletReward> walletRewards = rewardEntities.stream().map(rewardEntity -> toDTO(rewardEntity, zoneId)).toList();
     if (!walletRewards.isEmpty()) {
       WalletReward walletReward = walletRewards.getFirst();
       Wallet wallet = walletReward.getWallet();
@@ -258,16 +259,18 @@ public class WalletRewardReportStorage {
   }
 
   public Page<WalletReward> findWalletRewardsByPeriodId(long periodId,
-                                                                      ZoneId zoneId,
-                                                                      WalletRewardStatus walletRewardStatus,
+                                                        ZoneId zoneId,
+                                                        WalletRewardStatus walletRewardStatus,
                                                         Pageable pageable) {
-    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodId(periodId, walletRewardStatus.name(), pageable);
+    Page<WalletRewardEntity> walletRewardEntities = rewardDAO.findWalletRewardsByPeriodId(periodId,
+                                                                                          walletRewardStatus.name(),
+                                                                                          pageable);
 
     return walletRewardEntities.map(walletRewardEntity -> toDTO(walletRewardEntity, zoneId));
   }
 
   public double countWalletRewardsPointsByPeriodIdAndStatus(long periodId, boolean isValid) {
-    Double countWalletRewardsPoints =  rewardDAO.countWalletRewardsPointsByPeriodIdAndStatus(periodId, isValid);
+    Double countWalletRewardsPoints = rewardDAO.countWalletRewardsPointsByPeriodIdAndStatus(periodId, isValid);
     return countWalletRewardsPoints != null ? countWalletRewardsPoints : 0;
   }
 
@@ -280,6 +283,61 @@ public class WalletRewardReportStorage {
   public void deleteRewardsByPeriodId(long periodId) {
     rewardDAO.deleteRewardsByPeriodId(periodId);
   }
+
+  public WalletRewardPeriodSummary findWalletRewardPeriodSummaryByRewardPeriodId(Long rewardPeriodId) {
+    WalletRewardPeriodSummaryEntity walletRewardPeriodSummaryEntity =
+                                                                    rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(rewardPeriodId)
+                                                                                          .orElse(null);
+    if (walletRewardPeriodSummaryEntity == null) {
+      return null;
+    }
+    return toDTO(walletRewardPeriodSummaryEntity);
+  }
+  
+  public WalletRewardPeriodSummary createOrUpdateSummary(WalletRewardPeriodSummary walletRewardPeriodSummary) {
+    WalletRewardPeriodSummaryEntity summary = createOrUpdateSummaryForRewardPeriod(walletRewardPeriodSummary);
+    if (summary == null) {
+      return null;
+    }
+    return toDTO(summary);
+  }
+
+  private WalletRewardPeriodSummaryEntity createOrUpdateSummaryForRewardPeriod(WalletRewardPeriodSummary walletRewardPeriodSummary) {
+    return rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(walletRewardPeriodSummary.getPeriod().getId())
+            .map(existingSummary -> updateSummary(existingSummary, walletRewardPeriodSummary))
+            .orElseGet(() -> createSummary(walletRewardPeriodSummary));
+  }
+
+  private WalletRewardPeriodSummaryEntity updateSummary(WalletRewardPeriodSummaryEntity existing, WalletRewardPeriodSummary newSummary) {
+    existing.setPoints(newSummary.getPoints());
+    existing.setAchievementsCount(newSummary.getAchievementsCount());
+    existing.setParticipantsCount(newSummary.getParticipantsCount());
+    existing.setRecipientsCount(newSummary.getRecipientsCount());
+    existing.setTokensSent(newSummary.getTokensSent());
+    existing.setTokensToSend(newSummary.getTokensToSend());
+    existing.setCompletelyProcessed(newSummary.isCompletelyProcessed());
+    existing.setSentDate(newSummary.getSentDate());
+    return rewardPeriodSummaryDAO.save(existing);
+  }
+
+  private WalletRewardPeriodSummaryEntity createSummary(WalletRewardPeriodSummary walletRewardPeriodSummary) {
+    WalletRewardPeriodSummaryEntity summary = new WalletRewardPeriodSummaryEntity();
+    long rewardPeriodId = walletRewardPeriodSummary.getPeriod().getId();
+    rewardPeriodDAO.findById(rewardPeriodId).ifPresent(summary::setRewardPeriod);
+    if (summary.getRewardPeriod() == null) {
+      return null;
+    }
+    summary.setPoints(walletRewardPeriodSummary.getPoints());
+    summary.setAchievementsCount(walletRewardPeriodSummary.getAchievementsCount());
+    summary.setParticipantsCount(walletRewardPeriodSummary.getParticipantsCount());
+    summary.setRecipientsCount(walletRewardPeriodSummary.getRecipientsCount());
+    summary.setTokensSent(walletRewardPeriodSummary.getTokensSent());
+    summary.setTokensToSend(walletRewardPeriodSummary.getTokensToSend());
+    summary.setCompletelyProcessed(walletRewardPeriodSummary.isCompletelyProcessed());
+    summary.setSentDate(walletRewardPeriodSummary.getSentDate());
+    return rewardPeriodSummaryDAO.save(summary);
+  }
+
 
   private RewardPeriod toDTO(WalletRewardPeriodEntity period) {
     if (period == null) {
@@ -312,6 +370,20 @@ public class WalletRewardReportStorage {
       walletReward.setRank(rank != null ? rank : 0);
     }
     return walletReward;
+  }
+
+  private WalletRewardPeriodSummary toDTO(WalletRewardPeriodSummaryEntity rewardPeriodSummaryEntity) {
+    WalletRewardPeriodSummary walletRewardPeriodSummary = new WalletRewardPeriodSummary();
+    walletRewardPeriodSummary.setPeriod(toDTO(rewardPeriodSummaryEntity.getRewardPeriod()));
+    walletRewardPeriodSummary.setPoints(rewardPeriodSummaryEntity.getPoints());
+    walletRewardPeriodSummary.setAchievementsCount(rewardPeriodSummaryEntity.getAchievementsCount());
+    walletRewardPeriodSummary.setParticipantsCount(rewardPeriodSummaryEntity.getParticipantsCount());
+    walletRewardPeriodSummary.setRecipientsCount(rewardPeriodSummaryEntity.getRecipientsCount());
+    walletRewardPeriodSummary.setTokensSent(rewardPeriodSummaryEntity.getTokensSent());
+    walletRewardPeriodSummary.setTokensToSend(rewardPeriodSummaryEntity.getTokensToSend());
+    walletRewardPeriodSummary.setCompletelyProcessed(rewardPeriodSummaryEntity.getCompletelyProcessed());
+    walletRewardPeriodSummary.setSentDate(rewardPeriodSummaryEntity.getSentDate());
+    return walletRewardPeriodSummary;
   }
 
   private void retrieveTransaction(WalletRewardEntity rewardEntity, WalletReward walletReward) {

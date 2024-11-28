@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RewardReportStatus {
+public class WalletRewardPeriodSummary {
 
   private long         sentDate;
 
@@ -34,7 +34,7 @@ public class RewardReportStatus {
 
   private long         recipientsCount;
 
-  private int          achievementsCount;
+  private long         achievementsCount;
 
   private double       points;
 
