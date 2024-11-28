@@ -39,9 +39,9 @@ public interface RewardReportService {
    * Gets rewards report switch {@link RewardPeriod}
    *
    * @param rewardPeriod a {@link RewardPeriod}
-   * @return a {@link RewardReportStatus}
+   * @return a {@link WalletRewardPeriodSummary}
    */
-  RewardReportStatus getReport(RewardPeriod rewardPeriod);
+  WalletRewardPeriodSummary getReport(RewardPeriod rewardPeriod);
 
   /**
    * Compute rewards swicth configurations for the list of identities passed in
