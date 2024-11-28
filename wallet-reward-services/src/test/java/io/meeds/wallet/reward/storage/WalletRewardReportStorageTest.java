@@ -33,8 +33,10 @@ import java.util.Set;
 import io.meeds.wallet.model.*;
 import io.meeds.wallet.reward.dao.RewardDAO;
 import io.meeds.wallet.reward.dao.RewardPeriodDAO;
+import io.meeds.wallet.reward.dao.RewardPeriodSummaryDAO;
 import io.meeds.wallet.reward.entity.WalletRewardEntity;
 import io.meeds.wallet.reward.entity.WalletRewardPeriodEntity;
+import io.meeds.wallet.reward.entity.WalletRewardPeriodSummaryEntity;
 import io.meeds.wallet.service.WalletAccountService;
 import io.meeds.wallet.service.WalletTransactionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,19 +54,24 @@ import org.springframework.data.domain.Pageable;
 @ExtendWith(MockitoExtension.class)
 class WalletRewardReportStorageTest {
 
-  private static final Long         REWARD_ID        = 2L;
+  private static final Long         REWARD_ID                = 2L;
 
-  private static final Long         REWARD_PERIOD_ID = 2L;
+  private static final Long         REWARD_PERIOD_ID         = 2L;
 
-  private static final Long         IDENTITY_ID      = 5L;
+  private static final Long         REWARD_PERIOD_SUMMARY_ID = 2L;
 
-  private static final Pageable     PAGEABLE         = Pageable.ofSize(2);
+  private static final Long         IDENTITY_ID              = 5L;
+
+  private static final Pageable     PAGEABLE                 = Pageable.ofSize(2);
 
   @MockBean
   private RewardDAO                 rewardDAO;
 
   @MockBean
   private RewardPeriodDAO           rewardPeriodDAO;
+
+  @MockBean
+  private RewardPeriodSummaryDAO    rewardPeriodSummaryDAO;
 
   @MockBean
   private WalletAccountService      walletAccountService;
@@ -127,6 +134,20 @@ class WalletRewardReportStorageTest {
       when(rewardPeriodDAO.findById(entity.getId())).thenReturn(Optional.empty());
       return null;
     }).when(rewardPeriodDAO).delete(any());
+
+    when(rewardPeriodSummaryDAO.save(any())).thenAnswer(invocation -> {
+      WalletRewardPeriodSummaryEntity entity = invocation.getArgument(0);
+      if (entity.getId() == null) {
+        entity.setId(REWARD_PERIOD_SUMMARY_ID);
+      }
+      when(rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
+      return entity;
+    });
+    doAnswer(invocation -> {
+      WalletRewardPeriodEntity entity = invocation.getArgument(0);
+      when(rewardPeriodSummaryDAO.findById(entity.getId())).thenReturn(Optional.empty());
+      return null;
+    }).when(rewardPeriodSummaryDAO).delete(any());
   }
 
   @Test
@@ -154,7 +175,10 @@ class WalletRewardReportStorageTest {
     assertNotNull(walletRewardReportStorage.findRewardReportPeriods(PAGEABLE));
     assertNotNull(walletRewardReportStorage.findRewardPeriodsBetween(12125, 222125, PAGEABLE));
     assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
-    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault(), WalletRewardStatus.ESTIMATED, PAGEABLE));
+    assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodId(REWARD_PERIOD_ID,
+                                                                        ZoneId.systemDefault(),
+                                                                        WalletRewardStatus.ESTIMATED,
+                                                                        PAGEABLE));
   }
 
   @Test
@@ -180,6 +204,7 @@ class WalletRewardReportStorageTest {
     // Then
     assertNotNull(walletRewardReportStorage.getRewardReportByPeriodId(REWARD_PERIOD_ID, ZoneId.systemDefault()));
     assertNotNull(walletRewardReportStorage.getRewardPeriod(RewardPeriodType.WEEK, LocalDate.now(), ZoneId.systemDefault()));
+    assertNotNull(walletRewardReportStorage.getRewardPeriodById(REWARD_PERIOD_ID));
   }
 
   @Test
@@ -203,10 +228,29 @@ class WalletRewardReportStorageTest {
 
     // Then
     assertNotNull(walletRewardReportStorage.findWalletRewardsByPeriodIdAndIdentityIds(REWARD_PERIOD_ID,
-                                                                        List.of(IDENTITY_ID),
-                                                                        ZoneId.systemDefault(),
-                                                                        WalletRewardStatus.ALL,
-                                                                        PAGEABLE));
+                                                                                      List.of(IDENTITY_ID),
+                                                                                      ZoneId.systemDefault(),
+                                                                                      WalletRewardStatus.ALL,
+                                                                                      PAGEABLE));
+  }
+
+  @Test
+  void findWalletRewardPeriodSummaryByRewardPeriodId() {
+    // Given
+    RewardReport rewardReport = createRewardReportInstance(false);
+
+    walletRewardReportStorage.saveRewardReport(rewardReport);
+
+    WalletRewardPeriodSummary walletRewardPeriodSummary = createWalletRewardPeriodSummaryInstance(REWARD_PERIOD_ID);
+
+    walletRewardReportStorage.createOrUpdateSummary(walletRewardPeriodSummary);
+    // Then
+    assertNotNull(walletRewardReportStorage.findWalletRewardPeriodSummaryByRewardPeriodId(REWARD_PERIOD_ID));
+
+    walletRewardPeriodSummary.setPoints(500);
+    walletRewardReportStorage.createOrUpdateSummary(walletRewardPeriodSummary);
+
+    assertNotNull(walletRewardReportStorage.findWalletRewardPeriodSummaryByRewardPeriodId(REWARD_PERIOD_ID));
   }
 
   protected RewardReport createRewardReportInstance(boolean isSucceeded) {
@@ -227,6 +271,22 @@ class WalletRewardReportStorageTest {
     rewardReport.setRewards(walletRewards);
 
     return rewardReport;
+  }
+
+  protected WalletRewardPeriodSummary createWalletRewardPeriodSummaryInstance(long rewardPeriodId) {
+    WalletRewardPeriodSummary walletRewardPeriodSummary = new WalletRewardPeriodSummary();
+    RewardPeriod rewardPeriod = new RewardPeriod();
+    rewardPeriod.setId(rewardPeriodId);
+    walletRewardPeriodSummary.setPeriod(rewardPeriod);
+    walletRewardPeriodSummary.setPoints(100);
+    walletRewardPeriodSummary.setAchievementsCount(5);
+    walletRewardPeriodSummary.setParticipantsCount(2);
+    walletRewardPeriodSummary.setRecipientsCount(1);
+    walletRewardPeriodSummary.setTokensSent(100);
+    walletRewardPeriodSummary.setTokensToSend(100);
+    walletRewardPeriodSummary.setCompletelyProcessed(false);
+
+    return walletRewardPeriodSummary;
   }
 
   protected Wallet newWallet(long identityId) {
