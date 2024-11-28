@@ -88,15 +88,15 @@ public class RewardReportREST {
           @ApiResponse(responseCode = "400", description = "Invalid query input"),
           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public List<RewardReportStatus> getReportsStatus(@Parameter(description = "Page")
-                                                 @RequestParam(value = "page", defaultValue = "0", required = false)
-                                                 int page,
-                                                 @Parameter(description = "Page size")
-                                                 @RequestParam(value = "size", defaultValue = "12", required = false)
-                                                 int size) {
+  public List<WalletRewardPeriodSummary> getRewardPeriodSummary(@Parameter(description = "Page")
+                                                                @RequestParam(value = "page", defaultValue = "0", required = false)
+                                                                int page,
+                                                                @Parameter(description = "Page size")
+                                                                @RequestParam(value = "size", defaultValue = "12", required = false)
+                                                                int size) {
     int skip = page * size;
     List<RewardPeriod> periods = generatePreviousPeriods(skip + size).subList(skip, skip + size);
-    return periods.parallelStream().map(period -> rewardReportService.getReport(period)).toList();
+    return periods.stream().map(period -> rewardReportService.getReport(period)).toList();
   }
 
   @PostMapping(path = "period/compute")
