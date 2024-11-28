@@ -183,11 +183,28 @@ public class WalletRewardReportServiceTest { // NOSONAR
     when(rewardSettingsService.getSettings()).thenReturn(new RewardSettings());
 
     RewardPeriod rewardPeriod = new RewardPeriod(RewardPeriodType.WEEK, ZoneId.systemDefault().getId(), 1725832800, 1726437600);
+    // New reward period
     // When
+    when(realizationService.countParticipantsBetweenDates(any(Date.class), any(Date.class))).thenReturn(0L);
     rewardReportService.getReport(rewardPeriod);
     // Then
-    verify(realizationService, times(1)).countParticipantsBetweenDates(any(Date.class), any(Date.class));
-    verify(realizationService, times(1)).countRealizationsByFilter(any(RealizationFilter.class));
+    verify(rewardReportStorage, times(0)).createOrUpdateSummary(any(WalletRewardPeriodSummary.class));
+
+    // When
+    when(realizationService.countParticipantsBetweenDates(any(Date.class), any(Date.class))).thenReturn(4L);
+    rewardReportService.getReport(rewardPeriod);
+
+    // Then
+    verify(rewardReportStorage, times(1)).createOrUpdateSummary(any(WalletRewardPeriodSummary.class));
+
+    // When existing reward period
+    rewardPeriod.setId(4);
+    when(rewardReportStorage.getRewardPeriod(any(RewardPeriodType.class), any(LocalDate.class), any(ZoneId.class))).thenReturn(rewardPeriod);
+    rewardReportService.getReport(rewardPeriod);
+
+    verify(rewardReportStorage, times(2)).createOrUpdateSummary(any(WalletRewardPeriodSummary.class));
+
+
   }
 
   @Test
