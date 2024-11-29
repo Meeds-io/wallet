@@ -294,14 +294,15 @@ public class RewardReportREST {
   }
 
   @GetMapping(path = "periods")
-  @Secured("rewarding")
+  @Secured("users")
   @Operation(summary = "Retrieves the list of periods sorted descending by start date", method = "GET", description = "returns the list of periods sorted descending by start date")
   @ApiResponses(value = {
           @ApiResponse(responseCode = "200", description = "Request fulfilled"),
           @ApiResponse(responseCode = "400", description = "Invalid query input"),
           @ApiResponse(responseCode = "401", description = "Unauthorized operation"),
           @ApiResponse(responseCode = "500", description = "Internal server error") })
-  public PagedModel<EntityModel<RewardPeriod>> getRewardReportPeriods(Pageable pageable,
+  public PagedModel<EntityModel<RewardPeriod>> getRewardReportPeriods(HttpServletRequest request,
+                                                                      Pageable pageable,
                                                                       PagedResourcesAssembler<RewardPeriod> assembler,
                                                                       @Parameter(description = "From date results to retrieve")
                                                                       @RequestParam(value = "from", defaultValue = "0", required = false)
@@ -311,12 +312,16 @@ public class RewardReportREST {
                                                                       @DefaultValue("0")
                                                                       long to) {
     Page<RewardPeriod> rewardPeriods;
-    if (from >= 0 && to > 0) {
-      rewardPeriods = rewardReportService.findRewardPeriodsBetween(from, to, pageable);
-    } else {
-      rewardPeriods = rewardReportService.findRewardReportPeriods(pageable);
+    try {
+      if (from >= 0 && to > 0) {
+        rewardPeriods = rewardReportService.findRewardPeriodsBetween(request.getRemoteUser(), from, to, pageable);
+      } else {
+        rewardPeriods = rewardReportService.findRewardReportPeriods(request.getRemoteUser(), pageable);
+      }
+      return assembler.toModel(rewardPeriods);
+    } catch (IllegalAccessException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
-    return assembler.toModel(rewardPeriods);
   }
 
   private RewardPeriod getRewardPeriod(String date) {

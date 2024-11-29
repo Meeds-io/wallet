@@ -370,6 +370,22 @@ public class WalletRewardReportService implements RewardReportService {
   }
 
   @Override
+  public Page<RewardPeriod> findRewardReportPeriods(String currentUser, Pageable pageable) throws IllegalAccessException {
+    if (!realizationService.isRealizationManager(currentUser)) {
+      throw new IllegalAccessException("The user is not authorized to access reward periods ");
+    }
+    return rewardReportStorage.findRewardReportPeriods(pageable);
+  }
+
+  @Override
+  public Page<RewardPeriod> findRewardPeriodsBetween(String currentUser, long from, long to, Pageable pageable) throws IllegalAccessException {
+    if (!realizationService.isRealizationManager(currentUser)) {
+      throw new IllegalAccessException("The user is not authorized to access reward periods ");
+    }
+    return rewardReportStorage.findRewardPeriodsBetween(from, to, pageable);
+  }
+
+  @Override
   public List<RewardPeriod> getRewardPeriodsInProgress() {
     return rewardReportStorage.findRewardPeriodsByStatus(RewardStatus.PENDING);
   }
