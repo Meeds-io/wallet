@@ -364,26 +364,31 @@ class TestRewardReportREST {
 
   @Test
   void getRewardReportPeriodsSimpleUser() throws Exception {
+    when(rewardReportService.findRewardReportPeriods(anyString(),
+                                                     any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
+    when(rewardReportService.findRewardPeriodsBetween(anyString(),
+                                                      anyLong(),
+                                                      anyLong(),
+                                                      any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
+
     ResultActions response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "0")
-                                                                        .param("to", "10")
+                                                                        .param("to", "0")
                                                                         .with(testSimpleUser()));
-    response.andExpect(status().isForbidden());
-  }
-
-  @Test
-  void getRewardReportPeriodsAdmin() throws Exception {
-    when(rewardReportService.findRewardReportPeriods(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
-    when(rewardReportService.findRewardPeriodsBetween(anyLong(), anyLong(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(newRewardPeriod())));
-
-    ResultActions response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "0")
-            .param("to", "0")
-                                                                    .with(testAdminUser()));
     response.andExpect(status().isOk());
 
-    response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "11211")
-            .param("to", "225255")
-            .with(testAdminUser()));
+    response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "11211").param("to", "225255").with(testSimpleUser()));
     response.andExpect(status().isOk());
+
+    when(rewardReportService.findRewardReportPeriods(anyString(),
+                                                     any(Pageable.class))).thenThrow(new IllegalAccessException("Access denied"));
+    when(rewardReportService.findRewardPeriodsBetween(anyString(),
+                                                      anyLong(),
+                                                      anyLong(),
+                                                      any(Pageable.class))).thenThrow(new IllegalAccessException("Access denied"));
+
+    response = mockMvc.perform(get(REST_PATH + "/periods").param("from", "11211").param("to", "225255").with(testSimpleUser()));
+    response.andExpect(status().isUnauthorized());
+
   }
 
   @Test
