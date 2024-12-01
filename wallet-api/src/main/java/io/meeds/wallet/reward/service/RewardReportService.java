@@ -157,6 +157,29 @@ public interface RewardReportService {
   Page<RewardPeriod> findRewardPeriodsBetween(long from, long to, Pageable pageable);
 
   /**
+   * Retrieves the list of periods sorted descending by start date
+   * 
+   * @param currentUser user requesting access to reward periods
+   * @param pageable {@link Pageable} the page to be returned.
+   * @return {@link Page} of {@link RewardPeriod}
+   */
+  Page<RewardPeriod> findRewardReportPeriods(String currentUser, Pageable pageable) throws IllegalAccessException;
+
+  /**
+   * Retrieves the list of periods by interval sorted descending by start date
+   * 
+   * @param currentUser user requesting access to reward periods
+   * @param from from date
+   * @param to to date
+   * @param pageable {@link Pageable} the page to be returned.
+   * @return {@link Page} of {@link RewardPeriod}
+   */
+  Page<RewardPeriod> findRewardPeriodsBetween(String currentUser,
+                                              long from,
+                                              long to,
+                                              Pageable pageable) throws IllegalAccessException;
+
+  /**
    * @param currentUser current user listing his rewards
    * @param limit size limit of items to return
    * @return a {@link List} of {@link WalletReward} of current user
