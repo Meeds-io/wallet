@@ -65,6 +65,8 @@ public class WalletRewardReportServiceTest { // NOSONAR
 
   private static final String       ADMIN_USER = "root";
 
+  private static final String       SIMPLE_USER = "user";
+
   private static final Pageable     PAGEABLE   = Pageable.ofSize(2);
 
   @MockBean
@@ -199,11 +201,12 @@ public class WalletRewardReportServiceTest { // NOSONAR
 
     // When existing reward period
     rewardPeriod.setId(4);
-    when(rewardReportStorage.getRewardPeriod(any(RewardPeriodType.class), any(LocalDate.class), any(ZoneId.class))).thenReturn(rewardPeriod);
+    when(rewardReportStorage.getRewardPeriod(any(RewardPeriodType.class),
+                                             any(LocalDate.class),
+                                             any(ZoneId.class))).thenReturn(rewardPeriod);
     rewardReportService.getReport(rewardPeriod);
 
     verify(rewardReportStorage, times(2)).createOrUpdateSummary(any(WalletRewardPeriodSummary.class));
-
 
   }
 
@@ -211,11 +214,24 @@ public class WalletRewardReportServiceTest { // NOSONAR
   void testFindRewardReportPeriods() {
     rewardReportService.findRewardReportPeriods(PAGEABLE);
     verify(rewardReportStorage, times(1)).findRewardReportPeriods(PAGEABLE);
+
+    when(realizationService.isRealizationManager(SIMPLE_USER)).thenReturn(false);
+    assertThrows(IllegalAccessException.class, () -> rewardReportService.findRewardReportPeriods(SIMPLE_USER, PAGEABLE));
+
+    when(realizationService.isRealizationManager(SIMPLE_USER)).thenReturn(true);
+    verify(rewardReportStorage, times(1)).findRewardReportPeriods(PAGEABLE);
   }
 
   @Test
   void testFindRewardPeriodsBetween() {
     rewardReportService.findRewardPeriodsBetween(1725832800, 1726437600, PAGEABLE);
+    verify(rewardReportStorage, times(1)).findRewardPeriodsBetween(1725832800, 1726437600, PAGEABLE);
+
+    when(realizationService.isRealizationManager(SIMPLE_USER)).thenReturn(false);
+    assertThrows(IllegalAccessException.class,
+                 () -> rewardReportService.findRewardPeriodsBetween(SIMPLE_USER, 1725832800, 1726437600, PAGEABLE));
+
+    when(realizationService.isRealizationManager(SIMPLE_USER)).thenReturn(true);
     verify(rewardReportStorage, times(1)).findRewardPeriodsBetween(1725832800, 1726437600, PAGEABLE);
   }
 
@@ -460,7 +476,11 @@ public class WalletRewardReportServiceTest { // NOSONAR
     when(resourceBundle.getString(anyString())).thenReturn("header");
     when(resourceBundleService.getResourceBundle(anyString(), any(Locale.class))).thenReturn(resourceBundle);
 
-    InputStream exportInputStream = rewardReportService.exportXlsx(1, WalletRewardStatus.ALL, newSettings.zoneId(), "file-name", Locale.ENGLISH);
+    InputStream exportInputStream = rewardReportService.exportXlsx(1,
+                                                                   WalletRewardStatus.ALL,
+                                                                   newSettings.zoneId(),
+                                                                   "file-name",
+                                                                   Locale.ENGLISH);
     assertNotNull(exportInputStream);
 
     Workbook workbook = WorkbookFactory.create(exportInputStream);
