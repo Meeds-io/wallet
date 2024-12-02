@@ -72,6 +72,7 @@
         <number-input
           v-model="settingsToSave.threshold"
           :step="1"
+          :min="1"
           :max="1000"
           editable
           class="me-n1 pa-0 ma-0"
@@ -79,7 +80,8 @@
         <div class="ps-4">{{ $t('wallet.administration.budgetConfiguration.points') }}</div>
       </div>
       <span v-if="invalidThreshold" class="error-color d-flex px-4">{{ $t('wallet.administration.budgetConfigurationDrawer.invalidThreshold', {
-        0: maxValueFormatted(1000),
+        0: 1,
+        1: maxValueFormatted(1000),
       }) }}</span>
       <v-card-title class="pb-2">
         {{ $t('wallet.administration.budgetConfigurationDrawer.amount.title') }}
@@ -98,6 +100,7 @@
         <number-input
           v-model="settingsToSave.amount"
           :step="1"
+          :min="5"
           :max="5000"
           editable
           class="me-n1 my-0 pa-0"
@@ -105,7 +108,8 @@
         <div class="ps-4">Meeds</div>
       </div>
       <span v-if="invalidAmount" class="error-color d-flex px-4">{{ $t('wallet.administration.budgetConfigurationDrawer.invalidAmount', {
-        0: maxValueFormatted(5000),
+        0: 5,
+        1:maxValueFormatted(5000),
       }) }}</span>
       <wallet-budget-distribution-forecast
         v-if="distributionForecast"
