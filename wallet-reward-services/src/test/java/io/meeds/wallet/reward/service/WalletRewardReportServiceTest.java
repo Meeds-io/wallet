@@ -194,6 +194,9 @@ public class WalletRewardReportServiceTest { // NOSONAR
 
     // When
     when(realizationService.countParticipantsBetweenDates(any(Date.class), any(Date.class))).thenReturn(4L);
+    when(rewardReportStorage.getRewardPeriod(any(RewardPeriodType.class),
+                                             any(LocalDate.class),
+                                             any(ZoneId.class))).thenReturn(rewardPeriod);
     rewardReportService.getReport(rewardPeriod);
 
     // Then
