@@ -474,13 +474,17 @@ public class WalletRewardReportService implements RewardReportService {
 
   private WalletRewardPeriodSummary handleExistingRewardPeriod(RewardPeriod storedRewardPeriod) {
     WalletRewardPeriodSummary summary = rewardReportStorage.findWalletRewardPeriodSummaryByRewardPeriodId(storedRewardPeriod.getId());
-    if ((storedRewardPeriod.getId() > 0 && Boolean.TRUE.equals(getRewardSettingChanged().get(storedRewardPeriod.getId())))
-            || summary == null) {
+    if ((storedRewardPeriod.getId() > 0 && Boolean.TRUE.equals(getRewardSettingChanged().get(storedRewardPeriod.getId())))) {
       RewardReport rewardReport = computeAndSaveRewards(storedRewardPeriod);
       return updateSummaryWithReport(storedRewardPeriod, rewardReport);
+    } else if (summary == null) {
+      RewardReport rewardReport = computeRewards(storedRewardPeriod.getPeriodMedianDate());
+      return updateSummaryWithReport(storedRewardPeriod, rewardReport);
     }
-    if (!summary.isCompletelyProcessed() && RewardStatus.SUCCESS.equals(storedRewardPeriod.getStatus())) {
-      summary.setCompletelyProcessed(true);
+    if (RewardStatus.SUCCESS.equals(storedRewardPeriod.getStatus())
+        && (!summary.isCompletelyProcessed() || summary.getSentDate() == 0)) {
+      RewardReport rewardReport = computeRewards(storedRewardPeriod.getPeriodMedianDate());
+      summary = buildAndSaveSummary(rewardReport, storedRewardPeriod);
       rewardReportStorage.createOrUpdateSummary(summary);
     }
     return summary;
@@ -492,6 +496,8 @@ public class WalletRewardReportService implements RewardReportService {
     long participantsCount = realizationService.countParticipantsBetweenDates(start, end);
     if (participantsCount > 0) {
       RewardReport rewardReport = computeAndSaveRewards(rewardPeriod);
+      rewardPeriod = getRewardPeriod(rewardPeriod.getRewardPeriodType(), rewardPeriod.getPeriodMedianDate());
+      rewardReport.setPeriod(rewardPeriod);
       return buildAndSaveSummary(rewardReport, rewardPeriod);
     }
     WalletRewardPeriodSummary summary = new WalletRewardPeriodSummary();
