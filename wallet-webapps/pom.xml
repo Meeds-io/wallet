@@ -27,6 +27,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <name>Meeds:: Add-on:: Wallet - Application</name>
   <dependencies>
     <dependency>
+      <groupId>io.meeds.social</groupId>
+      <artifactId>social-component-service</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Platform-ui for Less Variables use-->
+    <dependency>
       <groupId>io.meeds.platform-ui</groupId>
       <artifactId>platform-ui-skin</artifactId>
       <classifier>sources</classifier>
