@@ -185,4 +185,79 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </addColumn>
   </changeSet>
 
+  <changeSet author="reward" id="1.0.0-15">
+    <validCheckSum>ANY</validCheckSum>
+    <addColumn tableName="ADDONS_WALLET_REWARD">
+      <column name="POINTS" type="DOUBLE" defaultValueNumeric="0"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-16" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+    </preConditions>
+    <sql>UPDATE ADDONS_WALLET_REWARD
+         SET POINTS=(SELECT SUM(POINTS)
+                     FROM ADDONS_WALLET_REWARD_PLUGIN
+                     WHERE ADDONS_WALLET_REWARD.REWARD_ID = ADDONS_WALLET_REWARD_PLUGIN.REWARD_ID)
+    </sql>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-17" onValidationFail="MARK_RAN">
+    <preConditions onFail="MARK_RAN">
+      <tableExists tableName="ADDONS_WALLET_GAM_TEAM"/>
+      <tableExists tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
+      <tableExists tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+      <foreignKeyConstraintExists foreignKeyTableName="ADDONS_WALLET_GAM_TEAM_MEMBER"
+                                  foreignKeyName="FK_WALLET_GAM_01"/>
+      <foreignKeyConstraintExists foreignKeyTableName="ADDONS_WALLET_REWARD" foreignKeyName="FK_WALLET_GAM_02"/>
+    </preConditions>
+    <dropForeignKeyConstraint
+            baseTableName="ADDONS_WALLET_GAM_TEAM_MEMBER"
+            constraintName="FK_WALLET_GAM_01"/>
+    <dropForeignKeyConstraint
+            baseTableName="ADDONS_WALLET_REWARD"
+            constraintName="FK_WALLET_GAM_02"/>
+    <dropTable tableName="ADDONS_WALLET_GAM_TEAM"/>
+    <dropTable tableName="ADDONS_WALLET_GAM_TEAM_MEMBER"/>
+    <dropTable tableName="ADDONS_WALLET_REWARD_PLUGIN"/>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-18">
+  <createTable tableName="ADDONS_WALLET_REWARD_PERIOD_SUMMARY">
+    <column name="ID" type="BIGINT" autoIncrement="true">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="PK_REWARD_PERIOD_SUMMARY"/>
+    </column>
+    <column name="REWARD_PERIOD_ID" type="BIGINT">
+      <constraints nullable="false" foreignKeyName="FK_REWARD_PERIOD_SUMMARY_01" references="ADDONS_WALLET_REWARD_PERIOD(REWARD_PERIOD_ID)"/>
+    </column>
+    <column name="POINTS" type="DOUBLE">
+      <constraints nullable="true"/>
+    </column>
+    <column name="TOKENS_SENT" type="DOUBLE" defaultValueNumeric="0">
+      <constraints nullable="false"/>
+    </column>
+    <column name="TOKENS_TO_SEND" type="DOUBLE" defaultValueNumeric="0">
+      <constraints nullable="false"/>
+    </column>
+    <column name="PARTICIPANTS_COUNT" type="BIGINT">
+      <constraints nullable="true"/>
+    </column>
+    <column name="RECIPIENTS_COUNT" type="BIGINT">
+      <constraints nullable="true"/>
+    </column>
+    <column name="ACHIEVEMRNTS_COUNT" type="BIGINT">
+      <constraints nullable="true"/>
+    </column>
+    <column name="COMPLETELY_PROCESSED" type="BOOLEAN">
+      <constraints nullable="true"/>
+    </column>
+    <column name="SENT_DATE" type="BIGINT" defaultValueNumeric="0" />
+  </createTable>
+  </changeSet>
+
+  <changeSet author="reward" id="1.0.0-19" dbms="oracle,postgresql,hsqldb">
+    <createSequence sequenceName="SEQ_WALLET_REWARD_SUMMARY_ID" startValue="1"/>
+  </changeSet>
 </databaseChangeLog>

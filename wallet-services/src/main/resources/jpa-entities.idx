@@ -1,0 +1,6 @@
+io.meeds.wallet.entity.AddressLabelEntity
+io.meeds.wallet.entity.TransactionEntity
+io.meeds.wallet.entity.WalletBackupEntity
+io.meeds.wallet.entity.WalletBlockchainStateEntity
+io.meeds.wallet.entity.WalletEntity
+io.meeds.wallet.entity.WalletPrivateKeyEntity

@@ -16,16 +16,15 @@
  */
 
 export function getRewardSettings() {
-  return fetch('/portal/rest/wallet/api/reward/settings', {
+  return fetch('/wallet/rest/settings/reward', {
     method: 'GET',
     credentials: 'include',
   })
-    .then((resp) => resp && resp.ok && resp.json())
-    .then((settings) => (window.walletRewardSettings = settings));
+    .then((resp) => resp && resp.ok && resp.json());
 }
 
 export function saveRewardSettings(settings) {
-  return fetch('/portal/rest/wallet/api/reward/settings/save', {
+  return fetch('/wallet/rest/settings/reward', {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -37,33 +36,21 @@ export function saveRewardSettings(settings) {
   });
 }
 
-export function getRewardTeams() {
-  return fetch('/portal/rest/wallet/api/reward/team/list', {
-    method: 'GET',
+export function deleteRewardSettings() {
+  return fetch('/wallet/rest/settings/reward', {
+    method: 'DELETE',
     credentials: 'include',
-  }).then((resp) => resp && resp.ok && resp.json());
-}
-
-export function saveRewardTeam(team) {
-  return fetch('/portal/rest/wallet/api/reward/team/save', {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(team),
-  }).then((resp) => resp && resp.ok && resp.json());
-}
-
-export function removeRewardTeam(id) {
-  return fetch(`/portal/rest/wallet/api/reward/team/remove?id=${id}`, {
-    method: 'GET',
-    credentials: 'include',
-  }).then((resp) => resp && resp.ok);
+  }).then(resp => {
+    if (resp && resp.ok) {
+      return resp.json;
+    } else {
+      throw new Error('Error when deleting rewarding settings');
+    }
+  });
 }
 
 export function getRewardDates(date) {
-  return fetch(`/portal/rest/wallet/api/reward/settings/getDates?date=${date}`, {
+  return fetch(`/wallet/rest/settings/reward/getDates?date=${date}`, {
     credentials: 'include',
     headers: {
       Accept: 'application/json',
@@ -72,10 +59,21 @@ export function getRewardDates(date) {
   }).then((resp) => resp && resp.ok && resp.json());
 }
 
-export function sendRewards(date) {
-  return fetch(`/portal/rest/wallet/api/reward/send?date=${date}`, {
-    method: 'GET',
+export function sendRewards(period) {
+  return fetch('/wallet/rest/reward/send', {
     credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      id: period?.id,
+      rewardPeriodType: period?.rewardPeriodType,
+      timeZone: period?.timeZone,
+      startDateInSeconds: period?.startDateInSeconds,
+      endDateInSeconds: period?.endDateInSeconds
+    })
   }).then((resp) => {
     if (!resp || !resp.ok) {
       try {
@@ -96,8 +94,32 @@ export function sendRewards(date) {
   });
 }
 
-export function computeRewards(date) {
-  return fetch(`/portal/rest/wallet/api/reward/compute?date=${date}`, {
+export function computeDistributionForecast(rewardSettings) {
+  return fetch('/wallet/rest/reward/forecast', {
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      periodType: rewardSettings?.periodType,
+      timeZone: rewardSettings?.timeZone,
+      budgetType: rewardSettings?.budgetType,
+      threshold: rewardSettings?.threshold,
+      amount: rewardSettings?.amount
+    })
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error when computing Distribution Forecast');
+    }
+  });
+}
+
+export function computeRewards(page, size) {
+  return fetch(`/wallet/rest/reward/compute?page=${page}&size=${size}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -119,8 +141,38 @@ export function computeRewards(date) {
   });
 }
 
+export function computeRewardsByPeriod(period) {
+  return fetch('/wallet/rest/reward/period/compute', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: period?.id,
+      rewardPeriodType: period?.rewardPeriodType,
+      timeZone: period?.timeZone,
+      startDateInSeconds: period?.startDateInSeconds,
+      endDateInSeconds: period?.endDateInSeconds
+    })
+  }).then((resp) => {
+    if (resp) {
+      try {
+        return resp.json().catch(() => {
+          throw new Error('Error computing rewards');
+        });
+      } catch (e) {
+        throw new Error('Error computing rewards');
+      }
+    } else {
+      throw new Error('Error computing rewards');
+    }
+  });
+}
+
 export function computeRewardsByUser(date) {
-  return fetch(`/portal/rest/wallet/api/reward/compute/user?date=${date}`, {
+  return fetch(`/wallet/rest/reward/compute/user?date=${date}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -136,8 +188,24 @@ export function computeRewardsByUser(date) {
   });
 }
 
+export function exportXlsxUrl(paramsObj) {
+  const formData = new FormData();
+  if (paramsObj) {
+    Object.keys(paramsObj).forEach(key => {
+      const value = paramsObj[key];
+      if (window.Array && Array.isArray && Array.isArray(value)) {
+        value.forEach(val => formData.append(key, val));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  }
+  const params = new URLSearchParams(formData).toString();
+  return `/wallet/rest/reward/export?${params}`;
+}
+
 export function getRewardsByUser(limit) {
-  return fetch(`${eXo.env.portal.context}/${eXo.env.portal.rest}/wallet/api/reward/list?limit=${limit || 10}`, {
+  return fetch(`/wallet/rest/reward/list?limit=${limit || 10}`, {
     method: 'GET',
     credentials: 'include',
   }).then(resp => {
@@ -145,6 +213,56 @@ export function getRewardsByUser(limit) {
       throw new Error('Error while getting user rewards', resp);
     } else {
       return resp.json();
+    }
+  });
+}
+
+export function getRewardReportPeriods(paramsObj) {
+  const formData = new FormData();
+  if (paramsObj) {
+    Object.keys(paramsObj).forEach(key => {
+      const value = paramsObj[key];
+      if (window.Array && Array.isArray && Array.isArray(value)) {
+        value.forEach(val => formData.append(key, val));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  }
+  const params = new URLSearchParams(formData).toString();
+  return fetch(`/wallet/rest/reward/periods?${params}`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error when getting report periods');
+    }
+  });
+}
+
+export function getWalletRewards(paramsObj) {
+  const formData = new FormData();
+  if (paramsObj) {
+    Object.keys(paramsObj).forEach(key => {
+      const value = paramsObj[key];
+      if (window.Array && Array.isArray && Array.isArray(value)) {
+        value.forEach(val => formData.append(key, val));
+      } else {
+        formData.append(key, value);
+      }
+    });
+  }
+  const params = new URLSearchParams(formData).toString();
+  return fetch(`/wallet/rest/reward/rewards?${params}`, {
+    method: 'GET',
+    credentials: 'include',
+  }).then((resp) => {
+    if (resp?.ok) {
+      return resp.json();
+    } else {
+      throw new Error('Error when getting wallet rewards');
     }
   });
 }

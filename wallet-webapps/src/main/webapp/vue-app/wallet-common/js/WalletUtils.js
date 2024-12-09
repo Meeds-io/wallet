@@ -436,6 +436,8 @@ export function getTransactionEtherscanlink() {
     return 'https://polygonscan.com/tx/';
   case 80001:
     return 'https://mumbai.polygonscan.com/tx/';
+  case 80002:
+    return 'https://amoy.polygonscan.com/tx/';
   default:
     return '#';
   }
@@ -666,9 +668,12 @@ export function toFixed(value, decimals) {
     decimals = DEFAULT_DECIMALS;
   }
   try {
-    return Number.parseFloat(value).toFixed(decimals).replace(/(\..*[1-9])0+$/, '$1').replace(/\.0*$/, '');
+    const factor = Math.pow(10, decimals);
+    const truncatedValue = Math.floor(value * factor) / factor;
+    const formattedValue = truncatedValue.toFixed(decimals);
+    return formattedValue.replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.0*$/, '');
   } catch (e) {
-    console.error('Error parsing value ', value, ' same value will be retruned', e);
+    console.error('Error parsing value ', value, ' same value will be returned', e);
     return value;
   }
 }

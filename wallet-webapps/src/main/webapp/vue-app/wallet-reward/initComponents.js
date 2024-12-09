@@ -1,19 +1,33 @@
 import RewardApp from './components/RewardApp.vue';
-import RewardDetailModal from './components/reward/modal/RewardDetailModal.vue';
+import RewardManagement from './components/reward/RewardManagement.vue';
+import RewardCard from './components/reward/RewardCard.vue';
+import RewardDetails from './components/reward/RewardDetails.vue';
+import RewardDetailsItem from './components/reward/RewardDetailsItem.vue';
+import CurrentBalance from './components/reward/CurrentBalance.vue';
+import BudgetConfiguration from './components/reward/BudgetConfiguration.vue';
+import BudgetConfigurationDrawer from './components/reward/BudgetConfigurationDrawer.vue';
+import DistributionForecast from './components/reward/DistributionForecast.vue';
 import TimeZoneSelectBox from './components/reward/TimeZoneSelectBox.vue';
-import ConfigurationTab from './components/reward/ConfigurationTab.vue';
-import SendRewardsTab from './components/reward/SendRewardsTab.vue';
-import TeamForm from './components/reward/TeamForm.vue';
-import TeamsListTab from './components/reward/TeamsListTab.vue';
+import RewardCardMaskContent from './components/reward/RewardCardMaskContent.vue';
+import RewardsDetailsDrawer from './components/reward/RewardsDetailsDrawer.vue';
+import RewardFilter from './components/reward/RewardFilter.vue';
+import GranteeAttendeeItem from './components/reward/GranteeAttendeeItem.vue';
 
 const components = {
   'wallet-reward-app': RewardApp,
-  'wallet-reward-reward-detail-modal': RewardDetailModal,
+  'wallet-reward-management': RewardManagement,
+  'wallet-reward-card': RewardCard,
+  'wallet-reward-details': RewardDetails,
+  'wallet-reward-details-item': RewardDetailsItem,
+  'wallet-rewards-details-drawer': RewardsDetailsDrawer,
+  'wallet-current-balance': CurrentBalance,
+  'wallet-budget-configuration': BudgetConfiguration,
+  'wallet-budget-configuration-drawer': BudgetConfigurationDrawer,
+  'wallet-budget-distribution-forecast': DistributionForecast,
   'wallet-reward-timezone-selectbox': TimeZoneSelectBox,
-  'wallet-reward-configuration-tab': ConfigurationTab,
-  'wallet-reward-send-rewards-tab': SendRewardsTab,
-  'wallet-reward-add-team-form': TeamForm,
-  'wallet-reward-teams-list-tab': TeamsListTab,
+  'wallet-reward-card-mask-content': RewardCardMaskContent,
+  'wallet-reward-filter': RewardFilter,
+  'wallet-reward-grantee-attendee-item': GranteeAttendeeItem,
 };
 
 for (const key in components) {
