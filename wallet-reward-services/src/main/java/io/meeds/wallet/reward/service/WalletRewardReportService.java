@@ -824,7 +824,7 @@ public class WalletRewardReportService implements RewardReportService {
     realizationFilter.setFromDate(fromDate);
     realizationFilter.setToDate(toDate);
     realizationFilter.setEarnerType(IdentityType.USER);
-    realizationFilter.setStatus(RealizationStatus.ACCEPTED);
+    realizationFilter.setStatuses(Collections.singletonList(RealizationStatus.ACCEPTED));
     int achievementsCount = realizationService.countRealizationsByFilter(realizationFilter);
     WalletReward succeededTransaction = rewardReport.getRewards()
                                                     .stream()
