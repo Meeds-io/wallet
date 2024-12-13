@@ -152,7 +152,7 @@ export default {
       if (this.isNotPastPeriod) {
         return {
           icon: 'fas fa-hourglass-half',
-          iconClass: 'secondary--text',
+          iconClass: 'error--text',
           iconColor: null,
           message: this.$t('wallet.administration.rewardCard.status.inPeriod'),
         };
