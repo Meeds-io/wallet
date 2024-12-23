@@ -693,32 +693,36 @@ public class WalletRewardReportService implements RewardReportService {
 
     Set<Long> identityIds = identitiesPointsEntries.stream().map(Entry::getKey).collect(Collectors.toSet());
 
-    // Iterate over enabledRewards and delete rewards not in
-    // identitiesPointsEntries.
-    Iterator<WalletReward> iterator = enabledRewards.iterator();
-    while (iterator.hasNext()) {
-      WalletReward walletReward = iterator.next();
-      if (!identityIds.contains(walletReward.getIdentityId())) {
-        rewardReportStorage.deleteRewardById(walletReward.getId());
-        iterator.remove();
+    WalletReward reward = enabledRewards.stream().filter(r -> r.getPeriod() != null).findFirst().orElse(null);
+    RewardPeriod rewardPeriod = reward != null ? reward.getPeriod() : null;
+    Date startDate = rewardPeriod != null ? new Date(rewardPeriod.getStartDateInSeconds() * 1000L) : null;
+    Date endDate = rewardPeriod != null ? new Date(rewardPeriod.getEndDateInSeconds() * 1000L) : null;
+
+    enabledRewards.removeIf(walletReward -> {
+      if (!identityIds.contains(walletReward.getIdentityId()) && reward != null) {
+        long score = realizationService.getScoreByIdentityIdAndBetweenDates(
+                                                                            String.valueOf(walletReward.getWallet()
+                                                                                                       .getTechnicalId()),
+                                                                            startDate,
+                                                                            endDate);
+        if (score == 0) {
+          rewardReportStorage.deleteRewardById(walletReward.getId());
+          return true;
+        }
       }
-    }
+      return false;
+    });
 
-    for (Entry<Long, Double> identitiyPointsEntry : identitiesPointsEntries) {
-      Long identityId = identitiyPointsEntry.getKey();
-      Double points = identitiyPointsEntry.getValue();
+    identitiesPointsEntries.forEach(entry -> {
+      Long identityId = entry.getKey();
+      Double points = entry.getValue();
       double amount = points * amountPerPoint;
-
-      WalletReward walletReward = enabledRewards.stream()
-                                                .filter(enabledReward -> enabledReward.getIdentityId() == identityId)
-                                                .findFirst()
-                                                .orElse(null);
+      WalletReward walletReward = enabledRewards.stream().filter(r -> r.getIdentityId() == identityId).findFirst().orElse(null);
       if (walletReward != null) {
-        walletReward.setIdentityId(identityId);
         walletReward.setPoints(points);
         walletReward.setAmount(amount);
       }
-    }
+    });
   }
 
   private void filterEligibleMembers(Set<Entry<Long, Double>> identitiesPointsEntries,

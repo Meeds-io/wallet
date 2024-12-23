@@ -40,14 +40,14 @@
         :avatar="walletAvatar"
         display-no-address />
     </td>
-    <td class="text-center d-sm-block d-none">
+    <td class="text-center d-sm-table-cell d-none">
       <v-btn
         text
         @click="openContributionDetails">
         {{ points }}
       </v-btn>
     </td>
-    <td class="text-center px-0 px-sm-4">
+    <td class="d-flex justify-center px-0 px-sm-4">
       <template v-if="!status">
         <v-tooltip
           v-if="!amount"
