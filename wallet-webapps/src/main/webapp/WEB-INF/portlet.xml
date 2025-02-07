@@ -45,10 +45,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <value>/WEB-INF/jsp/wallet.jsp</value>
     </init-param>
     <init-param>
-      <name>prefetch.resources</name>
-      <value>true</value>
-    </init-param>
-    <init-param>
       <name>prefetch.resource.bundles</name>
       <value>locale.addon.Wallet</value>
     </init-param>
@@ -75,10 +71,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <init-param>
       <name>portlet-view-dispatched-file-path</name>
       <value>/html/spaceWallet.html</value>
-    </init-param>
-    <init-param>
-      <name>prefetch.resources</name>
-      <value>true</value>
     </init-param>
     <init-param>
       <name>prefetch.resource.bundles</name>
