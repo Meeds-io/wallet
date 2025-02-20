@@ -1,13 +1,13 @@
+<%@page import="org.exoplatform.portal.application.PortalRequestContext"%>
 <%@ page import="jakarta.servlet.http.HttpServletRequest" %>
 <%@ page import="jakarta.servlet.http.HttpSession" %>
-<%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
 <%@ page import="org.exoplatform.web.application.RequestContext" %>
 <%@ page import="io.meeds.wallet.utils.WalletUtils" %>
 <%
-    HttpServletRequest httpRequest = ((WebuiRequestContext) RequestContext.getCurrentInstance()).getRequest();
-    HttpSession httpSession = httpRequest.getSession();
-    String generatedToken = WalletUtils.generateToken(httpSession);
-    %>
+  HttpServletRequest httpRequest = PortalRequestContext.getCurrentInstance().getRequest();
+  HttpSession httpSession = httpRequest.getSession();
+  String generatedToken = WalletUtils.generateToken(httpSession);
+%>
 <div class="VuetifyApp">
   <div id="WalletApp">
     <script>

@@ -1,6 +1,6 @@
+<%@page import="org.exoplatform.portal.application.PortalRequestContext"%>
 <%@ page import="jakarta.servlet.http.HttpServletRequest" %>
 <%@ page import="jakarta.servlet.http.HttpSession" %>
-<%@ page import="org.exoplatform.webui.application.WebuiRequestContext" %>
 <%@ page import="org.exoplatform.web.application.RequestContext" %>
 <%@ page import="io.meeds.wallet.utils.WalletUtils" %>
 <%
@@ -22,7 +22,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 %>
 <%
-HttpServletRequest httpRequest = ((WebuiRequestContext) RequestContext.getCurrentInstance()).getRequest();
+HttpServletRequest httpRequest = PortalRequestContext.getCurrentInstance().getRequest();
 HttpSession httpSession = httpRequest.getSession();
 String generatedToken = WalletUtils.generateToken(httpSession);
 %>
