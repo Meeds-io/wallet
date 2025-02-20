@@ -38,8 +38,8 @@ import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.service.template.TemplateContext;
 import org.exoplatform.commons.notification.template.TemplateUtils;
+import org.exoplatform.commons.utils.TimeConvertUtils;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
-import org.exoplatform.webui.utils.TimeConvertUtils;
 
 import io.meeds.common.ContainerTransactional;
 import io.meeds.wallet.model.RewardSettings;
