@@ -1,7 +1,6 @@
 <%@ page import="java.math.BigDecimal"%>
 <%@ page import="java.math.RoundingMode"%>
 <%@ page import="org.exoplatform.social.webui.Utils"%>
-<%@ page import="org.exoplatform.webui.application.WebuiRequestContext"%>
 <%@ page import="org.exoplatform.web.application.RequestContext"%>
 <%@ page import="org.exoplatform.container.ExoContainerContext"%>
 <%@ page import="io.meeds.wallet.service.WalletService"%>
