@@ -93,7 +93,7 @@
 <script>
 export default {
   data: () => ({
-    walletLink: `${eXo.env.portal.context}/${eXo.env.portal.myCraftSiteName}/wallet`,
+    walletLink: `${eXo.env.portal.context}/${eXo.env.portal.metaPortalName}/wallet`,
     walletBalance: 0,
     lastReward: 0,
     loading: true,
