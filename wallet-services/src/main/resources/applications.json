@@ -3,15 +3,18 @@
         {
             "name": "Wallet",
             "imagePath": "war:/../images/wallet.png",
+            "overrideMode": "merge",
             "override": false,
             "enabled": true,
             "application": {
                 "title": "Wallet",
-                "description": "Wallet application",
+                "description": "Access personal transactions and rewards",
                 "url": "./wallet",
                 "active": true,
                 "mandatory": false,
                 "mobile": true,
+                "default": false,
+                "pwa": false,
                 "permissions": [
                     "*:/platform/users",
                     "*:/platform/externals"
