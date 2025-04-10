@@ -35,6 +35,7 @@ const config = merge(webpackCommonConfig, {
     achievementsExtensions: './src/main/webapp/vue-app/achievementsExtensions/extensions.js',
     notificationExtension: './src/main/webapp/vue-app/notification-extension/main.js',
     myRewards: './src/main/webapp/vue-app/myRewards/main.js',
+    walletQuickAction: './src/main/webapp/vue-app/quick-actions/extensions.js',
   },
   output: {
     path: path.join(__dirname, 'target/wallet/'),
