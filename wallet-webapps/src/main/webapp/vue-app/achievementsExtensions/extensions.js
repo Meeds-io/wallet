@@ -20,13 +20,9 @@ import {getRewardReportPeriods} from './js/service';
 
 export function init() {
   extensionRegistry.registerExtension('engagementCenterAchievements', 'achievements-extensions', {
-    type: 'wallet',
-    computedCanUpdateStatus: {},
-    rewardReportPeriods: null,
-    init(from, to) {
+    type: 'wallet', computedCanUpdateStatus: {}, rewardReportPeriods: null, init(from, to) {
       this.rewardReportPeriods = getRewardReportPeriods(from, to, 0, -1);
-    },
-    canUpdateStatus(createdDate, updateStatusExtension) {
+    }, canUpdateStatus(createdDate, updateStatusExtension) {
       if (typeof this.computedCanUpdateStatus !== 'undefined' && createdDate in this.computedCanUpdateStatus) {
         return this.computedCanUpdateStatus[createdDate];
       } else {
@@ -43,7 +39,6 @@ export function init() {
           });
         return this.computedCanUpdateStatus[createdDate];
       }
-    },
-    cannotUpdateStatusLabel: 'gamification.achievement.cannotUpdateStatus.tooltip',
+    }, cannotUpdateStatusLabel: 'gamification.achievement.cannotUpdateStatus.tooltip',
   });
 }
