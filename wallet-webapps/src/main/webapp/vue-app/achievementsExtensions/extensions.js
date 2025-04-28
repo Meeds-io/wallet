@@ -37,7 +37,8 @@ export function init() {
         this.rewardReportPeriods = (this.rewardReportPeriods === null || typeof this.rewardReportPeriods === 'undefined') ? getRewardReportPeriods(null, null, 0, -1) : this.rewardReportPeriods;
         this.computedCanUpdateStatus[createdDate] = this.rewardReportPeriods
           .then(data => {
-            this.computedCanUpdateStatus[createdDate] = data?._embedded?.rewardPeriodList?.filter(rewardPeriod => rewardPeriod?.status === 'SUCCESS' && (createdDate >= rewardPeriod?.startDateInSeconds && createdDate <= rewardPeriod?.endDateInSeconds)).length === 0;
+            const rewardPeriodList = data?._embedded?.rewardPeriodList;
+            this.computedCanUpdateStatus[createdDate] = rewardPeriodList?.length ? rewardPeriodList?.filter(rewardPeriod => rewardPeriod?.status === 'SUCCESS' && (createdDate >= rewardPeriod?.startDateInSeconds && createdDate <= rewardPeriod?.endDateInSeconds)).length === 0 : true;
             return this.computedCanUpdateStatus[createdDate];
           });
         return this.computedCanUpdateStatus[createdDate];
