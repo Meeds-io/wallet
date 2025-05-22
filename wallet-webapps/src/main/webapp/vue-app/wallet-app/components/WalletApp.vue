@@ -27,66 +27,55 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <v-layout>
         <v-flex>
           <div class="application-toolbar">
-            <v-tabs
-              v-model="tab"
-              slider-size="4">
-              <v-tab>{{ tabName }}</v-tab>
-            </v-tabs>
-            <v-tabs-items v-model="tab" class="tabs-content">
-              <v-tab-item eager>
-                <v-flex>
-                  <v-layout
-                    row
-                    wrap
-                    class="ms-0 me-0 pr-0">
-                    <wallet-reward-summary
-                      ref="walletSummary"
-                      :wallet="wallet"
-                      :is-space="isSpace"
-                      :is-space-administrator="isSpaceAdministrator"
-                      :initialization-state="initializationState"
-                      :contract-details="contractDetails"
-                      :fiat-symbol="fiatSymbol"
-                      :selected-transaction-hash="selectedTransactionHash"
-                      :selected-contract-method-name="selectedContractMethodName"
-                      @refresh="refreshWallet(true)"
-                      @display-transactions="openAccountDetail"
-                      @error="error = $event" />
-                    <div class="my-8 walletRewardSetup">
-                      <wallet-reward-setup
-                        ref="walletSetup"
-                        :is-space="isSpace"
-                        :wallet="wallet"
-                        :initialization-state="initializationState"
-                        :loading="loading"
-                        @loading="loading = true"
-                        @end-loading="loading = false"
-                        @refresh="init()"
-                        @error="
-                          loading = false;
-                          error = $event;
-                        " />
-                    </div>
-                    <template v-if="wallet && contractDetails && this.initializationState !== 'DELETED'">
-                      <v-flex class="chartHistory WalletChart mt-6">
-                        <wallet-reward-transaction-history-chart-summary
-                          v-if="!loading"
-                          ref="chartPeriodicityButtons"
-                          :periodicity-label="periodicityLabel"
-                          @period-changed="periodChanged"
-                          @error="error = $event" />
-                      </v-flex>
-                      <v-flex class="WalletChart transactionHistoryChart mb-4">
-                        <wallet-reward-transaction-history-chart
-                          ref="transactionHistoryChart"
-                          :class="periodicity"
-                          :transaction-statistics="transactionStatistics" />
-                      </v-flex>
-                    </template>
-                  </v-layout>
+            <v-layout
+              row
+              wrap
+              class="ms-0 me-0 pr-0">
+              <wallet-reward-summary
+                ref="walletSummary"
+                :wallet="wallet"
+                :is-space="isSpace"
+                :is-space-administrator="isSpaceAdministrator"
+                :initialization-state="initializationState"
+                :contract-details="contractDetails"
+                :fiat-symbol="fiatSymbol"
+                :selected-transaction-hash="selectedTransactionHash"
+                :selected-contract-method-name="selectedContractMethodName"
+                @refresh="refreshWallet(true)"
+                @display-transactions="openAccountDetail"
+                @error="error = $event" />
+              <div class="walletRewardSetup">
+                <wallet-reward-setup
+                  ref="walletSetup"
+                  :is-space="isSpace"
+                  :wallet="wallet"
+                  :initialization-state="initializationState"
+                  :loading="loading"
+                  @loading="loading = true"
+                  @end-loading="loading = false"
+                  @refresh="init()"
+                  @error="
+                    loading = false;
+                    error = $event;
+                  " />
+              </div>
+              <template v-if="wallet && contractDetails && this.initializationState !== 'DELETED'">
+                <v-flex class="chartHistory WalletChart mt-6">
+                  <wallet-reward-transaction-history-chart-summary
+                    v-if="!loading"
+                    ref="chartPeriodicityButtons"
+                    :periodicity-label="periodicityLabel"
+                    @period-changed="periodChanged"
+                    @error="error = $event" />
                 </v-flex>
-              </v-tab-item>
-            </v-tabs-items>
+                <v-flex class="WalletChart transactionHistoryChart mb-4">
+                  <wallet-reward-transaction-history-chart
+                    ref="transactionHistoryChart"
+                    :class="periodicity"
+                    :transaction-statistics="transactionStatistics" />
+                </v-flex>
+              </template>
+            </v-layout>
           </div>
         </v-flex>
       </v-layout>
