@@ -15,13 +15,11 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <template>
-  <v-flex id="walletSummary" class="elevation-0 me-3">
+  <v-flex id="walletSummary" class="elevation-0">
     <template>
       <v-container
         fluid
-        ps-3
-        pe-0
-        class="mt-3 px-1 py-1">
+        class="mt-3 px-4 py-1">
         <v-layout
           wrap
           color="transparent"
@@ -93,12 +91,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 warning
               </v-icon>
             </div>
-            <wallet-reward-toolbar-menu
-              ref="walletAppMenu"
-              :is-space="isSpace"
-              :is-space-administrator="isSpaceAdministrator"
-              :wallet="wallet"
-              @refresh="init()" />
           </v-flex>
         </v-layout>
       </v-container>
