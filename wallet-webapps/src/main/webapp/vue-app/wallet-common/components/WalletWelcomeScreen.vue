@@ -1,57 +1,58 @@
 <template>
   <v-flex
     id="walletWelcomeScreen"
-    class="mx-4">
+    class="text-start mx-4 pa-0">
     <v-row no-gutters>
       <v-col>
-        <div class="title px-4 py-4 styleTitle">{{ $t('exoplatform.wallet.label.createWalletInvitation') }}</div>
-        <div class="d-flex flex-column pl-4">
-          <div class="subtitle walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.description') }}</div>
-          <div class="subtitle walletInformation pt-1">{{ $t('exoplatform.wallet.label.createWalletInvitation.spendDescription') }}</div>
+        <div class="text-title mb-4">{{ $t('exoplatform.wallet.label.createWalletInvitation') }}</div>
+        <div class="d-flex flex-column">
+          <div class="walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.description') }}</div>
+          <div class="walletInformation pt-1">{{ $t('exoplatform.wallet.label.createWalletInvitation.spendDescription') }}</div>
         </div>
         <div>
-          <div class="subtitle  px-4 pt-4 styleTitle">{{ $t('exoplatform.wallet.label.createWalletInvitation.secure') }}</div>
-          <ul class="ml-8 px-4 py-4">
-            <li class="subtitle walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.firstDescription') }}</li>
-            <li class="subtitle walletInformation">{{ $t('exoplatform.wallet.label.createWalletInvitation.lastDescription') }}</li>
+          <div class="font-weight-bold my-4">{{ $t('exoplatform.wallet.label.createWalletInvitation.secure') }}</div>
+          <ul class="ps-2">
+            <li class="walletInformation">- {{ $t('exoplatform.wallet.label.createWalletInvitation.firstDescription') }}</li>
+            <li class="walletInformation">- {{ $t('exoplatform.wallet.label.createWalletInvitation.lastDescription') }}</li>
           </ul>
         </div>
       </v-col>
     </v-row>
-    <v-row class="my-12 justify-space-between">
+    <v-row class="justify-space-between mt-4" no-gutters>
       <v-col class="text-start">
         <v-btn
           outlined
           @click="$emit('create-internal-wallet')"
-          class="ignore-vuetify-classes mx-2"
+          class="ignore-vuetify-classes font-weight-bold"
           :title="$t('exoplatform.wallet.label.meedsBtnTitle')">
           {{ $t('exoplatform.wallet.label.internalWallet') }}
           <img
-            class="ml-2"
+            class="ms-2"
             :src="`/wallet/images/meeds.svg`"
             alt="Meeds"
             width="16">
         </v-btn>
-        <div class="subtitle px-4 py-4 walletInformation">{{ $t('exoplatform.wallet.label.createInternalWallet') }}</div>
+        <div class="py-4 walletInformation">{{ $t('exoplatform.wallet.label.createInternalWallet') }}</div>
       </v-col>
+      <v-col cols="auto" class="mx-2" />
       <v-col class="text-start">
         <v-btn
           :disaled="!isMetamaskInstalled"
           @click="connectToMetamask"
           outlined
-          class="ignore-vuetify-classes mx-2"
+          class="ignore-vuetify-classes font-weight-bold"
           :class="metamaskBtnClass"
           :title="metamaskBtnTitle">
           {{ $t('exoplatform.wallet.button.metamask') }}
           <img
-            class="ml-2"
+            class="ms-2"
             :src="`/wallet/images/metamask.svg`"
             alt="Metamask"
             width="25">
         </v-btn>
-        <div class="subtitle px-4 py-4 walletInformation">
+        <div class="py-4 walletInformation">
           {{ $t('exoplatform.wallet.label.createMetamaskWallet') }}
-          <div class="subtitle walletInformation" v-if="!isMetamaskInstalled">
+          <div class="walletInformation" v-if="!isMetamaskInstalled">
             {{ $t('exoplatform.wallet.label.createMetamaskWalletLearnMore') }}
             <a
               :href="metamaskInstallLink"
