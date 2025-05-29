@@ -239,8 +239,8 @@ public class WalletStorage {
     WalletPrivateKeyEntity privateKeyEntity = privateKeyDAO.findByWalletId(walletId);
     if (privateKeyEntity != null) {
       WalletEntity wallet = privateKeyEntity.getWallet();
-      privateKeyDAO.delete(privateKeyEntity);
       wallet.setPrivateKey(null);
+      privateKeyDAO.delete(privateKeyEntity);
       walletAccountDAO.update(wallet);
     }
   }
