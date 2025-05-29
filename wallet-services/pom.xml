@@ -76,7 +76,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15on</artifactId>
+          <artifactId>bcprov-jdk18on</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

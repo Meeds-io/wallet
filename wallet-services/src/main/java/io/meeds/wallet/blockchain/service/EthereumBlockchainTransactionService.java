@@ -44,10 +44,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.servlet.ServletContext;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -57,7 +56,6 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.javascript.jscomp.jarjar.com.google.re2j.Pattern;
 
 import org.exoplatform.commons.api.settings.SettingService;
@@ -69,6 +67,8 @@ import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.wallet.contract.MeedsToken;
+
 import io.meeds.wallet.blockchain.BlockchainRequestException;
 import io.meeds.wallet.blockchain.MaxRequestRateReachedException;
 import io.meeds.wallet.model.ContractDetail;
@@ -80,7 +80,7 @@ import io.meeds.wallet.service.WalletAccountService;
 import io.meeds.wallet.service.WalletService;
 import io.meeds.wallet.service.WalletTransactionService;
 
-import org.exoplatform.wallet.contract.MeedsToken;
+import jakarta.servlet.ServletContext;
 
 public class EthereumBlockchainTransactionService implements BlockchainTransactionService, Startable {
 
@@ -135,7 +135,8 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     this.accountService = accountService;
     this.listenerService = listenerService;
 
-    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-transaction-refresh-%d").build();
+    ThreadFactory namedThreadFactory = new BasicThreadFactory.Builder().namingPattern("Ethereum-transaction-refresh-%d")
+                                                                       .build();
     transactionRefreshExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
   }
 
