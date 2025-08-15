@@ -49,6 +49,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.picocontainer.Startable;
 import org.web3j.abi.EventEncoder;
 import org.web3j.protocol.Web3j;
@@ -63,8 +64,6 @@ import org.web3j.protocol.websocket.WebSocketClient;
 import org.web3j.protocol.websocket.WebSocketListener;
 import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.utils.Async;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.cache.CacheService;
@@ -148,10 +147,12 @@ public class EthereumClientConnector implements ExoWalletStatisticService, Start
     String permanentlyScanParam = System.getProperty("exo.wallet.blockchain.permanentlyScan", "false");
     permanentlyScanBlockchain = Boolean.parseBoolean(permanentlyScanParam);
 
-    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-websocket-connector-%d").build();
+    ThreadFactory namedThreadFactory = new BasicThreadFactory.Builder().namingPattern("Ethereum-websocket-connector-%d")
+                                                                       .build();
     connectionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
 
-    namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Ethereum-contract-flowable-%d").build();
+    namedThreadFactory = new BasicThreadFactory.Builder().namingPattern("Ethereum-contract-flowable-%d")
+                                                         .build();
     subscriptionVerifierExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
 
     ExoCache<String, Transaction> transactionCache = cacheService.getCacheInstance("wallet.blockchain.transaction");
