@@ -19,7 +19,7 @@ files: [
     "source" : "/wallet-services/src/main/resources/locale/notification/WalletNotification_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/WalletNotification.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -29,7 +29,7 @@ files: [
     "source" : "/wallet-services/src/main/resources/locale/addon/Wallet_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/Wallet.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -39,7 +39,7 @@ files: [
     "source" : "/wallet-services/src/main/resources/locale/addon/Gamification_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/Gamification.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -49,7 +49,7 @@ files: [
     "source" : "/wallet-services/src/main/resources/locale/portlet/Portlets_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/Portlets.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -59,7 +59,7 @@ files: [
     "source" : "/wallet-webapps/src/main/resources/locale/navigation/portal/global_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/webui_en.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -69,7 +69,7 @@ files: [
     "source" : "/wallet-webapps/src/main/resources/locale/portlet/NotificationAdministration_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/NotificationAdministration.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -79,7 +79,7 @@ files: [
     "source" : "/wallet-webapps/src/main/resources/locale/portlet/Analytics_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/Analytics.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
@@ -89,7 +89,7 @@ files: [
     "source" : "/wallet-webapps/src/main/resources/locale/portlet/LayoutEditor_en.properties",
 
     "translation" : "%original_path%/%file_name%!_%locale_with_underscore%.%file_extension%",
-    "translation_replace" : {YML_CROWDIN_LANGUAGES_ARG},
+    "translation_replace" : {"_en!": "","ar_SA": "ar","ar_OM": "aro","ca_ES": "ca","co_FR": "co","cs_CZ": "cs","de_DE": "de","el_GR": "el","en_US": "en","es_ES": "es_ES","et_EE": "et","fa_IR": "fa","fi_FI": "fi","fil_PH": "fil","fr_FR": "fr","he_IL": "he","hr_HR": "hr","hu_HU": "hu","id_ID": "id","it_IT": "it","ja_JP": "ja","ko_KR": "ko","lt_LT": "lt","nl_NL": "nl","no_NO": "no","pl_PL": "pl","pt_BR": "pt_BR","pt_PT": "pt_PT","ro_RO": "ro","ru_RU": "ru","sk_SK": "sk","sl_SI": "sl","sq_AL": "sq","sv_SE": "sv_SE","th_TH": "th","tr_TR": "tr","uk_UA": "uk","vi_VN": "vi","zh_CN": "zh_CN","zh_TW": "zh_TW"},
     "dest" : "hub/wallet/LayoutEditor.properties",
     "update_option" : "update_as_unapproved",
     "escape_special_characters": 0,
