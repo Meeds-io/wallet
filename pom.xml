@@ -21,12 +21,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <parent>
     <artifactId>addons-parent-pom</artifactId>
     <groupId>io.meeds.addons</groupId>
-    <version>19-M02</version>
+    <version>19</version>
     <relativePath />
   </parent>
   <groupId>io.meeds.wallet</groupId>
   <artifactId>wallet</artifactId>
-  <version>7.1.0-M26</version>
+  <version>7.1.x-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Meeds:: Add-on:: Wallet Add-on</name>
   <description>Meeds Wallet Add-on</description>
@@ -41,15 +41,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <connection>scm:git:git://github.com/meeds-io/wallet.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/meeds-io/wallet.git</developerConnection>
     <url>https://github.com/meeds-io/wallet</url>
-    <tag>7.1.0-M26</tag>
+    <tag>HEAD</tag>
   </scm>
   <properties>
     <!-- 3rd party libraries versions -->
-    <io.meeds.social.version>7.1.0-M26</io.meeds.social.version>
+    <io.meeds.social.version>7.1.x-SNAPSHOT</io.meeds.social.version>
     <org.exoplatform.wallet.ert-contract.version>1.3.0</org.exoplatform.wallet.ert-contract.version>
-    <io.meeds.platform-ui.version>7.1.0-M26</io.meeds.platform-ui.version>
-    <addon.meeds.analytics.version>7.1.0-M26</addon.meeds.analytics.version>
-    <addon.meeds.gamification.version>7.1.0-M26</addon.meeds.gamification.version>
+    <io.meeds.platform-ui.version>7.1.x-SNAPSHOT</io.meeds.platform-ui.version>
+    <addon.meeds.analytics.version>7.1.x-SNAPSHOT</addon.meeds.analytics.version>
+    <addon.meeds.gamification.version>7.1.x-SNAPSHOT</addon.meeds.gamification.version>
       <!-- Sonar properties -->
     <sonar.organization>meeds-io</sonar.organization>
   </properties>
