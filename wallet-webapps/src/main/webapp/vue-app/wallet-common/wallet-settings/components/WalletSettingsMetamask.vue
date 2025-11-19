@@ -7,7 +7,7 @@
             <img
               class="pr-2 pl-1"
               :src="`/wallet/images/metamask.svg`"
-              alt="Metamask"
+              alt=" "
               width="18">
             <span></span>
             {{ $t('exoplatform.wallet.settings.useMetamask') }}
