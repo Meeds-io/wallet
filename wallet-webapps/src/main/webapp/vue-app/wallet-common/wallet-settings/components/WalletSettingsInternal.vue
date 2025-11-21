@@ -6,7 +6,7 @@
           <img
             class="pr-2 pl-1"
             :src="`/wallet/images/meeds.svg`"
-            alt="Meeds" 
+            alt="" 
             width="16">
           {{ $t('exoplatform.wallet.settings.meedsWallet') }}
         </div>
