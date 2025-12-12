@@ -260,4 +260,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <changeSet author="reward" id="1.0.0-19" dbms="oracle,postgresql,hsqldb">
     <createSequence sequenceName="SEQ_WALLET_REWARD_SUMMARY_ID" startValue="1"/>
   </changeSet>
+  <changeSet author="reward" id="1.0.0-20">
+    <addUniqueConstraint columnNames="REWARD_PERIOD_ID"
+                         constraintName="UQ_REWARD_PERIOD_SUMMARY_PERIOD"
+                         tableName="ADDONS_WALLET_REWARD_PERIOD_SUMMARY"/>
+  </changeSet>
 </databaseChangeLog>
