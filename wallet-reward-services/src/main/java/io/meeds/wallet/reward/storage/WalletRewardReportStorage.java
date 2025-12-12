@@ -286,7 +286,7 @@ public class WalletRewardReportStorage {
 
   public WalletRewardPeriodSummary findWalletRewardPeriodSummaryByRewardPeriodId(Long rewardPeriodId) {
     WalletRewardPeriodSummaryEntity walletRewardPeriodSummaryEntity =
-                                                                    rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(rewardPeriodId)
+                                                                    rewardPeriodSummaryDAO.findTopByRewardPeriod_IdOrderByIdDesc(rewardPeriodId)
                                                                                           .orElse(null);
     if (walletRewardPeriodSummaryEntity == null) {
       return null;
@@ -303,7 +303,7 @@ public class WalletRewardReportStorage {
   }
 
   private WalletRewardPeriodSummaryEntity createOrUpdateSummaryForRewardPeriod(WalletRewardPeriodSummary walletRewardPeriodSummary) {
-    return rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(walletRewardPeriodSummary.getPeriod().getId())
+    return rewardPeriodSummaryDAO.findTopByRewardPeriod_IdOrderByIdDesc(walletRewardPeriodSummary.getPeriod().getId())
             .map(existingSummary -> updateSummary(existingSummary, walletRewardPeriodSummary))
             .orElseGet(() -> createSummary(walletRewardPeriodSummary));
   }
