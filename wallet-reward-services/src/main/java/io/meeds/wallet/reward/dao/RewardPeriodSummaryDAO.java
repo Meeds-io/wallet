@@ -25,5 +25,5 @@ import java.util.Optional;
 
 public interface RewardPeriodSummaryDAO extends JpaRepository<WalletRewardPeriodSummaryEntity, Long> {
 
-    Optional<WalletRewardPeriodSummaryEntity> findWalletRewardPeriodSummaryByRewardPeriodId(Long rewardPeriodId);
+    Optional<WalletRewardPeriodSummaryEntity> findTopByRewardPeriod_IdOrderByIdDesc(Long rewardPeriodId);
 }
