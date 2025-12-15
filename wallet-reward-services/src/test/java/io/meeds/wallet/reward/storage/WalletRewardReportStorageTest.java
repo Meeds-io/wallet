@@ -140,7 +140,7 @@ class WalletRewardReportStorageTest {
       if (entity.getId() == null) {
         entity.setId(REWARD_PERIOD_SUMMARY_ID);
       }
-      when(rewardPeriodSummaryDAO.findWalletRewardPeriodSummaryByRewardPeriodId(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
+      when(rewardPeriodSummaryDAO.findTopByRewardPeriod_IdOrderByIdDesc(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
       return entity;
     });
     doAnswer(invocation -> {
