@@ -124,7 +124,7 @@ class WalletRewardReportStorageTest {
       when(rewardPeriodDAO.findById(REWARD_PERIOD_ID)).thenReturn(Optional.of(entity));
       when(rewardPeriodDAO.findRewardPeriodsBetween(12125, 222125, PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
       when(rewardPeriodDAO.findAll(PAGEABLE)).thenReturn(new PageImpl<>(List.of(entity)));
-      when(rewardPeriodDAO.findRewardPeriodByTypeAndTime(any(RewardPeriodType.class), anyLong())).thenReturn(entity);
+      when(rewardPeriodDAO.findFirstByPeriodTypeAndStartTimeLessThanEqualAndEndTimeGreaterThanOrderByIdDesc(any(RewardPeriodType.class), anyLong(), anyLong())).thenReturn(entity);
       when(rewardPeriodDAO.findWalletRewardPeriodEntitiesByStatus(any(RewardStatus.class))).thenReturn(List.of(entity));
       when(rewardPeriodDAO.count()).thenReturn(1L);
       return entity;

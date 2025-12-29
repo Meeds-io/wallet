@@ -85,16 +85,18 @@ public class WalletRewardReportStorage {
   public RewardReport getRewardReport(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
     RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity =
-                                                rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
-                                                                                              period.getPeriodMedianDateInSeconds());
+                                                rewardPeriodDAO.findFirstByPeriodTypeAndStartTimeLessThanEqualAndEndTimeGreaterThanOrderByIdDesc(periodType,
+                                                                                                                                                 period.getPeriodMedianDateInSeconds(),
+                                                                                                                                                 period.getPeriodMedianDateInSeconds());
     return getRewardReport(rewardPeriodEntity, zoneId);
   }
 
   public RewardPeriod getRewardPeriod(RewardPeriodType periodType, LocalDate date, ZoneId zoneId) {
     RewardPeriod period = periodType.getPeriodOfTime(date, zoneId);
     WalletRewardPeriodEntity rewardPeriodEntity =
-                                                rewardPeriodDAO.findRewardPeriodByTypeAndTime(periodType,
-                                                                                              period.getPeriodMedianDateInSeconds());
+                                                rewardPeriodDAO.findFirstByPeriodTypeAndStartTimeLessThanEqualAndEndTimeGreaterThanOrderByIdDesc(periodType,
+                                                                                                                                                 period.getPeriodMedianDateInSeconds(),
+                                                                                                                                                 period.getPeriodMedianDateInSeconds());
     return toDTO(rewardPeriodEntity);
   }
 
@@ -149,8 +151,9 @@ public class WalletRewardReportStorage {
     }
     RewardPeriod period = rewardReport.getPeriod();
     WalletRewardPeriodEntity rewardPeriodEntity =
-                                                rewardPeriodDAO.findRewardPeriodByTypeAndTime(period.getRewardPeriodType(),
-                                                                                              period.getPeriodMedianDateInSeconds());
+                                                rewardPeriodDAO.findFirstByPeriodTypeAndStartTimeLessThanEqualAndEndTimeGreaterThanOrderByIdDesc(period.getRewardPeriodType(),
+                                                                                                                                                 period.getPeriodMedianDateInSeconds(),
+                                                                                                                                                 period.getPeriodMedianDateInSeconds());
     if (rewardPeriodEntity == null) {
       rewardPeriodEntity = new WalletRewardPeriodEntity();
     } else if (rewardPeriodEntity.getStatus() == RewardStatus.SUCCESS) {
