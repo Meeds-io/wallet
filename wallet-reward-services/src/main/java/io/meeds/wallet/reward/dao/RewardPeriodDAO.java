@@ -39,10 +39,7 @@ public interface RewardPeriodDAO extends JpaRepository<WalletRewardPeriodEntity,
       """)
   Page<WalletRewardPeriodEntity> findRewardPeriodsBetween(@Param("from") long from, @Param("to") long to, Pageable pageable);
 
-  @Query("""
-          SELECT rp FROM RewardPeriod rp WHERE rp.periodType = :periodType AND rp.startTime <= :periodTime AND rp.endTime > :periodTime
-      """)
-  WalletRewardPeriodEntity findRewardPeriodByTypeAndTime(@Param("periodType") RewardPeriodType periodType, @Param("periodTime") long periodTime);
+  WalletRewardPeriodEntity findFirstByPeriodTypeAndStartTimeLessThanEqualAndEndTimeGreaterThanOrderByIdDesc(RewardPeriodType periodType, Long startTime, Long endTime);
 
   List<WalletRewardPeriodEntity> findWalletRewardPeriodEntitiesByStatus(RewardStatus status);
 
