@@ -88,11 +88,11 @@ class RewardSucceedAnalyticsListenerTest {
       assertEquals("sendPeriodRewards", actualStatisticData.getOperation());
       assertEquals("UTC", actualStatisticData.getParameters().get("rewardPeriodTimeZone"));
       assertEquals("month", actualStatisticData.getParameters().get("rewardPeriodType"));
-      assertEquals("10", actualStatisticData.getParameters().get("rewardTransactionsCount"));
-      assertEquals("500.0", actualStatisticData.getParameters().get("rewardTokensSent"));
-      assertEquals("1000.0", actualStatisticData.getParameters().get("rewardTokensToSend"));
-      assertEquals("5", actualStatisticData.getParameters().get("rewardRecipientWalletCount"));
-      assertEquals("1", actualStatisticData.getParameters().get("rewardParticipantWalletCount"));
+      assertEquals(10l, actualStatisticData.getParameters().get("rewardTransactionsCount"));
+      assertEquals(500d, actualStatisticData.getParameters().get("rewardTokensSent"));
+      assertEquals(1000d, actualStatisticData.getParameters().get("rewardTokensToSend"));
+      assertEquals(5l, actualStatisticData.getParameters().get("rewardRecipientWalletCount"));
+      assertEquals(1, actualStatisticData.getParameters().get("rewardParticipantWalletCount"));
     }
   }
 }
