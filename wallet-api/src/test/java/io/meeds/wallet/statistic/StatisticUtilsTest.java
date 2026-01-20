@@ -80,13 +80,13 @@ public class StatisticUtilsTest {
     assertEquals(StatisticStatus.valueOf(parameters.get(STATUS).toString().toUpperCase()), statisticData.getStatus());
     assertEquals(Long.parseLong(parameters.get(STATUS_CODE).toString()), statisticData.getErrorCode());
     assertEquals(0, statisticData.getUserId());
-    assertEquals(String.valueOf(toWallet.getTechnicalId()), statisticData.getParameters().get("toIdentityId"));
+    assertEquals(toWallet.getTechnicalId(), statisticData.getParameters().get("toIdentityId"));
     assertEquals(toWallet.getAddress(), statisticData.getParameters().get("toWalletAddress"));
-    assertEquals(String.valueOf(fromWallet.getTechnicalId()), statisticData.getParameters().get("fromIdentityId"));
+    assertEquals(fromWallet.getTechnicalId(), statisticData.getParameters().get("fromIdentityId"));
     assertEquals(fromWallet.getAddress(), statisticData.getParameters().get("fromWalletAddress"));
-    assertEquals(String.valueOf(byWallet.getTechnicalId()), statisticData.getParameters().get("byIdentityId"));
+    assertEquals(byWallet.getTechnicalId(), statisticData.getParameters().get("byIdentityId"));
     assertEquals(byWallet.getAddress(), statisticData.getParameters().get("byWalletAddress"));
-    assertEquals(String.valueOf(wallet.getTechnicalId()),
+    assertEquals(wallet.getTechnicalId(),
                  statisticData.getParameters().get(AnalyticsUtils.FIELD_SOCIAL_IDENTITY_ID));
     assertEquals(wallet.getAddress(), statisticData.getParameters().get("walletAddress"));
   }
