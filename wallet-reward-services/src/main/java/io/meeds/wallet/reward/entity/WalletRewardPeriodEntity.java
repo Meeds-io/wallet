@@ -18,13 +18,19 @@ package io.meeds.wallet.reward.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.*;
-
-import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
 
+import io.meeds.common.persistence.PortableSequence;
 import io.meeds.wallet.model.RewardPeriodType;
 import io.meeds.wallet.model.RewardStatus;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity(name = "RewardPeriod")
 @DynamicUpdate
@@ -35,8 +41,7 @@ public class WalletRewardPeriodEntity implements Serializable {
   private static final long serialVersionUID = -6286934482105645678L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_REWARD_PERIOD_ID", sequenceName = "SEQ_WALLET_REWARD_PERIOD_ID", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_REWARD_PERIOD_ID")
+  @PortableSequence(name = "SEQ_WALLET_REWARD_PERIOD_ID")
   @Column(name = "REWARD_PERIOD_ID")
   private Long              id;
 

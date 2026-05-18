@@ -18,9 +18,16 @@ package io.meeds.wallet.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.*;
+import io.meeds.common.persistence.PortableSequence;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity(name = "WalletBackupEntity")
 @Table(name = "ADDONS_WALLET_ACCOUNT_BACKUP")
@@ -30,8 +37,7 @@ public class WalletBackupEntity implements Serializable {
   private static final long serialVersionUID = -8212394514591241477L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_BACKUP_ID", sequenceName = "SEQ_WALLET_BACKUP_ID", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_BACKUP_ID")
+  @PortableSequence(name = "SEQ_WALLET_BACKUP_ID")
   @Column(name = "WALLET_BACKUP_ID")
 
   private Long         id;

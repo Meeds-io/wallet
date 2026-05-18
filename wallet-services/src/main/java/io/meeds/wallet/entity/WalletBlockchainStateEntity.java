@@ -18,11 +18,20 @@ package io.meeds.wallet.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.*;
-
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
+import io.meeds.common.persistence.PortableSequence;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
 
 @Entity(name = "WalletBlockchainState")
 @DynamicUpdate
@@ -37,8 +46,7 @@ public class WalletBlockchainStateEntity implements Serializable {
   private static final long serialVersionUID = -7294965683405044055L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_STATE", sequenceName = "SEQ_WALLET_STATE", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_STATE")
+  @PortableSequence(name = "SEQ_WALLET_STATE")
   @Column(name = "BLOCKCHAIN_STATE_ID")
   private Long              id;
 

@@ -19,15 +19,23 @@ package io.meeds.wallet.entity;
 import java.io.Serializable;
 import java.util.Collection;
 
-import jakarta.persistence.*;
-
 import org.hibernate.annotations.DynamicUpdate;
-
-import org.exoplatform.commons.api.persistence.ExoEntity;
 
 import io.meeds.wallet.model.WalletProvider;
 import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.model.WalletType;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity(name = "Wallet")
 @DynamicUpdate

@@ -45,7 +45,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -64,19 +64,19 @@ class WalletRewardReportStorageTest {
 
   private static final Pageable     PAGEABLE                 = Pageable.ofSize(2);
 
-  @MockBean
+  @MockitoBean
   private RewardDAO                 rewardDAO;
 
-  @MockBean
+  @MockitoBean
   private RewardPeriodDAO           rewardPeriodDAO;
 
-  @MockBean
+  @MockitoBean
   private RewardPeriodSummaryDAO    rewardPeriodSummaryDAO;
 
-  @MockBean
+  @MockitoBean
   private WalletAccountService      walletAccountService;
 
-  @MockBean
+  @MockitoBean
   private WalletTransactionService  walletTransactionService;
 
   @Autowired
