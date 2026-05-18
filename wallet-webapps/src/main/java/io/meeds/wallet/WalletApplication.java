@@ -19,7 +19,7 @@
 package io.meeds.wallet;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseAutoConfiguration;
 import org.springframework.context.annotation.PropertySource;
 
 import io.meeds.spring.AvailableIntegration;

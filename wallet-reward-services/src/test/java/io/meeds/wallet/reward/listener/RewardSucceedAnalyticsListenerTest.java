@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
@@ -45,10 +45,10 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = { RewardSucceedAnalyticsListener.class, })
 class RewardSucceedAnalyticsListenerTest {
 
-  @MockBean
+  @MockitoBean
   private ListenerService                    listenerService;
 
-  @MockBean
+  @MockitoBean
   private Event<RewardReport, Object>  event;
 
   @Autowired
