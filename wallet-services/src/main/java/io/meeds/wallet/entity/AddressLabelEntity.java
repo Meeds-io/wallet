@@ -18,11 +18,14 @@ package io.meeds.wallet.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.*;
-
 import org.hibernate.annotations.DynamicUpdate;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
+import io.meeds.common.persistence.PortableSequence;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity(name = "Label")
 @DynamicUpdate
@@ -31,8 +34,7 @@ public class AddressLabelEntity implements Serializable {
   private static final long serialVersionUID = -1622032986992776281L;
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_LABEL", sequenceName = "SEQ_WALLET_LABEL", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_LABEL")
+  @PortableSequence(name = "SEQ_WALLET_LABEL")
   @Column(name = "LABEL_ID")
   private Long              id;
 

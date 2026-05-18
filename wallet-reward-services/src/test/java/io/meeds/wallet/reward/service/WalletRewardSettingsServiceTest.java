@@ -30,7 +30,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,10 +41,10 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = { WalletRewardSettingsService.class })
 public class WalletRewardSettingsServiceTest {
 
-  @MockBean
+  @MockitoBean
   private SettingService        settingService;
 
-  @MockBean
+  @MockitoBean
   private ListenerService       listenerService;
 
   @Autowired

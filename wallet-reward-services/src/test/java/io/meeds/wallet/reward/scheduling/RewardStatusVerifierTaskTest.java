@@ -28,7 +28,7 @@ import org.exoplatform.services.listener.ListenerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static io.meeds.wallet.utils.RewardUtils.REWARD_SUCCESS_EVENT_NAME;
 import static org.mockito.Mockito.*;
@@ -36,13 +36,13 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = { RewardStatusVerifierTask.class })
 class RewardStatusVerifierTaskTest {
 
-  @MockBean
+  @MockitoBean
   private RewardReportService      rewardReportService;
 
-  @MockBean
+  @MockitoBean
   private WalletAccountService     walletAccountService;
 
-  @MockBean
+  @MockitoBean
   private ListenerService          listenerService;
 
   @Autowired

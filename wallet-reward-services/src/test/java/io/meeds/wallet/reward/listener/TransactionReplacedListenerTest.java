@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
@@ -39,13 +39,13 @@ class TransactionReplacedListenerTest {
 
   private static final String                EVENT_NAME = "exo.wallet.transaction.replaced";
 
-  @MockBean
+  @MockitoBean
   private ListenerService                    listenerService;
 
-  @MockBean
+  @MockitoBean
   private RewardReportService                rewardReportService;
 
-  @MockBean
+  @MockitoBean
   private Event<Object, Map<String, String>> event;
 
   @Autowired
