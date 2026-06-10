@@ -89,26 +89,20 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
 
     address = StringUtils.lowerCase(address);
     contractAddress = StringUtils.lowerCase(contractAddress);
-    StringBuilder queryString = new StringBuilder("SELECT tx FROM WalletTransaction tx WHERE tx.networkId = ");
-    queryString.append(networkId);
+    StringBuilder queryString = new StringBuilder("SELECT tx FROM WalletTransaction tx WHERE tx.networkId = :networkId");
 
     if (!includeAdministrationTransactions) {
       queryString.append(" AND tx.isAdminOperation = FALSE");
     }
     queryString.append(" AND tx.isDropped = FALSE");
 
-    queryString.append(" AND (tx.fromAddress = '");
-    queryString.append(address);
-    queryString.append("' OR tx.toAddress = '");
-    queryString.append(address);
-    queryString.append("' OR tx.byAddress = '");
-    queryString.append(address);
-    queryString.append("')");
+    queryString.append(" AND (tx.fromAddress = :address");
+    queryString.append(" OR tx.toAddress = :address");
+    queryString.append(" OR tx.byAddress = :address");
+    queryString.append(")");
 
     if (StringUtils.isNotBlank(contractMethodName)) {
-      queryString.append(" AND tx.contractMethodName = '");
-      queryString.append(contractMethodName);
-      queryString.append("'");
+      queryString.append(" AND tx.contractMethodName = :methodName");
     }
 
     if (onlyPending) {
@@ -116,13 +110,22 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     }
 
     if (StringUtils.isNotBlank(contractAddress)) {
-      queryString.append(" AND tx.contractAddress = '");
-      queryString.append(contractAddress);
-      queryString.append("' ");
+      queryString.append(" AND tx.contractAddress = :contractAddress");
     }
 
     queryString.append(" ORDER BY tx.createdDate DESC");
     TypedQuery<TransactionEntity> query = getEntityManager().createQuery(queryString.toString(), TransactionEntity.class);
+    query.setParameter(ADDRESS_PARAM, address);
+    query.setParameter(NETWORK_ID_PARAM, networkId);
+
+    if (StringUtils.isNotBlank(contractMethodName)) {
+      query.setParameter(CONTRACT_METHOD_NAME_PARAM, contractMethodName);
+    }
+
+    if (StringUtils.isNotBlank(contractAddress)) {
+      query.setParameter(CONTRACT_ADDRESS_PARAM, contractAddress);
+    }
+
     if (limit > 0) {
       query.setMaxResults(limit);
     }
