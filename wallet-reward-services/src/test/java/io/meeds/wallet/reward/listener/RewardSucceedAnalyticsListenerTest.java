@@ -92,7 +92,7 @@ class RewardSucceedAnalyticsListenerTest {
       assertEquals(500d, actualStatisticData.getParameters().get("rewardTokensSent"));
       assertEquals(1000d, actualStatisticData.getParameters().get("rewardTokensToSend"));
       assertEquals(5l, actualStatisticData.getParameters().get("rewardRecipientWalletCount"));
-      assertEquals(1, actualStatisticData.getParameters().get("rewardParticipantWalletCount"));
+      assertEquals(1l, actualStatisticData.getParameters().get("rewardParticipantWalletCount"));
     }
   }
 }
