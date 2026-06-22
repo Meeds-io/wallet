@@ -109,16 +109,16 @@ public class StatisticUtils {
 
         String prefix = key.replace("wallet", "").replace("Wallet", "");
         if (StringUtils.isBlank(prefix)) {
-          statisticData.addParameter(AnalyticsUtils.FIELD_SOCIAL_IDENTITY_ID, wallet.getTechnicalId());
-          statisticData.addParameter("walletAddress", wallet.getAddress());
+          statisticData.addKeyword(AnalyticsUtils.FIELD_SOCIAL_IDENTITY_ID, wallet.getTechnicalId());
+          statisticData.addKeyword("walletAddress", wallet.getAddress());
         } else {
           String entryKey = prefix + StringUtils.capitalize(AnalyticsUtils.FIELD_SOCIAL_IDENTITY_ID);
-          statisticData.addParameter(entryKey, wallet.getTechnicalId());
-          statisticData.addParameter(prefix + "WalletAddress", wallet.getAddress());
+          statisticData.addKeyword(entryKey, wallet.getTechnicalId());
+          statisticData.addKeyword(prefix + "WalletAddress", wallet.getAddress());
         }
       }
     }
-    parameters.forEach(statisticData::addParameter);
+    parameters.forEach(statisticData::addKeyword);
     analyticsConsumer.accept(statisticData);
   }
 
