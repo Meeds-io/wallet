@@ -63,17 +63,17 @@ public class RewardSucceedAnalyticsListener extends Listener<RewardReport, Objec
     statisticData.setModule("wallet");
     statisticData.setSubModule("reward");
     statisticData.setOperation("sendPeriodRewards");
-    statisticData.addParameter("rewardPeriodStartDate",
-                               Date.from(Instant.ofEpochSecond(rewardReport.getPeriod().getStartDateInSeconds())));
-    statisticData.addParameter("rewardPeriodEndDate",
-                               Date.from(Instant.ofEpochSecond(rewardReport.getPeriod().getEndDateInSeconds())));
-    statisticData.addParameter("rewardPeriodTimeZone", rewardReport.getPeriod().getTimeZone());
-    statisticData.addParameter("rewardPeriodType", rewardReport.getPeriod().getRewardPeriodType().name().toLowerCase());
-    statisticData.addParameter("rewardTransactionsCount", rewardReport.getSuccessTransactionCount());
-    statisticData.addParameter("rewardTokensSent", rewardReport.getTokensSent());
-    statisticData.addParameter("rewardTokensToSend", rewardReport.getTokensToSend());
-    statisticData.addParameter("rewardRecipientWalletCount", rewardReport.getValidRewardCount());
-    statisticData.addParameter("rewardParticipantWalletCount", rewardReport.getRewards().size());
+    statisticData.addDate("rewardPeriodStartDate",
+                          Date.from(Instant.ofEpochSecond(rewardReport.getPeriod().getStartDateInSeconds())));
+    statisticData.addDate("rewardPeriodEndDate",
+                          Date.from(Instant.ofEpochSecond(rewardReport.getPeriod().getEndDateInSeconds())));
+    statisticData.addKeyword("rewardPeriodTimeZone", rewardReport.getPeriod().getTimeZone());
+    statisticData.addKeyword("rewardPeriodType", rewardReport.getPeriod().getRewardPeriodType().name().toLowerCase());
+    statisticData.addLong("rewardTransactionsCount", rewardReport.getSuccessTransactionCount());
+    statisticData.addDouble("rewardTokensSent", rewardReport.getTokensSent());
+    statisticData.addDouble("rewardTokensToSend", rewardReport.getTokensToSend());
+    statisticData.addLong("rewardRecipientWalletCount", rewardReport.getValidRewardCount());
+    statisticData.addLong("rewardParticipantWalletCount", rewardReport.getRewards().size());
 
     AnalyticsUtils.addStatisticData(statisticData);
   }
