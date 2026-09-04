@@ -20,10 +20,17 @@ package io.meeds.wallet.reward.entity;
 
 import java.io.Serializable;
 
-import jakarta.persistence.*;
-
-import lombok.Data;
 import org.hibernate.annotations.DynamicUpdate;
+
+import io.meeds.common.persistence.PortableSequence;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Entity(name = "RewardPeriodSummary")
 @DynamicUpdate
@@ -32,8 +39,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class WalletRewardPeriodSummaryEntity implements Serializable {
 
   @Id
-  @SequenceGenerator(name = "SEQ_WALLET_REWARD_SUMMARY_ID", sequenceName = "SEQ_WALLET_REWARD_SUMMARY_ID", allocationSize = 1)
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_WALLET_REWARD_SUMMARY_ID")
+  @PortableSequence(name = "SEQ_WALLET_REWARD_SUMMARY_ID")
   private Long                     id;
 
   @OneToOne

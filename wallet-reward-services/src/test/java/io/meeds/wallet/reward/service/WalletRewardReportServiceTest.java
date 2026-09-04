@@ -51,7 +51,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -69,22 +69,22 @@ public class WalletRewardReportServiceTest { // NOSONAR
 
   private static final Pageable     PAGEABLE   = Pageable.ofSize(2);
 
-  @MockBean
+  @MockitoBean
   private WalletAccountService      walletAccountService;
 
-  @MockBean
+  @MockitoBean
   private WalletTokenAdminService   walletTokenAdminService;
 
-  @MockBean
+  @MockitoBean
   private RewardSettingsService     rewardSettingsService;
 
-  @MockBean
+  @MockitoBean
   private WalletRewardReportStorage rewardReportStorage;
 
-  @MockBean
+  @MockitoBean
   private RealizationService        realizationService;
 
-  @MockBean
+  @MockitoBean
   private ResourceBundleService     resourceBundleService;
 
   @Autowired

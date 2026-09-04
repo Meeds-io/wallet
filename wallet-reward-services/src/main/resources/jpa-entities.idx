@@ -1,2 +1,3 @@
-io.meeds.wallet.reward.entity.WalletRewardPeriodEntity
 io.meeds.wallet.reward.entity.WalletRewardEntity
+io.meeds.wallet.reward.entity.WalletRewardPeriodEntity
+io.meeds.wallet.reward.entity.WalletRewardPeriodSummaryEntity

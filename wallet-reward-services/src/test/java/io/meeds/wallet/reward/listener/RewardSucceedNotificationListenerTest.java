@@ -30,7 +30,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.PluginKey;
@@ -45,16 +45,16 @@ class RewardSucceedNotificationListenerTest {
 
   private static final String               EVENT_NAME = "exo.wallet.reward.report.success";
 
-  @MockBean
+  @MockitoBean
   private Event<RewardReport, Object>       event;
 
-  @MockBean
+  @MockitoBean
   private RewardReport                      rewardReport;
 
-  @MockBean
+  @MockitoBean
   private NotificationContext               notificationContext;
 
-  @MockBean
+  @MockitoBean
   private ListenerService                   listenerService;
 
   @Autowired

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.ListenerService;
@@ -44,19 +44,19 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = { RewardReportUpdateListener.class, })
 class RewardReportUpdateListenerTest {
 
-  @MockBean
+  @MockitoBean
   private WalletRewardReportService          rewardReportService;
 
-  @MockBean
+  @MockitoBean
   private RewardSettingsService              rewardSettingsService;
 
-  @MockBean
+  @MockitoBean
   private ListenerService                    listenerService;
 
-  @MockBean
+  @MockitoBean
   private RealizationService                 realizationService;
 
-  @MockBean
+  @MockitoBean
   private Event<Object, Map<String, String>> event;
 
   @Autowired

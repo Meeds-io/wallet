@@ -43,6 +43,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
       <excludes>
         <exclude>io.meeds.social:*</exclude>
         <exclude>org.aspectj:*</exclude>
+        <exclude>*:kotlin-stdlib</exclude>
+        <exclude>*:annotations</exclude>
+        <exclude>*:netty*</exclude>
+        <exclude>*:jackson-core</exclude>
       </excludes>
       <scope>compile</scope>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
