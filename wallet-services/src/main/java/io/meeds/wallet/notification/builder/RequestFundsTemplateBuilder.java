@@ -135,11 +135,6 @@ public class RequestFundsTemplateBuilder extends AbstractTemplateBuilder {
     }
   }
 
-  @Override
-  protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-    return false;
-  }
-
   private void addMessageSubject(MessageInfo messageInfo, TemplateContext templateContext, String type) {
     String pluginId = templateContext.getPluginId();
     PluginConfig templateConfig = getPluginConfig(pluginId);

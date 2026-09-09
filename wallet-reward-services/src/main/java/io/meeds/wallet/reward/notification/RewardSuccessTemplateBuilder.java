@@ -101,11 +101,6 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
     return messageInfo.body(body).end();
   }
 
-  @Override
-  protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-    return false;
-  }
-
   private void setLastModifiedDate(NotificationInfo notification, String language, TemplateContext templateContext) {
     try {
       Calendar lastModified = Calendar.getInstance();
