@@ -18,7 +18,6 @@ package io.meeds.wallet.notification.builder;
 
 import static io.meeds.wallet.utils.WalletUtils.*;
 
-import java.io.Writer;
 import java.util.Calendar;
 import java.util.Locale;
 
