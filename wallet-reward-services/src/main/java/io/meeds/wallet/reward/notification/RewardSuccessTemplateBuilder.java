@@ -24,7 +24,6 @@ import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE;
 import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE_FORMATTED;
 import static io.meeds.wallet.utils.RewardUtils.formatTime;
 
-import java.io.Writer;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
