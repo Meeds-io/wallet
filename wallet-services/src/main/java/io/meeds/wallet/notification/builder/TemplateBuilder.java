@@ -18,7 +18,6 @@ package io.meeds.wallet.notification.builder;
 
 import static io.meeds.wallet.utils.WalletUtils.*;
 
-import java.io.Writer;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -132,11 +131,6 @@ public class TemplateBuilder extends AbstractTemplateBuilder {
     } catch (Exception e) {
       templateContext.put("LAST_UPDATED_TIME", "");
     }
-  }
-
-  @Override
-  protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-    return false;
   }
 
   private void addMessageSubject(MessageInfo messageInfo, TemplateContext templateContext, String type) {

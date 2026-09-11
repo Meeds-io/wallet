@@ -24,7 +24,6 @@ import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE;
 import static io.meeds.wallet.utils.RewardUtils.REWARD_START_PERIOD_DATE_FORMATTED;
 import static io.meeds.wallet.utils.RewardUtils.formatTime;
 
-import java.io.Writer;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Locale;
@@ -99,11 +98,6 @@ public class RewardSuccessTemplateBuilder extends AbstractTemplateBuilder {
       messageInfo.subject(TemplateUtils.processSubject(templateContext));
     }
     return messageInfo.body(body).end();
-  }
-
-  @Override
-  protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-    return false;
   }
 
   private void setLastModifiedDate(NotificationInfo notification, String language, TemplateContext templateContext) {
