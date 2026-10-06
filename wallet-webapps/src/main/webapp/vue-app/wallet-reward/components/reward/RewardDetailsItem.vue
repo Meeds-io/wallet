@@ -54,7 +54,6 @@
           bottom>
           <template #activator="{ on, attrs }">
             <v-icon
-              color="grey"
               size="16"
               v-bind="attrs"
               v-on="on">
