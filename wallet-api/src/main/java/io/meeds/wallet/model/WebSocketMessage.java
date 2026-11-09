@@ -19,13 +19,11 @@ package io.meeds.wallet.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import groovy.transform.ToString;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-@ToString
 public class WebSocketMessage {
 
   String              eventId;
