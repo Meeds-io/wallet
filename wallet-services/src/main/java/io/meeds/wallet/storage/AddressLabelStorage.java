@@ -19,32 +19,50 @@ package io.meeds.wallet.storage;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.exoplatform.services.cache.CacheService;
+import org.exoplatform.services.cache.ExoCache;
+
 import io.meeds.wallet.dao.AddressLabelDAO;
 import io.meeds.wallet.entity.AddressLabelEntity;
 import io.meeds.wallet.model.WalletAddressLabel;
 
 public class AddressLabelStorage {
 
-  private AddressLabelDAO         addressLabelDAO;
+  /**
+   * The cache of the labels each node loaded: a node keeps its load, and a
+   * change made on any node evicts it on every node. A load that read the store
+   * before a change and caches its result after the eviction keeps the old
+   * value until the entry expires: at most the cache's live time, 30 seconds by
+   * default.
+   */
+  public static final String                     LABELS_CACHE_NAME = "wallet.addressLabels";
 
-  private Set<WalletAddressLabel> allLabels;
+  private static final String                    LABELS_KEY        = "labels";
 
-  public AddressLabelStorage(AddressLabelDAO addressLabelDAO) {
+  private AddressLabelDAO                        addressLabelDAO;
+
+  private ExoCache<String, Set<WalletAddressLabel>> labelsCache;
+
+  public AddressLabelStorage(AddressLabelDAO addressLabelDAO, CacheService cacheService) {
     this.addressLabelDAO = addressLabelDAO;
+    this.labelsCache = cacheService.getCacheInstance(LABELS_CACHE_NAME);
   }
 
   public Set<WalletAddressLabel> getAllLabels() {
-    if (this.allLabels != null) {
-      return this.allLabels;
+    Set<WalletAddressLabel> allLabels = labelsCache.get(LABELS_KEY);
+    if (allLabels != null) {
+      return allLabels;
     }
     List<AddressLabelEntity> allLabelsEntities = addressLabelDAO.findAll();
     if (allLabelsEntities == null || allLabelsEntities.isEmpty()) {
       return Collections.emptySet();
     }
-    this.allLabels = Collections.unmodifiableSet(allLabelsEntities.stream()
-                                                                  .map(this::fromEntity)
-                                                                  .collect(Collectors.toSet()));
-    return this.allLabels;
+    allLabels = Collections.unmodifiableSet(allLabelsEntities.stream()
+                                                             .map(this::fromEntity)
+                                                             .collect(Collectors.toSet()));
+    // Kept on this node: a change evicts it on every node
+    labelsCache.putLocal(LABELS_KEY, allLabels);
+    return allLabels;
   }
 
   public WalletAddressLabel saveLabel(WalletAddressLabel label) {
@@ -74,7 +92,7 @@ public class AddressLabelStorage {
   }
 
   public void clearCache() {
-    this.allLabels = null;
+    labelsCache.remove(LABELS_KEY);
   }
 
   private AddressLabelEntity toEntity(WalletAddressLabel label) {

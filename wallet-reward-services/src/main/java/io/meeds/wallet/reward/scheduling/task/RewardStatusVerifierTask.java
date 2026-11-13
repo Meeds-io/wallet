@@ -26,6 +26,7 @@ import org.quartz.DisallowConcurrentExecution;
 
 import org.exoplatform.services.listener.ListenerService;
 
+import io.meeds.spring.kernel.ClusterTaskScheduler;
 import io.meeds.wallet.model.RewardPeriod;
 import io.meeds.wallet.model.RewardReport;
 import io.meeds.wallet.model.Wallet;
@@ -55,7 +56,7 @@ public class RewardStatusVerifierTask {
   private ListenerService      listenerService;
 
   @ContainerTransactional
-  @Scheduled(cron = "${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}")
+  @Scheduled(cron = "${exo.wallet.RewardStatusVerifierJob.expression:0 * * * * ?}", scheduler = ClusterTaskScheduler.NAME)
   public void execute() {
     Wallet adminWallet = walletAccountService.getAdminWallet();
     if (!walletAccountService.isAdminAccountEnabled() || adminWallet == null || adminWallet.getEtherBalance() == null
