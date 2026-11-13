@@ -30,7 +30,10 @@ public class AddressLabelStorage {
 
   /**
    * The cache of the labels each node loaded: a node keeps its load, and a
-   * change made on any node evicts it on every node.
+   * change made on any node evicts it on every node. A load that read the store
+   * before a change and caches its result after the eviction keeps the old
+   * value until the entry expires: at most the cache's live time, 30 seconds by
+   * default.
    */
   public static final String                     LABELS_CACHE_NAME = "wallet.addressLabels";
 
