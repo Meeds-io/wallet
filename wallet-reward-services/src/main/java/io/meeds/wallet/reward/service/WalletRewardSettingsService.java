@@ -26,6 +26,8 @@ import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 
 import java.util.Objects;
 
+import org.exoplatform.services.cache.CacheService;
+import org.exoplatform.services.cache.ExoCache;
 import org.exoplatform.services.listener.ListenerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,15 @@ import io.meeds.wallet.model.RewardSettings;
 @Service
 public class WalletRewardSettingsService implements RewardSettingsService {
 
-  public static final String REWARD_SETTINGS_UPDATED = "reward.settings.updated";
+  public static final String REWARD_SETTINGS_UPDATED    = "reward.settings.updated";
+
+  /**
+   * The cache of the reward settings each node loaded: a node keeps its load,
+   * and a change made on any node evicts it on every node.
+   */
+  public static final String REWARD_SETTINGS_CACHE_NAME = "wallet.rewardSettings";
+
+  private static final String SETTINGS_KEY              = "settings";
 
   @Autowired
   private SettingService     settingService;
@@ -49,13 +59,15 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   @Autowired
   private ListenerService    listenerService;
 
-  private RewardSettings     configuredRewardSettings;
+  @Autowired
+  private CacheService       cacheService;
 
   @Override
   public RewardSettings getSettings() { // NOSONAR
     // Retrieve cached reward settings
-    if (this.configuredRewardSettings != null) {
-      return this.configuredRewardSettings.clone();
+    RewardSettings cachedSettings = getCache().get(SETTINGS_KEY);
+    if (cachedSettings != null) {
+      return cachedSettings.clone();
     }
 
     SettingValue<?> settingsValue = settingService.get(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME);
@@ -72,9 +84,9 @@ public class WalletRewardSettingsService implements RewardSettingsService {
       Objects.requireNonNull(rewardSettings).setStoredSetting(true);
     }
 
-    // Cache reward settings
-    this.configuredRewardSettings = rewardSettings;
-    return this.configuredRewardSettings;
+    // Cache reward settings on this node: a change evicts them on every node
+    getCache().putLocal(SETTINGS_KEY, rewardSettings);
+    return rewardSettings.clone();
   }
 
   @Override
@@ -86,8 +98,8 @@ public class WalletRewardSettingsService implements RewardSettingsService {
     String settingsString = toJsonString(rewardSettingsToStore);
     settingService.set(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME, SettingValue.create(settingsString));
 
-    // Purge cached settings
-    this.configuredRewardSettings = null;
+    // Purge cached settings, on every node
+    getCache().remove(SETTINGS_KEY);
     listenerService.broadcast(REWARD_SETTINGS_UPDATED, this, null);
   }
 
@@ -95,8 +107,12 @@ public class WalletRewardSettingsService implements RewardSettingsService {
   public void deleteSettings() {
     settingService.remove(REWARD_CONTEXT, REWARD_SCOPE, REWARD_SETTINGS_KEY_NAME);
 
-    // Purge cached settings
-    this.configuredRewardSettings = null;
+    // Purge cached settings, on every node
+    getCache().remove(SETTINGS_KEY);
     listenerService.broadcast(REWARD_SETTINGS_UPDATED, this, null);
+  }
+
+  private ExoCache<String, RewardSettings> getCache() {
+    return cacheService.getCacheInstance(REWARD_SETTINGS_CACHE_NAME);
   }
 }
