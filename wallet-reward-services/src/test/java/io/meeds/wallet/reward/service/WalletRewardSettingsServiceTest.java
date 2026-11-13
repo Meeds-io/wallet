@@ -26,7 +26,11 @@ import io.meeds.wallet.model.RewardBudgetType;
 import io.meeds.wallet.model.RewardPeriodType;
 import io.meeds.wallet.model.RewardSettings;
 
+import org.exoplatform.services.cache.CacheService;
+import org.exoplatform.services.cache.ExoCache;
+import org.exoplatform.services.cache.SimpleExoCache;
 import org.exoplatform.services.listener.ListenerService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,6 +50,44 @@ public class WalletRewardSettingsServiceTest {
 
   @MockitoBean
   private ListenerService       listenerService;
+
+  @MockitoBean
+  private CacheService          cacheService;
+
+  /** The cache of this node, whose evictions reach every node in a cluster */
+  private ExoCache<String, RewardSettings> cache;
+
+  @BeforeEach
+  public void setUp() {
+    cache = spy(new SimpleExoCache<>());
+    when(cacheService.<String, RewardSettings> getCacheInstance(WalletRewardSettingsService.REWARD_SETTINGS_CACHE_NAME)).thenReturn(cache);
+  }
+
+  @Test
+  public void testTheLoadedSettingsStayOnThisNode() {
+    rewardSettingsService.getSettings();
+    rewardSettingsService.getSettings();
+
+    verify(settingService, times(1)).get(any(), any(), any());
+    verify(cache).putLocal(any(), any());
+    verify(cache, never()).put(any(), any());
+  }
+
+  @Test
+  public void testAChangeMadeOnAnyNodeEvictsTheLoadedSettings() {
+    rewardSettingsService.getSettings();
+
+    // As the eviction a change on another node sends
+    cache.clearCache();
+    rewardSettingsService.getSettings();
+    rewardSettingsService.saveSettings(new RewardSettings());
+    rewardSettingsService.getSettings();
+    rewardSettingsService.deleteSettings();
+    rewardSettingsService.getSettings();
+
+    verify(settingService, times(4)).get(any(), any(), any());
+    verify(cache, times(2)).remove(any());
+  }
 
   @Autowired
   private RewardSettingsService rewardSettingsService;
