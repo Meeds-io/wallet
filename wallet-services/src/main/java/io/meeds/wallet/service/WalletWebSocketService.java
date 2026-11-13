@@ -22,6 +22,7 @@ import static io.meeds.wallet.utils.WalletUtils.toJsonString;
 import java.util.Collection;
 
 import org.mortbay.cometd.continuation.EXoContinuationBayeux;
+import org.picocontainer.Startable;
 
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.services.log.ExoLogger;
@@ -30,7 +31,7 @@ import org.exoplatform.ws.frameworks.cometd.ContinuationService;
 
 import io.meeds.wallet.model.WebSocketMessage;
 
-public class WalletWebSocketService {
+public class WalletWebSocketService implements Startable {
 
   private static final Log      LOG = ExoLogger.getLogger(WalletWebSocketService.class);
 
@@ -39,6 +40,28 @@ public class WalletWebSocketService {
   private EXoContinuationBayeux continuationBayeux;
 
   private String                cometdContextName;
+
+  public WalletWebSocketService() {
+    // Services looked up on first use
+  }
+
+  WalletWebSocketService(EXoContinuationBayeux continuationBayeux) {
+    this.continuationBayeux = continuationBayeux;
+  }
+
+  @Override
+  public void start() {
+    EXoContinuationBayeux bayeux = getContinuationBayeux();
+    if (bayeux != null) {
+      // A message sent to all reaches the users of the other nodes of a cluster
+      bayeux.observeChannel(COMETD_CHANNEL);
+    }
+  }
+
+  @Override
+  public void stop() {
+    // Nothing to stop
+  }
 
   public void sendMessage(String eventId, Collection<String> recipientUsers, boolean sendToAll, Object... objects) {
     getContinuationService();
