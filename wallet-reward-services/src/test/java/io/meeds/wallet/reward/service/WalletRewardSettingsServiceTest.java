@@ -51,7 +51,7 @@ public class WalletRewardSettingsServiceTest {
   @MockBean
   private ListenerService       listenerService;
 
-  @MockitoBean
+  @MockBean
   private CacheService          cacheService;
 
   /** The cache of this node, whose evictions reach every node in a cluster */
