@@ -56,7 +56,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.picocontainer.Startable;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.crypto.Sign.SignatureData;
@@ -66,10 +65,6 @@ import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.SettingValue;
 import org.exoplatform.commons.api.settings.data.Context;
 import org.exoplatform.commons.utils.CommonsUtils;
-import org.exoplatform.container.ExoContainerContext;
-import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.RootContainer;
-import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
@@ -87,9 +82,8 @@ import io.meeds.wallet.statistic.ExoWalletStatisticService;
 import io.meeds.wallet.storage.AddressLabelStorage;
 import io.meeds.wallet.storage.WalletStorage;
 
-import jakarta.servlet.ServletContext;
 
-public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService, Startable {
+public class WalletAccountServiceImpl implements WalletAccountService, ExoWalletStatisticService {
 
   private static final String     ERROR_BROADCASTING_EVENT_FOR_WALLET     = "Error broadcasting event {} for wallet {}";
 
@@ -112,8 +106,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private static final String     STATISTIC_OPERATION_DISABLE             = "disable";
 
-  private PortalContainer         container;
-
   private WalletTokenAdminService tokenAdminService;
 
   private SettingService          settingService;
@@ -126,14 +118,10 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   private String                  adminAccountPassword;
 
-  private boolean                 adminAccountEnabled;
-
-  public WalletAccountServiceImpl(PortalContainer container,
-                                  WalletStorage walletAccountStorage,
+  public WalletAccountServiceImpl(WalletStorage walletAccountStorage,
                                   AddressLabelStorage labelStorage,
                                   SettingService settingService,
                                   InitParams params) {
-    this.container = container;
     this.settingService = settingService;
     this.accountStorage = walletAccountStorage;
     this.labelStorage = labelStorage;
@@ -141,26 +129,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
         && StringUtils.isNotBlank(params.getValueParam(ADMIN_KEY_PARAMETER).getValue())) {
       this.adminAccountPassword = params.getValueParam(ADMIN_KEY_PARAMETER).getValue();
     }
-  }
-
-  @Override
-  public void start() {
-    // Ensure to make initialization after starting all other services of Wallet
-    PortalContainer.addInitTask(container.getPortalContext(), new RootContainer.PortalContainerPostInitTask() {
-      @Override
-      public void execute(ServletContext context, PortalContainer portalContainer) {
-        ExoContainerContext.setCurrentContainer(portalContainer);
-        RequestLifeCycle.begin(portalContainer);
-        try {
-          Wallet adminWallet = getAdminWallet();
-          adminAccountEnabled = adminWallet != null && adminWallet.isEnabled();
-        } catch (Exception e) {
-          LOG.error("Error starting service", e);
-        } finally {
-          RequestLifeCycle.end();
-        }
-      }
-    });
   }
 
   @Override
@@ -245,11 +213,6 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
       } catch (Exception e) {
         LOG.error("Error refreshing wallet state on blockchain", e);
       }
-    }
-
-    // Checks if admin wallet was newly enabled from blockchain
-    if (WalletType.isAdmin(wallet.getType())) {
-      this.adminAccountEnabled = wallet.isEnabled();
     }
   }
 
@@ -880,7 +843,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   @Override
   public boolean isAdminAccountEnabled() {
-    return adminAccountEnabled;
+    Wallet adminWallet = getWalletByTypeAndId(WalletType.ADMIN.getId(), WALLET_ADMIN_REMOTE_ID);
+    return adminWallet != null && adminWallet.isEnabled();
   }
 
   public void setTokenAdminService(WalletTokenAdminService tokenAdminService) {
