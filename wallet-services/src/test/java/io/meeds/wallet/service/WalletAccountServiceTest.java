@@ -44,7 +44,6 @@ import org.junit.Test;
 
 import org.exoplatform.commons.api.settings.SettingService;
 import org.exoplatform.commons.api.settings.data.Context;
-import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.listener.Event;
 import org.exoplatform.services.listener.Listener;
@@ -264,6 +263,38 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertEquals(etherBalance, wallet.getEtherBalance());
     assertNotNull(wallet.getTokenBalance());
     assertEquals(tokenBalance, wallet.getTokenBalance());
+  }
+
+  @Test
+  public void testIsAdminAccountEnabledAcrossInstances() {
+    WalletAccountService adminOwner = getService(WalletAccountService.class);
+    WalletStorage walletStorage = getService(WalletStorage.class);
+    WalletAccountServiceImpl nodeA = new WalletAccountServiceImpl(walletStorage,
+                                                                  getService(AddressLabelStorage.class),
+                                                                  getService(SettingService.class),
+                                                                  null);
+    WalletAccountServiceImpl nodeB = new WalletAccountServiceImpl(walletStorage,
+                                                                  getService(AddressLabelStorage.class),
+                                                                  getService(SettingService.class),
+                                                                  null);
+    assertTrue(nodeB.isAdminAccountEnabled());
+
+    Wallet wallet = adminOwner.getAdminWallet();
+    entitiesToClean.add(wallet);
+    wallet.setAddress(WALLET_ADDRESS_3);
+    wallet.setPassPhrase(PHRASE);
+    wallet.setInitializationState(INITIALIZATION_STATE);
+    nodeA.saveWallet(wallet, false);
+    assertTrue(nodeB.isAdminAccountEnabled());
+
+    wallet.setEnabled(false);
+    walletStorage.saveWallet(wallet, false);
+    assertFalse(nodeA.isAdminAccountEnabled());
+    assertFalse("Another instance must see the admin wallet disabled", nodeB.isAdminAccountEnabled());
+
+    wallet.setEnabled(true);
+    walletStorage.saveWallet(wallet, false);
+    assertTrue("Another instance must see the admin wallet enabled again", nodeB.isAdminAccountEnabled());
   }
 
   /**
@@ -861,8 +892,7 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     ListenerService listenerService = mock(ListenerService.class);
     WalletTokenAdminService tokenAdminService = mock(WalletTokenAdminService.class);
 
-    WalletAccountServiceImpl walletAccountService = new WalletAccountServiceImpl(mock(PortalContainer.class),
-                                                                                 accountStorage,
+    WalletAccountServiceImpl walletAccountService = new WalletAccountServiceImpl(accountStorage,
                                                                                  mock(AddressLabelStorage.class),
                                                                                  mock(SettingService.class),
                                                                                  mock(InitParams.class));
