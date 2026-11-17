@@ -40,10 +40,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1053,6 +1055,19 @@ public class EthereumBlockchainTransactionServiceTest extends BaseWalletTest {
     verify(listenerService, times(1)).broadcast(TRANSACTION_SENT_TO_BLOCKCHAIN_EVENT,
                                                 handledTransactionDetail,
                                                 handledTransactionDetail);
+  }
+
+
+  @Test
+  public void testTheRefreshRunsOnADaemonThreadThatEndsWithTheService() throws Exception {
+    ScheduledExecutorService refreshExecutor = (ScheduledExecutorService) FieldUtils.readField(service,
+                                                                                                "transactionRefreshExecutor",
+                                                                                                true);
+    assertTrue(refreshExecutor.submit(() -> Thread.currentThread().isDaemon()).get());
+
+    service.stop();
+
+    assertTrue(refreshExecutor.isShutdown());
   }
 
 }
