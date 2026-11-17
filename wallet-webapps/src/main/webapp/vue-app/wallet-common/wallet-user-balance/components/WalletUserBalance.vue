@@ -4,7 +4,7 @@
       v-show="!loading"
       flat>
       <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
-        <span class="my-2 tertiary-color">{{ symbol }}</span>
+        <span class="my-2 secondary-color">{{ symbol }}</span>
         <span
           class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">
           {{ balanceToDisplay || '-' }}

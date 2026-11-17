@@ -19,7 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     v-show="!loading"
     flat>
     <div class="pa-0 d-flex justify-center flex-nowrap text-color font-weight-bold big-number">
-      <span class="my-2 tertiary-color">{{ symbol }}</span>
+      <span class="my-2 secondary-color">{{ symbol }}</span>
       <span
         :class="typographyClass"
         class="ma-2 text-color text-h5 font-weight-bold d-flex align-self-center">

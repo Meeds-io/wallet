@@ -1,3 +1,4 @@
+<% def palette = org.exoplatform.commons.notification.mail.MailPalette.of(_templateContext) %>
 <!--
 This file is part of the Meeds project (https://meeds.io/).
 Copyright (C) 2020 Meeds Association
@@ -14,23 +15,23 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
-<table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height:20px;HelveticaNeue bold',arial,tahoma,serif;">
+<table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="${palette.surface}" align="center" style="background-color: ${palette.surface}; font-size: 12px;color:${palette.text};line-height:20px;HelveticaNeue bold',arial,tahoma,serif;" class="mail-surface mail-text">
     <%
       _templateContext.put("header_title", _ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted));
       _ctx.include("war:/notification/templates/mail/NotificationHeader.gtmpl", _templateContext);
     %>
     <tr>
-        <td bgcolor="#ffffff" style="background-color: #ffffff;">
-            <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="#ffffff" style="background-color: #ffffff; border:1px solid #d8d8d8;">
+        <td bgcolor="${palette.surface}" style="background-color: ${palette.surface};" class="mail-surface">
+            <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="${palette.surface}" style="background-color: ${palette.surface}; border:1px solid ${palette.border};" class="mail-surface mail-border">
                 <tr>
-                    <td bgcolor="#ffffff" style="background-color: #ffffff;">
-                        <table border="0" cellpadding="0" cellspacing="0" width="92%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; color:#333333;line-height:20px;">
+                    <td bgcolor="${palette.surface}" style="background-color: ${palette.surface};" class="mail-surface">
+                        <table border="0" cellpadding="0" cellspacing="0" width="92%" bgcolor="${palette.surface}" align="center" style="background-color: ${palette.surface}; color:${palette.text};line-height:20px;" class="mail-surface mail-text">
                             <tr>
-                                <td align="left" bgcolor="#ffffff" style="background-color: #ffffff;padding: 10px 0;" >
+                                <td align="left" bgcolor="${palette.surface}" style="background-color: ${palette.surface};padding: 10px 0;"  class="mail-surface">
                                     <table border="0" cellpadding="0" cellspacing="0" >
                                         <tr>
                                             <td  valign="top">
-                                                <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;white-space: pre-line;">
+                                                <p style="margin:0 0 12px; color: ${palette.text}; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;white-space: pre-line;" class="mail-text">
                                                   <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
                                                 </p>
                                             </td>
