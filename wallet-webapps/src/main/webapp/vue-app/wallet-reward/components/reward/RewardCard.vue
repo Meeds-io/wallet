@@ -38,7 +38,7 @@
       @click="openDetails">
       <v-card-title class="px-2 py-1">
         <v-icon
-          color="tertiary"
+          color="secondary"
           left>
           fas fa-calendar
         </v-icon>

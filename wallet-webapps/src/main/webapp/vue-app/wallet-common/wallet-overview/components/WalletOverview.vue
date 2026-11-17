@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <div class="justify-center d-flex flex-no-wrap">
           <div
             :class="isOverviewDisplay ? 'pe-2 display-1' : 'px-2 display-2'"
-            class="tertiary-color text-start font-weight-bold walletOverviewBalance">
+            class="secondary-color text-start font-weight-bold walletOverviewBalance">
             {{ currencySymbol }}
           </div>
           <div
