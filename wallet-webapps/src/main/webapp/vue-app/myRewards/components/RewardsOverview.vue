@@ -21,7 +21,7 @@
       </template>
       <template #default>
         <div v-if="!loading" class="d-flex flex-column align-center justify-center full-height full-width">
-          <v-icon color="tertiary" size="60">fa-money-bill</v-icon>
+          <v-icon color="secondary" size="60">fa-money-bill</v-icon>
           <span
             v-html="noWalletSummaryText"
             class="text-body mt-5"></span>

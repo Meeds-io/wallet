@@ -36,7 +36,37 @@ export default {
       this.initializeChart();
     }
   },
+  created() {
+    document.addEventListener('displayModeChanged', this.initializeChart);
+  },
+  beforeDestroy() {
+    document.removeEventListener('displayModeChanged', this.initializeChart);
+  },
   methods: {
+    isDarkVersion() {
+      // an application kept light (a light scope around it) shows the light version on a dark page
+      if (this.$root?.lightOnly || this.$el?.closest?.('[data-display-mode="light"]:not(html)')) {
+        return false;
+      }
+      const version = this.$displayMode?.getVersion?.();
+      return (version || document.documentElement.getAttribute('data-display-mode')) === 'dark';
+    },
+    darkChartOptions() {
+      // The canvas can't follow the page's CSS: in dark, its labels and grid read the theme colours; light keeps the chart's defaults
+      if (!this.isDarkVersion()) {
+        return {};
+      }
+      const style = window.getComputedStyle(document.documentElement);
+      const textColor = style.getPropertyValue('--allPagesBaseColor').trim() || '#ffffff';
+      const gridColor = style.getPropertyValue('--allPagesBorderColorDark').trim() || '#3a424a';
+      return {
+        legend: {labels: {fontColor: textColor}},
+        scales: {
+          xAxes: [{ticks: {fontColor: textColor}, gridLines: {color: gridColor}}],
+          yAxes: [{ticks: {fontColor: textColor}, gridLines: {color: gridColor}}],
+        },
+      };
+    },
     initializeChart() {
       if (!this.transactionStatistics) {
         return;
@@ -73,7 +103,7 @@ export default {
             data: this.transactionStatistics.outcome,
           }
         ]
-      }, {responsive: true, maintainAspectRatio: false});
+      }, {responsive: true, maintainAspectRatio: false, ...this.darkChartOptions()});
     }
   }
 };
