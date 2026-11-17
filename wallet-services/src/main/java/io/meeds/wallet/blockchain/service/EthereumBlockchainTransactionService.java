@@ -135,7 +135,9 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     this.accountService = accountService;
     this.listenerService = listenerService;
 
+    // A daemon thread: a refresh pass never keeps the process alive once the server stops
     ThreadFactory namedThreadFactory = new BasicThreadFactory.Builder().namingPattern("Ethereum-transaction-refresh-%d")
+                                                                       .daemon(true)
                                                                        .build();
     transactionRefreshExecutor = Executors.newSingleThreadScheduledExecutor(namedThreadFactory);
   }
@@ -155,9 +157,13 @@ public class EthereumBlockchainTransactionService implements BlockchainTransacti
     });
   }
 
+  /**
+   * Ends the periodic refresh of the transactions: no pass starts after the stop; a pass already running is left to
+   * finish and the stop does not wait for it, its blockchain calls having no bound.
+   */
   @Override
   public void stop() {
-    // Nothing to stop
+    transactionRefreshExecutor.shutdown();
   }
 
   @Override
