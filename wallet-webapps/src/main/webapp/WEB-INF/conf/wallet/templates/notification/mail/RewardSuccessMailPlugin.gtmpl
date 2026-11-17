@@ -14,28 +14,32 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
-<table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height:20px;HelveticaNeue bold',arial,tahoma,serif;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="width:100%;overflow-wrap:anywhere;word-break:break-word;background-color: #ffffff; font-size: 15px;color: #1d2327;line-height: 1.7;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="${io.meeds.portal.mail.EmailLayout.dir(_ctx.language)}">
     <%
       _templateContext.put("header_title", _ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted));
       _ctx.include("war:/notification/templates/mail/NotificationHeader.gtmpl", _templateContext);
     %>
     <tr>
-        <td bgcolor="#ffffff" style="background-color: #ffffff;">
-            <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="#ffffff" style="background-color: #ffffff; border:1px solid #d8d8d8;">
+        <td style="padding:0 24px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" style="max-width:600px;margin:0 auto;background-color: #ffffff;">
                 <tr>
                     <td bgcolor="#ffffff" style="background-color: #ffffff;">
-                        <table border="0" cellpadding="0" cellspacing="0" width="92%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; color:#333333;line-height:20px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" style="background-color: #ffffff; color: #1d2327;line-height: 1.7;">
                             <tr>
-                                <td align="left" bgcolor="#ffffff" style="background-color: #ffffff;padding: 10px 0;" >
+                                <td align="${io.meeds.portal.mail.EmailLayout.start(_ctx.language)}" bgcolor="#ffffff" style="background-color: #ffffff;padding: 30px 0 10px 0;" >
+                                    <p style="margin: 0 0 14px; font-size: 15px; color: #1d2327; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto"><%=_ctx.appRes("Notification.label.SayHello")%> <%=_ctx.escapeHTML(FIRSTNAME)%>,</p>
                                     <table border="0" cellpadding="0" cellspacing="0" >
                                         <tr>
                                             <td  valign="top">
-                                                <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;white-space: pre-line;">
+                                                <p style="margin:0 0 14px; color:#1d2327; line-height:1.7; font-size:15px; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto">
                                                   <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
                                                 </p>
                                             </td>
                                           </tr><!--end header area-->
                                     </table>
+                                <p style="margin:28px 0 0 0; color: #5d676d;font-size: 13px;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()}">
+                                        <%=io.meeds.portal.mail.EmailLayout.linkStyled(_ctx.appRes("Notification.label.footer", FOOTER_LINK))%>
+                                    </p>
                                 </td>
                             </tr>
                         </table>
