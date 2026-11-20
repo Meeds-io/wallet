@@ -15,72 +15,49 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
 <% String openURL = HASH == null ? BASE_URL : BASE_URL + "?hash=" + HASH; %>
-<table border="0" cellpadding="0" cellspacing="0" width="600" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height:20px;HelveticaNeue bold',arial,tahoma,serif;">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="width:100%;overflow-wrap:anywhere;word-break:break-word;background-color: #ffffff; font-size: 15px;color: #1d2327;line-height: 1.7;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="${io.meeds.portal.mail.EmailLayout.dir(_ctx.language)}">
     <%
       _templateContext.put("header_title", _ctx.appRes("UINotification.title.EtherReceiverNotificationPlugin"));
       _ctx.include("war:/notification/templates/mail/NotificationHeader.gtmpl", _templateContext);
     %>
     <tr>
-        <td bgcolor="#ffffff" style="background-color: #ffffff;">
-            <table cellpadding="0" cellspacing="0" width="100%"  bgcolor="#ffffff" style="background-color: #ffffff; border:1px solid #d8d8d8;">
+        <td style="padding:0 24px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" style="max-width:600px;margin:0 auto;background-color: #ffffff;">
                 <tr>
                     <td bgcolor="#ffffff" style="background-color: #ffffff;">
-                        <table border="0" cellpadding="0" cellspacing="0" width="92%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; color:#333333;line-height:20px;">
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" style="background-color: #ffffff; color: #1d2327;line-height: 1.7;">
                             <tr>
-                                <td align="left" bgcolor="#ffffff" style="background-color: #ffffff;padding: 10px 0;" >
+                                <td align="${io.meeds.portal.mail.EmailLayout.start(_ctx.language)}" bgcolor="#ffffff" style="background-color: #ffffff;padding: 30px 0 10px 0;" >
+                                    <p style="margin: 0 0 14px; font-size: 15px; color: #1d2327; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto"><%=_ctx.appRes("Notification.label.SayHello")%> <%=_ctx.escapeHTML(FIRSTNAME)%>,</p>
                                     <table border="0" cellpadding="0" cellspacing="0" >
                                         <tr>
                                             <% if(AVATAR != null) { %>
-                                              <td valign="top" width="90px" bgcolor="#ffffff" style="background: #ffffff;">
-                                                  <img width="70px" height="70px" style="margin-top: 5px;border-radius: 4px;border: 1px solid #c7c7c7;" src="$AVATAR" />
+                                              <!--[if mso]>
+                                                <td width="64" valign="top">
+                                                    <img width="44" height="44" style="margin-top: 2px; border-radius: <%= ACCOUNT_TYPE.equals("space") ? "8px" : "50%" %>;" src="$AVATAR" alt="" />
+                                                </td>
+                                              <![endif]-->
+                                              <td width="64" valign="top" style="mso-hide:all; ">
+                                                  <img width="44" height="44" style="margin-top: 2px; border-radius: <%= ACCOUNT_TYPE.equals("space") ? "8px" : "50%" %>;" src="$AVATAR" alt="" />
                                               </td>
                                             <% } %>
                                             <td  valign="top">
-                                                <p style="margin:0 0 12px; color: #333333; font-family:HelveticaNeue,arial,tahoma,serif; font-size:13px; line-height: 20px;">
-                                                  <%= ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL)%>
+                                                <p style="margin:0 0 14px; color:#1d2327; line-height:1.7; font-size:15px; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto">
+                                                  <%=io.meeds.portal.mail.EmailLayout.entityStyled(ACCOUNT_TYPE.equals("space") ? _ctx.appRes("Notification.message.SpaceEtherReceiverNotificationPlugin", RECEIVER_URL, AMOUNT, SENDER, SYMBOL) : _ctx.appRes("Notification.message.EtherReceiverNotificationPlugin", AMOUNT, SENDER_URL, SYMBOL))%>
                                                 </p>
                                                 <% if(org.apache.commons.lang3.StringUtils.isNotBlank(MESSAGE)) { %>
-                                                  <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="background-color: #ffffff; font-size: 12px;color:#333333;line-height: 18px; margin-bottom: 15px;">
-                                                      <tbody>
-                                                          <tr>
-                                                              <td align="left" bgcolor="#ffffff" style="background-color: #f9f9f9; padding: 15px 20px;">
-                                                                  <p style="margin: 5px 0; line-height: 16px; font-family: HelveticaNeue, Helvetica, Arial, sans-serif">$MESSAGE</p>
-                                                              </td>
-                                                          </tr>
-                                                      </tbody>
-                                                  </table>
+                                                  <%=io.meeds.portal.mail.EmailLayout.quoteStart(false, _ctx.language)%><p style="margin:0; color:#1d2327; line-height:1.7; font-size:15px; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()}; white-space:pre-line;" dir="auto"><%=_ctx.escapeHTML(MESSAGE)%></p><%=io.meeds.portal.mail.EmailLayout.quoteEnd()%>
                                                 <% } %>
-                                                <div>
-                                                    <a target="_blank" style="
-                                                        display: inline-block;
-                                                        text-decoration: none;
-                                                        font-size: 11px;
-                                                        font-family:HelveticaNeue,arial,tahoma,serif;
-                                                        color: #ffffff;
-                                                        text-shadow: 0 -1px 0 rgba(23, 33, 37, .25);
-                                                        background-color: #567ab6;
-                                                        background-image: -moz-linear-gradient(top, #638acd, #426393);
-                                                        background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#638acd), to(#426393));
-                                                        background-image: -webkit-linear-gradient(top, #638acd, #426393);
-                                                        background-image: -o-linear-gradient(top, #638acd, #426393);
-                                                        background-image: linear-gradient(to bottom, #638acd, #426393);
-                                                        background-repeat: repeat-x;
-                                                        border-radius: 4px;
-                                                        -moz-border-radius: 4px;
-                                                        padding: 5px 8px;
-                                                        line-height: 100%;
-                                                        text-align: center;
-                                                        border: 1px solid #224886;
-                                                        font-weight: bold;
-                                                        -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                        -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                        box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-                                                        vertical-align: middle;
-                                                    " href="$openURL" target="_blank"><%=_ctx.appRes("Notification.message.Open")%></a>
-                                                </div>
+                                                
                                             </td>
                                         </tr>
                                     </table>
+<div dir="${io.meeds.portal.mail.EmailLayout.dir(_ctx.language)}" style="margin: 20px 0 8px 0;">
+                                                    <%=io.meeds.portal.mail.EmailLayout.actionLink(_ctx.appRes("Notification.message.Open"), "$openURL", true)%>
+                                                </div>
+                                <p style="margin:28px 0 0 0; color: #5d676d;font-size: 13px;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()}">
+                                        <%=io.meeds.portal.mail.EmailLayout.linkStyled(_ctx.appRes("Notification.label.footer", FOOTER_LINK))%>
+                                    </p>
                                 </td>
                             </tr>
                         </table>
