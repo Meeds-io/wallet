@@ -14,7 +14,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 -->
-<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="width:100%;overflow-wrap:anywhere;word-break:break-word;background-color: #ffffff; font-size: 15px;color: #1d2327;line-height: 1.7;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="${io.meeds.portal.mail.EmailLayout.dir(_ctx.language)}">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" align="center" style="width:100%;overflow-wrap:anywhere;word-break:break-word;background-color: #ffffff; font-size: 15px;color: #1d2327;line-height: 1.7;font-family: ${io.meeds.portal.mail.util.EmailLayout.fontStack()};" dir="${io.meeds.portal.mail.util.EmailLayout.dir(_ctx.language)}">
     <%
       _templateContext.put("header_title", _ctx.appRes("Notification.content.rewardProceededSuccessfullyForPeriod", rewardStartPeriodDateFormatted, rewardEndPeriodDateFormatted));
       _ctx.include("war:/notification/templates/mail/NotificationHeader.gtmpl", _templateContext);
@@ -26,19 +26,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     <td bgcolor="#ffffff" style="background-color: #ffffff;">
                         <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff" style="background-color: #ffffff; color: #1d2327;line-height: 1.7;">
                             <tr>
-                                <td align="${io.meeds.portal.mail.EmailLayout.start(_ctx.language)}" bgcolor="#ffffff" style="background-color: #ffffff;padding: 30px 0 10px 0;" >
-                                    <p style="margin: 0 0 14px; font-size: 15px; color: #1d2327; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto"><%=_ctx.appRes("Notification.label.SayHello")%> <%=_ctx.escapeHTML(FIRSTNAME)%>,</p>
+                                <td align="${io.meeds.portal.mail.util.EmailLayout.start(_ctx.language)}" bgcolor="#ffffff" style="background-color: #ffffff;padding: 30px 0 10px 0;" >
+                                    <p style="margin: 0 0 14px; font-size: 15px; color: #1d2327; font-family: ${io.meeds.portal.mail.util.EmailLayout.fontStack()};" dir="auto"><%=_ctx.appRes("Notification.label.SayHello")%> <%=_ctx.escapeHTML(FIRSTNAME)%>,</p>
                                     <table border="0" cellpadding="0" cellspacing="0" >
                                         <tr>
                                             <td  valign="top">
-                                                <p style="margin:0 0 14px; color:#1d2327; line-height:1.7; font-size:15px; font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()};" dir="auto">
+                                                <p style="margin:0 0 14px; color:#1d2327; line-height:1.7; font-size:15px; font-family: ${io.meeds.portal.mail.util.EmailLayout.fontStack()};" dir="auto">
                                                   <%=_ctx.appRes("Notification.content.rewardReportDetails", amount, symbol, rewardValidMembersCount)%>
                                                 </p>
                                             </td>
                                           </tr><!--end header area-->
                                     </table>
-                                <p style="margin:28px 0 0 0; color: #5d676d;font-size: 13px;font-family: ${io.meeds.portal.mail.EmailLayout.fontStack()}">
-                                        <%=io.meeds.portal.mail.EmailLayout.linkStyled(_ctx.appRes("Notification.label.footer", FOOTER_LINK))%>
+                                <p style="margin:28px 0 0 0; color: #5d676d;font-size: 13px;font-family: ${io.meeds.portal.mail.util.EmailLayout.fontStack()}">
+                                        <%=io.meeds.portal.mail.util.EmailLayout.linkStyled(_ctx.appRes("Notification.label.footer", FOOTER_LINK))%>
                                     </p>
                                 </td>
                             </tr>
