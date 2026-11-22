@@ -267,6 +267,14 @@ public class WalletTransactionDAO extends GenericDAOJPAImpl<TransactionEntity, L
     return toNotNullLong(result);
   }
 
+  public long countEtherTransfersFromAddressForIssuer(long issuerIdentityId, String fromAddress) {
+    TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countEtherTransfersFromAddressForIssuer",
+                                                                 Long.class);
+    query.setParameter("issuerId", issuerIdentityId);
+    query.setParameter(ADDRESS_PARAM, StringUtils.lowerCase(fromAddress));
+    return query.getSingleResult();
+  }
+
   public long countPendingTransactionAsSender(long networkId, String fromAddress) {
     TypedQuery<Long> query = getEntityManager().createNamedQuery("WalletTransaction.countPendingTransactionAsSender",
                                                                  Long.class);

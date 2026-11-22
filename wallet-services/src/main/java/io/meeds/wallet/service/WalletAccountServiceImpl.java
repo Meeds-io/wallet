@@ -80,6 +80,7 @@ import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.statistic.ExoWalletStatistic;
 import io.meeds.wallet.statistic.ExoWalletStatisticService;
 import io.meeds.wallet.storage.AddressLabelStorage;
+import io.meeds.wallet.storage.TransactionStorage;
 import io.meeds.wallet.storage.WalletStorage;
 
 
@@ -115,6 +116,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   private AddressLabelStorage     labelStorage;
 
   private ListenerService         listenerService;
+
+  private TransactionStorage      transactionStorage;
 
   private String                  adminAccountPassword;
 
@@ -444,7 +447,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (!WalletType.isAdmin(wallet.getType())) {
       refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-      boolean isNew = oldWallet == null && !accountStorage.hasWalletBackup(identityId) && !isUserWalletInitialized(wallet.getId());
+      boolean isNew = oldWallet == null && !accountStorage.hasWalletBackup(identityId) && !isUserWalletFunded(wallet.getId(), identityId);
       String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
                                : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       try {
@@ -460,7 +463,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
     wallet = accountStorage.saveWallet(wallet, isNew);
-    if (isNew && !isUserWalletInitialized(wallet.getId())) {
+    if (isNew && !isUserWalletFunded(wallet.getId(), wallet.getTechnicalId())) {
       try {
         getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
       } catch (Exception e) {
@@ -529,7 +532,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-    boolean isNew = !isUserWalletInitialized(wallet.getId()) && !accountStorage.hasWalletBackup(identityId) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
+    boolean isNew = !accountStorage.hasWalletBackup(identityId)
+                    && (existingWallet == null
+                        || StringUtils.isBlank(existingWallet.getAddress())
+                        || StringUtils.isNotBlank(existingWallet.getInitializationState()))
+                    && !isUserWalletFunded(wallet.getId(), identityId);
     String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
                              : MODIFY_ADDRESS_ASSOCIATED_EVENT;
     try {
@@ -992,6 +999,31 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
                        WALLET_SCOPE,
                        WALLET_INITIALIZED_SETTING_PARAM,
                        SettingValue.create("true"));
+  }
+
+  /**
+   * A wallet is funded once the user flag says so, or once the transaction
+   * history holds the issuer of an ether transfer from the admin wallet: the
+   * flag can't be the only record of a payout already made. On the automatic
+   * initial-funds path the issuer is the funded user.
+   * The history count runs only for a user not yet flagged as funded.
+   */
+  private boolean isUserWalletFunded(String username, long identityId) {
+    return isUserWalletInitialized(username) || hasReceivedInitialFunds(identityId);
+  }
+
+  private boolean hasReceivedInitialFunds(long identityId) {
+    Wallet adminWallet = getAdminWallet();
+    return adminWallet != null
+           && StringUtils.isNotBlank(adminWallet.getAddress())
+           && getTransactionStorage().countEtherTransfersFromAddressForIssuer(identityId, adminWallet.getAddress()) > 0;
+  }
+
+  private TransactionStorage getTransactionStorage() {
+    if (transactionStorage == null) {
+      transactionStorage = CommonsUtils.getService(TransactionStorage.class);
+    }
+    return transactionStorage;
   }
 
   private boolean isUserWalletInitialized(String username) {
