@@ -942,6 +942,32 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     recordTransaction("23", WALLET_ADDRESS_3, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_2, false);
     // Sent from another address than the admin wallet
     recordTransaction("24", WALLET_ADDRESS_2, CURRENT_USER_IDENTITY_ID, null, false);
+    // Issued by this user, received by another user's wallet
+    saveAnotherUserWallet(WALLET_ADDRESS_2);
+    recordTransaction("25",
+                      WALLET_ADDRESS_3,
+                      WALLET_ADDRESS_2,
+                      WalletUtils.getNetworkId(),
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
+    // Sent on another network
+    recordTransaction("26",
+                      WALLET_ADDRESS_3,
+                      WALLET_ADDRESS_1,
+                      WalletUtils.getNetworkId() + 1,
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
+  }
+
+  private void saveAnotherUserWallet(String address) {
+    Wallet wallet = newWallet();
+    wallet.setTechnicalId(CURRENT_USER_IDENTITY_ID + 1000);
+    wallet.setAddress(address);
+    wallet.setType(WalletType.USER.name());
+    getService(WalletStorage.class).saveWallet(wallet, true);
+    entitiesToClean.add(wallet);
   }
 
   private void saveAdminWalletAddress() {
@@ -959,11 +985,21 @@ public class WalletAccountServiceTest extends BaseWalletTest {
                                  long issuerIdentityId,
                                  String contractAddress,
                                  boolean dropped) {
+    recordTransaction(hashSeed, from, WALLET_ADDRESS_1, WalletUtils.getNetworkId(), issuerIdentityId, contractAddress, dropped);
+  }
+
+  private void recordTransaction(String hashSeed, // NOSONAR
+                                 String from,
+                                 String to,
+                                 long networkId,
+                                 long issuerIdentityId,
+                                 String contractAddress,
+                                 boolean dropped) {
     TransactionDetail transaction = new TransactionDetail();
     transaction.setHash("0x" + hashSeed.repeat(32));
-    transaction.setNetworkId(1);
+    transaction.setNetworkId(networkId);
     transaction.setFrom(from);
-    transaction.setTo(WALLET_ADDRESS_1);
+    transaction.setTo(to);
     transaction.setValue(0.1d);
     transaction.setIssuerId(issuerIdentityId);
     transaction.setContractAddress(contractAddress);

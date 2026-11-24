@@ -37,6 +37,7 @@ import static io.meeds.wallet.utils.WalletUtils.getContractAddress;
 import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
 import static io.meeds.wallet.utils.WalletUtils.getIdentityById;
 import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static io.meeds.wallet.utils.WalletUtils.getNetworkId;
 import static io.meeds.wallet.utils.WalletUtils.getSettings;
 import static io.meeds.wallet.utils.WalletUtils.getSpacePrettyName;
 import static io.meeds.wallet.utils.WalletUtils.hideWalletOwnerPrivateInformation;
@@ -1003,9 +1004,14 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
   /**
    * A wallet is funded once the user flag says so, or once the transaction
-   * history holds the issuer of an ether transfer from the admin wallet: the
-   * flag can't be the only record of a payout already made. On the automatic
-   * initial-funds path the issuer is the funded user.
+   * history holds an ether transfer from the admin wallet, on the current
+   * network, issued for the user and received by an address that no wallet of
+   * another identity holds: the flag can't be the only record of a payout
+   * already made. On the automatic initial-funds path the issuer is the funded
+   * user and the receiver is the user's address at that time, which a later
+   * provider switch or wallet removal overwrites, so the receiver can't be
+   * required to be one of the user's current addresses. A transfer a
+   * rewarding user issued to another user's wallet is not the issuer's.
    * The history count runs only for a user not yet flagged as funded.
    */
   private boolean isUserWalletFunded(String username, long identityId) {
@@ -1016,7 +1022,9 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     Wallet adminWallet = getAdminWallet();
     return adminWallet != null
            && StringUtils.isNotBlank(adminWallet.getAddress())
-           && getTransactionStorage().countEtherTransfersFromAddressForIssuer(identityId, adminWallet.getAddress()) > 0;
+           && getTransactionStorage().countEtherTransfersFromAddressForIssuer(getNetworkId(),
+                                                                              identityId,
+                                                                              adminWallet.getAddress()) > 0;
   }
 
   private TransactionStorage getTransactionStorage() {
