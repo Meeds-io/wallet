@@ -27,6 +27,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <packaging>pom</packaging>
   <name>Meeds:: Add-on:: Wallet - Packaging</name>
   <description>Meeds Add-on:: Wallet - Packaging</description>
+  <properties>
+    <!-- Generate and publish the CycloneDX SBOM of the deliverable zip -->
+    <sbom.skip>false</sbom.skip>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.exoplatform.wallet</groupId>
