@@ -51,7 +51,9 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
 import io.meeds.wallet.dao.AddressLabelDAO;
+import io.meeds.wallet.dao.WalletAccountDAO;
 import io.meeds.wallet.entity.AddressLabelEntity;
+import io.meeds.wallet.entity.WalletEntity;
 import io.meeds.wallet.model.ContractDetail;
 import io.meeds.wallet.model.TransactionDetail;
 import io.meeds.wallet.model.Wallet;
@@ -66,6 +68,8 @@ import io.meeds.wallet.test.BaseWalletTest;
 import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
+
+  private static final String MIXED_CASE_WALLET_ADDRESS = "0xAbCdEf4444444444444444444444444444444444";
 
   private static final String NEW = "NEW";
 
@@ -951,6 +955,17 @@ public class WalletAccountServiceTest extends BaseWalletTest {
                       CURRENT_USER_IDENTITY_ID,
                       null,
                       false);
+    // Issued by this user, received by another user's wallet whose address is
+    // stored mixed-case, as MetaMask wallets were before addresses were
+    // lower-cased on save
+    saveAnotherUserWallet(CURRENT_USER_IDENTITY_ID + 1001, MIXED_CASE_WALLET_ADDRESS);
+    recordTransaction("27",
+                      WALLET_ADDRESS_3,
+                      MIXED_CASE_WALLET_ADDRESS,
+                      WalletUtils.getNetworkId(),
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
     // Sent on another network
     recordTransaction("26",
                       WALLET_ADDRESS_3,
@@ -962,12 +977,22 @@ public class WalletAccountServiceTest extends BaseWalletTest {
   }
 
   private void saveAnotherUserWallet(String address) {
+    saveAnotherUserWallet(CURRENT_USER_IDENTITY_ID + 1000, address);
+  }
+
+  private void saveAnotherUserWallet(long identityId, String address) {
     Wallet wallet = newWallet();
-    wallet.setTechnicalId(CURRENT_USER_IDENTITY_ID + 1000);
+    wallet.setTechnicalId(identityId);
     wallet.setAddress(address);
     wallet.setType(WalletType.USER.name());
     getService(WalletStorage.class).saveWallet(wallet, true);
     entitiesToClean.add(wallet);
+    // The storage lower-cases the address it saves: the row keeps the case it
+    // is given, as the rows saved before that did
+    WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
+    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+    walletEntity.setAddress(address);
+    walletAccountDAO.update(walletEntity);
   }
 
   private void saveAdminWalletAddress() {
