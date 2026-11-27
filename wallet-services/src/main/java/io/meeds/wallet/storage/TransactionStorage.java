@@ -277,6 +277,19 @@ public class TransactionStorage {
 
   /**
    * @param networkId blockchain network id
+   * @param issuerIdentityId identity id of the user the transactions were
+   *          issued for
+   * @param fromAddress transaction sender address
+   * @return count of non dropped ether transfers on the given network, sent
+   *         from the given address, issued for the given identity, to an
+   *         address that no wallet of another identity holds
+   */
+  public long countEtherTransfersFromAddressForIssuer(long networkId, long issuerIdentityId, String fromAddress) {
+    return walletTransactionDAO.countEtherTransfersFromAddressForIssuer(networkId, issuerIdentityId, fromAddress);
+  }
+
+  /**
+   * @param networkId blockchain network id
    * @param fromAddress transaction sender address
    * @return count of pending transactions of a sender
    */

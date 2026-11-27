@@ -37,6 +37,7 @@ import static io.meeds.wallet.utils.WalletUtils.getContractAddress;
 import static io.meeds.wallet.utils.WalletUtils.getContractDetail;
 import static io.meeds.wallet.utils.WalletUtils.getIdentityById;
 import static io.meeds.wallet.utils.WalletUtils.getIdentityByTypeAndId;
+import static io.meeds.wallet.utils.WalletUtils.getNetworkId;
 import static io.meeds.wallet.utils.WalletUtils.getSettings;
 import static io.meeds.wallet.utils.WalletUtils.getSpacePrettyName;
 import static io.meeds.wallet.utils.WalletUtils.hideWalletOwnerPrivateInformation;
@@ -80,6 +81,7 @@ import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.statistic.ExoWalletStatistic;
 import io.meeds.wallet.statistic.ExoWalletStatisticService;
 import io.meeds.wallet.storage.AddressLabelStorage;
+import io.meeds.wallet.storage.TransactionStorage;
 import io.meeds.wallet.storage.WalletStorage;
 
 
@@ -115,6 +117,8 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   private AddressLabelStorage     labelStorage;
 
   private ListenerService         listenerService;
+
+  private TransactionStorage      transactionStorage;
 
   private String                  adminAccountPassword;
 
@@ -444,7 +448,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
     if (!WalletType.isAdmin(wallet.getType())) {
       refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-      boolean isNew = oldWallet == null && !accountStorage.hasWalletBackup(identityId) && !isUserWalletInitialized(wallet.getId());
+      boolean isNew = oldWallet == null && !accountStorage.hasWalletBackup(identityId) && !isUserWalletFunded(wallet.getId(), identityId);
       String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
                                : MODIFY_ADDRESS_ASSOCIATED_EVENT;
       try {
@@ -460,7 +464,7 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
   @Override
   public Wallet saveWallet(Wallet wallet, boolean isNew) {
     wallet = accountStorage.saveWallet(wallet, isNew);
-    if (isNew && !isUserWalletInitialized(wallet.getId())) {
+    if (isNew && !isUserWalletFunded(wallet.getId(), wallet.getTechnicalId())) {
       try {
         getListenerService().broadcast(NEW_ADDRESS_ASSOCIATED_EVENT, wallet.clone(), wallet.getId());
       } catch (Exception e) {
@@ -529,7 +533,11 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
 
     refreshWalletFromBlockchain(wallet, getContractDetail(), null);
 
-    boolean isNew = !isUserWalletInitialized(wallet.getId()) && !accountStorage.hasWalletBackup(identityId) && (existingWallet == null || StringUtils.isBlank(existingWallet.getAddress()) || StringUtils.isNotBlank(existingWallet.getInitializationState()));
+    boolean isNew = !accountStorage.hasWalletBackup(identityId)
+                    && (existingWallet == null
+                        || StringUtils.isBlank(existingWallet.getAddress())
+                        || StringUtils.isNotBlank(existingWallet.getInitializationState()))
+                    && !isUserWalletFunded(wallet.getId(), identityId);
     String eventName = isNew ? NEW_ADDRESS_ASSOCIATED_EVENT
                              : MODIFY_ADDRESS_ASSOCIATED_EVENT;
     try {
@@ -992,6 +1000,38 @@ public class WalletAccountServiceImpl implements WalletAccountService, ExoWallet
                        WALLET_SCOPE,
                        WALLET_INITIALIZED_SETTING_PARAM,
                        SettingValue.create("true"));
+  }
+
+  /**
+   * A wallet is funded once the user flag says so, or once the transaction
+   * history holds an ether transfer from the admin wallet, on the current
+   * network, issued for the user and received by an address that no wallet of
+   * another identity holds: the flag can't be the only record of a payout
+   * already made. On the automatic initial-funds path the issuer is the funded
+   * user and the receiver is the user's address at that time, which a later
+   * provider switch or wallet removal overwrites, so the receiver can't be
+   * required to be one of the user's current addresses. A transfer a
+   * rewarding user issued to another user's wallet is not the issuer's.
+   * The history count runs only for a user not yet flagged as funded.
+   */
+  private boolean isUserWalletFunded(String username, long identityId) {
+    return isUserWalletInitialized(username) || hasReceivedInitialFunds(identityId);
+  }
+
+  private boolean hasReceivedInitialFunds(long identityId) {
+    Wallet adminWallet = getAdminWallet();
+    return adminWallet != null
+           && StringUtils.isNotBlank(adminWallet.getAddress())
+           && getTransactionStorage().countEtherTransfersFromAddressForIssuer(getNetworkId(),
+                                                                              identityId,
+                                                                              adminWallet.getAddress()) > 0;
+  }
+
+  private TransactionStorage getTransactionStorage() {
+    if (transactionStorage == null) {
+      transactionStorage = CommonsUtils.getService(TransactionStorage.class);
+    }
+    return transactionStorage;
   }
 
   private boolean isUserWalletInitialized(String username) {

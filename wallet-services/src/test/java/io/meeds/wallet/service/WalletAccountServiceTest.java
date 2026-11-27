@@ -51,19 +51,25 @@ import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.security.IdentityRegistry;
 import org.exoplatform.services.security.MembershipEntry;
 import io.meeds.wallet.dao.AddressLabelDAO;
+import io.meeds.wallet.dao.WalletAccountDAO;
 import io.meeds.wallet.entity.AddressLabelEntity;
+import io.meeds.wallet.entity.WalletEntity;
 import io.meeds.wallet.model.ContractDetail;
+import io.meeds.wallet.model.TransactionDetail;
 import io.meeds.wallet.model.Wallet;
 import io.meeds.wallet.model.WalletAddressLabel;
 import io.meeds.wallet.model.WalletProvider;
 import io.meeds.wallet.model.WalletState;
 import io.meeds.wallet.model.WalletType;
 import io.meeds.wallet.storage.AddressLabelStorage;
+import io.meeds.wallet.storage.TransactionStorage;
 import io.meeds.wallet.storage.WalletStorage;
 import io.meeds.wallet.test.BaseWalletTest;
 import io.meeds.wallet.utils.WalletUtils;
 
 public class WalletAccountServiceTest extends BaseWalletTest {
+
+  private static final String MIXED_CASE_WALLET_ADDRESS = "0xAbCdEf4444444444444444444444444444444444";
 
   private static final String NEW = "NEW";
 
@@ -820,6 +826,219 @@ public class WalletAccountServiceTest extends BaseWalletTest {
     assertNotNull(savedWallet);
     assertEquals(WalletProvider.METAMASK.name(), savedWallet.getProvider());
     entitiesToClean.add(savedWallet);
+  }
+
+  @Test
+  public void testSaveWalletAfterFundsSentAndFlagReset() {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    recordInitialFundsSentToCurrentUser();
+    resetFundedFlag();
+
+    Wallet userWallet = getService(WalletAccountService.class).saveWallet(newWallet(), true);
+    entitiesToClean.add(userWallet);
+
+    assertEquals("A wallet funded once must not be funded again", 0, newAddressEvents.get());
+  }
+
+  @Test
+  public void testSaveWalletAddressAfterFundsSentAndFlagReset() throws IllegalAccessException {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    recordInitialFundsSentToCurrentUser();
+    resetFundedFlag();
+
+    Wallet wallet = newWallet();
+    getService(WalletAccountService.class).saveWalletAddress(wallet, CURRENT_USER);
+    entitiesToClean.add(wallet);
+
+    assertEquals("A wallet funded once must not be funded again", 0, newAddressEvents.get());
+  }
+
+  @Test
+  public void testSaveWalletNeverFundedWithNearMissTransactions() {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    recordNearMissTransactions();
+    resetFundedFlag();
+
+    Wallet userWallet = getService(WalletAccountService.class).saveWallet(newWallet(), true);
+    entitiesToClean.add(userWallet);
+
+    assertEquals(1, newAddressEvents.get());
+  }
+
+  @Test
+  public void testSaveWalletAddressNeverFundedWithNearMissTransactions() throws IllegalAccessException {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    recordNearMissTransactions();
+    resetFundedFlag();
+
+    Wallet wallet = newWallet();
+    getService(WalletAccountService.class).saveWalletAddress(wallet, CURRENT_USER);
+    entitiesToClean.add(wallet);
+
+    assertEquals(1, newAddressEvents.get());
+  }
+
+  @Test
+  public void testSwitchWalletProviderAfterFundsSentAndFlagReset() {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = walletAccountService.saveWallet(externalProviderWallet(), true);
+    entitiesToClean.add(wallet);
+    recordInitialFundsSentToCurrentUser();
+    resetFundedFlag();
+    newAddressEvents.set(0);
+
+    switchToExternalProvider(walletAccountService, wallet.getTechnicalId());
+
+    assertEquals("A wallet funded once must not be funded again", 0, newAddressEvents.get());
+  }
+
+  @Test
+  public void testSwitchWalletProviderNeverFundedWithNearMissTransactions() {
+    AtomicInteger newAddressEvents = listenNewAddressEvents();
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet wallet = walletAccountService.saveWallet(externalProviderWallet(), true);
+    entitiesToClean.add(wallet);
+    recordNearMissTransactions();
+    resetFundedFlag();
+    newAddressEvents.set(0);
+
+    switchToExternalProvider(walletAccountService, wallet.getTechnicalId());
+
+    assertEquals(1, newAddressEvents.get());
+  }
+
+  private Wallet externalProviderWallet() {
+    Wallet wallet = newWallet();
+    wallet.setProvider(WalletProvider.METAMASK.name());
+    return wallet;
+  }
+
+  private AtomicInteger listenNewAddressEvents() {
+    AtomicInteger newAddressEvents = new AtomicInteger(0);
+    getService(ListenerService.class).addListener(NEW_ADDRESS_ASSOCIATED_EVENT, new Listener<Object, String>() {
+      @Override
+      public void onEvent(Event<Object, String> event) throws Exception {
+        newAddressEvents.incrementAndGet();
+      }
+    });
+    return newAddressEvents;
+  }
+
+  private void resetFundedFlag() {
+    getService(SettingService.class).remove(Context.USER.id(CURRENT_USER),
+                                            WALLET_SCOPE,
+                                            WALLET_INITIALIZED_SETTING_PARAM);
+  }
+
+  private void recordInitialFundsSentToCurrentUser() {
+    saveAdminWalletAddress();
+    recordTransaction("11", WALLET_ADDRESS_3, CURRENT_USER_IDENTITY_ID, null, false);
+  }
+
+  private void recordNearMissTransactions() {
+    saveAdminWalletAddress();
+    // Issued for another identity
+    recordTransaction("21", WALLET_ADDRESS_3, CURRENT_USER_IDENTITY_ID + 1000, null, false);
+    // Dropped
+    recordTransaction("22", WALLET_ADDRESS_3, CURRENT_USER_IDENTITY_ID, null, true);
+    // Token transfer
+    recordTransaction("23", WALLET_ADDRESS_3, CURRENT_USER_IDENTITY_ID, WALLET_ADDRESS_2, false);
+    // Sent from another address than the admin wallet
+    recordTransaction("24", WALLET_ADDRESS_2, CURRENT_USER_IDENTITY_ID, null, false);
+    // Issued by this user, received by another user's wallet
+    saveAnotherUserWallet(WALLET_ADDRESS_2);
+    recordTransaction("25",
+                      WALLET_ADDRESS_3,
+                      WALLET_ADDRESS_2,
+                      WalletUtils.getNetworkId(),
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
+    // Issued by this user, received by another user's wallet whose address is
+    // stored mixed-case, as MetaMask wallets were before addresses were
+    // lower-cased on save
+    saveAnotherUserWallet(CURRENT_USER_IDENTITY_ID + 1001, MIXED_CASE_WALLET_ADDRESS);
+    recordTransaction("27",
+                      WALLET_ADDRESS_3,
+                      MIXED_CASE_WALLET_ADDRESS,
+                      WalletUtils.getNetworkId(),
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
+    // Sent on another network
+    recordTransaction("26",
+                      WALLET_ADDRESS_3,
+                      WALLET_ADDRESS_1,
+                      WalletUtils.getNetworkId() + 1,
+                      CURRENT_USER_IDENTITY_ID,
+                      null,
+                      false);
+  }
+
+  private void saveAnotherUserWallet(String address) {
+    saveAnotherUserWallet(CURRENT_USER_IDENTITY_ID + 1000, address);
+  }
+
+  private void saveAnotherUserWallet(long identityId, String address) {
+    Wallet wallet = newWallet();
+    wallet.setTechnicalId(identityId);
+    wallet.setAddress(address);
+    wallet.setType(WalletType.USER.name());
+    getService(WalletStorage.class).saveWallet(wallet, true);
+    entitiesToClean.add(wallet);
+    // The storage lower-cases the address it saves: the row keeps the case it
+    // is given, as the rows saved before that did
+    WalletAccountDAO walletAccountDAO = getService(WalletAccountDAO.class);
+    WalletEntity walletEntity = walletAccountDAO.find(identityId);
+    walletEntity.setAddress(address);
+    walletAccountDAO.update(walletEntity);
+  }
+
+  private void saveAdminWalletAddress() {
+    WalletAccountService walletAccountService = getService(WalletAccountService.class);
+    Wallet adminWallet = walletAccountService.getAdminWallet();
+    entitiesToClean.add(adminWallet);
+    adminWallet.setAddress(WALLET_ADDRESS_3);
+    adminWallet.setPassPhrase(PHRASE);
+    adminWallet.setInitializationState(INITIALIZATION_STATE);
+    walletAccountService.saveWallet(adminWallet, false);
+  }
+
+  private void recordTransaction(String hashSeed,
+                                 String from,
+                                 long issuerIdentityId,
+                                 String contractAddress,
+                                 boolean dropped) {
+    recordTransaction(hashSeed, from, WALLET_ADDRESS_1, WalletUtils.getNetworkId(), issuerIdentityId, contractAddress, dropped);
+  }
+
+  private void recordTransaction(String hashSeed, // NOSONAR
+                                 String from,
+                                 String to,
+                                 long networkId,
+                                 long issuerIdentityId,
+                                 String contractAddress,
+                                 boolean dropped) {
+    TransactionDetail transaction = new TransactionDetail();
+    transaction.setHash("0x" + hashSeed.repeat(32));
+    transaction.setNetworkId(networkId);
+    transaction.setFrom(from);
+    transaction.setTo(to);
+    transaction.setValue(0.1d);
+    transaction.setIssuerId(issuerIdentityId);
+    transaction.setContractAddress(contractAddress);
+    transaction.setDropped(dropped);
+    getService(TransactionStorage.class).saveTransactionDetail(transaction);
+    entitiesToClean.add(transaction);
+  }
+
+  private void switchToExternalProvider(WalletAccountService walletAccountService, long technicalId) {
+    walletAccountService.switchWalletProvider(technicalId,
+                                              WalletProvider.METAMASK,
+                                              "0x927f51a2996Ff74d1C380F92DC9006b53A225CeF",
+                                              "-2037692822791791745-3891968992033463560-1384458414145506416",
+                                              "0x92874882ac3b2292dc4a05af2f0eceac48fee97392a26d8bc9002159c35279ac0b72729cbdd6e864696782176a39a5cdfbca45c3eec5b34e1f82d2a906356a7d1c");
   }
 
   @Test
